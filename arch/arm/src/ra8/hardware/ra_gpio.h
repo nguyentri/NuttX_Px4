@@ -21,11 +21,11 @@
 /* Usage Example:
  *
  * // Configure P1_05 as output pin
- * gpio_pinset_t led_pin = RA_GPIO_OUTPUT_PIN(1, 5);
+ * gpio_pinset_t led_pin = GPIO_OUTPUT_PIN(1, 5);
  * ra_configgpio(led_pin);
  *
  * // Configure P0_03 as input with pull-up
- * gpio_pinset_t button_pin = RA_GPIO_INPUT_PULLUP_PIN(0, 3);
+ * gpio_pinset_t button_pin = GPIO_INPUT_PULLUP_PIN(0, 3);
  * ra_configgpio(button_pin);
  *
  * // Control GPIO pins
@@ -99,82 +99,54 @@
 
 /* PFS - Pmn Pin Function Control Register */
 
-#define R_PFS_PSEL_SHIFT          (24) /* 1000000: Port Function Select These bits select the peripheral function. For individual pin functions, see the MPC table */
-#define R_PFS_PSEL_MASK           (0x1f)
-#define R_PFS_PMR                 (1 << 16) /* Bit 16: Port Mode Control */
-#define R_PFS_ASEL                (1 << 15) /* Bit 15: Analog Input enable */
-#define R_PFS_ISEL                (1 << 14) /* Bit 14: IRQ input enable */
-#define R_PFS_EOR                 (1 << 13) /* Bit 13: Event on Rising */
-#define R_PFS_EOF                 (1 << 12) /* Bit 12: Event on Falling */
-#define R_PFS_DSCR1               (1 << 11) /* Bit 11: Port Drive Capability 1 */
-#define R_PFS_DSCR                (1 << 10) /* Bit 10: Port Drive Capability */
-#define R_PFS_NCODR               (1 <<  6) /* Bit 6: N-Channel Open Drain Control */
-#define R_PFS_PCR                 (1 <<  4) /* Bit 4: Pull-up Control */
-#define R_PFS_PDR                 (1 <<  2) /* Bit 2: Port Direction */
-#define R_PFS_PIDR                (1 <<  1) /* Bit 1: Port Input Data */
-#define R_PFS_PODR                (1 <<  0) /* Bit 0: Port Output Data */
+#define R_PFS_PSEL_SHIFT_16       (24)   /* Hardware PSEL position in PFS register */
+#define R_PFS_PSEL_SHIFT_8        (8)    /* PSEL position in gpio_pinset_t.cfg (bits 8-12) */
+#define R_PFS_PSEL_MASK           (0x1f) /* 5-bit mask for PSEL field */
+/* GPIO Configurations for gpio_pinset_t.cfg field, 1 << bit configuration */
+#define R_PFS_PMR                 (16) /* Bit 16: Port Mode Control */
+#define R_PFS_ASEL                (15) /* Bit 15: Analog Input enable */
+#define R_PFS_ISEL                (14) /* Bit 14: IRQ input enable */
+#define R_PFS_EOR                 (13) /* Bit 13: Event on Rising */
+#define R_PFS_EOF                 (12) /* Bit 12: Event on Falling */
+#define R_PFS_DSCR1               (11) /* Bit 11: Port Drive Capability 1 */
+#define R_PFS_DSCR                (10) /* Bit 10: Port Drive Capability */
+#define R_PFS_NCODR               ( 6) /* Bit 6: N-Channel Open Drain Control */
+#define R_PFS_PCR                 ( 4) /* Bit 4: Pull-up Control */
+#define R_PFS_PDR                 ( 2) /* Bit 2: Port Direction */
+#define R_PFS_PIDR                ( 1) /* Bit 1: Port Input Data */
+#define R_PFS_PODR                ( 0) /* Bit 0: Port Output Data */
 
 /* PMISC Register Bits */
-#define R_PMISC_PWPRS_B0WI        (1 <<  7) /* 80: PFSWE Bit Write Disable */
-#define R_PMISC_PWPRS_PFSWE       (1 <<  6) /* 40: PFS Register Write Enable */
+#define R_PMISC_PWPRS_B0WI        ( 7) /* 80: PFSWE Bit Write Disable */
+#define R_PMISC_PWPRS_PFSWE       ( 6) /* 40: PFS Register Write Enable */
 
 /* Bit definitions for PWPRS are provided in ra_gpio.h to avoid duplication here. */
 
-#define PFS_PSEL_HIZ                 (0x00 << R_PFS_PSEL_SHIFT)
-#define PFS_PSEL_AGT                 (0x01 << R_PFS_PSEL_SHIFT)
-#define PFS_PSEL_GPT                 (0x02 << R_PFS_PSEL_SHIFT)
-#define PFS_PSEL_AGT1                (0x03 << R_PFS_PSEL_SHIFT)
-#define PFS_PSEL_SCI                 (0x04 << R_PFS_PSEL_SHIFT)
-#define PFS_PSEL_SCI1                (0x05 << R_PFS_PSEL_SHIFT)
-#define PFS_PSEL_SPI                 (0x06 << R_PFS_PSEL_SHIFT)
-#define PFS_PSEL_IIC                 (0x07 << R_PFS_PSEL_SHIFT)
-#define PFS_PSEL_KINT                (0x08 << R_PFS_PSEL_SHIFT)
-#define PFS_PSEL_CLKOUT_ACMPLP_RTC   (0x09 << R_PFS_PSEL_SHIFT)
-#define PFS_PSEL_CAC_ADC14           (0x0a << R_PFS_PSEL_SHIFT)
-#define PFS_PSEL_CTSU                (0x0c << R_PFS_PSEL_SHIFT)
-#define PFS_PSEL_SLCDC               (0x0d << R_PFS_PSEL_SHIFT)
-#define PFS_PSEL_CAN                 (0x10 << R_PFS_PSEL_SHIFT)
-#define PFS_PSEL_SSIE                (0x12 << R_PFS_PSEL_SHIFT)
-#define PFS_PSEL_USBFS               (0x13 << R_PFS_PSEL_SHIFT)
-#define PFS_PSEL_DAC                 (0x14 << R_PFS_PSEL_SHIFT)
-#define PFS_PSEL_TRACE               (0x15 << R_PFS_PSEL_SHIFT)
-#define PFS_PSEL_DEBUG               (0x16 << R_PFS_PSEL_SHIFT)
-#define PFS_PSEL_OPAMP               (0x17 << R_PFS_PSEL_SHIFT)
-#define PFS_PSEL_XSPI                (0x18 << R_PFS_PSEL_SHIFT)
-#define PFS_PSEL_ETHERNET            (0x19 << R_PFS_PSEL_SHIFT)
-#define PFS_PSEL_CEU                 (0x1A << R_PFS_PSEL_SHIFT)
-#define PFS_PSEL_OSPI                (0x1B << R_PFS_PSEL_SHIFT)
-#define PFS_PSEL_ULPT                (0x1C << R_PFS_PSEL_SHIFT)
-
-/* Register Addresses *******************************************************/
-
-#define PORT0 (0)
-#define PORT1 (1)
-#define PORT2 (2)
-#define PORT3 (3)
-#define PORT4 (4)
-#define PORT5 (5)
-#define PORT6 (6)
-#define PORT7 (7)
-#define PORT8 (8)
-#define PORT9 (9)
-
-#define PIN0 (0)
-#define PIN1 (1)
-#define PIN2 (2)
-#define PIN3 (3)
-#define PIN4 (4)
-#define PIN5 (5)
-#define PIN6 (6)
-#define PIN7 (7)
-#define PIN8 (8)
-#define PIN9 (9)
-#define PIN10 (10)
-#define PIN11 (11)
-#define PIN12 (12)
-#define PIN13 (13)
-#define PIN14 (14)
-#define PIN15 (15)
+#define PFS_PSEL_HIZ                 (0x00 << R_PFS_PSEL_SHIFT_8)
+#define PFS_PSEL_AGT                 (0x01 << R_PFS_PSEL_SHIFT_8)
+#define PFS_PSEL_GPT                 (0x02 << R_PFS_PSEL_SHIFT_8)
+#define PFS_PSEL_AGT1                (0x03 << R_PFS_PSEL_SHIFT_8)
+#define PFS_PSEL_SCI                 (0x04 << R_PFS_PSEL_SHIFT_8)
+#define PFS_PSEL_SCI1                (0x05 << R_PFS_PSEL_SHIFT_8)
+#define PFS_PSEL_SPI                 (0x06 << R_PFS_PSEL_SHIFT_8)
+#define PFS_PSEL_IIC                 (0x07 << R_PFS_PSEL_SHIFT_8)
+#define PFS_PSEL_KINT                (0x08 << R_PFS_PSEL_SHIFT_8)
+#define PFS_PSEL_CLKOUT_ACMPLP_RTC   (0x09 << R_PFS_PSEL_SHIFT_8)
+#define PFS_PSEL_CAC_ADC14           (0x0a << R_PFS_PSEL_SHIFT_8)
+#define PFS_PSEL_CTSU                (0x0c << R_PFS_PSEL_SHIFT_8)
+#define PFS_PSEL_SLCDC               (0x0d << R_PFS_PSEL_SHIFT_8)
+#define PFS_PSEL_CAN                 (0x10 << R_PFS_PSEL_SHIFT_8)
+#define PFS_PSEL_SSIE                (0x12 << R_PFS_PSEL_SHIFT_8)
+#define PFS_PSEL_USBFS               (0x13 << R_PFS_PSEL_SHIFT_8)
+#define PFS_PSEL_DAC                 (0x14 << R_PFS_PSEL_SHIFT_8)
+#define PFS_PSEL_TRACE               (0x15 << R_PFS_PSEL_SHIFT_8)
+#define PFS_PSEL_DEBUG               (0x16 << R_PFS_PSEL_SHIFT_8)
+#define PFS_PSEL_OPAMP               (0x17 << R_PFS_PSEL_SHIFT_8)
+#define PFS_PSEL_XSPI                (0x18 << R_PFS_PSEL_SHIFT_8)
+#define PFS_PSEL_ETHERNET            (0x19 << R_PFS_PSEL_SHIFT_8)
+#define PFS_PSEL_CEU                 (0x1A << R_PFS_PSEL_SHIFT_8)
+#define PFS_PSEL_OSPI                (0x1B << R_PFS_PSEL_SHIFT_8)
+#define PFS_PSEL_ULPT                (0x1C << R_PFS_PSEL_SHIFT_8)
 
 /* Relative PORT Registers */
 
@@ -191,113 +163,21 @@
 #  define R_PORT_EORR(port)            (R_PORT0_BASE + (port)*R_PORT_OFFSET + R_PORT_EORR_OFFSET)
 #  define R_PORT_EOSR(port)            (R_PORT0_BASE + (port)*R_PORT_OFFSET + R_PORT_EOSR_OFFSET)
 
-/* Register Bitfield Definitions ********************************************/
+/* GPIO Configuration Bit Fields for cfg field in gpio_pinset_t struct */
+/* These align with the R_PFS_* bit positions for direct use */
 
-/* Port Control Register 1 (32-bits) */
-
-#define R_PORT_PCNTR1_PODR_SHIFT              (16) /* 10000: Pmn Output Data */
-#define R_PORT_PCNTR1_PODR_MASK               (0xffff)
-#define R_PORT_PCNTR1_PDR_SHIFT               (0) /* 01: Pmn Direction */
-#define R_PORT_PCNTR1_PDR_MASK                (0xffff)
-
-/* Pmn Output Data (16-bits) */
-
-#define R_PORT_PODR_PODR_SHIFT                (0) /* 01: Pmn Output Data */
-#define R_PORT_PODR_PODR_MASK                 (0xffff)
-
-/* Pmn Direction (16-bits) */
-
-#define R_PORT_PDR_PDR_SHIFT                  (0) /* 01: Pmn Direction */
-#define R_PORT_PDR_PDR_MASK                   (0xffff)
-
-/* Port Control Register 2 (32-bits) */
-
-#define R_PORT_PCNTR2_EIDR_SHIFT              (16) /* 10000: Pmn Event Input Data */
-#define R_PORT_PCNTR2_EIDR_MASK               (0xffff)
-#define R_PORT_PCNTR2_PIDR_SHIFT              (0) /* 01: Pmn Input Data */
-#define R_PORT_PCNTR2_PIDR_MASK               (0xffff)
-
-/* Port Event Input Data (16-bits) */
-
-#define R_PORT_EIDR_EIDR_SHIFT                (0) /* 01: Pmn Event Input Data */
-#define R_PORT_EIDR_EIDR_MASK                 (0xffff)
-
-/* Pmn State (16-bits) */
-
-#define R_PORT_PIDR_PIDR_SHIFT                (0) /* 01: Pmn Input Data */
-#define R_PORT_PIDR_PIDR_MASK                 (0xffff)
-
-/* Port Control Register 3 (32-bits) */
-
-#define R_PORT_PCNTR3_PORR_SHIFT              (16) /* 10000: Pmn Output Reset */
-#define R_PORT_PCNTR3_PORR_MASK               (0xffff)
-#define R_PORT_PCNTR3_POSR_SHIFT              (0) /* 01: Pmn Output Set */
-#define R_PORT_PCNTR3_POSR_MASK               (0xffff)
-
-/* Pmn Output Reset (16-bits) */
-
-#define R_PORT_PORR_PORR_SHIFT                (0) /* 01: Pmn Output Reset */
-#define R_PORT_PORR_PORR_MASK                 (0xffff)
-
-/* Pmn Output Set (16-bits) */
-
-#define R_PORT_POSR_POSR_SHIFT                (0) /* 01: Pmn Output Set */
-#define R_PORT_POSR_POSR_MASK                 (0xffff)
-
-/* Port Control Register 3 (32-bits) */
-
-#define R_PORT_PCNTR4_EORR_SHIFT              (16) /* 10000: Pmn Event Output Reset */
-#define R_PORT_PCNTR4_EORR_MASK               (0xffff)
-#define R_PORT_PCNTR4_EOSR_SHIFT              (0) /* 01: Pmn Event Output Set */
-#define R_PORT_PCNTR4_EOSR_MASK               (0xffff)
-
-/* Pmn Event Output Set (16-bits) */
-
-#define R_PORT_EORR_EORR_SHIFT                (0) /* 01: Pmn Event Output Reset */
-#define R_PORT_EORR_EORR_MASK                 (0xffff)
-
-/* Pmn Output Reset (16-bits) */
-
-#define R_PORT_EOSR_EOSR_SHIFT                (0) /* 01: Pmn Event Output Set */
-#define R_PORT_EOSR_EOSR_MASK                 (0xffff)
-
-#define RA_PRV_PFS_PSEL_OFFSET            (24)
-#define RA_PRV_8BIT_MASK                  (0xFF)
-#define RA_PFS_PDR_OUTPUT                 (4U)
-#define RA_PRV_PIN_WRITE_MASK             (0xFFFE3FFE)
-
-/* PFS Register Bit Definitions (avoid conflicts with ra8e1_pinmap.h) */
-
-#define RA_PFS_PSEL_SHIFT                 (24)    /* PSEL field shift */
-#define RA_PFS_PMR                        (1 << 16) /* Peripheral Mode Register */
-#define RA_PFS_ASEL                       (1 << 15) /* Analog Select */
-#define RA_PFS_ISEL                       (1 << 14) /* Interrupt Input Select */
-#define RA_PFS_EOR                        (1 << 13) /* Event on Rising */
-#define RA_PFS_EOF                        (1 << 12) /* Event on Falling */
-#define RA_PFS_DSCR1                      (1 << 11) /* Drive Strength Control 1 */
-#define RA_PFS_DSCR                       (1 << 10) /* Drive Strength Control 0 */
-#define RA_PFS_NCODR                      (1 <<  6) /* N-Channel Open Drain */
-#define RA_PFS_PCR                        (1 <<  4) /* Pull-up Control */
-#define RA_PFS_PDR                        (1 <<  2) /* Port Direction */
-
-/* GPIO Configuration Bit Fields */
-#define RA_PFS_PIDR                       (1 <<  1) /* Port Input Data */
-#define RA_PFS_PODR                       (1 <<  0) /* Port Output Data */
-
-/* GPIO Configuration Options (matching Renesas FSP style) */
-
-#define RA_GPIO_CFG_INPUT                 (0x00000000) /* Input (default) */
-#define RA_GPIO_CFG_OUTPUT                (0x00000004) /* Output direction */
-
-#define RA_GPIO_CFG_PULLUP                (0x00000010) /* Enable pull-up resistor */
-#define RA_GPIO_CFG_OPENDRAIN             (0x00000040) /* Open-drain output */
-#define RA_GPIO_CFG_DRIVE_LOW             (0x00000000) /* Low drive strength */
-#define RA_GPIO_CFG_DRIVE_MID             (0x00000400) /* Mid drive strength */
-#define RA_GPIO_CFG_DRIVE_HIGH            (0x00000C00) /* High drive strength */
+#define GPIO_CFG_OUTPUT                   (1 << R_PFS_PDR)    /* Output direction */
+#define GPIO_CFG_PULLUP                   (1 << R_PFS_PCR)    /* Enable pull-up */
+#define GPIO_CFG_OPENDRAIN                (1 << R_PFS_NCODR)  /* Open-drain output */
+#define GPIO_CFG_DRIVE_MID                (1 << R_PFS_DSCR)   /* Mid drive strength */
+#define GPIO_CFG_DRIVE_HIGH               ((1 << R_PFS_DSCR) | (1 << R_PFS_DSCR1)) /* High drive */
+#define GPIO_CFG_ANALOG                   (1 << R_PFS_ASEL)   /* Analog mode */
+#define GPIO_CFG_IRQ                      (1 << R_PFS_ISEL)   /* IRQ input enable */
+#define GPIO_CFG_PERIPHERAL               (1 << R_PFS_PMR)    /* Peripheral mode */
 
 /* GPIO Pin Configuration Macro */
 
-#define RA_GPIO_PIN_CFG(port, pin, cfg)   \
+#define GPIO_PIN_CFG(port, pin, cfg)      \
   {                                       \
     .port = (port),                       \
     .pin = (pin),                         \
@@ -306,51 +186,19 @@
 
 /* Common GPIO Pin Configurations */
 
-#define RA_GPIO_INPUT_PIN(port, pin)      \
-  RA_GPIO_PIN_CFG(port, pin, RA_GPIO_CFG_INPUT)
+#define GPIO_INPUT_PIN(port, pin)         \
+  GPIO_PIN_CFG(port, pin, 0)
 
-#define RA_GPIO_OUTPUT_PIN(port, pin)     \
-  RA_GPIO_PIN_CFG(port, pin, RA_GPIO_CFG_OUTPUT)
+#define GPIO_OUTPUT_PIN(port, pin)        \
+  GPIO_PIN_CFG(port, pin, GPIO_CFG_OUTPUT)
 
-#define RA_GPIO_INPUT_PULLUP_PIN(port, pin) \
-  RA_GPIO_PIN_CFG(port, pin, RA_GPIO_CFG_INPUT | RA_GPIO_CFG_PULLUP)
+#define GPIO_INPUT_PULLUP_PIN(port, pin)  \
+  GPIO_PIN_CFG(port, pin, GPIO_CFG_PULLUP)
 
-#define RA_GPIO_OUTPUT_OPENDRAIN_PIN(port, pin) \
-  RA_GPIO_PIN_CFG(port, pin, RA_GPIO_CFG_OUTPUT | RA_GPIO_CFG_OPENDRAIN)
+#define GPIO_OUTPUT_OPENDRAIN_PIN(port, pin) \
+  GPIO_PIN_CFG(port, pin, GPIO_CFG_OUTPUT | GPIO_CFG_OPENDRAIN)
 
-#define RA_GPIO_CFG_OUTPUT_LOW            (0x00000000) /* Output low */
-#define RA_GPIO_CFG_OUTPUT_HIGH           (0x00000001) /* Output high */
-#define RA_GPIO_CFG_PULLUP_ENABLE         (0x00000010) /* Enable pull-up */
-#define RA_GPIO_CFG_NMOS_ENABLE           (0x00000040) /* N-channel open drain */
-#define RA_GPIO_CFG_PMOS_ENABLE           (0x00000080) /* P-channel open drain */
-#define RA_GPIO_CFG_DRIVE_MID             (0x00000400) /* Medium drive strength */
-#define RA_GPIO_CFG_DRIVE_HIGH            (0x00000C00) /* High drive strength */
-#define RA_GPIO_CFG_EVENT_RISING_EDGE     (0x00001000) /* Rising edge trigger */
-#define RA_GPIO_CFG_EVENT_FALLING_EDGE    (0x00002000) /* Falling edge trigger */
-#define RA_GPIO_CFG_EVENT_BOTH_EDGES      (0x00003000) /* Both edge trigger */
-#define RA_GPIO_CFG_IRQ_ENABLE            (0x00004000) /* Enable IRQ */
-#define RA_GPIO_CFG_ANALOG_ENABLE         (0x00008000) /* Analog mode */
-#define RA_GPIO_CFG_PERIPHERAL_PIN        (0x00010000) /* Peripheral mode */
-
-/* Common GPIO Configuration Combinations */
-
-#define RA_GPIO_INPUT                     (RA_GPIO_CFG_INPUT)
-#define RA_GPIO_INPUT_PULLUP              (RA_GPIO_CFG_INPUT | RA_GPIO_CFG_PULLUP_ENABLE)
-#define RA_GPIO_OUTPUT                    (RA_GPIO_CFG_OUTPUT)
-#define RA_GPIO_OUTPUT_LOW                (RA_GPIO_CFG_OUTPUT | RA_GPIO_CFG_OUTPUT_LOW)
-#define RA_GPIO_OUTPUT_HIGH               (RA_GPIO_CFG_OUTPUT | RA_GPIO_CFG_OUTPUT_HIGH)
-#define RA_GPIO_OUTPUT_OPENDRAIN          (RA_GPIO_CFG_OUTPUT | RA_GPIO_CFG_NMOS_ENABLE)
-
-/* Peripheral Selection Values (PSEL field) */
-
-#define RA_GPIO_PSEL_IO                   (0x00) /* GPIO mode */
-#define RA_GPIO_PSEL_AGT                  (0x01) /* AGT peripheral */
-#define RA_GPIO_PSEL_GPT0                 (0x02) /* GPT0 peripheral */
-#define RA_GPIO_PSEL_GPT1                 (0x03) /* GPT1 peripheral */
-#define RA_GPIO_PSEL_SCI0_2_4_6_8         (0x04) /* SCI0/2/4/6/8 peripheral */
-#define RA_GPIO_PSEL_SCI1_3_5_7_9         (0x05) /* SCI1/3/5/7/9 peripheral */
-#define RA_GPIO_PSEL_SPI                  (0x06) /* SPI peripheral */
-#define RA_GPIO_PSEL_IIC                  (0x07) /* IIC peripheral */
+/* GPIO Configuration macros are defined in ra8e1_pinmap.h */
 
 /****************************************************************************
  * Public Types

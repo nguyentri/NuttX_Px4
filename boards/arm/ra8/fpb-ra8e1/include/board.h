@@ -35,209 +35,84 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/*
- * Alternate function pin selections
- */
 
 /* UART/SCI Pin Definitions */
-#define GPIO_SCI2_RX   GPIO_RXD2_MISO2_SCL2_A  /* P802 - SBUS RX (Drone RC) */
-#define GPIO_SCI2_TX   GPIO_TXD2_MOSI2_SDA2_A  /* P801 */
+#define GPIO_SCI0_RX   GPIO_RXD0_MISO0_SCL0_C  /* P609 - Telemetry */
+#define GPIO_SCI0_TX   GPIO_TXD0_MOSI0_SDA0_C  /* P610 - Telemetry */
 
-#define GPIO_SCI1_RX   GPIO_RXD1_MISO1_SCL1_A  /* P401 */
-#define GPIO_SCI1_TX   GPIO_TXD1_MOSI1_SDA1_A  /* P400 */
+#define GPIO_SCI2_RX   GPIO_RXD2_MISO2_SCL2_A  /* P802 - Console */
+#define GPIO_SCI2_TX   GPIO_TXD2_MOSI2_SDA2_A  /* P801 - Console */
 
-#define GPIO_SCI3_RX   GPIO_RXD3_MISO3_SCL3_B  /* P309 - GPS RX */
-#define GPIO_SCI3_TX   GPIO_TXD3_MOSI3_SDA3_B  /* P310 - GPS TX */
+#define GPIO_SCI3_RX   GPIO_RXD3_MISO3_SCL3_B  /* P309 - RC Input */
+#define GPIO_SCI3_TX   GPIO_TXD3_MOSI3_SDA3_B  /* P310 - RC Input */
 
-#define GPIO_SCI9_RX   GPIO_RXD9_MISO9_SCL9_A  /* P101 */
-#define GPIO_SCI9_TX   GPIO_TXD9_MOSI9_SDA9_A  /* P102 */
+/* SPI Pin Definitions for Sensors */
+#define GPIO_SPI1_SCK   GPIO_RSPCKB_B_1          /* P412 - SPI1 Clock */
+#define GPIO_SPI1_MOSI  GPIO_MOSIB_B_1           /* P411 - SPI1 MOSI */
+#define GPIO_SPI1_MISO  GPIO_MISOB_B_1           /* P410 - SPI1 MISO */
+#define GPIO_SPI1_CS0   GPIO_P408_OUTPUT_HIGH    /* P408 - ICM20948 CS */
+#define GPIO_SPI1_CS1   GPIO_P407_OUTPUT_HIGH    /* P407 - BMP388 CS */
 
-/* SPI0 Pin Definitions (IMU/Barometer on Pmod 1) - Master */
-#define GPIO_SPI0_SCK   GPIO_RSPCKA_B_1         /* P610 - SPI Clock */
-#define GPIO_SPI0_MOSI  GPIO_MISOA_B_1          /* P609 - SPI MOSI */
-#define GPIO_SPI0_MISO  GPIO_MOSIA_B_2          /* P611 - SPI MISO */
-#define GPIO_SPI0_SS0   GPIO_CTS_RTS0_C_SS0_C_1 /* P612 - IMU CS (ICM20948) */
-#define GPIO_SPI0_SS1   GPIO_P605_OUTPUT_HIGH   /* P605 - BMP388 Barometer CS */
+/* SPI Slave Select aliases (for compatibility) */
+#define GPIO_SPI1_SS0   GPIO_SPI1_CS0            /* P408 - ICM20948 CS */
+#define GPIO_SPI1_SS1   GPIO_SPI1_CS1            /* P407 - BMP388 CS */
 
-/* SPI1 Pin Definitions (Expansion/Loopback) - Slave */
-#define GPIO_SPI1_SCK   GPIO_RSPCKB_B_1          /* P412 - SPI1 Clock (RSPCKB_B) */
-#define GPIO_SPI1_MOSI  GPIO_MOSIB_B_1           /* P411 - SPI1 MOSI (MOSIB_B) */
-#define GPIO_SPI1_MISO  GPIO_MISOB_B_1           /* P410 - SPI1 MISO (MISOB_B) */
-#define GPIO_SPI1_SSL0  GPIO_SSLB0_B_1           /* P413 - SPI Slave selection (SSLB0_B) */
-
-/* PWM/GPT Timer Pin Definitions for ESC Control */
-#define GPIO_GPT3_A     GPIO_GTIOC3A_1         /* P300 - ESC 4 PWM (ch 3A) */
-#define GPIO_GPT0_A     GPIO_GTIOC0A_3         /* P415 - ESC 1 PWM (ch 0A) */
-#define GPIO_GPT2_A     GPIO_GTIOC2A_2         /* P113 - ESC 2 PWM (ch 2A) */
-//#define GPIO_GPT2_B     GPIO_GTIOC2B_2         /* P114 - ESC 3 PWM (ch 2B) */
-//#define GPIO_GPT3_B     GPIO_GTIOC3B_1         /* P112 - ESC 5 PWM (ch 3B) */
-#define GPIO_GPT4_A     GPIO_GTIOC4A_2         /* P302 - ESC 6 PWM (ch 4A) */
-//#define GPIO_GPT10_A    GPIO_GTIOC10A_1        /* P409 - Status LED 2 (alt function, corrected from P408) */
-
-//#define GPIO_GPT5_A     GPIO_GTIOC5A_1         /* P905 - ESC 3 PWM (alt PWM) */
+/* PWM/GPT Timer Pin Definitions for Motor Control */
+#define GPIO_GPT0_A     GPIO_GTIOC0A_3         /* P415 - Motor 2 */
+#define GPIO_GPT2_A     GPIO_GTIOC2A_2         /* P113 - Motor 3 */
+#define GPIO_GPT3_A     GPIO_GTIOC3A_1         /* P300 - Motor 1 */
+#define GPIO_GPT4_A     GPIO_GTIOC4A_2         /* P302 - Motor 4 */
 
 /* I2C Pin Definitions */
-#define GPIO_I2C1_SDA   GPIO_SDA1_MOSI1_TXD1_C /* P511 - I2C SDA (Expansion) */
-#define GPIO_I2C1_SCL   GPIO_SCL1_MISO1_RXD1_C /* P512 - I2C SCL (Expansion) */
+#define GPIO_I2C3_SDA   	GPIO_SDA3_MOSI3_TXD3_A /* P511 - Expansion I2C */
+#define GPIO_I2C3_SCL   	GPIO_SCL3_MISO3_RXD3_A /* P512 - Expansion I2C */
 
-/* ADC Pin Definitions for Battery Monitoring */
-#define GPIO_ADC_AN000  GPIO_AN000_1           /* P004 - Battery Voltage */
-#define GPIO_ADC_AN104  GPIO_AN104_1           /* P003 - Battery Current */
+/* LED Pin Definitions */
+#define GPIO_LED1       GPIO_P404_OUTPUT_HIGH  /* P404 - LED1 */
+#define GPIO_LED2       GPIO_P405_OUTPUT_HIGH  /* P405 - LED2 */
 
-/* LED pin selections */
+/* Button Pin Definitions */
+#define GPIO_SW1        	GPIO_IRQ13_P009        /* P009 - User Button */
 
-#define GPIO_LED1     GPIO_P404_OUTPUT_HIGH  /* P404 (Green LED1) */
-#define GPIO_LED2     GPIO_P408_OUTPUT_HIGH  /* P408 (Green LED2) */
-
-/* User Button - SW1 on P009 using IRQ13 */
-#define GPIO_SW1         GPIO_IRQ13_P009
-
-/* Drone-specific GPIO Pin Definitions */
-
-/* Buzzer Control */
-#define GPIO_BUZZER      GPIO_P303_OUTPUT_LOW   /* P303 - Piezo Buzzer */
-
-/* ESC PWM Alternate GPIO (for P905 with GPT5) */
-//#define GPIO_ESC3_ALT    GPIO_GPT5_A            /* P905 - ESC 3 PWM (GPT5A) */
-/* ESC PWM Alternate GPIO (for P905 without timer) */
-//#define GPIO_ESC3_ALT    GPIO_P905_OUTPUT_LOW   /* P905 - ESC 3 Alt PWM */
-
-/* Additional GPIO Pin Definitions for General Use */
-
-/* GPIO inputs with pullup for sensors/switches */
-#define GPIO_SENSOR_INT1 GPIO_P100_INPUT_PULLUP /* P100 - General sensor interrupt */
-#define GPIO_SENSOR_INT2 GPIO_P101_INPUT_PULLUP /* P101 - General sensor interrupt */
-#define GPIO_SENSOR_INT3 GPIO_P104_INPUT_PULLUP /* P104 - General sensor interrupt */
-#define GPIO_SENSOR_INT4 GPIO_P105_INPUT_PULLUP /* P105 - General sensor interrupt */
-
-/* GPIO outputs for control signals */
-#define GPIO_CTRL_OUT1   GPIO_P106_OUTPUT_LOW   /* P106 - General control output */
-#define GPIO_CTRL_OUT2   GPIO_P107_OUTPUT_LOW   /* P107 - General control output */
-#define GPIO_CTRL_OUT3   GPIO_P112_OUTPUT_LOW   /* P112 - General control output */
-#define GPIO_CTRL_OUT4   GPIO_P400_OUTPUT_LOW   /* P400 - General control output */
-
-/* Status/Debug pins */
-#define GPIO_STATUS1     GPIO_P401_OUTPUT_LOW   /* P401 - Status indicator 1 */
-#define GPIO_STATUS2     GPIO_P402_OUTPUT_LOW   /* P402 - Status indicator 2 */
-#define GPIO_DEBUG1      GPIO_P403_OUTPUT_LOW   /* P403 - Debug signal 1 */
-#define GPIO_DEBUG2      GPIO_P405_OUTPUT_LOW   /* P405 - Debug signal 2 */
-
-/* Expansion/User pins */
-#define GPIO_USER1       GPIO_P406_INPUT        /* P406 - User configurable pin 1 */
-#define GPIO_USER2       GPIO_P407_INPUT        /* P407 - User configurable pin 2 */
-#define GPIO_USER3       GPIO_P410_INPUT        /* P410 - User configurable pin 3 */
-#define GPIO_USER4       GPIO_P411_INPUT        /* P411 - User configurable pin 4 */
-
-/* Additional expansion pins */
-#define GPIO_EXP1        GPIO_P412_INPUT        /* P412 - Expansion pin 1 */
-#define GPIO_EXP2        GPIO_P413_INPUT        /* P413 - Expansion pin 2 */
-#define GPIO_EXP3        GPIO_P414_INPUT        /* P414 - Expansion pin 3 */
-#define GPIO_EXP4        GPIO_P415_INPUT        /* P415 - Expansion pin 4 */
-
-/* SPI expansion pins (if not used for main SPI) */
-#define GPIO_SPI_EXP1    GPIO_P600_INPUT        /* P600 - SPI expansion 1 */
-#define GPIO_SPI_EXP2    GPIO_P601_INPUT        /* P601 - SPI expansion 2 */
-#define GPIO_SPI_EXP3    GPIO_P602_INPUT        /* P602 - SPI expansion 3 */
-#define GPIO_SPI_EXP4    GPIO_P603_INPUT        /* P603 - SPI expansion 4 */
-
-/* Communication interface expansion */
-#define GPIO_COMM_EXP1   GPIO_P800_INPUT        /* P800 - Communication expansion 1 */
-#define GPIO_COMM_EXP2   GPIO_P801_INPUT        /* P801 - Communication expansion 2 */
-#define GPIO_COMM_EXP3   GPIO_P803_INPUT        /* P803 - Communication expansion 3 */
-#define GPIO_COMM_EXP4   GPIO_P804_INPUT        /* P804 - Communication expansion 4 */
-
-/* Drone-specific Pin Name Mappings ************************************/
-
-/* ESC PWM Output Pins - 400Hz ESC Control */
-#define GPIO_ESC1_PWM    GPIO_GPT3_A   /* P300 - ESC1 PWM (ch 3A) */
-#define GPIO_ESC2_PWM    GPIO_GPT0_A  /* P415 - ESC2 PWM (ch 0A) */
-//#define GPIO_ESC3_PWM    GPIO_GPT5_A
-#define GPIO_ESC3_PWM    GPIO_GPT2_A  /* P114 - ESC3 PWM (ch 2A) */
-#define GPIO_ESC4_PWM    GPIO_GPT4_A  /* P302 - ESC4 PWM (ch 4A) */
-//#define GPIO_ESC5_PWM    GPIO_GPT2_A
-//#define GPIO_ESC6_PWM    GPIO_GPT4_A
-
-/* RC Receiver and GPS */
-#define GPIO_SBUS_RX     GPIO_SCI2_RX   /* P802 - SBUS RC Receiver */
-#define GPIO_GPS_RX      GPIO_SCI3_RX   /* P309 - GPS Module RX */
-#define GPIO_GPS_TX      GPIO_SCI3_TX   /* P310 - GPS Module TX */
-
-/* IMU and Barometer (SPI0) */
-#define GPIO_IMU_SCK     GPIO_SPI0_SCK  /* P611 - SPI Clock */
-#define GPIO_IMU_MOSI    GPIO_SPI0_MOSI /* P609 - SPI MOSI */
-#define GPIO_IMU_MISO    GPIO_SPI0_MISO /* P610 - SPI MISO */
-
-/* SPI Chip Select GPIO definitions for applications */
-#define GPIO_IMU_CS      GPIO_SPI0_SS0          /* P612 - IMU CS (ICM20948) */
-#define GPIO_BMP_CS      GPIO_SPI0_SS1          /* P605 - BMP388 Barometer CS */
-#define GPIO_IMU_DRDY    GPIO_IRQ11_P006        /* P006 - IMU Data Ready */
+/* IMU Data Ready Pin */
+#define GPIO_IMU_DRDY		GPIO_P409_INPUT_PULLUP /* P409 - ICM20948 Data Ready */
 
 /* Battery Monitoring */
-#define GPIO_BATT_VOLT   GPIO_ADC_AN000 /* P004 - Battery Voltage (5.7:1) */
-#define GPIO_BATT_CURR   GPIO_ADC_AN104 /* P003 - Battery Current (ACS712) */
+#define GPIO_BATT_VOLT   	GPIO_ADC_AN000 /* P004 - Battery Voltage (5.7:1) */
+#define GPIO_BATT_CURR   	GPIO_ADC_AN104 /* P003 - Battery Current (ACS712) */
 
 /* I2C Expansion Bus */
-#define GPIO_EXP_SDA     GPIO_I2C1_SDA  /* P511 - Expansion I2C SDA */
-#define GPIO_EXP_SCL     GPIO_I2C1_SCL  /* P512 - Expansion I2C SCL */
+#define GPIO_EXP_SDA     	GPIO_I2C1_SDA  /* P511 - Expansion I2C SDA */
+#define GPIO_EXP_SCL     	GPIO_I2C1_SCL  /* P512 - Expansion I2C SCL */
 
 /* These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
  * defined. In that case, the usage by the board port is defined in
  * include/board.h and src/ra8e1_auto_leds.c. The LEDs are used to encode
  * OS-related events as follows:
  *
- *  SYMBOL                MEANING                         LED STATE
- *                                                      LED1   LED2
+ *  SYMBOL                		MEANING               LED STATE
+ *                                                      	 LED1   LED2
  *  -----------------------  --------------------------  ----  ----
  */
-#define LED_STARTED       0  /* NuttX has been started     OFF   OFF  */
-#define LED_HEAPALLOCATE  0  /* Heap has been allocated    OFF   OFF  */
-#define LED_IRQSENABLED   0  /* Interrupts enabled         OFF   OFF  */
-#define LED_STACKCREATED  1  /* Idle stack created         ON    OFF  */
-#define LED_INIRQ         2  /* In an interrupt            N/C   ON   */
-#define LED_SIGNAL        2  /* In a signal handler        N/C   ON   */
-#define LED_ASSERTION     2  /* An assertion failed        N/C   ON   */
-#define LED_PANIC         3  /* The system has crashed     N/C   BLINK */
-#define LED_IDLE          3  /* MCU is in sleep mode       ----  Not used ---- */
+#define LED_STARTED       	0  /* NuttX has been started     OFF   OFF  */
+#define LED_HEAPALLOCATE  	0  /* Heap has been allocated    OFF   OFF  */
+#define LED_IRQSENABLED   	0  /* Interrupts enabled         OFF   OFF  */
+#define LED_STACKCREATED  	1  /* Idle stack created         ON    OFF  */
+#define LED_INIRQ         	2  /* In an interrupt            N/C   ON   */
+#define LED_SIGNAL        	2  /* In a signal handler        N/C   ON   */
+#define LED_ASSERTION     	2  /* An assertion failed        N/C   ON   */
+#define LED_PANIC         	3  /* The system has crashed     N/C   BLINK */
+#define LED_IDLE          	3  /* MCU is in sleep mode       ----  Not used ---- */
 
 /* Board LED Definitions */
-#define LED_1         0
-#define LED_2         1
-#define NLEDS         2
+#define LED_1         		0
+#define LED_2         		1
+#define NLEDS         		2
 
 /* LED bits for use with board_userled_all() */
-#define LED_1_BIT     (1 << LED_1)
-#define LED_2_BIT     (1 << LED_2)
+#define LED_1_BIT    		(1 << LED_1)
+#define LED_2_BIT    		(1 << LED_2)
 
-/*
- * UART Configuration Defaults
- */
-
-/* SBUS configuration (100kbps, 8E2, inverted) */
-#ifdef CONFIG_RA8E1_SBUS_EXAMPLE
-#  define UART2_DEFAULT_BAUD      100000
-#  define UART2_DEFAULT_DATABITS  8
-#  define UART2_DEFAULT_PARITY    2  /* Even parity */
-#  define UART2_DEFAULT_STOPBITS  2
-#  define UART2_DEFAULT_INVERTED  true
-#endif
-
-/* GPS configuration (38400bps, 8N1, non-inverted) */
-#ifdef CONFIG_RA8E1_GPS_EXAMPLE
-#  define UART3_DEFAULT_BAUD      38400
-#  define UART3_DEFAULT_DATABITS  8
-#  define UART3_DEFAULT_PARITY    0  /* No parity */
-#  define UART3_DEFAULT_STOPBITS  1
-#  define UART3_DEFAULT_INVERTED  false
-#endif
-
-/* Telemetry MAVLink configuration (57600bps, 8N1, non-inverted) */
-#ifdef CONFIG_RA8E1_TELEMETRY_EXAMPLE
-#  define UART1_DEFAULT_BAUD      57600
-#  define UART1_DEFAULT_DATABITS  8
-#  define UART1_DEFAULT_PARITY    0  /* No parity */
-#  define UART1_DEFAULT_STOPBITS  1
-#  define UART1_DEFAULT_INVERTED  false
-#endif
 
 /****************************************************************************
  * Public Function Prototypes

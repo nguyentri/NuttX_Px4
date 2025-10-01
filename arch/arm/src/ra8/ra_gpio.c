@@ -60,7 +60,7 @@ static volatile uint32_t g_pfs_protect_counter = 0;
  *
  ****************************************************************************/
 
-void ra_pin_access_enable(void)
+static void ra_pin_access_enable(void)
 {
   irqstate_t flags;
 
@@ -73,7 +73,7 @@ void ra_pin_access_enable(void)
       putreg8(0, R_PMISC_PWPRS);
 
       /* Set PFSWE bit - writing to PFS register enabled */
-      putreg8(R_PMISC_PWPRS_PFSWE, R_PMISC_PWPRS);
+      putreg8((1 << R_PMISC_PWPRS_PFSWE), R_PMISC_PWPRS);
     }
 
   /* Increment the protect counter */
@@ -91,7 +91,7 @@ void ra_pin_access_enable(void)
  *
  ****************************************************************************/
 
-void ra_pin_access_disable(void)
+static void ra_pin_access_disable(void)
 {
   irqstate_t flags;
 
@@ -110,7 +110,7 @@ void ra_pin_access_disable(void)
       putreg8(0, R_PMISC_PWPRS);
 
       /* Set BOWI bit - writing to PFSWE bit disabled */
-      putreg8(R_PMISC_PWPRS_B0WI, R_PMISC_PWPRS);
+      putreg8((1 << R_PMISC_PWPRS_B0WI), R_PMISC_PWPRS);
     }
 
   leave_critical_section(flags);
@@ -164,10 +164,10 @@ static void ra_gpio_pfs_write(uint8_t port, uint8_t pin, uint32_t value)
              (pin * R_PFS_PSEL_PIN_OFFSET);
 
   /* For peripheral functions, clear PMR first */
-  if ((value & RA_PFS_PMR) != 0)
+  if ((value & (1 << R_PFS_PMR)) != 0)
     {
       /* Clear PMR bit first, keeping other settings */
-      putreg32(value & ~RA_PFS_PMR, pfs_addr);
+      putreg32(value & ~(1 << R_PFS_PMR), pfs_addr);
     }
 
   /* Write the complete configuration */
@@ -190,14 +190,29 @@ static void ra_gpio_pfs_write(uint8_t port, uint8_t pin, uint32_t value)
 
 static uint32_t ra_gpio_get_pfs_config(gpio_pinset_t cfgset)
 {
-  /* Return the cfg field from the structure with validation */
-  uint32_t pfs_value = cfgset.cfg;
+  uint32_t pfs_value = 0;
+  uint16_t cfg = cfgset.cfg;
 
-  /* Ensure PMR bit is cleared for GPIO mode to avoid conflicts */
-  if ((pfs_value & (0xFF << RA_PFS_PSEL_SHIFT)) == 0)
+  /* Extract PSEL field from bits 8-12 (5 bits) */
+  uint8_t psel = (cfg >> R_PFS_PSEL_SHIFT_8) & R_PFS_PSEL_MASK;
+  if (psel != 0)
     {
-      pfs_value &= ~RA_PFS_PMR;
+      /* Peripheral mode: set PSEL and PMR */
+      pfs_value |= (psel << R_PFS_PSEL_SHIFT_16);
+      pfs_value |= (1 << R_PFS_PMR);
     }
+
+  /* Convert bit positions to masks for GPIO config bits (0-7) */
+  if (cfg & (1 << R_PFS_PODR)) pfs_value |= (1 << R_PFS_PODR);
+  if (cfg & (1 << R_PFS_PDR)) pfs_value |= (1 << R_PFS_PDR);
+  if (cfg & (1 << R_PFS_PCR)) pfs_value |= (1 << R_PFS_PCR);
+  if (cfg & (1 << R_PFS_NCODR)) pfs_value |= (1 << R_PFS_NCODR);
+  if (cfg & (1 << R_PFS_DSCR)) pfs_value |= (1 << R_PFS_DSCR);
+  if (cfg & (1 << R_PFS_DSCR1)) pfs_value |= (1 << R_PFS_DSCR1);
+  if (cfg & (1 << R_PFS_EOF)) pfs_value |= (1 << R_PFS_EOF);
+  if (cfg & (1 << R_PFS_EOR)) pfs_value |= (1 << R_PFS_EOR);
+  if (cfg & (1 << R_PFS_ISEL)) pfs_value |= (1 << R_PFS_ISEL);
+  if (cfg & (1 << R_PFS_ASEL)) pfs_value |= (1 << R_PFS_ASEL);
 
   return pfs_value;
 }
@@ -359,11 +374,11 @@ void ra_gpio_set_direction(gpio_pinset_t pinset, bool direction)
   pfs_value = getreg32(pfs_addr);
   if (direction)
     {
-      pfs_value |= RA_PFS_PDR;  /* Output */
+      pfs_value |= (1 << R_PFS_PDR);  /* Output */
     }
   else
     {
-      pfs_value &= ~RA_PFS_PDR; /* Input */
+      pfs_value &= ~(1 << R_PFS_PDR); /* Input */
     }
   putreg32(pfs_value, pfs_addr);
 
@@ -409,11 +424,11 @@ void ra_gpio_set_pullup(gpio_pinset_t pinset, bool enable)
   pfs_value = getreg32(pfs_addr);
   if (enable)
     {
-      pfs_value |= RA_PFS_PCR;  /* Enable pull-up */
+      pfs_value |= (1 << R_PFS_PCR);  /* Enable pull-up */
     }
   else
     {
-      pfs_value &= ~RA_PFS_PCR; /* Disable pull-up */
+      pfs_value &= ~(1 << R_PFS_PCR); /* Disable pull-up */
     }
   putreg32(pfs_value, pfs_addr);
 
@@ -459,17 +474,17 @@ void ra_gpio_set_drive_strength(gpio_pinset_t pinset, uint8_t strength)
   pfs_value = getreg32(pfs_addr);
 
   /* Clear existing drive strength bits */
-  pfs_value &= ~(RA_PFS_DSCR | RA_PFS_DSCR1);
+  pfs_value &= ~((1 << R_PFS_DSCR) | (1 << R_PFS_DSCR1));
 
   /* Set new drive strength */
   switch (strength)
     {
       case 1: /* Mid */
-        pfs_value |= RA_PFS_DSCR;
+        pfs_value |= (1 << R_PFS_DSCR);
         break;
 
       case 2: /* High */
-        pfs_value |= RA_PFS_DSCR | RA_PFS_DSCR1;
+        pfs_value |= (1 << R_PFS_DSCR) | (1 << R_PFS_DSCR1);
         break;
 
       default: /* Low */
