@@ -175,28 +175,18 @@
 #define GPIO_CFG_IRQ                      (1 << R_PFS_ISEL)   /* IRQ input enable */
 #define GPIO_CFG_PERIPHERAL               (1 << R_PFS_PMR)    /* Peripheral mode */
 
-/* GPIO Pin Configuration Macro */
+/* Macros to extract fields from gpio_pinset_t */
+#define GPIO_PORT_MASK    (0xFF000000UL)
+#define GPIO_PIN_MASK     (0x00FF0000UL)
+#define GPIO_CFG_MASK     (0x0000FFFFUL)
 
-#define GPIO_PIN_CFG(port, pin, cfg)      \
-  {                                       \
-    .port = (port),                       \
-    .pin = (pin),                         \
-    .cfg = (cfg)                          \
-  }
+#define GPIO_PORT_SHIFT   (24)
+#define GPIO_PIN_SHIFT    (16)
+#define GPIO_CFG_SHIFT    (0)
 
-/* Common GPIO Pin Configurations */
-
-#define GPIO_INPUT_PIN(port, pin)         \
-  GPIO_PIN_CFG(port, pin, 0)
-
-#define GPIO_OUTPUT_PIN(port, pin)        \
-  GPIO_PIN_CFG(port, pin, GPIO_CFG_OUTPUT)
-
-#define GPIO_INPUT_PULLUP_PIN(port, pin)  \
-  GPIO_PIN_CFG(port, pin, GPIO_CFG_PULLUP)
-
-#define GPIO_OUTPUT_OPENDRAIN_PIN(port, pin) \
-  GPIO_PIN_CFG(port, pin, GPIO_CFG_OUTPUT | GPIO_CFG_OPENDRAIN)
+#define GPIO_GET_PORT(pinset)  (((pinset) & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT)
+#define GPIO_GET_PIN(pinset)   (((pinset) & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT)
+#define GPIO_GET_CFG(pinset)   ((pinset) & GPIO_CFG_MASK)
 
 /* GPIO Configuration macros are defined in ra8e1_pinmap.h */
 

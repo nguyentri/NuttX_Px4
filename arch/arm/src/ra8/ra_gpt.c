@@ -926,11 +926,11 @@ struct pwm_lowerhalf_s *ra_gpt_initialize(int channel)
           lower->started = false;
 
           /* Configure GPIO pins for PWM output */
-          if( lower->config->pin_a.cfg != 0 )
+          if( lower->config->pin_a != 0 )
             {
               ra_configgpio(lower->config->pin_a);
             }
-          if( lower->config->pin_b.cfg != 0 )
+          if( lower->config->pin_b != 0 )
             {
               ra_configgpio(lower->config->pin_b);
             }

@@ -55,12 +55,32 @@ extern "C"
 
 /* Must be big enough to hold the 32-bit encoding */
 
-typedef struct gpio_pinset
-{
-    uint8_t port;
-    uint8_t pin;
-    uint16_t cfg;
-}gpio_pinset_t;
+typedef uint32_t gpio_pinset_t;
+
+
+/* Publication GPIO Pin Configuration Macro */
+
+#define GPIO_PIN_CFG(port, pin, cfg)      \
+  {                                       \
+    .port = (port),                       \
+    .pin = (pin),                         \
+    .cfg = (cfg)                          \
+  }
+
+/* Common GPIO Pin Configurations */
+
+#define GPIO_INPUT_PIN(port, pin)         \
+  GPIO_PIN_CFG(port, pin, 0)
+
+#define GPIO_OUTPUT_PIN(port, pin)        \
+  GPIO_PIN_CFG(port, pin, GPIO_CFG_OUTPUT)
+
+#define GPIO_INPUT_PULLUP_PIN(port, pin)  \
+  GPIO_PIN_CFG(port, pin, GPIO_CFG_PULLUP)
+
+#define GPIO_OUTPUT_OPENDRAIN_PIN(port, pin) \
+  GPIO_PIN_CFG(port, pin, GPIO_CFG_OUTPUT | GPIO_CFG_OPENDRAIN)
+
 
 /****************************************************************************
  * Name: ra_configgpio

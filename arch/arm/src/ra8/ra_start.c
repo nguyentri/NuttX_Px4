@@ -402,48 +402,36 @@ static void ra_cortex_m85_init(void)
   putreg16(1U, R_FCACHE_FCACHEE);
 }
 
-/****************************************************************************
- * Name: __start
- *
- * Description:
- *   This is the reset entry point.
- *
- ****************************************************************************/
+static void main(void){
 
-void __start(void)
-{
-    /* Enable the instruction cache, branch prediction, and the branch cache (required for Low Overhead Branch (LOB) extension).
-     * See sections 6.5, 6.6, and 6.7 in the Arm Cortex-M85 Processor Technical Reference Manual (Document ID: 101924_0002_05_en, Issue: 05)
-     * See section D1.2.9 in the Armv8-M Architecture Reference Manual (Document number: DDI0553B.w, Document version: ID07072023) */
-
-  /* 1. Cortex-M85 Initialization */
+  /* Cortex-M85 Initialization */
   ra_cortex_m85_init();
 
-  /* 2. TrustZone Configuration - early security setup */
+  /*TrustZone Configuration - early security setup */
 #if CONFIG_RA_TZ_SECURE_BUILD || CONFIG_RA_TZ_NONSECURE_BUILD
   ra_trustzone_init();
 #endif
 
-  /* Phase 2: Core and Clock Initialization */
-  /* 3. Setup System Clocks (includes Cortex-M85 core features) */
+  /* Core and Clock Initialization */
+  /* Setup System Clocks (includes Cortex-M85 core features) */
   ra_clock();
 
-  /* 4. Set Vector Table Base Address */
+  /* Set Vector Table Base Address */
   ra_vector_table_init();
 
-  /* Phase 3: Memory Initialization */
-  /* 5. Initialize RAM Sections (BSS, data, TCM) */
+  /* Memory Initialization */
+  /* Initialize RAM Sections (BSS, data, TCM) */
   ra_ram_init(0);
 
   /* Initialize GPIO security attribution */
   ra_gpio_security_init();
 
-  /* Phase 4: Low-level Hardware Setup */
-  /* 6. Configure the uart pins */
+  /* Perform early serial initialization */
+#ifdef USE_EARLYSERIALINIT
+  /* Low-level Hardware Setup */
+  /* Configure the uart pins for arm_earlyserialinit */
   ra_lowsetup();
 
-  /* 7. Perform early serial initialization */
-#ifdef USE_EARLYSERIALINIT
   /* The 'A' character is not displayed because the UART hardware is not fully ready */
   //showprogress('A');
   arm_earlyserialinit();
@@ -454,18 +442,31 @@ void __start(void)
 
   //showprogress('B');
 
-  /* Phase 5: Board-level Initialization */
-  /* 8. Initialize onboard resources */
+  /* Board-level Initialization */
+  /* Initialize onboard resources */
   ra_board_initialize();
   //showprogress('C');
 
-  /* Phase 6: Start NuttX */
-  /* 9. Then start NuttX main initialization */
+  /* Start NuttX */
+  /* Then start NuttX main initialization */
   showprogress('\r');
   showprogress('\n');
 
   nx_start();
+}
 
+/****************************************************************************
+ * Name: __start
+ *
+ * Description:
+ *   This is the reset entry point.
+ *
+ ****************************************************************************/
+
+void __start(void)
+{
+  /* Main entry point */
+  main();
   /* Shouldn't get here */
   for (; ; )
     {

@@ -191,7 +191,7 @@ static void ra_gpio_pfs_write(uint8_t port, uint8_t pin, uint32_t value)
 static uint32_t ra_gpio_get_pfs_config(gpio_pinset_t cfgset)
 {
   uint32_t pfs_value = 0;
-  uint16_t cfg = cfgset.cfg;
+  uint16_t cfg = GPIO_GET_CFG(cfgset);
 
   /* Extract PSEL field from bits 8-12 (5 bits) */
   uint8_t psel = (cfg >> R_PFS_PSEL_SHIFT_8) & R_PFS_PSEL_MASK;
@@ -241,9 +241,9 @@ int ra_configgpio(gpio_pinset_t cfgset)
   uint8_t pin;
   uint32_t pfs_value;
 
-  /* Extract port and pin from struct */
-  port = cfgset.port;
-  pin = cfgset.pin;
+  /* Extract port and pin from 32-bit value */
+  port = GPIO_GET_PORT(cfgset);
+  pin = GPIO_GET_PIN(cfgset);
 
   /* Validate port and pin numbers */
   if (!ra_gpio_validate_pin(port, pin))
@@ -279,9 +279,9 @@ void ra_gpiowrite(gpio_pinset_t pinset, bool value)
   uint8_t port;
   uint8_t pin;
 
-  /* Extract port and pin from struct */
-  port = pinset.port;
-  pin = pinset.pin;
+  /* Extract port and pin from 32-bit value */
+  port = GPIO_GET_PORT(pinset);
+  pin = GPIO_GET_PIN(pinset);
 
   /* Validate port and pin numbers */
   if (!ra_gpio_validate_pin(port, pin))
@@ -320,9 +320,9 @@ bool ra_gpioread(gpio_pinset_t pinset)
   uint8_t pin;
   uint16_t port_data;
 
-  /* Extract port and pin from struct */
-  port = pinset.port;
-  pin = pinset.pin;
+  /* Extract port and pin from 32-bit value */
+  port = GPIO_GET_PORT(pinset);
+  pin = GPIO_GET_PIN(pinset);
 
   /* Validate port and pin numbers */
   if (!ra_gpio_validate_pin(port, pin))
@@ -354,9 +354,9 @@ void ra_gpio_set_direction(gpio_pinset_t pinset, bool direction)
   uint32_t pfs_addr;
   uint32_t pfs_value;
 
-  /* Extract port and pin from struct */
-  port = pinset.port;
-  pin = pinset.pin;
+  /* Extract port and pin from 32-bit value */
+  port = GPIO_GET_PORT(pinset);
+  pin = GPIO_GET_PIN(pinset);
 
   /* Validate port and pin numbers */
   if (port > 14 || pin > 15)
@@ -404,9 +404,9 @@ void ra_gpio_set_pullup(gpio_pinset_t pinset, bool enable)
   uint32_t pfs_addr;
   uint32_t pfs_value;
 
-  /* Extract port and pin from struct */
-  port = pinset.port;
-  pin = pinset.pin;
+  /* Extract port and pin from 32-bit value */
+  port = GPIO_GET_PORT(pinset);
+  pin = GPIO_GET_PIN(pinset);
 
   /* Validate port and pin numbers */
   if (port > 14 || pin > 15)
@@ -454,9 +454,9 @@ void ra_gpio_set_drive_strength(gpio_pinset_t pinset, uint8_t strength)
   uint32_t pfs_addr;
   uint32_t pfs_value;
 
-  /* Extract port and pin from struct */
-  port = pinset.port;
-  pin = pinset.pin;
+  /* Extract port and pin from 32-bit value */
+  port = GPIO_GET_PORT(pinset);
+  pin = GPIO_GET_PIN(pinset);
 
   /* Validate port and pin numbers and strength level */
   if (port > 14 || pin > 15 || strength > 2)
