@@ -527,7 +527,7 @@ config ARCH_BOARD_IMXRT1064_EVK
 	---help---
 		This is the board configuration for the port of NuttX to the NXP i.MXRT
 		evaluation kit, MIMXRT1064-EVK.  This board features the MIMXRT1064DVL6A MCU.
-		
+
 config ARCH_BOARD_IMXRT1170_EVK
 	bool "NXP i.MX RT 1170 EVK"
 	depends on ARCH_CHIP_MIMXRT1176DVMAA
@@ -2858,6 +2858,7 @@ config ARCH_BOARD
 	default "spresense"                if ARCH_BOARD_SPRESENSE
 	default "xx3803"                   if ARCH_BOARD_XX3803
 	default "xx3823"                   if ARCH_BOARD_XX3823
+	default "fpb-ra8e1"                if ARCH_BOARD_FPB_RA8E1
 
 comment "Common Board Options"
 

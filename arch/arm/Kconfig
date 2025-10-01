@@ -541,6 +541,11 @@ config ARCH_CHIP_TLSR82
 	---help---
 		Telink tlsr82xx architectures (Customed armv6m)
 
+config ARCH_CHIP_RA8
+	bool "Renesas RA8"
+	---help---
+		Renesas RA8 Architecture (ARM Cortex-M85).
+
 config ARCH_CHIP_ARM_CUSTOM
 	bool "Custom ARM chip"
 	select ARCH_CHIP_CUSTOM
@@ -847,6 +852,23 @@ config ARCH_CORTEXM55
 	select ARCH_HAVE_USAGEFAULT_DEBUG
 	select ARCH_HAVE_SECUREFAULT_DEBUG if ARCH_TRUSTZONE_SECURE
 
+config ARCH_CORTEXM85
+	bool
+	default n
+	select ARM_THUMB
+	select ARCH_ARMV8M
+	select ARCH_HAVE_IRQPRIO
+	select ARCH_HAVE_IRQTRIGGER
+	select ARCH_HAVE_RAMVECTORS
+	select ARCH_HAVE_HIPRI_INTERRUPT
+	select ARCH_HAVE_RESET
+	select ARCH_HAVE_TESTSET
+	select ARCH_HAVE_HARDFAULT_DEBUG
+	select ARCH_HAVE_MEMFAULT_DEBUG
+	select ARCH_HAVE_BUSFAULT_DEBUG
+	select ARCH_HAVE_USAGEFAULT_DEBUG
+	select ARCH_HAVE_SECUREFAULT_DEBUG if ARCH_TRUSTZONE_SECURE
+
 config ARCH_FAMILY
 	string
 	default "arm"		if ARCH_ARM7TDMI || ARCH_ARM920T || ARCH_ARM926EJS || ARCH_ARM1136J || ARCH_ARM1156T2 || ARCH_ARM1176JZ
@@ -904,6 +926,7 @@ config ARCH_CHIP
 	default "cxd56xx"	if ARCH_CHIP_CXD56XX
 	default "phy62xx"	if ARCH_CHIP_PHY62XX
 	default "tlsr82"	if ARCH_CHIP_TLSR82
+	default "ra8"		if ARCH_CHIP_RA8
 
 config ARCH_HAVE_TRUSTZONE
 	bool
@@ -1308,5 +1331,8 @@ source "arch/arm/src/cxd56xx/Kconfig"
 endif
 if ARCH_CHIP_TLSR82
 source "arch/arm/src/tlsr82/Kconfig"
+endif
+if ARCH_CHIP_RA8
+source "arch/arm/src/ra8/Kconfig"
 endif
 endif # ARCH_ARM

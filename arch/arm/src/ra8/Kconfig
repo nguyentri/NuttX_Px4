@@ -96,6 +96,7 @@ config RA8_FAMILY
    default y
    select ARCH_CORTEXM85
    select ARCH_HAVE_FPU
+   select ARCH_HAVE_THUMB
    select ARCH_HAVE_DPFPU
    select ARMV8M_HAVE_ICACHE
    select ARMV8M_HAVE_DCACHE
