@@ -1,0 +1,95 @@
+############################################################################
+# arch/arm/src/ra8/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+# The start-up, "head", file
+
+# Common ARM and Cortex-M85 files
+
+include armv8-m/Make.defs
+
+# Add RA8-specific include paths
+
+EXTRAINCDIRS += $(ARCH_SRCDIR)$(DELIM)ra8
+EXTRAINCDIRS += $(ARCH_SRCDIR)$(DELIM)ra8$(DELIM)hardware
+EXTRAINCDIRS += $(ARCH_SRCDIR)$(DELIM)ra8$(DELIM)hardware$(DELIM)ra8e1
+
+# Required RA files
+CHIP_CSRCS += ra_mstp.c
+CHIP_CSRCS += ra_start.c
+CHIP_CSRCS += ra_clock.c
+CHIP_CSRCS += ra_irq.c
+CHIP_CSRCS += ra_icu.c
+CHIP_CSRCS += ra_gpio.c
+CHIP_CSRCS += ra_lowputc.c
+CHIP_CSRCS += ra_memmng.c
+CHIP_CSRCS += ra_timerisr.c
+CHIP_CSRCS += ra_serial.c
+
+# ADC driver
+ifeq ($(CONFIG_RA_ADC),y)
+CHIP_CSRCS += ra_adc.c
+endif
+
+# I2C driver
+ifeq ($(CONFIG_RA_I2C),y)
+CHIP_CSRCS += ra_i2c.c
+endif
+
+# I2C slave driver
+ifeq ($(CONFIG_RA_I2C_SLAVE),y)
+CHIP_CSRCS += ra_i2c_slave.c
+endif
+
+# DMAC driver
+ifeq ($(CONFIG_RA_DMAC),y)
+CHIP_CSRCS += ra_dmac.c
+endif
+
+# SPI driver
+ifeq ($(CONFIG_RA_SPI),y)
+CHIP_CSRCS += ra_spi.c
+CHIP_CSRCS += ra_dtc.c
+endif
+
+# PWM driver
+ifeq ($(CONFIG_RA_GPT),y)
+CHIP_CSRCS += ra_gpt.c
+endif
+
+# Enhanced UART+DMA driver
+ifeq ($(CONFIG_RA_SCI_UART),y)
+CHIP_CSRCS += ra_sci.c
+endif
+
+# Flash memory driver
+ifeq ($(CONFIG_RA_FLASH),y)
+CHIP_CSRCS += ra_flash.c
+endif
+
+# RTC driver
+ifeq ($(CONFIG_RA_RTC),y)
+CHIP_CSRCS += ra_rtc.c
+CHIP_CSRCS += ra_rtc_lowerhalf.c
+endif
+
+# IDLE task custom
+ifeq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
+CHIP_CSRCS += ra_idle.c
+endif
