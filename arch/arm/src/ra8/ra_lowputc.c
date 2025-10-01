@@ -238,11 +238,12 @@ void arm_lowputc(char ch)
  *
  ****************************************************************************/
 
-void up_putc(int ch)
+int up_putc(int ch)
 {
 #ifdef HAVE_CONSOLE
   arm_lowputc(ch);
 #endif
+  return ch;
 }
 
 /****************************************************************************
@@ -275,9 +276,8 @@ void ra_lowsetup(void)
   ra_configgpio(GPIO_SCI2_TX);
 #endif
 #if defined(CONFIG_RA_SCI3_UART)
-  /* TODO: Add proper GPIO pin configuration for SCI3 when pins are determined */
-  /* ra_configgpio(GPIO_SCI3_RX); */
-  /* ra_configgpio(GPIO_SCI3_TX); */
+  ra_configgpio(GPIO_SCI3_RX);
+  ra_configgpio(GPIO_SCI3_TX);
 #endif
 #if defined(CONFIG_RA_SCI4_UART)
   /* TODO: Add proper GPIO pin configuration for SCI4 when pins are determined */

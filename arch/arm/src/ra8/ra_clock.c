@@ -31,12 +31,14 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/syslog/syslog.h>
-#include <nuttx/spinlock.h>
+#include <arch/spinlock.h>
+
 #include <arch/board/board.h>
 #include <arch/irq.h>
-#include <arch/barriers.h>
 
+#include "barriers.h"
 #include "arm_internal.h"
+
 #include "ra_clock.h"
 #include "hardware/ra_flash.h"
 #include "hardware/ra_system.h"
@@ -399,9 +401,9 @@ static void ra_prv_clock_set_hard_reset(void)
   putreg16(RA_PRV_SRAM_UNLOCK, R_SRAM_SRAMPRCR);
 
   /* Execute data memory barrier before and after setting the wait states */
-  UP_DMB();
+  ARM_DMB();
   putreg8(RA_PRV_SRAM_WAIT_CYCLES, R_SRAM_SRAMWTSC);
-  UP_DMB();
+  ARM_DMB();
 
   putreg16(RA_PRV_SRAM_LOCK, R_SRAM_SRAMPRCR);
 #endif

@@ -31,7 +31,7 @@ else
   LDSCRIPT = fpb-ra8e1.ld
 endif
 
-ARCHSCRIPT = $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
+ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 
 # ARM Cortex-M85 specific flags
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10

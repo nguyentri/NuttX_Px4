@@ -66,6 +66,8 @@
 extern uint32_t __ram_thread_stack$$Limit;
 const uintptr_t g_idle_topstack = (uintptr_t)&__ram_thread_stack$$Limit + CONFIG_IDLETHREAD_STACKSIZE;
 
+extern uint32_t _vectors[]; /* See arm_vectors.S */
+
 /****************************************************************************
  * ID Code Definitions
  * Following Renesas FSP pattern for device identification
