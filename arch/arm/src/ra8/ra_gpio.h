@@ -29,6 +29,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <nuttx/irq.h>
 
 #include "chip.h"
 #include "hardware/ra_gpio.h"
@@ -139,6 +140,28 @@ void ra_gpio_set_pullup(gpio_pinset_t pinset, bool enable);
  ****************************************************************************/
 
 void ra_gpio_set_drive_strength(gpio_pinset_t pinset, uint8_t strength);
+
+/****************************************************************************
+ * Name: ra_gpiosetevent
+ *
+ * Description:
+ *   Configure GPIO pin for external interrupt/event detection
+ *
+ * Input Parameters:
+ *   pinset  - GPIO pin configuration
+ *   rising  - Enable interrupt on rising edge
+ *   falling - Enable interrupt on falling edge
+ *   event   - Enable event (unused, for compatibility)
+ *   func    - Interrupt callback function (NULL to disable)
+ *   arg     - Argument passed to callback function
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int ra_gpiosetevent(uint32_t pinset, bool rising, bool falling,
+                    bool event, xcpt_t func, void *arg);
 
 #undef EXTERN
 #if defined(__cplusplus)

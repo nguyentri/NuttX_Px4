@@ -33,12 +33,16 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
+#include <arch/irq.h>
 
 #include "arm_internal.h"
 #include "chip.h"
 #include "ra_start.h"
 #include "ra_gpio.h"
+#include "ra_icu.h"
 #include "hardware/ra_gpio.h"
+#include "hardware/ra_memorymap.h"
+#include <arch/ra8/ra8e1_irq.h>
 
 /****************************************************************************
  * Private Data
@@ -46,6 +50,22 @@
 
 /* PFS protection counter for safe register access (FSP-compatible) */
 static volatile uint32_t g_pfs_protect_counter = 0;
+
+/* GPIO interrupt callback information */
+struct ra_gpio_irq_s
+{
+  gpio_pinset_t pinset;     /* GPIO pin configuration */
+  xcpt_t        callback;   /* Interrupt callback function */
+  void         *arg;        /* Callback argument */
+  int           icu_slot;   /* ICU slot number (-1 if unused) */
+  bool          allocated;  /* True if this slot is allocated */
+};
+
+/* Maximum number of GPIO interrupts supported */
+#define MAX_GPIO_IRQS 16
+
+/* GPIO interrupt table */
+static struct ra_gpio_irq_s g_gpio_irqs[MAX_GPIO_IRQS];
 
 /****************************************************************************
  * Private Functions
@@ -215,6 +235,142 @@ static uint32_t ra_gpio_get_pfs_config(gpio_pinset_t cfgset)
   if (cfg & (1 << R_PFS_ASEL)) pfs_value |= (1 << R_PFS_ASEL);
 
   return pfs_value;
+}
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: ra_gpio_find_irq_for_pin
+ *
+ * Description:
+ *   Extract IRQ number from gpio_pinset_t configuration
+ *
+ * Input Parameters:
+ *   pinset - GPIO pin configuration with encoded IRQ number
+ *
+ * Returned Value:
+ *   External IRQ number (0-15) or -1 if pin is not configured for interrupts
+ *
+ ****************************************************************************/
+
+static int ra_gpio_find_irq_for_pin(gpio_pinset_t pinset)
+{
+  uint16_t cfg = GPIO_GET_CFG(pinset);
+
+  /* Check if this pin is configured for IRQ functionality */
+  if (!(cfg & (1 << R_PFS_ISEL)))
+    {
+      /* Pin is not configured for external interrupts */
+      return -1;
+    }
+
+  /* Extract IRQ number from lower 5 bits (bits 0-4) */
+  /* IRQ numbers 0-15 fit in 4 bits, but we use 5 bits for safety */
+  int irq_num = cfg & 0x1F;
+
+  /* Validate IRQ number range */
+  if (irq_num > 15)
+    {
+      return -1;
+    }
+
+  return irq_num;
+}
+
+/****************************************************************************
+ * Name: ra_gpio_get_irq_event
+ *
+ * Description:
+ *   Get ICU event number for external IRQ
+ *
+ * Input Parameters:
+ *   irq_num - External IRQ number (0-15)
+ *
+ * Returned Value:
+ *   ICU event number
+ *
+ ****************************************************************************/
+
+static int ra_gpio_get_irq_event(int irq_num)
+{
+  /* Map external IRQ numbers to their ICU event numbers */
+  switch (irq_num)
+    {
+      case 0:  return RA_ELC_ICU_IRQ0;
+      case 1:  return RA_ELC_ICU_IRQ1;
+      case 2:  return RA_ELC_ICU_IRQ2;
+      case 3:  return RA_ELC_ICU_IRQ3;
+      case 4:  return RA_ELC_ICU_IRQ4;
+      case 5:  return RA_ELC_ICU_IRQ5;
+      case 6:  return RA_ELC_ICU_IRQ6;
+      case 7:  return RA_ELC_ICU_IRQ7;
+      case 8:  return RA_ELC_ICU_IRQ8;
+      case 9:  return RA_ELC_ICU_IRQ9;
+      case 10: return RA_ELC_ICU_IRQ10;
+      case 11: return RA_ELC_ICU_IRQ11;
+      case 12: return RA_ELC_ICU_IRQ12;
+      case 13: return RA_ELC_ICU_IRQ13;
+      case 14: return RA_ELC_ICU_IRQ14;
+      case 15: return RA_ELC_ICU_IRQ15;
+      default: return -1;
+    }
+}
+
+/****************************************************************************
+ * Name: ra_gpio_find_free_irq_slot
+ *
+ * Description:
+ *   Find a free GPIO interrupt slot
+ *
+ * Returned Value:
+ *   Slot index or -1 if no free slots
+ *
+ ****************************************************************************/
+
+static int ra_gpio_find_free_irq_slot(void)
+{
+  int i;
+
+  for (i = 0; i < MAX_GPIO_IRQS; i++)
+    {
+      if (!g_gpio_irqs[i].allocated)
+        {
+          return i;
+        }
+    }
+
+  return -1;
+}
+
+/****************************************************************************
+ * Name: ra_gpio_irq_handler
+ *
+ * Description:
+ *   GPIO interrupt handler that routes interrupts to user callbacks
+ *
+ * Input Parameters:
+ *   irq     - IRQ number
+ *   context - Interrupt context
+ *   arg     - Handler argument (pointer to gpio_irq_s structure)
+ *
+ * Returned Value:
+ *   Zero on success
+ *
+ ****************************************************************************/
+
+static int ra_gpio_irq_handler(int irq, void *context, void *arg)
+{
+  struct ra_gpio_irq_s *gpio_irq = (struct ra_gpio_irq_s *)arg;
+
+  if (gpio_irq != NULL && gpio_irq->callback != NULL)
+    {
+      /* Call the user's callback function */
+      return gpio_irq->callback(irq, context, gpio_irq->arg);
+    }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -494,4 +650,163 @@ void ra_gpio_set_drive_strength(gpio_pinset_t pinset, uint8_t strength)
   putreg32(pfs_value, pfs_addr);
 
   ra_pin_access_disable();
+}
+
+
+
+int ra_gpiosetevent(uint32_t pinset, bool rising, bool falling,
+                         bool event, xcpt_t func, void *arg)
+{
+  uint8_t port;
+  uint8_t pin;
+  uint32_t pfs_addr;
+  uint32_t pfs_value;
+  int irq_num;
+  int icu_event;
+  int slot;
+  int icu_irq;
+  int ret;
+
+  /* Extract port and pin from pinset */
+  port = GPIO_GET_PORT(pinset);
+  pin = GPIO_GET_PIN(pinset);
+
+  /* Validate port and pin numbers */
+  if (!ra_gpio_validate_pin(port, pin))
+    {
+      return -EINVAL;
+    }
+
+  /* Find which external IRQ is encoded in this pin configuration */
+  irq_num = ra_gpio_find_irq_for_pin(pinset);
+  if (irq_num < 0)
+    {
+      /* This pin is not configured for external interrupts */
+      return -ENOTSUP;
+    }
+
+  /* Get the ICU event number for this external IRQ */
+  icu_event = ra_gpio_get_irq_event(irq_num);
+  if (icu_event < 0)
+    {
+      return -ENOTSUP;
+    }
+
+  /* If callback is NULL, we're disabling the interrupt */
+  if (func == NULL)
+    {
+      /* Find and disable existing interrupt for this pin */
+      for (slot = 0; slot < MAX_GPIO_IRQS; slot++)
+        {
+          if (g_gpio_irqs[slot].allocated &&
+              g_gpio_irqs[slot].pinset == pinset)
+            {
+              /* Disable interrupt in ICU */
+              ra_icu_detach(g_gpio_irqs[slot].icu_slot);
+
+              /* Clear the slot */
+              g_gpio_irqs[slot].allocated = false;
+              g_gpio_irqs[slot].callback = NULL;
+              g_gpio_irqs[slot].arg = NULL;
+              g_gpio_irqs[slot].icu_slot = -1;
+
+              /* Reset pin to normal GPIO mode */
+              pfs_addr = R_PFS_BASE + (port * R_PFS_PSEL_PORT_OFFSET) +
+                         (pin * R_PFS_PSEL_PIN_OFFSET);
+
+              ra_pin_access_enable();
+              pfs_value = getreg32(pfs_addr);
+              pfs_value &= ~((1 << R_PFS_ISEL) | (1 << R_PFS_EOR) | (1 << R_PFS_EOF));
+              putreg32(pfs_value, pfs_addr);
+              ra_pin_access_disable();
+
+              return OK;
+            }
+        }
+      return -ENODEV; /* Pin not configured for interrupts */
+    }
+
+  /* Find a free interrupt slot */
+  slot = ra_gpio_find_free_irq_slot();
+  if (slot < 0)
+    {
+      return -ENOMEM; /* No free interrupt slots */
+    }
+
+  /* Calculate PFS register address */
+  pfs_addr = R_PFS_BASE + (port * R_PFS_PSEL_PORT_OFFSET) +
+             (pin * R_PFS_PSEL_PIN_OFFSET);
+
+  /* Configure the pin for interrupt mode */
+  ra_pin_access_enable();
+
+  pfs_value = getreg32(pfs_addr);
+
+  /* Clear existing interrupt configuration bits */
+  pfs_value &= ~((1 << R_PFS_ISEL) | (1 << R_PFS_EOR) | (1 << R_PFS_EOF));
+
+  /* Enable IRQ input */
+  pfs_value |= (1 << R_PFS_ISEL);
+
+  /* Configure edge detection */
+  if (rising)
+    {
+      pfs_value |= (1 << R_PFS_EOR);  /* Event on Rising */
+    }
+  if (falling)
+    {
+      pfs_value |= (1 << R_PFS_EOF);  /* Event on Falling */
+    }
+
+  /* Set pin as input */
+  pfs_value &= ~(1 << R_PFS_PDR);
+
+  /* Write the configuration */
+  putreg32(pfs_value, pfs_addr);
+
+  ra_pin_access_disable();
+
+  /* Set up ICU interrupt link */
+  icu_irq = ra_icu_attach(icu_event, ra_gpio_irq_handler,
+                          &g_gpio_irqs[slot], true);
+  if (icu_irq < 0)
+    {
+      return icu_irq; /* ICU attach failed */
+    }
+
+  /* Configure external IRQ for appropriate edge detection mode */
+  uint8_t irq_mode;
+  if (rising && falling)
+    {
+      irq_mode = RA_ICU_IRQ_EDGE_BOTH;
+    }
+  else if (rising)
+    {
+      irq_mode = RA_ICU_IRQ_EDGE_RISING;
+    }
+  else if (falling)
+    {
+      irq_mode = RA_ICU_IRQ_EDGE_FALLING;
+    }
+  else
+    {
+      /* Neither rising nor falling specified - default to both */
+      irq_mode = RA_ICU_IRQ_EDGE_BOTH;
+    }
+
+  ret = ra_icu_config(irq_num, irq_mode, false, RA_ICU_FILTER_PCLK_DIV_1);
+  if (ret < 0)
+    {
+      ra_icu_detach(icu_irq);
+      return ret;
+    }
+
+  /* Store interrupt information */
+  g_gpio_irqs[slot].pinset = pinset;
+  g_gpio_irqs[slot].callback = func;
+  g_gpio_irqs[slot].arg = arg;
+  g_gpio_irqs[slot].icu_slot = icu_irq;
+  g_gpio_irqs[slot].allocated = true;
+
+  return OK;
 }

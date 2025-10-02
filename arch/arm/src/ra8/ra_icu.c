@@ -293,6 +293,53 @@ int ra_icu_set_event(int icu_slot, int event)
 
 
 /****************************************************************************
+ * Name: ra_icu_config
+ *
+ * Description:
+ *   Configure ICU interrupt mode and filtering
+ *
+ * Input Parameters:
+ *   icu_irq      - ICU IRQ number (0-15 for external interrupts)
+ *   mode         - Interrupt detection mode
+ *   filter_enable - Enable digital filter
+ *   filter_clock - Filter clock selection
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int ra_icu_config(int icu_irq, uint8_t mode, bool filter_enable,
+                  uint8_t filter_clock)
+{
+  uint32_t regval;
+
+  /* Validate IRQ range - only IRQ0-IRQ15 support configuration */
+  if (icu_irq < 0 || icu_irq > 15)
+    {
+      return -EINVAL;
+    }
+
+  /* Configure the IRQCR register for this external interrupt */
+  regval = 0;
+
+  /* Set interrupt detection mode */
+  regval |= (mode & R_ICU_IRQCR_IRQMD_MASK) << R_ICU_IRQCR_IRQMD;
+
+  /* Set filter configuration if enabled */
+  if (filter_enable)
+    {
+      regval |= R_ICU_IRQCR_FLTEN;
+      regval |= (filter_clock & R_ICU_IRQCR_FCLKSEL_MASK) << R_ICU_IRQCR_FCLKSEL_SHIFT;
+    }
+
+  /* Write to the IRQCR register */
+  putreg8(regval, R_ICU_IRQCR(icu_irq));
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: ra_icu_enable_wakeup
  *
  * Description:
