@@ -130,12 +130,10 @@ static inline void gpt_putreg(struct ra_gpt_s *priv, int offset, uint32_t value)
 static int gpt_configure(struct ra_gpt_s *priv);
 static uint32_t gpt_calculate_prescaler(uint32_t frequency, uint32_t pclkd);
 static void gpt_dumpregs(struct ra_gpt_s *priv, const char *msg);
+#ifdef CONFIG_DEBUG_PWM_INFO
 static void gpt_log_channel(uint8_t ch,
-                            uint32_t freq_hz,
-                            uint32_t prescaler,
-                            uint32_t pclkd,
-                            uint32_t reload_ticks,
-                            uint32_t duty_ticks);
+                            const struct gpt_channel_s *channel);
+#endif
 
 /* PWM driver methods */
 static int gpt_setup(struct pwm_lowerhalf_s *dev);
@@ -444,7 +442,7 @@ static int gpt_configure(struct ra_gpt_s *priv)
 {
   uint32_t regval;
 
-  pwminfo("Configuring GPT%d\n", priv->config->channel);
+  pwminfo("Configuring GPT%" PRIu32 "\n", priv->config->channel);
 
   /* Perform the multi-register configuration atomically to avoid races */
   irqstate_t flags = enter_critical_section();
@@ -519,7 +517,7 @@ static int gpt_setup(struct pwm_lowerhalf_s *dev)
 {
   struct ra_gpt_s *priv = (struct ra_gpt_s *)dev;
 
-  pwminfo("GPT%d setup\n", priv->config->channel);
+  pwminfo("GPT%" PRIu32 " setup\n", priv->config->channel);
 
   return gpt_configure(priv);
 }
@@ -545,7 +543,7 @@ static int gpt_shutdown(struct pwm_lowerhalf_s *dev)
   struct ra_gpt_s *priv = (struct ra_gpt_s *)dev;
   uint32_t regval;
 
-  pwminfo("GPT%d shutdown\n", priv->config->channel);
+  pwminfo("GPT%" PRIu32 " shutdown\n", priv->config->channel);
 
   /* Make shutdown sequence atomic */
   irqstate_t flags = enter_critical_section();
@@ -603,7 +601,7 @@ static int gpt_start(struct pwm_lowerhalf_s *dev,
   pwminfo("GPT%d start: frequency=%" PRIu32 " (multichan)\n",
           priv->config->channel, info->frequency);
 #else
-  pwminfo("GPT%d start: frequency=%" PRIu32 " duty=%08" PRIx32 "\n",
+  pwminfo("GPT%" PRIu32 " start: frequency=%" PRIu32 " duty=%08" PRIx32 "\n",
           priv->config->channel, info->frequency, (uint32_t)info->duty);
 #endif
 
@@ -782,7 +780,7 @@ static int gpt_stop(struct pwm_lowerhalf_s *dev)
   struct ra_gpt_s *priv = (struct ra_gpt_s *)dev;
   uint32_t regval;
 
-  pwminfo("GPT%d stop\n", priv->config->channel);
+  pwminfo("GPT%" PRIu32 " stop\n", priv->config->channel);
 
 
   irqstate_t flags = enter_critical_section();
@@ -832,7 +830,7 @@ static int gpt_ioctl(struct pwm_lowerhalf_s *dev, int cmd,
   struct ra_gpt_s *priv = (struct ra_gpt_s *)dev;
   int ret = 0;
 
-  pwminfo("GPT%d ioctl: cmd=%d arg=%08lx\n", priv->config->channel, cmd, arg);
+  pwminfo("GPT%" PRIu32 " ioctl: cmd=%d arg=%08lx\n", priv->config->channel, cmd, arg);
 
   switch (cmd)
     {
