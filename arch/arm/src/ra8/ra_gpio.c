@@ -40,9 +40,6 @@
 #include "ra_start.h"
 #include "ra_gpio.h"
 #include "ra_icu.h"
-#include "hardware/ra_gpio.h"
-#include "hardware/ra_memorymap.h"
-#include <arch/ra8/ra8e1_irq.h>
 
 /****************************************************************************
  * Private Data
@@ -60,9 +57,6 @@ struct ra_gpio_irq_s
   int           icu_slot;   /* ICU slot number (-1 if unused) */
   bool          allocated;  /* True if this slot is allocated */
 };
-
-/* Maximum number of GPIO interrupts supported */
-#define MAX_GPIO_IRQS 16
 
 /* GPIO interrupt table */
 static struct ra_gpio_irq_s g_gpio_irqs[MAX_GPIO_IRQS];
