@@ -458,7 +458,7 @@ static void ra_spi_cs_assert(struct ra_spi_priv_s *priv, uint32_t devid)
       ra_gpiowrite(cs_config->cs_gpio, assert_level);
 
       spiinfo("SPI%d CS GPIO assert for device 0x%08lx: pin=0x%08lx, level=%d\n",
-        priv->config->bus, (unsigned long)devid, (unsigned long)cs_config->cs_gpio.cfg, assert_level);
+        priv->config->bus, (unsigned long)devid, (unsigned long)cs_config->cs_gpio, assert_level);
     }
   else
     {
@@ -487,7 +487,7 @@ static void ra_spi_cs_deassert(struct ra_spi_priv_s *priv, uint32_t devid)
       ra_gpiowrite(cs_config->cs_gpio, deassert_level);
 
       spiinfo("SPI%d CS GPIO deassert for device 0x%08lx: pin=0x%08lx, level=%d\n",
-        priv->config->bus, (unsigned long)devid, (unsigned long)cs_config->cs_gpio.cfg, deassert_level);
+        priv->config->bus, (unsigned long)devid, (unsigned long)cs_config->cs_gpio, deassert_level);
     }
   else
     {

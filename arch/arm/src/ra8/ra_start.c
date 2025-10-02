@@ -402,7 +402,8 @@ static void ra_cortex_m85_init(void)
   putreg16(1U, R_FCACHE_FCACHEE);
 }
 
-static void main(void){
+/* Main entry point */
+int main(void){
 
   /* Cortex-M85 Initialization */
   ra_cortex_m85_init();
@@ -453,6 +454,8 @@ static void main(void){
   showprogress('\n');
 
   nx_start();
+
+  return 0;
 }
 
 /****************************************************************************

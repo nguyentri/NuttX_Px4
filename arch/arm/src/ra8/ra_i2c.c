@@ -135,18 +135,7 @@ static void ra_i2c_dtc_cleanup(struct ra_i2c_priv_s *priv);
  * Private Data
  ****************************************************************************/
 
-/* Adapter wrappers to match canonical i2c_ops_s */
-static int ra_i2c_setup(FAR struct i2c_master_s *dev)
-{
-  struct ra_i2c_priv_s *priv = (struct ra_i2c_priv_s *)dev;
-  return ra_i2c_init(priv);
-}
-
-static int ra_i2c_shutdown(FAR struct i2c_master_s *dev)
-{
-  struct ra_i2c_priv_s *priv = (struct ra_i2c_priv_s *)dev;
-  return ra_i2c_deinit(priv);
-}
+/* Modern NuttX I2C interface uses only transfer and reset operations */
 
 static int ra_i2c_transfer_wrapper(FAR struct i2c_master_s *dev,
                                    FAR struct i2c_msg_s *msgs, int count)
@@ -185,8 +174,6 @@ static const struct i2c_ops_s ra_i2c_ops =
 #ifdef CONFIG_I2C_RESET
   .reset    = ra_i2c_reset,
 #endif
-  .setup    = ra_i2c_setup,
-  .shutdown = ra_i2c_shutdown,
 };
 
 /* I2C device configuration */
