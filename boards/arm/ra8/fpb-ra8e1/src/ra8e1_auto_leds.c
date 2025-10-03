@@ -36,7 +36,7 @@
 #include "chip.h"
 #include "ra_gpio.h"
 
-/* The board.h file may override pin configurations defined in ra_pinmap.h */
+/* The board.h file may override pin configurations defined in <hardware/ra8e1/ra8e1_pinmap.h> */
 
 #include <arch/board/board.h>
 
@@ -55,7 +55,7 @@
  *
  * These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
  * defined.  In that case, the usage by the board port is defined in
- * include/board.h and src/ra8e1_auto_leds.c. The LEDs are used to encode 
+ * include/board.h and src/ra8e1_auto_leds.c. The LEDs are used to encode
  * OS-related events as follows:
  *
  *   SYMBOL                MEANING                         LED STATE
