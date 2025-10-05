@@ -28,6 +28,7 @@ target_include_directories(arch PRIVATE
 
 # Required RA8 core files
 set(SRCS
+    ra_mstp.c
     ra_start.c
     ra_timerisr.c
     ra_clock.c
@@ -58,24 +59,14 @@ if(CONFIG_RA_DMAC)
   list(APPEND SRCS ra_dmac.c)
 endif()
 
-# DMA driver
-if(CONFIG_RA_DMA)
-  list(APPEND SRCS ra_dmac.c)
-endif()
-
 # SPI driver
 if(CONFIG_RA_SPI)
-  list(APPEND SRCS ra_spi.c)
+  list(APPEND SRCS ra_spi.c ra_dtc.c)
 endif()
 
 # PWM driver
 if(CONFIG_RA_GPT)
   list(APPEND SRCS ra_gpt.c)
-endif()
-
-# Enhanced UART+DMA driver
-if(CONFIG_RA_SCI_UART)
-  list(APPEND SRCS ra_sci.c)
 endif()
 
 # Flash memory driver

@@ -73,11 +73,6 @@ ifeq ($(CONFIG_RA_GPT),y)
 CHIP_CSRCS += ra_gpt.c
 endif
 
-# Enhanced UART+DMA driver
-ifeq ($(CONFIG_RA_SCI_UART),y)
-CHIP_CSRCS += ra_sci.c
-endif
-
 # Flash memory driver
 ifeq ($(CONFIG_RA_FLASH),y)
 CHIP_CSRCS += ra_flash.c
