@@ -788,7 +788,7 @@ int ra_gpiosetevent(uint32_t pinset, bool rising, bool falling,
       irq_mode = RA_ICU_IRQ_EDGE_BOTH;
     }
 
-  ret = ra_icu_config(irq_num, irq_mode, false, RA_ICU_FILTER_PCLK_DIV_1);
+  ret = ra_icu_filter_config(irq_num, irq_mode, false, RA_ICU_FILTER_PCLK_DIV_1);
   if (ret < 0)
     {
       ra_icu_detach(icu_irq);

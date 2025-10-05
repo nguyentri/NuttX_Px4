@@ -132,7 +132,11 @@ static uint32_t gpt_calculate_prescaler(uint32_t frequency, uint32_t pclkd);
 static void gpt_dumpregs(struct ra_gpt_s *priv, const char *msg);
 #ifdef CONFIG_DEBUG_PWM_INFO
 static void gpt_log_channel(uint8_t ch,
-                            const struct gpt_channel_s *channel);
+                            uint32_t freq_hz,
+                            uint32_t prescaler,
+                            uint32_t pclkd,
+                            uint32_t reload_ticks,
+                            uint32_t duty_ticks);
 #endif
 
 /* PWM driver methods */

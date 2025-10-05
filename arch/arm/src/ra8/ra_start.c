@@ -68,18 +68,6 @@ const uintptr_t g_idle_topstack = (uintptr_t)&__ram_thread_stack$$Limit + CONFIG
 
 extern uint32_t _vectors[]; /* See arm_vectors.S */
 
-/****************************************************************************
- * ID Code Definitions
- * Following Renesas FSP pattern for device identification
- ****************************************************************************/
-
-/** ID code definitions defined here. */
-static const uint32_t g_ra_id_codes[] __attribute__((section(".id_code")))
-__attribute__((__used__)) =
-{
-  0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF
-};
-
 /***********************************************************************************************************************
  * Macro definitions
  **********************************************************************************************************************/

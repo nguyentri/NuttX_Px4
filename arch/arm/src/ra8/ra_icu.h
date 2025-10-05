@@ -64,6 +64,7 @@ void ra_icu_clear_irq(int irq);
 int ra_icu_attach(int event, xcpt_t handler, void *arg, bool irq_enable);
 int ra_icu_detach(int icu_irq);
 int ra_icu_set_event(int icu_slot, int event);
+int ra_icu_filter_config(int icu_irq, uint8_t mode, bool filter_enable, uint8_t filter_clock);
 
 /* Wakeup control functions */
 void ra_icu_enable_wakeup(uint32_t mask);

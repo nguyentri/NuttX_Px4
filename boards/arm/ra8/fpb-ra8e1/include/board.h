@@ -47,6 +47,10 @@
 #define GPIO_SCI3_TX   GPIO_TXD3_MOSI3_SDA3_B  /* P310 - RC Input */
 
 /* SPI Pin Definitions for Sensors */
+#define GPIO_SPI0_SCK   GPIO_RSPCKA_A_1          /*Temporay - SPI0 Clock */
+#define GPIO_SPI0_MOSI  GPIO_MOSIA_A_1           /*Temporay - SPI0 MOSI */
+#define GPIO_SPI0_MISO  GPIO_MISOA_A_1           /*Temporay - SPI0 MISO */
+
 #define GPIO_SPI1_SCK   GPIO_RSPCKB_B_1          /* P412 - SPI1 Clock */
 #define GPIO_SPI1_MOSI  GPIO_MOSIB_B_1           /* P411 - SPI1 MOSI */
 #define GPIO_SPI1_MISO  GPIO_MISOB_B_1           /* P410 - SPI1 MISO */

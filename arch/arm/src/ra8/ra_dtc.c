@@ -85,10 +85,10 @@ ra_dtc_ctrl_t g_dtc_contexts[RA_DTC_MAX_CONTEXTS];
 
 /* DTC vector table (aligned to 1024 bytes) */
 /* Place the DTC vector table into the linker section that the linker
- * script names __ram_dtc_vector$$ (section name: .fsp_dtc_vector_table)
+ * script names __ram_dtc_vector$$ (section name: .dtc_vector_table)
  */
 ra_dtc_info_t *g_dtc_vector_table[RA_DTC_VECTOR_TABLE_ENTRIES]
-  __attribute__((section(".fsp_dtc_vector_table")))
+  __attribute__((section(".dtc_vector_table")))
   __attribute__((aligned(RA_DTC_VECTOR_TABLE_ALIGN)));
 
 /* DTC module initialized flag */

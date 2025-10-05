@@ -293,7 +293,7 @@ int ra_icu_set_event(int icu_slot, int event)
 
 
 /****************************************************************************
- * Name: ra_icu_config
+ * Name: ra_icu_filter_config
  *
  * Description:
  *   Configure ICU interrupt mode and filtering
@@ -309,7 +309,7 @@ int ra_icu_set_event(int icu_slot, int event)
  *
  ****************************************************************************/
 
-int ra_icu_config(int icu_irq, uint8_t mode, bool filter_enable,
+int ra_icu_filter_config(int icu_irq, uint8_t mode, bool filter_enable,
                   uint8_t filter_clock)
 {
   uint32_t regval;

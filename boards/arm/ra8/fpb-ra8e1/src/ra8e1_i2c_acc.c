@@ -462,7 +462,7 @@ static int accel_setup_interrupt(void)
     }
 
   /* Configure ICU for falling edge interrupt */
-  ret = ra_icu_config(ACCEL_INT_IRQ, RA_ICU_IRQ_EDGE_FALLING, true,
+  ret = ra_icu_filter_config(ACCEL_INT_IRQ, RA_ICU_IRQ_EDGE_FALLING, true,
                       RA_ICU_FILTER_PCLK_DIV_64);
   if (ret < 0)
     {
