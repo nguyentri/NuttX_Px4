@@ -100,7 +100,7 @@
 #define I2C_FREQUENCY           400000          /* 400kHz - Fast mode */
 #define I2C_TIMEOUT_MS          1000
 
-/* ADXL345 Accelerometer Configuration (matching FSP example) */
+/* ADXL345 Accelerometer Configuration */
 #define ACCEL_I2C_ADDR          0x1D            /* 7-bit slave address */
 #define ACCEL_SENSITIVITY       0.0039f         /* g/LSB sensitivity */
 

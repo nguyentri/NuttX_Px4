@@ -415,7 +415,7 @@ static int spi_configure_devices(void)
  * Name: spi_test_write_and_read
  *
  * Description:
- *   Test separate write and read operations (matching FSP example)
+ *   Test separate write and read operations
  *
  ****************************************************************************/
 
@@ -462,7 +462,7 @@ static int spi_test_write_and_read(void)
  * Name: spi_test_write_read
  *
  * Description:
- *   Test simultaneous write/read operations (matching FSP example)
+ *   Test simultaneous write/read operations
  *
  ****************************************************************************/
 

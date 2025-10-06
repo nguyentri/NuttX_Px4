@@ -33,7 +33,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* FSP-Based Clock Configuration Defaults */
+/* Clock Configuration Defaults */
 
 #ifndef CONFIG_RA_HOCO_FREQUENCY
 #  define CONFIG_RA_HOCO_FREQUENCY    20000000  /* 20MHz HOCO (default for RA8E1) */
@@ -55,7 +55,7 @@
 #  define CONFIG_RA_MAIN_OSC_FREQUENCY CONFIG_RA_XTAL_FREQUENCY
 #endif
 
-/* FSP-Based System Clock Selection */
+/* System Clock Selection */
 
 /**
  * X=Integer portion of the multiplier.
@@ -79,7 +79,7 @@
 #  endif
 #endif
 
-/* Clock Source Definitions (FSP Compatible) */
+/* Clock Source Definitions */
 #define RA_CLOCKS_SOURCE_CLOCK_HOCO      0     /* HOCO */
 #define RA_CLOCKS_SOURCE_CLOCK_MOCO      1     /* MOCO */
 #define RA_CLOCKS_SOURCE_CLOCK_LOCO      2     /* LOCO */
@@ -349,13 +349,13 @@
 #define RA_CLOCKS_PLL_DIV_1_5                       (9)
 #define RA_CLOCKS_PLL_DIV_16                        (15)
 
-/* PLL configuration macros (FSP compatible) */
+/* PLL configuration macros */
 #ifndef CONFIG_RA_PLL_SOURCE
 #  define CONFIG_RA_PLL_SOURCE        RA_CLOCKS_SOURCE_CLOCK_HOCO  /* HOCO as PLL source */
 #endif
 
 #ifndef CONFIG_RA_PLL_DIV
-#  define CONFIG_RA_PLL_DIV           1         /* PLL input divider /2 (FSP value 1 = /2) */
+#  define CONFIG_RA_PLL_DIV           1         /* PLL input divider /2 ( 1 = /2) */
 #endif
 
 #ifndef CONFIG_RA_PLL_MUL
@@ -406,7 +406,7 @@
 
 /* PLL Output Dividers (RA8E1 specific) */
 #ifndef CONFIG_RA_PLL1P_DIV
-#  define CONFIG_RA_PLL1P_DIV         1         /* PLL1P divider /2 (FSP value 1 = /2) */
+#  define CONFIG_RA_PLL1P_DIV         1         /* PLL1P divider /2 ( 1 = /2) */
 #endif
 
 #ifndef CONFIG_RA_PLL1Q_DIV
@@ -456,7 +456,7 @@
 #define RA_PLL1Q_FREQUENCY            (RA_PLL_FREQUENCY / (CONFIG_RA_PLL1Q_DIV + 1))
 #define RA_PLL1R_FREQUENCY            (RA_PLL_FREQUENCY / (CONFIG_RA_PLL1R_DIV + 1))
 
-/* FSP-Based Clock Frequencies */
+/* Clock Frequencies */
 
 #if defined(CONFIG_RA_CLOCK_PLL1P) || defined(CONFIG_RA_CLOCK_PLL)
 #  define RA_SYSTEM_CLOCK_FREQUENCY    RA_PLL1P_FREQUENCY
@@ -521,11 +521,11 @@
 #endif
 
 #ifndef CONFIG_RA_OCTACLK_DIV
-#  define CONFIG_RA_OCTACLK_DIV       RA_CLOCKS_OCTA_CLOCK_DIV_4                           /* OCTA clock div /2 (FSP val 1 = /2) */
+#  define CONFIG_RA_OCTACLK_DIV       RA_CLOCKS_OCTA_CLOCK_DIV_4                           /* OCTA clock div /2 (1 = /2) */
 #endif
 
 #ifndef CONFIG_RA_USBCLK_DIV
-#  define CONFIG_RA_USBCLK_DIV        RA_CLOCKS_USB_CLOCK_DIV_5                           /* USB clock div /4 (FSP val 3 = /4) */
+#  define CONFIG_RA_USBCLK_DIV        RA_CLOCKS_USB_CLOCK_DIV_5                           /* USB clock div /4 (3 = /4) */
 #endif
 
 #ifndef CONFIG_RA_SCISPICLK_DIV
@@ -559,7 +559,7 @@
                    ((div) == 10) ? 12 : \
                    ((div) == 11) ? 24 : (1 << (div))) : (1 << (div)))
 
-/* FSP-Based Derived Frequencies */
+/* Derived Frequencies */
 
 #define RA_CPUCLK_FREQUENCY            (RA_SYSTEM_CLOCK_FREQUENCY / RA_DIV_TO_DIVISOR(CONFIG_RA_CPUCLK_DIV))
 #define RA_ICLK_FREQUENCY              (RA_SYSTEM_CLOCK_FREQUENCY / RA_DIV_TO_DIVISOR(CONFIG_RA_ICK_DIV))
@@ -576,7 +576,7 @@
 #  define RA_SCICLK_FREQUENCY          (RA_PLL1P_FREQUENCY / RA_DIV_TO_DIVISOR(CONFIG_RA_SCICLK_DIV))
 #endif
 
-/* FSP-Based Option Function Select Register Settings */
+/* Option Function Select Register Settings */
 
 /* HOCO Frequency Options for RA8E1 */
 #ifndef RA_HOCO_FREQUENCY
@@ -613,7 +613,7 @@
 #define RA_PRCR_UNLOCK         ((RA_PRCR_KEY) | 0x3U)
 #define RA_PRCR_LOCK           ((RA_PRCR_KEY) | 0x0U)
 
-/* FSP-Based ID Code Configuration */
+/* ID Code Configuration */
 #ifndef IDCODE1
 #  define IDCODE1                      0xFFFFFFFF
 #endif
@@ -634,7 +634,7 @@
  * Public Types
  ****************************************************************************/
 
-/* FSP-Compatible Clock Configuration Structure */
+/* Clock Configuration Structure */
 
 typedef struct
 {
@@ -660,7 +660,7 @@ typedef struct
  * Public Data
  ****************************************************************************/
 
-/* FSP-compatible system core clock variable */
+/* System core clock variable */
 extern uint32_t g_sys_core_clock;
 
 /****************************************************************************
@@ -682,7 +682,7 @@ extern "C"
  *
  * Description:
  *   Called to initialize the RA clocks. This does whatever setup is needed
- *   to put the SoC in a usable state using FSP-compatible clock
+ *   to put the SoC in a usable state using clock initialization sequence.
  *   initialization sequence.
  *
  ****************************************************************************/
@@ -694,7 +694,6 @@ void ra_clock(void);
  *
  * Description:
  *   Update the system core clock frequency based on current clock settings.
- *   FSP-compatible implementation.
  *
  ****************************************************************************/
 
@@ -704,7 +703,7 @@ void ra_sys_core_clock_update(void);
  * Name: ra_get_clock_config
  *
  * Description:
- *   Get current FSP-compatible clock configuration
+ *   Get current clock configuration
  *
  ****************************************************************************/
 
@@ -714,7 +713,7 @@ void ra_get_clock_config(ra_clock_config_t *config);
  * Name: ra_print_clock_info
  *
  * Description:
- *   Print FSP-compatible clock information for debugging
+ *   Print Clock information for debugging
  *
  ****************************************************************************/
 
@@ -724,7 +723,7 @@ void ra_print_clock_info(void);
  * Name: ra_get_peripheral_clock
  *
  * Description:
- *   Get peripheral clock frequency for FSP compatibility
+ *   Get peripheral clock frequency
  *
  ****************************************************************************/
 

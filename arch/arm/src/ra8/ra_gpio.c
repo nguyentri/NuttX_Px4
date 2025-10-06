@@ -45,7 +45,7 @@
  * Private Data
  ****************************************************************************/
 
-/* PFS protection counter for safe register access (FSP-compatible) */
+/* PFS protection counter for safe register access */
 static volatile uint32_t g_pfs_protect_counter = 0;
 
 /* GPIO interrupt callback information */
@@ -69,7 +69,7 @@ static struct ra_gpio_irq_s g_gpio_irqs[MAX_GPIO_IRQS];
  * Name: ra_pin_access_enable
  *
  * Description:
- *   Enable access to PFS registers (FSP-compatible implementation)
+ *   Enable access to PFS registers
  *   Uses reference counter to protect against re-entrancy
  *
  ****************************************************************************/
@@ -100,7 +100,7 @@ static void ra_pin_access_enable(void)
  * Name: ra_pin_access_disable
  *
  * Description:
- *   Disable access to PFS registers (FSP-compatible implementation)
+ *   Disable access to PFS registers
  *   Uses reference counter to protect against re-entrancy
  *
  ****************************************************************************/
@@ -404,7 +404,7 @@ int ra_configgpio(gpio_pinset_t cfgset)
   /* Convert to PFS configuration */
   pfs_value = ra_gpio_get_pfs_config(cfgset);
 
-  /* Configure the pin with FSP-style protection */
+  /* Configure the pin */
   ra_pin_access_enable();
   ra_gpio_pfs_write(port, pin, pfs_value);
   ra_pin_access_disable();
@@ -518,7 +518,7 @@ void ra_gpio_set_direction(gpio_pinset_t pinset, bool direction)
   pfs_addr = R_PFS_BASE + (port * R_PFS_PSEL_PORT_OFFSET) +
              (pin * R_PFS_PSEL_PIN_OFFSET);
 
-  /* Modify direction bit with FSP-style protection */
+  /* Modify direction bit */
   ra_pin_access_enable();
 
   pfs_value = getreg32(pfs_addr);
@@ -568,7 +568,7 @@ void ra_gpio_set_pullup(gpio_pinset_t pinset, bool enable)
   pfs_addr = R_PFS_BASE + (port * R_PFS_PSEL_PORT_OFFSET) +
              (pin * R_PFS_PSEL_PIN_OFFSET);
 
-  /* Modify pull-up bit with FSP-style protection */
+  /* Modify pull-up bit */
   ra_pin_access_enable();
 
   pfs_value = getreg32(pfs_addr);
@@ -618,7 +618,7 @@ void ra_gpio_set_drive_strength(gpio_pinset_t pinset, uint8_t strength)
   pfs_addr = R_PFS_BASE + (port * R_PFS_PSEL_PORT_OFFSET) +
              (pin * R_PFS_PSEL_PIN_OFFSET);
 
-  /* Modify drive strength bits with FSP-style protection */
+  /* Modify drive strength bits */
   ra_pin_access_enable();
 
   pfs_value = getreg32(pfs_addr);

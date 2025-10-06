@@ -247,7 +247,7 @@ void ra_delay_us(uint32_t delay_us);
  * Name: ra_register_protect_enable
  *
  * Description:
- *   Enable register protection (FSP-compatible)
+ *   Enable register protection
  *
  ****************************************************************************/
 
@@ -257,7 +257,7 @@ void ra_register_protect_enable(ra_reg_protect_t regs_to_protect);
  * Name: ra_register_protect_disable
  *
  * Description:
- *   Disable register protection (FSP-compatible)
+ *   Disable register protection
  *
  ****************************************************************************/
 
@@ -269,7 +269,7 @@ void ra_register_protect_disable(ra_reg_protect_t regs_to_unprotect);
  *
  * Description:
  *   Initialize PMSAR and PSCU registers to their default values.
- *   Sets all port pins to secure mode (0) as per FSP implementation.
+ *   Sets all port pins to secure mode (0)
  *   Must be called before configuring any port pins.
  *
  ****************************************************************************/

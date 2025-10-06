@@ -143,8 +143,6 @@ RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_bps_se
 /***********************************************************************************************************************
  * Typedef definitions
  **********************************************************************************************************************/
-/* FSP linker generated initialization table data structures types */
-/* These are only used for reference with FSP initialization approach */
 /* NuttX has its own memory initialization in arm_head.S */
 typedef enum e_ra_init_mem
 {
@@ -327,7 +325,7 @@ const ra_init_info_t g_init_info =
 
 #endif /* CONFIG_RA_LINKER_C */
 
-/* Register protection counters (FSP-compatible) */
+/* Register protection counters */
 static volatile uint16_t g_register_protect_counters[4] = {0};
 
 /****************************************************************************
@@ -471,14 +469,13 @@ void __start(void)
  *
  * Description:
  *   Initialize option bytes (security and boot configuration)
- *   Following Renesas FSP bsp_linker.c approach
+ *   Following Renesas bsp_linker.c approach
  *
  ****************************************************************************/
 
 void ra_option_bytes_init(void)
 {
   /* Configure option bytes for security, boot, etc. */
-  /* Reference Renesas FSP logic for OFS registers */
   /* Option bytes are typically handled by linker sections and bootloader */
   /* On RA8E1, these are defined in ra_start.h and placed by linker */
 
@@ -731,7 +728,7 @@ void ra_delay_us(uint32_t delay_us)
  * Name: ra_register_protect_enable
  *
  * Description:
- *   Enable register protection (FSP-compatible implementation)
+ *   Enable register protection
  *
  * Input Parameters:
  *   regs_to_protect - Registers which have write protection enabled
@@ -767,7 +764,7 @@ void ra_register_protect_enable(ra_reg_protect_t regs_to_protect)
  * Name: ra_register_protect_disable
  *
  * Description:
- *   Disable register protection (FSP-compatible implementation)
+ *   Disable register protection
  *
  * Input Parameters:
  *   regs_to_unprotect - Registers which have write protection disabled
@@ -802,7 +799,7 @@ void ra_register_protect_disable(ra_reg_protect_t regs_to_unprotect)
  *
  * Description:
  *   Initialize PMSAR and PSCU registers to their default values.
- *   Sets all port pins to secure mode (0) as per FSP implementation.
+ *   Sets all port pins to secure mode (0) as per  implementation.
  *   Must be called before configuring any port pins.
  *
  ****************************************************************************/

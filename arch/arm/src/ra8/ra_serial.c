@@ -545,7 +545,7 @@ static uart_dev_t  g_uart9port =
  *
  * Description:
  *   Calculate baud rate register settings for SCI_B UART.
- *   Based on Renesas FSP R_SCI_B_UART_BaudCalculate algorithm.
+ *   Based on Renesas R_SCI_B_UART_BaudCalculate algorithm.
  *
  * Input Parameters:
  *   baudrate - Desired baud rate (bps)
@@ -556,7 +556,7 @@ static uart_dev_t  g_uart9port =
  *
  ****************************************************************************/
 
-/* Baud rate divisor information (UART mode) - from Renesas FSP */
+/* Baud rate divisor information (UART mode)*/
 static const struct
 {
   uint8_t bgdm : 1;    /* Baud rate generator double-speed mode */

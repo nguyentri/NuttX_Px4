@@ -42,8 +42,7 @@
 #define RA_FLASH_CODE_BLOCK_SIZE     8192   /* 8KB Code Flash block size */
 #define RA_FLASH_DATA_BLOCK_SIZE     64     /* 64B Data Flash block size */
 
-/* Flash memory areas - Updated to match RA8E1 FSP specification */
-
+/* Flash memory areas */
 #define RA_FLASH_CODE_START         0x00000000
 #define RA_FLASH_CODE_SIZE          0x00100000  /* 1MB Code Flash */
 #define RA_FLASH_DATA_START         0x08000000  /* Data Flash starts at different address */
@@ -71,7 +70,7 @@ extern "C"
  * Name: ra_flash_initialize
  *
  * Description:
- *   Initialize the Flash MTD device driver for either Code Flash or 
+ *   Initialize the Flash MTD device driver for either Code Flash or
  *   Data Flash.
  *
  * Input Parameters:

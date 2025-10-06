@@ -720,9 +720,7 @@ static int ra_spi_dtc_configure_transfer(struct ra_spi_priv_s *priv,
  *
  * Description:
  *   Commit the previously prepared DTC transfer_info structures into the
- *   DTC/vector table and enable ICU triggers. This mirrors the FSP
- *   R_DTC_Reconfigure behavior (p_info is prepared by
- *   ra_spi_dtc_configure_transfer).
+ *   DTC/vector table and enable ICU triggers.
  *
  *   NOTE: This function does not modify SPI registers (SPCMD0/SPCR/etc.).
  *
@@ -835,8 +833,8 @@ static void ra_spi_start_transfer(struct ra_spi_priv_s *priv)
 
   /* Now set SPE to start the transfer. For non-DTC full-duplex transfers we
    * should preload the first one or two transmit words to fill the hardware
-   * shift register and buffer. This mirrors the Renesas FSP behavior which
-   * preloads two words to avoid initial RX zeros at high bitrates. */
+   * shift register and buffer.
+   */
   if (!priv->dtc_active && priv->txbuffer)
     {
       /* Temporarily disable TXI IRQ so we can preload without racing the ISR */

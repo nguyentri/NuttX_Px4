@@ -46,7 +46,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* FSP-Based Memory Configuration - Matched to Linker Script */
+/* Memory Configuration - Matched to Linker Script */
 
 #ifndef CONFIG_RA_DTCM_BASE
 #  define CONFIG_RA_DTCM_BASE         0x20000000  /* DTCM base from linker */
@@ -136,12 +136,12 @@
 
 void up_allocate_heap(void **heap_start, size_t *heap_size)
 {
-  /* FSP-based memory map validation and heap setup - Compatible with linker script */
+  /* Memory map validation and heap setup - Compatible with linker script */
 
   board_autoled_on(LED_HEAPALLOCATE);
 
 #ifdef CONFIG_RA_DTCM_HEAP
-  /* Use DTCM for heap if configured - FSP memory optimization */
+  /* Use DTCM for heap if configured - Memory optimization */
   /* Linker script: dtcm (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00004000 */
   *heap_start = (void *)CONFIG_RA_DTCM_BASE;
   *heap_size  = CONFIG_RA_DTCM_SIZE;
@@ -163,7 +163,7 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
 #endif
 
 #elif defined(CONFIG_RA_EXTERNAL_RAM_HEAP)
-  /* Use external RAM if available - FSP external memory support */
+  /* Use external RAM if available - external memory support */
   /* Linker script: ospi0_cs0 (rwx) : ORIGIN = 0x80000000, LENGTH = 0x10000000 */
   *heap_start = (void *)CONFIG_RA_EXTERNAL_RAM_BASE;
   *heap_size  = CONFIG_RA_EXTERNAL_RAM_SIZE;
@@ -176,16 +176,16 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
 #else
   /* Standard internal SRAM heap configuration */
   /* Linker script: sram (rwx) : ORIGIN = 0x22060000, LENGTH = 0x00080000 */
-  /* Validate memory boundaries using FSP memory map */
+  /* Validate memory boundaries using memory map */
   uintptr_t heap_end = CONFIG_RAM_END;  /* 0x22060000 + 0x80000 = 0x220E0000 */
 
 #ifdef CONFIG_RA_STACK_GUARD
-  /* Reserve stack guard region - FSP security feature */
+  /* Reserve stack guard region - security feature */
   heap_end -= CONFIG_RA_STACK_GUARD_SIZE;
 #endif
 
 #ifdef CONFIG_RA_HEAP_ALIGNMENT
-  /* Apply FSP-style heap alignment requirements */
+  /* Apply heap alignment requirements */
   uintptr_t heap_start_aligned = (g_idle_topstack + CONFIG_RA_HEAP_ALIGNMENT - 1) &
                                  ~(CONFIG_RA_HEAP_ALIGNMENT - 1);
   *heap_start = (void *)heap_start_aligned;
@@ -216,7 +216,7 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
   /* Validate heap size meets minimum requirements */
   if (*heap_size < CONFIG_IDLETHREAD_STACKSIZE)
     {
-      /* Insufficient heap space - FSP error handling */
+      /* Insufficient heap space - Error handling */
       syslog(LOG_ERR, "Insufficient heap space: %zu < %d bytes\n",
              *heap_size, CONFIG_IDLETHREAD_STACKSIZE);
       board_autoled_on(LED_PANIC);
@@ -262,7 +262,7 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
  * Name: ra_mem_validate
  *
  * Description:
- *   Validate memory configuration against FSP requirements and linker script
+ *   Validate memory configuration against
  *
  ****************************************************************************/
 

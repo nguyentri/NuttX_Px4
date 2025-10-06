@@ -1702,13 +1702,13 @@ config RA_DMA_TRANSFER_MODES
      - Normal transfer
      - Repeat transfer
      - Block transfer
-     Based on FSP DMAC implementation.
+     Based on DMAC implementation.
 
 endif # RA_DMA
 endmenu
 
-menu "RA8 Advanced Drivers"
-comment "FSP-based drivers with enhanced functionality"
+menu "RA8 Nuttx Drivers"
+comment "RA8 Nuttx Drivers with enhanced functionality"
 
 config RA_MSTP
    bool "Module Stop Control"
@@ -1717,19 +1717,12 @@ config RA_MSTP
      Enable Module Stop Control for power management.
      Required for proper peripheral initialization and power control.
 
-config RA_PINMAP
-   bool "Pin Mapping Support"
-   default y
-   help
-     Enable pin mapping and configuration support.
-     Required for GPIO and peripheral pin configuration.
-
 config RA_FLASH_LEGACY
    bool "Flash Memory Driver"
    default n
    select MTD
    help
-     Enable internal flash memory driver with FSP support.
+     Enable internal flash memory driver .
      Supports both code flash and data flash operations.
 
 if RA_FLASH_LEGACY

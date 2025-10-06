@@ -48,7 +48,7 @@
  * Pre-processor Definitions (Private Definitions)
  ****************************************************************************/
 
-/* BSP register unlock/lock keys (FSP compatible) */
+/* BSP register unlock/lock keys */
 #define RA_PRV_PRCR_KEY                        (0xA500U)
 #define RA_PRV_PRCR_UNLOCK                     ((RA_PRV_PRCR_KEY) | 0x3U)
 #define RA_PRV_PRCR_LOCK                       ((RA_PRV_PRCR_KEY) | 0x0U)
@@ -86,12 +86,12 @@
   #define RA_PRV_PLL_USED                         (0)
 #endif
 
-/* System clock divider calculations (BSP compatible) */
+/* System clock divider calculations */
 /* SCKDIVCR register format (RA8E1):
  * Bits 31-28: FCLK divider    Bits 27-24: ICLK divider    Bits 23-20: PCLKE divider
  * Bits 19-16: BCLK divider    Bits 15-12: PCLKA divider   Bits 11-8:  PCLKB divider
  * Bits 7-4:   PCLKC divider   Bits 3-0:   PCLKD divider
- * Expected value: 0x988a8998 (FSP reference) - VERIFIED MATCH ✓
+ * Expected value: 0x988a8998
  */
 #define RA_PRV_STARTUP_SCKDIVCR_FCLK_BITS        ((CONFIG_RA_FCLK_DIV & 0xFU) << 28U)
 #define RA_PRV_STARTUP_SCKDIVCR_ICLK_BITS        ((CONFIG_RA_ICK_DIV & 0xFU) << 24U)
@@ -128,17 +128,16 @@
                                                       RA_PRV_PLL2CCR2_PLL_DIV_Q_BIT) |                     \
                                                       (CONFIG_RA_PL2ODIVP & RA_PRV_PLL2CCR2_PLL_DIV_MASK))
 
-/* PLL Control Register (PLLCCR) calculations (FSP compatible)
+/* PLL Control Register (PLLCCR) calculations
  * For RA8E1 (PLLCCR_TYPE 3), the PLL multiplier format is:
  * BSP_CLOCKS_PLL_MUL(X,Y) = ((X-1) << 2) | (Y/33), where Y is fractional part
- * This must match the FSP expected values: PLLCCR=0x4711, PLLCCR2=0x111
  */
 #define RA_PRV_PLL_MUL_CFG_MACRO_PLLMUL_MASK    (0x3FFU)
 #define RA_PRV_PLLCCR_PLLMULNF_BIT               (6) // PLLMULNF in PLLCCR starts at bit 6
 #define RA_PRV_PLLCCR_PLSRCSEL_BIT               (4) // PLSRCSEL in PLLCCR starts at bit 4
-/* Convert PLL multiplier to FSP format: BSP_CLOCKS_PLL_MUL(X,Y) = ((X-1) << 2) | (Y/33) */
-#define RA_PRV_PLL_MUL_FSP_FORMAT                ((((CONFIG_RA_PLL_MUL) - 1U) << 2UL) | 0U)
-#define RA_PRV_PLLCCR                            ((((RA_PRV_PLL_MUL_FSP_FORMAT & RA_PRV_PLL_MUL_CFG_MACRO_PLLMUL_MASK) << \
+/* Convert PLL multiplier to format: BSP_CLOCKS_PLL_MUL(X,Y) = ((X-1) << 2) | (Y/33) */
+#define RA_PRV_PLL_MUL_FORMAT                   ((((CONFIG_RA_PLL_MUL) - 1U) << 2UL) | 0U)
+#define RA_PRV_PLLCCR                            ((((RA_PRV_PLL_MUL_FORMAT & RA_PRV_PLL_MUL_CFG_MACRO_PLLMUL_MASK) << \
                                                       RA_PRV_PLLCCR_PLLMULNF_BIT) |                               \
                                                     (RA_PRV_PLSRCSEL << RA_PRV_PLLCCR_PLSRCSEL_BIT)) |          \
                                                     CONFIG_RA_PLL_DIV)
@@ -155,7 +154,7 @@
  * Public Data
  ****************************************************************************/
 
-/* g_sys_core_clock variable for Renesas FSP compatibility */
+/* g_sys_core_clock variable */
 uint32_t g_sys_core_clock = CONFIG_RA_HOCO_FREQUENCY;
 
 /****************************************************************************
@@ -164,7 +163,7 @@ uint32_t g_sys_core_clock = CONFIG_RA_HOCO_FREQUENCY;
 
 static ra_clock_config_t g_ra_clock_config;
 
-/* FSP-Compatible clock frequency array */
+/* Clock frequency array */
 static uint32_t g_clock_freq[16];  /* Array size to accommodate all clock sources */
 
 /****************************************************************************
@@ -215,7 +214,7 @@ void ra_sys_core_clock_update (void)
  * Name: ra_clock_freq_var_init
  *
  * Description:
- *   Initialize clock frequency array (FSP-compatible implementation)
+ *   Initialize clock frequency array
  *
  ****************************************************************************/
 
@@ -353,7 +352,7 @@ static void ra_peripheral_clock_init(void)
  * Name: ra_prv_clock_set_hard_reset
  *
  * Description:
- *   Set clocks when coming from hard reset (FSP-compatible implementation)
+ *   Set clocks when coming from hard reset
  *
  ****************************************************************************/
 
@@ -413,7 +412,7 @@ static void ra_prv_clock_set_hard_reset(void)
  * Name: ra_clock_init
  *
  * Description:
- *   Initialize clocks (FSP-compatible implementation)
+ *   Initialize clocks
  *
  ****************************************************************************/
 
@@ -467,7 +466,7 @@ static void ra_clock_init(void)
 
 void ra_clock(void)
 {
-  /* Use FSP-compatible clock initialization sequence */
+  /* Use clock initialization sequence */
   ra_clock_init();
 
   /* Update internal clock configuration */
@@ -488,7 +487,7 @@ static ra_clock_config_t g_ra_clock_config;
  * Name: ra_update_clock_config
  *
  * Description:
- *   Update FSP clock configuration from hardware registers
+ *   Update Clock configuration from hardware registers
  *
  ****************************************************************************/
 
@@ -585,7 +584,7 @@ static void ra_update_clock_config(void)
  * Name: ra_get_clock_config
  *
  * Description:
- *   Get current FSP-compatible clock configuration
+ *   Get current clock configuration
  *
  ****************************************************************************/
 
@@ -604,7 +603,7 @@ void ra_get_clock_config(ra_clock_config_t *config)
  * Name: ra_print_clock_info
  *
  * Description:
- *   Print FSP-compatible clock information for debugging
+ *   Print clock information for debugging
  *
  ****************************************************************************/
 
@@ -615,7 +614,7 @@ void ra_print_clock_info(void)
 
   ra_get_clock_config(&config);
 
-  syslog(LOG_INFO, "FSP Clock Configuration:\n");
+  syslog(LOG_INFO, "Clock Configuration:\n");
   syslog(LOG_INFO, "  System Clock: %lu Hz\n", config.system_clock_freq);
   syslog(LOG_INFO, "  CPU Clock: %lu Hz\n", config.cpu_clock_freq);
   syslog(LOG_INFO, "  ICLK: %lu Hz\n", config.iclk_freq);
@@ -638,7 +637,7 @@ void ra_print_clock_info(void)
  * Name: ra_get_peripheral_clock
  *
  * Description:
- *   Get peripheral clock frequency for FSP compatibility
+ *   Get peripheral clock frequency
  *
  ****************************************************************************/
 

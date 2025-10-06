@@ -137,8 +137,7 @@ int ra_timer_arch_isr(int irq, void *context, void *arg)
  * Function:  ra_systick_isr
  *
  * Description:
- *   GPT-based timer interrupt handler. Based on the working FSP GPT driver
- *   implementation and adapted for NuttX system timer.
+ *   GPT-based timer interrupt handler.
  *
  ****************************************************************************/
 
@@ -152,7 +151,7 @@ static int ra_systick_isr(int irq, void *context, void *arg)
   /* Check if overflow interrupt occurred - this is what we want for system timer */
   if (status & GPT_GTST_TCFPO)
     {
-      /* Clear overflow flag by writing 0 to it - FSP style */
+      /* Clear overflow flag by writing 0 to it */
       putreg32(status & ~GPT_GTST_TCFPO, RA_GPT_SYSTICK_GTST);
 
       /* Process timer interrupt */
@@ -195,7 +194,7 @@ static int ra_systick_isr(int irq, void *context, void *arg)
  *
  * Description:
  *   This function is called during start-up to initialize
- *   the timer interrupt. Implementation based on working FSP GPT driver
+ *   the timer interrupt. Implementation based on working
  *   and adapted for NuttX system timer requirements.
  *
  ****************************************************************************/
@@ -226,7 +225,7 @@ void up_timer_initialize(void)
   /* Set period register for desired interrupt frequency */
   putreg32(SYSTICK_RELOAD, RA_GPT_SYSTICK_GTPR);
 
-  /* Set period buffer register (GTPBR) - FSP requirement for double buffering */
+  /* Set period buffer register (GTPBR) - requirement for double buffering */
   putreg32(SYSTICK_RELOAD, RA_GPT_SYSTICK_GTPBR);
 
   /* Configure compare match registers to zero - not used */
@@ -246,7 +245,7 @@ void up_timer_initialize(void)
            GPT_GTCR_TPCS_PCLKD_1;         /* Use PCLKD as clock source */
   putreg32(regval, RA_GPT_SYSTICK_GTCR);
 
-  /* Configure start/stop/clear sources to match FSP */
+  /* Configure start/stop/clear sources*/
   regval = (1 << 31);  /* CSTRT: Software start enable */
   putreg32(regval, RA_GPT_SYSTICK_GTSSR);
 
@@ -260,7 +259,7 @@ void up_timer_initialize(void)
   //regval = GPT_GTINTAD_GTINTV;            /* Overflow interrupt */
   //putreg32(regval, RA_GPT_SYSTICK_GTINTAD);
 
-  /* Configure GTINTAD register - FSP style (no direct interrupt enables) */
+  /* Configure GTINTAD register - (no direct interrupt enables) */
   /* Clear GTINTAD completely - overflow interrupt is routed via ICU events */
   putreg32(0, RA_GPT_SYSTICK_GTINTAD);
 

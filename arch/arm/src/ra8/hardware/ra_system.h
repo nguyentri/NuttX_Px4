@@ -386,8 +386,8 @@
 
 #define R_SYSTEM_SCKDIVCR2_CPUCK_SHIFT           (0)                                    /* Bits 3-0: CPU Clock (CPUCLK) Select */
 #define R_SYSTEM_SCKDIVCR2_CPUCK_MASK            (0x0F << R_SYSTEM_SCKDIVCR2_CPUCK_SHIFT)
-#define R_SYSTEM_SCKDIVCR2_CPUCK_Pos             (0)                                    /* For compatibility with Renesas FSP */
-#define R_SYSTEM_SCKDIVCR2_CPUCK_Msk             (0x0FUL)                               /* For compatibility with Renesas FSP */
+#define R_SYSTEM_SCKDIVCR2_CPUCK_Pos             (0)
+#define R_SYSTEM_SCKDIVCR2_CPUCK_Msk             (0x0FUL)
 
 /* System Clock Source Control Register (8-bits) */
 
