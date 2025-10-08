@@ -566,30 +566,39 @@ void ra_tcm_init(void)
  ****************************************************************************/
 void ra_ram_init (const uint32_t external)
 {
-    //const register uint32_t *src;
-    //register uint32_t *dest;
-   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
-    * certain that there are no issues with the state of global variables.
-    */
+#if (0) // Disable standard NuttX RAM initialization
+    const register uint32_t *src;
+    register uint32_t *dest;
 
-    // for (dest = (uint32_t *)_sbss; dest < (uint32_t *)_ebss; )
-    // {
-    //   *dest++ = 0;
-    // }
+    /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
+     * certain that there are no issues with the state of global variables.
+     */
+    extern uint32_t _sbss;
+    extern uint32_t _ebss;
 
-  /* Move the initialized data section from his temporary holding spot in
-   * FLASH into the correct place in OCRAM.  The correct place in OCRAM is
-   * give by _sdata and _edata.  The temporary location is in FLASH at the
-   * end of all of the other read-only data (.text, .rodata) at _eronly.
-   */
+    for (dest = (uint32_t *)&_sbss; dest < (uint32_t *)&_ebss; )
+    {
+      *dest++ = 0;
+    }
 
-    // for (src = (const uint32_t *)_eronly,
-    //    dest = (uint32_t *)_sdata; dest < (uint32_t *)_edata;
-    //   )
-    // {
-    //   *dest++ = *src++;
-    // }
+    /* Move the initialized data section from his temporary holding spot in
+     * FLASH into the correct place in RAM.  The correct place in RAM is
+     * given by _sdata and _edata.  The temporary location is in FLASH at the
+     * end of all of the other read-only data (.text, .rodata) at _eronly.
+     */
+    extern const uint32_t _eronly;  // Flash location (const)
+    extern uint32_t _sdata;         // RAM location
+    extern uint32_t _edata;         // RAM location
 
+    for (src = (const uint32_t *)&_eronly,
+         dest = (uint32_t *)&_sdata; dest < (uint32_t *)&_edata;
+      )
+    {
+      *dest++ = *src++;  // CRITICAL: Copy initialized .data from flash!
+    }
+#endif
+
+    /* Use custom memory sections */
     for (uint32_t i = 0; i < g_init_info.zero_count; i++)
     {
         if (external == g_init_info.p_zero_list[i].type.external)

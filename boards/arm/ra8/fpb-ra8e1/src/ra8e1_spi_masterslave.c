@@ -393,6 +393,7 @@ static int spi_configure_devices(void)
 {
   /* Configure SPI Master (SPI0) */
   SPI_LOCK(g_spi_loopback.master, true);
+  SPI_SELECT(g_spi_loopback.master, MASTER_DEVICE_ID, false);
   SPI_SETMODE(g_spi_loopback.master, SPI_MODE);
   SPI_SETBITS(g_spi_loopback.master, 32);  /* 32-bit transfers */
   SPI_SETFREQUENCY(g_spi_loopback.master, SPI_FREQUENCY);
@@ -400,6 +401,7 @@ static int spi_configure_devices(void)
 
   /* Configure SPI Slave (SPI1) */
   SPI_LOCK(g_spi_loopback.slave, true);
+  SPI_SELECT(g_spi_loopback.slave, SLAVE_DEVICE_ID, false);
   SPI_SETMODE(g_spi_loopback.slave, SPI_MODE);
   SPI_SETBITS(g_spi_loopback.slave, 32);   /* 32-bit transfers */
   SPI_SETFREQUENCY(g_spi_loopback.slave, SPI_FREQUENCY);
