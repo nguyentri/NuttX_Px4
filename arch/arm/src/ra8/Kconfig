@@ -920,16 +920,6 @@ config RA_SRAM_BASE
 
 endmenu
 
-menu "Timer Configuration"
-
-config RA_SYSTICK_GPT
-   bool "Use GPT for system tick"
-   default n
-   help
-     Use GPT (General Purpose Timer) instead of SysTick for system timing.
-     Provides more accurate timing for some applications.
-endmenu
-
 menu "RA8 Flash Configuration"
 
 config RA_FLASH

@@ -47,55 +47,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/*  GPT timer configuration */
-#ifdef CONFIG_RA_SYSTICK_GPT
-#  include "ra_mstp.h"
-#define RA_GPT_CHANNEL        (1) /* Use GPT1 for system timer */
-
-#if RA_GPT_CHANNEL == 0
-#  define RA_MSTP_GPT_SYSTICK       RA_MSTP_GPT0
-#elif RA_GPT_CHANNEL == 1
-#  define RA_MSTP_GPT_SYSTICK       RA_MSTP_GPT1
-#elif RA_GPT_CHANNEL == 2
-#  define RA_MSTP_GPT_SYSTICK       RA_MSTP_GPT2
-#elif RA_GPT_CHANNEL == 3
-#  define RA_MSTP_GPT_SYSTICK       RA_MSTP_GPT3
-#elif RA_GPT_CHANNEL == 4
-#  define RA_MSTP_GPT_SYSTICK       RA_MSTP_GPT4
-#elif RA_GPT_CHANNEL == 5
-#  define RA_MSTP_GPT_SYSTICK       RA_MSTP_GPT5
-#else
-#  error "Unsupported GPT channel for system timer"
-#endif
-/* Use the new channel-based register macros */
-#define RA_GPT_SYSTICK_GTWP           RA_GPT_GTWP(RA_GPT_CHANNEL)
-#define RA_GPT_SYSTICK_GTSTR          RA_GPT_GTSTR(RA_GPT_CHANNEL)
-#define RA_GPT_SYSTICK_GTSTP          RA_GPT_GTSTP(RA_GPT_CHANNEL)
-#define RA_GPT_SYSTICK_GTCLR          RA_GPT_GTCLR(RA_GPT_CHANNEL)
-#define RA_GPT_SYSTICK_GTCR           RA_GPT_GTCR(RA_GPT_CHANNEL)
-#define RA_GPT_SYSTICK_GTPR           RA_GPT_GTPR(RA_GPT_CHANNEL)
-#define RA_GPT_SYSTICK_GTINTAD        RA_GPT_GTINTAD(RA_GPT_CHANNEL)
-#define RA_GPT_SYSTICK_GTST           RA_GPT_GTST_REG(RA_GPT_CHANNEL)
-#define RA_GPT_SYSTICK_GTCNT          RA_GPT_GTCNT(RA_GPT_CHANNEL)
-#define RA_GPT_SYSTICK_GTIOR          RA_GPT_GTIOR(RA_GPT_CHANNEL)
-#define RA_GPT_SYSTICK_GTPBR          RA_GPT_GTPBR(RA_GPT_CHANNEL)
-#define RA_GPT_SYSTICK_GTCCRA         RA_GPT_GTCCRA(RA_GPT_CHANNEL)
-#define RA_GPT_SYSTICK_GTCCRB         RA_GPT_GTCCRB(RA_GPT_CHANNEL)
-#define RA_GPT_SYSTICK_GTCCRC         RA_GPT_GTCCRC(RA_GPT_CHANNEL)
-#define RA_GPT_SYSTICK_GTCCRE         RA_GPT_GTCCRE(RA_GPT_CHANNEL)
-#define RA_GPT_SYSTICK_GTSSR          RA_GPT_REG(RA_GPT_CHANNEL, RA_GPT_GTSSR_OFFSET)
-#define RA_GPT_SYSTICK_GTPSR          RA_GPT_REG(RA_GPT_CHANNEL, RA_GPT_GTPSR_OFFSET)
-#define RA_GPT_SYSTICK_GTCSR          RA_GPT_REG(RA_GPT_CHANNEL, RA_GPT_GTCSR_OFFSET)
-#define RA_TIMER_CLOCK                (RA_PCLKD_FREQUENCY)
-#define SYSTICK_RELOAD                ((RA_TIMER_CLOCK / CLK_TCK) - 1)
-#if SYSTICK_RELOAD > 0xFFFFFFFF
-#  error GPT timer reload value exceeds 32-bit range
-#endif
-#else
-#  include "ra_clock.h"
 #  define SYSTICK_CLOCK     RA_CPUCLK_FREQUENCY
 #  define SYSTICK_RELOAD    ((SYSTICK_CLOCK / CLK_TCK) - 1)
-#endif
 
 /* The size of the reload field is 24 bits.  Verify that the reload value
  * will fit in the reload register.
@@ -122,68 +75,12 @@
  *   of the systems.
  *
  ****************************************************************************/
-
-#if !defined(CONFIG_ARMV8M_SYSTICK) && !defined(CONFIG_TIMER_ARCH)
 int ra_timer_arch_isr(int irq, void *context, void *arg)
 {
   /* Process timer interrupt */
   nxsched_process_timer();
   return 0;
 }
-#endif
-
-#ifdef CONFIG_RA_SYSTICK_GPT
-/****************************************************************************
- * Function:  ra_systick_isr
- *
- * Description:
- *   GPT-based timer interrupt handler.
- *
- ****************************************************************************/
-
-static int ra_systick_isr(int irq, void *context, void *arg)
-{
-  uint32_t status;
-
-  /* Read GPT status flags */
-  status = getreg32(RA_GPT_SYSTICK_GTST);
-
-  /* Check if overflow interrupt occurred - this is what we want for system timer */
-  if (status & GPT_GTST_TCFPO)
-    {
-      /* Clear overflow flag by writing 0 to it */
-      putreg32(status & ~GPT_GTST_TCFPO, RA_GPT_SYSTICK_GTST);
-
-      /* Process timer interrupt */
-      nxsched_process_timer();
-    }
-
-  /* Clear any other potential flags to prevent spurious interrupts */
-  if (status & (GPT_GTST_TCFA | GPT_GTST_TCFB | GPT_GTST_TCFC | GPT_GTST_TCFD |
-                GPT_GTST_TCFE | GPT_GTST_TCFF | GPT_GTST_TCFPU))
-    {
-      /* Clear all other flags */
-      putreg32(status & ~(GPT_GTST_TCFA | GPT_GTST_TCFB | GPT_GTST_TCFC | GPT_GTST_TCFD |
-                          GPT_GTST_TCFE | GPT_GTST_TCFF | GPT_GTST_TCFPU),
-               RA_GPT_SYSTICK_GTST);
-    }
-
-  return 0;
-}
-#else
-/* ARM Cortex-M85 SysTick interrupt handler for NuttX system timer */
-static int ra_systick_isr(int irq, void *context, void *arg)
-{
-  /* SysTick interrupt is acknowledged automatically by reading the
-   * SYST_CSR register or writing to the SYST_CVR register.
-   * The COUNTFLAG bit is cleared automatically when SYST_CSR is read.
-   */
-
-  /* Process timer interrupt */
-  nxsched_process_timer();
-  return 0;
-}
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -199,85 +96,6 @@ static int ra_systick_isr(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_RA_SYSTICK_GPT
-void up_timer_initialize(void)
-{
-  uint32_t regval;
-
-  /* Enable GPT module clock */
-  ra_mstp_start(RA_MSTP_GPT_SYSTICK);
-
-  /* Disable write protection to configure GPT registers */
-  regval = GPT_GTWP_PRKEY;  /* Write protection key without WP bit */
-  putreg32(regval, RA_GPT_SYSTICK_GTWP);
-
-  /* Stop GPT channel if running */
-  putreg32((1 << RA_GPT_CHANNEL), RA_GPT_SYSTICK_GTSTP);
-
-  /* Clear GPT counter */
-  putreg32(0, RA_GPT_SYSTICK_GTCNT);
-
-  /* Set count direction to up-counting for periodic mode */
-  /* Set count direction (count up for normal operation) */
-  regval = GPT_GTUDDTYC_UD;  /* Count up */
-  putreg32(regval, RA_GPT_GTUDDTYC(RA_GPT_CHANNEL));
-
-  /* Set period register for desired interrupt frequency */
-  putreg32(SYSTICK_RELOAD, RA_GPT_SYSTICK_GTPR);
-
-  /* Set period buffer register (GTPBR) - requirement for double buffering */
-  putreg32(SYSTICK_RELOAD, RA_GPT_SYSTICK_GTPBR);
-
-  /* Configure compare match registers to zero - not used */
-  putreg32(0, RA_GPT_SYSTICK_GTCCRA);
-  putreg32(0, RA_GPT_SYSTICK_GTCCRB);
-  putreg32(0, RA_GPT_SYSTICK_GTCCRC);
-  putreg32(0, RA_GPT_SYSTICK_GTCCRE);
-
-  /* Set GTCCRA to the full period for system tick timing */
-  //putreg32(SYSTICK_RELOAD, RA_GPT_SYSTICK_GTCCRA);
-  //putreg32(SYSTICK_RELOAD, RA_GPT_SYSTICK_GTCCRB);
-  //putreg32(SYSTICK_RELOAD, RA_GPT_SYSTICK_GTCCRC);
-  //putreg32(SYSTICK_RELOAD, RA_GPT_SYSTICK_GTCCRE);
-
-  /* Configure GPT control register for simple timer mode */
-  regval = GPT_GTCR_MD_SAW_WAVE_UP |      /* Simple up-counting timer mode */
-           GPT_GTCR_TPCS_PCLKD_1;         /* Use PCLKD as clock source */
-  putreg32(regval, RA_GPT_SYSTICK_GTCR);
-
-  /* Configure start/stop/clear sources*/
-  regval = (1 << 31);  /* CSTRT: Software start enable */
-  putreg32(regval, RA_GPT_SYSTICK_GTSSR);
-
-  regval = (1 << 31);  /* CSTOP: Software stop enable */
-  putreg32(regval, RA_GPT_SYSTICK_GTPSR);
-
-  regval = (1 << 31);  /* CCLR: Software clear enable */
-  putreg32(regval, RA_GPT_SYSTICK_GTCSR);
-
-  /* Enable overflow interrupt for system timer */
-  //regval = GPT_GTINTAD_GTINTV;            /* Overflow interrupt */
-  //putreg32(regval, RA_GPT_SYSTICK_GTINTAD);
-
-  /* Configure GTINTAD register - (no direct interrupt enables) */
-  /* Clear GTINTAD completely - overflow interrupt is routed via ICU events */
-  putreg32(0, RA_GPT_SYSTICK_GTINTAD);
-
-  /* Clear any residual interrupt flags again after configuration */
-  putreg32(0, RA_GPT_SYSTICK_GTST);
-
-  /* Attach the timer interrupt handler through ICU */
-  (void)ra_icu_attach(RA_ELC_GPT0_COUNTER_OVERFLOW, ra_systick_isr, NULL, true);
-
-  /* Start GPT timer - this must be done BEFORE re-enabling write protection */
-  putreg32((1 << RA_GPT_CHANNEL), RA_GPT_SYSTICK_GTSTR);
-
-  /* Re-enable write protection after configuration */
-  regval = GPT_GTWP_PRKEY | GPT_GTWP_WP;
-  putreg32(regval, RA_GPT_SYSTICK_GTWP);
-}
-#else
-/* Standard ARM Cortex-M85 SysTick configuration */
 void up_timer_initialize(void)
 {
   uint32_t regval;
@@ -295,7 +113,7 @@ void up_timer_initialize(void)
 
   /* Attach the SysTick interrupt handler */
   /* SysTick uses a fixed exception number (-1) which maps to a specific IRQ */
-  irq_attach(RA_IRQ_SYSTICK, (xcpt_t)ra_systick_isr, NULL);
+  irq_attach(RA_IRQ_SYSTICK, (xcpt_t)ra_timer_arch_isr, NULL);
 
   /* Configure and enable SysTick:
    * - ENABLE: Enable the counter
@@ -313,7 +131,6 @@ void up_timer_initialize(void)
   syslog(LOG_INFO, "Nuttx: Clock = %u MHz, Tick rate = %u Hz (reload = %u)\n",
         SYSTICK_CLOCK / 1000000, CLK_TCK, SYSTICK_RELOAD + 1);
 }
-#endif
 
 /****************************************************************************
  * Function:  up_timer_gettime
@@ -346,43 +163,6 @@ void up_timer_initialize(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_RA_SYSTICK_GPT
-int up_timer_gettime(struct timespec *ts)
-{
-  uint64_t usecs;
-  uint32_t period;
-  uint32_t current;
-  uint32_t elapsed;
-  irqstate_t flags;
-
-  DEBUGASSERT(ts != NULL);
-
-  /* Get the period and current counter values and the tick count, being
-   * careful that we get a coherent set of values.
-   */
-
-  flags = enter_critical_section();
-
-  /* Get GPT registers - counter counts up in our configuration */
-  period  = getreg32(RA_GPT_SYSTICK_GTPR) + 1;
-  current = getreg32(RA_GPT_SYSTICK_GTCNT);
-
-  /* Get the number of full ticks elapsed */
-  usecs = clock_systime_ticks() * USEC_PER_TICK;
-
-  /* Add the partial tick time - current counts from 0 to period */
-  elapsed = current;
-  usecs  += (elapsed * USEC_PER_TICK) / period;
-
-  leave_critical_section(flags);
-
-  /* Convert to timespec */
-  ts->tv_sec  = usecs / USEC_PER_SEC;
-  ts->tv_nsec = (usecs % USEC_PER_SEC) * NSEC_PER_USEC;
-
-  return OK;
-}
-#else
 int up_timer_gettime(struct timespec *ts)
 {
   uint64_t usecs;
@@ -418,7 +198,6 @@ int up_timer_gettime(struct timespec *ts)
 
   return OK;
 }
-#endif
 
 /****************************************************************************
  * Function:  up_timer_cancel
@@ -454,42 +233,6 @@ int up_timer_gettime(struct timespec *ts)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_RA_SYSTICK_GPT
-int up_timer_cancel(struct timespec *ts)
-{
-  uint32_t period;
-  uint32_t current;
-  uint32_t remaining;
-
-  if (ts != NULL)
-    {
-      /* Get the current GPT state */
-      period  = getreg32(RA_GPT_SYSTICK_GTPR) + 1;
-      current = getreg32(RA_GPT_SYSTICK_GTCNT);
-
-      /* Calculate remaining time in this tick period */
-      remaining = period - current;
-
-      /* Convert to microseconds */
-      uint32_t remaining_usecs = (remaining * USEC_PER_TICK) / period;
-
-      /* Convert to timespec */
-      ts->tv_sec  = 0;
-      ts->tv_nsec = remaining_usecs * NSEC_PER_USEC;
-    }
-
-  /* Stop GPT timer */
-  putreg32((1 << RA_GPT_CHANNEL), RA_GPT_SYSTICK_GTSTP);
-
-  /* Clear counter */
-  putreg32(0, RA_GPT_SYSTICK_GTCNT);
-
-  /* Disable overflow interrupt */
-  putreg32(0, RA_GPT_SYSTICK_GTINTAD);
-
-  return OK;
-}
-#else
 int up_timer_cancel(struct timespec *ts)
 {
   uint32_t reload;
@@ -521,7 +264,6 @@ int up_timer_cancel(struct timespec *ts)
 
   return OK;
 }
-#endif
 
 /****************************************************************************
  * Function:  up_timer_start
@@ -548,51 +290,6 @@ int up_timer_cancel(struct timespec *ts)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_RA_SYSTICK_GPT
-int up_timer_start(const struct timespec *ts)
-{
-  uint64_t usecs;
-  uint32_t period_val;
-  uint32_t regval;
-
-  DEBUGASSERT(ts != NULL);
-
-  /* Convert timespec to microseconds */
-  usecs = (uint64_t)ts->tv_sec * USEC_PER_SEC +
-          (uint64_t)ts->tv_nsec / NSEC_PER_USEC;
-
-  /* Convert microseconds to GPT counts */
-  period_val = (usecs * RA_TIMER_CLOCK) / USEC_PER_SEC;
-
-  /* Ensure period value is within valid range */
-  if (period_val == 0)
-    {
-      period_val = 1;
-    }
-  else if (period_val > 0xFFFFFFFF)
-    {
-      period_val = 0xFFFFFFFF;
-    }
-
-  /* Stop timer during setup */
-  putreg32((1 << RA_GPT_CHANNEL), RA_GPT_SYSTICK_GTSTP);
-
-  /* Clear counter */
-  putreg32(0, RA_GPT_SYSTICK_GTCNT);
-
-  /* Set new period value */
-  putreg32(period_val - 1, RA_GPT_SYSTICK_GTPR);
-
-  /* Enable overflow interrupt */
-  regval = GPT_GTINTAD_GTINTV;
-  putreg32(regval, RA_GPT_SYSTICK_GTINTAD);
-
-  /* Start timer */
-  putreg32((1 << RA_GPT_CHANNEL), RA_GPT_SYSTICK_GTSTR);
-
-  return OK;
-}
-#else
 int up_timer_start(const struct timespec *ts)
 {
   uint64_t usecs;
@@ -633,4 +330,3 @@ int up_timer_start(const struct timespec *ts)
 
   return OK;
 }
-#endif
