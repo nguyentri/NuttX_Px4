@@ -139,7 +139,7 @@ int ra8p1_bringup(void)
   board_button_initialize();
 #endif
 
-  //ra8e1_app_examples();
+  ra8p1_app_examples();
 
   return ret;
 }

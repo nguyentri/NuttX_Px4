@@ -455,7 +455,6 @@ SECTIONS
     __ram_zero$$ ALIGN(.,32) (NOLOAD) :
     {
         __ram_zero$$Base = .;
-        _sbss = .;
         /* section.ram.zero */
         *(.ram)
         *(.bss*)
@@ -862,4 +861,5 @@ PROVIDE( _edata = ADDR(__ram_from_flash$$) + SIZEOF(__ram_from_flash$$) );
 PROVIDE( _stext = ADDR(__flash_readonly$$));
 PROVIDE( _etext = ADDR(__flash_readonly$$) + SIZEOF(__flash_readonly$$) );
 PROVIDE( _eronly = ADDR(__flash_readonly$$) + SIZEOF(__flash_readonly$$) );
+PROVIDE( _sbss = ADDR(__ram_zero$$) );
 PROVIDE( _ebss = ADDR(__ram_zero$$) + SIZEOF(__ram_zero$$) );

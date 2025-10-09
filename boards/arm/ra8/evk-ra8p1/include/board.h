@@ -47,13 +47,13 @@
 #define GPIO_SCI3_TX   GPIO_TXD3_B  /* TBD - RC Input */
 
 /* SPI Pin Definitions for Sensors */
-#define GPIO_SPI0_SCK   GPIO_RSPCKA_A_1          /*Temporay - SPI0 Clock */
-#define GPIO_SPI0_MOSI  GPIO_MOSIA_A_1           /*Temporay - SPI0 MOSI */
-#define GPIO_SPI0_MISO  GPIO_MISOA_A_1           /*Temporay - SPI0 MISO */
+#define GPIO_SPI0_SCK   GPIO_RSPCKA_A_1          /* SPI0 Clock */
+#define GPIO_SPI0_MOSI  GPIO_MOSI0_A_1           /* SPI0 MOSI */
+#define GPIO_SPI0_MISO  GPIO_MISO0_A_1           /* SPI0 MISO */
 
-#define GPIO_SPI1_SCK   GPIO_RSPCKB_B_1          /* TBD - SPI1 Clock */
-#define GPIO_SPI1_MOSI  GPIO_MOSIB_B_1           /* TBD - SPI1 MOSI */
-#define GPIO_SPI1_MISO  GPIO_MISOB_B_1           /* TBD - SPI1 MISO */
+#define GPIO_SPI1_SCK   GPIO_RSPCKA_B_1          /* SPI1 Clock */
+#define GPIO_SPI1_MOSI  GPIO_MOSI1_B_1           /* SPI1 MOSI */
+#define GPIO_SPI1_MISO  GPIO_MISO1_B_1           /* SPI1 MISO */
 #define GPIO_SPI1_CS0   GPIO_P408_OUTPUT_HIGH    /* TBD - ICM20948 CS */
 #define GPIO_SPI1_CS1   GPIO_P407_OUTPUT_HIGH    /* TBD - BMP388 CS */
 

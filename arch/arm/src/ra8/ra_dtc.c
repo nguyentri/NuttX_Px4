@@ -42,7 +42,6 @@
 #include "arm_internal.h"
 #include "chip.h"
 #include "hardware/ra_dtc.h"
-#include "hardware/ra8e1/ra8e1_memorymap.h"
 #include "ra_dtc.h"
 #include "ra_icu.h"
 
@@ -260,12 +259,6 @@ static int ra_dtc_interrupt_handler(int irq, void *context, void *arg)
 
   if (ctrl && ctrl->config.callback)
     {
-      /* For DTC completion interrupt (RA_ELC_DTC_COMPLETE), the specific
-       * transfer that completed is indicated in DTCSTS register.
-       * However, since we're using individual control blocks per transfer,
-       * we can directly call the callback for this specific context.
-       */
-
       /* Check if DTC is still active for this specific transfer */
       uint32_t dtc_status = getreg32(RA_DTC_DTCSTS);
 
@@ -273,7 +266,7 @@ static int ra_dtc_interrupt_handler(int irq, void *context, void *arg)
       if (!(dtc_status & RA_DTC_DTCSTS_ACT))
         {
           /* Transfer completed, call user callback */
-          ctrl->config.callback(ctrl, RA_DTC_EVENT_COMPLETE, ctrl->config.user_data);
+          ctrl->config.callback(ctrl, RA_DTC_EVENT_END, ctrl->config.user_data);
         }
     }
 
@@ -510,7 +503,7 @@ int ra_dtc_open(ra_dtc_handle_t *handle, const ra_dtc_config_t *config)
       if (config->callback)
         {
           /* Use DTC completion interrupt for notification */
-          ret = ra_icu_attach(RA_ELC_DTC_COMPLETE, ra_dtc_interrupt_handler, ctrl, false);
+          ret = ra_icu_attach(RA_ELC_DTC_END, ra_dtc_interrupt_handler, ctrl, false);
           if (ret < 0)
             {
               g_dtc_vector_table[vec_index] = NULL;

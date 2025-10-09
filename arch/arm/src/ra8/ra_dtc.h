@@ -36,7 +36,7 @@
  ****************************************************************************/
 
 /* DTC Events */
-#define RA_DTC_EVENT_COMPLETE    (0)  /* Transfer complete */
+#define RA_DTC_EVENT_END         (0)  /* Transfer complete */
 #define RA_DTC_EVENT_ERROR       (1)  /* Transfer error */
 
 /* DTC Limits */
