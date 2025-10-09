@@ -105,6 +105,6 @@ int board_app_initialize(uintptr_t arg)
   return OK;
 #else
   /* Perform board-specific initialization */
-  return ra8e1_bringup();
+  return ra8p1_bringup();
 #endif
 }

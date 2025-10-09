@@ -102,19 +102,7 @@
 #define R_PFS_PSEL_SHIFT_16       (24)   /* Hardware PSEL position in PFS register */
 #define R_PFS_PSEL_SHIFT_8        (8)    /* PSEL position in gpio_pinset_t.cfg (bits 8-12) */
 #define R_PFS_PSEL_MASK           (0x1f) /* 5-bit mask for PSEL field */
-/* GPIO Configurations for gpio_pinset_t.cfg field, 1 << bit configuration */
-#define R_PFS_PMR                 (16) /* Bit 16: Port Mode Control */
-#define R_PFS_ASEL                (15) /* Bit 15: Analog Input enable */
-#define R_PFS_ISEL                (14) /* Bit 14: IRQ input enable */
-#define R_PFS_EOR                 (13) /* Bit 13: Event on Rising */
-#define R_PFS_EOF                 (12) /* Bit 12: Event on Falling */
-#define R_PFS_DSCR1               (11) /* Bit 11: Port Drive Capability 1 */
-#define R_PFS_DSCR                (10) /* Bit 10: Port Drive Capability */
-#define R_PFS_NCODR               ( 6) /* Bit 6: N-Channel Open Drain Control */
-#define R_PFS_PCR                 ( 4) /* Bit 4: Pull-up Control */
-#define R_PFS_PDR                 ( 2) /* Bit 2: Port Direction */
-#define R_PFS_PIDR                ( 1) /* Bit 1: Port Input Data */
-#define R_PFS_PODR                ( 0) /* Bit 0: Port Output Data */
+
 
 /* PMISC Register Bits */
 #define R_PWPR_B0WI        ( 7) /* 80: PFSWE Bit Write Disable */

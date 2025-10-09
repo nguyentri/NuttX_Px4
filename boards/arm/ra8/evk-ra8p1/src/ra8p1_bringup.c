@@ -59,7 +59,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ra8e1_bringup
+ * Name: ra8p1_bringup
  *
  * Description:
  *   Perform architecture-specific initialization
@@ -72,11 +72,11 @@
  *
  ****************************************************************************/
 
-int ra8e1_bringup(void)
+int ra8p1_bringup(void)
 {
   int ret = 0;
 
-  syslog(LOG_INFO, "Nuttx: RA8E1 Board bring-up starting...\n");
+  syslog(LOG_INFO, "Nuttx: RA8P1 Board bring-up starting...\n");
 
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */

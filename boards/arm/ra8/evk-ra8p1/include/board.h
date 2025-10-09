@@ -37,57 +37,57 @@
 
 
 /* UART/SCI Pin Definitions */
-#define GPIO_SCI0_RX   GPIO_RXD0_MISO0_SCL0_C  /* P609 - Telemetry */
-#define GPIO_SCI0_TX   GPIO_TXD0_MOSI0_SDA0_C  /* P610 - Telemetry */
+#define GPIO_SCI0_RX   GPIO_TXD0_A  /* TBD - Telemetry */
+#define GPIO_SCI0_TX   GPIO_RXD0_A  /* TBD - Telemetry */
 
-#define GPIO_SCI2_RX   GPIO_RXD2_MISO2_SCL2_A  /* P802 - Console */
-#define GPIO_SCI2_TX   GPIO_TXD2_MOSI2_SDA2_A  /* P801 - Console */
+#define GPIO_SCI2_RX   GPIO_TXD2_A  /* TBD - Console */
+#define GPIO_SCI2_TX   GPIO_RXD2_A  /* TBD - Console */
 
-#define GPIO_SCI3_RX   GPIO_RXD3_MISO3_SCL3_B  /* P309 - RC Input */
-#define GPIO_SCI3_TX   GPIO_TXD3_MOSI3_SDA3_B  /* P310 - RC Input */
+#define GPIO_SCI3_RX   GPIO_RXD3_B  /* TBD - RC Input */
+#define GPIO_SCI3_TX   GPIO_TXD3_B  /* TBD - RC Input */
 
 /* SPI Pin Definitions for Sensors */
 #define GPIO_SPI0_SCK   GPIO_RSPCKA_A_1          /*Temporay - SPI0 Clock */
 #define GPIO_SPI0_MOSI  GPIO_MOSIA_A_1           /*Temporay - SPI0 MOSI */
 #define GPIO_SPI0_MISO  GPIO_MISOA_A_1           /*Temporay - SPI0 MISO */
 
-#define GPIO_SPI1_SCK   GPIO_RSPCKB_B_1          /* P412 - SPI1 Clock */
-#define GPIO_SPI1_MOSI  GPIO_MOSIB_B_1           /* P411 - SPI1 MOSI */
-#define GPIO_SPI1_MISO  GPIO_MISOB_B_1           /* P410 - SPI1 MISO */
-#define GPIO_SPI1_CS0   GPIO_P408_OUTPUT_HIGH    /* P408 - ICM20948 CS */
-#define GPIO_SPI1_CS1   GPIO_P407_OUTPUT_HIGH    /* P407 - BMP388 CS */
+#define GPIO_SPI1_SCK   GPIO_RSPCKB_B_1          /* TBD - SPI1 Clock */
+#define GPIO_SPI1_MOSI  GPIO_MOSIB_B_1           /* TBD - SPI1 MOSI */
+#define GPIO_SPI1_MISO  GPIO_MISOB_B_1           /* TBD - SPI1 MISO */
+#define GPIO_SPI1_CS0   GPIO_P408_OUTPUT_HIGH    /* TBD - ICM20948 CS */
+#define GPIO_SPI1_CS1   GPIO_P407_OUTPUT_HIGH    /* TBD - BMP388 CS */
 
 /* SPI Slave Select aliases (for compatibility) */
-#define GPIO_SPI1_SS0   GPIO_SPI1_CS0            /* P408 - ICM20948 CS */
-#define GPIO_SPI1_SS1   GPIO_SPI1_CS1            /* P407 - BMP388 CS */
+#define GPIO_SPI1_SS0   GPIO_SPI1_CS0            /* TBD - ICM20948 CS */
+#define GPIO_SPI1_SS1   GPIO_SPI1_CS1            /* TBD - BMP388 CS */
 
 /* PWM/GPT Timer Pin Definitions for Motor Control */
-#define GPIO_GPT0_A     GPIO_GTIOC0A_3         /* P415 - Motor 2 */
-#define GPIO_GPT2_A     GPIO_GTIOC2A_2         /* P113 - Motor 3 */
-#define GPIO_GPT3_A     GPIO_GTIOC3A_1         /* P300 - Motor 1 */
-#define GPIO_GPT4_A     GPIO_GTIOC4A_2         /* P302 - Motor 4 */
+#define GPIO_GPT0_A     GPIO_GTIOC0A_3         /* TBD- Motor 2 */
+#define GPIO_GPT2_A     GPIO_GTIOC2A_2         /* TBD- Motor 3 */
+#define GPIO_GPT3_A     GPIO_GTIOC3A_1         /* TBD- Motor 1 */
+#define GPIO_GPT4_A     GPIO_GTIOC4A_2         /* TBD- Motor 4 */
 
 /* I2C Pin Definitions */
-#define GPIO_I2C3_SDA   	GPIO_SDA3_MOSI3_TXD3_A /* P511 - Expansion I2C */
-#define GPIO_I2C3_SCL   	GPIO_SCL3_MISO3_RXD3_A /* P512 - Expansion I2C */
+#define GPIO_I2C3_SDA   	GPIO_SDA3_A_1    /* TBD - Expansion I2C */
+#define GPIO_I2C3_SCL   	GPIO_SCL3_A_1   /*  TBD - Expansion I2C */
 
 /* LED Pin Definitions */
-#define GPIO_LED1       GPIO_P404_OUTPUT_HIGH  /* P404 - LED1 */
-#define GPIO_LED2       GPIO_P405_OUTPUT_HIGH  /* P405 - LED2 */
+#define GPIO_LED1       GPIO_PA04_OUTPUT_HIGH  /* TBD - LED1 */
+#define GPIO_LED2       GPIO_PA05_OUTPUT_HIGH  /* TBD - LED2 */
 
 /* Button Pin Definitions */
-#define GPIO_SW1        	GPIO_IRQ13_P009        /* P009 - User Button */
+#define GPIO_SW1        	GPIO_IRQ13_P009        /* TBD - User Button */
 
 /* IMU Data Ready Pin */
-#define GPIO_IMU_DRDY		GPIO_P409_INPUT_PULLUP /* P409 - ICM20948 Data Ready */
+#define GPIO_IMU_DRDY		GPIO_P409_INPUT_PULLUP /* TBD - ICM20948 Data Ready */
 
 /* Battery Monitoring */
-#define GPIO_BATT_VOLT   	GPIO_ADC_AN000 /* P004 - Battery Voltage (5.7:1) */
-#define GPIO_BATT_CURR   	GPIO_ADC_AN104 /* P003 - Battery Current (ACS712) */
+#define GPIO_BATT_VOLT   	GPIO_ADC_AN000 /* TBD - Battery Voltage (5.7:1) */
+#define GPIO_BATT_CURR   	GPIO_ADC_AN104 /* TBD - Battery Current (ACS712) */
 
 /* I2C Expansion Bus */
-#define GPIO_EXP_SDA     	GPIO_I2C1_SDA  /* P511 - Expansion I2C SDA */
-#define GPIO_EXP_SCL     	GPIO_I2C1_SCL  /* P512 - Expansion I2C SCL */
+#define GPIO_EXP_SDA     	GPIO_I2C1_SDA  /* TBD - Expansion I2C SDA */
+#define GPIO_EXP_SCL     	GPIO_I2C1_SCL  /* TBD - Expansion I2C SCL */
 
 /* These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
  * defined. In that case, the usage by the board port is defined in

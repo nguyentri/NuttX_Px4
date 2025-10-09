@@ -223,8 +223,8 @@ static uint32_t ra_gpio_get_pfs_config(gpio_pinset_t cfgset)
   if (cfg & (1 << R_PFS_NCODR)) pfs_value |= (1 << R_PFS_NCODR);
   if (cfg & (1 << R_PFS_DSCR)) pfs_value |= (1 << R_PFS_DSCR);
   if (cfg & (1 << R_PFS_DSCR1)) pfs_value |= (1 << R_PFS_DSCR1);
-  if (cfg & (1 << R_PFS_EOF)) pfs_value |= (1 << R_PFS_EOF);
-  if (cfg & (1 << R_PFS_EOR)) pfs_value |= (1 << R_PFS_EOR);
+  if (cfg & (1 << R_PFS_EOFR0)) pfs_value |= (1 << R_PFS_EOFR0);
+  if (cfg & (1 << R_PFS_EOFR1)) pfs_value |= (1 << R_PFS_EOFR1);
   if (cfg & (1 << R_PFS_ISEL)) pfs_value |= (1 << R_PFS_ISEL);
   if (cfg & (1 << R_PFS_ASEL)) pfs_value |= (1 << R_PFS_ASEL);
 
@@ -710,7 +710,7 @@ int ra_gpiosetevent(uint32_t pinset, bool rising, bool falling,
 
               ra_pin_access_enable();
               pfs_value = getreg32(pfs_addr);
-              pfs_value &= ~((1 << R_PFS_ISEL) | (1 << R_PFS_EOR) | (1 << R_PFS_EOF));
+              pfs_value &= ~((1 << R_PFS_ISEL) | (1 << R_PFS_EOFR0) | (1 << R_PFS_EOFR1));
               putreg32(pfs_value, pfs_addr);
               ra_pin_access_disable();
 
@@ -737,7 +737,7 @@ int ra_gpiosetevent(uint32_t pinset, bool rising, bool falling,
   pfs_value = getreg32(pfs_addr);
 
   /* Clear existing interrupt configuration bits */
-  pfs_value &= ~((1 << R_PFS_ISEL) | (1 << R_PFS_EOR) | (1 << R_PFS_EOF));
+  pfs_value &= ~((1 << R_PFS_ISEL) | (1 << R_PFS_EOFR0) | (1 << R_PFS_EOFR1));
 
   /* Enable IRQ input */
   pfs_value |= (1 << R_PFS_ISEL);
@@ -745,11 +745,11 @@ int ra_gpiosetevent(uint32_t pinset, bool rising, bool falling,
   /* Configure edge detection */
   if (rising)
     {
-      pfs_value |= (1 << R_PFS_EOR);  /* Event on Rising */
+      pfs_value |= (1 << R_PFS_EOFR0);  /* Event on Rising */
     }
   if (falling)
     {
-      pfs_value |= (1 << R_PFS_EOF);  /* Event on Falling */
+      pfs_value |= (1 << R_PFS_EOFR1);  /* Event on Falling */
     }
 
   /* Set pin as input */
