@@ -32,6 +32,8 @@
 
 #if defined(CONFIG_RA8E1_GROUP)
 #  include "ra8e1/ra8e1_pinmap.h"
+#elif defined(CONFIG_RA8P1_GROUP)
+#  include "ra8p1/ra8p1_pinmap.h"
 #else
 #  error "Unsupported RA memory map"
 #endif

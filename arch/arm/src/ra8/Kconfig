@@ -1,11 +1,11 @@
 #
-# RA8E1 MCU Configuration Options
+# RA8 Family MCU Configuration Options
 #
 
-comment "RA8E1 MCU Selection"
+comment "RA8 Family MCU Selection"
 
 choice
-   prompt "RA8E1 Chip Selection"
+   prompt "RA8 Chip Selection"
    default ARCH_CHIP_R7FA8E1AFDCFB
    depends on ARCH_CHIP_RA8
 
@@ -81,15 +81,62 @@ config ARCH_CHIP_R7FA8E1AFDCFP
    select RA_HAVE_DAC12
    select RA_HAVE_ACMPHS
 
+config ARCH_CHIP_R7KA8P1KFLCAC
+   bool "R7KA8P1KFLCAC (PLBG0289JA)"
+   select RA8_FAMILY
+   select RA8P1_GROUP
+   select RA_HAVE_SCI0_UART
+   select RA_HAVE_SCI1_UART
+   select RA_HAVE_SCI2_UART
+   select RA_HAVE_SCI3_UART
+   select RA_HAVE_SCI4_UART
+   select RA_HAVE_SCI9_UART
+   select RA_HAVE_I2C0
+   select RA_HAVE_I2C1
+   select RA_HAVE_I2C2
+   select RA_HAVE_DMAC
+   select RA_HAVE_SPI0
+   select RA_HAVE_SPI1
+   select RA_HAVE_SPI2
+   select RA_HAVE_CAN0
+   select RA_HAVE_ETHERC_MII
+   select RA_HAVE_ETHERC_RMII
+   select RA_HAVE_USBFS
+   select RA_HAVE_OSPI
+   select RA_HAVE_SSIE
+   select RA_HAVE_GPT
+   select RA_HAVE_GPT0
+   select RA_HAVE_GPT1
+   select RA_HAVE_GPT2
+   select RA_HAVE_GPT3
+   select RA_HAVE_GPT4
+   select RA_HAVE_GPT5
+   select RA_HAVE_GPT6
+   select RA_HAVE_GPT7
+   select RA_HAVE_AGT
+   select RA_HAVE_ULPT
+   select RA_HAVE_RTC
+   select RA_HAVE_ADC12
+   select RA_HAVE_DAC12
+   select RA_HAVE_ACMPHS
+
 endchoice
 
 # RA8E1 Group Configuration
 config RA8E1_GROUP
    bool
-   default y
+   default n
    help
      Enables the RA8E1 group of features and peripherals.
      This is required for all RA8E1 configurations.
+
+# RA8P1 Group Configuration
+config RA8P1_GROUP
+   bool
+   default n
+   help
+     Enables the RA8P1 group of features and peripherals.
+     This is required for all RA8P1 configurations.
 
 config RA8_FAMILY
    bool

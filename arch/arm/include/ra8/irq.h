@@ -64,6 +64,8 @@
 
 #if defined(CONFIG_RA8E1_GROUP)
 #  include <arch/ra8/ra8e1_irq.h>
+#elif defined(CONFIG_RA8P1_GROUP)
+#  include <arch/ra8/ra8p1_irq.h>
 #else
 #  error Unrecognized RA architecture
 #endif

@@ -1,0 +1,47 @@
+# ##############################################################################
+# boards/arm/rzv/evk-ra8p1/Kconfig
+#
+# Kconfig for the EVK-RA8P1 board support package for the RA8P1 MPU.
+#
+if ARCH_BOARD_EVK_RA8P1
+
+config BOARD_EVK_RA8P1
+    bool "EVK-RA8P1 Board Support"
+    help
+      Enable support for the EVK-RA8P1 board based on the RA8P1 MPU.
+
+endif
+
+# Sensor module support (internal to board)
+config SENSORS_IMU_MODULE
+	bool "IMU sensor module support"
+	default n
+	depends on RA8_SPI
+	---help---
+		Enable support for IMU sensor module containing
+		9DOF IMU and barometric pressure sensor.
+
+if SENSORS_IMU_MODULE
+
+config IMU_MODULE_SPI_FREQUENCY
+	int "IMU module SPI frequency"
+	default 1000000
+	range 100000 8000000
+	---help---
+		SPI frequency for IMU sensor communication (Hz)
+
+config IMU_MODULE_USE_DMA
+	bool "Use DMA for IMU transfers"
+	default y
+	depends on RA8_SPI0_DMA
+	---help---
+		Use DMA for IMU sensor data transfers for better performance
+
+config IMU_MODULE_DEBUG
+	bool "IMU module debug output"
+	default n
+	depends on DEBUG_SENSORS
+	---help---
+		Enable debug output for IMU sensor module
+
+endif # SENSORS_IMU_MODULE

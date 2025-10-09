@@ -1,5 +1,7 @@
 /****************************************************************************
- * arch/arm/src/ra8/hardware/ra_pinmap.h
+ * boards/arm/ra8/fpb-ra8e1/src/ra8e1_user_leds.c
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,40 +20,81 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA_HARDWARE_RA_PINMAP_H
-#define __ARCH_ARM_SRC_RA_HARDWARE_RA_PINMAP_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+#include <stdbool.h>
+#include <debug.h>
+
 #include "chip.h"
-#include "hardware/ra_memorymap.h"
+#include "ra_gpio.h"
 
-#if defined(CONFIG_RA8E1_GROUP)
-#  include "ra8e1/ra8e1_pinmap.h"
-#elif defined(CONFIG_RA8P1_GROUP)
-#  include "ra8p1/ra8p1_pinmap.h"
-#else
-#  error "Unsupported RA memory map"
-#endif
+#include <arch/board/board.h>
+
+#ifndef CONFIG_ARCH_LEDS
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Types
+ * Name: board_userled_initialize
  ****************************************************************************/
+
+uint32_t board_userled_initialize(void)
+{
+  /* Configure LED GPIOs for output */
+
+  ra_configgpio(GPIO_LED1);
+  ra_configgpio(GPIO_LED2);
+
+  return NLEDS;
+}
 
 /****************************************************************************
- * Public Data
+ * Name: board_userled
  ****************************************************************************/
+
+void board_userled(int led, bool ledon)
+{
+  gpio_pinset_t ledcfg;
+
+  if (led == LED_1)
+    {
+      ledcfg = GPIO_LED1;
+      ledon = ledon;
+    }
+  else if (led == LED_2)
+    {
+      ledcfg = GPIO_LED2;
+      ledon = !ledon;  /* Invert logic for LED2 */
+    }
+  else
+    {
+      return;
+    }
+
+  ra_gpiowrite(ledcfg, ledon);
+}
 
 /****************************************************************************
- * Public Functions Prototypes
+ * Name: board_userled_all
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_RA_HARDWARE_RA_PINMAP_H */
+void board_userled_all(uint32_t ledset)
+{
+  bool ledon;
+
+  ledon = ((ledset & LED_1_BIT) != 0);
+  ra_gpiowrite(GPIO_LED1, ledon);
+
+  ledon = ((ledset & LED_2_BIT) != 0);
+  ra_gpiowrite(GPIO_LED2, ledon);
+
+}
+
+#endif /* !CONFIG_ARCH_LEDS */

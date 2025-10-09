@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/ra8/hardware/ra_pinmap.h
+ * boards/arm/ra8/fpb-ra8e1/src/ra8e1_buttons.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,40 +18,70 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA_HARDWARE_RA_PINMAP_H
-#define __ARCH_ARM_SRC_RA_HARDWARE_RA_PINMAP_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include "chip.h"
-#include "hardware/ra_memorymap.h"
+#include <stdint.h>
+#include <stdbool.h>
+#include <errno.h>
+#include <debug.h>
 
-#if defined(CONFIG_RA8E1_GROUP)
-#  include "ra8e1/ra8e1_pinmap.h"
-#elif defined(CONFIG_RA8P1_GROUP)
-#  include "ra8p1/ra8p1_pinmap.h"
-#else
-#  error "Unsupported RA memory map"
-#endif
+#include <nuttx/arch.h>
+#include <nuttx/board.h>
+#include <nuttx/irq.h>
+
+#include "ra_gpio.h"
+#include "ra_icu.h"
+
+#include <arch/board/board.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Private Data
+ ****************************************************************************/
+
+static bool g_led1_state = true; /* Active low, true = off */
+static bool g_led2_state = true; /* Active low, true = off */
+
+/****************************************************************************
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Types
+ * Name: button_handler_isr
+ ****************************************************************************/
+
+static int button_handler_isr(int irq, void *context, void *arg)
+{
+  /* Clear  pending isr */
+  ra_icu clear_irq(irq);
+
+  /* Toggle both LEDs */
+  g_led1_state = !g_led1_state;
+  g_led2_state = !g_led2_state;
+
+  ra_gpiowrite(GPIO_LED1, g_led1_state);
+  ra_gpiowrite(GPIO_LED2, g_led2_state);
+
+  return 0;
+}
+
+/****************************************************************************
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Name: board_button_initialize
  ****************************************************************************/
+uint32_t board_button_initialize(void)
+{
+  /* Configure the button pin as an input with pullup and interrupt on falling edge */
+  ra_configgpio(GPIO_SW1);
 
-/****************************************************************************
- * Public Functions Prototypes
- ****************************************************************************/
+  /* Attach the button interrupt handler */
+  (void)ra_icu_attach(RA_ELC_ICU_IRQ0, button_handler_isr, NULL, true);
 
-#endif /* __ARCH_ARM_SRC_RA_HARDWARE_RA_PINMAP_H */
+  return 0;
+}
