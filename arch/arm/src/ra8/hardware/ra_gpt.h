@@ -41,7 +41,7 @@
 
 #define RA_GPT_CH_STRIDE              0x100u
 
-#define RA_GPT_BASE(ch)               (R_GPT0_BASE + ((uint32_t)(ch) * RA_GPT_CH_STRIDE))
+#define RA_GPT_BASE(ch)               (R_GPT320_BASE + ((uint32_t)(ch) * RA_GPT_CH_STRIDE))
 
 /* Channel classification */
 #define RA_GPT_IS_32BIT(ch)           ((unsigned)(ch) <= 5u)

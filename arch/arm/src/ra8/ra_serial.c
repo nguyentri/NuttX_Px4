@@ -323,7 +323,7 @@ static char g_uart9txbuffer[CONFIG_SCI9_TXBUFSIZE];
 #ifdef CONFIG_RA_SCI0_UART
 static struct up_dev_s  g_uart0priv =
 {
-  .scibase      = R_SCI0_BASE,
+  .scibase      = R_SCI0_B_BASE,
   .mstp         = R_MSTP_MSTPCRB_SCI0,
   .rxi_irq      = -1,               /* Will be assigned by ICU */
   .txi_irq      = -1,               /* Will be assigned by ICU */
@@ -359,7 +359,7 @@ static uart_dev_t g_uart0port =
 #ifdef CONFIG_RA_SCI1_UART
 static struct up_dev_s  g_uart1priv =
 {
-  .scibase      = R_SCI1_BASE,
+  .scibase      = R_SCI1_B_BASE,
   .mstp         = R_MSTP_MSTPCRB_SCI1,
   .rxi_irq      = -1,               /* Will be assigned by ICU */
   .txi_irq      = -1,               /* Will be assigned by ICU */
@@ -395,7 +395,7 @@ static uart_dev_t  g_uart1port =
 #ifdef CONFIG_RA_SCI2_UART
 static struct up_dev_s  g_uart2priv =
 {
-  .scibase      = R_SCI2_BASE,
+  .scibase      = R_SCI2_B_BASE,
   .mstp         = R_MSTP_MSTPCRB_SCI2,
   .rxi_irq      = -1,               /* Will be assigned by ICU */
   .txi_irq      = -1,               /* Will be assigned by ICU */
@@ -431,7 +431,7 @@ static uart_dev_t  g_uart2port =
 #ifdef CONFIG_RA_SCI3_UART
 static struct up_dev_s  g_uart3priv =
 {
-  .scibase      = R_SCI3_BASE,
+  .scibase      = R_SCI3_B_BASE,
   .mstp         = R_MSTP_MSTPCRB_SCI3,
   .rxi_irq      = -1,               /* Will be assigned by ICU */
   .txi_irq      = -1,               /* Will be assigned by ICU */
@@ -467,7 +467,7 @@ static uart_dev_t  g_uart3port =
 #ifdef CONFIG_RA_SCI4_UART
 static struct up_dev_s  g_uart4priv =
 {
-  .scibase      = R_SCI4_BASE,
+  .scibase      = R_SCI4_B_BASE,
   .mstp         = R_MSTP_MSTPCRB_SCI4,
   .rxi_irq      = -1,               /* Will be assigned by ICU */
   .txi_irq      = -1,               /* Will be assigned by ICU */
@@ -503,7 +503,7 @@ static uart_dev_t  g_uart4port =
 #ifdef CONFIG_RA_SCI9_UART
 static struct up_dev_s  g_uart9priv =
 {
-  .scibase      = R_SCI9_BASE,
+  .scibase      = R_SCI9_B_BASE,
   .mstp         = R_MSTP_MSTPCRB_SCI9,
   .rxi_irq      = -1,               /* Will be assigned by ICU */
   .txi_irq      = -1,               /* Will be assigned by ICU */
@@ -928,11 +928,11 @@ static void up_sci_config(struct up_dev_s *priv)
   up_serialout(priv, R_SCI_B_CCR2_OFFSET, regval);
 
  // _info("SCI%d: Baud %lu, CCR2=0x%08lx (BGDM=%d, ABCS=%d, ABCSE=%d, ABCSE2=%d, CKS=%d, BRR=%d, MDDR=%d)\n",
-  //       priv->scibase == R_SCI0_BASE ? 0 :
-  //       priv->scibase == R_SCI1_BASE ? 1 :
-  //       priv->scibase == R_SCI2_BASE ? 2 :
-  //       priv->scibase == R_SCI3_BASE ? 3 :
-  //       priv->scibase == R_SCI4_BASE ? 4 : 9,
+  //       priv->scibase == R_SCI0_B_BASE ? 0 :
+  //       priv->scibase == R_SCI1_B_BASE ? 1 :
+  //       priv->scibase == R_SCI2_B_BASE ? 2 :
+  //       priv->scibase == R_SCI3_B_BASE ? 3 :
+  //       priv->scibase == R_SCI4_B_BASE ? 4 : 9,
   //       (unsigned long)priv->baud, (unsigned long)regval,
   //       baud_setting.bgdm, baud_setting.abcs, baud_setting.abcse, baud_setting.abcse2,
   //       baud_setting.cks, baud_setting.brr, baud_setting.mddr);

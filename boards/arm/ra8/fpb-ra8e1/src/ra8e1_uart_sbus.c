@@ -175,7 +175,7 @@ static int sbus_uart_initialize(void)
 
   /* Configure UART for SBUS */
   memset(&config, 0, sizeof(config));
-  config.base = R_SCI2_BASE;
+  config.base = R_SCI2_B_BASE;
   config.baud = SBUS_BAUDRATE;
   config.bits = SBUS_DATABITS;
   config.parity = SBUS_PARITY;

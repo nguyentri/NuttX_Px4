@@ -46,15 +46,15 @@
 #define RA_DTC_DTCVBR_SEC_OFFSET 0x14  /* DTC Vector Base Register for Secure Region */
 
 /* DTC Register Addresses */
-#define RA_DTC_DTCST             (R_DTC_BASE + RA_DTC_DTCST_OFFSET)
-#define RA_DTC_DTCSTS            (R_DTC_BASE + RA_DTC_DTCSTS_OFFSET)
-#define RA_DTC_DTEVR             (R_DTC_BASE + RA_DTC_DTEVR_OFFSET)
+#define RA_DTC_DTCST             (R_DTC0_BASE + RA_DTC_DTCST_OFFSET)
+#define RA_DTC_DTCSTS            (R_DTC0_BASE + RA_DTC_DTCSTS_OFFSET)
+#define RA_DTC_DTEVR             (R_DTC0_BASE + RA_DTC_DTEVR_OFFSET)
 
-#define RA_DTC_DTCCR_NC          (R_DTC_BASE + RA_DTC_DTCCR_OFFSET)
-#define RA_DTC_DTCVBR_NC         (R_DTC_BASE + RA_DTC_DTCVBR_OFFSET)
+#define RA_DTC_DTCCR_NC          (R_DTC0_BASE + RA_DTC_DTCCR_OFFSET)
+#define RA_DTC_DTCVBR_NC         (R_DTC0_BASE + RA_DTC_DTCVBR_OFFSET)
 
-#define RA_DTC_DTCCR_SEC         (R_DTC_BASE + RA_DTC_DTCCR_SEC_OFFSET)
-#define RA_DTC_DTCVBR_SEC        (R_DTC_BASE + RA_DTC_DTCVBR_SEC_OFFSET)
+#define RA_DTC_DTCCR_SEC         (R_DTC0_BASE + RA_DTC_DTCCR_SEC_OFFSET)
+#define RA_DTC_DTCVBR_SEC        (R_DTC0_BASE + RA_DTC_DTCVBR_SEC_OFFSET)
 
 /* DTC Module Start Register (DTCST) bit definitions */
 #define RA_DTC_DTCST_DTCST       (1 << 0)  /* DTC Module Start */

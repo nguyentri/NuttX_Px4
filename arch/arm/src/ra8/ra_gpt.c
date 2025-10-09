@@ -167,7 +167,7 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
 {
 #ifdef CONFIG_RA_GPT0
   {
-    .base       = R_GPT0_BASE,
+    .base       = R_GPT320_BASE,
     .mstp       = RA_MSTP_GPT0,
     .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
@@ -179,7 +179,7 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
 #endif
 #ifdef CONFIG_RA_GPT1 // not configured
   {
-    .base       = R_GPT1_BASE,
+    .base       = R_GPT321_BASE,
     .mstp       = RA_MSTP_GPT1,
     .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
@@ -191,7 +191,7 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
 #endif
 #ifdef CONFIG_RA_GPT2
   {
-    .base       = R_GPT2_BASE,
+    .base       = R_GPT322_BASE,
     .mstp       = RA_MSTP_GPT2,
     .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
@@ -203,7 +203,7 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
 #endif
 #ifdef CONFIG_RA_GPT3
   {
-    .base       = R_GPT3_BASE,
+    .base       = R_GPT323_BASE,
     .mstp       = RA_MSTP_GPT3,
     .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
@@ -215,7 +215,7 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
 #endif
 #ifdef CONFIG_RA_GPT4
   {
-    .base       = R_GPT4_BASE,
+    .base       = R_GPT324_BASE,
     .mstp       = RA_MSTP_GPT4,
     .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
@@ -227,7 +227,7 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
 #endif
 #ifdef CONFIG_RA_GPT5
   {
-    .base       = R_GPT5_BASE,
+    .base       = R_GPT325_BASE,
     .mstp       = RA_MSTP_GPT5,
     .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */

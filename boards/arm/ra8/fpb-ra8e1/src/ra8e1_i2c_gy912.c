@@ -38,6 +38,8 @@
 #include <nuttx/semaphore.h>
 #include <arch/board/board.h>
 
+#include <nuttx/kmalloc.h>
+
 #include "arm_internal.h"
 #include "chip.h"
 #include "ra_gpio.h"

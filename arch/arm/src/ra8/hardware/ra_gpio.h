@@ -69,29 +69,29 @@
 
 #define R_PFS_PSEL_PORT_OFFSET          0x40
 #define R_PFS_PSEL_PIN_OFFSET           0x04
-#define R_PMISC_PWPRS_OFFSET            0x14
-#define R_PMISC_PMSAR_OFFSET            0x30
+#define R_PWPR_OFFSET                   0x514
+#define R_PMSAR_OFFSET                  0x530
 
 /* PSCU - Port Security Control Unit Registers */
 
-#define R_PSCU_PSARB_OFFSET               0x04
-#define R_PSCU_PSARC_OFFSET               0x08
-#define R_PSCU_PSARD_OFFSET               0x0C
-#define R_PSCU_PSARE_OFFSET               0x10
+#define R_PSCU_PSARB_OFFSET             0x04
+#define R_PSCU_PSARC_OFFSET             0x08
+#define R_PSCU_PSARD_OFFSET             0x0C
+#define R_PSCU_PSARE_OFFSET             0x10
 
-#define R_PSCU_PSARB                      (R_PSCU_BASE + R_PSCU_PSARB_OFFSET)
-#define R_PSCU_PSARC                      (R_PSCU_BASE + R_PSCU_PSARC_OFFSET)
-#define R_PSCU_PSARD                      (R_PSCU_BASE + R_PSCU_PSARD_OFFSET)
-#define R_PSCU_PSARE                      (R_PSCU_BASE + R_PSCU_PSARE_OFFSET)
+#define R_PSCU_PSARB                    (R_PSCU_BASE + R_PSCU_PSARB_OFFSET)
+#define R_PSCU_PSARC                    (R_PSCU_BASE + R_PSCU_PSARC_OFFSET)
+#define R_PSCU_PSARD                    (R_PSCU_BASE + R_PSCU_PSARD_OFFSET)
+#define R_PSCU_PSARE                    (R_PSCU_BASE + R_PSCU_PSARE_OFFSET)
 
 /* Register Addresses *******************************************************/
 
 #define R_PFS(port,pin)                 (R_PFS_BASE + (port)*R_PFS_PSEL_PORT_OFFSET + (pin)*R_PFS_PSEL_PIN_OFFSET)
-#define R_PMISC_PWPRS                    (R_PMISC_BASE + R_PMISC_PWPRS_OFFSET)
+#define R_PWPR                          (R_PFS_BASE + R_PWPR_OFFSET)
 
 /* PMSAR - Port Security Attribution Registers */
 
-#define R_PMSAR_BASE                      (R_PMISC_BASE + R_PMISC_PMSAR_OFFSET)
+#define R_PMSAR_BASE                      (R_PFS_BASE + R_PMSAR_OFFSET)
 #define R_PMSAR(port)                     (R_PMSAR_BASE + (port) * 0x04)
 #define R_PMSAR_NUM                       (10)  /* Ports 0-9 have PMSAR registers */
 
@@ -117,10 +117,10 @@
 #define R_PFS_PODR                ( 0) /* Bit 0: Port Output Data */
 
 /* PMISC Register Bits */
-#define R_PMISC_PWPRS_B0WI        ( 7) /* 80: PFSWE Bit Write Disable */
-#define R_PMISC_PWPRS_PFSWE       ( 6) /* 40: PFS Register Write Enable */
+#define R_PWPR_B0WI        ( 7) /* 80: PFSWE Bit Write Disable */
+#define R_PWPR_PFSWE       ( 6) /* 40: PFS Register Write Enable */
 
-/* Bit definitions for PWPRS are provided in ra_gpio.h to avoid duplication here. */
+/* Bit definitions for PWPR are provided in ra_gpio.h to avoid duplication here. */
 
 #define PFS_PSEL_HIZ                 (0x00 << R_PFS_PSEL_SHIFT_8)
 #define PFS_PSEL_AGT                 (0x01 << R_PFS_PSEL_SHIFT_8)

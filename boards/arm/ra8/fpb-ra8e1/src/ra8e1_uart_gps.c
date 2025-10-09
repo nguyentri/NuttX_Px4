@@ -153,22 +153,22 @@ static int gps_uart_initialize(void)
 
   /* Configure UART for GPS */
   memset(&config, 0, sizeof(config));
-  config.base = R_SCI3_BASE;
+  config.base = R_SCI3_B_BASE;
   config.baud = GPS_BAUDRATE;
   config.bits = 8;
   config.parity = 0; /* No parity */
   config.stop = 1;   /* 1 stop bit */
-  
+
   /* Pin configuration for UART3 */
   config.tx_pin = RA_GPIO_PIN(RA_GPIO_PORT3, 10); /* P310 - TXD3 */
   config.rx_pin = RA_GPIO_PIN(RA_GPIO_PORT3, 9);  /* P309 - RXD3 */
-  
+
   /* DMA configuration */
   config.rx_dma.enabled = true;
   config.rx_dma.channel = 2;
   config.tx_dma.enabled = true;
   config.tx_dma.channel = 3;
-  
+
   /* Set up device structure */
   g_gps_uart.config = &config;
   g_gps_uart.rx_buffer = g_gps_rx_buffer;
@@ -176,7 +176,7 @@ static int gps_uart_initialize(void)
   g_gps_uart.tx_buffer = g_gps_tx_buffer;
   g_gps_uart.tx_buffer_size = GPS_TX_BUFFER_SIZE;
   g_gps_uart.callback = gps_uart_callback;
-  
+
   /* Initialize UART with DMA */
   ret = ra_sci_initialize(&g_gps_uart);
   if (ret < 0)
@@ -184,7 +184,7 @@ static int gps_uart_initialize(void)
       _err("GPS: Failed to initialize UART: %d\n", ret);
       return ret;
     }
-  
+
   _info("GPS: UART3 initialized for 38400 baud, 8N1\n");
   return OK;
 }
@@ -200,7 +200,7 @@ static int gps_uart_initialize(void)
 static void gps_uart_callback(ra_sci_dev_t *dev, uint32_t event)
 {
   int i;
-  
+
   if (event & RA_UART_EVENT_RX_CHAR)
     {
       /* Process received bytes */
@@ -209,7 +209,7 @@ static void gps_uart_callback(ra_sci_dev_t *dev, uint32_t event)
           nmea_process_byte(dev->rx_buffer[i]);
         }
     }
-  
+
   if (event & (RA_UART_EVENT_ERR_PARITY | RA_UART_EVENT_ERR_FRAMING | RA_UART_EVENT_ERR_OVERFLOW))
     {
       g_nmea_parser.parse_errors++;
@@ -250,7 +250,7 @@ static void nmea_process_byte(uint8_t byte)
           /* End of sentence */
           g_nmea_parser.sentence[g_nmea_parser.sentence_pos] = '\0';
           g_nmea_parser.sentence_ready = true;
-          
+
           /* Process complete sentence */
           if (nmea_parse_sentence(g_nmea_parser.sentence))
             {
@@ -260,13 +260,13 @@ static void nmea_process_byte(uint8_t byte)
             {
               g_nmea_parser.parse_errors++;
             }
-          
+
           g_nmea_parser.sentence_pos = 0;
         }
       else if (g_nmea_parser.sentence_pos < NMEA_MAX_SENTENCE_LEN - 1)
         {
           g_nmea_parser.sentence[g_nmea_parser.sentence_pos++] = byte;
-          
+
           /* Calculate checksum (exclude $ and * characters) */
           if (!g_nmea_parser.checksum_mode && byte != NMEA_START_CHAR)
             {
@@ -296,13 +296,13 @@ static bool nmea_parse_sentence(const char *sentence)
     {
       return false;
     }
-  
+
   /* Validate checksum */
   if (!nmea_checksum_valid(sentence))
     {
       return false;
     }
-  
+
   /* Parse specific sentence types */
   if (strncmp(sentence, "$GPGGA", 6) == 0 || strncmp(sentence, "$GNGGA", 6) == 0)
     {
@@ -316,7 +316,7 @@ static bool nmea_parse_sentence(const char *sentence)
     {
       return nmea_parse_gsa(sentence) == OK;
     }
-  
+
   /* Unknown sentence type, but valid checksum */
   return true;
 }
@@ -335,23 +335,23 @@ static bool nmea_checksum_valid(const char *sentence)
   uint8_t calculated_checksum = 0;
   uint8_t received_checksum;
   int i;
-  
+
   /* Find checksum delimiter */
   checksum_ptr = strchr(sentence, '*');
   if (!checksum_ptr || strlen(checksum_ptr) < 3)
     {
       return false;
     }
-  
+
   /* Calculate checksum */
   for (i = 1; i < (checksum_ptr - sentence); i++)
     {
       calculated_checksum ^= sentence[i];
     }
-  
+
   /* Parse received checksum */
   received_checksum = (uint8_t)strtol(checksum_ptr + 1, NULL, 16);
-  
+
   return calculated_checksum == received_checksum;
 }
 
@@ -369,9 +369,9 @@ static void nmea_split_fields(const char *sentence, char fields[][16], int *fiel
   int field_idx = 0;
   int char_idx = 0;
   int i;
-  
+
   *field_count = 0;
-  
+
   for (i = 0; i < len && field_idx < NMEA_MAX_FIELDS; i++)
     {
       if (sentence[i] == ',' || sentence[i] == '*')
@@ -386,7 +386,7 @@ static void nmea_split_fields(const char *sentence, char fields[][16], int *fiel
           fields[field_idx][char_idx++] = sentence[i];
         }
     }
-  
+
   if (field_idx < NMEA_MAX_FIELDS && char_idx > 0)
     {
       fields[field_idx][char_idx] = '\0';
@@ -406,52 +406,52 @@ static int nmea_parse_gga(const char *sentence)
 {
   char fields[NMEA_MAX_FIELDS][16];
   int field_count;
-  
+
   nmea_split_fields(sentence, fields, &field_count);
-  
+
   if (field_count < 15)
     {
       return -EINVAL;
     }
-  
+
   /* Parse time (field 1) */
   if (strlen(fields[1]) >= 6)
     {
       char time_str[3];
       time_str[2] = '\0';
-      
+
       strncpy(time_str, fields[1], 2);
       g_gps_data.hour = atoi(time_str);
-      
+
       strncpy(time_str, fields[1] + 2, 2);
       g_gps_data.minute = atoi(time_str);
-      
+
       strncpy(time_str, fields[1] + 4, 2);
       g_gps_data.second = atoi(time_str);
     }
-  
+
   /* Parse latitude (fields 2, 3) */
   g_gps_data.latitude = nmea_parse_coordinate(fields[2], fields[3]);
-  
+
   /* Parse longitude (fields 4, 5) */
   g_gps_data.longitude = nmea_parse_coordinate(fields[4], fields[5]);
-  
+
   /* Parse fix quality (field 6) */
   g_gps_data.fix_type = nmea_parse_int(fields[6]);
   g_gps_data.fix_valid = g_gps_data.fix_type > 0;
-  
+
   /* Parse satellites used (field 7) */
   g_gps_data.satellites_used = nmea_parse_int(fields[7]);
-  
+
   /* Parse HDOP (field 8) */
   g_gps_data.hdop = nmea_parse_float(fields[8]);
-  
+
   /* Parse altitude (field 9) */
   g_gps_data.altitude = nmea_parse_float(fields[9]);
-  
+
   /* Update timestamp */
   g_gps_data.timestamp = up_systime();
-  
+
   return OK;
 }
 
@@ -467,39 +467,39 @@ static int nmea_parse_rmc(const char *sentence)
 {
   char fields[NMEA_MAX_FIELDS][16];
   int field_count;
-  
+
   nmea_split_fields(sentence, fields, &field_count);
-  
+
   if (field_count < 12)
     {
       return -EINVAL;
     }
-  
+
   /* Parse status (field 2) */
   g_gps_data.fix_valid = (fields[2][0] == 'A');
-  
+
   /* Parse speed (field 7) - convert from knots to km/h */
   g_gps_data.speed_kmh = nmea_parse_float(fields[7]) * 1.852f;
-  
+
   /* Parse course (field 8) */
   g_gps_data.course = nmea_parse_float(fields[8]);
-  
+
   /* Parse date (field 9) */
   if (strlen(fields[9]) >= 6)
     {
       char date_str[3];
       date_str[2] = '\0';
-      
+
       strncpy(date_str, fields[9], 2);
       g_gps_data.day = atoi(date_str);
-      
+
       strncpy(date_str, fields[9] + 2, 2);
       g_gps_data.month = atoi(date_str);
-      
+
       strncpy(date_str, fields[9] + 4, 2);
       g_gps_data.year = 2000 + atoi(date_str);
     }
-  
+
   return OK;
 }
 
@@ -515,23 +515,23 @@ static int nmea_parse_gsa(const char *sentence)
 {
   char fields[NMEA_MAX_FIELDS][16];
   int field_count;
-  
+
   nmea_split_fields(sentence, fields, &field_count);
-  
+
   if (field_count < 18)
     {
       return -EINVAL;
     }
-  
+
   /* Parse PDOP (field 15) */
   g_gps_data.pdop = nmea_parse_float(fields[15]);
-  
+
   /* Parse HDOP (field 16) */
   g_gps_data.hdop = nmea_parse_float(fields[16]);
-  
+
   /* Parse VDOP (field 17) */
   g_gps_data.vdop = nmea_parse_float(fields[17]);
-  
+
   return OK;
 }
 
@@ -547,12 +547,12 @@ static double nmea_parse_coordinate(const char *field, const char *dir_field)
 {
   double coord = 0.0;
   double degrees, minutes;
-  
+
   if (strlen(field) < 4)
     {
       return 0.0;
     }
-  
+
   /* Parse degrees and minutes */
   if (strlen(field) > 4)
     {
@@ -566,15 +566,15 @@ static double nmea_parse_coordinate(const char *field, const char *dir_field)
       degrees = (field[0] - '0') * 100 + (field[1] - '0') * 10 + (field[2] - '0');
       minutes = atof(field + 3);
     }
-  
+
   coord = degrees + minutes / 60.0;
-  
+
   /* Apply direction */
   if (dir_field[0] == 'S' || dir_field[0] == 'W')
     {
       coord = -coord;
     }
-  
+
   return coord;
 }
 
@@ -592,7 +592,7 @@ static float nmea_parse_float(const char *field)
     {
       return 0.0f;
     }
-  
+
   return (float)atof(field);
 }
 
@@ -610,7 +610,7 @@ static int nmea_parse_int(const char *field)
     {
       return 0;
     }
-  
+
   return atoi(field);
 }
 
@@ -625,16 +625,16 @@ static int nmea_parse_int(const char *field)
 static void gps_print_position(void)
 {
   syslog(LOG_INFO, "\nGPS Position:\n");
-  syslog(LOG_INFO, "  Fix: %s (Type: %d)\n", 
+  syslog(LOG_INFO, "  Fix: %s (Type: %d)\n",
              g_gps_data.fix_valid ? "Valid" : "Invalid", g_gps_data.fix_type);
   syslog(LOG_INFO, "  Latitude:  %.6f°\n", g_gps_data.latitude);
   syslog(LOG_INFO, "  Longitude: %.6f°\n", g_gps_data.longitude);
   syslog(LOG_INFO, "  Altitude:  %.1f m\n", g_gps_data.altitude);
   syslog(LOG_INFO, "  Speed:     %.1f km/h\n", g_gps_data.speed_kmh);
   syslog(LOG_INFO, "  Course:    %.1f°\n", g_gps_data.course);
-  syslog(LOG_INFO, "  Time:      %02d:%02d:%02d UTC\n", 
+  syslog(LOG_INFO, "  Time:      %02d:%02d:%02d UTC\n",
              g_gps_data.hour, g_gps_data.minute, g_gps_data.second);
-  syslog(LOG_INFO, "  Date:      %02d/%02d/%04d\n", 
+  syslog(LOG_INFO, "  Date:      %02d/%02d/%04d\n",
              g_gps_data.day, g_gps_data.month, g_gps_data.year);
   syslog(LOG_INFO, "  Satellites: %d\n", g_gps_data.satellites_used);
   syslog(LOG_INFO, "  HDOP:      %.1f\n", g_gps_data.hdop);
@@ -654,12 +654,12 @@ static void gps_print_status(void)
 {
   uint32_t current_time = up_systime();
   uint32_t time_since_last = current_time - g_gps_data.timestamp;
-  
+
   syslog(LOG_INFO, "\nGPS Status:\n");
   syslog(LOG_INFO, "  Sentences received: %u\n", g_nmea_parser.sentence_count);
   syslog(LOG_INFO, "  Parse errors: %u\n", g_nmea_parser.parse_errors);
   syslog(LOG_INFO, "  Last update: %u ms ago\n", time_since_last);
-  syslog(LOG_INFO, "  Message rate: %.1f Hz\n", 
+  syslog(LOG_INFO, "  Message rate: %.1f Hz\n",
              g_nmea_parser.sentence_count > 0 ? (float)g_nmea_parser.sentence_count * 1000.0f / current_time : 0.0f);
 }
 
@@ -695,37 +695,37 @@ static void process_rtt_command(const char *command)
     {
       return;
     }
-  
+
   switch (command[0])
     {
       case 'p':
       case 'P':
         gps_print_position();
         break;
-        
+
       case 's':
       case 'S':
         gps_print_status();
         break;
-        
+
       case 'r':
       case 'R':
         g_nmea_parser.sentence_count = 0;
         g_nmea_parser.parse_errors = 0;
         syslog(LOG_INFO, "Counters reset\n");
         break;
-        
+
       case 'h':
       case 'H':
         print_menu();
         break;
-        
+
       case 'q':
       case 'Q':
         g_running = false;
         _info("Exiting GPS demo\n");
         break;
-        
+
       default:
         syslog(LOG_INFO, "Unknown command: %c\n", command[0]);
         print_menu();
@@ -764,16 +764,16 @@ int ra8e1_gps_main(int argc, char *argv[])
   int ret;
   int key;
   uint8_t cmd_pos = 0;
-  
+
   syslog(LOG_INFO, "\nRA8E1 GPS Demo Starting...\n");
   syslog(LOG_INFO, "GPS TX: P310 (TXD3) -> GPS RX\n");
   syslog(LOG_INFO, "GPS RX: P309 (RXD3) <- GPS TX\n");
   syslog(LOG_INFO, "Configuration: 38400 baud, 8N1\n\n");
-  
+
   /* Initialize NMEA parser */
   memset(&g_nmea_parser, 0, sizeof(g_nmea_parser));
   memset(&g_gps_data, 0, sizeof(g_gps_data));
-  
+
   /* Initialize UART for GPS */
   ret = gps_uart_initialize();
   if (ret < 0)
@@ -781,10 +781,10 @@ int ra8e1_gps_main(int argc, char *argv[])
       _err("GPS: Failed to initialize UART: %d\n", ret);
       return ret;
     }
-  
+
   print_menu();
   g_running = true;
-  
+
   _info("Demo initialized - ready for commands\n");
 
   /* Main demo loop */
@@ -818,15 +818,15 @@ int ra8e1_gps_main(int argc, char *argv[])
                 }
             }
         }
-      
+
       /* Small delay to prevent overwhelming the system */
       usleep(10000); /* 10ms */
     }
-  
+
   /* Cleanup */
   ra_sci_finalize(&g_gps_uart);
   _info("GPS demo finished\n");
-  
+
   return OK;
 }
 
@@ -844,17 +844,17 @@ int ra8e1_gps_parse(const char *nmea_sentence, struct gps_data_s *gps_data)
     {
       return -EINVAL;
     }
-  
-  /* This is a simplified interface - in practice, you would 
+
+  /* This is a simplified interface - in practice, you would
    * maintain state and parse multiple sentence types */
-  
+
   if (strncmp(nmea_sentence, "$GPGGA", 6) == 0 || strncmp(nmea_sentence, "$GNGGA", 6) == 0)
     {
       /* Copy current data and parse GGA */
       memcpy(gps_data, &g_gps_data, sizeof(struct gps_data_s));
       return nmea_parse_gga(nmea_sentence);
     }
-  
+
   return -ENOTSUP;
 }
 

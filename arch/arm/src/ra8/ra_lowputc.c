@@ -113,42 +113,42 @@
 /* Select USART parameters for the selected console */
 
 #  if defined(CONFIG_SCI0_SERIAL_CONSOLE)
-#    define RA_CONSOLE_BASE     R_SCI0_BASE
+#    define RA_CONSOLE_BASE     R_SCI0_B_BASE
 #    define RA_CONSOLE_MTSP     R_MSTP_MSTPCRB_SCI0
 #    define RA_CONSOLE_BAUD     CONFIG_SCI0_BAUD
 #    define RA_CONSOLE_BITS     CONFIG_SCI0_BITS
 #    define RA_CONSOLE_PARITY   CONFIG_SCI0_PARITY
 #    define RA_CONSOLE_2STOP    CONFIG_SCI0_2STOP
 #  elif defined(CONFIG_SCI1_SERIAL_CONSOLE)
-#    define RA_CONSOLE_BASE     R_SCI1_BASE
+#    define RA_CONSOLE_BASE     R_SCI1_B_BASE
 #    define RA_CONSOLE_MTSP     R_MSTP_MSTPCRB_SCI1
 #    define RA_CONSOLE_BAUD     CONFIG_SCI1_BAUD
 #    define RA_CONSOLE_BITS     CONFIG_SCI1_BITS
 #    define RA_CONSOLE_PARITY   CONFIG_SCI1_PARITY
 #    define RA_CONSOLE_2STOP    CONFIG_SCI1_2STOP
 #  elif defined(CONFIG_SCI2_SERIAL_CONSOLE)
-#    define RA_CONSOLE_BASE     R_SCI2_BASE
+#    define RA_CONSOLE_BASE     R_SCI2_B_BASE
 #    define RA_CONSOLE_MTSP     R_MSTP_MSTPCRB_SCI2
 #    define RA_CONSOLE_BAUD     CONFIG_SCI2_BAUD
 #    define RA_CONSOLE_BITS     CONFIG_SCI2_BITS
 #    define RA_CONSOLE_PARITY   CONFIG_SCI2_PARITY
 #    define RA_CONSOLE_2STOP    CONFIG_SCI2_2STOP
 #  elif defined(CONFIG_SCI3_SERIAL_CONSOLE)
-#    define RA_CONSOLE_BASE     R_SCI3_BASE
+#    define RA_CONSOLE_BASE     R_SCI3_B_BASE
 #    define RA_CONSOLE_MTSP     R_MSTP_MSTPCRB_SCI3
 #    define RA_CONSOLE_BAUD     CONFIG_SCI3_BAUD
 #    define RA_CONSOLE_BITS     CONFIG_SCI3_BITS
 #    define RA_CONSOLE_PARITY   CONFIG_SCI3_PARITY
 #    define RA_CONSOLE_2STOP    CONFIG_SCI3_2STOP
 #  elif defined(CONFIG_SCI4_SERIAL_CONSOLE)
-#    define RA_CONSOLE_BASE     R_SCI4_BASE
+#    define RA_CONSOLE_BASE     R_SCI4_B_BASE
 #    define RA_CONSOLE_MTSP     R_MSTP_MSTPCRB_SCI4
 #    define RA_CONSOLE_BAUD     CONFIG_SCI4_BAUD
 #    define RA_CONSOLE_BITS     CONFIG_SCI4_BITS
 #    define RA_CONSOLE_PARITY   CONFIG_SCI4_PARITY
 #    define RA_CONSOLE_2STOP    CONFIG_SCI4_2STOP
 #  elif defined(CONFIG_SCI9_SERIAL_CONSOLE)
-#    define RA_CONSOLE_BASE     R_SCI9_BASE
+#    define RA_CONSOLE_BASE     R_SCI9_B_BASE
 #    define RA_CONSOLE_MTSP     R_MSTP_MSTPCRB_SCI9
 #    define RA_CONSOLE_BAUD     CONFIG_SCI9_BAUD
 #    define RA_CONSOLE_BITS     CONFIG_SCI9_BITS
@@ -177,7 +177,7 @@
  * Private Data
  ****************************************************************************/
 #ifdef HAVE_CONSOLE
-static spinlock_t g_ra_lowputc_lock = SP_UNLOCKED;
+static spinlock_t g_ra_lowputc_lock;
 #endif
 
 /****************************************************************************

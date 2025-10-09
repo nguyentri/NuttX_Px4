@@ -127,8 +127,8 @@ RUST_LIB_PATH = $(RUST_TARGET_DIR)/$(RUST_TARGET)/release/libra8e1_rust_lib.a
 # Check if cargo is available
 CARGO := $(shell which cargo 2>/dev/null)
 ifneq ($(CARGO),)
-  # Add Rust library to user libraries (gets linked at final stage)
-  USERLIBS += $(RUST_LIB_PATH)
+  # Add Rust library to extra libraries (gets linked at final stage)
+  EXTRA_LIBS += $(RUST_LIB_PATH)
 
   # Build Rust library before C code (like add_dependencies in Zephyr)
   context:: rust_lib

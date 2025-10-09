@@ -84,10 +84,10 @@ static void ra_pin_access_enable(void)
   if (g_pfs_protect_counter == 0)
     {
       /* Clear BOWI bit - writing to PFSWE bit enabled */
-      putreg8(0, R_PMISC_PWPRS);
+      putreg8(0, R_PWPR);
 
       /* Set PFSWE bit - writing to PFS register enabled */
-      putreg8((1 << R_PMISC_PWPRS_PFSWE), R_PMISC_PWPRS);
+      putreg8((1 << R_PWPR_PFSWE), R_PWPR);
     }
 
   /* Increment the protect counter */
@@ -121,10 +121,10 @@ static void ra_pin_access_disable(void)
   if (g_pfs_protect_counter == 0)
     {
       /* Clear PFSWE bit - writing to PFS register disabled */
-      putreg8(0, R_PMISC_PWPRS);
+      putreg8(0, R_PWPR);
 
       /* Set BOWI bit - writing to PFSWE bit disabled */
-      putreg8((1 << R_PMISC_PWPRS_B0WI), R_PMISC_PWPRS);
+      putreg8((1 << R_PWPR_B0WI), R_PWPR);
     }
 
   leave_critical_section(flags);

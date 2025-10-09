@@ -1257,6 +1257,12 @@ config ARM_SEMIHOSTING_HOSTFS_CACHE_COHERENCE
 
 endif
 
+if ARCH_ARMV7M
+source "arch/arm/src/armv7-m/Kconfig"
+endif
+if ARCH_ARMV8M
+source "arch/arm/src/armv8-m/Kconfig"
+endif
 if ARCH_CHIP_IMXRT
 source "arch/arm/src/imxrt/Kconfig"
 endif

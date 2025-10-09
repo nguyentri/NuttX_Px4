@@ -367,16 +367,3 @@ endif
 ifeq ($(CONFIG_ARMV8M_CMSE),y)
   ARCHCPUFLAGS += -mcmse
 endif
-
-# CPU-specific flags for assembler
-ifeq ($(CONFIG_ARCH_CORTEXM23),y)
-  ARCHCPUFLAGS += -mcpu=cortex-m23
-else ifeq ($(CONFIG_ARCH_CORTEXM33),y)
-  ARCHCPUFLAGS += -mcpu=cortex-m33
-else ifeq ($(CONFIG_ARCH_CORTEXM35P),y)
-  ARCHCPUFLAGS += -mcpu=cortex-m35p
-else ifeq ($(CONFIG_ARCH_CORTEXM55),y)
-  ARCHCPUFLAGS += -mcpu=cortex-m55
-else ifeq ($(CONFIG_ARCH_CORTEXM85),y)
-  ARCHCPUFLAGS += -mcpu=cortex-m85
-endif

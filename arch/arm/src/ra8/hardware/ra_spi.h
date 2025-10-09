@@ -233,13 +233,13 @@
 
 /* SPI Base Addresses */
 #ifdef CONFIG_RA_SPI0
-#define RA_SPI0_BASE             R_SPI0_BASE
+#define RA_SPI0_BASE             R_SPI0_B_BASE
 #endif
 #ifdef CONFIG_RA_SPI1
-#define RA_SPI1_BASE             R_SPI1_BASE
+#define RA_SPI1_BASE             R_SPI1_B_BASE
 #endif
 
 /* Helper macros */
-#define RA_SPI_BASE(n)           ((n == 0) ? R_SPI0_BASE : R_SPI1_BASE)
+#define RA_SPI_BASE(n)           ((n == 0) ? R_SPI0_B_BASE : R_SPI1_B_BASE)
 
 #endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA_SPI_H */

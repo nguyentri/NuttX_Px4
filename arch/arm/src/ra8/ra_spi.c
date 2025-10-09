@@ -248,7 +248,7 @@ static const struct spi_ops_s ra_spi_ops =
 #ifdef CONFIG_RA_SPI0
 static const struct ra_spi_config_s ra_spi0_config =
 {
-  .base        = R_SPI0_BASE,
+  .base        = R_SPI0_B_BASE,
   .bus         = 0,
 
   .rxi_elc     = RA_ELC_SPI0_RXI,
@@ -286,7 +286,7 @@ static struct ra_spi_priv_s ra_spi0_priv =
 #ifdef CONFIG_RA_SPI1
 static const struct ra_spi_config_s ra_spi1_config =
 {
-  .base        = R_SPI1_BASE,
+  .base        = R_SPI1_B_BASE,
   .bus         = 1,
 
   .rxi_elc     = RA_ELC_SPI1_RXI,

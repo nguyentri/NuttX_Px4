@@ -55,7 +55,7 @@ struct spi_dev_s;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ra8e1_bringup
+ * Name: ra8p1_bringup
  *
  * Description:
  *   Perform architecture-specific initialization
@@ -68,23 +68,23 @@ struct spi_dev_s;
  *
  ****************************************************************************/
 
-int ra8e1_bringup(void);
+int ra8p1_bringup(void);
 
-/* Run all enabled application examples (used by ra8e1_bringup()) */
-int ra8e1_app_examples(void);
+/* Run all enabled application examples (used by ra8p1_bringup()) */
+int ra8p1_app_examples(void);
 
 /****************************************************************************
- * Name: ra8e1_boardinitialize
+ * Name: ra8p1_boardinitialize
  *
  * Description:
- *   All RA8E1 architectures must provide the following entry point.  This
+ *   All RA8P1 architectures must provide the following entry point.  This
  *   entry point is called early in the initialization -- after all memory
  *   has been configured and mapped but before any devices have been
  *   initialized.
  *
  ****************************************************************************/
 
-void ra8e1_boardinitialize(void);
+void ra8p1_boardinitialize(void);
 
 /****************************************************************************
  * Name: board_autoled_initialize
@@ -109,84 +109,84 @@ int board_rtc_initialize(void);
 #endif
 
 /****************************************************************************
- * RA8E1 driver interfaces for use by applications on the fpb-ra8e1 board
+ * RA8P1 driver interfaces for use by applications on the fpb-ra8p1 board
  ****************************************************************************/
 
-#ifdef CONFIG_RA8E1_GPIO
-int ra8e1_gpio_initialize(void);
+#ifdef CONFIG_RA8P1_GPIO
+int ra8p1_gpio_initialize(void);
 #endif
 
 /****************************************************************************
  * Example application interfaces
  ****************************************************************************/
 
-#ifdef CONFIG_RA8E1_SPI_LOOPBACK_EXAMPLE
-int ra8e1_spi_loopback_init(void);
-int ra8e1_spi_loopback_test(void);
-int ra8e1_spi_loopback_main(int argc, char *argv[]);
+#ifdef CONFIG_RA8P1_SPI_LOOPBACK_EXAMPLE
+int ra8p1_spi_loopback_init(void);
+int ra8p1_spi_loopback_test(void);
+int ra8p1_spi_loopback_main(int argc, char *argv[]);
  #endif
 
-#ifdef CONFIG_RA8E1_SPI_MASTERSLAVE_EXAMPLE
-int ra8e1_spi_masterslave_init(void);
-int ra8e1_spi_masterslave_test(void);
-int ra8e1_spi_masterslave_main(int argc, char *argv[]);
+#ifdef CONFIG_RA8P1_SPI_MASTERSLAVE_EXAMPLE
+int ra8p1_spi_masterslave_init(void);
+int ra8p1_spi_masterslave_test(void);
+int ra8p1_spi_masterslave_main(int argc, char *argv[]);
 #endif
 
-#ifdef CONFIG_RA8E1_ADC_BMS_EXAMPLE
-int ra8e1_adc_bms_init(void);
-int ra8e1_adc_bms_main(int argc, FAR char *argv[]);
+#ifdef CONFIG_RA8P1_ADC_BMS_EXAMPLE
+int ra8p1_adc_bms_init(void);
+int ra8p1_adc_bms_main(int argc, FAR char *argv[]);
 #endif
 
-#ifdef CONFIG_RA8E1_ADC_EXAMPLE
+#ifdef CONFIG_RA8P1_ADC_EXAMPLE
 /* Board-level ADC initialization */
-int ra8e1_adc_driver_initialize(void);
+int ra8p1_adc_driver_initialize(void);
 #endif
 
-#ifdef CONFIG_RA8E1_CODE_FLASH_EXAMPLE
-int ra8e1_code_flash_init(void);
-int ra8e1_code_flash_test(void);
-int ra8e1_code_flash_info(void);
-int ra8e1_code_flash_main(int argc, char *argv[]);
+#ifdef CONFIG_RA8P1_CODE_FLASH_EXAMPLE
+int ra8p1_code_flash_init(void);
+int ra8p1_code_flash_test(void);
+int ra8p1_code_flash_info(void);
+int ra8p1_code_flash_main(int argc, char *argv[]);
 #endif
 
-#ifdef CONFIG_RA8E1_DATA_FLASH_EXAMPLE
-int ra8e1_data_flash_init(void);
-int ra8e1_data_flash_test(void);
-int ra8e1_data_flash_main(int argc, char *argv[]);
+#ifdef CONFIG_RA8P1_DATA_FLASH_EXAMPLE
+int ra8p1_data_flash_init(void);
+int ra8p1_data_flash_test(void);
+int ra8p1_data_flash_main(int argc, char *argv[]);
 #endif
 
-#ifdef CONFIG_RA8E1_GPT_PWM_EXAMPLE
-int ra8e1_gpt_pwm_initialize(void);
-int ra8e1_gpt_pwm_main(int argc, char *argv[]);
+#ifdef CONFIG_RA8P1_GPT_PWM_EXAMPLE
+int ra8p1_gpt_pwm_initialize(void);
+int ra8p1_gpt_pwm_main(int argc, char *argv[]);
 #endif
 
-#ifdef CONFIG_RA8E1_PWM_ESCS_EXAMPLE
-int ra8e1_gpt_escs_init(void);
-int ra8e1_gpt_escs_main(int argc, char *argv[]);
+#ifdef CONFIG_RA8P1_PWM_ESCS_EXAMPLE
+int ra8p1_gpt_escs_init(void);
+int ra8p1_gpt_escs_main(int argc, char *argv[]);
 #endif
 
-#ifdef CONFIG_RA8E1_GPS_EXAMPLE
-int ra8e1_gps_init(void);
-int ra8e1_gps_main(int argc, char *argv[]);
+#ifdef CONFIG_RA8P1_GPS_EXAMPLE
+int ra8p1_gps_init(void);
+int ra8p1_gps_main(int argc, char *argv[]);
 #endif
 
-#ifdef CONFIG_RA8E1_SBUS_EXAMPLE
-int ra8e1_sbus_init(void);
-int ra8e1_sbus_main(int argc, char *argv[]);
+#ifdef CONFIG_RA8P1_SBUS_EXAMPLE
+int ra8p1_sbus_init(void);
+int ra8p1_sbus_main(int argc, char *argv[]);
 #endif
 
-#ifdef CONFIG_RA8E1_I2C_ACC_EXAMPLE
-int ra8e1_i2c_acc_init(void);
-int ra8e1_i2c_acc_main(int argc, char *argv[]);
+#ifdef CONFIG_RA8P1_I2C_ACC_EXAMPLE
+int ra8p1_i2c_acc_init(void);
+int ra8p1_i2c_acc_main(int argc, char *argv[]);
 #endif
 
-#ifdef CONFIG_RA8E1_I2C_GY912_EXAMPLE
-int ra8e1_i2c_gy912_init(void);
-int ra8e1_i2c_gy912_main(int argc, FAR char *argv[]);
+#ifdef CONFIG_RA8P1_I2C_GY912_EXAMPLE
+int ra8p1_i2c_gy912_init(void);
+int ra8p1_i2c_gy912_main(int argc, FAR char *argv[]);
 #endif
 
-#ifdef CONFIG_RA8E1_RUST_EXAMPLE
-int ra8e1_rust_sample_init(void);
+#ifdef CONFIG_RA8P1_RUST_EXAMPLE
+int ra8p1_rust_sample_init(void);
 #endif
 
 /****************************************************************************
@@ -197,7 +197,7 @@ int ra8e1_rust_sample_init(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_RA8E1_SPI_GY912_EXAMPLE
+#ifdef CONFIG_RA8P1_SPI_GY912_EXAMPLE
 struct spi_dev_s;
 int gy912_register_sensors(FAR struct spi_dev_s *spi);
 #endif
