@@ -432,20 +432,22 @@ config RA_MCU_CLOCK_FREQUENCY
 
 config RA_HOCO_FREQUENCY
    int "HOCO Frequency (Hz)"
-   default 20000000
+   default 20000000 if RA8E1_GROUP
+   default 48000000 if RA8P1_GROUP
    range 16000000 64000000
    help
      HOCO (High-Speed On-Chip Oscillator) frequency in Hz.
      Valid frequencies: 16, 18, 20, 24, 32, 48, 64 MHz.
-     Default is 20MHz for RA8E1.
+     Default is 20MHz for RA8E1, 48MHz for RA8P1.
 
 config RA_XTAL_FREQUENCY
    int "External Crystal Frequency (Hz)"
-   default 20000000
+   default 20000000 if RA8E1_GROUP
+   default 24000000 if RA8P1_GROUP
    range 1000000 25000000
    help
      External crystal oscillator frequency in Hz.
-     Typically 20MHz for RA8E1 FPB board.
+     Typically 20MHz for RA8E1 FPB board, 24MHz for RA8P1 EVK board.
 
 if RA_CLOCK_PLL || RA_CLOCK_PLL1P
 
@@ -467,19 +469,23 @@ endchoice
 
 config RA_PLL_DIV
    int "PLL Input Divider"
-   default 1
+   default 1 if RA8E1_GROUP
+   default 2 if RA8P1_GROUP
    range 0 15
    help
      PLL input divider value (0 = /1, 1 = /2, 2 = /3, etc.).
      For RA8E1: HOCO 20MHz / 2 = 10MHz PLL input.
+     For RA8P1: XTAL 24MHz / 3 = 8MHz PLL input.
 
 config RA_PLL_MUL
    int "PLL Multiplier"
-   default 72
-   range 20 150
+   default 72 if RA8E1_GROUP
+   default 250 if RA8P1_GROUP
+   range 20 300
    help
      PLL multiplier value.
      For RA8E1: 10MHz * 72 = 720MHz PLL output.
+     For RA8P1: 8MHz * 250 = 2000MHz PLL output.
 
 config RA_PLL1P_DIV
    int "PLL1P Output Divider"
@@ -488,20 +494,97 @@ config RA_PLL1P_DIV
    help
      PLL1P output divider (0 = /1, 1 = /2, etc.).
      For RA8E1: 720MHz / 2 = 360MHz system clock.
+     For RA8P1: 2000MHz / 2 = 1000MHz system clock.
 
 config RA_PLL1Q_DIV
    int "PLL1Q Output Divider"
-   default 1
+   default 1 if RA8E1_GROUP
+   default 5 if RA8P1_GROUP
    range 0 15
    help
      PLL1Q output divider for peripheral clocks.
+     For RA8E1: 720MHz / 2 = 360MHz.
+     For RA8P1: 2000MHz / 6 = 333MHz.
 
 config RA_PLL1R_DIV
    int "PLL1R Output Divider"
-   default 1
+   default 1 if RA8E1_GROUP
+   default 4 if RA8P1_GROUP
    range 0 15
    help
      PLL1R output divider for peripheral clocks.
+     For RA8E1: 720MHz / 2 = 360MHz.
+     For RA8P1: 2000MHz / 5 = 400MHz.
+
+menu "PLL2 Configuration (RA8P1 only)"
+   depends on RA8P1_GROUP
+
+config RA_PLL2_ENABLE
+   bool "Enable PLL2"
+   default y if RA8P1_GROUP
+   help
+     Enable PLL2 for additional peripheral clock sources.
+     RA8P1 uses PLL2 for high-performance peripheral clocks.
+
+if RA_PLL2_ENABLE
+
+choice
+   prompt "PLL2 Source Clock"
+   default RA_PLL2_SOURCE_MAIN_OSC
+   help
+     Select the PLL2 input source clock.
+
+config RA_PLL2_SOURCE_HOCO
+   bool "HOCO (High-Speed On-Chip Oscillator)"
+
+config RA_PLL2_SOURCE_MAIN_OSC
+   bool "Main Oscillator (External Crystal)"
+
+endchoice
+
+config RA_PLL2_DIV
+   int "PLL2 Input Divider"
+   default 2
+   range 0 15
+   help
+     PLL2 input divider value (0 = /1, 1 = /2, 2 = /3, etc.).
+     For RA8P1: XTAL 24MHz / 3 = 8MHz PLL2 input.
+
+config RA_PLL2_MUL
+   int "PLL2 Multiplier"
+   default 300
+   range 20 300
+   help
+     PLL2 multiplier value.
+     For RA8P1: 8MHz * 300 = 2400MHz PLL2 output.
+
+config RA_PLL2P_DIV
+   int "PLL2P Output Divider"
+   default 3
+   range 0 15
+   help
+     PLL2P output divider for peripheral clocks.
+     For RA8P1: 2400MHz / 4 = 600MHz.
+
+config RA_PLL2Q_DIV
+   int "PLL2Q Output Divider"
+   default 2
+   range 0 15
+   help
+     PLL2Q output divider for peripheral clocks.
+     For RA8P1: 2400MHz / 3 = 800MHz.
+
+config RA_PLL2R_DIV
+   int "PLL2R Output Divider"
+   default 4
+   range 0 15
+   help
+     PLL2R output divider for peripheral clocks.
+     For RA8P1: 2400MHz / 5 = 480MHz.
+
+endif # RA_PLL2_ENABLE
+
+endmenu
 
 endmenu
 
@@ -518,67 +601,83 @@ config RA_CPUCLK_DIV
 
 config RA_ICK_DIV
    int "ICLK Divider"
-   default 8
+   default 8 if RA8E1_GROUP
+   default 2 if RA8P1_GROUP
    range 0 11
    help
      Internal clock (ICLK) divider for system bus.
-     Default: 8 (/3) gives 120MHz from 360MHz system clock.
+     RA8E1: 8 (/3) gives 120MHz from 360MHz system clock.
+     RA8P1: 2 (/4) gives 250MHz from 1000MHz system clock.
 
 config RA_PCKA_DIV
    int "PCLKA Divider"
-   default 8
+   default 8 if RA8E1_GROUP
+   default 3 if RA8P1_GROUP
    range 0 11
    help
      Peripheral Clock A divider.
-     Default: 8 (/3) gives 120MHz.
+     RA8E1: 8 (/3) gives 120MHz.
+     RA8P1: 3 (/8) gives 125MHz.
 
 config RA_PCKB_DIV
    int "PCLKB Divider"
-   default 9
+   default 9 if RA8E1_GROUP
+   default 4 if RA8P1_GROUP
    range 0 11
    help
      Peripheral Clock B divider.
-     Default: 9 (/6) gives 60MHz.
+     RA8E1: 9 (/6) gives 60MHz.
+     RA8P1: 4 (/16) gives 62.5MHz.
 
 config RA_PCKC_DIV
    int "PCLKC Divider"
-   default 9
+   default 9 if RA8E1_GROUP
+   default 3 if RA8P1_GROUP
    range 0 11
    help
      Peripheral Clock C divider.
-     Default: 9 (/6) gives 60MHz.
+     RA8E1: 9 (/6) gives 60MHz.
+     RA8P1: 3 (/8) gives 125MHz.
 
 config RA_PCKD_DIV
    int "PCLKD Divider"
-   default 8
+   default 8 if RA8E1_GROUP
+   default 2 if RA8P1_GROUP
    range 0 11
    help
      Peripheral Clock D divider.
-     Default: 8 (/3) gives 120MHz.
+     RA8E1: 8 (/3) gives 120MHz.
+     RA8P1: 2 (/4) gives 250MHz.
 
 config RA_PCKE_DIV
    int "PCLKE Divider"
-   default 8
+   default 8 if RA8E1_GROUP
+   default 2 if RA8P1_GROUP
    range 0 11
    help
      Peripheral Clock E divider.
-     Default: 8 (/3) gives 120MHz.
+     RA8E1: 8 (/3) gives 120MHz.
+     RA8P1: 2 (/4) gives 250MHz.
 
 config RA_BCLK_DIV
    int "BCLK Divider"
-   default 10
+   default 10 if RA8E1_GROUP
+   default 3 if RA8P1_GROUP
    range 0 11
    help
      Bus Clock divider.
-     Default: 10 (/12) gives 30MHz.
+     RA8E1: 10 (/12) gives 30MHz.
+     RA8P1: 3 (/8) gives 125MHz.
 
 config RA_FCLK_DIV
    int "FCLK Divider"
-   default 9
+   default 9 if RA8E1_GROUP
+   default 3 if RA8P1_GROUP
    range 0 11
    help
      Flash Clock divider.
-     Default: 9 (/6) gives 60MHz.
+     RA8E1: 9 (/6) gives 60MHz.
+     RA8P1: 3 (/8) gives 125MHz.
 
 endmenu
 
