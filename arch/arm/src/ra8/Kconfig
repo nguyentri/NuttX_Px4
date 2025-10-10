@@ -13,25 +13,38 @@ config ARCH_CHIP_R7FA8E1AFDCFB
    bool "R7FA8E1AFDCFB (LQFP144)"
    select RA8_FAMILY
    select RA8E1_GROUP
+   # Serial Communication - 6 SCI UART channels
    select RA_HAVE_SCI0_UART
    select RA_HAVE_SCI1_UART
    select RA_HAVE_SCI2_UART
    select RA_HAVE_SCI3_UART
    select RA_HAVE_SCI4_UART
    select RA_HAVE_SCI9_UART
+   # I2C - 2 channels only (removed incorrect I2C2)
    select RA_HAVE_I2C0
    select RA_HAVE_I2C1
-   select RA_HAVE_I2C2
+   # DMA
    select RA_HAVE_DMAC
+   # SPI - 2 channels only (removed incorrect SPI2)
    select RA_HAVE_SPI0
    select RA_HAVE_SPI1
-   select RA_HAVE_SPI2
+   # CAN - 2 channels
    select RA_HAVE_CAN0
+   select RA_HAVE_CAN1
+   # Ethernet
    select RA_HAVE_ETHERC_MII
    select RA_HAVE_ETHERC_RMII
+   # USB
    select RA_HAVE_USBFS
+   # Storage
    select RA_HAVE_OSPI
+   # Audio - 2 SSIE channels
    select RA_HAVE_SSIE
+   select RA_HAVE_SSIE0
+   select RA_HAVE_SSIE1
+   # Camera/Video
+   select RA_HAVE_CEU
+   # General Purpose Timers - 8 channels
    select RA_HAVE_GPT
    select RA_HAVE_GPT0
    select RA_HAVE_GPT1
@@ -41,69 +54,148 @@ config ARCH_CHIP_R7FA8E1AFDCFB
    select RA_HAVE_GPT5
    select RA_HAVE_GPT6
    select RA_HAVE_GPT7
+   # Low Power Timers
    select RA_HAVE_AGT
+   select RA_HAVE_AGT0
+   select RA_HAVE_AGT1
    select RA_HAVE_ULPT
+   select RA_HAVE_ULPT0
+   select RA_HAVE_ULPT1
+   # RTC
    select RA_HAVE_RTC
+   # Analog
    select RA_HAVE_ADC12
    select RA_HAVE_DAC12
    select RA_HAVE_ACMPHS
+   select RA_HAVE_ACMPHS0
+   select RA_HAVE_ACMPHS1
+   # Security Features
+   select RA_HAVE_CPSCU
+   select RA_HAVE_PSCU
+   select RA_HAVE_ECC
+   # System Utilities
+   select RA_HAVE_CRC
+   select RA_HAVE_CAC
+   select RA_HAVE_DOC
+   select RA_HAVE_ELC
+   select RA_HAVE_POEG
 
 config ARCH_CHIP_R7FA8E1AFDCFP
    bool "R7FA8E1AFDCFP (LQFP100)"
    select RA8_FAMILY
    select RA8E1_GROUP
+   # Serial Communication - 6 SCI UART channels
    select RA_HAVE_SCI0_UART
    select RA_HAVE_SCI1_UART
    select RA_HAVE_SCI2_UART
    select RA_HAVE_SCI3_UART
    select RA_HAVE_SCI4_UART
    select RA_HAVE_SCI9_UART
+   # I2C - 2 channels only
    select RA_HAVE_I2C0
    select RA_HAVE_I2C1
+   # DMA
    select RA_HAVE_DMAC
+   # SPI - 1 channel only (LQFP100 package limitation)
    select RA_HAVE_SPI0
-   # No SPI1, SPI2
-   # No CAN0
-   # No ETHERC_MII
+   # No SPI1, SPI2 (not available in LQFP100)
+   # No CAN (not available in LQFP100)
+   # Ethernet - RMII only (no MII in LQFP100)
    select RA_HAVE_ETHERC_RMII
+   # USB
    select RA_HAVE_USBFS
-   # No OSPI, SSIE
+   # No OSPI, SSIE (not available in LQFP100)
+   # General Purpose Timers - 5 channels (LQFP100 limitation)
    select RA_HAVE_GPT
    select RA_HAVE_GPT0
    select RA_HAVE_GPT1
    select RA_HAVE_GPT2
    select RA_HAVE_GPT3
    select RA_HAVE_GPT4
+   # Low Power Timers
    select RA_HAVE_AGT
+   select RA_HAVE_AGT0
+   select RA_HAVE_AGT1
    select RA_HAVE_ULPT
+   select RA_HAVE_ULPT0
+   select RA_HAVE_ULPT1
+   # RTC
    select RA_HAVE_RTC
+   # Analog
    select RA_HAVE_ADC12
    select RA_HAVE_DAC12
    select RA_HAVE_ACMPHS
+   select RA_HAVE_ACMPHS0
+   select RA_HAVE_ACMPHS1
+   # Security Features
+   select RA_HAVE_CPSCU
+   select RA_HAVE_PSCU
+   select RA_HAVE_ECC
+   # System Utilities
+   select RA_HAVE_CRC
+   select RA_HAVE_CAC
+   select RA_HAVE_DOC
+   select RA_HAVE_ELC
+   select RA_HAVE_POEG
 
 config ARCH_CHIP_R7KA8P1KFLCAC
    bool "R7KA8P1KFLCAC (PLBG0289JA)"
    select RA8_FAMILY
    select RA8P1_GROUP
+   # Serial Communication - 10 SCI UART channels
    select RA_HAVE_SCI0_UART
    select RA_HAVE_SCI1_UART
    select RA_HAVE_SCI2_UART
    select RA_HAVE_SCI3_UART
    select RA_HAVE_SCI4_UART
+   select RA_HAVE_SCI5_UART
+   select RA_HAVE_SCI6_UART
+   select RA_HAVE_SCI7_UART
+   select RA_HAVE_SCI8_UART
    select RA_HAVE_SCI9_UART
+   # I2C and I3C interfaces
    select RA_HAVE_I2C0
    select RA_HAVE_I2C1
    select RA_HAVE_I2C2
+   select RA_HAVE_I3C
+   # DMA
    select RA_HAVE_DMAC
+   # SPI
    select RA_HAVE_SPI0
    select RA_HAVE_SPI1
    select RA_HAVE_SPI2
+   # CAN - 2 channels
    select RA_HAVE_CAN0
+   select RA_HAVE_CAN1
+   # Ethernet
    select RA_HAVE_ETHERC_MII
    select RA_HAVE_ETHERC_RMII
+   select RA_HAVE_ETHERCAT
+   select RA_HAVE_ETHSW
+   select RA_HAVE_GPTP
+   # USB - Full Speed and High Speed
    select RA_HAVE_USBFS
+   select RA_HAVE_USBHS
+   # Storage - Octal SPI (2 channels) and SD Host (2 channels)
    select RA_HAVE_OSPI
+   select RA_HAVE_OSPI0
+   select RA_HAVE_OSPI1
+   select RA_HAVE_SDHI
+   select RA_HAVE_SDHI0
+   select RA_HAVE_SDHI1
+   # Audio - Serial Sound Interface (2 channels) and PDM
    select RA_HAVE_SSIE
+   select RA_HAVE_SSIE0
+   select RA_HAVE_SSIE1
+   select RA_HAVE_PDMIF
+   # Graphics and Display
+   select RA_HAVE_GLCDC
+   select RA_HAVE_DRW
+   select RA_HAVE_MIPI_DSI
+   select RA_HAVE_MIPI_CSI
+   select RA_HAVE_CEU
+   select RA_HAVE_VIN
+   # General Purpose Timers - 14 channels (GPT0-GPT13)
    select RA_HAVE_GPT
    select RA_HAVE_GPT0
    select RA_HAVE_GPT1
@@ -113,12 +205,43 @@ config ARCH_CHIP_R7KA8P1KFLCAC
    select RA_HAVE_GPT5
    select RA_HAVE_GPT6
    select RA_HAVE_GPT7
+   select RA_HAVE_GPT8
+   select RA_HAVE_GPT9
+   select RA_HAVE_GPT10
+   select RA_HAVE_GPT11
+   select RA_HAVE_GPT12
+   select RA_HAVE_GPT13
+   # Low Power Timers
    select RA_HAVE_AGT
+   select RA_HAVE_AGT0
+   select RA_HAVE_AGT1
    select RA_HAVE_ULPT
+   select RA_HAVE_ULPT0
+   select RA_HAVE_ULPT1
+   # RTC
    select RA_HAVE_RTC
+   # Analog - ADC, DAC, and 4 High-Speed Comparators
    select RA_HAVE_ADC12
    select RA_HAVE_DAC12
    select RA_HAVE_ACMPHS
+   select RA_HAVE_ACMPHS0
+   select RA_HAVE_ACMPHS1
+   select RA_HAVE_ACMPHS2
+   select RA_HAVE_ACMPHS3
+   # Security Features
+   select RA_HAVE_DOTF
+   select RA_HAVE_CPSCU
+   select RA_HAVE_PSCU
+   select RA_HAVE_ECC
+   # System Utilities
+   select RA_HAVE_CRC
+   select RA_HAVE_CAC
+   select RA_HAVE_DOC
+   select RA_HAVE_ELC
+   select RA_HAVE_PDG
+   select RA_HAVE_POEG
+   # Inter-Processor Communication
+   select RA_HAVE_IPC
 
 endchoice
 
@@ -1048,6 +1171,22 @@ config RA_HAVE_SCI4_UART
    bool
    default n
 
+config RA_HAVE_SCI5_UART
+   bool
+   default n
+
+config RA_HAVE_SCI6_UART
+   bool
+   default n
+
+config RA_HAVE_SCI7_UART
+   bool
+   default n
+
+config RA_HAVE_SCI8_UART
+   bool
+   default n
+
 config RA_HAVE_SCI9_UART
    bool
    default n
@@ -1208,6 +1347,10 @@ config RA_HAVE_I2C1
    default n
 
 config RA_HAVE_I2C2
+   bool
+   default n
+
+config RA_HAVE_I3C
    bool
    default n
 
@@ -1382,6 +1525,30 @@ config RA_HAVE_GPT7
    bool
    default n
 
+config RA_HAVE_GPT8
+   bool
+   default n
+
+config RA_HAVE_GPT9
+   bool
+   default n
+
+config RA_HAVE_GPT10
+   bool
+   default n
+
+config RA_HAVE_GPT11
+   bool
+   default n
+
+config RA_HAVE_GPT12
+   bool
+   default n
+
+config RA_HAVE_GPT13
+   bool
+   default n
+
 config RA_GPT
    bool "GPT (General Purpose Timer) support"
    default n
@@ -1435,6 +1602,42 @@ config RA_GPT7
    bool "GPT7 PWM support"
    default n
    depends on RA_HAVE_GPT7
+   select RA_GPT
+
+config RA_GPT8
+   bool "GPT8 PWM support"
+   default n
+   depends on RA_HAVE_GPT8
+   select RA_GPT
+
+config RA_GPT9
+   bool "GPT9 PWM support"
+   default n
+   depends on RA_HAVE_GPT9
+   select RA_GPT
+
+config RA_GPT10
+   bool "GPT10 PWM support"
+   default n
+   depends on RA_HAVE_GPT10
+   select RA_GPT
+
+config RA_GPT11
+   bool "GPT11 PWM support"
+   default n
+   depends on RA_HAVE_GPT11
+   select RA_GPT
+
+config RA_GPT12
+   bool "GPT12 PWM support"
+   default n
+   depends on RA_HAVE_GPT12
+   select RA_GPT
+
+config RA_GPT13
+   bool "GPT13 PWM support"
+   default n
+   depends on RA_HAVE_GPT13
    select RA_GPT
 
 endmenu
@@ -1516,6 +1719,10 @@ config RA_HAVE_CAN0
    bool
    default n
 
+config RA_HAVE_CAN1
+   bool
+   default n
+
 config RA_CAN
    bool
    default n
@@ -1525,6 +1732,12 @@ config RA_CAN0
    bool "CAN0"
    default n
    depends on RA_HAVE_CAN0
+   select RA_CAN
+
+config RA_CAN1
+   bool "CAN1"
+   default n
+   depends on RA_HAVE_CAN1
    select RA_CAN
 endmenu
 
@@ -1537,6 +1750,18 @@ config RA_HAVE_ETHERC_RMII
    bool
    default n
 
+config RA_HAVE_ETHERCAT
+   bool
+   default n
+
+config RA_HAVE_ETHSW
+   bool
+   default n
+
+config RA_HAVE_GPTP
+   bool
+   default n
+
 config RA_ETHERC_MII
    bool "Ethernet MII"
    default n
@@ -1546,10 +1771,39 @@ config RA_ETHERC_RMII
    bool "Ethernet RMII"
    default n
    depends on RA_HAVE_ETHERC_RMII
+
+config RA_ETHERCAT
+   bool "EtherCAT Slave Controller"
+   default n
+   depends on RA_HAVE_ETHERCAT
+   help
+     Enable EtherCAT industrial Ethernet slave controller support.
+
+config RA_ETHSW
+   bool "Layer 3 Ethernet Switch"
+   default n
+   depends on RA_HAVE_ETHSW
+   help
+     Enable built-in Layer 3 Ethernet switch support.
+
+config RA_GPTP
+   bool "IEEE 1588 Precision Time Protocol"
+   default n
+   depends on RA_HAVE_GPTP
+   help
+     Enable IEEE 1588 Precision Time Protocol (PTP) support.
 endmenu
 
 menu "USB"
 config RA_HAVE_USBFS
+   bool
+   default n
+
+config RA_HAVE_USBHS
+   bool
+   default n
+
+config RA_USB
    bool
    default n
 
@@ -1558,10 +1812,29 @@ config RA_USBFS
    default n
    depends on RA_HAVE_USBFS
    select RA_USB
+
+config RA_USBHS
+   bool "USB High Speed"
+   default n
+   depends on RA_HAVE_USBHS
+   select RA_USB
+   help
+     Enable USB 2.0 High-Speed support.
 endmenu
 
-menu "Octal SPI"
+menu "Storage Interfaces"
+
+comment "Octal SPI"
+
 config RA_HAVE_OSPI
+   bool
+   default n
+
+config RA_HAVE_OSPI0
+   bool
+   default n
+
+config RA_HAVE_OSPI1
    bool
    default n
 
@@ -1569,10 +1842,57 @@ config RA_OSPI
    bool "Octal SPI"
    default n
    depends on RA_HAVE_OSPI
+
+comment "SD Host Interface"
+
+config RA_HAVE_SDHI
+   bool
+   default n
+
+config RA_HAVE_SDHI0
+   bool
+   default n
+
+config RA_HAVE_SDHI1
+   bool
+   default n
+
+config RA_SDHI
+   bool
+   default n
+   select SDIO
+
+config RA_SDHI0
+   bool "SDHI0 - SD/MMC Host Controller 0"
+   default n
+   depends on RA_HAVE_SDHI0
+   select RA_SDHI
+   help
+     Enable SD Host Interface 0 for SD/SDIO/MMC card support.
+
+config RA_SDHI1
+   bool "SDHI1 - SD/MMC Host Controller 1"
+   default n
+   depends on RA_HAVE_SDHI1
+   select RA_SDHI
+   help
+     Enable SD Host Interface 1 for SD/SDIO/MMC card support.
+
 endmenu
 
-menu "Serial Sound Interface"
+menu "Audio Interfaces"
+
+comment "Serial Sound Interface (I2S/PCM)"
+
 config RA_HAVE_SSIE
+   bool
+   default n
+
+config RA_HAVE_SSIE0
+   bool
+   default n
+
+config RA_HAVE_SSIE1
    bool
    default n
 
@@ -1580,6 +1900,36 @@ config RA_SSIE
    bool "Serial Sound Interface"
    default n
    depends on RA_HAVE_SSIE
+
+config RA_SSIE0
+   bool "SSIE0 - I2S/PCM Audio Interface 0"
+   default n
+   depends on RA_HAVE_SSIE0
+   select RA_SSIE
+   help
+     Enable Serial Sound Interface 0 for I2S/PCM audio.
+
+config RA_SSIE1
+   bool "SSIE1 - I2S/PCM Audio Interface 1"
+   default n
+   depends on RA_HAVE_SSIE1
+   select RA_SSIE
+   help
+     Enable Serial Sound Interface 1 for I2S/PCM audio.
+
+comment "PDM Digital Microphone Interface"
+
+config RA_HAVE_PDMIF
+   bool
+   default n
+
+config RA_PDMIF
+   bool "PDM Microphone Interface"
+   default n
+   depends on RA_HAVE_PDMIF
+   help
+     Enable PDM (Pulse Density Modulation) interface for digital microphones.
+
 endmenu
 
 menu "Timers"
@@ -1591,7 +1941,23 @@ config RA_HAVE_AGT
    bool
    default n
 
+config RA_HAVE_AGT0
+   bool
+   default n
+
+config RA_HAVE_AGT1
+   bool
+   default n
+
 config RA_HAVE_ULPT
+   bool
+   default n
+
+config RA_HAVE_ULPT0
+   bool
+   default n
+
+config RA_HAVE_ULPT1
    bool
    default n
 
@@ -1600,10 +1966,34 @@ config RA_AGT
    default n
    depends on RA_HAVE_AGT
 
+config RA_AGT0
+   bool "AGT0 - Asynchronous Timer 0"
+   default n
+   depends on RA_HAVE_AGT0
+   select RA_AGT
+
+config RA_AGT1
+   bool "AGT1 - Asynchronous Timer 1"
+   default n
+   depends on RA_HAVE_AGT1
+   select RA_AGT
+
 config RA_ULPT
    bool "Ultra Low Power Timer"
    default n
    depends on RA_HAVE_ULPT
+
+config RA_ULPT0
+   bool "ULPT0 - Ultra Low Power Timer 0"
+   default n
+   depends on RA_HAVE_ULPT0
+   select RA_ULPT
+
+config RA_ULPT1
+   bool "ULPT1 - Ultra Low Power Timer 1"
+   default n
+   depends on RA_HAVE_ULPT1
+   select RA_ULPT
 
 config RA_PWM
    bool "RA8 PWM Driver"
@@ -1682,12 +2072,53 @@ config RA_HAVE_ACMPHS
    bool
    default n
 
+config RA_HAVE_ACMPHS0
+   bool
+   default n
+
+config RA_HAVE_ACMPHS1
+   bool
+   default n
+
+config RA_HAVE_ACMPHS2
+   bool
+   default n
+
+config RA_HAVE_ACMPHS3
+   bool
+   default n
+
 config RA_ACMPHS
    bool "High-Speed Analog Comparator"
    default n
    depends on RA_HAVE_ACMPHS
    help
      Enable High-Speed Analog Comparator.
+
+config RA_ACMPHS0
+   bool "ACMPHS0 - High-Speed Comparator 0"
+   default n
+   depends on RA_HAVE_ACMPHS0
+   select RA_ACMPHS
+
+config RA_ACMPHS1
+   bool "ACMPHS1 - High-Speed Comparator 1"
+   default n
+   depends on RA_HAVE_ACMPHS1
+   select RA_ACMPHS
+
+config RA_ACMPHS2
+   bool "ACMPHS2 - High-Speed Comparator 2"
+   default n
+   depends on RA_HAVE_ACMPHS2
+   select RA_ACMPHS
+
+config RA_ACMPHS3
+   bool "ACMPHS3 - High-Speed Comparator 3"
+   default n
+   depends on RA_HAVE_ACMPHS3
+   select RA_ACMPHS
+
 endmenu
 
 menu "DMA"
@@ -1742,6 +2173,207 @@ config RA_DMA_TRANSFER_MODES
      Based on DMAC implementation.
 
 endif # RA_DMA
+endmenu
+
+menu "Graphics and Display"
+
+config RA_HAVE_GLCDC
+   bool
+   default n
+
+config RA_HAVE_DRW
+   bool
+   default n
+
+config RA_HAVE_MIPI_DSI
+   bool
+   default n
+
+config RA_HAVE_MIPI_CSI
+   bool
+   default n
+
+config RA_HAVE_CEU
+   bool
+   default n
+
+config RA_HAVE_VIN
+   bool
+   default n
+
+config RA_GLCDC
+   bool "Graphics LCD Controller"
+   default n
+   depends on RA_HAVE_GLCDC
+   help
+     Enable Graphics LCD Controller for display interfaces.
+     Supports multiple layers and various pixel formats.
+
+config RA_DRW
+   bool "2D Drawing Engine"
+   default n
+   depends on RA_HAVE_DRW
+   help
+     Enable 2D hardware graphics acceleration engine.
+
+config RA_MIPI_DSI
+   bool "MIPI Display Serial Interface"
+   default n
+   depends on RA_HAVE_MIPI_DSI
+   help
+     Enable MIPI DSI for display output.
+
+config RA_MIPI_CSI
+   bool "MIPI Camera Serial Interface"
+   default n
+   depends on RA_HAVE_MIPI_CSI
+   help
+     Enable MIPI CSI for camera input.
+
+config RA_CEU
+   bool "Capture Engine Unit"
+   default n
+   depends on RA_HAVE_CEU
+   help
+     Enable image/video capture engine.
+
+config RA_VIN
+   bool "Video Input"
+   default n
+   depends on RA_HAVE_VIN
+   help
+     Enable video input processing.
+
+endmenu
+
+menu "Security Features"
+
+config RA_HAVE_DOTF
+   bool
+   default n
+
+config RA_HAVE_CPSCU
+   bool
+   default n
+
+config RA_HAVE_PSCU
+   bool
+   default n
+
+config RA_HAVE_ECC
+   bool
+   default n
+
+config RA_DOTF
+   bool "Data On-The-Fly Encryption"
+   default n
+   depends on RA_HAVE_DOTF
+   help
+     Enable real-time data encryption/decryption for external memory.
+     Provides transparent encryption for secure data storage.
+
+config RA_CPSCU
+   bool "CPU Security Control Unit"
+   default n
+   depends on RA_HAVE_CPSCU
+   help
+     Enable CPU-level security controls and TrustZone support.
+
+config RA_PSCU
+   bool "Peripheral Security Control Unit"
+   default n
+   depends on RA_HAVE_PSCU
+   help
+     Enable peripheral access security management.
+
+config RA_ECC
+   bool "ECC Memory Protection"
+   default n
+   depends on RA_HAVE_ECC
+   help
+     Enable Error Correction Code for memory protection.
+
+endmenu
+
+menu "System Utilities"
+
+config RA_HAVE_CRC
+   bool
+   default n
+
+config RA_HAVE_CAC
+   bool
+   default n
+
+config RA_HAVE_DOC
+   bool
+   default n
+
+config RA_HAVE_ELC
+   bool
+   default n
+
+config RA_HAVE_PDG
+   bool
+   default n
+
+config RA_HAVE_POEG
+   bool
+   default n
+
+config RA_HAVE_IPC
+   bool
+   default n
+
+config RA_CRC
+   bool "Hardware CRC Calculator"
+   default n
+   depends on RA_HAVE_CRC
+   help
+     Enable hardware CRC calculation engine.
+
+config RA_CAC
+   bool "Clock Accuracy Measurement"
+   default n
+   depends on RA_HAVE_CAC
+   help
+     Enable clock frequency accuracy measurement circuit.
+
+config RA_DOC
+   bool "Data Operation Circuit"
+   default n
+   depends on RA_HAVE_DOC
+   help
+     Enable hardware data comparison and operations.
+
+config RA_ELC
+   bool "Event Link Controller"
+   default n
+   depends on RA_HAVE_ELC
+   help
+     Enable hardware event routing without CPU intervention.
+
+config RA_PDG
+   bool "PWM Delay Generation"
+   default n
+   depends on RA_HAVE_PDG
+   help
+     Enable PWM delay generation for motor control applications.
+
+config RA_POEG
+   bool "Port Output Enable for GPT"
+   default n
+   depends on RA_HAVE_POEG
+   help
+     Enable emergency shutdown control for PWM outputs.
+
+config RA_IPC
+   bool "Inter-Processor Communication"
+   default n
+   depends on RA_HAVE_IPC
+   help
+     Enable hardware support for multi-core communication.
+
 endmenu
 
 menu "RA8 Nuttx Drivers"
