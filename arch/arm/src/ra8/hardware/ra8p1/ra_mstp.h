@@ -40,19 +40,19 @@
 
 /* MSTP Register Offsets */
 
-#define R_MSTP_MSTPCRA_OFFSET     0x00000000  /* Module Stop Control Register A */
-#define R_MSTP_MSTPCRB_OFFSET     0x00000004  /* Module Stop Control Register B */
-#define R_MSTP_MSTPCRC_OFFSET     0x00000008  /* Module Stop Control Register C */
-#define R_MSTP_MSTPCRD_OFFSET     0x0000000c  /* Module Stop Control Register D */
-#define R_MSTP_MSTPCRE_OFFSET     0x00000010  /* Module Stop Control Register E */
+#define R_MSTP_MSTPCRA_OFFSET                     0x00000000  /* Module Stop Control Register A */
+#define R_MSTP_MSTPCRB_OFFSET                     0x00000004  /* Module Stop Control Register B */
+#define R_MSTP_MSTPCRC_OFFSET                     0x00000008  /* Module Stop Control Register C */
+#define R_MSTP_MSTPCRD_OFFSET                     0x0000000c  /* Module Stop Control Register D */
+#define R_MSTP_MSTPCRE_OFFSET                     0x00000010  /* Module Stop Control Register E */
 
 /* MSTP Register Addresses */
 
-#define R_MSTP_MSTPCRA                 (R_MSTP_BASE + R_MSTP_MSTPCRA_OFFSET)
-#define R_MSTP_MSTPCRB                 (R_MSTP_BASE + R_MSTP_MSTPCRB_OFFSET)
-#define R_MSTP_MSTPCRC                 (R_MSTP_BASE + R_MSTP_MSTPCRC_OFFSET)
-#define R_MSTP_MSTPCRD                 (R_MSTP_BASE + R_MSTP_MSTPCRD_OFFSET)
-#define R_MSTP_MSTPCRE                 (R_MSTP_BASE + R_MSTP_MSTPCRE_OFFSET)
+#define R_MSTP_MSTPCRA                            (R_MSTP_BASE + R_MSTP_MSTPCRA_OFFSET)
+#define R_MSTP_MSTPCRB                            (R_MSTP_BASE + R_MSTP_MSTPCRB_OFFSET)
+#define R_MSTP_MSTPCRC                            (R_MSTP_BASE + R_MSTP_MSTPCRC_OFFSET)
+#define R_MSTP_MSTPCRD                            (R_MSTP_BASE + R_MSTP_MSTPCRD_OFFSET)
+#define R_MSTP_MSTPCRE                            (R_MSTP_BASE + R_MSTP_MSTPCRE_OFFSET)
 
 /* Register bit definitions */
 /* MSTPCRA Register bit definitions */
@@ -81,6 +81,44 @@
 #define R_MSTP_MSTPCRA_MSTPA8                     (1 << 8)  /* Module stop bit 8. See device hardware manual for usage. */
 
 #define R_MSTP_MSTPCRA_MSTPA9                     (1 << 9)  /* Module stop bit 9. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRA_MSTPA10                    (1 << 10)  /* Module stop bit 10. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRA_MSTPA11                    (1 << 11)  /* Module stop bit 11. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRA_MSTPA12                    (1 << 12)  /* Module stop bit 12. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRA_MSTPA13                    (1 << 13)  /* Module stop bit 13. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRA_MSTPA14                    (1 << 14)  /* Module stop bit 14. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRA_MSTPA15                    (1 << 15)  /* Module stop bit 15. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRA_MSTPA17                    (1 << 17)  /* Module stop bit 17. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRA_MSTPA18                    (1 << 18)  /* Module stop bit 18. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRA_MSTPA19                    (1 << 19)  /* Module stop bit 19. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRA_MSTPA20                    (1 << 20)  /* Module stop bit 20. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRA_MSTPA21                    (1 << 21)  /* Module stop bit 21. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRA_MSTPA24                    (1 << 24)  /* Module stop bit 24. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRA_MSTPA25                    (1 << 25)  /* Module stop bit 25. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRA_MSTPA26                    (1 << 26)  /* Module stop bit 26. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRA_MSTPA27                    (1 << 27)  /* Module stop bit 27. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRA_MSTPA28                    (1 << 28)  /* Module stop bit 28. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRA_MSTPA29                    (1 << 29)  /* Module stop bit 29. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRA_MSTPA30                    (1 << 30)  /* Module stop bit 30. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRA_MSTPA31                    (1 << 31)  /* Module stop bit 31. See device hardware manual for usage. */
 
 /* MSTPCRB Register bit definitions */
 #define R_MSTP_MSTPCRB_MSTPB4                     (1 << 4)  /* I3C Bus Interface Module Stop */
@@ -135,6 +173,18 @@
 
 #define R_MSTP_MSTPCRB_MSTPB6                     (1 << 6)  /* Module stop bit 6. See device hardware manual for usage. */
 
+#define R_MSTP_MSTPCRB_MSTPB10                    (1 << 10)  /* Module stop bit 10. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRB_MSTPB13                    (1 << 13)  /* Module stop bit 13. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRB_MSTPB14                    (1 << 14)  /* Module stop bit 14. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRB_MSTPB15                    (1 << 15)  /* Module stop bit 15. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRB_MSTPB20                    (1 << 20)  /* Module stop bit 20. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRB_MSTPB21                    (1 << 21)  /* Module stop bit 21. See device hardware manual for usage. */
+
 /* MSTPCRC Register bit definitions */
 #define R_MSTP_MSTPCRC_MSTPC0                     (1 << 0)  /* Clock Frequency Accuracy Measurement Circuit Module Stop */
 
@@ -182,6 +232,24 @@
 
 #define R_MSTP_MSTPCRC_MSTPC9                     (1 << 9)  /* Module stop bit 9. See device hardware manual for usage. */
 
+#define R_MSTP_MSTPCRC_MSTPC15                    (1 << 15)  /* Module stop bit 15. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRC_MSTPC18                    (1 << 18)  /* Module stop bit 18. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRC_MSTPC19                    (1 << 19)  /* Module stop bit 19. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRC_MSTPC20                    (1 << 20)  /* Module stop bit 20. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRC_MSTPC21                    (1 << 21)  /* Module stop bit 21. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRC_MSTPC22                    (1 << 22)  /* Module stop bit 22. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRC_MSTPC23                    (1 << 23)  /* Module stop bit 23. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRC_MSTPC25                    (1 << 25)  /* Module stop bit 25. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRC_MSTPC29                    (1 << 29)  /* Module stop bit 29. See device hardware manual for usage. */
+
 /* MSTPCRD Register bit definitions */
 #define R_MSTP_MSTPCRD_MSTPD4                     (1 << 4)  /* Low power Asynchronous General Purpose Timer 1 Module Stop */
 
@@ -227,6 +295,26 @@
 
 #define R_MSTP_MSTPCRD_MSTPD9                     (1 << 9)  /* Module stop bit 9. See device hardware manual for usage. */
 
+#define R_MSTP_MSTPCRD_MSTPD10                    (1 << 10)  /* Module stop bit 10. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRD_MSTPD15                    (1 << 15)  /* Module stop bit 15. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRD_MSTPD16                    (1 << 16)  /* Module stop bit 16. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRD_MSTPD17                    (1 << 17)  /* Module stop bit 17. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRD_MSTPD18                    (1 << 18)  /* Module stop bit 18. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRD_MSTPD23                    (1 << 23)  /* Module stop bit 23. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRD_MSTPD24                    (1 << 24)  /* Module stop bit 24. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRD_MSTPD29                    (1 << 29)  /* Module stop bit 29. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRD_MSTPD30                    (1 << 30)  /* Module stop bit 30. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRD_MSTPD31                    (1 << 31)  /* Module stop bit 31. See device hardware manual for usage. */
+
 /* MSTPCRE Register bit definitions */
 #define R_MSTP_MSTPCRE_MSTPE8                     (1 << 8)  /* Ultra-Low Power Timer 1 Module Stop */
 
@@ -265,6 +353,32 @@
 #define R_MSTP_MSTPCRE_MSTPE6                     (1 << 6)  /* Module stop bit 6. See device hardware manual for usage. */
 
 #define R_MSTP_MSTPCRE_MSTPE7                     (1 << 7)  /* Module stop bit 7. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRE_MSTPE10                    (1 << 10)  /* Module stop bit 10. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRE_MSTPE11                    (1 << 11)  /* Module stop bit 11. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRE_MSTPE12                    (1 << 12)  /* Module stop bit 12. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRE_MSTPE13                    (1 << 13)  /* Module stop bit 13. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRE_MSTPE14                    (1 << 14)  /* Module stop bit 14. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRE_MSTPE15                    (1 << 15)  /* Module stop bit 15. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRE_MSTPE16                    (1 << 16)  /* Module stop bit 16. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRE_MSTPE17                    (1 << 17)  /* Module stop bit 17. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRE_MSTPE22                    (1 << 22)  /* Module stop bit 22. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRE_MSTPE23                    (1 << 23)  /* Module stop bit 23. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRE_MSTPE24                    (1 << 24)  /* Module stop bit 24. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRE_MSTPE25                    (1 << 25)  /* Module stop bit 25. See device hardware manual for usage. */
+
+#define R_MSTP_MSTPCRE_MSTPE26                    (1 << 26)  /* Module stop bit 26. See device hardware manual for usage. */
 
 
 /* Maximum number of channels */

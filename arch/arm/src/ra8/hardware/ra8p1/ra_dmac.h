@@ -44,41 +44,41 @@
 
 /* DMAC Register Offsets */
 
-#define R_DMAC_DMSAR_OFFSET     0x00000000  /* DMA Source Address Register */
-#define R_DMAC_DMDAR_OFFSET     0x00000004  /* DMA Destination Address Register */
-#define R_DMAC_DMCRA_OFFSET     0x00000008  /* DMA Transfer Count Register */
-#define R_DMAC_DMCRB_OFFSET     0x0000000c  /* DMA Block Transfer Count Register */
-#define R_DMAC_DMTMD_OFFSET     0x00000010  /* DMA Transfer Mode Register */
-#define R_DMAC_DMINT_OFFSET     0x00000013  /* DMA Interrupt Setting Register */
-#define R_DMAC_DMAMD_OFFSET     0x00000014  /* DMA Address Mode Register */
-#define R_DMAC_DMOFR_OFFSET     0x00000018  /* DMA Offset Register */
-#define R_DMAC_DMCNT_OFFSET     0x0000001c  /* DMA Transfer Enable Register */
-#define R_DMAC_DMREQ_OFFSET     0x0000001d  /* DMA Software Start Register */
-#define R_DMAC_DMSTS_OFFSET     0x0000001e  /* DMA Status Register */
-#define R_DMAC_DMSRR_OFFSET     0x00000020  /* DMA Source Reload Address Register */
-#define R_DMAC_DMDRR_OFFSET     0x00000024  /* DMA Destination Reload Address Register */
-#define R_DMAC_DMSBS_OFFSET     0x00000028  /* DMA Source Buffer Size Register */
-#define R_DMAC_DMDBS_OFFSET     0x0000002c  /* DMA Destination Buffer Size Register */
-#define R_DMAC_DMBWR_OFFSET     0x00000030  /* DMA Bufferable Write Enable Register */
+#define R_DMAC_DMSAR_OFFSET                       0x00000000  /* DMA Source Address Register */
+#define R_DMAC_DMDAR_OFFSET                       0x00000004  /* DMA Destination Address Register */
+#define R_DMAC_DMCRA_OFFSET                       0x00000008  /* DMA Transfer Count Register */
+#define R_DMAC_DMCRB_OFFSET                       0x0000000c  /* DMA Block Transfer Count Register */
+#define R_DMAC_DMTMD_OFFSET                       0x00000010  /* DMA Transfer Mode Register */
+#define R_DMAC_DMINT_OFFSET                       0x00000013  /* DMA Interrupt Setting Register */
+#define R_DMAC_DMAMD_OFFSET                       0x00000014  /* DMA Address Mode Register */
+#define R_DMAC_DMOFR_OFFSET                       0x00000018  /* DMA Offset Register */
+#define R_DMAC_DMCNT_OFFSET                       0x0000001c  /* DMA Transfer Enable Register */
+#define R_DMAC_DMREQ_OFFSET                       0x0000001d  /* DMA Software Start Register */
+#define R_DMAC_DMSTS_OFFSET                       0x0000001e  /* DMA Status Register */
+#define R_DMAC_DMSRR_OFFSET                       0x00000020  /* DMA Source Reload Address Register */
+#define R_DMAC_DMDRR_OFFSET                       0x00000024  /* DMA Destination Reload Address Register */
+#define R_DMAC_DMSBS_OFFSET                       0x00000028  /* DMA Source Buffer Size Register */
+#define R_DMAC_DMDBS_OFFSET                       0x0000002c  /* DMA Destination Buffer Size Register */
+#define R_DMAC_DMBWR_OFFSET                       0x00000030  /* DMA Bufferable Write Enable Register */
 
 /* DMAC Register Addresses */
 
-#define R_DMAC_DMSAR                 (R_DMAC_BASE + R_DMAC_DMSAR_OFFSET)
-#define R_DMAC_DMDAR                 (R_DMAC_BASE + R_DMAC_DMDAR_OFFSET)
-#define R_DMAC_DMCRA                 (R_DMAC_BASE + R_DMAC_DMCRA_OFFSET)
-#define R_DMAC_DMCRB                 (R_DMAC_BASE + R_DMAC_DMCRB_OFFSET)
-#define R_DMAC_DMTMD                 (R_DMAC_BASE + R_DMAC_DMTMD_OFFSET)
-#define R_DMAC_DMINT                 (R_DMAC_BASE + R_DMAC_DMINT_OFFSET)
-#define R_DMAC_DMAMD                 (R_DMAC_BASE + R_DMAC_DMAMD_OFFSET)
-#define R_DMAC_DMOFR                 (R_DMAC_BASE + R_DMAC_DMOFR_OFFSET)
-#define R_DMAC_DMCNT                 (R_DMAC_BASE + R_DMAC_DMCNT_OFFSET)
-#define R_DMAC_DMREQ                 (R_DMAC_BASE + R_DMAC_DMREQ_OFFSET)
-#define R_DMAC_DMSTS                 (R_DMAC_BASE + R_DMAC_DMSTS_OFFSET)
-#define R_DMAC_DMSRR                 (R_DMAC_BASE + R_DMAC_DMSRR_OFFSET)
-#define R_DMAC_DMDRR                 (R_DMAC_BASE + R_DMAC_DMDRR_OFFSET)
-#define R_DMAC_DMSBS                 (R_DMAC_BASE + R_DMAC_DMSBS_OFFSET)
-#define R_DMAC_DMDBS                 (R_DMAC_BASE + R_DMAC_DMDBS_OFFSET)
-#define R_DMAC_DMBWR                 (R_DMAC_BASE + R_DMAC_DMBWR_OFFSET)
+#define R_DMAC_DMSAR(n)                           (R_DMAC_CH_BASE(n) + R_DMAC_DMSAR_OFFSET)
+#define R_DMAC_DMDAR(n)                           (R_DMAC_CH_BASE(n) + R_DMAC_DMDAR_OFFSET)
+#define R_DMAC_DMCRA(n)                           (R_DMAC_CH_BASE(n) + R_DMAC_DMCRA_OFFSET)
+#define R_DMAC_DMCRB(n)                           (R_DMAC_CH_BASE(n) + R_DMAC_DMCRB_OFFSET)
+#define R_DMAC_DMTMD(n)                           (R_DMAC_CH_BASE(n) + R_DMAC_DMTMD_OFFSET)
+#define R_DMAC_DMINT(n)                           (R_DMAC_CH_BASE(n) + R_DMAC_DMINT_OFFSET)
+#define R_DMAC_DMAMD(n)                           (R_DMAC_CH_BASE(n) + R_DMAC_DMAMD_OFFSET)
+#define R_DMAC_DMOFR(n)                           (R_DMAC_CH_BASE(n) + R_DMAC_DMOFR_OFFSET)
+#define R_DMAC_DMCNT(n)                           (R_DMAC_CH_BASE(n) + R_DMAC_DMCNT_OFFSET)
+#define R_DMAC_DMREQ(n)                           (R_DMAC_CH_BASE(n) + R_DMAC_DMREQ_OFFSET)
+#define R_DMAC_DMSTS(n)                           (R_DMAC_CH_BASE(n) + R_DMAC_DMSTS_OFFSET)
+#define R_DMAC_DMSRR(n)                           (R_DMAC_CH_BASE(n) + R_DMAC_DMSRR_OFFSET)
+#define R_DMAC_DMDRR(n)                           (R_DMAC_CH_BASE(n) + R_DMAC_DMDRR_OFFSET)
+#define R_DMAC_DMSBS(n)                           (R_DMAC_CH_BASE(n) + R_DMAC_DMSBS_OFFSET)
+#define R_DMAC_DMDBS(n)                           (R_DMAC_CH_BASE(n) + R_DMAC_DMDBS_OFFSET)
+#define R_DMAC_DMBWR(n)                           (R_DMAC_CH_BASE(n) + R_DMAC_DMBWR_OFFSET)
 
 /* Register bit definitions */
 /* DMSAR Register bit definitions */
@@ -169,6 +169,10 @@
 #  define R_DMAC_DMAMD_SM_01                              (1 << R_DMAC_DMAMD_SM_SHIFT)  /* Offset addition. */
 #  define R_DMAC_DMAMD_SM_10                              (2 << R_DMAC_DMAMD_SM_SHIFT)  /* Source address is incremented. */
 #  define R_DMAC_DMAMD_SM_11                              (3 << R_DMAC_DMAMD_SM_SHIFT)  /* Source address is decremented. */
+
+/* DMOFR Register bit definitions */
+#define R_DMAC_DMOFR_DMOFR_SHIFT                  (0)  /* Specifies the offset when offset addition is selected as the address update mode for transfer source or destination. */
+#define R_DMAC_DMOFR_DMOFR_MASK                   0xffffffff
 
 /* DMCNT Register bit definitions */
 #define R_DMAC_DMCNT_DTE                          (1 << 0)  /* DMA Transfer Enable */

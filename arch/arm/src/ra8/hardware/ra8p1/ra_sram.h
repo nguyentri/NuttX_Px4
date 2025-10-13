@@ -38,58 +38,36 @@
 #endif
 #endif
 
-/* Channel stride for multi-channel peripherals */
-#define R_SRAM_CH_STRIDE    0x00000004
-#define R_SRAM_CH_BASE(ch)   (R_SRAM_BASE + ((uint32_t)(ch) * R_SRAM_CH_STRIDE))
-
 /* SRAM Register Offsets */
 
-#define R_SRAM_SRAMPRCR_S_OFFSET     0x00000000  /* SRAM Protection Control Register for Secure */
-#define R_SRAM_SRAMWTSC_OFFSET     0x00000008  /* SRAM Wait State Control Register */
+#define R_SRAM_SRAMPRCR_S_OFFSET                  0x00000000  /* SRAM Protection Control Register for Secure */
+#define R_SRAM_SRAMWTSC_OFFSET                    0x00000008  /* SRAM Wait State Control Register */
 /* SRAMCR%s Registers (0-3) */
-#define R_SRAM_SRAMCR0_OFFSET     0x00000010  /* SRAM Control Register 0 For ECC RAM */
-#define R_SRAM_SRAMCR1_OFFSET     0x00000014  /* SRAM Control Register 1 For ECC RAM */
-#define R_SRAM_SRAMCR2_OFFSET     0x00000018  /* SRAM Control Register 2 For ECC RAM */
-#define R_SRAM_SRAMCR3_OFFSET     0x0000001c  /* SRAM Control Register 3 For ECC RAM */
-#define R_SRAM_SRAMECCRGN0_OFFSET     0x00000030  /* SRAM ECC Region Control Register 0 */
-#define R_SRAM_SRAMECCRGN1_OFFSET     0x00000034  /* SRAM ECC Region Control Register 1 */
-#define R_SRAM_SRAMECCRGN2_OFFSET     0x00000038  /* SRAM ECC Region Control Register 2 */
-#define R_SRAM_SRAMECCRGN3_OFFSET     0x0000003c  /* SRAM ECC Region Control Register 3 */
-#define R_SRAM_SRAMESR_OFFSET     0x00000040  /* SRAM Error Status Register For ECC RAM */
-#define R_SRAM_SRAMESCLR_OFFSET     0x00000048  /* SRAM Error Status Clear Register For ECC RAM */
+#define R_SRAM_SRAMCR_OFFSET(m)                   (0x00000010 + ((m) * 0x00000004))  /* SRAM Control Register %s For ECC RAM */
+#define R_SRAM_SRAMECCRGN0_OFFSET                 0x00000030  /* SRAM ECC Region Control Register 0 */
+#define R_SRAM_SRAMECCRGN1_OFFSET                 0x00000034  /* SRAM ECC Region Control Register 1 */
+#define R_SRAM_SRAMECCRGN2_OFFSET                 0x00000038  /* SRAM ECC Region Control Register 2 */
+#define R_SRAM_SRAMECCRGN3_OFFSET                 0x0000003c  /* SRAM ECC Region Control Register 3 */
+#define R_SRAM_SRAMESR_OFFSET                     0x00000040  /* SRAM Error Status Register For ECC RAM */
+#define R_SRAM_SRAMESCLR_OFFSET                   0x00000048  /* SRAM Error Status Clear Register For ECC RAM */
 /* SRAMEAR%s0 Registers (0-3) */
-#define R_SRAM_SRAMEAR00_OFFSET     0x00000050  /* SRAM Error Address Register n0 For ECC RAM */
-#define R_SRAM_SRAMEAR10_OFFSET     0x00000060  /* SRAM Error Address Register n0 For ECC RAM */
-#define R_SRAM_SRAMEAR20_OFFSET     0x00000070  /* SRAM Error Address Register n0 For ECC RAM */
-#define R_SRAM_SRAMEAR30_OFFSET     0x00000080  /* SRAM Error Address Register n0 For ECC RAM */
+#define R_SRAM_SRAMEAR0_OFFSET(m)                 (0x00000050 + ((m) * 0x00000010))  /* SRAM Error Address Register n0 For ECC RAM */
 /* SRAMEAR%s1 Registers (0-3) */
-#define R_SRAM_SRAMEAR01_OFFSET     0x00000054  /* SRAM Error Address Register n1 For ECC RAM */
-#define R_SRAM_SRAMEAR11_OFFSET     0x00000064  /* SRAM Error Address Register n1 For ECC RAM */
-#define R_SRAM_SRAMEAR21_OFFSET     0x00000074  /* SRAM Error Address Register n1 For ECC RAM */
-#define R_SRAM_SRAMEAR31_OFFSET     0x00000084  /* SRAM Error Address Register n1 For ECC RAM */
+#define R_SRAM_SRAMEAR1_OFFSET(m)                 (0x00000054 + ((m) * 0x00000010))  /* SRAM Error Address Register n1 For ECC RAM */
 
 /* SRAM Register Addresses */
 
-#define R_SRAM_SRAMPRCR_S                 (R_SRAM_BASE + R_SRAM_SRAMPRCR_S_OFFSET)
-#define R_SRAM_SRAMWTSC                 (R_SRAM_BASE + R_SRAM_SRAMWTSC_OFFSET)
-#define R_SRAM_SRAMCR0                 (R_SRAM_BASE + R_SRAM_SRAMCR0_OFFSET)
-#define R_SRAM_SRAMCR1                 (R_SRAM_BASE + R_SRAM_SRAMCR1_OFFSET)
-#define R_SRAM_SRAMCR2                 (R_SRAM_BASE + R_SRAM_SRAMCR2_OFFSET)
-#define R_SRAM_SRAMCR3                 (R_SRAM_BASE + R_SRAM_SRAMCR3_OFFSET)
-#define R_SRAM_SRAMECCRGN0                 (R_SRAM_BASE + R_SRAM_SRAMECCRGN0_OFFSET)
-#define R_SRAM_SRAMECCRGN1                 (R_SRAM_BASE + R_SRAM_SRAMECCRGN1_OFFSET)
-#define R_SRAM_SRAMECCRGN2                 (R_SRAM_BASE + R_SRAM_SRAMECCRGN2_OFFSET)
-#define R_SRAM_SRAMECCRGN3                 (R_SRAM_BASE + R_SRAM_SRAMECCRGN3_OFFSET)
-#define R_SRAM_SRAMESR                 (R_SRAM_BASE + R_SRAM_SRAMESR_OFFSET)
-#define R_SRAM_SRAMESCLR                 (R_SRAM_BASE + R_SRAM_SRAMESCLR_OFFSET)
-#define R_SRAM_SRAMEAR00                 (R_SRAM_BASE + R_SRAM_SRAMEAR00_OFFSET)
-#define R_SRAM_SRAMEAR10                 (R_SRAM_BASE + R_SRAM_SRAMEAR10_OFFSET)
-#define R_SRAM_SRAMEAR20                 (R_SRAM_BASE + R_SRAM_SRAMEAR20_OFFSET)
-#define R_SRAM_SRAMEAR30                 (R_SRAM_BASE + R_SRAM_SRAMEAR30_OFFSET)
-#define R_SRAM_SRAMEAR01                 (R_SRAM_BASE + R_SRAM_SRAMEAR01_OFFSET)
-#define R_SRAM_SRAMEAR11                 (R_SRAM_BASE + R_SRAM_SRAMEAR11_OFFSET)
-#define R_SRAM_SRAMEAR21                 (R_SRAM_BASE + R_SRAM_SRAMEAR21_OFFSET)
-#define R_SRAM_SRAMEAR31                 (R_SRAM_BASE + R_SRAM_SRAMEAR31_OFFSET)
+#define R_SRAM_SRAMPRCR_S                         (R_SRAM_BASE + R_SRAM_SRAMPRCR_S_OFFSET)
+#define R_SRAM_SRAMWTSC                           (R_SRAM_BASE + R_SRAM_SRAMWTSC_OFFSET)
+#define R_SRAM_SRAMCR(m)                          (R_SRAM_BASE + R_SRAM_SRAMCR_OFFSET(m))
+#define R_SRAM_SRAMECCRGN0                        (R_SRAM_BASE + R_SRAM_SRAMECCRGN0_OFFSET)
+#define R_SRAM_SRAMECCRGN1                        (R_SRAM_BASE + R_SRAM_SRAMECCRGN1_OFFSET)
+#define R_SRAM_SRAMECCRGN2                        (R_SRAM_BASE + R_SRAM_SRAMECCRGN2_OFFSET)
+#define R_SRAM_SRAMECCRGN3                        (R_SRAM_BASE + R_SRAM_SRAMECCRGN3_OFFSET)
+#define R_SRAM_SRAMESR                            (R_SRAM_BASE + R_SRAM_SRAMESR_OFFSET)
+#define R_SRAM_SRAMESCLR                          (R_SRAM_BASE + R_SRAM_SRAMESCLR_OFFSET)
+#define R_SRAM_SRAMEAR0(m)                        (R_SRAM_BASE + R_SRAM_SRAMEAR0_OFFSET(m))
+#define R_SRAM_SRAMEAR1(m)                        (R_SRAM_BASE + R_SRAM_SRAMEAR1_OFFSET(m))
 
 /* Register bit definitions */
 /* SRAMPRCR_S Register bit definitions */

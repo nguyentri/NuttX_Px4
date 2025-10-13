@@ -38,226 +38,32 @@
 #endif
 #endif
 
-/* Channel stride for multi-channel peripherals */
-#define R_ICU_CH_STRIDE    0x00000004
-#define R_ICU_CH_BASE(ch)   (R_ICU_BASE + ((uint32_t)(ch) * R_ICU_CH_STRIDE))
-
 /* ICU Register Offsets */
 
-#define R_ICU_NMIER_OFFSET     0x00000100  /* Non-Maskable Interrupt Enable Register */
-#define R_ICU_NMICLR_OFFSET     0x00000110  /* Non-Maskable Interrupt Status Clear Register */
-#define R_ICU_NMISR_OFFSET     0x00000120  /* Non-Maskable Interrupt Status Register */
-#define R_ICU_WUPEN0_OFFSET     0x000001a0  /* Wake Up Interrupt Enable Register 0 */
-#define R_ICU_WUPEN1_OFFSET     0x000001a4  /* Wake Up Interrupt Enable Register 1 */
-#define R_ICU_DSLPWUPIRQEN0_OFFSET     0x00000214  /* Deep Sleep Wake Up IRQ Enable Register 0 */
-#define R_ICU_DSLPWUPIRQEN1_OFFSET     0x00000218  /* Deep Sleep Wake Up IRQ Enable Register 1 */
-#define R_ICU_DSLPWUPIRQEN2_OFFSET     0x0000021c  /* Deep Sleep Wake Up IRQ Enable Register 2 */
-#define R_ICU_DELSRM_OFFSET     0x00000280  /* DMAC Event Link Setting Register m (m = 0 to 7) */
+#define R_ICU_NMIER_OFFSET                        0x00000100  /* Non-Maskable Interrupt Enable Register */
+#define R_ICU_NMICLR_OFFSET                       0x00000110  /* Non-Maskable Interrupt Status Clear Register */
+#define R_ICU_NMISR_OFFSET                        0x00000120  /* Non-Maskable Interrupt Status Register */
+#define R_ICU_WUPEN0_OFFSET                       0x000001a0  /* Wake Up Interrupt Enable Register 0 */
+#define R_ICU_WUPEN1_OFFSET                       0x000001a4  /* Wake Up Interrupt Enable Register 1 */
+#define R_ICU_DSLPWUPIRQEN0_OFFSET                0x00000214  /* Deep Sleep Wake Up IRQ Enable Register 0 */
+#define R_ICU_DSLPWUPIRQEN1_OFFSET                0x00000218  /* Deep Sleep Wake Up IRQ Enable Register 1 */
+#define R_ICU_DSLPWUPIRQEN2_OFFSET                0x0000021c  /* Deep Sleep Wake Up IRQ Enable Register 2 */
+#define R_ICU_DELSRM_OFFSET                       0x00000280  /* DMAC Event Link Setting Register m (m = 0 to 7) */
 /* IELSR%s Registers (0-95) */
-#define R_ICU_IELSR00_OFFSET     0x00000300  /* Interrupt Controller Unit Event Link Setting Register 00 */
-#define R_ICU_IELSR01_OFFSET     0x00000304  /* Interrupt Controller Unit Event Link Setting Register 01 */
-#define R_ICU_IELSR02_OFFSET     0x00000308  /* Interrupt Controller Unit Event Link Setting Register 02 */
-#define R_ICU_IELSR03_OFFSET     0x0000030c  /* Interrupt Controller Unit Event Link Setting Register 03 */
-#define R_ICU_IELSR04_OFFSET     0x00000310  /* Interrupt Controller Unit Event Link Setting Register 04 */
-#define R_ICU_IELSR05_OFFSET     0x00000314  /* Interrupt Controller Unit Event Link Setting Register 05 */
-#define R_ICU_IELSR06_OFFSET     0x00000318  /* Interrupt Controller Unit Event Link Setting Register 06 */
-#define R_ICU_IELSR07_OFFSET     0x0000031c  /* Interrupt Controller Unit Event Link Setting Register 07 */
-#define R_ICU_IELSR08_OFFSET     0x00000320  /* Interrupt Controller Unit Event Link Setting Register 08 */
-#define R_ICU_IELSR09_OFFSET     0x00000324  /* Interrupt Controller Unit Event Link Setting Register 09 */
-#define R_ICU_IELSR10_OFFSET     0x00000328  /* Interrupt Controller Unit Event Link Setting Register 10 */
-#define R_ICU_IELSR11_OFFSET     0x0000032c  /* Interrupt Controller Unit Event Link Setting Register 11 */
-#define R_ICU_IELSR12_OFFSET     0x00000330  /* Interrupt Controller Unit Event Link Setting Register 12 */
-#define R_ICU_IELSR13_OFFSET     0x00000334  /* Interrupt Controller Unit Event Link Setting Register 13 */
-#define R_ICU_IELSR14_OFFSET     0x00000338  /* Interrupt Controller Unit Event Link Setting Register 14 */
-#define R_ICU_IELSR15_OFFSET     0x0000033c  /* Interrupt Controller Unit Event Link Setting Register 15 */
-#define R_ICU_IELSR16_OFFSET     0x00000340  /* Interrupt Controller Unit Event Link Setting Register 16 */
-#define R_ICU_IELSR17_OFFSET     0x00000344  /* Interrupt Controller Unit Event Link Setting Register 17 */
-#define R_ICU_IELSR18_OFFSET     0x00000348  /* Interrupt Controller Unit Event Link Setting Register 18 */
-#define R_ICU_IELSR19_OFFSET     0x0000034c  /* Interrupt Controller Unit Event Link Setting Register 19 */
-#define R_ICU_IELSR20_OFFSET     0x00000350  /* Interrupt Controller Unit Event Link Setting Register 20 */
-#define R_ICU_IELSR21_OFFSET     0x00000354  /* Interrupt Controller Unit Event Link Setting Register 21 */
-#define R_ICU_IELSR22_OFFSET     0x00000358  /* Interrupt Controller Unit Event Link Setting Register 22 */
-#define R_ICU_IELSR23_OFFSET     0x0000035c  /* Interrupt Controller Unit Event Link Setting Register 23 */
-#define R_ICU_IELSR24_OFFSET     0x00000360  /* Interrupt Controller Unit Event Link Setting Register 24 */
-#define R_ICU_IELSR25_OFFSET     0x00000364  /* Interrupt Controller Unit Event Link Setting Register 25 */
-#define R_ICU_IELSR26_OFFSET     0x00000368  /* Interrupt Controller Unit Event Link Setting Register 26 */
-#define R_ICU_IELSR27_OFFSET     0x0000036c  /* Interrupt Controller Unit Event Link Setting Register 27 */
-#define R_ICU_IELSR28_OFFSET     0x00000370  /* Interrupt Controller Unit Event Link Setting Register 28 */
-#define R_ICU_IELSR29_OFFSET     0x00000374  /* Interrupt Controller Unit Event Link Setting Register 29 */
-#define R_ICU_IELSR30_OFFSET     0x00000378  /* Interrupt Controller Unit Event Link Setting Register 30 */
-#define R_ICU_IELSR31_OFFSET     0x0000037c  /* Interrupt Controller Unit Event Link Setting Register 31 */
-#define R_ICU_IELSR32_OFFSET     0x00000380  /* Interrupt Controller Unit Event Link Setting Register 32 */
-#define R_ICU_IELSR33_OFFSET     0x00000384  /* Interrupt Controller Unit Event Link Setting Register 33 */
-#define R_ICU_IELSR34_OFFSET     0x00000388  /* Interrupt Controller Unit Event Link Setting Register 34 */
-#define R_ICU_IELSR35_OFFSET     0x0000038c  /* Interrupt Controller Unit Event Link Setting Register 35 */
-#define R_ICU_IELSR36_OFFSET     0x00000390  /* Interrupt Controller Unit Event Link Setting Register 36 */
-#define R_ICU_IELSR37_OFFSET     0x00000394  /* Interrupt Controller Unit Event Link Setting Register 37 */
-#define R_ICU_IELSR38_OFFSET     0x00000398  /* Interrupt Controller Unit Event Link Setting Register 38 */
-#define R_ICU_IELSR39_OFFSET     0x0000039c  /* Interrupt Controller Unit Event Link Setting Register 39 */
-#define R_ICU_IELSR40_OFFSET     0x000003a0  /* Interrupt Controller Unit Event Link Setting Register 40 */
-#define R_ICU_IELSR41_OFFSET     0x000003a4  /* Interrupt Controller Unit Event Link Setting Register 41 */
-#define R_ICU_IELSR42_OFFSET     0x000003a8  /* Interrupt Controller Unit Event Link Setting Register 42 */
-#define R_ICU_IELSR43_OFFSET     0x000003ac  /* Interrupt Controller Unit Event Link Setting Register 43 */
-#define R_ICU_IELSR44_OFFSET     0x000003b0  /* Interrupt Controller Unit Event Link Setting Register 44 */
-#define R_ICU_IELSR45_OFFSET     0x000003b4  /* Interrupt Controller Unit Event Link Setting Register 45 */
-#define R_ICU_IELSR46_OFFSET     0x000003b8  /* Interrupt Controller Unit Event Link Setting Register 46 */
-#define R_ICU_IELSR47_OFFSET     0x000003bc  /* Interrupt Controller Unit Event Link Setting Register 47 */
-#define R_ICU_IELSR48_OFFSET     0x000003c0  /* Interrupt Controller Unit Event Link Setting Register 48 */
-#define R_ICU_IELSR49_OFFSET     0x000003c4  /* Interrupt Controller Unit Event Link Setting Register 49 */
-#define R_ICU_IELSR50_OFFSET     0x000003c8  /* Interrupt Controller Unit Event Link Setting Register 50 */
-#define R_ICU_IELSR51_OFFSET     0x000003cc  /* Interrupt Controller Unit Event Link Setting Register 51 */
-#define R_ICU_IELSR52_OFFSET     0x000003d0  /* Interrupt Controller Unit Event Link Setting Register 52 */
-#define R_ICU_IELSR53_OFFSET     0x000003d4  /* Interrupt Controller Unit Event Link Setting Register 53 */
-#define R_ICU_IELSR54_OFFSET     0x000003d8  /* Interrupt Controller Unit Event Link Setting Register 54 */
-#define R_ICU_IELSR55_OFFSET     0x000003dc  /* Interrupt Controller Unit Event Link Setting Register 55 */
-#define R_ICU_IELSR56_OFFSET     0x000003e0  /* Interrupt Controller Unit Event Link Setting Register 56 */
-#define R_ICU_IELSR57_OFFSET     0x000003e4  /* Interrupt Controller Unit Event Link Setting Register 57 */
-#define R_ICU_IELSR58_OFFSET     0x000003e8  /* Interrupt Controller Unit Event Link Setting Register 58 */
-#define R_ICU_IELSR59_OFFSET     0x000003ec  /* Interrupt Controller Unit Event Link Setting Register 59 */
-#define R_ICU_IELSR60_OFFSET     0x000003f0  /* Interrupt Controller Unit Event Link Setting Register 60 */
-#define R_ICU_IELSR61_OFFSET     0x000003f4  /* Interrupt Controller Unit Event Link Setting Register 61 */
-#define R_ICU_IELSR62_OFFSET     0x000003f8  /* Interrupt Controller Unit Event Link Setting Register 62 */
-#define R_ICU_IELSR63_OFFSET     0x000003fc  /* Interrupt Controller Unit Event Link Setting Register 63 */
-#define R_ICU_IELSR64_OFFSET     0x00000400  /* Interrupt Controller Unit Event Link Setting Register 64 */
-#define R_ICU_IELSR65_OFFSET     0x00000404  /* Interrupt Controller Unit Event Link Setting Register 65 */
-#define R_ICU_IELSR66_OFFSET     0x00000408  /* Interrupt Controller Unit Event Link Setting Register 66 */
-#define R_ICU_IELSR67_OFFSET     0x0000040c  /* Interrupt Controller Unit Event Link Setting Register 67 */
-#define R_ICU_IELSR68_OFFSET     0x00000410  /* Interrupt Controller Unit Event Link Setting Register 68 */
-#define R_ICU_IELSR69_OFFSET     0x00000414  /* Interrupt Controller Unit Event Link Setting Register 69 */
-#define R_ICU_IELSR70_OFFSET     0x00000418  /* Interrupt Controller Unit Event Link Setting Register 70 */
-#define R_ICU_IELSR71_OFFSET     0x0000041c  /* Interrupt Controller Unit Event Link Setting Register 71 */
-#define R_ICU_IELSR72_OFFSET     0x00000420  /* Interrupt Controller Unit Event Link Setting Register 72 */
-#define R_ICU_IELSR73_OFFSET     0x00000424  /* Interrupt Controller Unit Event Link Setting Register 73 */
-#define R_ICU_IELSR74_OFFSET     0x00000428  /* Interrupt Controller Unit Event Link Setting Register 74 */
-#define R_ICU_IELSR75_OFFSET     0x0000042c  /* Interrupt Controller Unit Event Link Setting Register 75 */
-#define R_ICU_IELSR76_OFFSET     0x00000430  /* Interrupt Controller Unit Event Link Setting Register 76 */
-#define R_ICU_IELSR77_OFFSET     0x00000434  /* Interrupt Controller Unit Event Link Setting Register 77 */
-#define R_ICU_IELSR78_OFFSET     0x00000438  /* Interrupt Controller Unit Event Link Setting Register 78 */
-#define R_ICU_IELSR79_OFFSET     0x0000043c  /* Interrupt Controller Unit Event Link Setting Register 79 */
-#define R_ICU_IELSR80_OFFSET     0x00000440  /* Interrupt Controller Unit Event Link Setting Register 80 */
-#define R_ICU_IELSR81_OFFSET     0x00000444  /* Interrupt Controller Unit Event Link Setting Register 81 */
-#define R_ICU_IELSR82_OFFSET     0x00000448  /* Interrupt Controller Unit Event Link Setting Register 82 */
-#define R_ICU_IELSR83_OFFSET     0x0000044c  /* Interrupt Controller Unit Event Link Setting Register 83 */
-#define R_ICU_IELSR84_OFFSET     0x00000450  /* Interrupt Controller Unit Event Link Setting Register 84 */
-#define R_ICU_IELSR85_OFFSET     0x00000454  /* Interrupt Controller Unit Event Link Setting Register 85 */
-#define R_ICU_IELSR86_OFFSET     0x00000458  /* Interrupt Controller Unit Event Link Setting Register 86 */
-#define R_ICU_IELSR87_OFFSET     0x0000045c  /* Interrupt Controller Unit Event Link Setting Register 87 */
-#define R_ICU_IELSR88_OFFSET     0x00000460  /* Interrupt Controller Unit Event Link Setting Register 88 */
-#define R_ICU_IELSR89_OFFSET     0x00000464  /* Interrupt Controller Unit Event Link Setting Register 89 */
-#define R_ICU_IELSR90_OFFSET     0x00000468  /* Interrupt Controller Unit Event Link Setting Register 90 */
-#define R_ICU_IELSR91_OFFSET     0x0000046c  /* Interrupt Controller Unit Event Link Setting Register 91 */
-#define R_ICU_IELSR92_OFFSET     0x00000470  /* Interrupt Controller Unit Event Link Setting Register 92 */
-#define R_ICU_IELSR93_OFFSET     0x00000474  /* Interrupt Controller Unit Event Link Setting Register 93 */
-#define R_ICU_IELSR94_OFFSET     0x00000478  /* Interrupt Controller Unit Event Link Setting Register 94 */
-#define R_ICU_IELSR95_OFFSET     0x0000047c  /* Interrupt Controller Unit Event Link Setting Register 95 */
+#define R_ICU_IELSR_OFFSET(m)                     (0x00000300 + ((m) * 0x00000004))  /* Interrupt Controller Unit Event Link Setting Register %s */
 
 /* ICU Register Addresses */
 
-#define R_ICU_NMIER                 (R_ICU_BASE + R_ICU_NMIER_OFFSET)
-#define R_ICU_NMICLR                 (R_ICU_BASE + R_ICU_NMICLR_OFFSET)
-#define R_ICU_NMISR                 (R_ICU_BASE + R_ICU_NMISR_OFFSET)
-#define R_ICU_WUPEN0                 (R_ICU_BASE + R_ICU_WUPEN0_OFFSET)
-#define R_ICU_WUPEN1                 (R_ICU_BASE + R_ICU_WUPEN1_OFFSET)
-#define R_ICU_DSLPWUPIRQEN0                 (R_ICU_BASE + R_ICU_DSLPWUPIRQEN0_OFFSET)
-#define R_ICU_DSLPWUPIRQEN1                 (R_ICU_BASE + R_ICU_DSLPWUPIRQEN1_OFFSET)
-#define R_ICU_DSLPWUPIRQEN2                 (R_ICU_BASE + R_ICU_DSLPWUPIRQEN2_OFFSET)
-#define R_ICU_DELSRM                 (R_ICU_BASE + R_ICU_DELSRM_OFFSET)
-#define R_ICU_IELSR00                 (R_ICU_BASE + R_ICU_IELSR00_OFFSET)
-#define R_ICU_IELSR01                 (R_ICU_BASE + R_ICU_IELSR01_OFFSET)
-#define R_ICU_IELSR02                 (R_ICU_BASE + R_ICU_IELSR02_OFFSET)
-#define R_ICU_IELSR03                 (R_ICU_BASE + R_ICU_IELSR03_OFFSET)
-#define R_ICU_IELSR04                 (R_ICU_BASE + R_ICU_IELSR04_OFFSET)
-#define R_ICU_IELSR05                 (R_ICU_BASE + R_ICU_IELSR05_OFFSET)
-#define R_ICU_IELSR06                 (R_ICU_BASE + R_ICU_IELSR06_OFFSET)
-#define R_ICU_IELSR07                 (R_ICU_BASE + R_ICU_IELSR07_OFFSET)
-#define R_ICU_IELSR08                 (R_ICU_BASE + R_ICU_IELSR08_OFFSET)
-#define R_ICU_IELSR09                 (R_ICU_BASE + R_ICU_IELSR09_OFFSET)
-#define R_ICU_IELSR10                 (R_ICU_BASE + R_ICU_IELSR10_OFFSET)
-#define R_ICU_IELSR11                 (R_ICU_BASE + R_ICU_IELSR11_OFFSET)
-#define R_ICU_IELSR12                 (R_ICU_BASE + R_ICU_IELSR12_OFFSET)
-#define R_ICU_IELSR13                 (R_ICU_BASE + R_ICU_IELSR13_OFFSET)
-#define R_ICU_IELSR14                 (R_ICU_BASE + R_ICU_IELSR14_OFFSET)
-#define R_ICU_IELSR15                 (R_ICU_BASE + R_ICU_IELSR15_OFFSET)
-#define R_ICU_IELSR16                 (R_ICU_BASE + R_ICU_IELSR16_OFFSET)
-#define R_ICU_IELSR17                 (R_ICU_BASE + R_ICU_IELSR17_OFFSET)
-#define R_ICU_IELSR18                 (R_ICU_BASE + R_ICU_IELSR18_OFFSET)
-#define R_ICU_IELSR19                 (R_ICU_BASE + R_ICU_IELSR19_OFFSET)
-#define R_ICU_IELSR20                 (R_ICU_BASE + R_ICU_IELSR20_OFFSET)
-#define R_ICU_IELSR21                 (R_ICU_BASE + R_ICU_IELSR21_OFFSET)
-#define R_ICU_IELSR22                 (R_ICU_BASE + R_ICU_IELSR22_OFFSET)
-#define R_ICU_IELSR23                 (R_ICU_BASE + R_ICU_IELSR23_OFFSET)
-#define R_ICU_IELSR24                 (R_ICU_BASE + R_ICU_IELSR24_OFFSET)
-#define R_ICU_IELSR25                 (R_ICU_BASE + R_ICU_IELSR25_OFFSET)
-#define R_ICU_IELSR26                 (R_ICU_BASE + R_ICU_IELSR26_OFFSET)
-#define R_ICU_IELSR27                 (R_ICU_BASE + R_ICU_IELSR27_OFFSET)
-#define R_ICU_IELSR28                 (R_ICU_BASE + R_ICU_IELSR28_OFFSET)
-#define R_ICU_IELSR29                 (R_ICU_BASE + R_ICU_IELSR29_OFFSET)
-#define R_ICU_IELSR30                 (R_ICU_BASE + R_ICU_IELSR30_OFFSET)
-#define R_ICU_IELSR31                 (R_ICU_BASE + R_ICU_IELSR31_OFFSET)
-#define R_ICU_IELSR32                 (R_ICU_BASE + R_ICU_IELSR32_OFFSET)
-#define R_ICU_IELSR33                 (R_ICU_BASE + R_ICU_IELSR33_OFFSET)
-#define R_ICU_IELSR34                 (R_ICU_BASE + R_ICU_IELSR34_OFFSET)
-#define R_ICU_IELSR35                 (R_ICU_BASE + R_ICU_IELSR35_OFFSET)
-#define R_ICU_IELSR36                 (R_ICU_BASE + R_ICU_IELSR36_OFFSET)
-#define R_ICU_IELSR37                 (R_ICU_BASE + R_ICU_IELSR37_OFFSET)
-#define R_ICU_IELSR38                 (R_ICU_BASE + R_ICU_IELSR38_OFFSET)
-#define R_ICU_IELSR39                 (R_ICU_BASE + R_ICU_IELSR39_OFFSET)
-#define R_ICU_IELSR40                 (R_ICU_BASE + R_ICU_IELSR40_OFFSET)
-#define R_ICU_IELSR41                 (R_ICU_BASE + R_ICU_IELSR41_OFFSET)
-#define R_ICU_IELSR42                 (R_ICU_BASE + R_ICU_IELSR42_OFFSET)
-#define R_ICU_IELSR43                 (R_ICU_BASE + R_ICU_IELSR43_OFFSET)
-#define R_ICU_IELSR44                 (R_ICU_BASE + R_ICU_IELSR44_OFFSET)
-#define R_ICU_IELSR45                 (R_ICU_BASE + R_ICU_IELSR45_OFFSET)
-#define R_ICU_IELSR46                 (R_ICU_BASE + R_ICU_IELSR46_OFFSET)
-#define R_ICU_IELSR47                 (R_ICU_BASE + R_ICU_IELSR47_OFFSET)
-#define R_ICU_IELSR48                 (R_ICU_BASE + R_ICU_IELSR48_OFFSET)
-#define R_ICU_IELSR49                 (R_ICU_BASE + R_ICU_IELSR49_OFFSET)
-#define R_ICU_IELSR50                 (R_ICU_BASE + R_ICU_IELSR50_OFFSET)
-#define R_ICU_IELSR51                 (R_ICU_BASE + R_ICU_IELSR51_OFFSET)
-#define R_ICU_IELSR52                 (R_ICU_BASE + R_ICU_IELSR52_OFFSET)
-#define R_ICU_IELSR53                 (R_ICU_BASE + R_ICU_IELSR53_OFFSET)
-#define R_ICU_IELSR54                 (R_ICU_BASE + R_ICU_IELSR54_OFFSET)
-#define R_ICU_IELSR55                 (R_ICU_BASE + R_ICU_IELSR55_OFFSET)
-#define R_ICU_IELSR56                 (R_ICU_BASE + R_ICU_IELSR56_OFFSET)
-#define R_ICU_IELSR57                 (R_ICU_BASE + R_ICU_IELSR57_OFFSET)
-#define R_ICU_IELSR58                 (R_ICU_BASE + R_ICU_IELSR58_OFFSET)
-#define R_ICU_IELSR59                 (R_ICU_BASE + R_ICU_IELSR59_OFFSET)
-#define R_ICU_IELSR60                 (R_ICU_BASE + R_ICU_IELSR60_OFFSET)
-#define R_ICU_IELSR61                 (R_ICU_BASE + R_ICU_IELSR61_OFFSET)
-#define R_ICU_IELSR62                 (R_ICU_BASE + R_ICU_IELSR62_OFFSET)
-#define R_ICU_IELSR63                 (R_ICU_BASE + R_ICU_IELSR63_OFFSET)
-#define R_ICU_IELSR64                 (R_ICU_BASE + R_ICU_IELSR64_OFFSET)
-#define R_ICU_IELSR65                 (R_ICU_BASE + R_ICU_IELSR65_OFFSET)
-#define R_ICU_IELSR66                 (R_ICU_BASE + R_ICU_IELSR66_OFFSET)
-#define R_ICU_IELSR67                 (R_ICU_BASE + R_ICU_IELSR67_OFFSET)
-#define R_ICU_IELSR68                 (R_ICU_BASE + R_ICU_IELSR68_OFFSET)
-#define R_ICU_IELSR69                 (R_ICU_BASE + R_ICU_IELSR69_OFFSET)
-#define R_ICU_IELSR70                 (R_ICU_BASE + R_ICU_IELSR70_OFFSET)
-#define R_ICU_IELSR71                 (R_ICU_BASE + R_ICU_IELSR71_OFFSET)
-#define R_ICU_IELSR72                 (R_ICU_BASE + R_ICU_IELSR72_OFFSET)
-#define R_ICU_IELSR73                 (R_ICU_BASE + R_ICU_IELSR73_OFFSET)
-#define R_ICU_IELSR74                 (R_ICU_BASE + R_ICU_IELSR74_OFFSET)
-#define R_ICU_IELSR75                 (R_ICU_BASE + R_ICU_IELSR75_OFFSET)
-#define R_ICU_IELSR76                 (R_ICU_BASE + R_ICU_IELSR76_OFFSET)
-#define R_ICU_IELSR77                 (R_ICU_BASE + R_ICU_IELSR77_OFFSET)
-#define R_ICU_IELSR78                 (R_ICU_BASE + R_ICU_IELSR78_OFFSET)
-#define R_ICU_IELSR79                 (R_ICU_BASE + R_ICU_IELSR79_OFFSET)
-#define R_ICU_IELSR80                 (R_ICU_BASE + R_ICU_IELSR80_OFFSET)
-#define R_ICU_IELSR81                 (R_ICU_BASE + R_ICU_IELSR81_OFFSET)
-#define R_ICU_IELSR82                 (R_ICU_BASE + R_ICU_IELSR82_OFFSET)
-#define R_ICU_IELSR83                 (R_ICU_BASE + R_ICU_IELSR83_OFFSET)
-#define R_ICU_IELSR84                 (R_ICU_BASE + R_ICU_IELSR84_OFFSET)
-#define R_ICU_IELSR85                 (R_ICU_BASE + R_ICU_IELSR85_OFFSET)
-#define R_ICU_IELSR86                 (R_ICU_BASE + R_ICU_IELSR86_OFFSET)
-#define R_ICU_IELSR87                 (R_ICU_BASE + R_ICU_IELSR87_OFFSET)
-#define R_ICU_IELSR88                 (R_ICU_BASE + R_ICU_IELSR88_OFFSET)
-#define R_ICU_IELSR89                 (R_ICU_BASE + R_ICU_IELSR89_OFFSET)
-#define R_ICU_IELSR90                 (R_ICU_BASE + R_ICU_IELSR90_OFFSET)
-#define R_ICU_IELSR91                 (R_ICU_BASE + R_ICU_IELSR91_OFFSET)
-#define R_ICU_IELSR92                 (R_ICU_BASE + R_ICU_IELSR92_OFFSET)
-#define R_ICU_IELSR93                 (R_ICU_BASE + R_ICU_IELSR93_OFFSET)
-#define R_ICU_IELSR94                 (R_ICU_BASE + R_ICU_IELSR94_OFFSET)
-#define R_ICU_IELSR95                 (R_ICU_BASE + R_ICU_IELSR95_OFFSET)
+#define R_ICU_NMIER                               (R_ICU_BASE + R_ICU_NMIER_OFFSET)
+#define R_ICU_NMICLR                              (R_ICU_BASE + R_ICU_NMICLR_OFFSET)
+#define R_ICU_NMISR                               (R_ICU_BASE + R_ICU_NMISR_OFFSET)
+#define R_ICU_WUPEN0                              (R_ICU_BASE + R_ICU_WUPEN0_OFFSET)
+#define R_ICU_WUPEN1                              (R_ICU_BASE + R_ICU_WUPEN1_OFFSET)
+#define R_ICU_DSLPWUPIRQEN0                       (R_ICU_BASE + R_ICU_DSLPWUPIRQEN0_OFFSET)
+#define R_ICU_DSLPWUPIRQEN1                       (R_ICU_BASE + R_ICU_DSLPWUPIRQEN1_OFFSET)
+#define R_ICU_DSLPWUPIRQEN2                       (R_ICU_BASE + R_ICU_DSLPWUPIRQEN2_OFFSET)
+#define R_ICU_DELSRM                              (R_ICU_BASE + R_ICU_DELSRM_OFFSET)
+#define R_ICU_IELSR(m)                            (R_ICU_BASE + R_ICU_IELSR_OFFSET(m))
 
 /* Register bit definitions */
 /* NMIER Register bit definitions */
@@ -469,6 +275,38 @@
 
 #define R_ICU_WUPEN1_IRQWUPEN31                   (1 << 31)  /* Interrupt Software Standby Returns Enable bits IRQ31 to IRQ16 */
 
+#define R_ICU_WUPEN1_WUPEN16                      (1 << 0)  /* Peripheral Interrupt Deep Sleep/Software Standby Returns Enable bit 16 */
+
+#define R_ICU_WUPEN1_WUPEN17                      (1 << 1)  /* Peripheral Interrupt Deep Sleep/Software Standby Returns Enable bit 17 */
+
+#define R_ICU_WUPEN1_WUPEN18                      (1 << 2)  /* Peripheral Interrupt Deep Sleep/Software Standby Returns Enable bit 18 */
+
+#define R_ICU_WUPEN1_WUPEN19                      (1 << 3)  /* Peripheral Interrupt Deep Sleep/Software Standby Returns Enable bit 19 */
+
+#define R_ICU_WUPEN1_WUPEN20                      (1 << 4)  /* Peripheral Interrupt Deep Sleep/Software Standby Returns Enable bit 20 */
+
+#define R_ICU_WUPEN1_WUPEN21                      (1 << 5)  /* Peripheral Interrupt Deep Sleep/Software Standby Returns Enable bit 21 */
+
+#define R_ICU_WUPEN1_WUPEN22                      (1 << 6)  /* Peripheral Interrupt Deep Sleep/Software Standby Returns Enable bit 22 */
+
+#define R_ICU_WUPEN1_WUPEN23                      (1 << 7)  /* Peripheral Interrupt Deep Sleep/Software Standby Returns Enable bit 23 */
+
+#define R_ICU_WUPEN1_WUPEN24                      (1 << 8)  /* Peripheral Interrupt Deep Sleep/Software Standby Returns Enable bit 24 */
+
+#define R_ICU_WUPEN1_WUPEN25                      (1 << 9)  /* Peripheral Interrupt Deep Sleep/Software Standby Returns Enable bit 25 */
+
+#define R_ICU_WUPEN1_WUPEN26                      (1 << 10)  /* Peripheral Interrupt Deep Sleep/Software Standby Returns Enable bit 26 */
+
+#define R_ICU_WUPEN1_WUPEN27                      (1 << 11)  /* Peripheral Interrupt Deep Sleep/Software Standby Returns Enable bit 27 */
+
+#define R_ICU_WUPEN1_WUPEN28                      (1 << 12)  /* Peripheral Interrupt Deep Sleep/Software Standby Returns Enable bit 28 */
+
+#define R_ICU_WUPEN1_WUPEN29                      (1 << 13)  /* Peripheral Interrupt Deep Sleep/Software Standby Returns Enable bit 29 */
+
+#define R_ICU_WUPEN1_WUPEN30                      (1 << 14)  /* Peripheral Interrupt Deep Sleep/Software Standby Returns Enable bit 30 */
+
+#define R_ICU_WUPEN1_WUPEN31                      (1 << 15)  /* Peripheral Interrupt Deep Sleep/Software Standby Returns Enable bit 31 */
+
 /* DSLPWUPIRQEN0 Register bit definitions */
 #define R_ICU_DSLPWUPIRQEN0_IRQ00                 (1 << 0)  /* IRQ Deep Sleep Returns Enable bit. */
 
@@ -670,6 +508,14 @@
 #  define R_ICU_DELSRM_DELS_0X00                          (0 << R_ICU_DELSRM_DELS_SHIFT)  /* Disable interrupts to the associated DMAC module */
 
 #define R_ICU_DELSRM_IR                           (1 << 16)  /* DMAC Activation Request Status flag */
+
+/* IELSR Register bit definitions */
+#define R_ICU_IELSR_IELS_SHIFT                    (0)  /* ICU Event Link Select */
+#define R_ICU_IELSR_IELS_MASK                     0x3ff
+
+#define R_ICU_IELSR_IR                            (1 << 16)  /* Interrupt Status Flag */
+
+#define R_ICU_IELSR_DTCE                          (1 << 24)  /* DTC Activation Enable */
 
 
 /* Maximum number of channels */

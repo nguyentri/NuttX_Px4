@@ -47,7 +47,7 @@
 #include "arm_internal.h"
 #include "chip.h"
 #include "hardware/ra_memorymap.h"
-#include "hardware/ra_system.h"
+#include "hardware/ra_hardware.h"
 #include "ra_mstp.h"
 #include "ra_lowputc.h"
 #include "ra_icu.h"
@@ -1000,9 +1000,9 @@ static int up_setup(struct uart_dev_s *dev)
     }
 
   /* Enable module stop control for all SCI channels */
-  putreg16((R_SYSC_PRCR_PRKEY | R_SYSC_PRCR_PRC1), R_SYSC_PRCR_S);
+  putreg16((RA_PRCR_KEY | R_SYSC_PRCR_S_PRC1), R_SYSC_PRCR_S);
   modifyreg32(R_MSTP_MSTPCRB, priv->mstp, 0);
-  putreg16(R_SYSC_PRCR_PRKEY, R_SYSC_PRCR_S);
+  putreg16(RA_PRCR_KEY, R_SYSC_PRCR_S);
 
   /* Read back to ensure write completed and add delay for module power-up */
   (void)getreg32(R_MSTP_MSTPCRB);
@@ -1039,9 +1039,9 @@ static void up_shutdown(struct uart_dev_s *dev)
   up_serialout(priv, R_SCI_B_CCR0_OFFSET, 0);
 
   /* Stop SCI  */
-  putreg16((R_SYSC_PRCR_PRKEY | R_SYSC_PRCR_PRC1), R_SYSC_PRCR_S);
+  putreg16((RA_PRCR_KEY | R_SYSC_PRCR_S_PRC1), R_SYSC_PRCR_S);
   modifyreg32(R_MSTP_MSTPCRB, priv->mstp, 1);
-  putreg16(R_SYSC_PRCR_PRKEY, R_SYSC_PRCR_S);
+  putreg16(RA_PRCR_KEY, R_SYSC_PRCR_S);
 }
 
 /****************************************************************************

@@ -38,258 +38,124 @@
 #endif
 #endif
 
-/* Channel stride for multi-channel peripherals */
-#define R_GPTP_CH_STRIDE    0x00000040
-#define R_GPTP_CH_BASE(ch)   (R_GPTP_BASE + ((uint32_t)(ch) * R_GPTP_CH_STRIDE))
-
 /* GPTP Register Offsets */
 
-#define R_GPTP_PTPIPV_OFFSET     0x00000000  /* IP Version Register */
-#define R_GPTP_PTPTMEC_OFFSET     0x00000010  /* Timer Enable Configuration Register */
-#define R_GPTP_PTPTMDC_OFFSET     0x00000014  /* Timer Disable Configuration Register */
+#define R_GPTP_PTPIPV_OFFSET                      0x00000000  /* IP Version Register */
+#define R_GPTP_PTPTMEC_OFFSET                     0x00000010  /* Timer Enable Configuration Register */
+#define R_GPTP_PTPTMDC_OFFSET                     0x00000014  /* Timer Disable Configuration Register */
 /* PTPTIVC%s Registers (0-1) */
-#define R_GPTP_PTPTIVC0_OFFSET     0x00000020  /* Timer 0 Increment Value Configuration Register */
-#define R_GPTP_PTPTIVC1_OFFSET     0x00000060  /* Timer 1 Increment Value Configuration Register */
+#define R_GPTP_PTPTIVC_OFFSET(m)                  (0x00000020 + ((m) * 0x00000040))  /* Timer %s Increment Value Configuration Register */
 /* PTPTOVC%sL Registers (0-1) */
-#define R_GPTP_PTPTOVC0L_OFFSET     0x00000030  /* Timer 0 Offset Value Configuration Register L */
-#define R_GPTP_PTPTOVC1L_OFFSET     0x00000070  /* Timer 1 Offset Value Configuration Register L */
+#define R_GPTP_PTPTOVCL_OFFSET(m)                 (0x00000030 + ((m) * 0x00000040))  /* Timer %s Offset Value Configuration Register L */
 /* PTPTOVCM%s Registers (0-1) */
-#define R_GPTP_PTPTOVCM0_OFFSET     0x00000034  /* Timer 0 Offset Value Configuration Register M */
-#define R_GPTP_PTPTOVCM1_OFFSET     0x00000074  /* Timer 1 Offset Value Configuration Register M */
+#define R_GPTP_PTPTOVCM_OFFSET(m)                 (0x00000034 + ((m) * 0x00000040))  /* Timer %s Offset Value Configuration Register M */
 /* PTPTOVC%sU Registers (0-1) */
-#define R_GPTP_PTPTOVC0U_OFFSET     0x00000038  /* Timer 0 Offset Value Configuration Register U */
-#define R_GPTP_PTPTOVC1U_OFFSET     0x00000078  /* Timer 1 Offset Value Configuration Register U */
+#define R_GPTP_PTPTOVCU_OFFSET(m)                 (0x00000038 + ((m) * 0x00000040))  /* Timer %s Offset Value Configuration Register U */
 /* PTPAVTPTM%sL Registers (0-1) */
-#define R_GPTP_PTPAVTPTM0L_OFFSET     0x00000040  /* AVTP Timer 0 Monitoring Register L */
-#define R_GPTP_PTPAVTPTM1L_OFFSET     0x00000080  /* AVTP Timer 1 Monitoring Register L */
+#define R_GPTP_PTPAVTPTML_OFFSET(m)               (0x00000040 + ((m) * 0x00000040))  /* AVTP Timer %s Monitoring Register L */
 /* PTPAVTPTM%sU Registers (0-1) */
-#define R_GPTP_PTPAVTPTM0U_OFFSET     0x00000044  /* AVTP Timer 0 Monitoring Register U */
-#define R_GPTP_PTPAVTPTM1U_OFFSET     0x00000084  /* AVTP Timer 1 Monitoring Register U */
+#define R_GPTP_PTPAVTPTMU_OFFSET(m)               (0x00000044 + ((m) * 0x00000040))  /* AVTP Timer %s Monitoring Register U */
 /* PTPGPTPTM%sL Registers (0-1) */
-#define R_GPTP_PTPGPTPTM0L_OFFSET     0x00000050  /* GPTP Timer 0 Monitoring Register L */
-#define R_GPTP_PTPGPTPTM1L_OFFSET     0x00000090  /* GPTP Timer 1 Monitoring Register L */
+#define R_GPTP_PTPGPTPTML_OFFSET(m)               (0x00000050 + ((m) * 0x00000040))  /* GPTP Timer %s Monitoring Register L */
 /* PTPGPTPTM%sM Registers (0-1) */
-#define R_GPTP_PTPGPTPTM0M_OFFSET     0x00000054  /* GPTP Timer 0 Monitoring Register M */
-#define R_GPTP_PTPGPTPTM1M_OFFSET     0x00000094  /* GPTP Timer 1 Monitoring Register M */
+#define R_GPTP_PTPGPTPTMM_OFFSET(m)               (0x00000054 + ((m) * 0x00000040))  /* GPTP Timer %s Monitoring Register M */
 /* PTPGPTPTM%sU Registers (0-1) */
-#define R_GPTP_PTPGPTPTM0U_OFFSET     0x00000058  /* GPTP Timer 0 Monitoring Register U */
-#define R_GPTP_PTPGPTPTM1U_OFFSET     0x00000098  /* GPTP Timer 1 Monitoring Register U */
+#define R_GPTP_PTPGPTPTMU_OFFSET(m)               (0x00000058 + ((m) * 0x00000040))  /* GPTP Timer %s Monitoring Register U */
 /* PTPMCCC%s Registers (0-1) */
-#define R_GPTP_PTPMCCC0_OFFSET     0x00000200  /* Media Clock 0 Capture Configuration Register */
-#define R_GPTP_PTPMCCC1_OFFSET     0x00000210  /* Media Clock 1 Capture Configuration Register */
+#define R_GPTP_PTPMCCC_OFFSET(m)                  (0x00000200 + ((m) * 0x00000010))  /* Media Clock %s Capture Configuration Register */
 /* PTPMCCM%sL Registers (0-1) */
-#define R_GPTP_PTPMCCM0L_OFFSET     0x00000204  /* Media Clock 0 Capture Monitoring Register L */
-#define R_GPTP_PTPMCCM1L_OFFSET     0x00000214  /* Media Clock 1 Capture Monitoring Register L */
+#define R_GPTP_PTPMCCML_OFFSET(m)                 (0x00000204 + ((m) * 0x00000010))  /* Media Clock %s Capture Monitoring Register L */
 /* PTPMCCM%sM Registers (0-1) */
-#define R_GPTP_PTPMCCM0M_OFFSET     0x00000208  /* Media Clock 0 Capture Monitoring Register M */
-#define R_GPTP_PTPMCCM1M_OFFSET     0x00000218  /* Media Clock 1 Capture Monitoring Register M */
+#define R_GPTP_PTPMCCMM_OFFSET(m)                 (0x00000208 + ((m) * 0x00000010))  /* Media Clock %s Capture Monitoring Register M */
 /* PTPMCCM%sU Registers (0-1) */
-#define R_GPTP_PTPMCCM0U_OFFSET     0x0000020c  /* Media Clock 0 Capture Monitoring Register U */
-#define R_GPTP_PTPMCCM1U_OFFSET     0x0000021c  /* Media Clock 1 Capture Monitoring Register U */
+#define R_GPTP_PTPMCCMU_OFFSET(m)                 (0x0000020c + ((m) * 0x00000010))  /* Media Clock %s Capture Monitoring Register U */
 /* PTPMCRC%s Registers (0-1) */
-#define R_GPTP_PTPMCRC0_OFFSET     0x00000300  /* Media Clock 0 Recovery Configuration Register */
-#define R_GPTP_PTPMCRC1_OFFSET     0x00000310  /* Media Clock 1 Recovery Configuration Register */
+#define R_GPTP_PTPMCRC_OFFSET(m)                  (0x00000300 + ((m) * 0x00000010))  /* Media Clock %s Recovery Configuration Register */
 /* PTPMCRTC%sL Registers (0-1) */
-#define R_GPTP_PTPMCRTC0L_OFFSET     0x00000304  /* Media Clock 0 Recovery Time Configuration Register L */
-#define R_GPTP_PTPMCRTC1L_OFFSET     0x00000314  /* Media Clock 1 Recovery Time Configuration Register L */
+#define R_GPTP_PTPMCRTCL_OFFSET(m)                (0x00000304 + ((m) * 0x00000010))  /* Media Clock %s Recovery Time Configuration Register L */
 /* PTPMCRTC%sM Registers (0-1) */
-#define R_GPTP_PTPMCRTC0M_OFFSET     0x00000308  /* Media Clock 0 Recovery Time Configuration Register M */
-#define R_GPTP_PTPMCRTC1M_OFFSET     0x00000318  /* Media Clock 1 Recovery Time Configuration Register M */
+#define R_GPTP_PTPMCRTCM_OFFSET(m)                (0x00000308 + ((m) * 0x00000010))  /* Media Clock %s Recovery Time Configuration Register M */
 /* PTPMCRTC%sU Registers (0-1) */
-#define R_GPTP_PTPMCRTC0U_OFFSET     0x0000030c  /* Media Clock 0 Recovery Time Configuration Register U */
-#define R_GPTP_PTPMCRTC1U_OFFSET     0x0000031c  /* Media Clock 1 Recovery Time Configuration Register U */
+#define R_GPTP_PTPMCRTCU_OFFSET(m)                (0x0000030c + ((m) * 0x00000010))  /* Media Clock %s Recovery Time Configuration Register U */
 /* PTPMCPC%s Registers (0-1) */
-#define R_GPTP_PTPMCPC0_OFFSET     0x00000400  /* Media Clock 0 Pin Configuration Register */
-#define R_GPTP_PTPMCPC1_OFFSET     0x00000404  /* Media Clock 1 Pin Configuration Register */
+#define R_GPTP_PTPMCPC_OFFSET(m)                  (0x00000400 + ((m) * 0x00000004))  /* Media Clock %s Pin Configuration Register */
 /* PTPCCC%s0 Registers (0-7) */
-#define R_GPTP_PTPCCC00_OFFSET     0x00000500  /* Cyclic Compare 0 Configuration Register 0 (c = 0 to 7) */
-#define R_GPTP_PTPCCC10_OFFSET     0x00000508  /* Cyclic Compare 1 Configuration Register 0 (c = 0 to 7) */
-#define R_GPTP_PTPCCC20_OFFSET     0x00000510  /* Cyclic Compare 2 Configuration Register 0 (c = 0 to 7) */
-#define R_GPTP_PTPCCC30_OFFSET     0x00000518  /* Cyclic Compare 3 Configuration Register 0 (c = 0 to 7) */
-#define R_GPTP_PTPCCC40_OFFSET     0x00000520  /* Cyclic Compare 4 Configuration Register 0 (c = 0 to 7) */
-#define R_GPTP_PTPCCC50_OFFSET     0x00000528  /* Cyclic Compare 5 Configuration Register 0 (c = 0 to 7) */
-#define R_GPTP_PTPCCC60_OFFSET     0x00000530  /* Cyclic Compare 6 Configuration Register 0 (c = 0 to 7) */
-#define R_GPTP_PTPCCC70_OFFSET     0x00000538  /* Cyclic Compare 7 Configuration Register 0 (c = 0 to 7) */
+#define R_GPTP_PTPCCC0_OFFSET(m)                  (0x00000500 + ((m) * 0x00000008))  /* Cyclic Compare %s Configuration Register 0 (c = 0 to 7) */
 /* PTPCCC%s1 Registers (0-7) */
-#define R_GPTP_PTPCCC01_OFFSET     0x00000504  /* Cyclic Compare 0 Configuration Register 1 (c = 0 to 7) */
-#define R_GPTP_PTPCCC11_OFFSET     0x0000050c  /* Cyclic Compare 1 Configuration Register 1 (c = 0 to 7) */
-#define R_GPTP_PTPCCC21_OFFSET     0x00000514  /* Cyclic Compare 2 Configuration Register 1 (c = 0 to 7) */
-#define R_GPTP_PTPCCC31_OFFSET     0x0000051c  /* Cyclic Compare 3 Configuration Register 1 (c = 0 to 7) */
-#define R_GPTP_PTPCCC41_OFFSET     0x00000524  /* Cyclic Compare 4 Configuration Register 1 (c = 0 to 7) */
-#define R_GPTP_PTPCCC51_OFFSET     0x0000052c  /* Cyclic Compare 5 Configuration Register 1 (c = 0 to 7) */
-#define R_GPTP_PTPCCC61_OFFSET     0x00000534  /* Cyclic Compare 6 Configuration Register 1 (c = 0 to 7) */
-#define R_GPTP_PTPCCC71_OFFSET     0x0000053c  /* Cyclic Compare 7 Configuration Register 1 (c = 0 to 7) */
-#define R_GPTP_PTPIS0_OFFSET     0x00000700  /* Interrupt Status Register 0 */
-#define R_GPTP_PTPIE0_OFFSET     0x00000704  /* Interrupt Enable Register 0 */
-#define R_GPTP_PTPID0_OFFSET     0x00000708  /* Interrupt Disable Register 0 */
-#define R_GPTP_PTPIS1_OFFSET     0x00000710  /* Interrupt Status Register 1 */
-#define R_GPTP_PTPIE1_OFFSET     0x00000714  /* Interrupt Enable Register 1 */
-#define R_GPTP_PTPID1_OFFSET     0x00000718  /* Interrupt Disable Register 1 */
-#define R_GPTP_POTCFGR_OFFSET     0x00001000  /* Pulse Output Timer Configuration Register */
+#define R_GPTP_PTPCCC1_OFFSET(m)                  (0x00000504 + ((m) * 0x00000008))  /* Cyclic Compare %s Configuration Register 1 (c = 0 to 7) */
+#define R_GPTP_PTPIS0_OFFSET                      0x00000700  /* Interrupt Status Register 0 */
+#define R_GPTP_PTPIE0_OFFSET                      0x00000704  /* Interrupt Enable Register 0 */
+#define R_GPTP_PTPID0_OFFSET                      0x00000708  /* Interrupt Disable Register 0 */
+#define R_GPTP_PTPIS1_OFFSET                      0x00000710  /* Interrupt Status Register 1 */
+#define R_GPTP_PTPIE1_OFFSET                      0x00000714  /* Interrupt Enable Register 1 */
+#define R_GPTP_PTPID1_OFFSET                      0x00000718  /* Interrupt Disable Register 1 */
+#define R_GPTP_POTCFGR_OFFSET                     0x00001000  /* Pulse Output Timer Configuration Register */
 /* POTCR%s Registers (0-3) */
-#define R_GPTP_POTCR0_OFFSET     0x00001004  /* Pulse Output Timer Control Register 0 */
-#define R_GPTP_POTCR1_OFFSET     0x00001034  /* Pulse Output Timer Control Register 1 */
-#define R_GPTP_POTCR2_OFFSET     0x00001064  /* Pulse Output Timer Control Register 2 */
-#define R_GPTP_POTCR3_OFFSET     0x00001094  /* Pulse Output Timer Control Register 3 */
+#define R_GPTP_POTCR_OFFSET(m)                    (0x00001004 + ((m) * 0x00000030))  /* Pulse Output Timer Control Register %s */
 /* POTSTR%sU Registers (0-3) */
-#define R_GPTP_POTSTR0U_OFFSET     0x00001008  /* Pulse Output Start Time Setting Register nU */
-#define R_GPTP_POTSTR1U_OFFSET     0x00001038  /* Pulse Output Start Time Setting Register nU */
-#define R_GPTP_POTSTR2U_OFFSET     0x00001068  /* Pulse Output Start Time Setting Register nU */
-#define R_GPTP_POTSTR3U_OFFSET     0x00001098  /* Pulse Output Start Time Setting Register nU */
+#define R_GPTP_POTSTRU_OFFSET(m)                  (0x00001008 + ((m) * 0x00000030))  /* Pulse Output Start Time Setting Register nU */
 /* POTSTR%sM Registers (0-3) */
-#define R_GPTP_POTSTR0M_OFFSET     0x0000100c  /* Pulse Output Start Time Setting Register nM */
-#define R_GPTP_POTSTR1M_OFFSET     0x0000103c  /* Pulse Output Start Time Setting Register nM */
-#define R_GPTP_POTSTR2M_OFFSET     0x0000106c  /* Pulse Output Start Time Setting Register nM */
-#define R_GPTP_POTSTR3M_OFFSET     0x0000109c  /* Pulse Output Start Time Setting Register nM */
+#define R_GPTP_POTSTRM_OFFSET(m)                  (0x0000100c + ((m) * 0x00000030))  /* Pulse Output Start Time Setting Register nM */
 /* POTSTR%sL Registers (0-3) */
-#define R_GPTP_POTSTR0L_OFFSET     0x00001010  /* Pulse Output Start Time Setting Register nL */
-#define R_GPTP_POTSTR1L_OFFSET     0x00001040  /* Pulse Output Start Time Setting Register nL */
-#define R_GPTP_POTSTR2L_OFFSET     0x00001070  /* Pulse Output Start Time Setting Register nL */
-#define R_GPTP_POTSTR3L_OFFSET     0x000010a0  /* Pulse Output Start Time Setting Register nL */
+#define R_GPTP_POTSTRL_OFFSET(m)                  (0x00001010 + ((m) * 0x00000030))  /* Pulse Output Start Time Setting Register nL */
 /* POTPER%sU Registers (0-3) */
-#define R_GPTP_POTPER0U_OFFSET     0x00001014  /* Period Setting Register nU */
-#define R_GPTP_POTPER1U_OFFSET     0x00001044  /* Period Setting Register nU */
-#define R_GPTP_POTPER2U_OFFSET     0x00001074  /* Period Setting Register nU */
-#define R_GPTP_POTPER3U_OFFSET     0x000010a4  /* Period Setting Register nU */
+#define R_GPTP_POTPERU_OFFSET(m)                  (0x00001014 + ((m) * 0x00000030))  /* Period Setting Register nU */
 /* POTPER%sM Registers (0-3) */
-#define R_GPTP_POTPER0M_OFFSET     0x00001018  /* Period Setting Register nM */
-#define R_GPTP_POTPER1M_OFFSET     0x00001048  /* Period Setting Register nM */
-#define R_GPTP_POTPER2M_OFFSET     0x00001078  /* Period Setting Register nM */
-#define R_GPTP_POTPER3M_OFFSET     0x000010a8  /* Period Setting Register nM */
+#define R_GPTP_POTPERM_OFFSET(m)                  (0x00001018 + ((m) * 0x00000030))  /* Period Setting Register nM */
 /* POTPER%sL Registers (0-3) */
-#define R_GPTP_POTPER0L_OFFSET     0x0000101c  /* Period Setting Register nL */
-#define R_GPTP_POTPER1L_OFFSET     0x0000104c  /* Period Setting Register nL */
-#define R_GPTP_POTPER2L_OFFSET     0x0000107c  /* Period Setting Register nL */
-#define R_GPTP_POTPER3L_OFFSET     0x000010ac  /* Period Setting Register nL */
+#define R_GPTP_POTPERL_OFFSET(m)                  (0x0000101c + ((m) * 0x00000030))  /* Period Setting Register nL */
 /* POTPWR%s Registers (0-3) */
-#define R_GPTP_POTPWR0_OFFSET     0x00001020  /* Pulse Width Setting Register 0 */
-#define R_GPTP_POTPWR1_OFFSET     0x00001050  /* Pulse Width Setting Register 1 */
-#define R_GPTP_POTPWR2_OFFSET     0x00001080  /* Pulse Width Setting Register 2 */
-#define R_GPTP_POTPWR3_OFFSET     0x000010b0  /* Pulse Width Setting Register 3 */
+#define R_GPTP_POTPWR_OFFSET(m)                   (0x00001020 + ((m) * 0x00000030))  /* Pulse Width Setting Register %s */
 /* POTCPR%sU Registers (0-3) */
-#define R_GPTP_POTCPR0U_OFFSET     0x00001028  /* Time Capture Register nU */
-#define R_GPTP_POTCPR1U_OFFSET     0x00001058  /* Time Capture Register nU */
-#define R_GPTP_POTCPR2U_OFFSET     0x00001088  /* Time Capture Register nU */
-#define R_GPTP_POTCPR3U_OFFSET     0x000010b8  /* Time Capture Register nU */
+#define R_GPTP_POTCPRU_OFFSET(m)                  (0x00001028 + ((m) * 0x00000030))  /* Time Capture Register nU */
 /* POTCPR%sM Registers (0-3) */
-#define R_GPTP_POTCPR0M_OFFSET     0x0000102c  /* Time Capture Register nM */
-#define R_GPTP_POTCPR1M_OFFSET     0x0000105c  /* Time Capture Register nM */
-#define R_GPTP_POTCPR2M_OFFSET     0x0000108c  /* Time Capture Register nM */
-#define R_GPTP_POTCPR3M_OFFSET     0x000010bc  /* Time Capture Register nM */
+#define R_GPTP_POTCPRM_OFFSET(m)                  (0x0000102c + ((m) * 0x00000030))  /* Time Capture Register nM */
 /* POTCPR%sL Registers (0-3) */
-#define R_GPTP_POTCPR0L_OFFSET     0x00001030  /* Time Capture Register nL */
-#define R_GPTP_POTCPR1L_OFFSET     0x00001060  /* Time Capture Register nL */
-#define R_GPTP_POTCPR2L_OFFSET     0x00001090  /* Time Capture Register nL */
-#define R_GPTP_POTCPR3L_OFFSET     0x000010c0  /* Time Capture Register nL */
+#define R_GPTP_POTCPRL_OFFSET(m)                  (0x00001030 + ((m) * 0x00000030))  /* Time Capture Register nL */
 
 /* GPTP Register Addresses */
 
-#define R_GPTP_PTPIPV                 (R_GPTP_BASE + R_GPTP_PTPIPV_OFFSET)
-#define R_GPTP_PTPTMEC                 (R_GPTP_BASE + R_GPTP_PTPTMEC_OFFSET)
-#define R_GPTP_PTPTMDC                 (R_GPTP_BASE + R_GPTP_PTPTMDC_OFFSET)
-#define R_GPTP_PTPTIVC0                 (R_GPTP_BASE + R_GPTP_PTPTIVC0_OFFSET)
-#define R_GPTP_PTPTIVC1                 (R_GPTP_BASE + R_GPTP_PTPTIVC1_OFFSET)
-#define R_GPTP_PTPTOVC0L                 (R_GPTP_BASE + R_GPTP_PTPTOVC0L_OFFSET)
-#define R_GPTP_PTPTOVC1L                 (R_GPTP_BASE + R_GPTP_PTPTOVC1L_OFFSET)
-#define R_GPTP_PTPTOVCM0                 (R_GPTP_BASE + R_GPTP_PTPTOVCM0_OFFSET)
-#define R_GPTP_PTPTOVCM1                 (R_GPTP_BASE + R_GPTP_PTPTOVCM1_OFFSET)
-#define R_GPTP_PTPTOVC0U                 (R_GPTP_BASE + R_GPTP_PTPTOVC0U_OFFSET)
-#define R_GPTP_PTPTOVC1U                 (R_GPTP_BASE + R_GPTP_PTPTOVC1U_OFFSET)
-#define R_GPTP_PTPAVTPTM0L                 (R_GPTP_BASE + R_GPTP_PTPAVTPTM0L_OFFSET)
-#define R_GPTP_PTPAVTPTM1L                 (R_GPTP_BASE + R_GPTP_PTPAVTPTM1L_OFFSET)
-#define R_GPTP_PTPAVTPTM0U                 (R_GPTP_BASE + R_GPTP_PTPAVTPTM0U_OFFSET)
-#define R_GPTP_PTPAVTPTM1U                 (R_GPTP_BASE + R_GPTP_PTPAVTPTM1U_OFFSET)
-#define R_GPTP_PTPGPTPTM0L                 (R_GPTP_BASE + R_GPTP_PTPGPTPTM0L_OFFSET)
-#define R_GPTP_PTPGPTPTM1L                 (R_GPTP_BASE + R_GPTP_PTPGPTPTM1L_OFFSET)
-#define R_GPTP_PTPGPTPTM0M                 (R_GPTP_BASE + R_GPTP_PTPGPTPTM0M_OFFSET)
-#define R_GPTP_PTPGPTPTM1M                 (R_GPTP_BASE + R_GPTP_PTPGPTPTM1M_OFFSET)
-#define R_GPTP_PTPGPTPTM0U                 (R_GPTP_BASE + R_GPTP_PTPGPTPTM0U_OFFSET)
-#define R_GPTP_PTPGPTPTM1U                 (R_GPTP_BASE + R_GPTP_PTPGPTPTM1U_OFFSET)
-#define R_GPTP_PTPMCCC0                 (R_GPTP_BASE + R_GPTP_PTPMCCC0_OFFSET)
-#define R_GPTP_PTPMCCC1                 (R_GPTP_BASE + R_GPTP_PTPMCCC1_OFFSET)
-#define R_GPTP_PTPMCCM0L                 (R_GPTP_BASE + R_GPTP_PTPMCCM0L_OFFSET)
-#define R_GPTP_PTPMCCM1L                 (R_GPTP_BASE + R_GPTP_PTPMCCM1L_OFFSET)
-#define R_GPTP_PTPMCCM0M                 (R_GPTP_BASE + R_GPTP_PTPMCCM0M_OFFSET)
-#define R_GPTP_PTPMCCM1M                 (R_GPTP_BASE + R_GPTP_PTPMCCM1M_OFFSET)
-#define R_GPTP_PTPMCCM0U                 (R_GPTP_BASE + R_GPTP_PTPMCCM0U_OFFSET)
-#define R_GPTP_PTPMCCM1U                 (R_GPTP_BASE + R_GPTP_PTPMCCM1U_OFFSET)
-#define R_GPTP_PTPMCRC0                 (R_GPTP_BASE + R_GPTP_PTPMCRC0_OFFSET)
-#define R_GPTP_PTPMCRC1                 (R_GPTP_BASE + R_GPTP_PTPMCRC1_OFFSET)
-#define R_GPTP_PTPMCRTC0L                 (R_GPTP_BASE + R_GPTP_PTPMCRTC0L_OFFSET)
-#define R_GPTP_PTPMCRTC1L                 (R_GPTP_BASE + R_GPTP_PTPMCRTC1L_OFFSET)
-#define R_GPTP_PTPMCRTC0M                 (R_GPTP_BASE + R_GPTP_PTPMCRTC0M_OFFSET)
-#define R_GPTP_PTPMCRTC1M                 (R_GPTP_BASE + R_GPTP_PTPMCRTC1M_OFFSET)
-#define R_GPTP_PTPMCRTC0U                 (R_GPTP_BASE + R_GPTP_PTPMCRTC0U_OFFSET)
-#define R_GPTP_PTPMCRTC1U                 (R_GPTP_BASE + R_GPTP_PTPMCRTC1U_OFFSET)
-#define R_GPTP_PTPMCPC0                 (R_GPTP_BASE + R_GPTP_PTPMCPC0_OFFSET)
-#define R_GPTP_PTPMCPC1                 (R_GPTP_BASE + R_GPTP_PTPMCPC1_OFFSET)
-#define R_GPTP_PTPCCC00                 (R_GPTP_BASE + R_GPTP_PTPCCC00_OFFSET)
-#define R_GPTP_PTPCCC10                 (R_GPTP_BASE + R_GPTP_PTPCCC10_OFFSET)
-#define R_GPTP_PTPCCC20                 (R_GPTP_BASE + R_GPTP_PTPCCC20_OFFSET)
-#define R_GPTP_PTPCCC30                 (R_GPTP_BASE + R_GPTP_PTPCCC30_OFFSET)
-#define R_GPTP_PTPCCC40                 (R_GPTP_BASE + R_GPTP_PTPCCC40_OFFSET)
-#define R_GPTP_PTPCCC50                 (R_GPTP_BASE + R_GPTP_PTPCCC50_OFFSET)
-#define R_GPTP_PTPCCC60                 (R_GPTP_BASE + R_GPTP_PTPCCC60_OFFSET)
-#define R_GPTP_PTPCCC70                 (R_GPTP_BASE + R_GPTP_PTPCCC70_OFFSET)
-#define R_GPTP_PTPCCC01                 (R_GPTP_BASE + R_GPTP_PTPCCC01_OFFSET)
-#define R_GPTP_PTPCCC11                 (R_GPTP_BASE + R_GPTP_PTPCCC11_OFFSET)
-#define R_GPTP_PTPCCC21                 (R_GPTP_BASE + R_GPTP_PTPCCC21_OFFSET)
-#define R_GPTP_PTPCCC31                 (R_GPTP_BASE + R_GPTP_PTPCCC31_OFFSET)
-#define R_GPTP_PTPCCC41                 (R_GPTP_BASE + R_GPTP_PTPCCC41_OFFSET)
-#define R_GPTP_PTPCCC51                 (R_GPTP_BASE + R_GPTP_PTPCCC51_OFFSET)
-#define R_GPTP_PTPCCC61                 (R_GPTP_BASE + R_GPTP_PTPCCC61_OFFSET)
-#define R_GPTP_PTPCCC71                 (R_GPTP_BASE + R_GPTP_PTPCCC71_OFFSET)
-#define R_GPTP_PTPIS0                 (R_GPTP_BASE + R_GPTP_PTPIS0_OFFSET)
-#define R_GPTP_PTPIE0                 (R_GPTP_BASE + R_GPTP_PTPIE0_OFFSET)
-#define R_GPTP_PTPID0                 (R_GPTP_BASE + R_GPTP_PTPID0_OFFSET)
-#define R_GPTP_PTPIS1                 (R_GPTP_BASE + R_GPTP_PTPIS1_OFFSET)
-#define R_GPTP_PTPIE1                 (R_GPTP_BASE + R_GPTP_PTPIE1_OFFSET)
-#define R_GPTP_PTPID1                 (R_GPTP_BASE + R_GPTP_PTPID1_OFFSET)
-#define R_GPTP_POTCFGR                 (R_GPTP_BASE + R_GPTP_POTCFGR_OFFSET)
-#define R_GPTP_POTCR0                 (R_GPTP_BASE + R_GPTP_POTCR0_OFFSET)
-#define R_GPTP_POTCR1                 (R_GPTP_BASE + R_GPTP_POTCR1_OFFSET)
-#define R_GPTP_POTCR2                 (R_GPTP_BASE + R_GPTP_POTCR2_OFFSET)
-#define R_GPTP_POTCR3                 (R_GPTP_BASE + R_GPTP_POTCR3_OFFSET)
-#define R_GPTP_POTSTR0U                 (R_GPTP_BASE + R_GPTP_POTSTR0U_OFFSET)
-#define R_GPTP_POTSTR1U                 (R_GPTP_BASE + R_GPTP_POTSTR1U_OFFSET)
-#define R_GPTP_POTSTR2U                 (R_GPTP_BASE + R_GPTP_POTSTR2U_OFFSET)
-#define R_GPTP_POTSTR3U                 (R_GPTP_BASE + R_GPTP_POTSTR3U_OFFSET)
-#define R_GPTP_POTSTR0M                 (R_GPTP_BASE + R_GPTP_POTSTR0M_OFFSET)
-#define R_GPTP_POTSTR1M                 (R_GPTP_BASE + R_GPTP_POTSTR1M_OFFSET)
-#define R_GPTP_POTSTR2M                 (R_GPTP_BASE + R_GPTP_POTSTR2M_OFFSET)
-#define R_GPTP_POTSTR3M                 (R_GPTP_BASE + R_GPTP_POTSTR3M_OFFSET)
-#define R_GPTP_POTSTR0L                 (R_GPTP_BASE + R_GPTP_POTSTR0L_OFFSET)
-#define R_GPTP_POTSTR1L                 (R_GPTP_BASE + R_GPTP_POTSTR1L_OFFSET)
-#define R_GPTP_POTSTR2L                 (R_GPTP_BASE + R_GPTP_POTSTR2L_OFFSET)
-#define R_GPTP_POTSTR3L                 (R_GPTP_BASE + R_GPTP_POTSTR3L_OFFSET)
-#define R_GPTP_POTPER0U                 (R_GPTP_BASE + R_GPTP_POTPER0U_OFFSET)
-#define R_GPTP_POTPER1U                 (R_GPTP_BASE + R_GPTP_POTPER1U_OFFSET)
-#define R_GPTP_POTPER2U                 (R_GPTP_BASE + R_GPTP_POTPER2U_OFFSET)
-#define R_GPTP_POTPER3U                 (R_GPTP_BASE + R_GPTP_POTPER3U_OFFSET)
-#define R_GPTP_POTPER0M                 (R_GPTP_BASE + R_GPTP_POTPER0M_OFFSET)
-#define R_GPTP_POTPER1M                 (R_GPTP_BASE + R_GPTP_POTPER1M_OFFSET)
-#define R_GPTP_POTPER2M                 (R_GPTP_BASE + R_GPTP_POTPER2M_OFFSET)
-#define R_GPTP_POTPER3M                 (R_GPTP_BASE + R_GPTP_POTPER3M_OFFSET)
-#define R_GPTP_POTPER0L                 (R_GPTP_BASE + R_GPTP_POTPER0L_OFFSET)
-#define R_GPTP_POTPER1L                 (R_GPTP_BASE + R_GPTP_POTPER1L_OFFSET)
-#define R_GPTP_POTPER2L                 (R_GPTP_BASE + R_GPTP_POTPER2L_OFFSET)
-#define R_GPTP_POTPER3L                 (R_GPTP_BASE + R_GPTP_POTPER3L_OFFSET)
-#define R_GPTP_POTPWR0                 (R_GPTP_BASE + R_GPTP_POTPWR0_OFFSET)
-#define R_GPTP_POTPWR1                 (R_GPTP_BASE + R_GPTP_POTPWR1_OFFSET)
-#define R_GPTP_POTPWR2                 (R_GPTP_BASE + R_GPTP_POTPWR2_OFFSET)
-#define R_GPTP_POTPWR3                 (R_GPTP_BASE + R_GPTP_POTPWR3_OFFSET)
-#define R_GPTP_POTCPR0U                 (R_GPTP_BASE + R_GPTP_POTCPR0U_OFFSET)
-#define R_GPTP_POTCPR1U                 (R_GPTP_BASE + R_GPTP_POTCPR1U_OFFSET)
-#define R_GPTP_POTCPR2U                 (R_GPTP_BASE + R_GPTP_POTCPR2U_OFFSET)
-#define R_GPTP_POTCPR3U                 (R_GPTP_BASE + R_GPTP_POTCPR3U_OFFSET)
-#define R_GPTP_POTCPR0M                 (R_GPTP_BASE + R_GPTP_POTCPR0M_OFFSET)
-#define R_GPTP_POTCPR1M                 (R_GPTP_BASE + R_GPTP_POTCPR1M_OFFSET)
-#define R_GPTP_POTCPR2M                 (R_GPTP_BASE + R_GPTP_POTCPR2M_OFFSET)
-#define R_GPTP_POTCPR3M                 (R_GPTP_BASE + R_GPTP_POTCPR3M_OFFSET)
-#define R_GPTP_POTCPR0L                 (R_GPTP_BASE + R_GPTP_POTCPR0L_OFFSET)
-#define R_GPTP_POTCPR1L                 (R_GPTP_BASE + R_GPTP_POTCPR1L_OFFSET)
-#define R_GPTP_POTCPR2L                 (R_GPTP_BASE + R_GPTP_POTCPR2L_OFFSET)
-#define R_GPTP_POTCPR3L                 (R_GPTP_BASE + R_GPTP_POTCPR3L_OFFSET)
+#define R_GPTP_PTPIPV                             (R_GPTP_BASE + R_GPTP_PTPIPV_OFFSET)
+#define R_GPTP_PTPTMEC                            (R_GPTP_BASE + R_GPTP_PTPTMEC_OFFSET)
+#define R_GPTP_PTPTMDC                            (R_GPTP_BASE + R_GPTP_PTPTMDC_OFFSET)
+#define R_GPTP_PTPTIVC(m)                         (R_GPTP_BASE + R_GPTP_PTPTIVC_OFFSET(m))
+#define R_GPTP_PTPTOVCL(m)                        (R_GPTP_BASE + R_GPTP_PTPTOVCL_OFFSET(m))
+#define R_GPTP_PTPTOVCM(m)                        (R_GPTP_BASE + R_GPTP_PTPTOVCM_OFFSET(m))
+#define R_GPTP_PTPTOVCU(m)                        (R_GPTP_BASE + R_GPTP_PTPTOVCU_OFFSET(m))
+#define R_GPTP_PTPAVTPTML(m)                      (R_GPTP_BASE + R_GPTP_PTPAVTPTML_OFFSET(m))
+#define R_GPTP_PTPAVTPTMU(m)                      (R_GPTP_BASE + R_GPTP_PTPAVTPTMU_OFFSET(m))
+#define R_GPTP_PTPGPTPTML(m)                      (R_GPTP_BASE + R_GPTP_PTPGPTPTML_OFFSET(m))
+#define R_GPTP_PTPGPTPTMM(m)                      (R_GPTP_BASE + R_GPTP_PTPGPTPTMM_OFFSET(m))
+#define R_GPTP_PTPGPTPTMU(m)                      (R_GPTP_BASE + R_GPTP_PTPGPTPTMU_OFFSET(m))
+#define R_GPTP_PTPMCCC(m)                         (R_GPTP_BASE + R_GPTP_PTPMCCC_OFFSET(m))
+#define R_GPTP_PTPMCCML(m)                        (R_GPTP_BASE + R_GPTP_PTPMCCML_OFFSET(m))
+#define R_GPTP_PTPMCCMM(m)                        (R_GPTP_BASE + R_GPTP_PTPMCCMM_OFFSET(m))
+#define R_GPTP_PTPMCCMU(m)                        (R_GPTP_BASE + R_GPTP_PTPMCCMU_OFFSET(m))
+#define R_GPTP_PTPMCRC(m)                         (R_GPTP_BASE + R_GPTP_PTPMCRC_OFFSET(m))
+#define R_GPTP_PTPMCRTCL(m)                       (R_GPTP_BASE + R_GPTP_PTPMCRTCL_OFFSET(m))
+#define R_GPTP_PTPMCRTCM(m)                       (R_GPTP_BASE + R_GPTP_PTPMCRTCM_OFFSET(m))
+#define R_GPTP_PTPMCRTCU(m)                       (R_GPTP_BASE + R_GPTP_PTPMCRTCU_OFFSET(m))
+#define R_GPTP_PTPMCPC(m)                         (R_GPTP_BASE + R_GPTP_PTPMCPC_OFFSET(m))
+#define R_GPTP_PTPCCC0(m)                         (R_GPTP_BASE + R_GPTP_PTPCCC0_OFFSET(m))
+#define R_GPTP_PTPCCC1(m)                         (R_GPTP_BASE + R_GPTP_PTPCCC1_OFFSET(m))
+#define R_GPTP_PTPIS0                             (R_GPTP_BASE + R_GPTP_PTPIS0_OFFSET)
+#define R_GPTP_PTPIE0                             (R_GPTP_BASE + R_GPTP_PTPIE0_OFFSET)
+#define R_GPTP_PTPID0                             (R_GPTP_BASE + R_GPTP_PTPID0_OFFSET)
+#define R_GPTP_PTPIS1                             (R_GPTP_BASE + R_GPTP_PTPIS1_OFFSET)
+#define R_GPTP_PTPIE1                             (R_GPTP_BASE + R_GPTP_PTPIE1_OFFSET)
+#define R_GPTP_PTPID1                             (R_GPTP_BASE + R_GPTP_PTPID1_OFFSET)
+#define R_GPTP_POTCFGR                            (R_GPTP_BASE + R_GPTP_POTCFGR_OFFSET)
+#define R_GPTP_POTCR(m)                           (R_GPTP_BASE + R_GPTP_POTCR_OFFSET(m))
+#define R_GPTP_POTSTRU(m)                         (R_GPTP_BASE + R_GPTP_POTSTRU_OFFSET(m))
+#define R_GPTP_POTSTRM(m)                         (R_GPTP_BASE + R_GPTP_POTSTRM_OFFSET(m))
+#define R_GPTP_POTSTRL(m)                         (R_GPTP_BASE + R_GPTP_POTSTRL_OFFSET(m))
+#define R_GPTP_POTPERU(m)                         (R_GPTP_BASE + R_GPTP_POTPERU_OFFSET(m))
+#define R_GPTP_POTPERM(m)                         (R_GPTP_BASE + R_GPTP_POTPERM_OFFSET(m))
+#define R_GPTP_POTPERL(m)                         (R_GPTP_BASE + R_GPTP_POTPERL_OFFSET(m))
+#define R_GPTP_POTPWR(m)                          (R_GPTP_BASE + R_GPTP_POTPWR_OFFSET(m))
+#define R_GPTP_POTCPRU(m)                         (R_GPTP_BASE + R_GPTP_POTCPRU_OFFSET(m))
+#define R_GPTP_POTCPRM(m)                         (R_GPTP_BASE + R_GPTP_POTCPRM_OFFSET(m))
+#define R_GPTP_POTCPRL(m)                         (R_GPTP_BASE + R_GPTP_POTCPRL_OFFSET(m))
 
 /* Register bit definitions */
 /* PTPIPV Register bit definitions */

@@ -38,610 +38,228 @@
 #endif
 #endif
 
-/* Channel stride for multi-channel peripherals */
-#define R_GWCA_CH_STRIDE    0x00000004
-#define R_GWCA_CH_BASE(ch)   (R_GWCA_BASE + ((uint32_t)(ch) * R_GWCA_CH_STRIDE))
-
 /* GWCA Register Offsets */
 
-#define R_GWCA_GWMC_OFFSET     0x00000000  /* Mode Configuration Register */
-#define R_GWCA_GWMS_OFFSET     0x00000004  /* Mode Status Register */
-#define R_GWCA_GWIRC_OFFSET     0x00000010  /* IPV Remapping Configuration Register [802.1Q] */
-#define R_GWCA_GWRDQSC_OFFSET     0x00000014  /* RX Descriptor Queue Security Configuration Register */
-#define R_GWCA_GWRDQC_OFFSET     0x00000018  /* RX Descriptor Queue Control Register */
-#define R_GWCA_GWRDQAC_OFFSET     0x0000001c  /* RX Descriptor Queue Arbitration Control Register */
-#define R_GWCA_GWRGC_OFFSET     0x00000020  /* RX General Configuration Register */
+#define R_GWCA_GWMC_OFFSET                        0x00000000  /* Mode Configuration Register */
+#define R_GWCA_GWMS_OFFSET                        0x00000004  /* Mode Status Register */
+#define R_GWCA_GWIRC_OFFSET                       0x00000010  /* IPV Remapping Configuration Register [802.1Q] */
+#define R_GWCA_GWRDQSC_OFFSET                     0x00000014  /* RX Descriptor Queue Security Configuration Register */
+#define R_GWCA_GWRDQC_OFFSET                      0x00000018  /* RX Descriptor Queue Control Register */
+#define R_GWCA_GWRDQAC_OFFSET                     0x0000001c  /* RX Descriptor Queue Arbitration Control Register */
+#define R_GWCA_GWRGC_OFFSET                       0x00000020  /* RX General Configuration Register */
 /* GWRMFSC%s Registers (0-7) */
-#define R_GWCA_GWRMFSC0_OFFSET     0x00000040  /* Reception Maximum Frame Size Configuration Register 0 */
-#define R_GWCA_GWRMFSC1_OFFSET     0x00000044  /* Reception Maximum Frame Size Configuration Register 1 */
-#define R_GWCA_GWRMFSC2_OFFSET     0x00000048  /* Reception Maximum Frame Size Configuration Register 2 */
-#define R_GWCA_GWRMFSC3_OFFSET     0x0000004c  /* Reception Maximum Frame Size Configuration Register 3 */
-#define R_GWCA_GWRMFSC4_OFFSET     0x00000050  /* Reception Maximum Frame Size Configuration Register 4 */
-#define R_GWCA_GWRMFSC5_OFFSET     0x00000054  /* Reception Maximum Frame Size Configuration Register 5 */
-#define R_GWCA_GWRMFSC6_OFFSET     0x00000058  /* Reception Maximum Frame Size Configuration Register 6 */
-#define R_GWCA_GWRMFSC7_OFFSET     0x0000005c  /* Reception Maximum Frame Size Configuration Register 7 */
+#define R_GWCA_GWRMFSC_OFFSET(m)                  (0x00000040 + ((m) * 0x00000004))  /* Reception Maximum Frame Size Configuration Register %s */
 /* GWRDQDC%s Registers (0-7) */
-#define R_GWCA_GWRDQDC0_OFFSET     0x00000060  /* Reception Descriptor Queue 0 Depth Configuration Register */
-#define R_GWCA_GWRDQDC1_OFFSET     0x00000064  /* Reception Descriptor Queue 1 Depth Configuration Register */
-#define R_GWCA_GWRDQDC2_OFFSET     0x00000068  /* Reception Descriptor Queue 2 Depth Configuration Register */
-#define R_GWCA_GWRDQDC3_OFFSET     0x0000006c  /* Reception Descriptor Queue 3 Depth Configuration Register */
-#define R_GWCA_GWRDQDC4_OFFSET     0x00000070  /* Reception Descriptor Queue 4 Depth Configuration Register */
-#define R_GWCA_GWRDQDC5_OFFSET     0x00000074  /* Reception Descriptor Queue 5 Depth Configuration Register */
-#define R_GWCA_GWRDQDC6_OFFSET     0x00000078  /* Reception Descriptor Queue 6 Depth Configuration Register */
-#define R_GWCA_GWRDQDC7_OFFSET     0x0000007c  /* Reception Descriptor Queue 7 Depth Configuration Register */
+#define R_GWCA_GWRDQDC_OFFSET(m)                  (0x00000060 + ((m) * 0x00000004))  /* Reception Descriptor Queue %s Depth Configuration Register */
 /* GWRDQM%s Registers (0-7) */
-#define R_GWCA_GWRDQM0_OFFSET     0x00000080  /* RX Descriptor Queue 0 Monitoring Register */
-#define R_GWCA_GWRDQM1_OFFSET     0x00000084  /* RX Descriptor Queue 1 Monitoring Register */
-#define R_GWCA_GWRDQM2_OFFSET     0x00000088  /* RX Descriptor Queue 2 Monitoring Register */
-#define R_GWCA_GWRDQM3_OFFSET     0x0000008c  /* RX Descriptor Queue 3 Monitoring Register */
-#define R_GWCA_GWRDQM4_OFFSET     0x00000090  /* RX Descriptor Queue 4 Monitoring Register */
-#define R_GWCA_GWRDQM5_OFFSET     0x00000094  /* RX Descriptor Queue 5 Monitoring Register */
-#define R_GWCA_GWRDQM6_OFFSET     0x00000098  /* RX Descriptor Queue 6 Monitoring Register */
-#define R_GWCA_GWRDQM7_OFFSET     0x0000009c  /* RX Descriptor Queue 7 Monitoring Register */
+#define R_GWCA_GWRDQM_OFFSET(m)                   (0x00000080 + ((m) * 0x00000004))  /* RX Descriptor Queue %s Monitoring Register */
 /* GWRDQMLM%s Registers (0-7) */
-#define R_GWCA_GWRDQMLM0_OFFSET     0x000000a0  /* RX Descriptor Queue 0 Max Level Monitoring Register */
-#define R_GWCA_GWRDQMLM1_OFFSET     0x000000a4  /* RX Descriptor Queue 1 Max Level Monitoring Register */
-#define R_GWCA_GWRDQMLM2_OFFSET     0x000000a8  /* RX Descriptor Queue 2 Max Level Monitoring Register */
-#define R_GWCA_GWRDQMLM3_OFFSET     0x000000ac  /* RX Descriptor Queue 3 Max Level Monitoring Register */
-#define R_GWCA_GWRDQMLM4_OFFSET     0x000000b0  /* RX Descriptor Queue 4 Max Level Monitoring Register */
-#define R_GWCA_GWRDQMLM5_OFFSET     0x000000b4  /* RX Descriptor Queue 5 Max Level Monitoring Register */
-#define R_GWCA_GWRDQMLM6_OFFSET     0x000000b8  /* RX Descriptor Queue 6 Max Level Monitoring Register */
-#define R_GWCA_GWRDQMLM7_OFFSET     0x000000bc  /* RX Descriptor Queue 7 Max Level Monitoring Register */
-#define R_GWCA_GWMTIRM_OFFSET     0x00000100  /* Multicast Table Initialization Register Monitoring Register */
-#define R_GWCA_GWMSTLS_OFFSET     0x00000104  /* Multicast Table Learning Setting Register */
-#define R_GWCA_GWMSTLR_OFFSET     0x00000108  /* Multicast Table Learning Result Register */
-#define R_GWCA_GWMSTSS_OFFSET     0x0000010c  /* Multicast Table Searching Setting Register */
-#define R_GWCA_GWMSTSR_OFFSET     0x00000110  /* Multicast Table Searching Result Register */
-#define R_GWCA_GWMAC0_OFFSET     0x00000120  /* MAC Address Configuration Register 0 */
-#define R_GWCA_GWMAC1_OFFSET     0x00000124  /* MAC Address Configuration Register 1 */
-#define R_GWCA_GWVCC_OFFSET     0x00000130  /* VLAN Control Configuration Register */
-#define R_GWCA_GWVTC_OFFSET     0x00000134  /* VLAN TAG Configuration Register */
-#define R_GWCA_GWTTFC_OFFSET     0x00000138  /* Transmission TAG Filtering Configuration Register */
+#define R_GWCA_GWRDQMLM_OFFSET(m)                 (0x000000a0 + ((m) * 0x00000004))  /* RX Descriptor Queue %s Max Level Monitoring Register */
+#define R_GWCA_GWMTIRM_OFFSET                     0x00000100  /* Multicast Table Initialization Register Monitoring Register */
+#define R_GWCA_GWMSTLS_OFFSET                     0x00000104  /* Multicast Table Learning Setting Register */
+#define R_GWCA_GWMSTLR_OFFSET                     0x00000108  /* Multicast Table Learning Result Register */
+#define R_GWCA_GWMSTSS_OFFSET                     0x0000010c  /* Multicast Table Searching Setting Register */
+#define R_GWCA_GWMSTSR_OFFSET                     0x00000110  /* Multicast Table Searching Result Register */
+#define R_GWCA_GWMAC0_OFFSET                      0x00000120  /* MAC Address Configuration Register 0 */
+#define R_GWCA_GWMAC1_OFFSET                      0x00000124  /* MAC Address Configuration Register 1 */
+#define R_GWCA_GWVCC_OFFSET                       0x00000130  /* VLAN Control Configuration Register */
+#define R_GWCA_GWVTC_OFFSET                       0x00000134  /* VLAN TAG Configuration Register */
+#define R_GWCA_GWTTFC_OFFSET                      0x00000138  /* Transmission TAG Filtering Configuration Register */
 /* GWTDCAC%s0 Registers (0-1) */
-#define R_GWCA_GWTDCAC00_OFFSET     0x00000140  /* Timestamp Descriptor Chain 0 Address Configuration Register 0 */
-#define R_GWCA_GWTDCAC10_OFFSET     0x00000148  /* Timestamp Descriptor Chain 1 Address Configuration Register 0 */
+#define R_GWCA_GWTDCAC0_OFFSET(m)                 (0x00000140 + ((m) * 0x00000008))  /* Timestamp Descriptor Chain %s Address Configuration Register 0 */
 /* GWTDCAC%s1 Registers (0-1) */
-#define R_GWCA_GWTDCAC01_OFFSET     0x00000144  /* Timestamp Descriptor Chain 0 Address Configuration Register 1 */
-#define R_GWCA_GWTDCAC11_OFFSET     0x0000014c  /* Timestamp Descriptor Chain 1 Address Configuration Register 1 */
+#define R_GWCA_GWTDCAC1_OFFSET(m)                 (0x00000144 + ((m) * 0x00000008))  /* Timestamp Descriptor Chain %s Address Configuration Register 1 */
 /* GWTSDCC%s Registers (0-1) */
-#define R_GWCA_GWTSDCC0_OFFSET     0x00000160  /* Timestamp Descriptor Chain 0 Configuration Register */
-#define R_GWCA_GWTSDCC1_OFFSET     0x00000164  /* Timestamp Descriptor Chain 1 Configuration Register */
-#define R_GWCA_GWTSNM_OFFSET     0x00000180  /* Timestamp Number Monitoring Register */
-#define R_GWCA_GWTSMNM_OFFSET     0x00000184  /* Timestamp Maximum Number Monitoring Register */
-#define R_GWCA_GWAC_OFFSET     0x00000190  /* AXI Control Register */
-#define R_GWCA_GWDCBAC0_OFFSET     0x00000194  /* Descriptor Chain Base Address Configuration Register 0 */
-#define R_GWCA_GWDCBAC1_OFFSET     0x00000198  /* Descriptor Chain Base Address Configuration Register 1 */
-#define R_GWCA_GWMDNC_OFFSET     0x000001a0  /* Maximum Descriptor Number Configuration Register */
-#define R_GWCA_GWTRC0_OFFSET     0x00000200  /* Transmission Request Configuration Register  */
-#define R_GWCA_GWTRC1_OFFSET     0x00000204  /* Transmission Request Configuration Register  */
-#define R_GWCA_GWTPCP_OFFSET     0x00000300  /* Transmission Pause Configuration Register p (p = 0 to 1) */
-#define R_GWCA_GWARIRM_OFFSET     0x00000380  /* AXI RAM Initialization Register Monitoring Register */
+#define R_GWCA_GWTSDCC_OFFSET(m)                  (0x00000160 + ((m) * 0x00000004))  /* Timestamp Descriptor Chain %s Configuration Register */
+#define R_GWCA_GWTSNM_OFFSET                      0x00000180  /* Timestamp Number Monitoring Register */
+#define R_GWCA_GWTSMNM_OFFSET                     0x00000184  /* Timestamp Maximum Number Monitoring Register */
+#define R_GWCA_GWAC_OFFSET                        0x00000190  /* AXI Control Register */
+#define R_GWCA_GWDCBAC0_OFFSET                    0x00000194  /* Descriptor Chain Base Address Configuration Register 0 */
+#define R_GWCA_GWDCBAC1_OFFSET                    0x00000198  /* Descriptor Chain Base Address Configuration Register 1 */
+#define R_GWCA_GWMDNC_OFFSET                      0x000001a0  /* Maximum Descriptor Number Configuration Register */
+#define R_GWCA_GWTRC0_OFFSET                      0x00000200  /* Transmission Request Configuration Register  */
+#define R_GWCA_GWTRC1_OFFSET                      0x00000204  /* Transmission Request Configuration Register  */
+#define R_GWCA_GWTPCP_OFFSET                      0x00000300  /* Transmission Pause Configuration Register p (p = 0 to 1) */
+#define R_GWCA_GWARIRM_OFFSET                     0x00000380  /* AXI RAM Initialization Register Monitoring Register */
 /* GWDCC%s Registers (0-63) */
-#define R_GWCA_GWDCC00_OFFSET     0x00000400  /* Descriptor Chain 00 Configuration Register */
-#define R_GWCA_GWDCC01_OFFSET     0x00000404  /* Descriptor Chain 01 Configuration Register */
-#define R_GWCA_GWDCC02_OFFSET     0x00000408  /* Descriptor Chain 02 Configuration Register */
-#define R_GWCA_GWDCC03_OFFSET     0x0000040c  /* Descriptor Chain 03 Configuration Register */
-#define R_GWCA_GWDCC04_OFFSET     0x00000410  /* Descriptor Chain 04 Configuration Register */
-#define R_GWCA_GWDCC05_OFFSET     0x00000414  /* Descriptor Chain 05 Configuration Register */
-#define R_GWCA_GWDCC06_OFFSET     0x00000418  /* Descriptor Chain 06 Configuration Register */
-#define R_GWCA_GWDCC07_OFFSET     0x0000041c  /* Descriptor Chain 07 Configuration Register */
-#define R_GWCA_GWDCC08_OFFSET     0x00000420  /* Descriptor Chain 08 Configuration Register */
-#define R_GWCA_GWDCC09_OFFSET     0x00000424  /* Descriptor Chain 09 Configuration Register */
-#define R_GWCA_GWDCC10_OFFSET     0x00000428  /* Descriptor Chain 10 Configuration Register */
-#define R_GWCA_GWDCC11_OFFSET     0x0000042c  /* Descriptor Chain 11 Configuration Register */
-#define R_GWCA_GWDCC12_OFFSET     0x00000430  /* Descriptor Chain 12 Configuration Register */
-#define R_GWCA_GWDCC13_OFFSET     0x00000434  /* Descriptor Chain 13 Configuration Register */
-#define R_GWCA_GWDCC14_OFFSET     0x00000438  /* Descriptor Chain 14 Configuration Register */
-#define R_GWCA_GWDCC15_OFFSET     0x0000043c  /* Descriptor Chain 15 Configuration Register */
-#define R_GWCA_GWDCC16_OFFSET     0x00000440  /* Descriptor Chain 16 Configuration Register */
-#define R_GWCA_GWDCC17_OFFSET     0x00000444  /* Descriptor Chain 17 Configuration Register */
-#define R_GWCA_GWDCC18_OFFSET     0x00000448  /* Descriptor Chain 18 Configuration Register */
-#define R_GWCA_GWDCC19_OFFSET     0x0000044c  /* Descriptor Chain 19 Configuration Register */
-#define R_GWCA_GWDCC20_OFFSET     0x00000450  /* Descriptor Chain 20 Configuration Register */
-#define R_GWCA_GWDCC21_OFFSET     0x00000454  /* Descriptor Chain 21 Configuration Register */
-#define R_GWCA_GWDCC22_OFFSET     0x00000458  /* Descriptor Chain 22 Configuration Register */
-#define R_GWCA_GWDCC23_OFFSET     0x0000045c  /* Descriptor Chain 23 Configuration Register */
-#define R_GWCA_GWDCC24_OFFSET     0x00000460  /* Descriptor Chain 24 Configuration Register */
-#define R_GWCA_GWDCC25_OFFSET     0x00000464  /* Descriptor Chain 25 Configuration Register */
-#define R_GWCA_GWDCC26_OFFSET     0x00000468  /* Descriptor Chain 26 Configuration Register */
-#define R_GWCA_GWDCC27_OFFSET     0x0000046c  /* Descriptor Chain 27 Configuration Register */
-#define R_GWCA_GWDCC28_OFFSET     0x00000470  /* Descriptor Chain 28 Configuration Register */
-#define R_GWCA_GWDCC29_OFFSET     0x00000474  /* Descriptor Chain 29 Configuration Register */
-#define R_GWCA_GWDCC30_OFFSET     0x00000478  /* Descriptor Chain 30 Configuration Register */
-#define R_GWCA_GWDCC31_OFFSET     0x0000047c  /* Descriptor Chain 31 Configuration Register */
-#define R_GWCA_GWDCC32_OFFSET     0x00000480  /* Descriptor Chain 32 Configuration Register */
-#define R_GWCA_GWDCC33_OFFSET     0x00000484  /* Descriptor Chain 33 Configuration Register */
-#define R_GWCA_GWDCC34_OFFSET     0x00000488  /* Descriptor Chain 34 Configuration Register */
-#define R_GWCA_GWDCC35_OFFSET     0x0000048c  /* Descriptor Chain 35 Configuration Register */
-#define R_GWCA_GWDCC36_OFFSET     0x00000490  /* Descriptor Chain 36 Configuration Register */
-#define R_GWCA_GWDCC37_OFFSET     0x00000494  /* Descriptor Chain 37 Configuration Register */
-#define R_GWCA_GWDCC38_OFFSET     0x00000498  /* Descriptor Chain 38 Configuration Register */
-#define R_GWCA_GWDCC39_OFFSET     0x0000049c  /* Descriptor Chain 39 Configuration Register */
-#define R_GWCA_GWDCC40_OFFSET     0x000004a0  /* Descriptor Chain 40 Configuration Register */
-#define R_GWCA_GWDCC41_OFFSET     0x000004a4  /* Descriptor Chain 41 Configuration Register */
-#define R_GWCA_GWDCC42_OFFSET     0x000004a8  /* Descriptor Chain 42 Configuration Register */
-#define R_GWCA_GWDCC43_OFFSET     0x000004ac  /* Descriptor Chain 43 Configuration Register */
-#define R_GWCA_GWDCC44_OFFSET     0x000004b0  /* Descriptor Chain 44 Configuration Register */
-#define R_GWCA_GWDCC45_OFFSET     0x000004b4  /* Descriptor Chain 45 Configuration Register */
-#define R_GWCA_GWDCC46_OFFSET     0x000004b8  /* Descriptor Chain 46 Configuration Register */
-#define R_GWCA_GWDCC47_OFFSET     0x000004bc  /* Descriptor Chain 47 Configuration Register */
-#define R_GWCA_GWDCC48_OFFSET     0x000004c0  /* Descriptor Chain 48 Configuration Register */
-#define R_GWCA_GWDCC49_OFFSET     0x000004c4  /* Descriptor Chain 49 Configuration Register */
-#define R_GWCA_GWDCC50_OFFSET     0x000004c8  /* Descriptor Chain 50 Configuration Register */
-#define R_GWCA_GWDCC51_OFFSET     0x000004cc  /* Descriptor Chain 51 Configuration Register */
-#define R_GWCA_GWDCC52_OFFSET     0x000004d0  /* Descriptor Chain 52 Configuration Register */
-#define R_GWCA_GWDCC53_OFFSET     0x000004d4  /* Descriptor Chain 53 Configuration Register */
-#define R_GWCA_GWDCC54_OFFSET     0x000004d8  /* Descriptor Chain 54 Configuration Register */
-#define R_GWCA_GWDCC55_OFFSET     0x000004dc  /* Descriptor Chain 55 Configuration Register */
-#define R_GWCA_GWDCC56_OFFSET     0x000004e0  /* Descriptor Chain 56 Configuration Register */
-#define R_GWCA_GWDCC57_OFFSET     0x000004e4  /* Descriptor Chain 57 Configuration Register */
-#define R_GWCA_GWDCC58_OFFSET     0x000004e8  /* Descriptor Chain 58 Configuration Register */
-#define R_GWCA_GWDCC59_OFFSET     0x000004ec  /* Descriptor Chain 59 Configuration Register */
-#define R_GWCA_GWDCC60_OFFSET     0x000004f0  /* Descriptor Chain 60 Configuration Register */
-#define R_GWCA_GWDCC61_OFFSET     0x000004f4  /* Descriptor Chain 61 Configuration Register */
-#define R_GWCA_GWDCC62_OFFSET     0x000004f8  /* Descriptor Chain 62 Configuration Register */
-#define R_GWCA_GWDCC63_OFFSET     0x000004fc  /* Descriptor Chain 63 Configuration Register */
-#define R_GWCA_GWAARSS_OFFSET     0x00000800  /* AXI Address RAM Searching Setting Register */
-#define R_GWCA_GWAARSR0_OFFSET     0x00000804  /* AXI Address RAM Searching Result Register 0 */
-#define R_GWCA_GWAARSR1_OFFSET     0x00000808  /* AXI Address RAM Searching Result Register 1 */
+#define R_GWCA_GWDCC_OFFSET(m)                    (0x00000400 + ((m) * 0x00000004))  /* Descriptor Chain %s Configuration Register */
+#define R_GWCA_GWAARSS_OFFSET                     0x00000800  /* AXI Address RAM Searching Setting Register */
+#define R_GWCA_GWAARSR0_OFFSET                    0x00000804  /* AXI Address RAM Searching Result Register 0 */
+#define R_GWCA_GWAARSR1_OFFSET                    0x00000808  /* AXI Address RAM Searching Result Register 1 */
 /* GWIDAUAS%s Registers (0-3) */
-#define R_GWCA_GWIDAUAS0_OFFSET     0x00000840  /* Incremental Data Area 0 Used Area Size Register */
-#define R_GWCA_GWIDAUAS1_OFFSET     0x00000844  /* Incremental Data Area 1 Used Area Size Register */
-#define R_GWCA_GWIDAUAS2_OFFSET     0x00000848  /* Incremental Data Area 2 Used Area Size Register */
-#define R_GWCA_GWIDAUAS3_OFFSET     0x0000084c  /* Incremental Data Area 3 Used Area Size Register */
+#define R_GWCA_GWIDAUAS_OFFSET(m)                 (0x00000840 + ((m) * 0x00000004))  /* Incremental Data Area %s Used Area Size Register */
 /* GWIDASM%s Registers (0-3) */
-#define R_GWCA_GWIDASM0_OFFSET     0x00000880  /* Incremental Data Area 0 Size Monitoring Register */
-#define R_GWCA_GWIDASM1_OFFSET     0x00000884  /* Incremental Data Area 1 Size Monitoring Register */
-#define R_GWCA_GWIDASM2_OFFSET     0x00000888  /* Incremental Data Area 2 Size Monitoring Register */
-#define R_GWCA_GWIDASM3_OFFSET     0x0000088c  /* Incremental Data Area 3 Size Monitoring Register */
+#define R_GWCA_GWIDASM_OFFSET(m)                  (0x00000880 + ((m) * 0x00000004))  /* Incremental Data Area %s Size Monitoring Register */
 /* GWIDASAM%s0 Registers (0-3) */
-#define R_GWCA_GWIDASAM00_OFFSET     0x00000900  /* Incremental Data Area 0 Start Address Monitoring Register 0 */
-#define R_GWCA_GWIDASAM10_OFFSET     0x00000908  /* Incremental Data Area 1 Start Address Monitoring Register 0 */
-#define R_GWCA_GWIDASAM20_OFFSET     0x00000910  /* Incremental Data Area 2 Start Address Monitoring Register 0 */
-#define R_GWCA_GWIDASAM30_OFFSET     0x00000918  /* Incremental Data Area 3 Start Address Monitoring Register 0 */
+#define R_GWCA_GWIDASAM0_OFFSET(m)                (0x00000900 + ((m) * 0x00000008))  /* Incremental Data Area %s Start Address Monitoring Register 0 */
 /* GWIDASAM%s1 Registers (0-3) */
-#define R_GWCA_GWIDASAM01_OFFSET     0x00000904  /* Incremental Data Area 0 Start Address Monitoring Register 1 */
-#define R_GWCA_GWIDASAM11_OFFSET     0x0000090c  /* Incremental Data Area 1 Start Address Monitoring Register 1 */
-#define R_GWCA_GWIDASAM21_OFFSET     0x00000914  /* Incremental Data Area 2 Start Address Monitoring Register 1 */
-#define R_GWCA_GWIDASAM31_OFFSET     0x0000091c  /* Incremental Data Area 3 Start Address Monitoring Register 1 */
+#define R_GWCA_GWIDASAM1_OFFSET(m)                (0x00000904 + ((m) * 0x00000008))  /* Incremental Data Area %s Start Address Monitoring Register 1 */
 /* GWIDACAM%s0 Registers (0-3) */
-#define R_GWCA_GWIDACAM00_OFFSET     0x00000980  /* Incremental Data Area 0 Current Address Monitoring Register 0 */
-#define R_GWCA_GWIDACAM10_OFFSET     0x00000988  /* Incremental Data Area 1 Current Address Monitoring Register 0 */
-#define R_GWCA_GWIDACAM20_OFFSET     0x00000990  /* Incremental Data Area 2 Current Address Monitoring Register 0 */
-#define R_GWCA_GWIDACAM30_OFFSET     0x00000998  /* Incremental Data Area 3 Current Address Monitoring Register 0 */
+#define R_GWCA_GWIDACAM0_OFFSET(m)                (0x00000980 + ((m) * 0x00000008))  /* Incremental Data Area %s Current Address Monitoring Register 0 */
 /* GWIDACAM%s1 Registers (0-3) */
-#define R_GWCA_GWIDACAM01_OFFSET     0x00000984  /* Incremental Data Area 0 Current Address Monitoring Register 1 */
-#define R_GWCA_GWIDACAM11_OFFSET     0x0000098c  /* Incremental Data Area 1 Current Address Monitoring Register 1 */
-#define R_GWCA_GWIDACAM21_OFFSET     0x00000994  /* Incremental Data Area 2 Current Address Monitoring Register 1 */
-#define R_GWCA_GWIDACAM31_OFFSET     0x0000099c  /* Incremental Data Area 3 Current Address Monitoring Register 1 */
-#define R_GWCA_GWGRLC_OFFSET     0x00000a00  /* Global Rate Limiter Configuration Register */
-#define R_GWCA_GWGRLULC_OFFSET     0x00000a04  /* Global Rate Limiter Upper Limit Configuration Register */
+#define R_GWCA_GWIDACAM1_OFFSET(m)                (0x00000984 + ((m) * 0x00000008))  /* Incremental Data Area %s Current Address Monitoring Register 1 */
+#define R_GWCA_GWGRLC_OFFSET                      0x00000a00  /* Global Rate Limiter Configuration Register */
+#define R_GWCA_GWGRLULC_OFFSET                    0x00000a04  /* Global Rate Limiter Upper Limit Configuration Register */
 /* GWRLC%s Registers (0-7) */
-#define R_GWCA_GWRLC0_OFFSET     0x00000a80  /* Rate Limiter 0 Configuration Register */
-#define R_GWCA_GWRLC1_OFFSET     0x00000a88  /* Rate Limiter 1 Configuration Register */
-#define R_GWCA_GWRLC2_OFFSET     0x00000a90  /* Rate Limiter 2 Configuration Register */
-#define R_GWCA_GWRLC3_OFFSET     0x00000a98  /* Rate Limiter 3 Configuration Register */
-#define R_GWCA_GWRLC4_OFFSET     0x00000aa0  /* Rate Limiter 4 Configuration Register */
-#define R_GWCA_GWRLC5_OFFSET     0x00000aa8  /* Rate Limiter 5 Configuration Register */
-#define R_GWCA_GWRLC6_OFFSET     0x00000ab0  /* Rate Limiter 6 Configuration Register */
-#define R_GWCA_GWRLC7_OFFSET     0x00000ab8  /* Rate Limiter 7 Configuration Register */
+#define R_GWCA_GWRLC_OFFSET(m)                    (0x00000a80 + ((m) * 0x00000008))  /* Rate Limiter %s Configuration Register */
 /* GWRLULC%s Registers (0-7) */
-#define R_GWCA_GWRLULC0_OFFSET     0x00000a84  /* Rate Limiter 0 Upper Limit Configuration Register */
-#define R_GWCA_GWRLULC1_OFFSET     0x00000a8c  /* Rate Limiter 1 Upper Limit Configuration Register */
-#define R_GWCA_GWRLULC2_OFFSET     0x00000a94  /* Rate Limiter 2 Upper Limit Configuration Register */
-#define R_GWCA_GWRLULC3_OFFSET     0x00000a9c  /* Rate Limiter 3 Upper Limit Configuration Register */
-#define R_GWCA_GWRLULC4_OFFSET     0x00000aa4  /* Rate Limiter 4 Upper Limit Configuration Register */
-#define R_GWCA_GWRLULC5_OFFSET     0x00000aac  /* Rate Limiter 5 Upper Limit Configuration Register */
-#define R_GWCA_GWRLULC6_OFFSET     0x00000ab4  /* Rate Limiter 6 Upper Limit Configuration Register */
-#define R_GWCA_GWRLULC7_OFFSET     0x00000abc  /* Rate Limiter 7 Upper Limit Configuration Register */
-#define R_GWCA_GWIDPC_OFFSET     0x00000b80  /* Interrupt Delay Prescaler Configuration Register */
-#define R_GWCA_GWRDCN_OFFSET     0x00001000  /* Received Data Counter Register */
-#define R_GWCA_GWTDCN_OFFSET     0x00001004  /* Transmitted Data Counter Register */
-#define R_GWCA_GWTSCN_OFFSET     0x00001008  /* Timestamp Counter Register */
-#define R_GWCA_GWTSOVFECN_OFFSET     0x0000100c  /* Timestamp Overflow Error Counter Register */
-#define R_GWCA_GWUSMFSECN_OFFSET     0x00001010  /* Under Minimum Frame Size Error Counter Register */
-#define R_GWCA_GWTFECN_OFFSET     0x00001014  /* TAG Filtering Error Counter Register */
-#define R_GWCA_GWSEQECN_OFFSET     0x00001018  /* Sequence Error Counter Register */
-#define R_GWCA_GWTXDNECN_OFFSET     0x00001020  /* TX Descriptor Number Error Counter Register */
-#define R_GWCA_GWFSECN_OFFSET     0x00001024  /* Frame Size Error Counter Register */
-#define R_GWCA_GWTDFECN_OFFSET     0x00001028  /* Timestamp Descriptor Full Error Counter Register */
-#define R_GWCA_GWTSDNECN_OFFSET     0x0000102c  /* Timestamp Descriptor Number Error Counter Register */
-#define R_GWCA_GWDQOECN_OFFSET     0x00001030  /* Descriptor Queue Overflow Error Counter Register */
-#define R_GWCA_GWDQSECN_OFFSET     0x00001034  /* Descriptor Queue Security Error Counter Register */
-#define R_GWCA_GWDFECN_OFFSET     0x00001038  /* Descriptor Full Error Counter Register */
-#define R_GWCA_GWDSECN_OFFSET     0x0000103c  /* Descriptor Security Error Counter Register */
-#define R_GWCA_GWDSZECN_OFFSET     0x00001040  /* Data Size Error Counter Register */
-#define R_GWCA_GWDCTECN_OFFSET     0x00001044  /* Descriptor Chain Type Error Counter Register */
-#define R_GWCA_GWRXDNECN_OFFSET     0x00001048  /* RX Descriptor Number Error Counter Register */
-#define R_GWCA_GWDIS0_OFFSET     0x00001100  /* Data Interrupt Status Register  */
-#define R_GWCA_GWDIE0_OFFSET     0x00001104  /* Data Interrupt Enable Register  */
-#define R_GWCA_GWDID0_OFFSET     0x00001108  /* Data Interrupt Disable Register  */
-#define R_GWCA_GWDIDS0_OFFSET     0x0000110c  /* Data Interrupt Delayed Status Register  */
-#define R_GWCA_GWDIS1_OFFSET     0x00001110  /* Data Interrupt Status Register  */
-#define R_GWCA_GWDIE1_OFFSET     0x00001114  /* Data Interrupt Enable Register  */
-#define R_GWCA_GWDID1_OFFSET     0x00001118  /* Data Interrupt Disable Register  */
-#define R_GWCA_GWDIDS1_OFFSET     0x0000111c  /* Data Interrupt Delayed Status Register  */
-#define R_GWCA_GWTSDIS_OFFSET     0x00001180  /* Timestamp Data Interrupt Status Register */
-#define R_GWCA_GWTSDIE_OFFSET     0x00001184  /* Timestamp Data Interrupt Enable Register */
-#define R_GWCA_GWTSDID_OFFSET     0x00001188  /* Timestamp Data Interrupt Disable Register */
-#define R_GWCA_GWEIS0_OFFSET     0x00001190  /* Error Interrupt Status Register 0 */
-#define R_GWCA_GWEIE0_OFFSET     0x00001194  /* Error Interrupt Enable Register 0 */
-#define R_GWCA_GWEID0_OFFSET     0x00001198  /* Error Interrupt Disable Register 0 */
-#define R_GWCA_GWEIS1_OFFSET     0x000011a0  /* Error Interrupt Status Register 1 */
-#define R_GWCA_GWEIE1_OFFSET     0x000011a4  /* Error Interrupt Enable Register 1 */
-#define R_GWCA_GWEID1_OFFSET     0x000011a8  /* Error Interrupt Disable Register 1 */
-#define R_GWCA_GWEIS20_OFFSET     0x00001200  /* Error Interrupt Status Register 2 */
-#define R_GWCA_GWEIE20_OFFSET     0x00001204  /* Error Interrupt Enable Register 2 */
-#define R_GWCA_GWEID20_OFFSET     0x00001208  /* Error Interrupt Disable Register 2 */
-#define R_GWCA_GWEIS21_OFFSET     0x00001210  /* Error Interrupt Status Register 2 */
-#define R_GWCA_GWEIE21_OFFSET     0x00001214  /* Error Interrupt Enable Register 2 */
-#define R_GWCA_GWEID21_OFFSET     0x00001218  /* Error Interrupt Disable Register 2 */
-#define R_GWCA_GWEIS3_OFFSET     0x00001280  /* Error Interrupt Status Register 3 */
-#define R_GWCA_GWEIE3_OFFSET     0x00001284  /* Error Interrupt Enable Register 3 */
-#define R_GWCA_GWEID3_OFFSET     0x00001288  /* Error Interrupt Disable Register 3 */
-#define R_GWCA_GWEIS4_OFFSET     0x00001290  /* Error Interrupt Status Register 4 */
-#define R_GWCA_GWEIE4_OFFSET     0x00001294  /* Error Interrupt Enable Register 4 */
-#define R_GWCA_GWEID4_OFFSET     0x00001298  /* Error Interrupt Disable Register 4 */
-#define R_GWCA_GWEIS5_OFFSET     0x000012a0  /* Error Interrupt Status Register 5 */
-#define R_GWCA_GWEIE5_OFFSET     0x000012a4  /* Error Interrupt Enable Register 5 */
-#define R_GWCA_GWEID5_OFFSET     0x000012a8  /* Error Interrupt Disable Register 5 */
+#define R_GWCA_GWRLULC_OFFSET(m)                  (0x00000a84 + ((m) * 0x00000008))  /* Rate Limiter %s Upper Limit Configuration Register */
+#define R_GWCA_GWIDPC_OFFSET                      0x00000b80  /* Interrupt Delay Prescaler Configuration Register */
+#define R_GWCA_GWRDCN_OFFSET                      0x00001000  /* Received Data Counter Register */
+#define R_GWCA_GWTDCN_OFFSET                      0x00001004  /* Transmitted Data Counter Register */
+#define R_GWCA_GWTSCN_OFFSET                      0x00001008  /* Timestamp Counter Register */
+#define R_GWCA_GWTSOVFECN_OFFSET                  0x0000100c  /* Timestamp Overflow Error Counter Register */
+#define R_GWCA_GWUSMFSECN_OFFSET                  0x00001010  /* Under Minimum Frame Size Error Counter Register */
+#define R_GWCA_GWTFECN_OFFSET                     0x00001014  /* TAG Filtering Error Counter Register */
+#define R_GWCA_GWSEQECN_OFFSET                    0x00001018  /* Sequence Error Counter Register */
+#define R_GWCA_GWTXDNECN_OFFSET                   0x00001020  /* TX Descriptor Number Error Counter Register */
+#define R_GWCA_GWFSECN_OFFSET                     0x00001024  /* Frame Size Error Counter Register */
+#define R_GWCA_GWTDFECN_OFFSET                    0x00001028  /* Timestamp Descriptor Full Error Counter Register */
+#define R_GWCA_GWTSDNECN_OFFSET                   0x0000102c  /* Timestamp Descriptor Number Error Counter Register */
+#define R_GWCA_GWDQOECN_OFFSET                    0x00001030  /* Descriptor Queue Overflow Error Counter Register */
+#define R_GWCA_GWDQSECN_OFFSET                    0x00001034  /* Descriptor Queue Security Error Counter Register */
+#define R_GWCA_GWDFECN_OFFSET                     0x00001038  /* Descriptor Full Error Counter Register */
+#define R_GWCA_GWDSECN_OFFSET                     0x0000103c  /* Descriptor Security Error Counter Register */
+#define R_GWCA_GWDSZECN_OFFSET                    0x00001040  /* Data Size Error Counter Register */
+#define R_GWCA_GWDCTECN_OFFSET                    0x00001044  /* Descriptor Chain Type Error Counter Register */
+#define R_GWCA_GWRXDNECN_OFFSET                   0x00001048  /* RX Descriptor Number Error Counter Register */
+#define R_GWCA_GWDIS0_OFFSET                      0x00001100  /* Data Interrupt Status Register  */
+#define R_GWCA_GWDIE0_OFFSET                      0x00001104  /* Data Interrupt Enable Register  */
+#define R_GWCA_GWDID0_OFFSET                      0x00001108  /* Data Interrupt Disable Register  */
+#define R_GWCA_GWDIDS0_OFFSET                     0x0000110c  /* Data Interrupt Delayed Status Register  */
+#define R_GWCA_GWDIS1_OFFSET                      0x00001110  /* Data Interrupt Status Register  */
+#define R_GWCA_GWDIE1_OFFSET                      0x00001114  /* Data Interrupt Enable Register  */
+#define R_GWCA_GWDID1_OFFSET                      0x00001118  /* Data Interrupt Disable Register  */
+#define R_GWCA_GWDIDS1_OFFSET                     0x0000111c  /* Data Interrupt Delayed Status Register  */
+#define R_GWCA_GWTSDIS_OFFSET                     0x00001180  /* Timestamp Data Interrupt Status Register */
+#define R_GWCA_GWTSDIE_OFFSET                     0x00001184  /* Timestamp Data Interrupt Enable Register */
+#define R_GWCA_GWTSDID_OFFSET                     0x00001188  /* Timestamp Data Interrupt Disable Register */
+#define R_GWCA_GWEIS0_OFFSET                      0x00001190  /* Error Interrupt Status Register 0 */
+#define R_GWCA_GWEIE0_OFFSET                      0x00001194  /* Error Interrupt Enable Register 0 */
+#define R_GWCA_GWEID0_OFFSET                      0x00001198  /* Error Interrupt Disable Register 0 */
+#define R_GWCA_GWEIS1_OFFSET                      0x000011a0  /* Error Interrupt Status Register 1 */
+#define R_GWCA_GWEIE1_OFFSET                      0x000011a4  /* Error Interrupt Enable Register 1 */
+#define R_GWCA_GWEID1_OFFSET                      0x000011a8  /* Error Interrupt Disable Register 1 */
+#define R_GWCA_GWEIS20_OFFSET                     0x00001200  /* Error Interrupt Status Register 2 */
+#define R_GWCA_GWEIE20_OFFSET                     0x00001204  /* Error Interrupt Enable Register 2 */
+#define R_GWCA_GWEID20_OFFSET                     0x00001208  /* Error Interrupt Disable Register 2 */
+#define R_GWCA_GWEIS21_OFFSET                     0x00001210  /* Error Interrupt Status Register 2 */
+#define R_GWCA_GWEIE21_OFFSET                     0x00001214  /* Error Interrupt Enable Register 2 */
+#define R_GWCA_GWEID21_OFFSET                     0x00001218  /* Error Interrupt Disable Register 2 */
+#define R_GWCA_GWEIS3_OFFSET                      0x00001280  /* Error Interrupt Status Register 3 */
+#define R_GWCA_GWEIE3_OFFSET                      0x00001284  /* Error Interrupt Enable Register 3 */
+#define R_GWCA_GWEID3_OFFSET                      0x00001288  /* Error Interrupt Disable Register 3 */
+#define R_GWCA_GWEIS4_OFFSET                      0x00001290  /* Error Interrupt Status Register 4 */
+#define R_GWCA_GWEIE4_OFFSET                      0x00001294  /* Error Interrupt Enable Register 4 */
+#define R_GWCA_GWEID4_OFFSET                      0x00001298  /* Error Interrupt Disable Register 4 */
+#define R_GWCA_GWEIS5_OFFSET                      0x000012a0  /* Error Interrupt Status Register 5 */
+#define R_GWCA_GWEIE5_OFFSET                      0x000012a4  /* Error Interrupt Enable Register 5 */
+#define R_GWCA_GWEID5_OFFSET                      0x000012a8  /* Error Interrupt Disable Register 5 */
 /* GWIDC%s Registers (0-63) */
-#define R_GWCA_GWIDC00_OFFSET     0x0000c000  /* Interrupt Delay 00 Configuration Register */
-#define R_GWCA_GWIDC01_OFFSET     0x0000c004  /* Interrupt Delay 01 Configuration Register */
-#define R_GWCA_GWIDC02_OFFSET     0x0000c008  /* Interrupt Delay 02 Configuration Register */
-#define R_GWCA_GWIDC03_OFFSET     0x0000c00c  /* Interrupt Delay 03 Configuration Register */
-#define R_GWCA_GWIDC04_OFFSET     0x0000c010  /* Interrupt Delay 04 Configuration Register */
-#define R_GWCA_GWIDC05_OFFSET     0x0000c014  /* Interrupt Delay 05 Configuration Register */
-#define R_GWCA_GWIDC06_OFFSET     0x0000c018  /* Interrupt Delay 06 Configuration Register */
-#define R_GWCA_GWIDC07_OFFSET     0x0000c01c  /* Interrupt Delay 07 Configuration Register */
-#define R_GWCA_GWIDC08_OFFSET     0x0000c020  /* Interrupt Delay 08 Configuration Register */
-#define R_GWCA_GWIDC09_OFFSET     0x0000c024  /* Interrupt Delay 09 Configuration Register */
-#define R_GWCA_GWIDC10_OFFSET     0x0000c028  /* Interrupt Delay 10 Configuration Register */
-#define R_GWCA_GWIDC11_OFFSET     0x0000c02c  /* Interrupt Delay 11 Configuration Register */
-#define R_GWCA_GWIDC12_OFFSET     0x0000c030  /* Interrupt Delay 12 Configuration Register */
-#define R_GWCA_GWIDC13_OFFSET     0x0000c034  /* Interrupt Delay 13 Configuration Register */
-#define R_GWCA_GWIDC14_OFFSET     0x0000c038  /* Interrupt Delay 14 Configuration Register */
-#define R_GWCA_GWIDC15_OFFSET     0x0000c03c  /* Interrupt Delay 15 Configuration Register */
-#define R_GWCA_GWIDC16_OFFSET     0x0000c040  /* Interrupt Delay 16 Configuration Register */
-#define R_GWCA_GWIDC17_OFFSET     0x0000c044  /* Interrupt Delay 17 Configuration Register */
-#define R_GWCA_GWIDC18_OFFSET     0x0000c048  /* Interrupt Delay 18 Configuration Register */
-#define R_GWCA_GWIDC19_OFFSET     0x0000c04c  /* Interrupt Delay 19 Configuration Register */
-#define R_GWCA_GWIDC20_OFFSET     0x0000c050  /* Interrupt Delay 20 Configuration Register */
-#define R_GWCA_GWIDC21_OFFSET     0x0000c054  /* Interrupt Delay 21 Configuration Register */
-#define R_GWCA_GWIDC22_OFFSET     0x0000c058  /* Interrupt Delay 22 Configuration Register */
-#define R_GWCA_GWIDC23_OFFSET     0x0000c05c  /* Interrupt Delay 23 Configuration Register */
-#define R_GWCA_GWIDC24_OFFSET     0x0000c060  /* Interrupt Delay 24 Configuration Register */
-#define R_GWCA_GWIDC25_OFFSET     0x0000c064  /* Interrupt Delay 25 Configuration Register */
-#define R_GWCA_GWIDC26_OFFSET     0x0000c068  /* Interrupt Delay 26 Configuration Register */
-#define R_GWCA_GWIDC27_OFFSET     0x0000c06c  /* Interrupt Delay 27 Configuration Register */
-#define R_GWCA_GWIDC28_OFFSET     0x0000c070  /* Interrupt Delay 28 Configuration Register */
-#define R_GWCA_GWIDC29_OFFSET     0x0000c074  /* Interrupt Delay 29 Configuration Register */
-#define R_GWCA_GWIDC30_OFFSET     0x0000c078  /* Interrupt Delay 30 Configuration Register */
-#define R_GWCA_GWIDC31_OFFSET     0x0000c07c  /* Interrupt Delay 31 Configuration Register */
-#define R_GWCA_GWIDC32_OFFSET     0x0000c080  /* Interrupt Delay 32 Configuration Register */
-#define R_GWCA_GWIDC33_OFFSET     0x0000c084  /* Interrupt Delay 33 Configuration Register */
-#define R_GWCA_GWIDC34_OFFSET     0x0000c088  /* Interrupt Delay 34 Configuration Register */
-#define R_GWCA_GWIDC35_OFFSET     0x0000c08c  /* Interrupt Delay 35 Configuration Register */
-#define R_GWCA_GWIDC36_OFFSET     0x0000c090  /* Interrupt Delay 36 Configuration Register */
-#define R_GWCA_GWIDC37_OFFSET     0x0000c094  /* Interrupt Delay 37 Configuration Register */
-#define R_GWCA_GWIDC38_OFFSET     0x0000c098  /* Interrupt Delay 38 Configuration Register */
-#define R_GWCA_GWIDC39_OFFSET     0x0000c09c  /* Interrupt Delay 39 Configuration Register */
-#define R_GWCA_GWIDC40_OFFSET     0x0000c0a0  /* Interrupt Delay 40 Configuration Register */
-#define R_GWCA_GWIDC41_OFFSET     0x0000c0a4  /* Interrupt Delay 41 Configuration Register */
-#define R_GWCA_GWIDC42_OFFSET     0x0000c0a8  /* Interrupt Delay 42 Configuration Register */
-#define R_GWCA_GWIDC43_OFFSET     0x0000c0ac  /* Interrupt Delay 43 Configuration Register */
-#define R_GWCA_GWIDC44_OFFSET     0x0000c0b0  /* Interrupt Delay 44 Configuration Register */
-#define R_GWCA_GWIDC45_OFFSET     0x0000c0b4  /* Interrupt Delay 45 Configuration Register */
-#define R_GWCA_GWIDC46_OFFSET     0x0000c0b8  /* Interrupt Delay 46 Configuration Register */
-#define R_GWCA_GWIDC47_OFFSET     0x0000c0bc  /* Interrupt Delay 47 Configuration Register */
-#define R_GWCA_GWIDC48_OFFSET     0x0000c0c0  /* Interrupt Delay 48 Configuration Register */
-#define R_GWCA_GWIDC49_OFFSET     0x0000c0c4  /* Interrupt Delay 49 Configuration Register */
-#define R_GWCA_GWIDC50_OFFSET     0x0000c0c8  /* Interrupt Delay 50 Configuration Register */
-#define R_GWCA_GWIDC51_OFFSET     0x0000c0cc  /* Interrupt Delay 51 Configuration Register */
-#define R_GWCA_GWIDC52_OFFSET     0x0000c0d0  /* Interrupt Delay 52 Configuration Register */
-#define R_GWCA_GWIDC53_OFFSET     0x0000c0d4  /* Interrupt Delay 53 Configuration Register */
-#define R_GWCA_GWIDC54_OFFSET     0x0000c0d8  /* Interrupt Delay 54 Configuration Register */
-#define R_GWCA_GWIDC55_OFFSET     0x0000c0dc  /* Interrupt Delay 55 Configuration Register */
-#define R_GWCA_GWIDC56_OFFSET     0x0000c0e0  /* Interrupt Delay 56 Configuration Register */
-#define R_GWCA_GWIDC57_OFFSET     0x0000c0e4  /* Interrupt Delay 57 Configuration Register */
-#define R_GWCA_GWIDC58_OFFSET     0x0000c0e8  /* Interrupt Delay 58 Configuration Register */
-#define R_GWCA_GWIDC59_OFFSET     0x0000c0ec  /* Interrupt Delay 59 Configuration Register */
-#define R_GWCA_GWIDC60_OFFSET     0x0000c0f0  /* Interrupt Delay 60 Configuration Register */
-#define R_GWCA_GWIDC61_OFFSET     0x0000c0f4  /* Interrupt Delay 61 Configuration Register */
-#define R_GWCA_GWIDC62_OFFSET     0x0000c0f8  /* Interrupt Delay 62 Configuration Register */
-#define R_GWCA_GWIDC63_OFFSET     0x0000c0fc  /* Interrupt Delay 63 Configuration Register */
+#define R_GWCA_GWIDC_OFFSET(m)                    (0x0000c000 + ((m) * 0x00000004))  /* Interrupt Delay %s Configuration Register */
 
 /* GWCA Register Addresses */
 
-#define R_GWCA_GWMC                 (R_GWCA_BASE + R_GWCA_GWMC_OFFSET)
-#define R_GWCA_GWMS                 (R_GWCA_BASE + R_GWCA_GWMS_OFFSET)
-#define R_GWCA_GWIRC                 (R_GWCA_BASE + R_GWCA_GWIRC_OFFSET)
-#define R_GWCA_GWRDQSC                 (R_GWCA_BASE + R_GWCA_GWRDQSC_OFFSET)
-#define R_GWCA_GWRDQC                 (R_GWCA_BASE + R_GWCA_GWRDQC_OFFSET)
-#define R_GWCA_GWRDQAC                 (R_GWCA_BASE + R_GWCA_GWRDQAC_OFFSET)
-#define R_GWCA_GWRGC                 (R_GWCA_BASE + R_GWCA_GWRGC_OFFSET)
-#define R_GWCA_GWRMFSC0                 (R_GWCA_BASE + R_GWCA_GWRMFSC0_OFFSET)
-#define R_GWCA_GWRMFSC1                 (R_GWCA_BASE + R_GWCA_GWRMFSC1_OFFSET)
-#define R_GWCA_GWRMFSC2                 (R_GWCA_BASE + R_GWCA_GWRMFSC2_OFFSET)
-#define R_GWCA_GWRMFSC3                 (R_GWCA_BASE + R_GWCA_GWRMFSC3_OFFSET)
-#define R_GWCA_GWRMFSC4                 (R_GWCA_BASE + R_GWCA_GWRMFSC4_OFFSET)
-#define R_GWCA_GWRMFSC5                 (R_GWCA_BASE + R_GWCA_GWRMFSC5_OFFSET)
-#define R_GWCA_GWRMFSC6                 (R_GWCA_BASE + R_GWCA_GWRMFSC6_OFFSET)
-#define R_GWCA_GWRMFSC7                 (R_GWCA_BASE + R_GWCA_GWRMFSC7_OFFSET)
-#define R_GWCA_GWRDQDC0                 (R_GWCA_BASE + R_GWCA_GWRDQDC0_OFFSET)
-#define R_GWCA_GWRDQDC1                 (R_GWCA_BASE + R_GWCA_GWRDQDC1_OFFSET)
-#define R_GWCA_GWRDQDC2                 (R_GWCA_BASE + R_GWCA_GWRDQDC2_OFFSET)
-#define R_GWCA_GWRDQDC3                 (R_GWCA_BASE + R_GWCA_GWRDQDC3_OFFSET)
-#define R_GWCA_GWRDQDC4                 (R_GWCA_BASE + R_GWCA_GWRDQDC4_OFFSET)
-#define R_GWCA_GWRDQDC5                 (R_GWCA_BASE + R_GWCA_GWRDQDC5_OFFSET)
-#define R_GWCA_GWRDQDC6                 (R_GWCA_BASE + R_GWCA_GWRDQDC6_OFFSET)
-#define R_GWCA_GWRDQDC7                 (R_GWCA_BASE + R_GWCA_GWRDQDC7_OFFSET)
-#define R_GWCA_GWRDQM0                 (R_GWCA_BASE + R_GWCA_GWRDQM0_OFFSET)
-#define R_GWCA_GWRDQM1                 (R_GWCA_BASE + R_GWCA_GWRDQM1_OFFSET)
-#define R_GWCA_GWRDQM2                 (R_GWCA_BASE + R_GWCA_GWRDQM2_OFFSET)
-#define R_GWCA_GWRDQM3                 (R_GWCA_BASE + R_GWCA_GWRDQM3_OFFSET)
-#define R_GWCA_GWRDQM4                 (R_GWCA_BASE + R_GWCA_GWRDQM4_OFFSET)
-#define R_GWCA_GWRDQM5                 (R_GWCA_BASE + R_GWCA_GWRDQM5_OFFSET)
-#define R_GWCA_GWRDQM6                 (R_GWCA_BASE + R_GWCA_GWRDQM6_OFFSET)
-#define R_GWCA_GWRDQM7                 (R_GWCA_BASE + R_GWCA_GWRDQM7_OFFSET)
-#define R_GWCA_GWRDQMLM0                 (R_GWCA_BASE + R_GWCA_GWRDQMLM0_OFFSET)
-#define R_GWCA_GWRDQMLM1                 (R_GWCA_BASE + R_GWCA_GWRDQMLM1_OFFSET)
-#define R_GWCA_GWRDQMLM2                 (R_GWCA_BASE + R_GWCA_GWRDQMLM2_OFFSET)
-#define R_GWCA_GWRDQMLM3                 (R_GWCA_BASE + R_GWCA_GWRDQMLM3_OFFSET)
-#define R_GWCA_GWRDQMLM4                 (R_GWCA_BASE + R_GWCA_GWRDQMLM4_OFFSET)
-#define R_GWCA_GWRDQMLM5                 (R_GWCA_BASE + R_GWCA_GWRDQMLM5_OFFSET)
-#define R_GWCA_GWRDQMLM6                 (R_GWCA_BASE + R_GWCA_GWRDQMLM6_OFFSET)
-#define R_GWCA_GWRDQMLM7                 (R_GWCA_BASE + R_GWCA_GWRDQMLM7_OFFSET)
-#define R_GWCA_GWMTIRM                 (R_GWCA_BASE + R_GWCA_GWMTIRM_OFFSET)
-#define R_GWCA_GWMSTLS                 (R_GWCA_BASE + R_GWCA_GWMSTLS_OFFSET)
-#define R_GWCA_GWMSTLR                 (R_GWCA_BASE + R_GWCA_GWMSTLR_OFFSET)
-#define R_GWCA_GWMSTSS                 (R_GWCA_BASE + R_GWCA_GWMSTSS_OFFSET)
-#define R_GWCA_GWMSTSR                 (R_GWCA_BASE + R_GWCA_GWMSTSR_OFFSET)
-#define R_GWCA_GWMAC0                 (R_GWCA_BASE + R_GWCA_GWMAC0_OFFSET)
-#define R_GWCA_GWMAC1                 (R_GWCA_BASE + R_GWCA_GWMAC1_OFFSET)
-#define R_GWCA_GWVCC                 (R_GWCA_BASE + R_GWCA_GWVCC_OFFSET)
-#define R_GWCA_GWVTC                 (R_GWCA_BASE + R_GWCA_GWVTC_OFFSET)
-#define R_GWCA_GWTTFC                 (R_GWCA_BASE + R_GWCA_GWTTFC_OFFSET)
-#define R_GWCA_GWTDCAC00                 (R_GWCA_BASE + R_GWCA_GWTDCAC00_OFFSET)
-#define R_GWCA_GWTDCAC10                 (R_GWCA_BASE + R_GWCA_GWTDCAC10_OFFSET)
-#define R_GWCA_GWTDCAC01                 (R_GWCA_BASE + R_GWCA_GWTDCAC01_OFFSET)
-#define R_GWCA_GWTDCAC11                 (R_GWCA_BASE + R_GWCA_GWTDCAC11_OFFSET)
-#define R_GWCA_GWTSDCC0                 (R_GWCA_BASE + R_GWCA_GWTSDCC0_OFFSET)
-#define R_GWCA_GWTSDCC1                 (R_GWCA_BASE + R_GWCA_GWTSDCC1_OFFSET)
-#define R_GWCA_GWTSNM                 (R_GWCA_BASE + R_GWCA_GWTSNM_OFFSET)
-#define R_GWCA_GWTSMNM                 (R_GWCA_BASE + R_GWCA_GWTSMNM_OFFSET)
-#define R_GWCA_GWAC                 (R_GWCA_BASE + R_GWCA_GWAC_OFFSET)
-#define R_GWCA_GWDCBAC0                 (R_GWCA_BASE + R_GWCA_GWDCBAC0_OFFSET)
-#define R_GWCA_GWDCBAC1                 (R_GWCA_BASE + R_GWCA_GWDCBAC1_OFFSET)
-#define R_GWCA_GWMDNC                 (R_GWCA_BASE + R_GWCA_GWMDNC_OFFSET)
-#define R_GWCA_GWTRC0                 (R_GWCA_BASE + R_GWCA_GWTRC0_OFFSET)
-#define R_GWCA_GWTRC1                 (R_GWCA_BASE + R_GWCA_GWTRC1_OFFSET)
-#define R_GWCA_GWTPCP                 (R_GWCA_BASE + R_GWCA_GWTPCP_OFFSET)
-#define R_GWCA_GWARIRM                 (R_GWCA_BASE + R_GWCA_GWARIRM_OFFSET)
-#define R_GWCA_GWDCC00                 (R_GWCA_BASE + R_GWCA_GWDCC00_OFFSET)
-#define R_GWCA_GWDCC01                 (R_GWCA_BASE + R_GWCA_GWDCC01_OFFSET)
-#define R_GWCA_GWDCC02                 (R_GWCA_BASE + R_GWCA_GWDCC02_OFFSET)
-#define R_GWCA_GWDCC03                 (R_GWCA_BASE + R_GWCA_GWDCC03_OFFSET)
-#define R_GWCA_GWDCC04                 (R_GWCA_BASE + R_GWCA_GWDCC04_OFFSET)
-#define R_GWCA_GWDCC05                 (R_GWCA_BASE + R_GWCA_GWDCC05_OFFSET)
-#define R_GWCA_GWDCC06                 (R_GWCA_BASE + R_GWCA_GWDCC06_OFFSET)
-#define R_GWCA_GWDCC07                 (R_GWCA_BASE + R_GWCA_GWDCC07_OFFSET)
-#define R_GWCA_GWDCC08                 (R_GWCA_BASE + R_GWCA_GWDCC08_OFFSET)
-#define R_GWCA_GWDCC09                 (R_GWCA_BASE + R_GWCA_GWDCC09_OFFSET)
-#define R_GWCA_GWDCC10                 (R_GWCA_BASE + R_GWCA_GWDCC10_OFFSET)
-#define R_GWCA_GWDCC11                 (R_GWCA_BASE + R_GWCA_GWDCC11_OFFSET)
-#define R_GWCA_GWDCC12                 (R_GWCA_BASE + R_GWCA_GWDCC12_OFFSET)
-#define R_GWCA_GWDCC13                 (R_GWCA_BASE + R_GWCA_GWDCC13_OFFSET)
-#define R_GWCA_GWDCC14                 (R_GWCA_BASE + R_GWCA_GWDCC14_OFFSET)
-#define R_GWCA_GWDCC15                 (R_GWCA_BASE + R_GWCA_GWDCC15_OFFSET)
-#define R_GWCA_GWDCC16                 (R_GWCA_BASE + R_GWCA_GWDCC16_OFFSET)
-#define R_GWCA_GWDCC17                 (R_GWCA_BASE + R_GWCA_GWDCC17_OFFSET)
-#define R_GWCA_GWDCC18                 (R_GWCA_BASE + R_GWCA_GWDCC18_OFFSET)
-#define R_GWCA_GWDCC19                 (R_GWCA_BASE + R_GWCA_GWDCC19_OFFSET)
-#define R_GWCA_GWDCC20                 (R_GWCA_BASE + R_GWCA_GWDCC20_OFFSET)
-#define R_GWCA_GWDCC21                 (R_GWCA_BASE + R_GWCA_GWDCC21_OFFSET)
-#define R_GWCA_GWDCC22                 (R_GWCA_BASE + R_GWCA_GWDCC22_OFFSET)
-#define R_GWCA_GWDCC23                 (R_GWCA_BASE + R_GWCA_GWDCC23_OFFSET)
-#define R_GWCA_GWDCC24                 (R_GWCA_BASE + R_GWCA_GWDCC24_OFFSET)
-#define R_GWCA_GWDCC25                 (R_GWCA_BASE + R_GWCA_GWDCC25_OFFSET)
-#define R_GWCA_GWDCC26                 (R_GWCA_BASE + R_GWCA_GWDCC26_OFFSET)
-#define R_GWCA_GWDCC27                 (R_GWCA_BASE + R_GWCA_GWDCC27_OFFSET)
-#define R_GWCA_GWDCC28                 (R_GWCA_BASE + R_GWCA_GWDCC28_OFFSET)
-#define R_GWCA_GWDCC29                 (R_GWCA_BASE + R_GWCA_GWDCC29_OFFSET)
-#define R_GWCA_GWDCC30                 (R_GWCA_BASE + R_GWCA_GWDCC30_OFFSET)
-#define R_GWCA_GWDCC31                 (R_GWCA_BASE + R_GWCA_GWDCC31_OFFSET)
-#define R_GWCA_GWDCC32                 (R_GWCA_BASE + R_GWCA_GWDCC32_OFFSET)
-#define R_GWCA_GWDCC33                 (R_GWCA_BASE + R_GWCA_GWDCC33_OFFSET)
-#define R_GWCA_GWDCC34                 (R_GWCA_BASE + R_GWCA_GWDCC34_OFFSET)
-#define R_GWCA_GWDCC35                 (R_GWCA_BASE + R_GWCA_GWDCC35_OFFSET)
-#define R_GWCA_GWDCC36                 (R_GWCA_BASE + R_GWCA_GWDCC36_OFFSET)
-#define R_GWCA_GWDCC37                 (R_GWCA_BASE + R_GWCA_GWDCC37_OFFSET)
-#define R_GWCA_GWDCC38                 (R_GWCA_BASE + R_GWCA_GWDCC38_OFFSET)
-#define R_GWCA_GWDCC39                 (R_GWCA_BASE + R_GWCA_GWDCC39_OFFSET)
-#define R_GWCA_GWDCC40                 (R_GWCA_BASE + R_GWCA_GWDCC40_OFFSET)
-#define R_GWCA_GWDCC41                 (R_GWCA_BASE + R_GWCA_GWDCC41_OFFSET)
-#define R_GWCA_GWDCC42                 (R_GWCA_BASE + R_GWCA_GWDCC42_OFFSET)
-#define R_GWCA_GWDCC43                 (R_GWCA_BASE + R_GWCA_GWDCC43_OFFSET)
-#define R_GWCA_GWDCC44                 (R_GWCA_BASE + R_GWCA_GWDCC44_OFFSET)
-#define R_GWCA_GWDCC45                 (R_GWCA_BASE + R_GWCA_GWDCC45_OFFSET)
-#define R_GWCA_GWDCC46                 (R_GWCA_BASE + R_GWCA_GWDCC46_OFFSET)
-#define R_GWCA_GWDCC47                 (R_GWCA_BASE + R_GWCA_GWDCC47_OFFSET)
-#define R_GWCA_GWDCC48                 (R_GWCA_BASE + R_GWCA_GWDCC48_OFFSET)
-#define R_GWCA_GWDCC49                 (R_GWCA_BASE + R_GWCA_GWDCC49_OFFSET)
-#define R_GWCA_GWDCC50                 (R_GWCA_BASE + R_GWCA_GWDCC50_OFFSET)
-#define R_GWCA_GWDCC51                 (R_GWCA_BASE + R_GWCA_GWDCC51_OFFSET)
-#define R_GWCA_GWDCC52                 (R_GWCA_BASE + R_GWCA_GWDCC52_OFFSET)
-#define R_GWCA_GWDCC53                 (R_GWCA_BASE + R_GWCA_GWDCC53_OFFSET)
-#define R_GWCA_GWDCC54                 (R_GWCA_BASE + R_GWCA_GWDCC54_OFFSET)
-#define R_GWCA_GWDCC55                 (R_GWCA_BASE + R_GWCA_GWDCC55_OFFSET)
-#define R_GWCA_GWDCC56                 (R_GWCA_BASE + R_GWCA_GWDCC56_OFFSET)
-#define R_GWCA_GWDCC57                 (R_GWCA_BASE + R_GWCA_GWDCC57_OFFSET)
-#define R_GWCA_GWDCC58                 (R_GWCA_BASE + R_GWCA_GWDCC58_OFFSET)
-#define R_GWCA_GWDCC59                 (R_GWCA_BASE + R_GWCA_GWDCC59_OFFSET)
-#define R_GWCA_GWDCC60                 (R_GWCA_BASE + R_GWCA_GWDCC60_OFFSET)
-#define R_GWCA_GWDCC61                 (R_GWCA_BASE + R_GWCA_GWDCC61_OFFSET)
-#define R_GWCA_GWDCC62                 (R_GWCA_BASE + R_GWCA_GWDCC62_OFFSET)
-#define R_GWCA_GWDCC63                 (R_GWCA_BASE + R_GWCA_GWDCC63_OFFSET)
-#define R_GWCA_GWAARSS                 (R_GWCA_BASE + R_GWCA_GWAARSS_OFFSET)
-#define R_GWCA_GWAARSR0                 (R_GWCA_BASE + R_GWCA_GWAARSR0_OFFSET)
-#define R_GWCA_GWAARSR1                 (R_GWCA_BASE + R_GWCA_GWAARSR1_OFFSET)
-#define R_GWCA_GWIDAUAS0                 (R_GWCA_BASE + R_GWCA_GWIDAUAS0_OFFSET)
-#define R_GWCA_GWIDAUAS1                 (R_GWCA_BASE + R_GWCA_GWIDAUAS1_OFFSET)
-#define R_GWCA_GWIDAUAS2                 (R_GWCA_BASE + R_GWCA_GWIDAUAS2_OFFSET)
-#define R_GWCA_GWIDAUAS3                 (R_GWCA_BASE + R_GWCA_GWIDAUAS3_OFFSET)
-#define R_GWCA_GWIDASM0                 (R_GWCA_BASE + R_GWCA_GWIDASM0_OFFSET)
-#define R_GWCA_GWIDASM1                 (R_GWCA_BASE + R_GWCA_GWIDASM1_OFFSET)
-#define R_GWCA_GWIDASM2                 (R_GWCA_BASE + R_GWCA_GWIDASM2_OFFSET)
-#define R_GWCA_GWIDASM3                 (R_GWCA_BASE + R_GWCA_GWIDASM3_OFFSET)
-#define R_GWCA_GWIDASAM00                 (R_GWCA_BASE + R_GWCA_GWIDASAM00_OFFSET)
-#define R_GWCA_GWIDASAM10                 (R_GWCA_BASE + R_GWCA_GWIDASAM10_OFFSET)
-#define R_GWCA_GWIDASAM20                 (R_GWCA_BASE + R_GWCA_GWIDASAM20_OFFSET)
-#define R_GWCA_GWIDASAM30                 (R_GWCA_BASE + R_GWCA_GWIDASAM30_OFFSET)
-#define R_GWCA_GWIDASAM01                 (R_GWCA_BASE + R_GWCA_GWIDASAM01_OFFSET)
-#define R_GWCA_GWIDASAM11                 (R_GWCA_BASE + R_GWCA_GWIDASAM11_OFFSET)
-#define R_GWCA_GWIDASAM21                 (R_GWCA_BASE + R_GWCA_GWIDASAM21_OFFSET)
-#define R_GWCA_GWIDASAM31                 (R_GWCA_BASE + R_GWCA_GWIDASAM31_OFFSET)
-#define R_GWCA_GWIDACAM00                 (R_GWCA_BASE + R_GWCA_GWIDACAM00_OFFSET)
-#define R_GWCA_GWIDACAM10                 (R_GWCA_BASE + R_GWCA_GWIDACAM10_OFFSET)
-#define R_GWCA_GWIDACAM20                 (R_GWCA_BASE + R_GWCA_GWIDACAM20_OFFSET)
-#define R_GWCA_GWIDACAM30                 (R_GWCA_BASE + R_GWCA_GWIDACAM30_OFFSET)
-#define R_GWCA_GWIDACAM01                 (R_GWCA_BASE + R_GWCA_GWIDACAM01_OFFSET)
-#define R_GWCA_GWIDACAM11                 (R_GWCA_BASE + R_GWCA_GWIDACAM11_OFFSET)
-#define R_GWCA_GWIDACAM21                 (R_GWCA_BASE + R_GWCA_GWIDACAM21_OFFSET)
-#define R_GWCA_GWIDACAM31                 (R_GWCA_BASE + R_GWCA_GWIDACAM31_OFFSET)
-#define R_GWCA_GWGRLC                 (R_GWCA_BASE + R_GWCA_GWGRLC_OFFSET)
-#define R_GWCA_GWGRLULC                 (R_GWCA_BASE + R_GWCA_GWGRLULC_OFFSET)
-#define R_GWCA_GWRLC0                 (R_GWCA_BASE + R_GWCA_GWRLC0_OFFSET)
-#define R_GWCA_GWRLC1                 (R_GWCA_BASE + R_GWCA_GWRLC1_OFFSET)
-#define R_GWCA_GWRLC2                 (R_GWCA_BASE + R_GWCA_GWRLC2_OFFSET)
-#define R_GWCA_GWRLC3                 (R_GWCA_BASE + R_GWCA_GWRLC3_OFFSET)
-#define R_GWCA_GWRLC4                 (R_GWCA_BASE + R_GWCA_GWRLC4_OFFSET)
-#define R_GWCA_GWRLC5                 (R_GWCA_BASE + R_GWCA_GWRLC5_OFFSET)
-#define R_GWCA_GWRLC6                 (R_GWCA_BASE + R_GWCA_GWRLC6_OFFSET)
-#define R_GWCA_GWRLC7                 (R_GWCA_BASE + R_GWCA_GWRLC7_OFFSET)
-#define R_GWCA_GWRLULC0                 (R_GWCA_BASE + R_GWCA_GWRLULC0_OFFSET)
-#define R_GWCA_GWRLULC1                 (R_GWCA_BASE + R_GWCA_GWRLULC1_OFFSET)
-#define R_GWCA_GWRLULC2                 (R_GWCA_BASE + R_GWCA_GWRLULC2_OFFSET)
-#define R_GWCA_GWRLULC3                 (R_GWCA_BASE + R_GWCA_GWRLULC3_OFFSET)
-#define R_GWCA_GWRLULC4                 (R_GWCA_BASE + R_GWCA_GWRLULC4_OFFSET)
-#define R_GWCA_GWRLULC5                 (R_GWCA_BASE + R_GWCA_GWRLULC5_OFFSET)
-#define R_GWCA_GWRLULC6                 (R_GWCA_BASE + R_GWCA_GWRLULC6_OFFSET)
-#define R_GWCA_GWRLULC7                 (R_GWCA_BASE + R_GWCA_GWRLULC7_OFFSET)
-#define R_GWCA_GWIDPC                 (R_GWCA_BASE + R_GWCA_GWIDPC_OFFSET)
-#define R_GWCA_GWRDCN                 (R_GWCA_BASE + R_GWCA_GWRDCN_OFFSET)
-#define R_GWCA_GWTDCN                 (R_GWCA_BASE + R_GWCA_GWTDCN_OFFSET)
-#define R_GWCA_GWTSCN                 (R_GWCA_BASE + R_GWCA_GWTSCN_OFFSET)
-#define R_GWCA_GWTSOVFECN                 (R_GWCA_BASE + R_GWCA_GWTSOVFECN_OFFSET)
-#define R_GWCA_GWUSMFSECN                 (R_GWCA_BASE + R_GWCA_GWUSMFSECN_OFFSET)
-#define R_GWCA_GWTFECN                 (R_GWCA_BASE + R_GWCA_GWTFECN_OFFSET)
-#define R_GWCA_GWSEQECN                 (R_GWCA_BASE + R_GWCA_GWSEQECN_OFFSET)
-#define R_GWCA_GWTXDNECN                 (R_GWCA_BASE + R_GWCA_GWTXDNECN_OFFSET)
-#define R_GWCA_GWFSECN                 (R_GWCA_BASE + R_GWCA_GWFSECN_OFFSET)
-#define R_GWCA_GWTDFECN                 (R_GWCA_BASE + R_GWCA_GWTDFECN_OFFSET)
-#define R_GWCA_GWTSDNECN                 (R_GWCA_BASE + R_GWCA_GWTSDNECN_OFFSET)
-#define R_GWCA_GWDQOECN                 (R_GWCA_BASE + R_GWCA_GWDQOECN_OFFSET)
-#define R_GWCA_GWDQSECN                 (R_GWCA_BASE + R_GWCA_GWDQSECN_OFFSET)
-#define R_GWCA_GWDFECN                 (R_GWCA_BASE + R_GWCA_GWDFECN_OFFSET)
-#define R_GWCA_GWDSECN                 (R_GWCA_BASE + R_GWCA_GWDSECN_OFFSET)
-#define R_GWCA_GWDSZECN                 (R_GWCA_BASE + R_GWCA_GWDSZECN_OFFSET)
-#define R_GWCA_GWDCTECN                 (R_GWCA_BASE + R_GWCA_GWDCTECN_OFFSET)
-#define R_GWCA_GWRXDNECN                 (R_GWCA_BASE + R_GWCA_GWRXDNECN_OFFSET)
-#define R_GWCA_GWDIS0                 (R_GWCA_BASE + R_GWCA_GWDIS0_OFFSET)
-#define R_GWCA_GWDIE0                 (R_GWCA_BASE + R_GWCA_GWDIE0_OFFSET)
-#define R_GWCA_GWDID0                 (R_GWCA_BASE + R_GWCA_GWDID0_OFFSET)
-#define R_GWCA_GWDIDS0                 (R_GWCA_BASE + R_GWCA_GWDIDS0_OFFSET)
-#define R_GWCA_GWDIS1                 (R_GWCA_BASE + R_GWCA_GWDIS1_OFFSET)
-#define R_GWCA_GWDIE1                 (R_GWCA_BASE + R_GWCA_GWDIE1_OFFSET)
-#define R_GWCA_GWDID1                 (R_GWCA_BASE + R_GWCA_GWDID1_OFFSET)
-#define R_GWCA_GWDIDS1                 (R_GWCA_BASE + R_GWCA_GWDIDS1_OFFSET)
-#define R_GWCA_GWTSDIS                 (R_GWCA_BASE + R_GWCA_GWTSDIS_OFFSET)
-#define R_GWCA_GWTSDIE                 (R_GWCA_BASE + R_GWCA_GWTSDIE_OFFSET)
-#define R_GWCA_GWTSDID                 (R_GWCA_BASE + R_GWCA_GWTSDID_OFFSET)
-#define R_GWCA_GWEIS0                 (R_GWCA_BASE + R_GWCA_GWEIS0_OFFSET)
-#define R_GWCA_GWEIE0                 (R_GWCA_BASE + R_GWCA_GWEIE0_OFFSET)
-#define R_GWCA_GWEID0                 (R_GWCA_BASE + R_GWCA_GWEID0_OFFSET)
-#define R_GWCA_GWEIS1                 (R_GWCA_BASE + R_GWCA_GWEIS1_OFFSET)
-#define R_GWCA_GWEIE1                 (R_GWCA_BASE + R_GWCA_GWEIE1_OFFSET)
-#define R_GWCA_GWEID1                 (R_GWCA_BASE + R_GWCA_GWEID1_OFFSET)
-#define R_GWCA_GWEIS20                 (R_GWCA_BASE + R_GWCA_GWEIS20_OFFSET)
-#define R_GWCA_GWEIE20                 (R_GWCA_BASE + R_GWCA_GWEIE20_OFFSET)
-#define R_GWCA_GWEID20                 (R_GWCA_BASE + R_GWCA_GWEID20_OFFSET)
-#define R_GWCA_GWEIS21                 (R_GWCA_BASE + R_GWCA_GWEIS21_OFFSET)
-#define R_GWCA_GWEIE21                 (R_GWCA_BASE + R_GWCA_GWEIE21_OFFSET)
-#define R_GWCA_GWEID21                 (R_GWCA_BASE + R_GWCA_GWEID21_OFFSET)
-#define R_GWCA_GWEIS3                 (R_GWCA_BASE + R_GWCA_GWEIS3_OFFSET)
-#define R_GWCA_GWEIE3                 (R_GWCA_BASE + R_GWCA_GWEIE3_OFFSET)
-#define R_GWCA_GWEID3                 (R_GWCA_BASE + R_GWCA_GWEID3_OFFSET)
-#define R_GWCA_GWEIS4                 (R_GWCA_BASE + R_GWCA_GWEIS4_OFFSET)
-#define R_GWCA_GWEIE4                 (R_GWCA_BASE + R_GWCA_GWEIE4_OFFSET)
-#define R_GWCA_GWEID4                 (R_GWCA_BASE + R_GWCA_GWEID4_OFFSET)
-#define R_GWCA_GWEIS5                 (R_GWCA_BASE + R_GWCA_GWEIS5_OFFSET)
-#define R_GWCA_GWEIE5                 (R_GWCA_BASE + R_GWCA_GWEIE5_OFFSET)
-#define R_GWCA_GWEID5                 (R_GWCA_BASE + R_GWCA_GWEID5_OFFSET)
-#define R_GWCA_GWIDC00                 (R_GWCA_BASE + R_GWCA_GWIDC00_OFFSET)
-#define R_GWCA_GWIDC01                 (R_GWCA_BASE + R_GWCA_GWIDC01_OFFSET)
-#define R_GWCA_GWIDC02                 (R_GWCA_BASE + R_GWCA_GWIDC02_OFFSET)
-#define R_GWCA_GWIDC03                 (R_GWCA_BASE + R_GWCA_GWIDC03_OFFSET)
-#define R_GWCA_GWIDC04                 (R_GWCA_BASE + R_GWCA_GWIDC04_OFFSET)
-#define R_GWCA_GWIDC05                 (R_GWCA_BASE + R_GWCA_GWIDC05_OFFSET)
-#define R_GWCA_GWIDC06                 (R_GWCA_BASE + R_GWCA_GWIDC06_OFFSET)
-#define R_GWCA_GWIDC07                 (R_GWCA_BASE + R_GWCA_GWIDC07_OFFSET)
-#define R_GWCA_GWIDC08                 (R_GWCA_BASE + R_GWCA_GWIDC08_OFFSET)
-#define R_GWCA_GWIDC09                 (R_GWCA_BASE + R_GWCA_GWIDC09_OFFSET)
-#define R_GWCA_GWIDC10                 (R_GWCA_BASE + R_GWCA_GWIDC10_OFFSET)
-#define R_GWCA_GWIDC11                 (R_GWCA_BASE + R_GWCA_GWIDC11_OFFSET)
-#define R_GWCA_GWIDC12                 (R_GWCA_BASE + R_GWCA_GWIDC12_OFFSET)
-#define R_GWCA_GWIDC13                 (R_GWCA_BASE + R_GWCA_GWIDC13_OFFSET)
-#define R_GWCA_GWIDC14                 (R_GWCA_BASE + R_GWCA_GWIDC14_OFFSET)
-#define R_GWCA_GWIDC15                 (R_GWCA_BASE + R_GWCA_GWIDC15_OFFSET)
-#define R_GWCA_GWIDC16                 (R_GWCA_BASE + R_GWCA_GWIDC16_OFFSET)
-#define R_GWCA_GWIDC17                 (R_GWCA_BASE + R_GWCA_GWIDC17_OFFSET)
-#define R_GWCA_GWIDC18                 (R_GWCA_BASE + R_GWCA_GWIDC18_OFFSET)
-#define R_GWCA_GWIDC19                 (R_GWCA_BASE + R_GWCA_GWIDC19_OFFSET)
-#define R_GWCA_GWIDC20                 (R_GWCA_BASE + R_GWCA_GWIDC20_OFFSET)
-#define R_GWCA_GWIDC21                 (R_GWCA_BASE + R_GWCA_GWIDC21_OFFSET)
-#define R_GWCA_GWIDC22                 (R_GWCA_BASE + R_GWCA_GWIDC22_OFFSET)
-#define R_GWCA_GWIDC23                 (R_GWCA_BASE + R_GWCA_GWIDC23_OFFSET)
-#define R_GWCA_GWIDC24                 (R_GWCA_BASE + R_GWCA_GWIDC24_OFFSET)
-#define R_GWCA_GWIDC25                 (R_GWCA_BASE + R_GWCA_GWIDC25_OFFSET)
-#define R_GWCA_GWIDC26                 (R_GWCA_BASE + R_GWCA_GWIDC26_OFFSET)
-#define R_GWCA_GWIDC27                 (R_GWCA_BASE + R_GWCA_GWIDC27_OFFSET)
-#define R_GWCA_GWIDC28                 (R_GWCA_BASE + R_GWCA_GWIDC28_OFFSET)
-#define R_GWCA_GWIDC29                 (R_GWCA_BASE + R_GWCA_GWIDC29_OFFSET)
-#define R_GWCA_GWIDC30                 (R_GWCA_BASE + R_GWCA_GWIDC30_OFFSET)
-#define R_GWCA_GWIDC31                 (R_GWCA_BASE + R_GWCA_GWIDC31_OFFSET)
-#define R_GWCA_GWIDC32                 (R_GWCA_BASE + R_GWCA_GWIDC32_OFFSET)
-#define R_GWCA_GWIDC33                 (R_GWCA_BASE + R_GWCA_GWIDC33_OFFSET)
-#define R_GWCA_GWIDC34                 (R_GWCA_BASE + R_GWCA_GWIDC34_OFFSET)
-#define R_GWCA_GWIDC35                 (R_GWCA_BASE + R_GWCA_GWIDC35_OFFSET)
-#define R_GWCA_GWIDC36                 (R_GWCA_BASE + R_GWCA_GWIDC36_OFFSET)
-#define R_GWCA_GWIDC37                 (R_GWCA_BASE + R_GWCA_GWIDC37_OFFSET)
-#define R_GWCA_GWIDC38                 (R_GWCA_BASE + R_GWCA_GWIDC38_OFFSET)
-#define R_GWCA_GWIDC39                 (R_GWCA_BASE + R_GWCA_GWIDC39_OFFSET)
-#define R_GWCA_GWIDC40                 (R_GWCA_BASE + R_GWCA_GWIDC40_OFFSET)
-#define R_GWCA_GWIDC41                 (R_GWCA_BASE + R_GWCA_GWIDC41_OFFSET)
-#define R_GWCA_GWIDC42                 (R_GWCA_BASE + R_GWCA_GWIDC42_OFFSET)
-#define R_GWCA_GWIDC43                 (R_GWCA_BASE + R_GWCA_GWIDC43_OFFSET)
-#define R_GWCA_GWIDC44                 (R_GWCA_BASE + R_GWCA_GWIDC44_OFFSET)
-#define R_GWCA_GWIDC45                 (R_GWCA_BASE + R_GWCA_GWIDC45_OFFSET)
-#define R_GWCA_GWIDC46                 (R_GWCA_BASE + R_GWCA_GWIDC46_OFFSET)
-#define R_GWCA_GWIDC47                 (R_GWCA_BASE + R_GWCA_GWIDC47_OFFSET)
-#define R_GWCA_GWIDC48                 (R_GWCA_BASE + R_GWCA_GWIDC48_OFFSET)
-#define R_GWCA_GWIDC49                 (R_GWCA_BASE + R_GWCA_GWIDC49_OFFSET)
-#define R_GWCA_GWIDC50                 (R_GWCA_BASE + R_GWCA_GWIDC50_OFFSET)
-#define R_GWCA_GWIDC51                 (R_GWCA_BASE + R_GWCA_GWIDC51_OFFSET)
-#define R_GWCA_GWIDC52                 (R_GWCA_BASE + R_GWCA_GWIDC52_OFFSET)
-#define R_GWCA_GWIDC53                 (R_GWCA_BASE + R_GWCA_GWIDC53_OFFSET)
-#define R_GWCA_GWIDC54                 (R_GWCA_BASE + R_GWCA_GWIDC54_OFFSET)
-#define R_GWCA_GWIDC55                 (R_GWCA_BASE + R_GWCA_GWIDC55_OFFSET)
-#define R_GWCA_GWIDC56                 (R_GWCA_BASE + R_GWCA_GWIDC56_OFFSET)
-#define R_GWCA_GWIDC57                 (R_GWCA_BASE + R_GWCA_GWIDC57_OFFSET)
-#define R_GWCA_GWIDC58                 (R_GWCA_BASE + R_GWCA_GWIDC58_OFFSET)
-#define R_GWCA_GWIDC59                 (R_GWCA_BASE + R_GWCA_GWIDC59_OFFSET)
-#define R_GWCA_GWIDC60                 (R_GWCA_BASE + R_GWCA_GWIDC60_OFFSET)
-#define R_GWCA_GWIDC61                 (R_GWCA_BASE + R_GWCA_GWIDC61_OFFSET)
-#define R_GWCA_GWIDC62                 (R_GWCA_BASE + R_GWCA_GWIDC62_OFFSET)
-#define R_GWCA_GWIDC63                 (R_GWCA_BASE + R_GWCA_GWIDC63_OFFSET)
+#define R_GWCA_GWMC                               (R_GWCA_BASE + R_GWCA_GWMC_OFFSET)
+#define R_GWCA_GWMS                               (R_GWCA_BASE + R_GWCA_GWMS_OFFSET)
+#define R_GWCA_GWIRC                              (R_GWCA_BASE + R_GWCA_GWIRC_OFFSET)
+#define R_GWCA_GWRDQSC                            (R_GWCA_BASE + R_GWCA_GWRDQSC_OFFSET)
+#define R_GWCA_GWRDQC                             (R_GWCA_BASE + R_GWCA_GWRDQC_OFFSET)
+#define R_GWCA_GWRDQAC                            (R_GWCA_BASE + R_GWCA_GWRDQAC_OFFSET)
+#define R_GWCA_GWRGC                              (R_GWCA_BASE + R_GWCA_GWRGC_OFFSET)
+#define R_GWCA_GWRMFSC(m)                         (R_GWCA_BASE + R_GWCA_GWRMFSC_OFFSET(m))
+#define R_GWCA_GWRDQDC(m)                         (R_GWCA_BASE + R_GWCA_GWRDQDC_OFFSET(m))
+#define R_GWCA_GWRDQM(m)                          (R_GWCA_BASE + R_GWCA_GWRDQM_OFFSET(m))
+#define R_GWCA_GWRDQMLM(m)                        (R_GWCA_BASE + R_GWCA_GWRDQMLM_OFFSET(m))
+#define R_GWCA_GWMTIRM                            (R_GWCA_BASE + R_GWCA_GWMTIRM_OFFSET)
+#define R_GWCA_GWMSTLS                            (R_GWCA_BASE + R_GWCA_GWMSTLS_OFFSET)
+#define R_GWCA_GWMSTLR                            (R_GWCA_BASE + R_GWCA_GWMSTLR_OFFSET)
+#define R_GWCA_GWMSTSS                            (R_GWCA_BASE + R_GWCA_GWMSTSS_OFFSET)
+#define R_GWCA_GWMSTSR                            (R_GWCA_BASE + R_GWCA_GWMSTSR_OFFSET)
+#define R_GWCA_GWMAC0                             (R_GWCA_BASE + R_GWCA_GWMAC0_OFFSET)
+#define R_GWCA_GWMAC1                             (R_GWCA_BASE + R_GWCA_GWMAC1_OFFSET)
+#define R_GWCA_GWVCC                              (R_GWCA_BASE + R_GWCA_GWVCC_OFFSET)
+#define R_GWCA_GWVTC                              (R_GWCA_BASE + R_GWCA_GWVTC_OFFSET)
+#define R_GWCA_GWTTFC                             (R_GWCA_BASE + R_GWCA_GWTTFC_OFFSET)
+#define R_GWCA_GWTDCAC0(m)                        (R_GWCA_BASE + R_GWCA_GWTDCAC0_OFFSET(m))
+#define R_GWCA_GWTDCAC1(m)                        (R_GWCA_BASE + R_GWCA_GWTDCAC1_OFFSET(m))
+#define R_GWCA_GWTSDCC(m)                         (R_GWCA_BASE + R_GWCA_GWTSDCC_OFFSET(m))
+#define R_GWCA_GWTSNM                             (R_GWCA_BASE + R_GWCA_GWTSNM_OFFSET)
+#define R_GWCA_GWTSMNM                            (R_GWCA_BASE + R_GWCA_GWTSMNM_OFFSET)
+#define R_GWCA_GWAC                               (R_GWCA_BASE + R_GWCA_GWAC_OFFSET)
+#define R_GWCA_GWDCBAC0                           (R_GWCA_BASE + R_GWCA_GWDCBAC0_OFFSET)
+#define R_GWCA_GWDCBAC1                           (R_GWCA_BASE + R_GWCA_GWDCBAC1_OFFSET)
+#define R_GWCA_GWMDNC                             (R_GWCA_BASE + R_GWCA_GWMDNC_OFFSET)
+#define R_GWCA_GWTRC0                             (R_GWCA_BASE + R_GWCA_GWTRC0_OFFSET)
+#define R_GWCA_GWTRC1                             (R_GWCA_BASE + R_GWCA_GWTRC1_OFFSET)
+#define R_GWCA_GWTPCP                             (R_GWCA_BASE + R_GWCA_GWTPCP_OFFSET)
+#define R_GWCA_GWARIRM                            (R_GWCA_BASE + R_GWCA_GWARIRM_OFFSET)
+#define R_GWCA_GWDCC(m)                           (R_GWCA_BASE + R_GWCA_GWDCC_OFFSET(m))
+#define R_GWCA_GWAARSS                            (R_GWCA_BASE + R_GWCA_GWAARSS_OFFSET)
+#define R_GWCA_GWAARSR0                           (R_GWCA_BASE + R_GWCA_GWAARSR0_OFFSET)
+#define R_GWCA_GWAARSR1                           (R_GWCA_BASE + R_GWCA_GWAARSR1_OFFSET)
+#define R_GWCA_GWIDAUAS(m)                        (R_GWCA_BASE + R_GWCA_GWIDAUAS_OFFSET(m))
+#define R_GWCA_GWIDASM(m)                         (R_GWCA_BASE + R_GWCA_GWIDASM_OFFSET(m))
+#define R_GWCA_GWIDASAM0(m)                       (R_GWCA_BASE + R_GWCA_GWIDASAM0_OFFSET(m))
+#define R_GWCA_GWIDASAM1(m)                       (R_GWCA_BASE + R_GWCA_GWIDASAM1_OFFSET(m))
+#define R_GWCA_GWIDACAM0(m)                       (R_GWCA_BASE + R_GWCA_GWIDACAM0_OFFSET(m))
+#define R_GWCA_GWIDACAM1(m)                       (R_GWCA_BASE + R_GWCA_GWIDACAM1_OFFSET(m))
+#define R_GWCA_GWGRLC                             (R_GWCA_BASE + R_GWCA_GWGRLC_OFFSET)
+#define R_GWCA_GWGRLULC                           (R_GWCA_BASE + R_GWCA_GWGRLULC_OFFSET)
+#define R_GWCA_GWRLC(m)                           (R_GWCA_BASE + R_GWCA_GWRLC_OFFSET(m))
+#define R_GWCA_GWRLULC(m)                         (R_GWCA_BASE + R_GWCA_GWRLULC_OFFSET(m))
+#define R_GWCA_GWIDPC                             (R_GWCA_BASE + R_GWCA_GWIDPC_OFFSET)
+#define R_GWCA_GWRDCN                             (R_GWCA_BASE + R_GWCA_GWRDCN_OFFSET)
+#define R_GWCA_GWTDCN                             (R_GWCA_BASE + R_GWCA_GWTDCN_OFFSET)
+#define R_GWCA_GWTSCN                             (R_GWCA_BASE + R_GWCA_GWTSCN_OFFSET)
+#define R_GWCA_GWTSOVFECN                         (R_GWCA_BASE + R_GWCA_GWTSOVFECN_OFFSET)
+#define R_GWCA_GWUSMFSECN                         (R_GWCA_BASE + R_GWCA_GWUSMFSECN_OFFSET)
+#define R_GWCA_GWTFECN                            (R_GWCA_BASE + R_GWCA_GWTFECN_OFFSET)
+#define R_GWCA_GWSEQECN                           (R_GWCA_BASE + R_GWCA_GWSEQECN_OFFSET)
+#define R_GWCA_GWTXDNECN                          (R_GWCA_BASE + R_GWCA_GWTXDNECN_OFFSET)
+#define R_GWCA_GWFSECN                            (R_GWCA_BASE + R_GWCA_GWFSECN_OFFSET)
+#define R_GWCA_GWTDFECN                           (R_GWCA_BASE + R_GWCA_GWTDFECN_OFFSET)
+#define R_GWCA_GWTSDNECN                          (R_GWCA_BASE + R_GWCA_GWTSDNECN_OFFSET)
+#define R_GWCA_GWDQOECN                           (R_GWCA_BASE + R_GWCA_GWDQOECN_OFFSET)
+#define R_GWCA_GWDQSECN                           (R_GWCA_BASE + R_GWCA_GWDQSECN_OFFSET)
+#define R_GWCA_GWDFECN                            (R_GWCA_BASE + R_GWCA_GWDFECN_OFFSET)
+#define R_GWCA_GWDSECN                            (R_GWCA_BASE + R_GWCA_GWDSECN_OFFSET)
+#define R_GWCA_GWDSZECN                           (R_GWCA_BASE + R_GWCA_GWDSZECN_OFFSET)
+#define R_GWCA_GWDCTECN                           (R_GWCA_BASE + R_GWCA_GWDCTECN_OFFSET)
+#define R_GWCA_GWRXDNECN                          (R_GWCA_BASE + R_GWCA_GWRXDNECN_OFFSET)
+#define R_GWCA_GWDIS0                             (R_GWCA_BASE + R_GWCA_GWDIS0_OFFSET)
+#define R_GWCA_GWDIE0                             (R_GWCA_BASE + R_GWCA_GWDIE0_OFFSET)
+#define R_GWCA_GWDID0                             (R_GWCA_BASE + R_GWCA_GWDID0_OFFSET)
+#define R_GWCA_GWDIDS0                            (R_GWCA_BASE + R_GWCA_GWDIDS0_OFFSET)
+#define R_GWCA_GWDIS1                             (R_GWCA_BASE + R_GWCA_GWDIS1_OFFSET)
+#define R_GWCA_GWDIE1                             (R_GWCA_BASE + R_GWCA_GWDIE1_OFFSET)
+#define R_GWCA_GWDID1                             (R_GWCA_BASE + R_GWCA_GWDID1_OFFSET)
+#define R_GWCA_GWDIDS1                            (R_GWCA_BASE + R_GWCA_GWDIDS1_OFFSET)
+#define R_GWCA_GWTSDIS                            (R_GWCA_BASE + R_GWCA_GWTSDIS_OFFSET)
+#define R_GWCA_GWTSDIE                            (R_GWCA_BASE + R_GWCA_GWTSDIE_OFFSET)
+#define R_GWCA_GWTSDID                            (R_GWCA_BASE + R_GWCA_GWTSDID_OFFSET)
+#define R_GWCA_GWEIS0                             (R_GWCA_BASE + R_GWCA_GWEIS0_OFFSET)
+#define R_GWCA_GWEIE0                             (R_GWCA_BASE + R_GWCA_GWEIE0_OFFSET)
+#define R_GWCA_GWEID0                             (R_GWCA_BASE + R_GWCA_GWEID0_OFFSET)
+#define R_GWCA_GWEIS1                             (R_GWCA_BASE + R_GWCA_GWEIS1_OFFSET)
+#define R_GWCA_GWEIE1                             (R_GWCA_BASE + R_GWCA_GWEIE1_OFFSET)
+#define R_GWCA_GWEID1                             (R_GWCA_BASE + R_GWCA_GWEID1_OFFSET)
+#define R_GWCA_GWEIS20                            (R_GWCA_BASE + R_GWCA_GWEIS20_OFFSET)
+#define R_GWCA_GWEIE20                            (R_GWCA_BASE + R_GWCA_GWEIE20_OFFSET)
+#define R_GWCA_GWEID20                            (R_GWCA_BASE + R_GWCA_GWEID20_OFFSET)
+#define R_GWCA_GWEIS21                            (R_GWCA_BASE + R_GWCA_GWEIS21_OFFSET)
+#define R_GWCA_GWEIE21                            (R_GWCA_BASE + R_GWCA_GWEIE21_OFFSET)
+#define R_GWCA_GWEID21                            (R_GWCA_BASE + R_GWCA_GWEID21_OFFSET)
+#define R_GWCA_GWEIS3                             (R_GWCA_BASE + R_GWCA_GWEIS3_OFFSET)
+#define R_GWCA_GWEIE3                             (R_GWCA_BASE + R_GWCA_GWEIE3_OFFSET)
+#define R_GWCA_GWEID3                             (R_GWCA_BASE + R_GWCA_GWEID3_OFFSET)
+#define R_GWCA_GWEIS4                             (R_GWCA_BASE + R_GWCA_GWEIS4_OFFSET)
+#define R_GWCA_GWEIE4                             (R_GWCA_BASE + R_GWCA_GWEIE4_OFFSET)
+#define R_GWCA_GWEID4                             (R_GWCA_BASE + R_GWCA_GWEID4_OFFSET)
+#define R_GWCA_GWEIS5                             (R_GWCA_BASE + R_GWCA_GWEIS5_OFFSET)
+#define R_GWCA_GWEIE5                             (R_GWCA_BASE + R_GWCA_GWEIE5_OFFSET)
+#define R_GWCA_GWEID5                             (R_GWCA_BASE + R_GWCA_GWEID5_OFFSET)
+#define R_GWCA_GWIDC(m)                           (R_GWCA_BASE + R_GWCA_GWIDC_OFFSET(m))
 
 /* Register bit definitions */
 /* GWMC Register bit definitions */

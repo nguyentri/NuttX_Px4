@@ -40,11 +40,11 @@
 
 /* FCACHE Register Offsets */
 
-#define R_FCACHE_FSAR_OFFSET     0x00000040  /* Flash Security Attribution Register */
+#define R_FCACHE_FSAR_OFFSET                      0x00000040  /* Flash Security Attribution Register */
 
 /* FCACHE Register Addresses */
 
-#define R_FCACHE_FSAR                 (R_FCACHE_BASE + R_FCACHE_FSAR_OFFSET)
+#define R_FCACHE_FSAR                             (R_FCACHE_BASE + R_FCACHE_FSAR_OFFSET)
 
 /* Register bit definitions */
 /* FSAR Register bit definitions */

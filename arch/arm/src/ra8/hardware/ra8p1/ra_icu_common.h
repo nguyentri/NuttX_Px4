@@ -38,146 +38,80 @@
 #endif
 #endif
 
-/* Channel stride for multi-channel peripherals */
-#define R_ICU_COMMON_CH_STRIDE    0x00000004
-#define R_ICU_COMMON_CH_BASE(ch)   (R_ICU_COMMON_BASE + ((uint32_t)(ch) * R_ICU_COMMON_CH_STRIDE))
-
 /* ICU_COMMON Register Offsets */
 
-#define R_ICU_COMMON_IRQCR0_OFFSET     0x00000000  /* IRQ Control Register */
-#define R_ICU_COMMON_IRQCR1_OFFSET     0x00000001  /* IRQ Control Register */
-#define R_ICU_COMMON_IRQCR2_OFFSET     0x00000002  /* IRQ Control Register */
-#define R_ICU_COMMON_IRQCR3_OFFSET     0x00000003  /* IRQ Control Register */
-#define R_ICU_COMMON_IRQCR4_OFFSET     0x00000004  /* IRQ Control Register */
-#define R_ICU_COMMON_IRQCR5_OFFSET     0x00000005  /* IRQ Control Register */
-#define R_ICU_COMMON_IRQCR6_OFFSET     0x00000006  /* IRQ Control Register */
-#define R_ICU_COMMON_IRQCR7_OFFSET     0x00000007  /* IRQ Control Register */
-#define R_ICU_COMMON_IRQCR8_OFFSET     0x00000008  /* IRQ Control Register */
-#define R_ICU_COMMON_IRQCR9_OFFSET     0x00000009  /* IRQ Control Register */
-#define R_ICU_COMMON_IRQCR10_OFFSET     0x0000000a  /* IRQ Control Register */
-#define R_ICU_COMMON_IRQCR11_OFFSET     0x0000000b  /* IRQ Control Register */
-#define R_ICU_COMMON_IRQCR12_OFFSET     0x0000000c  /* IRQ Control Register */
-#define R_ICU_COMMON_IRQCR13_OFFSET     0x0000000d  /* IRQ Control Register */
-#define R_ICU_COMMON_IRQCR14_OFFSET     0x0000000e  /* IRQ Control Register */
-#define R_ICU_COMMON_IRQCR15_OFFSET     0x0000000f  /* IRQ Control Register */
-#define R_ICU_COMMON_NMICR_OFFSET     0x00000010  /* NMI Pin Interrupt Control Register */
-#define R_ICU_COMMON_IRQCR16_OFFSET     0x00000014  /* IRQ Control Register */
-#define R_ICU_COMMON_IRQCR17_OFFSET     0x00000015  /* IRQ Control Register */
-#define R_ICU_COMMON_IRQCR18_OFFSET     0x00000016  /* IRQ Control Register */
-#define R_ICU_COMMON_IRQCR19_OFFSET     0x00000017  /* IRQ Control Register */
-#define R_ICU_COMMON_IRQCR20_OFFSET     0x00000018  /* IRQ Control Register */
-#define R_ICU_COMMON_IRQCR21_OFFSET     0x00000019  /* IRQ Control Register */
-#define R_ICU_COMMON_IRQCR22_OFFSET     0x0000001a  /* IRQ Control Register */
-#define R_ICU_COMMON_IRQCR23_OFFSET     0x0000001b  /* IRQ Control Register */
-#define R_ICU_COMMON_IRQCR24_OFFSET     0x0000001c  /* IRQ Control Register */
-#define R_ICU_COMMON_IRQCR25_OFFSET     0x0000001d  /* IRQ Control Register */
-#define R_ICU_COMMON_IRQCR26_OFFSET     0x0000001e  /* IRQ Control Register */
-#define R_ICU_COMMON_IRQCR27_OFFSET     0x0000001f  /* IRQ Control Register */
-#define R_ICU_COMMON_IRQCR28_OFFSET     0x00000020  /* IRQ Control Register */
-#define R_ICU_COMMON_IRQCR29_OFFSET     0x00000021  /* IRQ Control Register */
-#define R_ICU_COMMON_IRQCR30_OFFSET     0x00000022  /* IRQ Control Register */
-#define R_ICU_COMMON_IRQCR31_OFFSET     0x00000023  /* IRQ Control Register */
+#define R_ICU_COMMON_IRQCR0_OFFSET                0x00000000  /* IRQ Control Register */
+#define R_ICU_COMMON_IRQCR1_OFFSET                0x00000001  /* IRQ Control Register */
+#define R_ICU_COMMON_IRQCR2_OFFSET                0x00000002  /* IRQ Control Register */
+#define R_ICU_COMMON_IRQCR3_OFFSET                0x00000003  /* IRQ Control Register */
+#define R_ICU_COMMON_IRQCR4_OFFSET                0x00000004  /* IRQ Control Register */
+#define R_ICU_COMMON_IRQCR5_OFFSET                0x00000005  /* IRQ Control Register */
+#define R_ICU_COMMON_IRQCR6_OFFSET                0x00000006  /* IRQ Control Register */
+#define R_ICU_COMMON_IRQCR7_OFFSET                0x00000007  /* IRQ Control Register */
+#define R_ICU_COMMON_IRQCR8_OFFSET                0x00000008  /* IRQ Control Register */
+#define R_ICU_COMMON_IRQCR9_OFFSET                0x00000009  /* IRQ Control Register */
+#define R_ICU_COMMON_IRQCR10_OFFSET               0x0000000a  /* IRQ Control Register */
+#define R_ICU_COMMON_IRQCR11_OFFSET               0x0000000b  /* IRQ Control Register */
+#define R_ICU_COMMON_IRQCR12_OFFSET               0x0000000c  /* IRQ Control Register */
+#define R_ICU_COMMON_IRQCR13_OFFSET               0x0000000d  /* IRQ Control Register */
+#define R_ICU_COMMON_IRQCR14_OFFSET               0x0000000e  /* IRQ Control Register */
+#define R_ICU_COMMON_IRQCR15_OFFSET               0x0000000f  /* IRQ Control Register */
+#define R_ICU_COMMON_NMICR_OFFSET                 0x00000010  /* NMI Pin Interrupt Control Register */
+#define R_ICU_COMMON_IRQCR16_OFFSET               0x00000014  /* IRQ Control Register */
+#define R_ICU_COMMON_IRQCR17_OFFSET               0x00000015  /* IRQ Control Register */
+#define R_ICU_COMMON_IRQCR18_OFFSET               0x00000016  /* IRQ Control Register */
+#define R_ICU_COMMON_IRQCR19_OFFSET               0x00000017  /* IRQ Control Register */
+#define R_ICU_COMMON_IRQCR20_OFFSET               0x00000018  /* IRQ Control Register */
+#define R_ICU_COMMON_IRQCR21_OFFSET               0x00000019  /* IRQ Control Register */
+#define R_ICU_COMMON_IRQCR22_OFFSET               0x0000001a  /* IRQ Control Register */
+#define R_ICU_COMMON_IRQCR23_OFFSET               0x0000001b  /* IRQ Control Register */
+#define R_ICU_COMMON_IRQCR24_OFFSET               0x0000001c  /* IRQ Control Register */
+#define R_ICU_COMMON_IRQCR25_OFFSET               0x0000001d  /* IRQ Control Register */
+#define R_ICU_COMMON_IRQCR26_OFFSET               0x0000001e  /* IRQ Control Register */
+#define R_ICU_COMMON_IRQCR27_OFFSET               0x0000001f  /* IRQ Control Register */
+#define R_ICU_COMMON_IRQCR28_OFFSET               0x00000020  /* IRQ Control Register */
+#define R_ICU_COMMON_IRQCR29_OFFSET               0x00000021  /* IRQ Control Register */
+#define R_ICU_COMMON_IRQCR30_OFFSET               0x00000022  /* IRQ Control Register */
+#define R_ICU_COMMON_IRQCR31_OFFSET               0x00000023  /* IRQ Control Register */
 /* INTSELR%s Registers (0-31) */
-#define R_ICU_COMMON_INTSELR00_OFFSET     0x00000040  /* Interrupt Request Select Register */
-#define R_ICU_COMMON_INTSELR01_OFFSET     0x00000044  /* Interrupt Request Select Register */
-#define R_ICU_COMMON_INTSELR02_OFFSET     0x00000048  /* Interrupt Request Select Register */
-#define R_ICU_COMMON_INTSELR03_OFFSET     0x0000004c  /* Interrupt Request Select Register */
-#define R_ICU_COMMON_INTSELR04_OFFSET     0x00000050  /* Interrupt Request Select Register */
-#define R_ICU_COMMON_INTSELR05_OFFSET     0x00000054  /* Interrupt Request Select Register */
-#define R_ICU_COMMON_INTSELR06_OFFSET     0x00000058  /* Interrupt Request Select Register */
-#define R_ICU_COMMON_INTSELR07_OFFSET     0x0000005c  /* Interrupt Request Select Register */
-#define R_ICU_COMMON_INTSELR08_OFFSET     0x00000060  /* Interrupt Request Select Register */
-#define R_ICU_COMMON_INTSELR09_OFFSET     0x00000064  /* Interrupt Request Select Register */
-#define R_ICU_COMMON_INTSELR10_OFFSET     0x00000068  /* Interrupt Request Select Register */
-#define R_ICU_COMMON_INTSELR11_OFFSET     0x0000006c  /* Interrupt Request Select Register */
-#define R_ICU_COMMON_INTSELR12_OFFSET     0x00000070  /* Interrupt Request Select Register */
-#define R_ICU_COMMON_INTSELR13_OFFSET     0x00000074  /* Interrupt Request Select Register */
-#define R_ICU_COMMON_INTSELR14_OFFSET     0x00000078  /* Interrupt Request Select Register */
-#define R_ICU_COMMON_INTSELR15_OFFSET     0x0000007c  /* Interrupt Request Select Register */
-#define R_ICU_COMMON_INTSELR16_OFFSET     0x00000080  /* Interrupt Request Select Register */
-#define R_ICU_COMMON_INTSELR17_OFFSET     0x00000084  /* Interrupt Request Select Register */
-#define R_ICU_COMMON_INTSELR18_OFFSET     0x00000088  /* Interrupt Request Select Register */
-#define R_ICU_COMMON_INTSELR19_OFFSET     0x0000008c  /* Interrupt Request Select Register */
-#define R_ICU_COMMON_INTSELR20_OFFSET     0x00000090  /* Interrupt Request Select Register */
-#define R_ICU_COMMON_INTSELR21_OFFSET     0x00000094  /* Interrupt Request Select Register */
-#define R_ICU_COMMON_INTSELR22_OFFSET     0x00000098  /* Interrupt Request Select Register */
-#define R_ICU_COMMON_INTSELR23_OFFSET     0x0000009c  /* Interrupt Request Select Register */
-#define R_ICU_COMMON_INTSELR24_OFFSET     0x000000a0  /* Interrupt Request Select Register */
-#define R_ICU_COMMON_INTSELR25_OFFSET     0x000000a4  /* Interrupt Request Select Register */
-#define R_ICU_COMMON_INTSELR26_OFFSET     0x000000a8  /* Interrupt Request Select Register */
-#define R_ICU_COMMON_INTSELR27_OFFSET     0x000000ac  /* Interrupt Request Select Register */
-#define R_ICU_COMMON_INTSELR28_OFFSET     0x000000b0  /* Interrupt Request Select Register */
-#define R_ICU_COMMON_INTSELR29_OFFSET     0x000000b4  /* Interrupt Request Select Register */
-#define R_ICU_COMMON_INTSELR30_OFFSET     0x000000b8  /* Interrupt Request Select Register */
-#define R_ICU_COMMON_INTSELR31_OFFSET     0x000000bc  /* Interrupt Request Select Register */
+#define R_ICU_COMMON_INTSELR_OFFSET(m)            (0x00000040 + ((m) * 0x00000004))  /* Interrupt Request Select Register */
 
 /* ICU_COMMON Register Addresses */
 
-#define R_ICU_COMMON_IRQCR0                 (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR0_OFFSET)
-#define R_ICU_COMMON_IRQCR1                 (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR1_OFFSET)
-#define R_ICU_COMMON_IRQCR2                 (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR2_OFFSET)
-#define R_ICU_COMMON_IRQCR3                 (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR3_OFFSET)
-#define R_ICU_COMMON_IRQCR4                 (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR4_OFFSET)
-#define R_ICU_COMMON_IRQCR5                 (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR5_OFFSET)
-#define R_ICU_COMMON_IRQCR6                 (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR6_OFFSET)
-#define R_ICU_COMMON_IRQCR7                 (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR7_OFFSET)
-#define R_ICU_COMMON_IRQCR8                 (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR8_OFFSET)
-#define R_ICU_COMMON_IRQCR9                 (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR9_OFFSET)
-#define R_ICU_COMMON_IRQCR10                 (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR10_OFFSET)
-#define R_ICU_COMMON_IRQCR11                 (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR11_OFFSET)
-#define R_ICU_COMMON_IRQCR12                 (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR12_OFFSET)
-#define R_ICU_COMMON_IRQCR13                 (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR13_OFFSET)
-#define R_ICU_COMMON_IRQCR14                 (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR14_OFFSET)
-#define R_ICU_COMMON_IRQCR15                 (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR15_OFFSET)
-#define R_ICU_COMMON_NMICR                 (R_ICU_COMMON_BASE + R_ICU_COMMON_NMICR_OFFSET)
-#define R_ICU_COMMON_IRQCR16                 (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR16_OFFSET)
-#define R_ICU_COMMON_IRQCR17                 (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR17_OFFSET)
-#define R_ICU_COMMON_IRQCR18                 (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR18_OFFSET)
-#define R_ICU_COMMON_IRQCR19                 (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR19_OFFSET)
-#define R_ICU_COMMON_IRQCR20                 (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR20_OFFSET)
-#define R_ICU_COMMON_IRQCR21                 (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR21_OFFSET)
-#define R_ICU_COMMON_IRQCR22                 (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR22_OFFSET)
-#define R_ICU_COMMON_IRQCR23                 (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR23_OFFSET)
-#define R_ICU_COMMON_IRQCR24                 (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR24_OFFSET)
-#define R_ICU_COMMON_IRQCR25                 (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR25_OFFSET)
-#define R_ICU_COMMON_IRQCR26                 (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR26_OFFSET)
-#define R_ICU_COMMON_IRQCR27                 (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR27_OFFSET)
-#define R_ICU_COMMON_IRQCR28                 (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR28_OFFSET)
-#define R_ICU_COMMON_IRQCR29                 (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR29_OFFSET)
-#define R_ICU_COMMON_IRQCR30                 (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR30_OFFSET)
-#define R_ICU_COMMON_IRQCR31                 (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR31_OFFSET)
-#define R_ICU_COMMON_INTSELR00                 (R_ICU_COMMON_BASE + R_ICU_COMMON_INTSELR00_OFFSET)
-#define R_ICU_COMMON_INTSELR01                 (R_ICU_COMMON_BASE + R_ICU_COMMON_INTSELR01_OFFSET)
-#define R_ICU_COMMON_INTSELR02                 (R_ICU_COMMON_BASE + R_ICU_COMMON_INTSELR02_OFFSET)
-#define R_ICU_COMMON_INTSELR03                 (R_ICU_COMMON_BASE + R_ICU_COMMON_INTSELR03_OFFSET)
-#define R_ICU_COMMON_INTSELR04                 (R_ICU_COMMON_BASE + R_ICU_COMMON_INTSELR04_OFFSET)
-#define R_ICU_COMMON_INTSELR05                 (R_ICU_COMMON_BASE + R_ICU_COMMON_INTSELR05_OFFSET)
-#define R_ICU_COMMON_INTSELR06                 (R_ICU_COMMON_BASE + R_ICU_COMMON_INTSELR06_OFFSET)
-#define R_ICU_COMMON_INTSELR07                 (R_ICU_COMMON_BASE + R_ICU_COMMON_INTSELR07_OFFSET)
-#define R_ICU_COMMON_INTSELR08                 (R_ICU_COMMON_BASE + R_ICU_COMMON_INTSELR08_OFFSET)
-#define R_ICU_COMMON_INTSELR09                 (R_ICU_COMMON_BASE + R_ICU_COMMON_INTSELR09_OFFSET)
-#define R_ICU_COMMON_INTSELR10                 (R_ICU_COMMON_BASE + R_ICU_COMMON_INTSELR10_OFFSET)
-#define R_ICU_COMMON_INTSELR11                 (R_ICU_COMMON_BASE + R_ICU_COMMON_INTSELR11_OFFSET)
-#define R_ICU_COMMON_INTSELR12                 (R_ICU_COMMON_BASE + R_ICU_COMMON_INTSELR12_OFFSET)
-#define R_ICU_COMMON_INTSELR13                 (R_ICU_COMMON_BASE + R_ICU_COMMON_INTSELR13_OFFSET)
-#define R_ICU_COMMON_INTSELR14                 (R_ICU_COMMON_BASE + R_ICU_COMMON_INTSELR14_OFFSET)
-#define R_ICU_COMMON_INTSELR15                 (R_ICU_COMMON_BASE + R_ICU_COMMON_INTSELR15_OFFSET)
-#define R_ICU_COMMON_INTSELR16                 (R_ICU_COMMON_BASE + R_ICU_COMMON_INTSELR16_OFFSET)
-#define R_ICU_COMMON_INTSELR17                 (R_ICU_COMMON_BASE + R_ICU_COMMON_INTSELR17_OFFSET)
-#define R_ICU_COMMON_INTSELR18                 (R_ICU_COMMON_BASE + R_ICU_COMMON_INTSELR18_OFFSET)
-#define R_ICU_COMMON_INTSELR19                 (R_ICU_COMMON_BASE + R_ICU_COMMON_INTSELR19_OFFSET)
-#define R_ICU_COMMON_INTSELR20                 (R_ICU_COMMON_BASE + R_ICU_COMMON_INTSELR20_OFFSET)
-#define R_ICU_COMMON_INTSELR21                 (R_ICU_COMMON_BASE + R_ICU_COMMON_INTSELR21_OFFSET)
-#define R_ICU_COMMON_INTSELR22                 (R_ICU_COMMON_BASE + R_ICU_COMMON_INTSELR22_OFFSET)
-#define R_ICU_COMMON_INTSELR23                 (R_ICU_COMMON_BASE + R_ICU_COMMON_INTSELR23_OFFSET)
-#define R_ICU_COMMON_INTSELR24                 (R_ICU_COMMON_BASE + R_ICU_COMMON_INTSELR24_OFFSET)
-#define R_ICU_COMMON_INTSELR25                 (R_ICU_COMMON_BASE + R_ICU_COMMON_INTSELR25_OFFSET)
-#define R_ICU_COMMON_INTSELR26                 (R_ICU_COMMON_BASE + R_ICU_COMMON_INTSELR26_OFFSET)
-#define R_ICU_COMMON_INTSELR27                 (R_ICU_COMMON_BASE + R_ICU_COMMON_INTSELR27_OFFSET)
-#define R_ICU_COMMON_INTSELR28                 (R_ICU_COMMON_BASE + R_ICU_COMMON_INTSELR28_OFFSET)
-#define R_ICU_COMMON_INTSELR29                 (R_ICU_COMMON_BASE + R_ICU_COMMON_INTSELR29_OFFSET)
-#define R_ICU_COMMON_INTSELR30                 (R_ICU_COMMON_BASE + R_ICU_COMMON_INTSELR30_OFFSET)
-#define R_ICU_COMMON_INTSELR31                 (R_ICU_COMMON_BASE + R_ICU_COMMON_INTSELR31_OFFSET)
+#define R_ICU_COMMON_IRQCR0                       (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR0_OFFSET)
+#define R_ICU_COMMON_IRQCR1                       (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR1_OFFSET)
+#define R_ICU_COMMON_IRQCR2                       (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR2_OFFSET)
+#define R_ICU_COMMON_IRQCR3                       (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR3_OFFSET)
+#define R_ICU_COMMON_IRQCR4                       (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR4_OFFSET)
+#define R_ICU_COMMON_IRQCR5                       (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR5_OFFSET)
+#define R_ICU_COMMON_IRQCR6                       (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR6_OFFSET)
+#define R_ICU_COMMON_IRQCR7                       (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR7_OFFSET)
+#define R_ICU_COMMON_IRQCR8                       (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR8_OFFSET)
+#define R_ICU_COMMON_IRQCR9                       (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR9_OFFSET)
+#define R_ICU_COMMON_IRQCR10                      (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR10_OFFSET)
+#define R_ICU_COMMON_IRQCR11                      (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR11_OFFSET)
+#define R_ICU_COMMON_IRQCR12                      (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR12_OFFSET)
+#define R_ICU_COMMON_IRQCR13                      (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR13_OFFSET)
+#define R_ICU_COMMON_IRQCR14                      (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR14_OFFSET)
+#define R_ICU_COMMON_IRQCR15                      (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR15_OFFSET)
+#define R_ICU_COMMON_NMICR                        (R_ICU_COMMON_BASE + R_ICU_COMMON_NMICR_OFFSET)
+#define R_ICU_COMMON_IRQCR16                      (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR16_OFFSET)
+#define R_ICU_COMMON_IRQCR17                      (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR17_OFFSET)
+#define R_ICU_COMMON_IRQCR18                      (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR18_OFFSET)
+#define R_ICU_COMMON_IRQCR19                      (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR19_OFFSET)
+#define R_ICU_COMMON_IRQCR20                      (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR20_OFFSET)
+#define R_ICU_COMMON_IRQCR21                      (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR21_OFFSET)
+#define R_ICU_COMMON_IRQCR22                      (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR22_OFFSET)
+#define R_ICU_COMMON_IRQCR23                      (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR23_OFFSET)
+#define R_ICU_COMMON_IRQCR24                      (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR24_OFFSET)
+#define R_ICU_COMMON_IRQCR25                      (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR25_OFFSET)
+#define R_ICU_COMMON_IRQCR26                      (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR26_OFFSET)
+#define R_ICU_COMMON_IRQCR27                      (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR27_OFFSET)
+#define R_ICU_COMMON_IRQCR28                      (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR28_OFFSET)
+#define R_ICU_COMMON_IRQCR29                      (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR29_OFFSET)
+#define R_ICU_COMMON_IRQCR30                      (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR30_OFFSET)
+#define R_ICU_COMMON_IRQCR31                      (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR31_OFFSET)
+#define R_ICU_COMMON_INTSELR(m)                   (R_ICU_COMMON_BASE + R_ICU_COMMON_INTSELR_OFFSET(m))
 
 /* Register bit definitions */
 /* IRQCR0 Register bit definitions */

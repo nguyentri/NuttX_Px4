@@ -40,17 +40,17 @@
 
 /* POEG Register Offsets */
 
-#define R_POEG_POEGGA_OFFSET     0x00000000  /* POEG Group A Setting Register */
-#define R_POEG_POEGGB_OFFSET     0x00000100  /* POEG Group B Setting Register */
-#define R_POEG_POEGGC_OFFSET     0x00000200  /* POEG Group C Setting Register */
-#define R_POEG_POEGGD_OFFSET     0x00000300  /* POEG Group D Setting Register */
+#define R_POEG_POEGGA_OFFSET                      0x00000000  /* POEG Group A Setting Register */
+#define R_POEG_POEGGB_OFFSET                      0x00000100  /* POEG Group B Setting Register */
+#define R_POEG_POEGGC_OFFSET                      0x00000200  /* POEG Group C Setting Register */
+#define R_POEG_POEGGD_OFFSET                      0x00000300  /* POEG Group D Setting Register */
 
 /* POEG Register Addresses */
 
-#define R_POEG_POEGGA                 (R_POEG_BASE + R_POEG_POEGGA_OFFSET)
-#define R_POEG_POEGGB                 (R_POEG_BASE + R_POEG_POEGGB_OFFSET)
-#define R_POEG_POEGGC                 (R_POEG_BASE + R_POEG_POEGGC_OFFSET)
-#define R_POEG_POEGGD                 (R_POEG_BASE + R_POEG_POEGGD_OFFSET)
+#define R_POEG_POEGGA                             (R_POEG_BASE + R_POEG_POEGGA_OFFSET)
+#define R_POEG_POEGGB                             (R_POEG_BASE + R_POEG_POEGGB_OFFSET)
+#define R_POEG_POEGGC                             (R_POEG_BASE + R_POEG_POEGGC_OFFSET)
+#define R_POEG_POEGGD                             (R_POEG_BASE + R_POEG_POEGGD_OFFSET)
 
 /* Register bit definitions */
 /* POEGGA Register bit definitions */

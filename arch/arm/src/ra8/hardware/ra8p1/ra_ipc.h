@@ -38,100 +38,66 @@
 #endif
 #endif
 
-/* Channel stride for multi-channel peripherals */
-#define R_IPC_CH_STRIDE    0x00000004
-#define R_IPC_CH_BASE(ch)   (R_IPC_BASE + ((uint32_t)(ch) * R_IPC_CH_STRIDE))
-
 /* IPC Register Offsets */
 
 /* IPCSEM%s Registers (0-15) */
-#define R_IPC_IPCSEM00_OFFSET     0x00000000  /* Semaphore Register 00 (n = 0 to 15) */
-#define R_IPC_IPCSEM01_OFFSET     0x00000004  /* Semaphore Register 01 (n = 0 to 15) */
-#define R_IPC_IPCSEM02_OFFSET     0x00000008  /* Semaphore Register 02 (n = 0 to 15) */
-#define R_IPC_IPCSEM03_OFFSET     0x0000000c  /* Semaphore Register 03 (n = 0 to 15) */
-#define R_IPC_IPCSEM04_OFFSET     0x00000010  /* Semaphore Register 04 (n = 0 to 15) */
-#define R_IPC_IPCSEM05_OFFSET     0x00000014  /* Semaphore Register 05 (n = 0 to 15) */
-#define R_IPC_IPCSEM06_OFFSET     0x00000018  /* Semaphore Register 06 (n = 0 to 15) */
-#define R_IPC_IPCSEM07_OFFSET     0x0000001c  /* Semaphore Register 07 (n = 0 to 15) */
-#define R_IPC_IPCSEM08_OFFSET     0x00000020  /* Semaphore Register 08 (n = 0 to 15) */
-#define R_IPC_IPCSEM09_OFFSET     0x00000024  /* Semaphore Register 09 (n = 0 to 15) */
-#define R_IPC_IPCSEM10_OFFSET     0x00000028  /* Semaphore Register 10 (n = 0 to 15) */
-#define R_IPC_IPCSEM11_OFFSET     0x0000002c  /* Semaphore Register 11 (n = 0 to 15) */
-#define R_IPC_IPCSEM12_OFFSET     0x00000030  /* Semaphore Register 12 (n = 0 to 15) */
-#define R_IPC_IPCSEM13_OFFSET     0x00000034  /* Semaphore Register 13 (n = 0 to 15) */
-#define R_IPC_IPCSEM14_OFFSET     0x00000038  /* Semaphore Register 14 (n = 0 to 15) */
-#define R_IPC_IPCSEM15_OFFSET     0x0000003c  /* Semaphore Register 15 (n = 0 to 15) */
-#define R_IPC_IPC0NMISTA_OFFSET     0x00000080  /* Inter-Processor0 NMI Request Status Register */
-#define R_IPC_IPC0NMISET_OFFSET     0x00000084  /* Inter-Processor0 NMI Request Set Register */
-#define R_IPC_IPC0NMICLR_OFFSET     0x00000088  /* Inter-Processor0 NMI Request Clear Register */
-#define R_IPC_IPC1NMISTA_OFFSET     0x00000090  /* Inter-Processor1 NMI Request Status Register */
-#define R_IPC_IPC1NMISET_OFFSET     0x00000094  /* Inter-Processor1 NMI Request Set Register */
-#define R_IPC_IPC1NMICLR_OFFSET     0x00000098  /* Inter-Processor1 NMI Request Clear Register */
-#define R_IPC_IPC0STA0_OFFSET     0x000000c0  /* Inter-Processor0 Status Register0 */
-#define R_IPC_IPC0ISET0_OFFSET     0x000000c4  /* Inter-Processor0 IRQ Request Set Register0 */
-#define R_IPC_IPC0TXD0_OFFSET     0x000000c8  /* Inter-Processor0 FIFO Transfer Data Register0 */
-#define R_IPC_IPC0RXD0_OFFSET     0x000000cc  /* Inter-Processor0 FIFO Receive Data Register0 */
-#define R_IPC_IPC0CLR0_OFFSET     0x000000d0  /* Inter-Processor0 Clear Register0 */
-#define R_IPC_IPC0STA1_OFFSET     0x000000e0  /* Inter-Processor0 Status Register1 */
-#define R_IPC_IPC0ISET1_OFFSET     0x000000e4  /* Inter-Processor0 IRQ Request Set Register1 */
-#define R_IPC_IPC0TXD1_OFFSET     0x000000e8  /* Inter-Processor0 FIFO Transfer Data Register1 */
-#define R_IPC_IPC0RXD1_OFFSET     0x000000ec  /* Inter-Processor0 FIFO Receive Data Register1 */
-#define R_IPC_IPC0CLR1_OFFSET     0x000000f0  /* Inter-Processor0 Clear Register1 */
-#define R_IPC_IPC1STA0_OFFSET     0x00000100  /* Inter-Processor1 Status Register0 */
-#define R_IPC_IPC1ISET0_OFFSET     0x00000104  /* Inter-Processor1 IRQ Request Set Register0 */
-#define R_IPC_IPC1TXD0_OFFSET     0x00000108  /* Inter-Processor1 FIFO Transfer Data Register0 */
-#define R_IPC_IPC1RXD0_OFFSET     0x0000010c  /* Inter-Processor1 FIFO Receive Data Register0 */
-#define R_IPC_IPC1CLR0_OFFSET     0x00000110  /* Inter-Processor1 Request Clear Register0 */
-#define R_IPC_IPC1STA1_OFFSET     0x00000120  /* Inter-Processor1 Request Status Register1 */
-#define R_IPC_IPC1ISET1_OFFSET     0x00000124  /* Inter-Processor1 IRQ Request Set Register1 */
-#define R_IPC_IPC1TXD1_OFFSET     0x00000128  /* Inter-Processor1 FIFO Transfer Data Register1 */
-#define R_IPC_IPC1RXD1_OFFSET     0x0000012c  /* Inter-Processor1 FIFO Receive Data Register1 */
-#define R_IPC_IPC1CLR1_OFFSET     0x00000130  /* Inter-Processor1 Clear Register1 */
+#define R_IPC_IPCSEM_OFFSET(m)                    (0x00000000 + ((m) * 0x00000004))  /* Semaphore Register %s (n = 0 to 15) */
+#define R_IPC_IPC0NMISTA_OFFSET                   0x00000080  /* Inter-Processor0 NMI Request Status Register */
+#define R_IPC_IPC0NMISET_OFFSET                   0x00000084  /* Inter-Processor0 NMI Request Set Register */
+#define R_IPC_IPC0NMICLR_OFFSET                   0x00000088  /* Inter-Processor0 NMI Request Clear Register */
+#define R_IPC_IPC1NMISTA_OFFSET                   0x00000090  /* Inter-Processor1 NMI Request Status Register */
+#define R_IPC_IPC1NMISET_OFFSET                   0x00000094  /* Inter-Processor1 NMI Request Set Register */
+#define R_IPC_IPC1NMICLR_OFFSET                   0x00000098  /* Inter-Processor1 NMI Request Clear Register */
+#define R_IPC_IPC0STA0_OFFSET                     0x000000c0  /* Inter-Processor0 Status Register0 */
+#define R_IPC_IPC0ISET0_OFFSET                    0x000000c4  /* Inter-Processor0 IRQ Request Set Register0 */
+#define R_IPC_IPC0TXD0_OFFSET                     0x000000c8  /* Inter-Processor0 FIFO Transfer Data Register0 */
+#define R_IPC_IPC0RXD0_OFFSET                     0x000000cc  /* Inter-Processor0 FIFO Receive Data Register0 */
+#define R_IPC_IPC0CLR0_OFFSET                     0x000000d0  /* Inter-Processor0 Clear Register0 */
+#define R_IPC_IPC0STA1_OFFSET                     0x000000e0  /* Inter-Processor0 Status Register1 */
+#define R_IPC_IPC0ISET1_OFFSET                    0x000000e4  /* Inter-Processor0 IRQ Request Set Register1 */
+#define R_IPC_IPC0TXD1_OFFSET                     0x000000e8  /* Inter-Processor0 FIFO Transfer Data Register1 */
+#define R_IPC_IPC0RXD1_OFFSET                     0x000000ec  /* Inter-Processor0 FIFO Receive Data Register1 */
+#define R_IPC_IPC0CLR1_OFFSET                     0x000000f0  /* Inter-Processor0 Clear Register1 */
+#define R_IPC_IPC1STA0_OFFSET                     0x00000100  /* Inter-Processor1 Status Register0 */
+#define R_IPC_IPC1ISET0_OFFSET                    0x00000104  /* Inter-Processor1 IRQ Request Set Register0 */
+#define R_IPC_IPC1TXD0_OFFSET                     0x00000108  /* Inter-Processor1 FIFO Transfer Data Register0 */
+#define R_IPC_IPC1RXD0_OFFSET                     0x0000010c  /* Inter-Processor1 FIFO Receive Data Register0 */
+#define R_IPC_IPC1CLR0_OFFSET                     0x00000110  /* Inter-Processor1 Request Clear Register0 */
+#define R_IPC_IPC1STA1_OFFSET                     0x00000120  /* Inter-Processor1 Request Status Register1 */
+#define R_IPC_IPC1ISET1_OFFSET                    0x00000124  /* Inter-Processor1 IRQ Request Set Register1 */
+#define R_IPC_IPC1TXD1_OFFSET                     0x00000128  /* Inter-Processor1 FIFO Transfer Data Register1 */
+#define R_IPC_IPC1RXD1_OFFSET                     0x0000012c  /* Inter-Processor1 FIFO Receive Data Register1 */
+#define R_IPC_IPC1CLR1_OFFSET                     0x00000130  /* Inter-Processor1 Clear Register1 */
 
 /* IPC Register Addresses */
 
-#define R_IPC_IPCSEM00                 (R_IPC_BASE + R_IPC_IPCSEM00_OFFSET)
-#define R_IPC_IPCSEM01                 (R_IPC_BASE + R_IPC_IPCSEM01_OFFSET)
-#define R_IPC_IPCSEM02                 (R_IPC_BASE + R_IPC_IPCSEM02_OFFSET)
-#define R_IPC_IPCSEM03                 (R_IPC_BASE + R_IPC_IPCSEM03_OFFSET)
-#define R_IPC_IPCSEM04                 (R_IPC_BASE + R_IPC_IPCSEM04_OFFSET)
-#define R_IPC_IPCSEM05                 (R_IPC_BASE + R_IPC_IPCSEM05_OFFSET)
-#define R_IPC_IPCSEM06                 (R_IPC_BASE + R_IPC_IPCSEM06_OFFSET)
-#define R_IPC_IPCSEM07                 (R_IPC_BASE + R_IPC_IPCSEM07_OFFSET)
-#define R_IPC_IPCSEM08                 (R_IPC_BASE + R_IPC_IPCSEM08_OFFSET)
-#define R_IPC_IPCSEM09                 (R_IPC_BASE + R_IPC_IPCSEM09_OFFSET)
-#define R_IPC_IPCSEM10                 (R_IPC_BASE + R_IPC_IPCSEM10_OFFSET)
-#define R_IPC_IPCSEM11                 (R_IPC_BASE + R_IPC_IPCSEM11_OFFSET)
-#define R_IPC_IPCSEM12                 (R_IPC_BASE + R_IPC_IPCSEM12_OFFSET)
-#define R_IPC_IPCSEM13                 (R_IPC_BASE + R_IPC_IPCSEM13_OFFSET)
-#define R_IPC_IPCSEM14                 (R_IPC_BASE + R_IPC_IPCSEM14_OFFSET)
-#define R_IPC_IPCSEM15                 (R_IPC_BASE + R_IPC_IPCSEM15_OFFSET)
-#define R_IPC_IPC0NMISTA                 (R_IPC_BASE + R_IPC_IPC0NMISTA_OFFSET)
-#define R_IPC_IPC0NMISET                 (R_IPC_BASE + R_IPC_IPC0NMISET_OFFSET)
-#define R_IPC_IPC0NMICLR                 (R_IPC_BASE + R_IPC_IPC0NMICLR_OFFSET)
-#define R_IPC_IPC1NMISTA                 (R_IPC_BASE + R_IPC_IPC1NMISTA_OFFSET)
-#define R_IPC_IPC1NMISET                 (R_IPC_BASE + R_IPC_IPC1NMISET_OFFSET)
-#define R_IPC_IPC1NMICLR                 (R_IPC_BASE + R_IPC_IPC1NMICLR_OFFSET)
-#define R_IPC_IPC0STA0                 (R_IPC_BASE + R_IPC_IPC0STA0_OFFSET)
-#define R_IPC_IPC0ISET0                 (R_IPC_BASE + R_IPC_IPC0ISET0_OFFSET)
-#define R_IPC_IPC0TXD0                 (R_IPC_BASE + R_IPC_IPC0TXD0_OFFSET)
-#define R_IPC_IPC0RXD0                 (R_IPC_BASE + R_IPC_IPC0RXD0_OFFSET)
-#define R_IPC_IPC0CLR0                 (R_IPC_BASE + R_IPC_IPC0CLR0_OFFSET)
-#define R_IPC_IPC0STA1                 (R_IPC_BASE + R_IPC_IPC0STA1_OFFSET)
-#define R_IPC_IPC0ISET1                 (R_IPC_BASE + R_IPC_IPC0ISET1_OFFSET)
-#define R_IPC_IPC0TXD1                 (R_IPC_BASE + R_IPC_IPC0TXD1_OFFSET)
-#define R_IPC_IPC0RXD1                 (R_IPC_BASE + R_IPC_IPC0RXD1_OFFSET)
-#define R_IPC_IPC0CLR1                 (R_IPC_BASE + R_IPC_IPC0CLR1_OFFSET)
-#define R_IPC_IPC1STA0                 (R_IPC_BASE + R_IPC_IPC1STA0_OFFSET)
-#define R_IPC_IPC1ISET0                 (R_IPC_BASE + R_IPC_IPC1ISET0_OFFSET)
-#define R_IPC_IPC1TXD0                 (R_IPC_BASE + R_IPC_IPC1TXD0_OFFSET)
-#define R_IPC_IPC1RXD0                 (R_IPC_BASE + R_IPC_IPC1RXD0_OFFSET)
-#define R_IPC_IPC1CLR0                 (R_IPC_BASE + R_IPC_IPC1CLR0_OFFSET)
-#define R_IPC_IPC1STA1                 (R_IPC_BASE + R_IPC_IPC1STA1_OFFSET)
-#define R_IPC_IPC1ISET1                 (R_IPC_BASE + R_IPC_IPC1ISET1_OFFSET)
-#define R_IPC_IPC1TXD1                 (R_IPC_BASE + R_IPC_IPC1TXD1_OFFSET)
-#define R_IPC_IPC1RXD1                 (R_IPC_BASE + R_IPC_IPC1RXD1_OFFSET)
-#define R_IPC_IPC1CLR1                 (R_IPC_BASE + R_IPC_IPC1CLR1_OFFSET)
+#define R_IPC_IPCSEM(m)                           (R_IPC_BASE + R_IPC_IPCSEM_OFFSET(m))
+#define R_IPC_IPC0NMISTA                          (R_IPC_BASE + R_IPC_IPC0NMISTA_OFFSET)
+#define R_IPC_IPC0NMISET                          (R_IPC_BASE + R_IPC_IPC0NMISET_OFFSET)
+#define R_IPC_IPC0NMICLR                          (R_IPC_BASE + R_IPC_IPC0NMICLR_OFFSET)
+#define R_IPC_IPC1NMISTA                          (R_IPC_BASE + R_IPC_IPC1NMISTA_OFFSET)
+#define R_IPC_IPC1NMISET                          (R_IPC_BASE + R_IPC_IPC1NMISET_OFFSET)
+#define R_IPC_IPC1NMICLR                          (R_IPC_BASE + R_IPC_IPC1NMICLR_OFFSET)
+#define R_IPC_IPC0STA0                            (R_IPC_BASE + R_IPC_IPC0STA0_OFFSET)
+#define R_IPC_IPC0ISET0                           (R_IPC_BASE + R_IPC_IPC0ISET0_OFFSET)
+#define R_IPC_IPC0TXD0                            (R_IPC_BASE + R_IPC_IPC0TXD0_OFFSET)
+#define R_IPC_IPC0RXD0                            (R_IPC_BASE + R_IPC_IPC0RXD0_OFFSET)
+#define R_IPC_IPC0CLR0                            (R_IPC_BASE + R_IPC_IPC0CLR0_OFFSET)
+#define R_IPC_IPC0STA1                            (R_IPC_BASE + R_IPC_IPC0STA1_OFFSET)
+#define R_IPC_IPC0ISET1                           (R_IPC_BASE + R_IPC_IPC0ISET1_OFFSET)
+#define R_IPC_IPC0TXD1                            (R_IPC_BASE + R_IPC_IPC0TXD1_OFFSET)
+#define R_IPC_IPC0RXD1                            (R_IPC_BASE + R_IPC_IPC0RXD1_OFFSET)
+#define R_IPC_IPC0CLR1                            (R_IPC_BASE + R_IPC_IPC0CLR1_OFFSET)
+#define R_IPC_IPC1STA0                            (R_IPC_BASE + R_IPC_IPC1STA0_OFFSET)
+#define R_IPC_IPC1ISET0                           (R_IPC_BASE + R_IPC_IPC1ISET0_OFFSET)
+#define R_IPC_IPC1TXD0                            (R_IPC_BASE + R_IPC_IPC1TXD0_OFFSET)
+#define R_IPC_IPC1RXD0                            (R_IPC_BASE + R_IPC_IPC1RXD0_OFFSET)
+#define R_IPC_IPC1CLR0                            (R_IPC_BASE + R_IPC_IPC1CLR0_OFFSET)
+#define R_IPC_IPC1STA1                            (R_IPC_BASE + R_IPC_IPC1STA1_OFFSET)
+#define R_IPC_IPC1ISET1                           (R_IPC_BASE + R_IPC_IPC1ISET1_OFFSET)
+#define R_IPC_IPC1TXD1                            (R_IPC_BASE + R_IPC_IPC1TXD1_OFFSET)
+#define R_IPC_IPC1RXD1                            (R_IPC_BASE + R_IPC_IPC1RXD1_OFFSET)
+#define R_IPC_IPC1CLR1                            (R_IPC_BASE + R_IPC_IPC1CLR1_OFFSET)
 
 /* Register bit definitions */
 /* IPCSEM Register bit definitions */

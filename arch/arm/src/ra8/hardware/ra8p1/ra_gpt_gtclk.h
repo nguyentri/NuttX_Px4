@@ -40,11 +40,11 @@
 
 /* GPT_GTCLK Register Offsets */
 
-#define R_GPT_GTCLK_GTCLKCR_OFFSET     0x00000000  /* General PWM Timer Clock Control Register */
+#define R_GPT_GTCLK_GTCLKCR_OFFSET                0x00000000  /* General PWM Timer Clock Control Register */
 
 /* GPT_GTCLK Register Addresses */
 
-#define R_GPT_GTCLK_GTCLKCR                 (R_GPT_GTCLK_BASE + R_GPT_GTCLK_GTCLKCR_OFFSET)
+#define R_GPT_GTCLK_GTCLKCR                       (R_GPT_GTCLK_BASE + R_GPT_GTCLK_GTCLKCR_OFFSET)
 
 /* Register bit definitions */
 /* GTCLKCR Register bit definitions */

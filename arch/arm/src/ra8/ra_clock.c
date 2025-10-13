@@ -41,7 +41,7 @@
 
 #include "chip.h"
 #include "hardware/ra_memorymap.h"
-#include "hardware/ra_system.h"
+#include "hardware/ra_hardware.h"
 #include "ra_clock.h"
 
 
@@ -429,7 +429,7 @@ static void ra_clock_init(void)
 #if defined(CONFIG_RA_CLOCK_HOCO) || defined(CONFIG_RA_CLOCK_PLL) || defined(CONFIG_RA_CLOCK_PLL1P)
   putreg8(0U, R_SYSC_HOCOCR);  /* Enable HOCO */
   /* Wait for HOCO to stabilize */
-  RA_HARDWARE_REGISTER_WAIT((getreg8(R_SYSC_OSCSF) & R_SYSC_OSCSF_HOCOSF), R_SYSC_OSCSF_HOCOSF);
+  RA_HARDWARE_WAIT((getreg8(R_SYSC_OSCSF) & R_SYSC_OSCSF_HOCOSF), R_SYSC_OSCSF_HOCOSF);
 #endif
 
   /* Step 4: Configure and start PLL if used */
@@ -438,7 +438,7 @@ static void ra_clock_init(void)
   putreg16((uint16_t)RA_PRV_PLLCCR2, R_SYSC_PLLCCR2);
   putreg8(0U, R_SYSC_PLLCR);  /* Enable PLL */
   /* Wait for PLL to stabilize */
-  RA_HARDWARE_REGISTER_WAIT((getreg8(R_SYSC_OSCSF) & R_SYSC_OSCSF_PLLSF), R_SYSC_OSCSF_PLLSF);
+  RA_HARDWARE_WAIT((getreg8(R_SYSC_OSCSF) & R_SYSC_OSCSF_PLLSF), R_SYSC_OSCSF_PLLSF);
 #endif
 
   /* Step 5: Set clocks from hard reset state */

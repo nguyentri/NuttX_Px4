@@ -38,86 +38,76 @@
 #endif
 #endif
 
-/* Channel stride for multi-channel peripherals */
-#define R_CPSCU_CH_STRIDE    0x00000004
-#define R_CPSCU_CH_BASE(ch)   (R_CPSCU_BASE + ((uint32_t)(ch) * R_CPSCU_CH_STRIDE))
-
 /* CPSCU Register Offsets */
 
-#define R_CPSCU_SRAMSAR_OFFSET     0x00000010  /* SRAM Security Attribution Register */
-#define R_CPSCU_DTCSAR_OFFSET     0x00000030  /* DTC Controller Security Attribution Register */
-#define R_CPSCU_DMACSAR_OFFSET     0x00000034  /* DMAC Controller Security Attribution Register */
-#define R_CPSCU_ICUSARA_OFFSET     0x00000040  /* Interrupt Controller Unit Security Attribution Register A */
-#define R_CPSCU_ICUSARB_OFFSET     0x00000044  /* Interrupt Controller Unit Security Attribution Register B */
-#define R_CPSCU_ICUSARE_OFFSET     0x00000050  /* Interrupt Controller Unit Security Attribution Register E */
-#define R_CPSCU_ICUSARF_OFFSET     0x00000054  /* Interrupt Controller Unit Security Attribution Register F */
-#define R_CPSCU_ICUSARG_OFFSET     0x00000070  /* Interrupt Controller Unit Security Attribution Register G */
-#define R_CPSCU_ICUSARH_OFFSET     0x00000074  /* Interrupt Controller Unit Security Attribution Register H */
-#define R_CPSCU_ICUSARI_OFFSET     0x00000078  /* Interrupt Controller Unit Security Attribution Register I */
-#define R_CPSCU_ICUSARJ_OFFSET     0x0000007c  /* Interrupt Controller Unit Security Attribution Register J */
-#define R_CPSCU_ICUSARK_OFFSET     0x00000080  /* Interrupt Controller Unit Security Attribution Register K */
-#define R_CPSCU_ICUSARL_OFFSET     0x00000084  /* Interrupt Controller Unit Security Attribution Register L */
-#define R_CPSCU_BUSSARA_OFFSET     0x00000100  /* Bus Security Attribution Register A */
-#define R_CPSCU_BUSSARB_OFFSET     0x00000104  /* Bus Security Attribution Register B */
-#define R_CPSCU_BUSSARC_OFFSET     0x00000110  /* Bus Security Attribution Register C */
-#define R_CPSCU_BUSPARC_OFFSET     0x00000114  /* Bus Privileged Attribution Register C */
-#define R_CPSCU_MMPUSARA_OFFSET     0x00000130  /* Master Memory Protection Unit Security Attribution Register A */
-#define R_CPSCU_MMPUSARB_OFFSET     0x00000134  /* Master Memory Protection Unit Security Attribution Register B */
-#define R_CPSCU_CPUSAR_OFFSET     0x00000170  /* CPU Security Attribution Register */
-#define R_CPSCU_DEBUGSAR_OFFSET     0x00000180  /* Debug Security Attribution Register */
-#define R_CPSCU_DMACCHSAR_OFFSET     0x000001a0  /* DMA Channel Security Attribution Register */
-#define R_CPSCU_DMACCHPAR_OFFSET     0x000001f0  /* DMA Channel Privilege Attribution Register */
+#define R_CPSCU_SRAMSAR_OFFSET                    0x00000010  /* SRAM Security Attribution Register */
+#define R_CPSCU_DTCSAR_OFFSET                     0x00000030  /* DTC Controller Security Attribution Register */
+#define R_CPSCU_DMACSAR_OFFSET                    0x00000034  /* DMAC Controller Security Attribution Register */
+#define R_CPSCU_ICUSARA_OFFSET                    0x00000040  /* Interrupt Controller Unit Security Attribution Register A */
+#define R_CPSCU_ICUSARB_OFFSET                    0x00000044  /* Interrupt Controller Unit Security Attribution Register B */
+#define R_CPSCU_ICUSARE_OFFSET                    0x00000050  /* Interrupt Controller Unit Security Attribution Register E */
+#define R_CPSCU_ICUSARF_OFFSET                    0x00000054  /* Interrupt Controller Unit Security Attribution Register F */
+#define R_CPSCU_ICUSARG_OFFSET                    0x00000070  /* Interrupt Controller Unit Security Attribution Register G */
+#define R_CPSCU_ICUSARH_OFFSET                    0x00000074  /* Interrupt Controller Unit Security Attribution Register H */
+#define R_CPSCU_ICUSARI_OFFSET                    0x00000078  /* Interrupt Controller Unit Security Attribution Register I */
+#define R_CPSCU_ICUSARJ_OFFSET                    0x0000007c  /* Interrupt Controller Unit Security Attribution Register J */
+#define R_CPSCU_ICUSARK_OFFSET                    0x00000080  /* Interrupt Controller Unit Security Attribution Register K */
+#define R_CPSCU_ICUSARL_OFFSET                    0x00000084  /* Interrupt Controller Unit Security Attribution Register L */
+#define R_CPSCU_BUSSARA_OFFSET                    0x00000100  /* Bus Security Attribution Register A */
+#define R_CPSCU_BUSSARB_OFFSET                    0x00000104  /* Bus Security Attribution Register B */
+#define R_CPSCU_BUSSARC_OFFSET                    0x00000110  /* Bus Security Attribution Register C */
+#define R_CPSCU_BUSPARC_OFFSET                    0x00000114  /* Bus Privileged Attribution Register C */
+#define R_CPSCU_MMPUSARA_OFFSET                   0x00000130  /* Master Memory Protection Unit Security Attribution Register A */
+#define R_CPSCU_MMPUSARB_OFFSET                   0x00000134  /* Master Memory Protection Unit Security Attribution Register B */
+#define R_CPSCU_CPUSAR_OFFSET                     0x00000170  /* CPU Security Attribution Register */
+#define R_CPSCU_DEBUGSAR_OFFSET                   0x00000180  /* Debug Security Attribution Register */
+#define R_CPSCU_DMACCHSAR_OFFSET                  0x000001a0  /* DMA Channel Security Attribution Register */
+#define R_CPSCU_DMACCHPAR_OFFSET                  0x000001f0  /* DMA Channel Privilege Attribution Register */
 /* SRAMSABAR%s Registers (0-3) */
-#define R_CPSCU_SRAMSABAR0_OFFSET     0x00000400  /* SRAM Security Attribute Boundary Address Register (n = 0 to 3) */
-#define R_CPSCU_SRAMSABAR1_OFFSET     0x00000404  /* SRAM Security Attribute Boundary Address Register (n = 0 to 3) */
-#define R_CPSCU_SRAMSABAR2_OFFSET     0x00000408  /* SRAM Security Attribute Boundary Address Register (n = 0 to 3) */
-#define R_CPSCU_SRAMSABAR3_OFFSET     0x0000040c  /* SRAM Security Attribute Boundary Address Register (n = 0 to 3) */
-#define R_CPSCU_CACHESAR_OFFSET     0x00000500  /* Cache Security Attribution Register */
-#define R_CPSCU_TCMSAR_OFFSET     0x00000504  /* TCM Security Attribution Register */
-#define R_CPSCU_TCMSABARC_OFFSET     0x00000508  /* TCM Security Attribute Boundary Address Register */
-#define R_CPSCU_TCMSABARS_OFFSET     0x0000050c  /* TCM Security Attribute Boundary Address Register */
-#define R_CPSCU_SRAMESAR_OFFSET     0x00000510  /* SRAM ECC region Security Attribute Register */
-#define R_CPSCU_TEVTRCR_OFFSET     0x00000600  /* Trusted Event Route Control Register */
-#define R_CPSCU_IPCSAR_OFFSET     0x00000610  /* IPC Security Attribution Register */
-#define R_CPSCU_IPCPAR_OFFSET     0x00000614  /* IPC Privileged Attribution Register */
+#define R_CPSCU_SRAMSABAR_OFFSET(m)               (0x00000400 + ((m) * 0x00000004))  /* SRAM Security Attribute Boundary Address Register (n = 0 to 3) */
+#define R_CPSCU_CACHESAR_OFFSET                   0x00000500  /* Cache Security Attribution Register */
+#define R_CPSCU_TCMSAR_OFFSET                     0x00000504  /* TCM Security Attribution Register */
+#define R_CPSCU_TCMSABARC_OFFSET                  0x00000508  /* TCM Security Attribute Boundary Address Register */
+#define R_CPSCU_TCMSABARS_OFFSET                  0x0000050c  /* TCM Security Attribute Boundary Address Register */
+#define R_CPSCU_SRAMESAR_OFFSET                   0x00000510  /* SRAM ECC region Security Attribute Register */
+#define R_CPSCU_TEVTRCR_OFFSET                    0x00000600  /* Trusted Event Route Control Register */
+#define R_CPSCU_IPCSAR_OFFSET                     0x00000610  /* IPC Security Attribution Register */
+#define R_CPSCU_IPCPAR_OFFSET                     0x00000614  /* IPC Privileged Attribution Register */
 
 /* CPSCU Register Addresses */
 
-#define R_CPSCU_SRAMSAR                 (R_CPSCU_BASE + R_CPSCU_SRAMSAR_OFFSET)
-#define R_CPSCU_DTCSAR                 (R_CPSCU_BASE + R_CPSCU_DTCSAR_OFFSET)
-#define R_CPSCU_DMACSAR                 (R_CPSCU_BASE + R_CPSCU_DMACSAR_OFFSET)
-#define R_CPSCU_ICUSARA                 (R_CPSCU_BASE + R_CPSCU_ICUSARA_OFFSET)
-#define R_CPSCU_ICUSARB                 (R_CPSCU_BASE + R_CPSCU_ICUSARB_OFFSET)
-#define R_CPSCU_ICUSARE                 (R_CPSCU_BASE + R_CPSCU_ICUSARE_OFFSET)
-#define R_CPSCU_ICUSARF                 (R_CPSCU_BASE + R_CPSCU_ICUSARF_OFFSET)
-#define R_CPSCU_ICUSARG                 (R_CPSCU_BASE + R_CPSCU_ICUSARG_OFFSET)
-#define R_CPSCU_ICUSARH                 (R_CPSCU_BASE + R_CPSCU_ICUSARH_OFFSET)
-#define R_CPSCU_ICUSARI                 (R_CPSCU_BASE + R_CPSCU_ICUSARI_OFFSET)
-#define R_CPSCU_ICUSARJ                 (R_CPSCU_BASE + R_CPSCU_ICUSARJ_OFFSET)
-#define R_CPSCU_ICUSARK                 (R_CPSCU_BASE + R_CPSCU_ICUSARK_OFFSET)
-#define R_CPSCU_ICUSARL                 (R_CPSCU_BASE + R_CPSCU_ICUSARL_OFFSET)
-#define R_CPSCU_BUSSARA                 (R_CPSCU_BASE + R_CPSCU_BUSSARA_OFFSET)
-#define R_CPSCU_BUSSARB                 (R_CPSCU_BASE + R_CPSCU_BUSSARB_OFFSET)
-#define R_CPSCU_BUSSARC                 (R_CPSCU_BASE + R_CPSCU_BUSSARC_OFFSET)
-#define R_CPSCU_BUSPARC                 (R_CPSCU_BASE + R_CPSCU_BUSPARC_OFFSET)
-#define R_CPSCU_MMPUSARA                 (R_CPSCU_BASE + R_CPSCU_MMPUSARA_OFFSET)
-#define R_CPSCU_MMPUSARB                 (R_CPSCU_BASE + R_CPSCU_MMPUSARB_OFFSET)
-#define R_CPSCU_CPUSAR                 (R_CPSCU_BASE + R_CPSCU_CPUSAR_OFFSET)
-#define R_CPSCU_DEBUGSAR                 (R_CPSCU_BASE + R_CPSCU_DEBUGSAR_OFFSET)
-#define R_CPSCU_DMACCHSAR                 (R_CPSCU_BASE + R_CPSCU_DMACCHSAR_OFFSET)
-#define R_CPSCU_DMACCHPAR                 (R_CPSCU_BASE + R_CPSCU_DMACCHPAR_OFFSET)
-#define R_CPSCU_SRAMSABAR0                 (R_CPSCU_BASE + R_CPSCU_SRAMSABAR0_OFFSET)
-#define R_CPSCU_SRAMSABAR1                 (R_CPSCU_BASE + R_CPSCU_SRAMSABAR1_OFFSET)
-#define R_CPSCU_SRAMSABAR2                 (R_CPSCU_BASE + R_CPSCU_SRAMSABAR2_OFFSET)
-#define R_CPSCU_SRAMSABAR3                 (R_CPSCU_BASE + R_CPSCU_SRAMSABAR3_OFFSET)
-#define R_CPSCU_CACHESAR                 (R_CPSCU_BASE + R_CPSCU_CACHESAR_OFFSET)
-#define R_CPSCU_TCMSAR                 (R_CPSCU_BASE + R_CPSCU_TCMSAR_OFFSET)
-#define R_CPSCU_TCMSABARC                 (R_CPSCU_BASE + R_CPSCU_TCMSABARC_OFFSET)
-#define R_CPSCU_TCMSABARS                 (R_CPSCU_BASE + R_CPSCU_TCMSABARS_OFFSET)
-#define R_CPSCU_SRAMESAR                 (R_CPSCU_BASE + R_CPSCU_SRAMESAR_OFFSET)
-#define R_CPSCU_TEVTRCR                 (R_CPSCU_BASE + R_CPSCU_TEVTRCR_OFFSET)
-#define R_CPSCU_IPCSAR                 (R_CPSCU_BASE + R_CPSCU_IPCSAR_OFFSET)
-#define R_CPSCU_IPCPAR                 (R_CPSCU_BASE + R_CPSCU_IPCPAR_OFFSET)
+#define R_CPSCU_SRAMSAR                           (R_CPSCU_BASE + R_CPSCU_SRAMSAR_OFFSET)
+#define R_CPSCU_DTCSAR                            (R_CPSCU_BASE + R_CPSCU_DTCSAR_OFFSET)
+#define R_CPSCU_DMACSAR                           (R_CPSCU_BASE + R_CPSCU_DMACSAR_OFFSET)
+#define R_CPSCU_ICUSARA                           (R_CPSCU_BASE + R_CPSCU_ICUSARA_OFFSET)
+#define R_CPSCU_ICUSARB                           (R_CPSCU_BASE + R_CPSCU_ICUSARB_OFFSET)
+#define R_CPSCU_ICUSARE                           (R_CPSCU_BASE + R_CPSCU_ICUSARE_OFFSET)
+#define R_CPSCU_ICUSARF                           (R_CPSCU_BASE + R_CPSCU_ICUSARF_OFFSET)
+#define R_CPSCU_ICUSARG                           (R_CPSCU_BASE + R_CPSCU_ICUSARG_OFFSET)
+#define R_CPSCU_ICUSARH                           (R_CPSCU_BASE + R_CPSCU_ICUSARH_OFFSET)
+#define R_CPSCU_ICUSARI                           (R_CPSCU_BASE + R_CPSCU_ICUSARI_OFFSET)
+#define R_CPSCU_ICUSARJ                           (R_CPSCU_BASE + R_CPSCU_ICUSARJ_OFFSET)
+#define R_CPSCU_ICUSARK                           (R_CPSCU_BASE + R_CPSCU_ICUSARK_OFFSET)
+#define R_CPSCU_ICUSARL                           (R_CPSCU_BASE + R_CPSCU_ICUSARL_OFFSET)
+#define R_CPSCU_BUSSARA                           (R_CPSCU_BASE + R_CPSCU_BUSSARA_OFFSET)
+#define R_CPSCU_BUSSARB                           (R_CPSCU_BASE + R_CPSCU_BUSSARB_OFFSET)
+#define R_CPSCU_BUSSARC                           (R_CPSCU_BASE + R_CPSCU_BUSSARC_OFFSET)
+#define R_CPSCU_BUSPARC                           (R_CPSCU_BASE + R_CPSCU_BUSPARC_OFFSET)
+#define R_CPSCU_MMPUSARA                          (R_CPSCU_BASE + R_CPSCU_MMPUSARA_OFFSET)
+#define R_CPSCU_MMPUSARB                          (R_CPSCU_BASE + R_CPSCU_MMPUSARB_OFFSET)
+#define R_CPSCU_CPUSAR                            (R_CPSCU_BASE + R_CPSCU_CPUSAR_OFFSET)
+#define R_CPSCU_DEBUGSAR                          (R_CPSCU_BASE + R_CPSCU_DEBUGSAR_OFFSET)
+#define R_CPSCU_DMACCHSAR                         (R_CPSCU_BASE + R_CPSCU_DMACCHSAR_OFFSET)
+#define R_CPSCU_DMACCHPAR                         (R_CPSCU_BASE + R_CPSCU_DMACCHPAR_OFFSET)
+#define R_CPSCU_SRAMSABAR(m)                      (R_CPSCU_BASE + R_CPSCU_SRAMSABAR_OFFSET(m))
+#define R_CPSCU_CACHESAR                          (R_CPSCU_BASE + R_CPSCU_CACHESAR_OFFSET)
+#define R_CPSCU_TCMSAR                            (R_CPSCU_BASE + R_CPSCU_TCMSAR_OFFSET)
+#define R_CPSCU_TCMSABARC                         (R_CPSCU_BASE + R_CPSCU_TCMSABARC_OFFSET)
+#define R_CPSCU_TCMSABARS                         (R_CPSCU_BASE + R_CPSCU_TCMSABARS_OFFSET)
+#define R_CPSCU_SRAMESAR                          (R_CPSCU_BASE + R_CPSCU_SRAMESAR_OFFSET)
+#define R_CPSCU_TEVTRCR                           (R_CPSCU_BASE + R_CPSCU_TEVTRCR_OFFSET)
+#define R_CPSCU_IPCSAR                            (R_CPSCU_BASE + R_CPSCU_IPCSAR_OFFSET)
+#define R_CPSCU_IPCPAR                            (R_CPSCU_BASE + R_CPSCU_IPCPAR_OFFSET)
 
 /* Register bit definitions */
 /* SRAMSAR Register bit definitions */
@@ -205,6 +195,26 @@
 #define R_CPSCU_ICUSARA_SAIRQCR30                 (1 << 30)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
 
 #define R_CPSCU_ICUSARA_SAIRQCR31                 (1 << 31)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
+
+#define R_CPSCU_ICUSARA_SAIRQCR0                  (1 << 0)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
+
+#define R_CPSCU_ICUSARA_SAIRQCR1                  (1 << 1)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
+
+#define R_CPSCU_ICUSARA_SAIRQCR2                  (1 << 2)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
+
+#define R_CPSCU_ICUSARA_SAIRQCR3                  (1 << 3)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
+
+#define R_CPSCU_ICUSARA_SAIRQCR4                  (1 << 4)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
+
+#define R_CPSCU_ICUSARA_SAIRQCR5                  (1 << 5)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
+
+#define R_CPSCU_ICUSARA_SAIRQCR6                  (1 << 6)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
+
+#define R_CPSCU_ICUSARA_SAIRQCR7                  (1 << 7)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
+
+#define R_CPSCU_ICUSARA_SAIRQCR8                  (1 << 8)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
+
+#define R_CPSCU_ICUSARA_SAIRQCR9                  (1 << 9)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
 
 /* ICUSARB Register bit definitions */
 #define R_CPSCU_ICUSARB_SANMI                     (1 << 0)  /* Security attributes of the NMICR register */
@@ -335,6 +345,26 @@
 #define R_CPSCU_ICUSARG_SAIELSR30                 (1 << 30)  /* Security attributes of registers for ICU0 event link setting0 */
 
 #define R_CPSCU_ICUSARG_SAIELSR31                 (1 << 31)  /* Security attributes of registers for ICU0 event link setting0 */
+
+#define R_CPSCU_ICUSARG_SAIELSR0                  (1 << 0)  /* Security attributes of registers for ICU0 event link setting0 */
+
+#define R_CPSCU_ICUSARG_SAIELSR1                  (1 << 1)  /* Security attributes of registers for ICU0 event link setting0 */
+
+#define R_CPSCU_ICUSARG_SAIELSR2                  (1 << 2)  /* Security attributes of registers for ICU0 event link setting0 */
+
+#define R_CPSCU_ICUSARG_SAIELSR3                  (1 << 3)  /* Security attributes of registers for ICU0 event link setting0 */
+
+#define R_CPSCU_ICUSARG_SAIELSR4                  (1 << 4)  /* Security attributes of registers for ICU0 event link setting0 */
+
+#define R_CPSCU_ICUSARG_SAIELSR5                  (1 << 5)  /* Security attributes of registers for ICU0 event link setting0 */
+
+#define R_CPSCU_ICUSARG_SAIELSR6                  (1 << 6)  /* Security attributes of registers for ICU0 event link setting0 */
+
+#define R_CPSCU_ICUSARG_SAIELSR7                  (1 << 7)  /* Security attributes of registers for ICU0 event link setting0 */
+
+#define R_CPSCU_ICUSARG_SAIELSR8                  (1 << 8)  /* Security attributes of registers for ICU0 event link setting0 */
+
+#define R_CPSCU_ICUSARG_SAIELSR9                  (1 << 9)  /* Security attributes of registers for ICU0 event link setting0 */
 
 /* ICUSARH Register bit definitions */
 #define R_CPSCU_ICUSARH_SAIELSR32                 (1 << 0)  /* Security attributes of registers for ICU0event link setting1. */
@@ -908,6 +938,38 @@
 #define R_CPSCU_DMACCHPAR_PADMAC106               (1 << 22)  /* Privilege attributes of outputs and registers for DMAC1 channel */
 
 #define R_CPSCU_DMACCHPAR_PADMAC107               (1 << 23)  /* Privilege attributes of outputs and registers for DMAC1 channel */
+
+#define R_CPSCU_DMACCHPAR_PADMAC00                (1 << 0)  /* Privilege attributes of outputs and registers for DMAC0 channel */
+
+#define R_CPSCU_DMACCHPAR_PADMAC01                (1 << 1)  /* Privilege attributes of outputs and registers for DMAC0 channel */
+
+#define R_CPSCU_DMACCHPAR_PADMAC02                (1 << 2)  /* Privilege attributes of outputs and registers for DMAC0 channel */
+
+#define R_CPSCU_DMACCHPAR_PADMAC03                (1 << 3)  /* Privilege attributes of outputs and registers for DMAC0 channel */
+
+#define R_CPSCU_DMACCHPAR_PADMAC04                (1 << 4)  /* Privilege attributes of outputs and registers for DMAC0 channel */
+
+#define R_CPSCU_DMACCHPAR_PADMAC05                (1 << 5)  /* Privilege attributes of outputs and registers for DMAC0 channel */
+
+#define R_CPSCU_DMACCHPAR_PADMAC06                (1 << 6)  /* Privilege attributes of outputs and registers for DMAC0 channel */
+
+#define R_CPSCU_DMACCHPAR_PADMAC07                (1 << 7)  /* Privilege attributes of outputs and registers for DMAC0 channel */
+
+#define R_CPSCU_DMACCHPAR_PADMAC10                (1 << 16)  /* Privilege attributes of outputs and registers for DMAC1 channel */
+
+#define R_CPSCU_DMACCHPAR_PADMAC11                (1 << 17)  /* Privilege attributes of outputs and registers for DMAC1 channel */
+
+#define R_CPSCU_DMACCHPAR_PADMAC12                (1 << 18)  /* Privilege attributes of outputs and registers for DMAC1 channel */
+
+#define R_CPSCU_DMACCHPAR_PADMAC13                (1 << 19)  /* Privilege attributes of outputs and registers for DMAC1 channel */
+
+#define R_CPSCU_DMACCHPAR_PADMAC14                (1 << 20)  /* Privilege attributes of outputs and registers for DMAC1 channel */
+
+#define R_CPSCU_DMACCHPAR_PADMAC15                (1 << 21)  /* Privilege attributes of outputs and registers for DMAC1 channel */
+
+#define R_CPSCU_DMACCHPAR_PADMAC16                (1 << 22)  /* Privilege attributes of outputs and registers for DMAC1 channel */
+
+#define R_CPSCU_DMACCHPAR_PADMAC17                (1 << 23)  /* Privilege attributes of outputs and registers for DMAC1 channel */
 
 /* CACHESAR Register bit definitions */
 #define R_CPSCU_CACHESAR_CACHESA                  (1 << 0)  /* Security attributes of registers for cache control */

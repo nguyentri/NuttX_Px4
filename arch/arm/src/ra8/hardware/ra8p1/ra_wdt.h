@@ -44,21 +44,25 @@
 
 /* WDT Register Offsets */
 
-#define R_WDT_WDTRR_OFFSET     0x00000000  /* WDT Refresh Register */
-#define R_WDT_WDTCR_OFFSET     0x00000002  /* WDT Control Register */
-#define R_WDT_WDTSR_OFFSET     0x00000004  /* WDT Status Register */
-#define R_WDT_WDTRCR_OFFSET     0x00000006  /* WDT Reset Control Register */
-#define R_WDT_WDTCSTPR_OFFSET     0x00000008  /* WDT Count Stop Control Register */
+#define R_WDT_WDTRR_OFFSET                        0x00000000  /* WDT Refresh Register */
+#define R_WDT_WDTCR_OFFSET                        0x00000002  /* WDT Control Register */
+#define R_WDT_WDTSR_OFFSET                        0x00000004  /* WDT Status Register */
+#define R_WDT_WDTRCR_OFFSET                       0x00000006  /* WDT Reset Control Register */
+#define R_WDT_WDTCSTPR_OFFSET                     0x00000008  /* WDT Count Stop Control Register */
 
 /* WDT Register Addresses */
 
-#define R_WDT_WDTRR                 (R_WDT_BASE + R_WDT_WDTRR_OFFSET)
-#define R_WDT_WDTCR                 (R_WDT_BASE + R_WDT_WDTCR_OFFSET)
-#define R_WDT_WDTSR                 (R_WDT_BASE + R_WDT_WDTSR_OFFSET)
-#define R_WDT_WDTRCR                 (R_WDT_BASE + R_WDT_WDTRCR_OFFSET)
-#define R_WDT_WDTCSTPR                 (R_WDT_BASE + R_WDT_WDTCSTPR_OFFSET)
+#define R_WDT_WDTRR(n)                            (R_WDT_CH_BASE(n) + R_WDT_WDTRR_OFFSET)
+#define R_WDT_WDTCR(n)                            (R_WDT_CH_BASE(n) + R_WDT_WDTCR_OFFSET)
+#define R_WDT_WDTSR(n)                            (R_WDT_CH_BASE(n) + R_WDT_WDTSR_OFFSET)
+#define R_WDT_WDTRCR(n)                           (R_WDT_CH_BASE(n) + R_WDT_WDTRCR_OFFSET)
+#define R_WDT_WDTCSTPR(n)                         (R_WDT_CH_BASE(n) + R_WDT_WDTCSTPR_OFFSET)
 
 /* Register bit definitions */
+/* WDTRR Register bit definitions */
+#define R_WDT_WDTRR_WDTRR_SHIFT                   (0)  /* WDTRR is an 8-bit register that refreshes the down-counter of the WDT. */
+#define R_WDT_WDTRR_WDTRR_MASK                    0xff
+
 /* WDTCR Register bit definitions */
 #define R_WDT_WDTCR_TOPS_SHIFT                    (0)  /* Timeout Period Select */
 #define R_WDT_WDTCR_TOPS_MASK                     0x3

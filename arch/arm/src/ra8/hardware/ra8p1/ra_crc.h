@@ -40,25 +40,25 @@
 
 /* CRC Register Offsets */
 
-#define R_CRC_CRCCR0_OFFSET     0x00000000  /* CRC Control Register 0 */
-#define R_CRC_CRCCR1_OFFSET     0x00000001  /* CRC Control Register 1 */
-#define R_CRC_CRCDIR_OFFSET     0x00000004  /* CRC Data Input Register */
-#define R_CRC_CRCDIR_BY_OFFSET     0x00000004  /* CRC Data Input Register */
-#define R_CRC_CRCDOR_OFFSET     0x00000008  /* CRC Data Output Register */
-#define R_CRC_CRCDOR_HA_OFFSET     0x00000008  /* CRC Data Output Register */
-#define R_CRC_CRCDOR_BY_OFFSET     0x00000008  /* CRC Data Output Register */
-#define R_CRC_CRCSAR_OFFSET     0x0000000c  /* Snoop Address Register */
+#define R_CRC_CRCCR0_OFFSET                       0x00000000  /* CRC Control Register 0 */
+#define R_CRC_CRCCR1_OFFSET                       0x00000001  /* CRC Control Register 1 */
+#define R_CRC_CRCDIR_OFFSET                       0x00000004  /* CRC Data Input Register */
+#define R_CRC_CRCDIR_BY_OFFSET                    0x00000004  /* CRC Data Input Register */
+#define R_CRC_CRCDOR_OFFSET                       0x00000008  /* CRC Data Output Register */
+#define R_CRC_CRCDOR_HA_OFFSET                    0x00000008  /* CRC Data Output Register */
+#define R_CRC_CRCDOR_BY_OFFSET                    0x00000008  /* CRC Data Output Register */
+#define R_CRC_CRCSAR_OFFSET                       0x0000000c  /* Snoop Address Register */
 
 /* CRC Register Addresses */
 
-#define R_CRC_CRCCR0                 (R_CRC_BASE + R_CRC_CRCCR0_OFFSET)
-#define R_CRC_CRCCR1                 (R_CRC_BASE + R_CRC_CRCCR1_OFFSET)
-#define R_CRC_CRCDIR                 (R_CRC_BASE + R_CRC_CRCDIR_OFFSET)
-#define R_CRC_CRCDIR_BY                 (R_CRC_BASE + R_CRC_CRCDIR_BY_OFFSET)
-#define R_CRC_CRCDOR                 (R_CRC_BASE + R_CRC_CRCDOR_OFFSET)
-#define R_CRC_CRCDOR_HA                 (R_CRC_BASE + R_CRC_CRCDOR_HA_OFFSET)
-#define R_CRC_CRCDOR_BY                 (R_CRC_BASE + R_CRC_CRCDOR_BY_OFFSET)
-#define R_CRC_CRCSAR                 (R_CRC_BASE + R_CRC_CRCSAR_OFFSET)
+#define R_CRC_CRCCR0                              (R_CRC_BASE + R_CRC_CRCCR0_OFFSET)
+#define R_CRC_CRCCR1                              (R_CRC_BASE + R_CRC_CRCCR1_OFFSET)
+#define R_CRC_CRCDIR                              (R_CRC_BASE + R_CRC_CRCDIR_OFFSET)
+#define R_CRC_CRCDIR_BY                           (R_CRC_BASE + R_CRC_CRCDIR_BY_OFFSET)
+#define R_CRC_CRCDOR                              (R_CRC_BASE + R_CRC_CRCDOR_OFFSET)
+#define R_CRC_CRCDOR_HA                           (R_CRC_BASE + R_CRC_CRCDOR_HA_OFFSET)
+#define R_CRC_CRCDOR_BY                           (R_CRC_BASE + R_CRC_CRCDOR_BY_OFFSET)
+#define R_CRC_CRCSAR                              (R_CRC_BASE + R_CRC_CRCSAR_OFFSET)
 
 /* Register bit definitions */
 /* CRCCR0 Register bit definitions */
@@ -83,9 +83,17 @@
 #define R_CRC_CRCDIR_CRCDIR_SHIFT                 (0)  /* Calculation input Data (Case of CRC-32, CRC-32C ) */
 #define R_CRC_CRCDIR_CRCDIR_MASK                  0xffffffff
 
+/* CRCDIR_BY Register bit definitions */
+#define R_CRC_CRCDIR_BY_CRCDIR_BY_SHIFT           (0)  /* Calculation input Data ( Case of CRC-8, CRC-16 or CRC-CCITT ) */
+#define R_CRC_CRCDIR_BY_CRCDIR_BY_MASK            0xff
+
 /* CRCDOR Register bit definitions */
 #define R_CRC_CRCDOR_CRCDOR_SHIFT                 (0)  /* Calculation output Data (Case of CRC-32, CRC-32C ) */
 #define R_CRC_CRCDOR_CRCDOR_MASK                  0xffffffff
+
+/* CRCDOR_HA Register bit definitions */
+#define R_CRC_CRCDOR_HA_CRCDOR_HA_SHIFT           (0)  /* Calculation output Data (Case of CRC-16 or CRC-CCITT ) */
+#define R_CRC_CRCDOR_HA_CRCDOR_HA_MASK            0xffff
 
 /* CRCDOR_BY Register bit definitions */
 #define R_CRC_CRCDOR_BY_CRCDOR_BY_SHIFT           (0)  /* Calculation output Data (Case of CRC-8 ) */

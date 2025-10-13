@@ -40,51 +40,51 @@
 
 /* CACHE Register Offsets */
 
-#define R_CACHE_CCACTL_OFFSET     0x00000000  /* C-Cache Control Register */
-#define R_CACHE_CCAFCT_OFFSET     0x00000004  /* C-Cache Flush Control Register */
-#define R_CACHE_CCAWTA_OFFSET     0x0000000c  /* C-Cache Write Attribute */
-#define R_CACHE_CCAEDST_OFFSET     0x00000010  /* C-Cache Error Detection Status */
-#define R_CACHE_CCATAA_OFFSET     0x00000014  /* C-Cache Test Access Address */
-#define R_CACHE_CCATAD_DATA_OFFSET     0x00000018  /* C-Cache Test Access Data (DATA) */
-#define R_CACHE_CCATAD_ECC_OFFSET     0x00000018  /* C-Cache Test Access Data (ECC) */
-#define R_CACHE_CCATAD_LRU_OFFSET     0x00000018  /* C-Cache Test Access Data (LRU) */
-#define R_CACHE_CCATAD_TAG_OFFSET     0x00000018  /* C-Cache Test Access Data (TAG) */
-#define R_CACHE_CCATAD_TAGECC_OFFSET     0x00000018  /* C-Cache Test Access Data (TAGECC) */
-#define R_CACHE_SCACTL_OFFSET     0x00000040  /* S-Cache Control Register */
-#define R_CACHE_SCAFCT_OFFSET     0x00000044  /* S-Cache Flush Control Register */
-#define R_CACHE_SCAWTA_OFFSET     0x0000004c  /* S-Cache Write Attribute */
-#define R_CACHE_SCAEDST_OFFSET     0x00000050  /* S-Cache Error Detection Status */
-#define R_CACHE_SCATAA_OFFSET     0x00000054  /* S-Cache Test Access Address */
-#define R_CACHE_SCATAD_DATA_OFFSET     0x00000058  /* S-Cache Test Access Data (DATA) */
-#define R_CACHE_SCATAD_ECC_OFFSET     0x00000058  /* S-Cache Test Access Data (ECC) */
-#define R_CACHE_SCATAD_LRU_OFFSET     0x00000058  /* S-Cache Test Access Data (LRU) */
-#define R_CACHE_SCATAD_TAG_OFFSET     0x00000058  /* S-Cache Test Access Data (TAG) */
-#define R_CACHE_CAPOAD_OFFSET     0x00000200  /* Cache Parity Error Operation After Detection Register */
-#define R_CACHE_CAPRCR_OFFSET     0x00000204  /* Cache Protection Register */
+#define R_CACHE_CCACTL_OFFSET                     0x00000000  /* C-Cache Control Register */
+#define R_CACHE_CCAFCT_OFFSET                     0x00000004  /* C-Cache Flush Control Register */
+#define R_CACHE_CCAWTA_OFFSET                     0x0000000c  /* C-Cache Write Attribute */
+#define R_CACHE_CCAEDST_OFFSET                    0x00000010  /* C-Cache Error Detection Status */
+#define R_CACHE_CCATAA_OFFSET                     0x00000014  /* C-Cache Test Access Address */
+#define R_CACHE_CCATAD_DATA_OFFSET                0x00000018  /* C-Cache Test Access Data (DATA) */
+#define R_CACHE_CCATAD_ECC_OFFSET                 0x00000018  /* C-Cache Test Access Data (ECC) */
+#define R_CACHE_CCATAD_LRU_OFFSET                 0x00000018  /* C-Cache Test Access Data (LRU) */
+#define R_CACHE_CCATAD_TAG_OFFSET                 0x00000018  /* C-Cache Test Access Data (TAG) */
+#define R_CACHE_CCATAD_TAGECC_OFFSET              0x00000018  /* C-Cache Test Access Data (TAGECC) */
+#define R_CACHE_SCACTL_OFFSET                     0x00000040  /* S-Cache Control Register */
+#define R_CACHE_SCAFCT_OFFSET                     0x00000044  /* S-Cache Flush Control Register */
+#define R_CACHE_SCAWTA_OFFSET                     0x0000004c  /* S-Cache Write Attribute */
+#define R_CACHE_SCAEDST_OFFSET                    0x00000050  /* S-Cache Error Detection Status */
+#define R_CACHE_SCATAA_OFFSET                     0x00000054  /* S-Cache Test Access Address */
+#define R_CACHE_SCATAD_DATA_OFFSET                0x00000058  /* S-Cache Test Access Data (DATA) */
+#define R_CACHE_SCATAD_ECC_OFFSET                 0x00000058  /* S-Cache Test Access Data (ECC) */
+#define R_CACHE_SCATAD_LRU_OFFSET                 0x00000058  /* S-Cache Test Access Data (LRU) */
+#define R_CACHE_SCATAD_TAG_OFFSET                 0x00000058  /* S-Cache Test Access Data (TAG) */
+#define R_CACHE_CAPOAD_OFFSET                     0x00000200  /* Cache Parity Error Operation After Detection Register */
+#define R_CACHE_CAPRCR_OFFSET                     0x00000204  /* Cache Protection Register */
 
 /* CACHE Register Addresses */
 
-#define R_CACHE_CCACTL                 (R_CACHE_BASE + R_CACHE_CCACTL_OFFSET)
-#define R_CACHE_CCAFCT                 (R_CACHE_BASE + R_CACHE_CCAFCT_OFFSET)
-#define R_CACHE_CCAWTA                 (R_CACHE_BASE + R_CACHE_CCAWTA_OFFSET)
-#define R_CACHE_CCAEDST                 (R_CACHE_BASE + R_CACHE_CCAEDST_OFFSET)
-#define R_CACHE_CCATAA                 (R_CACHE_BASE + R_CACHE_CCATAA_OFFSET)
-#define R_CACHE_CCATAD_DATA                 (R_CACHE_BASE + R_CACHE_CCATAD_DATA_OFFSET)
-#define R_CACHE_CCATAD_ECC                 (R_CACHE_BASE + R_CACHE_CCATAD_ECC_OFFSET)
-#define R_CACHE_CCATAD_LRU                 (R_CACHE_BASE + R_CACHE_CCATAD_LRU_OFFSET)
-#define R_CACHE_CCATAD_TAG                 (R_CACHE_BASE + R_CACHE_CCATAD_TAG_OFFSET)
-#define R_CACHE_CCATAD_TAGECC                 (R_CACHE_BASE + R_CACHE_CCATAD_TAGECC_OFFSET)
-#define R_CACHE_SCACTL                 (R_CACHE_BASE + R_CACHE_SCACTL_OFFSET)
-#define R_CACHE_SCAFCT                 (R_CACHE_BASE + R_CACHE_SCAFCT_OFFSET)
-#define R_CACHE_SCAWTA                 (R_CACHE_BASE + R_CACHE_SCAWTA_OFFSET)
-#define R_CACHE_SCAEDST                 (R_CACHE_BASE + R_CACHE_SCAEDST_OFFSET)
-#define R_CACHE_SCATAA                 (R_CACHE_BASE + R_CACHE_SCATAA_OFFSET)
-#define R_CACHE_SCATAD_DATA                 (R_CACHE_BASE + R_CACHE_SCATAD_DATA_OFFSET)
-#define R_CACHE_SCATAD_ECC                 (R_CACHE_BASE + R_CACHE_SCATAD_ECC_OFFSET)
-#define R_CACHE_SCATAD_LRU                 (R_CACHE_BASE + R_CACHE_SCATAD_LRU_OFFSET)
-#define R_CACHE_SCATAD_TAG                 (R_CACHE_BASE + R_CACHE_SCATAD_TAG_OFFSET)
-#define R_CACHE_CAPOAD                 (R_CACHE_BASE + R_CACHE_CAPOAD_OFFSET)
-#define R_CACHE_CAPRCR                 (R_CACHE_BASE + R_CACHE_CAPRCR_OFFSET)
+#define R_CACHE_CCACTL                            (R_CACHE_BASE + R_CACHE_CCACTL_OFFSET)
+#define R_CACHE_CCAFCT                            (R_CACHE_BASE + R_CACHE_CCAFCT_OFFSET)
+#define R_CACHE_CCAWTA                            (R_CACHE_BASE + R_CACHE_CCAWTA_OFFSET)
+#define R_CACHE_CCAEDST                           (R_CACHE_BASE + R_CACHE_CCAEDST_OFFSET)
+#define R_CACHE_CCATAA                            (R_CACHE_BASE + R_CACHE_CCATAA_OFFSET)
+#define R_CACHE_CCATAD_DATA                       (R_CACHE_BASE + R_CACHE_CCATAD_DATA_OFFSET)
+#define R_CACHE_CCATAD_ECC                        (R_CACHE_BASE + R_CACHE_CCATAD_ECC_OFFSET)
+#define R_CACHE_CCATAD_LRU                        (R_CACHE_BASE + R_CACHE_CCATAD_LRU_OFFSET)
+#define R_CACHE_CCATAD_TAG                        (R_CACHE_BASE + R_CACHE_CCATAD_TAG_OFFSET)
+#define R_CACHE_CCATAD_TAGECC                     (R_CACHE_BASE + R_CACHE_CCATAD_TAGECC_OFFSET)
+#define R_CACHE_SCACTL                            (R_CACHE_BASE + R_CACHE_SCACTL_OFFSET)
+#define R_CACHE_SCAFCT                            (R_CACHE_BASE + R_CACHE_SCAFCT_OFFSET)
+#define R_CACHE_SCAWTA                            (R_CACHE_BASE + R_CACHE_SCAWTA_OFFSET)
+#define R_CACHE_SCAEDST                           (R_CACHE_BASE + R_CACHE_SCAEDST_OFFSET)
+#define R_CACHE_SCATAA                            (R_CACHE_BASE + R_CACHE_SCATAA_OFFSET)
+#define R_CACHE_SCATAD_DATA                       (R_CACHE_BASE + R_CACHE_SCATAD_DATA_OFFSET)
+#define R_CACHE_SCATAD_ECC                        (R_CACHE_BASE + R_CACHE_SCATAD_ECC_OFFSET)
+#define R_CACHE_SCATAD_LRU                        (R_CACHE_BASE + R_CACHE_SCATAD_LRU_OFFSET)
+#define R_CACHE_SCATAD_TAG                        (R_CACHE_BASE + R_CACHE_SCATAD_TAG_OFFSET)
+#define R_CACHE_CAPOAD                            (R_CACHE_BASE + R_CACHE_CAPOAD_OFFSET)
+#define R_CACHE_CAPRCR                            (R_CACHE_BASE + R_CACHE_CAPRCR_OFFSET)
 
 /* Register bit definitions */
 /* CCACTL Register bit definitions */

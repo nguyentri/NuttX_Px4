@@ -38,175 +38,75 @@
 #endif
 #endif
 
-/* Channel stride for multi-channel peripherals */
-#define R_MIPI_CSI_CH_STRIDE    0x00000010
-#define R_MIPI_CSI_CH_BASE(ch)   (R_MIPI_CSI_BASE + ((uint32_t)(ch) * R_MIPI_CSI_CH_STRIDE))
-
 /* MIPI_CSI Register Offsets */
 
-#define R_MIPI_CSI_MCG_OFFSET     0x00000000  /* Module Configuration Register */
-#define R_MIPI_CSI_MCT0_OFFSET     0x00000010  /* Module Control Register 0 */
-#define R_MIPI_CSI_MCT2_OFFSET     0x00000018  /* Module Control Register 2 */
-#define R_MIPI_CSI_MCT3_OFFSET     0x0000001c  /* Module Control Register 3 */
-#define R_MIPI_CSI_RTCT_OFFSET     0x00000028  /* Reset Control Register */
-#define R_MIPI_CSI_RTST_OFFSET     0x0000002c  /* Reset Status Register */
-#define R_MIPI_CSI_EPCT_OFFSET     0x00000040  /* EPD Option Control Register */
-#define R_MIPI_CSI_EMCT_OFFSET     0x00000044  /* EPD Misc Option Control Register */
-#define R_MIPI_CSI_MIST_OFFSET     0x00000050  /* Module Interrupt Status Register */
-#define R_MIPI_CSI_DTEL_OFFSET     0x00000060  /* Receive Data Type Enable Low Register */
-#define R_MIPI_CSI_DTEH_OFFSET     0x00000064  /* Receive Data Type Enable High Register */
-#define R_MIPI_CSI_RXST_OFFSET     0x00000070  /* Receive Status Register */
-#define R_MIPI_CSI_RXSC_OFFSET     0x00000074  /* Receive Status Clear Register */
-#define R_MIPI_CSI_RXIE_OFFSET     0x00000078  /* Receive Interrupt Enable Register */
+#define R_MIPI_CSI_MCG_OFFSET                     0x00000000  /* Module Configuration Register */
+#define R_MIPI_CSI_MCT0_OFFSET                    0x00000010  /* Module Control Register 0 */
+#define R_MIPI_CSI_MCT2_OFFSET                    0x00000018  /* Module Control Register 2 */
+#define R_MIPI_CSI_MCT3_OFFSET                    0x0000001c  /* Module Control Register 3 */
+#define R_MIPI_CSI_RTCT_OFFSET                    0x00000028  /* Reset Control Register */
+#define R_MIPI_CSI_RTST_OFFSET                    0x0000002c  /* Reset Status Register */
+#define R_MIPI_CSI_EPCT_OFFSET                    0x00000040  /* EPD Option Control Register */
+#define R_MIPI_CSI_EMCT_OFFSET                    0x00000044  /* EPD Misc Option Control Register */
+#define R_MIPI_CSI_MIST_OFFSET                    0x00000050  /* Module Interrupt Status Register */
+#define R_MIPI_CSI_DTEL_OFFSET                    0x00000060  /* Receive Data Type Enable Low Register */
+#define R_MIPI_CSI_DTEH_OFFSET                    0x00000064  /* Receive Data Type Enable High Register */
+#define R_MIPI_CSI_RXST_OFFSET                    0x00000070  /* Receive Status Register */
+#define R_MIPI_CSI_RXSC_OFFSET                    0x00000074  /* Receive Status Clear Register */
+#define R_MIPI_CSI_RXIE_OFFSET                    0x00000078  /* Receive Interrupt Enable Register */
 /* DLST%s Registers (0-1) */
-#define R_MIPI_CSI_DLST0_OFFSET     0x00000080  /* Data Lane (N) Status Register */
-#define R_MIPI_CSI_DLST1_OFFSET     0x00000090  /* Data Lane (N) Status Register */
+#define R_MIPI_CSI_DLST_OFFSET(m)                 (0x00000080 + ((m) * 0x00000010))  /* Data Lane (N) Status Register */
 /* DLSC%s Registers (0-1) */
-#define R_MIPI_CSI_DLSC0_OFFSET     0x00000084  /* Data Lane (N) Status Clear Register */
-#define R_MIPI_CSI_DLSC1_OFFSET     0x00000094  /* Data Lane (N) Status Clear Register */
+#define R_MIPI_CSI_DLSC_OFFSET(m)                 (0x00000084 + ((m) * 0x00000010))  /* Data Lane (N) Status Clear Register */
 /* DLIE%s Registers (0-1) */
-#define R_MIPI_CSI_DLIE0_OFFSET     0x00000088  /* Data Lane (N) Interrupt Enable Register */
-#define R_MIPI_CSI_DLIE1_OFFSET     0x00000098  /* Data Lane (N) Interrupt Enable Register */
+#define R_MIPI_CSI_DLIE_OFFSET(m)                 (0x00000088 + ((m) * 0x00000010))  /* Data Lane (N) Interrupt Enable Register */
 /* VCST%s Registers (0-15) */
-#define R_MIPI_CSI_VCST00_OFFSET     0x00000100  /* Virtual Channel (M) Status Register */
-#define R_MIPI_CSI_VCST01_OFFSET     0x00000110  /* Virtual Channel (M) Status Register */
-#define R_MIPI_CSI_VCST02_OFFSET     0x00000120  /* Virtual Channel (M) Status Register */
-#define R_MIPI_CSI_VCST03_OFFSET     0x00000130  /* Virtual Channel (M) Status Register */
-#define R_MIPI_CSI_VCST04_OFFSET     0x00000140  /* Virtual Channel (M) Status Register */
-#define R_MIPI_CSI_VCST05_OFFSET     0x00000150  /* Virtual Channel (M) Status Register */
-#define R_MIPI_CSI_VCST06_OFFSET     0x00000160  /* Virtual Channel (M) Status Register */
-#define R_MIPI_CSI_VCST07_OFFSET     0x00000170  /* Virtual Channel (M) Status Register */
-#define R_MIPI_CSI_VCST08_OFFSET     0x00000180  /* Virtual Channel (M) Status Register */
-#define R_MIPI_CSI_VCST09_OFFSET     0x00000190  /* Virtual Channel (M) Status Register */
-#define R_MIPI_CSI_VCST10_OFFSET     0x000001a0  /* Virtual Channel (M) Status Register */
-#define R_MIPI_CSI_VCST11_OFFSET     0x000001b0  /* Virtual Channel (M) Status Register */
-#define R_MIPI_CSI_VCST12_OFFSET     0x000001c0  /* Virtual Channel (M) Status Register */
-#define R_MIPI_CSI_VCST13_OFFSET     0x000001d0  /* Virtual Channel (M) Status Register */
-#define R_MIPI_CSI_VCST14_OFFSET     0x000001e0  /* Virtual Channel (M) Status Register */
-#define R_MIPI_CSI_VCST15_OFFSET     0x000001f0  /* Virtual Channel (M) Status Register */
+#define R_MIPI_CSI_VCST_OFFSET(m)                 (0x00000100 + ((m) * 0x00000010))  /* Virtual Channel (M) Status Register */
 /* VCSC%s Registers (0-15) */
-#define R_MIPI_CSI_VCSC00_OFFSET     0x00000104  /* Virtual Channel (M) Status Clear Register */
-#define R_MIPI_CSI_VCSC01_OFFSET     0x00000114  /* Virtual Channel (M) Status Clear Register */
-#define R_MIPI_CSI_VCSC02_OFFSET     0x00000124  /* Virtual Channel (M) Status Clear Register */
-#define R_MIPI_CSI_VCSC03_OFFSET     0x00000134  /* Virtual Channel (M) Status Clear Register */
-#define R_MIPI_CSI_VCSC04_OFFSET     0x00000144  /* Virtual Channel (M) Status Clear Register */
-#define R_MIPI_CSI_VCSC05_OFFSET     0x00000154  /* Virtual Channel (M) Status Clear Register */
-#define R_MIPI_CSI_VCSC06_OFFSET     0x00000164  /* Virtual Channel (M) Status Clear Register */
-#define R_MIPI_CSI_VCSC07_OFFSET     0x00000174  /* Virtual Channel (M) Status Clear Register */
-#define R_MIPI_CSI_VCSC08_OFFSET     0x00000184  /* Virtual Channel (M) Status Clear Register */
-#define R_MIPI_CSI_VCSC09_OFFSET     0x00000194  /* Virtual Channel (M) Status Clear Register */
-#define R_MIPI_CSI_VCSC10_OFFSET     0x000001a4  /* Virtual Channel (M) Status Clear Register */
-#define R_MIPI_CSI_VCSC11_OFFSET     0x000001b4  /* Virtual Channel (M) Status Clear Register */
-#define R_MIPI_CSI_VCSC12_OFFSET     0x000001c4  /* Virtual Channel (M) Status Clear Register */
-#define R_MIPI_CSI_VCSC13_OFFSET     0x000001d4  /* Virtual Channel (M) Status Clear Register */
-#define R_MIPI_CSI_VCSC14_OFFSET     0x000001e4  /* Virtual Channel (M) Status Clear Register */
-#define R_MIPI_CSI_VCSC15_OFFSET     0x000001f4  /* Virtual Channel (M) Status Clear Register */
+#define R_MIPI_CSI_VCSC_OFFSET(m)                 (0x00000104 + ((m) * 0x00000010))  /* Virtual Channel (M) Status Clear Register */
 /* VCIE%s Registers (0-15) */
-#define R_MIPI_CSI_VCIE00_OFFSET     0x00000108  /* Virtual Channel (M) Interrupt Enable Register */
-#define R_MIPI_CSI_VCIE01_OFFSET     0x00000118  /* Virtual Channel (M) Interrupt Enable Register */
-#define R_MIPI_CSI_VCIE02_OFFSET     0x00000128  /* Virtual Channel (M) Interrupt Enable Register */
-#define R_MIPI_CSI_VCIE03_OFFSET     0x00000138  /* Virtual Channel (M) Interrupt Enable Register */
-#define R_MIPI_CSI_VCIE04_OFFSET     0x00000148  /* Virtual Channel (M) Interrupt Enable Register */
-#define R_MIPI_CSI_VCIE05_OFFSET     0x00000158  /* Virtual Channel (M) Interrupt Enable Register */
-#define R_MIPI_CSI_VCIE06_OFFSET     0x00000168  /* Virtual Channel (M) Interrupt Enable Register */
-#define R_MIPI_CSI_VCIE07_OFFSET     0x00000178  /* Virtual Channel (M) Interrupt Enable Register */
-#define R_MIPI_CSI_VCIE08_OFFSET     0x00000188  /* Virtual Channel (M) Interrupt Enable Register */
-#define R_MIPI_CSI_VCIE09_OFFSET     0x00000198  /* Virtual Channel (M) Interrupt Enable Register */
-#define R_MIPI_CSI_VCIE10_OFFSET     0x000001a8  /* Virtual Channel (M) Interrupt Enable Register */
-#define R_MIPI_CSI_VCIE11_OFFSET     0x000001b8  /* Virtual Channel (M) Interrupt Enable Register */
-#define R_MIPI_CSI_VCIE12_OFFSET     0x000001c8  /* Virtual Channel (M) Interrupt Enable Register */
-#define R_MIPI_CSI_VCIE13_OFFSET     0x000001d8  /* Virtual Channel (M) Interrupt Enable Register */
-#define R_MIPI_CSI_VCIE14_OFFSET     0x000001e8  /* Virtual Channel (M) Interrupt Enable Register */
-#define R_MIPI_CSI_VCIE15_OFFSET     0x000001f8  /* Virtual Channel (M) Interrupt Enable Register */
-#define R_MIPI_CSI_PMST_OFFSET     0x00000200  /* Power Management Status Register */
-#define R_MIPI_CSI_PMSC_OFFSET     0x00000204  /* Power Management Status Clear Register */
-#define R_MIPI_CSI_PMIE_OFFSET     0x00000208  /* Power Management Interrupt Enable Register */
-#define R_MIPI_CSI_GSCT_OFFSET     0x00000280  /* Generic Short Packet Control Register */
-#define R_MIPI_CSI_GSST_OFFSET     0x00000284  /* Generic Short Packet Status Register */
-#define R_MIPI_CSI_GSSC_OFFSET     0x00000288  /* Generic Short Packet Status Clear Register */
-#define R_MIPI_CSI_GSIE_OFFSET     0x0000028c  /* Generic Short Packet Interrupt Enable Register */
-#define R_MIPI_CSI_GSHT_OFFSET     0x00000290  /* Generic Short Packet Register */
-#define R_MIPI_CSI_GSIU_OFFSET     0x00000294  /* Generic Short Packet Information Update Register */
+#define R_MIPI_CSI_VCIE_OFFSET(m)                 (0x00000108 + ((m) * 0x00000010))  /* Virtual Channel (M) Interrupt Enable Register */
+#define R_MIPI_CSI_PMST_OFFSET                    0x00000200  /* Power Management Status Register */
+#define R_MIPI_CSI_PMSC_OFFSET                    0x00000204  /* Power Management Status Clear Register */
+#define R_MIPI_CSI_PMIE_OFFSET                    0x00000208  /* Power Management Interrupt Enable Register */
+#define R_MIPI_CSI_GSCT_OFFSET                    0x00000280  /* Generic Short Packet Control Register */
+#define R_MIPI_CSI_GSST_OFFSET                    0x00000284  /* Generic Short Packet Status Register */
+#define R_MIPI_CSI_GSSC_OFFSET                    0x00000288  /* Generic Short Packet Status Clear Register */
+#define R_MIPI_CSI_GSIE_OFFSET                    0x0000028c  /* Generic Short Packet Interrupt Enable Register */
+#define R_MIPI_CSI_GSHT_OFFSET                    0x00000290  /* Generic Short Packet Register */
+#define R_MIPI_CSI_GSIU_OFFSET                    0x00000294  /* Generic Short Packet Information Update Register */
 
 /* MIPI_CSI Register Addresses */
 
-#define R_MIPI_CSI_MCG                 (R_MIPI_CSI_BASE + R_MIPI_CSI_MCG_OFFSET)
-#define R_MIPI_CSI_MCT0                 (R_MIPI_CSI_BASE + R_MIPI_CSI_MCT0_OFFSET)
-#define R_MIPI_CSI_MCT2                 (R_MIPI_CSI_BASE + R_MIPI_CSI_MCT2_OFFSET)
-#define R_MIPI_CSI_MCT3                 (R_MIPI_CSI_BASE + R_MIPI_CSI_MCT3_OFFSET)
-#define R_MIPI_CSI_RTCT                 (R_MIPI_CSI_BASE + R_MIPI_CSI_RTCT_OFFSET)
-#define R_MIPI_CSI_RTST                 (R_MIPI_CSI_BASE + R_MIPI_CSI_RTST_OFFSET)
-#define R_MIPI_CSI_EPCT                 (R_MIPI_CSI_BASE + R_MIPI_CSI_EPCT_OFFSET)
-#define R_MIPI_CSI_EMCT                 (R_MIPI_CSI_BASE + R_MIPI_CSI_EMCT_OFFSET)
-#define R_MIPI_CSI_MIST                 (R_MIPI_CSI_BASE + R_MIPI_CSI_MIST_OFFSET)
-#define R_MIPI_CSI_DTEL                 (R_MIPI_CSI_BASE + R_MIPI_CSI_DTEL_OFFSET)
-#define R_MIPI_CSI_DTEH                 (R_MIPI_CSI_BASE + R_MIPI_CSI_DTEH_OFFSET)
-#define R_MIPI_CSI_RXST                 (R_MIPI_CSI_BASE + R_MIPI_CSI_RXST_OFFSET)
-#define R_MIPI_CSI_RXSC                 (R_MIPI_CSI_BASE + R_MIPI_CSI_RXSC_OFFSET)
-#define R_MIPI_CSI_RXIE                 (R_MIPI_CSI_BASE + R_MIPI_CSI_RXIE_OFFSET)
-#define R_MIPI_CSI_DLST0                 (R_MIPI_CSI_BASE + R_MIPI_CSI_DLST0_OFFSET)
-#define R_MIPI_CSI_DLST1                 (R_MIPI_CSI_BASE + R_MIPI_CSI_DLST1_OFFSET)
-#define R_MIPI_CSI_DLSC0                 (R_MIPI_CSI_BASE + R_MIPI_CSI_DLSC0_OFFSET)
-#define R_MIPI_CSI_DLSC1                 (R_MIPI_CSI_BASE + R_MIPI_CSI_DLSC1_OFFSET)
-#define R_MIPI_CSI_DLIE0                 (R_MIPI_CSI_BASE + R_MIPI_CSI_DLIE0_OFFSET)
-#define R_MIPI_CSI_DLIE1                 (R_MIPI_CSI_BASE + R_MIPI_CSI_DLIE1_OFFSET)
-#define R_MIPI_CSI_VCST00                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCST00_OFFSET)
-#define R_MIPI_CSI_VCST01                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCST01_OFFSET)
-#define R_MIPI_CSI_VCST02                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCST02_OFFSET)
-#define R_MIPI_CSI_VCST03                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCST03_OFFSET)
-#define R_MIPI_CSI_VCST04                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCST04_OFFSET)
-#define R_MIPI_CSI_VCST05                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCST05_OFFSET)
-#define R_MIPI_CSI_VCST06                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCST06_OFFSET)
-#define R_MIPI_CSI_VCST07                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCST07_OFFSET)
-#define R_MIPI_CSI_VCST08                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCST08_OFFSET)
-#define R_MIPI_CSI_VCST09                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCST09_OFFSET)
-#define R_MIPI_CSI_VCST10                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCST10_OFFSET)
-#define R_MIPI_CSI_VCST11                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCST11_OFFSET)
-#define R_MIPI_CSI_VCST12                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCST12_OFFSET)
-#define R_MIPI_CSI_VCST13                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCST13_OFFSET)
-#define R_MIPI_CSI_VCST14                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCST14_OFFSET)
-#define R_MIPI_CSI_VCST15                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCST15_OFFSET)
-#define R_MIPI_CSI_VCSC00                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCSC00_OFFSET)
-#define R_MIPI_CSI_VCSC01                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCSC01_OFFSET)
-#define R_MIPI_CSI_VCSC02                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCSC02_OFFSET)
-#define R_MIPI_CSI_VCSC03                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCSC03_OFFSET)
-#define R_MIPI_CSI_VCSC04                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCSC04_OFFSET)
-#define R_MIPI_CSI_VCSC05                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCSC05_OFFSET)
-#define R_MIPI_CSI_VCSC06                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCSC06_OFFSET)
-#define R_MIPI_CSI_VCSC07                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCSC07_OFFSET)
-#define R_MIPI_CSI_VCSC08                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCSC08_OFFSET)
-#define R_MIPI_CSI_VCSC09                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCSC09_OFFSET)
-#define R_MIPI_CSI_VCSC10                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCSC10_OFFSET)
-#define R_MIPI_CSI_VCSC11                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCSC11_OFFSET)
-#define R_MIPI_CSI_VCSC12                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCSC12_OFFSET)
-#define R_MIPI_CSI_VCSC13                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCSC13_OFFSET)
-#define R_MIPI_CSI_VCSC14                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCSC14_OFFSET)
-#define R_MIPI_CSI_VCSC15                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCSC15_OFFSET)
-#define R_MIPI_CSI_VCIE00                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCIE00_OFFSET)
-#define R_MIPI_CSI_VCIE01                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCIE01_OFFSET)
-#define R_MIPI_CSI_VCIE02                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCIE02_OFFSET)
-#define R_MIPI_CSI_VCIE03                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCIE03_OFFSET)
-#define R_MIPI_CSI_VCIE04                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCIE04_OFFSET)
-#define R_MIPI_CSI_VCIE05                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCIE05_OFFSET)
-#define R_MIPI_CSI_VCIE06                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCIE06_OFFSET)
-#define R_MIPI_CSI_VCIE07                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCIE07_OFFSET)
-#define R_MIPI_CSI_VCIE08                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCIE08_OFFSET)
-#define R_MIPI_CSI_VCIE09                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCIE09_OFFSET)
-#define R_MIPI_CSI_VCIE10                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCIE10_OFFSET)
-#define R_MIPI_CSI_VCIE11                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCIE11_OFFSET)
-#define R_MIPI_CSI_VCIE12                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCIE12_OFFSET)
-#define R_MIPI_CSI_VCIE13                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCIE13_OFFSET)
-#define R_MIPI_CSI_VCIE14                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCIE14_OFFSET)
-#define R_MIPI_CSI_VCIE15                 (R_MIPI_CSI_BASE + R_MIPI_CSI_VCIE15_OFFSET)
-#define R_MIPI_CSI_PMST                 (R_MIPI_CSI_BASE + R_MIPI_CSI_PMST_OFFSET)
-#define R_MIPI_CSI_PMSC                 (R_MIPI_CSI_BASE + R_MIPI_CSI_PMSC_OFFSET)
-#define R_MIPI_CSI_PMIE                 (R_MIPI_CSI_BASE + R_MIPI_CSI_PMIE_OFFSET)
-#define R_MIPI_CSI_GSCT                 (R_MIPI_CSI_BASE + R_MIPI_CSI_GSCT_OFFSET)
-#define R_MIPI_CSI_GSST                 (R_MIPI_CSI_BASE + R_MIPI_CSI_GSST_OFFSET)
-#define R_MIPI_CSI_GSSC                 (R_MIPI_CSI_BASE + R_MIPI_CSI_GSSC_OFFSET)
-#define R_MIPI_CSI_GSIE                 (R_MIPI_CSI_BASE + R_MIPI_CSI_GSIE_OFFSET)
-#define R_MIPI_CSI_GSHT                 (R_MIPI_CSI_BASE + R_MIPI_CSI_GSHT_OFFSET)
-#define R_MIPI_CSI_GSIU                 (R_MIPI_CSI_BASE + R_MIPI_CSI_GSIU_OFFSET)
+#define R_MIPI_CSI_MCG                            (R_MIPI_CSI_BASE + R_MIPI_CSI_MCG_OFFSET)
+#define R_MIPI_CSI_MCT0                           (R_MIPI_CSI_BASE + R_MIPI_CSI_MCT0_OFFSET)
+#define R_MIPI_CSI_MCT2                           (R_MIPI_CSI_BASE + R_MIPI_CSI_MCT2_OFFSET)
+#define R_MIPI_CSI_MCT3                           (R_MIPI_CSI_BASE + R_MIPI_CSI_MCT3_OFFSET)
+#define R_MIPI_CSI_RTCT                           (R_MIPI_CSI_BASE + R_MIPI_CSI_RTCT_OFFSET)
+#define R_MIPI_CSI_RTST                           (R_MIPI_CSI_BASE + R_MIPI_CSI_RTST_OFFSET)
+#define R_MIPI_CSI_EPCT                           (R_MIPI_CSI_BASE + R_MIPI_CSI_EPCT_OFFSET)
+#define R_MIPI_CSI_EMCT                           (R_MIPI_CSI_BASE + R_MIPI_CSI_EMCT_OFFSET)
+#define R_MIPI_CSI_MIST                           (R_MIPI_CSI_BASE + R_MIPI_CSI_MIST_OFFSET)
+#define R_MIPI_CSI_DTEL                           (R_MIPI_CSI_BASE + R_MIPI_CSI_DTEL_OFFSET)
+#define R_MIPI_CSI_DTEH                           (R_MIPI_CSI_BASE + R_MIPI_CSI_DTEH_OFFSET)
+#define R_MIPI_CSI_RXST                           (R_MIPI_CSI_BASE + R_MIPI_CSI_RXST_OFFSET)
+#define R_MIPI_CSI_RXSC                           (R_MIPI_CSI_BASE + R_MIPI_CSI_RXSC_OFFSET)
+#define R_MIPI_CSI_RXIE                           (R_MIPI_CSI_BASE + R_MIPI_CSI_RXIE_OFFSET)
+#define R_MIPI_CSI_DLST(m)                        (R_MIPI_CSI_BASE + R_MIPI_CSI_DLST_OFFSET(m))
+#define R_MIPI_CSI_DLSC(m)                        (R_MIPI_CSI_BASE + R_MIPI_CSI_DLSC_OFFSET(m))
+#define R_MIPI_CSI_DLIE(m)                        (R_MIPI_CSI_BASE + R_MIPI_CSI_DLIE_OFFSET(m))
+#define R_MIPI_CSI_VCST(m)                        (R_MIPI_CSI_BASE + R_MIPI_CSI_VCST_OFFSET(m))
+#define R_MIPI_CSI_VCSC(m)                        (R_MIPI_CSI_BASE + R_MIPI_CSI_VCSC_OFFSET(m))
+#define R_MIPI_CSI_VCIE(m)                        (R_MIPI_CSI_BASE + R_MIPI_CSI_VCIE_OFFSET(m))
+#define R_MIPI_CSI_PMST                           (R_MIPI_CSI_BASE + R_MIPI_CSI_PMST_OFFSET)
+#define R_MIPI_CSI_PMSC                           (R_MIPI_CSI_BASE + R_MIPI_CSI_PMSC_OFFSET)
+#define R_MIPI_CSI_PMIE                           (R_MIPI_CSI_BASE + R_MIPI_CSI_PMIE_OFFSET)
+#define R_MIPI_CSI_GSCT                           (R_MIPI_CSI_BASE + R_MIPI_CSI_GSCT_OFFSET)
+#define R_MIPI_CSI_GSST                           (R_MIPI_CSI_BASE + R_MIPI_CSI_GSST_OFFSET)
+#define R_MIPI_CSI_GSSC                           (R_MIPI_CSI_BASE + R_MIPI_CSI_GSSC_OFFSET)
+#define R_MIPI_CSI_GSIE                           (R_MIPI_CSI_BASE + R_MIPI_CSI_GSIE_OFFSET)
+#define R_MIPI_CSI_GSHT                           (R_MIPI_CSI_BASE + R_MIPI_CSI_GSHT_OFFSET)
+#define R_MIPI_CSI_GSIU                           (R_MIPI_CSI_BASE + R_MIPI_CSI_GSIU_OFFSET)
 
 /* Register bit definitions */
 /* MCG Register bit definitions */
@@ -215,7 +115,7 @@
 
 #define R_MIPI_CSI_MCG_SDLN_SHIFT                 (8)  /* Number of Supported Data Lanes */
 #define R_MIPI_CSI_MCG_SDLN_MASK                  0xf00
-#  define R_MIPI_CSI_MCG_SDLN_0X2                         (0 << R_MIPI_CSI_MCG_SDLN_SHIFT)  /* Operable with 2 lanes or 1 lane */
+#  define R_MIPI_CSI_MCG_SDLN_0X2                         (2 << R_MIPI_CSI_MCG_SDLN_SHIFT)  /* Operable with 2 lanes or 1 lane */
 
 #define R_MIPI_CSI_MCG_GSNM_SHIFT                 (16)  /* Number of Generic Short Packet FIFO */
 #define R_MIPI_CSI_MCG_GSNM_MASK                  0xff0000
@@ -223,8 +123,8 @@
 /* MCT0 Register bit definitions */
 #define R_MIPI_CSI_MCT0_VDLN_SHIFT                (0)  /* Number of Valid Data Lanes */
 #define R_MIPI_CSI_MCT0_VDLN_MASK                 0xf
-#  define R_MIPI_CSI_MCT0_VDLN_0X1                        (0 << R_MIPI_CSI_MCT0_VDLN_SHIFT)  /* Operation with one lane */
-#  define R_MIPI_CSI_MCT0_VDLN_0X2                        (0 << R_MIPI_CSI_MCT0_VDLN_SHIFT)  /* Operation with two lanes */
+#  define R_MIPI_CSI_MCT0_VDLN_0X1                        (1 << R_MIPI_CSI_MCT0_VDLN_SHIFT)  /* Operation with one lane */
+#  define R_MIPI_CSI_MCT0_VDLN_0X2                        (2 << R_MIPI_CSI_MCT0_VDLN_SHIFT)  /* Operation with two lanes */
 
 #define R_MIPI_CSI_MCT0_ZLMD                      (1 << 16)  /* Zero Length Long Packet Output Mode */
 

@@ -44,119 +44,119 @@
 
 /* GPT32 Register Offsets */
 
-#define R_GPT32_GTWP_OFFSET     0x00000000  /* General PWM Timer Write-Protection Register */
-#define R_GPT32_GTSTR_OFFSET     0x00000004  /* General PWM Timer Software Start Register */
-#define R_GPT32_GTSTP_OFFSET     0x00000008  /* General PWM Timer Software Stop Register */
-#define R_GPT32_GTCLR_OFFSET     0x0000000c  /* General PWM Timer Software Clear Register */
-#define R_GPT32_GTSSR_OFFSET     0x00000010  /* General PWM Timer Start Source Select Register */
-#define R_GPT32_GTPSR_OFFSET     0x00000014  /* General PWM Timer Stop Source Select Register */
-#define R_GPT32_GTCSR_OFFSET     0x00000018  /* General PWM Timer Clear Source Select Register */
-#define R_GPT32_GTUPSR_OFFSET     0x0000001c  /* General PWM Timer Up Count Source Select Register */
-#define R_GPT32_GTDNSR_OFFSET     0x00000020  /* General PWM Timer Down Count Source Select Register */
-#define R_GPT32_GTICASR_OFFSET     0x00000024  /* General PWM Timer Input Capture Source Select Register A */
-#define R_GPT32_GTICBSR_OFFSET     0x00000028  /* General PWM Timer Input Capture Source Select Register B */
-#define R_GPT32_GTCR_OFFSET     0x0000002c  /* General PWM Timer Control Register */
-#define R_GPT32_GTUDDTYC_OFFSET     0x00000030  /* General PWM Timer Count Direction and Duty Setting Register */
-#define R_GPT32_GTIOR_OFFSET     0x00000034  /* General PWM Timer I/O Control Register */
-#define R_GPT32_GTINTAD_OFFSET     0x00000038  /* General PWM Timer Interrupt Output Setting Register */
-#define R_GPT32_GTST_OFFSET     0x0000003c  /* General PWM Timer Status Register */
-#define R_GPT32_GTBER_OFFSET     0x00000040  /* General PWM Timer Buffer Enable Register */
-#define R_GPT32_GTITC_OFFSET     0x00000044  /* General PWM Timer Interrupt and A/D Conversion Start Request Skipping Setting Register */
-#define R_GPT32_GTCNT_OFFSET     0x00000048  /* General PWM Timer Counter */
-#define R_GPT32_GTCCRA_OFFSET     0x0000004c  /* General PWM Timer Compare Capture Register A */
-#define R_GPT32_GTCCRB_OFFSET     0x00000050  /* General PWM Timer Compare Capture Register B */
-#define R_GPT32_GTCCRC_OFFSET     0x00000054  /* General PWM Timer Compare Capture Register C */
-#define R_GPT32_GTCCRE_OFFSET     0x00000058  /* General PWM Timer Compare Capture Register E */
-#define R_GPT32_GTCCRD_OFFSET     0x0000005c  /* General PWM Timer Compare Capture Register D */
-#define R_GPT32_GTCCRF_OFFSET     0x00000060  /* General PWM Timer Compare Capture Register F */
-#define R_GPT32_GTPR_OFFSET     0x00000064  /* General PWM Timer Cycle Setting Register */
-#define R_GPT32_GTPBR_OFFSET     0x00000068  /* General PWM Timer Cycle Setting Buffer Register */
-#define R_GPT32_GTPDBR_OFFSET     0x0000006c  /* General PWM Timer Cycle Setting Double-Buffer Register */
-#define R_GPT32_GTADTRA_OFFSET     0x00000070  /* A/D Conversion Start Request Timing Register A */
-#define R_GPT32_GTADTBRA_OFFSET     0x00000074  /* A/D Conversion Start Request Timing Buffer Register A */
-#define R_GPT32_GTADTDBRA_OFFSET     0x00000078  /* A/D Conversion Start Request Timing Double-Buffer Register A */
-#define R_GPT32_GTADTRB_OFFSET     0x0000007c  /* A/D Conversion Start Request Timing Register B */
-#define R_GPT32_GTADTBRB_OFFSET     0x00000080  /* A/D Conversion Start Request Timing Buffer Register B */
-#define R_GPT32_GTADTDBRB_OFFSET     0x00000084  /* A/D Conversion Start Request Timing Double-Buffer Register B */
-#define R_GPT32_GTDTCR_OFFSET     0x00000088  /* General PWM Timer Dead Time Control Register */
-#define R_GPT32_GTDVU_OFFSET     0x0000008c  /* General PWM Timer Dead Time Value Register U */
-#define R_GPT32_GTDVD_OFFSET     0x00000090  /* General PWM Timer Dead Time Value Register D */
-#define R_GPT32_GTDBU_OFFSET     0x00000094  /* General PWM Timer Dead Time Buffer Register U */
-#define R_GPT32_GTDBD_OFFSET     0x00000098  /* General PWM Timer Dead Time Buffer Register D */
-#define R_GPT32_GTSOS_OFFSET     0x0000009c  /* General PWM Timer Output Protection Function Status Register */
-#define R_GPT32_GTSOTR_OFFSET     0x000000a0  /* General PWM Timer Output Protection Function Temporary Release Register */
-#define R_GPT32_GTADSMR_OFFSET     0x000000a4  /* General PWM Timer A/D Conversion Start Request Signal Monitoring Register */
-#define R_GPT32_GTEITC_OFFSET     0x000000a8  /* General PWM Timer Extended Interrupt Skipping Counter Control Register */
-#define R_GPT32_GTEITLI1_OFFSET     0x000000ac  /* General PWM Timer Extended Interrupt Skipping Setting Register 1 */
-#define R_GPT32_GTEITLI2_OFFSET     0x000000b0  /* General PWM Timer Extended Interrupt Skipping Setting Register 2 */
-#define R_GPT32_GTEITLB_OFFSET     0x000000b4  /* General PWM Timer Extended Buffer Transfer Skipping Setting Register */
-#define R_GPT32_GTICLF_OFFSET     0x000000b8  /* General PWM Timer Inter Channel Logical Operation Function Setting Register */
-#define R_GPT32_GTPC_OFFSET     0x000000bc  /* General PWM Timer Period Count Register */
-#define R_GPT32_GTADCMSC_OFFSET     0x000000c0  /* General PWM Timer A/D Conversion Start Request Compare Match Skipping Control Register */
-#define R_GPT32_GTADCMSS_OFFSET     0x000000c4  /* General PWM Timer A/D Conversion Start Request Compare Match Skipping Setting Register */
-#define R_GPT32_GTSECSR_OFFSET     0x000000d0  /* General PWM Timer Operation Enable Bit Simultaneous Control Channel Select Register */
-#define R_GPT32_GTSECR_OFFSET     0x000000d4  /* General PWM Timer Operation Enable Bit Simultaneous Control Register */
-#define R_GPT32_GTBER2_OFFSET     0x000000e0  /* General PWM Timer Buffer Enable Register 2 */
-#define R_GPT32_GTOLBR_OFFSET     0x000000e4  /* General PWM Timer Output Level Buffer Register */
-#define R_GPT32_GTICCR_OFFSET     0x000000ec  /* General PWM Timer Inter Channel Cooperation Input Capture Control Register */
+#define R_GPT32_GTWP_OFFSET                       0x00000000  /* General PWM Timer Write-Protection Register */
+#define R_GPT32_GTSTR_OFFSET                      0x00000004  /* General PWM Timer Software Start Register */
+#define R_GPT32_GTSTP_OFFSET                      0x00000008  /* General PWM Timer Software Stop Register */
+#define R_GPT32_GTCLR_OFFSET                      0x0000000c  /* General PWM Timer Software Clear Register */
+#define R_GPT32_GTSSR_OFFSET                      0x00000010  /* General PWM Timer Start Source Select Register */
+#define R_GPT32_GTPSR_OFFSET                      0x00000014  /* General PWM Timer Stop Source Select Register */
+#define R_GPT32_GTCSR_OFFSET                      0x00000018  /* General PWM Timer Clear Source Select Register */
+#define R_GPT32_GTUPSR_OFFSET                     0x0000001c  /* General PWM Timer Up Count Source Select Register */
+#define R_GPT32_GTDNSR_OFFSET                     0x00000020  /* General PWM Timer Down Count Source Select Register */
+#define R_GPT32_GTICASR_OFFSET                    0x00000024  /* General PWM Timer Input Capture Source Select Register A */
+#define R_GPT32_GTICBSR_OFFSET                    0x00000028  /* General PWM Timer Input Capture Source Select Register B */
+#define R_GPT32_GTCR_OFFSET                       0x0000002c  /* General PWM Timer Control Register */
+#define R_GPT32_GTUDDTYC_OFFSET                   0x00000030  /* General PWM Timer Count Direction and Duty Setting Register */
+#define R_GPT32_GTIOR_OFFSET                      0x00000034  /* General PWM Timer I/O Control Register */
+#define R_GPT32_GTINTAD_OFFSET                    0x00000038  /* General PWM Timer Interrupt Output Setting Register */
+#define R_GPT32_GTST_OFFSET                       0x0000003c  /* General PWM Timer Status Register */
+#define R_GPT32_GTBER_OFFSET                      0x00000040  /* General PWM Timer Buffer Enable Register */
+#define R_GPT32_GTITC_OFFSET                      0x00000044  /* General PWM Timer Interrupt and A/D Conversion Start Request Skipping Setting Register */
+#define R_GPT32_GTCNT_OFFSET                      0x00000048  /* General PWM Timer Counter */
+#define R_GPT32_GTCCRA_OFFSET                     0x0000004c  /* General PWM Timer Compare Capture Register A */
+#define R_GPT32_GTCCRB_OFFSET                     0x00000050  /* General PWM Timer Compare Capture Register B */
+#define R_GPT32_GTCCRC_OFFSET                     0x00000054  /* General PWM Timer Compare Capture Register C */
+#define R_GPT32_GTCCRE_OFFSET                     0x00000058  /* General PWM Timer Compare Capture Register E */
+#define R_GPT32_GTCCRD_OFFSET                     0x0000005c  /* General PWM Timer Compare Capture Register D */
+#define R_GPT32_GTCCRF_OFFSET                     0x00000060  /* General PWM Timer Compare Capture Register F */
+#define R_GPT32_GTPR_OFFSET                       0x00000064  /* General PWM Timer Cycle Setting Register */
+#define R_GPT32_GTPBR_OFFSET                      0x00000068  /* General PWM Timer Cycle Setting Buffer Register */
+#define R_GPT32_GTPDBR_OFFSET                     0x0000006c  /* General PWM Timer Cycle Setting Double-Buffer Register */
+#define R_GPT32_GTADTRA_OFFSET                    0x00000070  /* A/D Conversion Start Request Timing Register A */
+#define R_GPT32_GTADTBRA_OFFSET                   0x00000074  /* A/D Conversion Start Request Timing Buffer Register A */
+#define R_GPT32_GTADTDBRA_OFFSET                  0x00000078  /* A/D Conversion Start Request Timing Double-Buffer Register A */
+#define R_GPT32_GTADTRB_OFFSET                    0x0000007c  /* A/D Conversion Start Request Timing Register B */
+#define R_GPT32_GTADTBRB_OFFSET                   0x00000080  /* A/D Conversion Start Request Timing Buffer Register B */
+#define R_GPT32_GTADTDBRB_OFFSET                  0x00000084  /* A/D Conversion Start Request Timing Double-Buffer Register B */
+#define R_GPT32_GTDTCR_OFFSET                     0x00000088  /* General PWM Timer Dead Time Control Register */
+#define R_GPT32_GTDVU_OFFSET                      0x0000008c  /* General PWM Timer Dead Time Value Register U */
+#define R_GPT32_GTDVD_OFFSET                      0x00000090  /* General PWM Timer Dead Time Value Register D */
+#define R_GPT32_GTDBU_OFFSET                      0x00000094  /* General PWM Timer Dead Time Buffer Register U */
+#define R_GPT32_GTDBD_OFFSET                      0x00000098  /* General PWM Timer Dead Time Buffer Register D */
+#define R_GPT32_GTSOS_OFFSET                      0x0000009c  /* General PWM Timer Output Protection Function Status Register */
+#define R_GPT32_GTSOTR_OFFSET                     0x000000a0  /* General PWM Timer Output Protection Function Temporary Release Register */
+#define R_GPT32_GTADSMR_OFFSET                    0x000000a4  /* General PWM Timer A/D Conversion Start Request Signal Monitoring Register */
+#define R_GPT32_GTEITC_OFFSET                     0x000000a8  /* General PWM Timer Extended Interrupt Skipping Counter Control Register */
+#define R_GPT32_GTEITLI1_OFFSET                   0x000000ac  /* General PWM Timer Extended Interrupt Skipping Setting Register 1 */
+#define R_GPT32_GTEITLI2_OFFSET                   0x000000b0  /* General PWM Timer Extended Interrupt Skipping Setting Register 2 */
+#define R_GPT32_GTEITLB_OFFSET                    0x000000b4  /* General PWM Timer Extended Buffer Transfer Skipping Setting Register */
+#define R_GPT32_GTICLF_OFFSET                     0x000000b8  /* General PWM Timer Inter Channel Logical Operation Function Setting Register */
+#define R_GPT32_GTPC_OFFSET                       0x000000bc  /* General PWM Timer Period Count Register */
+#define R_GPT32_GTADCMSC_OFFSET                   0x000000c0  /* General PWM Timer A/D Conversion Start Request Compare Match Skipping Control Register */
+#define R_GPT32_GTADCMSS_OFFSET                   0x000000c4  /* General PWM Timer A/D Conversion Start Request Compare Match Skipping Setting Register */
+#define R_GPT32_GTSECSR_OFFSET                    0x000000d0  /* General PWM Timer Operation Enable Bit Simultaneous Control Channel Select Register */
+#define R_GPT32_GTSECR_OFFSET                     0x000000d4  /* General PWM Timer Operation Enable Bit Simultaneous Control Register */
+#define R_GPT32_GTBER2_OFFSET                     0x000000e0  /* General PWM Timer Buffer Enable Register 2 */
+#define R_GPT32_GTOLBR_OFFSET                     0x000000e4  /* General PWM Timer Output Level Buffer Register */
+#define R_GPT32_GTICCR_OFFSET                     0x000000ec  /* General PWM Timer Inter Channel Cooperation Input Capture Control Register */
 
 /* GPT32 Register Addresses */
 
-#define R_GPT32_GTWP                 (R_GPT32_BASE + R_GPT32_GTWP_OFFSET)
-#define R_GPT32_GTSTR                 (R_GPT32_BASE + R_GPT32_GTSTR_OFFSET)
-#define R_GPT32_GTSTP                 (R_GPT32_BASE + R_GPT32_GTSTP_OFFSET)
-#define R_GPT32_GTCLR                 (R_GPT32_BASE + R_GPT32_GTCLR_OFFSET)
-#define R_GPT32_GTSSR                 (R_GPT32_BASE + R_GPT32_GTSSR_OFFSET)
-#define R_GPT32_GTPSR                 (R_GPT32_BASE + R_GPT32_GTPSR_OFFSET)
-#define R_GPT32_GTCSR                 (R_GPT32_BASE + R_GPT32_GTCSR_OFFSET)
-#define R_GPT32_GTUPSR                 (R_GPT32_BASE + R_GPT32_GTUPSR_OFFSET)
-#define R_GPT32_GTDNSR                 (R_GPT32_BASE + R_GPT32_GTDNSR_OFFSET)
-#define R_GPT32_GTICASR                 (R_GPT32_BASE + R_GPT32_GTICASR_OFFSET)
-#define R_GPT32_GTICBSR                 (R_GPT32_BASE + R_GPT32_GTICBSR_OFFSET)
-#define R_GPT32_GTCR                 (R_GPT32_BASE + R_GPT32_GTCR_OFFSET)
-#define R_GPT32_GTUDDTYC                 (R_GPT32_BASE + R_GPT32_GTUDDTYC_OFFSET)
-#define R_GPT32_GTIOR                 (R_GPT32_BASE + R_GPT32_GTIOR_OFFSET)
-#define R_GPT32_GTINTAD                 (R_GPT32_BASE + R_GPT32_GTINTAD_OFFSET)
-#define R_GPT32_GTST                 (R_GPT32_BASE + R_GPT32_GTST_OFFSET)
-#define R_GPT32_GTBER                 (R_GPT32_BASE + R_GPT32_GTBER_OFFSET)
-#define R_GPT32_GTITC                 (R_GPT32_BASE + R_GPT32_GTITC_OFFSET)
-#define R_GPT32_GTCNT                 (R_GPT32_BASE + R_GPT32_GTCNT_OFFSET)
-#define R_GPT32_GTCCRA                 (R_GPT32_BASE + R_GPT32_GTCCRA_OFFSET)
-#define R_GPT32_GTCCRB                 (R_GPT32_BASE + R_GPT32_GTCCRB_OFFSET)
-#define R_GPT32_GTCCRC                 (R_GPT32_BASE + R_GPT32_GTCCRC_OFFSET)
-#define R_GPT32_GTCCRE                 (R_GPT32_BASE + R_GPT32_GTCCRE_OFFSET)
-#define R_GPT32_GTCCRD                 (R_GPT32_BASE + R_GPT32_GTCCRD_OFFSET)
-#define R_GPT32_GTCCRF                 (R_GPT32_BASE + R_GPT32_GTCCRF_OFFSET)
-#define R_GPT32_GTPR                 (R_GPT32_BASE + R_GPT32_GTPR_OFFSET)
-#define R_GPT32_GTPBR                 (R_GPT32_BASE + R_GPT32_GTPBR_OFFSET)
-#define R_GPT32_GTPDBR                 (R_GPT32_BASE + R_GPT32_GTPDBR_OFFSET)
-#define R_GPT32_GTADTRA                 (R_GPT32_BASE + R_GPT32_GTADTRA_OFFSET)
-#define R_GPT32_GTADTBRA                 (R_GPT32_BASE + R_GPT32_GTADTBRA_OFFSET)
-#define R_GPT32_GTADTDBRA                 (R_GPT32_BASE + R_GPT32_GTADTDBRA_OFFSET)
-#define R_GPT32_GTADTRB                 (R_GPT32_BASE + R_GPT32_GTADTRB_OFFSET)
-#define R_GPT32_GTADTBRB                 (R_GPT32_BASE + R_GPT32_GTADTBRB_OFFSET)
-#define R_GPT32_GTADTDBRB                 (R_GPT32_BASE + R_GPT32_GTADTDBRB_OFFSET)
-#define R_GPT32_GTDTCR                 (R_GPT32_BASE + R_GPT32_GTDTCR_OFFSET)
-#define R_GPT32_GTDVU                 (R_GPT32_BASE + R_GPT32_GTDVU_OFFSET)
-#define R_GPT32_GTDVD                 (R_GPT32_BASE + R_GPT32_GTDVD_OFFSET)
-#define R_GPT32_GTDBU                 (R_GPT32_BASE + R_GPT32_GTDBU_OFFSET)
-#define R_GPT32_GTDBD                 (R_GPT32_BASE + R_GPT32_GTDBD_OFFSET)
-#define R_GPT32_GTSOS                 (R_GPT32_BASE + R_GPT32_GTSOS_OFFSET)
-#define R_GPT32_GTSOTR                 (R_GPT32_BASE + R_GPT32_GTSOTR_OFFSET)
-#define R_GPT32_GTADSMR                 (R_GPT32_BASE + R_GPT32_GTADSMR_OFFSET)
-#define R_GPT32_GTEITC                 (R_GPT32_BASE + R_GPT32_GTEITC_OFFSET)
-#define R_GPT32_GTEITLI1                 (R_GPT32_BASE + R_GPT32_GTEITLI1_OFFSET)
-#define R_GPT32_GTEITLI2                 (R_GPT32_BASE + R_GPT32_GTEITLI2_OFFSET)
-#define R_GPT32_GTEITLB                 (R_GPT32_BASE + R_GPT32_GTEITLB_OFFSET)
-#define R_GPT32_GTICLF                 (R_GPT32_BASE + R_GPT32_GTICLF_OFFSET)
-#define R_GPT32_GTPC                 (R_GPT32_BASE + R_GPT32_GTPC_OFFSET)
-#define R_GPT32_GTADCMSC                 (R_GPT32_BASE + R_GPT32_GTADCMSC_OFFSET)
-#define R_GPT32_GTADCMSS                 (R_GPT32_BASE + R_GPT32_GTADCMSS_OFFSET)
-#define R_GPT32_GTSECSR                 (R_GPT32_BASE + R_GPT32_GTSECSR_OFFSET)
-#define R_GPT32_GTSECR                 (R_GPT32_BASE + R_GPT32_GTSECR_OFFSET)
-#define R_GPT32_GTBER2                 (R_GPT32_BASE + R_GPT32_GTBER2_OFFSET)
-#define R_GPT32_GTOLBR                 (R_GPT32_BASE + R_GPT32_GTOLBR_OFFSET)
-#define R_GPT32_GTICCR                 (R_GPT32_BASE + R_GPT32_GTICCR_OFFSET)
+#define R_GPT32_GTWP(n)                           (R_GPT32_CH_BASE(n) + R_GPT32_GTWP_OFFSET)
+#define R_GPT32_GTSTR(n)                          (R_GPT32_CH_BASE(n) + R_GPT32_GTSTR_OFFSET)
+#define R_GPT32_GTSTP(n)                          (R_GPT32_CH_BASE(n) + R_GPT32_GTSTP_OFFSET)
+#define R_GPT32_GTCLR(n)                          (R_GPT32_CH_BASE(n) + R_GPT32_GTCLR_OFFSET)
+#define R_GPT32_GTSSR(n)                          (R_GPT32_CH_BASE(n) + R_GPT32_GTSSR_OFFSET)
+#define R_GPT32_GTPSR(n)                          (R_GPT32_CH_BASE(n) + R_GPT32_GTPSR_OFFSET)
+#define R_GPT32_GTCSR(n)                          (R_GPT32_CH_BASE(n) + R_GPT32_GTCSR_OFFSET)
+#define R_GPT32_GTUPSR(n)                         (R_GPT32_CH_BASE(n) + R_GPT32_GTUPSR_OFFSET)
+#define R_GPT32_GTDNSR(n)                         (R_GPT32_CH_BASE(n) + R_GPT32_GTDNSR_OFFSET)
+#define R_GPT32_GTICASR(n)                        (R_GPT32_CH_BASE(n) + R_GPT32_GTICASR_OFFSET)
+#define R_GPT32_GTICBSR(n)                        (R_GPT32_CH_BASE(n) + R_GPT32_GTICBSR_OFFSET)
+#define R_GPT32_GTCR(n)                           (R_GPT32_CH_BASE(n) + R_GPT32_GTCR_OFFSET)
+#define R_GPT32_GTUDDTYC(n)                       (R_GPT32_CH_BASE(n) + R_GPT32_GTUDDTYC_OFFSET)
+#define R_GPT32_GTIOR(n)                          (R_GPT32_CH_BASE(n) + R_GPT32_GTIOR_OFFSET)
+#define R_GPT32_GTINTAD(n)                        (R_GPT32_CH_BASE(n) + R_GPT32_GTINTAD_OFFSET)
+#define R_GPT32_GTST(n)                           (R_GPT32_CH_BASE(n) + R_GPT32_GTST_OFFSET)
+#define R_GPT32_GTBER(n)                          (R_GPT32_CH_BASE(n) + R_GPT32_GTBER_OFFSET)
+#define R_GPT32_GTITC(n)                          (R_GPT32_CH_BASE(n) + R_GPT32_GTITC_OFFSET)
+#define R_GPT32_GTCNT(n)                          (R_GPT32_CH_BASE(n) + R_GPT32_GTCNT_OFFSET)
+#define R_GPT32_GTCCRA(n)                         (R_GPT32_CH_BASE(n) + R_GPT32_GTCCRA_OFFSET)
+#define R_GPT32_GTCCRB(n)                         (R_GPT32_CH_BASE(n) + R_GPT32_GTCCRB_OFFSET)
+#define R_GPT32_GTCCRC(n)                         (R_GPT32_CH_BASE(n) + R_GPT32_GTCCRC_OFFSET)
+#define R_GPT32_GTCCRE(n)                         (R_GPT32_CH_BASE(n) + R_GPT32_GTCCRE_OFFSET)
+#define R_GPT32_GTCCRD(n)                         (R_GPT32_CH_BASE(n) + R_GPT32_GTCCRD_OFFSET)
+#define R_GPT32_GTCCRF(n)                         (R_GPT32_CH_BASE(n) + R_GPT32_GTCCRF_OFFSET)
+#define R_GPT32_GTPR(n)                           (R_GPT32_CH_BASE(n) + R_GPT32_GTPR_OFFSET)
+#define R_GPT32_GTPBR(n)                          (R_GPT32_CH_BASE(n) + R_GPT32_GTPBR_OFFSET)
+#define R_GPT32_GTPDBR(n)                         (R_GPT32_CH_BASE(n) + R_GPT32_GTPDBR_OFFSET)
+#define R_GPT32_GTADTRA(n)                        (R_GPT32_CH_BASE(n) + R_GPT32_GTADTRA_OFFSET)
+#define R_GPT32_GTADTBRA(n)                       (R_GPT32_CH_BASE(n) + R_GPT32_GTADTBRA_OFFSET)
+#define R_GPT32_GTADTDBRA(n)                      (R_GPT32_CH_BASE(n) + R_GPT32_GTADTDBRA_OFFSET)
+#define R_GPT32_GTADTRB(n)                        (R_GPT32_CH_BASE(n) + R_GPT32_GTADTRB_OFFSET)
+#define R_GPT32_GTADTBRB(n)                       (R_GPT32_CH_BASE(n) + R_GPT32_GTADTBRB_OFFSET)
+#define R_GPT32_GTADTDBRB(n)                      (R_GPT32_CH_BASE(n) + R_GPT32_GTADTDBRB_OFFSET)
+#define R_GPT32_GTDTCR(n)                         (R_GPT32_CH_BASE(n) + R_GPT32_GTDTCR_OFFSET)
+#define R_GPT32_GTDVU(n)                          (R_GPT32_CH_BASE(n) + R_GPT32_GTDVU_OFFSET)
+#define R_GPT32_GTDVD(n)                          (R_GPT32_CH_BASE(n) + R_GPT32_GTDVD_OFFSET)
+#define R_GPT32_GTDBU(n)                          (R_GPT32_CH_BASE(n) + R_GPT32_GTDBU_OFFSET)
+#define R_GPT32_GTDBD(n)                          (R_GPT32_CH_BASE(n) + R_GPT32_GTDBD_OFFSET)
+#define R_GPT32_GTSOS(n)                          (R_GPT32_CH_BASE(n) + R_GPT32_GTSOS_OFFSET)
+#define R_GPT32_GTSOTR(n)                         (R_GPT32_CH_BASE(n) + R_GPT32_GTSOTR_OFFSET)
+#define R_GPT32_GTADSMR(n)                        (R_GPT32_CH_BASE(n) + R_GPT32_GTADSMR_OFFSET)
+#define R_GPT32_GTEITC(n)                         (R_GPT32_CH_BASE(n) + R_GPT32_GTEITC_OFFSET)
+#define R_GPT32_GTEITLI1(n)                       (R_GPT32_CH_BASE(n) + R_GPT32_GTEITLI1_OFFSET)
+#define R_GPT32_GTEITLI2(n)                       (R_GPT32_CH_BASE(n) + R_GPT32_GTEITLI2_OFFSET)
+#define R_GPT32_GTEITLB(n)                        (R_GPT32_CH_BASE(n) + R_GPT32_GTEITLB_OFFSET)
+#define R_GPT32_GTICLF(n)                         (R_GPT32_CH_BASE(n) + R_GPT32_GTICLF_OFFSET)
+#define R_GPT32_GTPC(n)                           (R_GPT32_CH_BASE(n) + R_GPT32_GTPC_OFFSET)
+#define R_GPT32_GTADCMSC(n)                       (R_GPT32_CH_BASE(n) + R_GPT32_GTADCMSC_OFFSET)
+#define R_GPT32_GTADCMSS(n)                       (R_GPT32_CH_BASE(n) + R_GPT32_GTADCMSS_OFFSET)
+#define R_GPT32_GTSECSR(n)                        (R_GPT32_CH_BASE(n) + R_GPT32_GTSECSR_OFFSET)
+#define R_GPT32_GTSECR(n)                         (R_GPT32_CH_BASE(n) + R_GPT32_GTSECR_OFFSET)
+#define R_GPT32_GTBER2(n)                         (R_GPT32_CH_BASE(n) + R_GPT32_GTBER2_OFFSET)
+#define R_GPT32_GTOLBR(n)                         (R_GPT32_CH_BASE(n) + R_GPT32_GTOLBR_OFFSET)
+#define R_GPT32_GTICCR(n)                         (R_GPT32_CH_BASE(n) + R_GPT32_GTICCR_OFFSET)
 
 /* Register bit definitions */
 /* GTWP Register bit definitions */

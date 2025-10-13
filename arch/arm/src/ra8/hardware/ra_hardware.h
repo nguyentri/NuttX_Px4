@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/ra8/hardware/ra_system.h
+ * arch/arm/src/ra8/hardware/ra_hardware.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -34,16 +34,8 @@
 
 #define RENESAS_CORTEX_M85
 
-
-/* SYSTEM Control Register Bits */
-#define R_SYSC_PRCR_PRKEY               (0xA500)      /* Protection Key */
-#define R_SYSC_PRCR_PRC0                (1 << 0)      /* Protect bit 0 */
-#define R_SYSC_PRCR_PRC1                (1 << 1)      /* Protect bit 1 */
-#define R_SYSC_PRCR_PRC3                (1 << 3)      /* Protect bit 3 */
-#define R_SYSC_PRCR_PRC4                (1 << 4)      /* Protect bit 4 */
-
 /* Hardware register wait macro */
-#define RA_HARDWARE_REGISTER_WAIT(reg, expected) \
+#define RA_HARDWARE_WAIT(reg, expected) \
   do { \
     while ((reg) != (expected)) \
       { \
@@ -53,7 +45,7 @@
 
 
 /* Software delay loop */
-inline void ra_delay_loop (__attribute__((unused)) uint32_t loop_cnt)
+inline void ra_harware_loop (__attribute__((unused)) uint32_t loop_cnt)
 {
     __asm volatile (
 #if defined(RENESAS_CORTEX_M85) && (defined(__ARMCC_VERSION) || defined(__GNUC__))

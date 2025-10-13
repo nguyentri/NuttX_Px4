@@ -40,37 +40,37 @@
 
 /* MIPI_PHY Register Offsets */
 
-#define R_MIPI_PHY_DPHYREFCR_OFFSET     0x00000000  /* D-PHY Reference Clock Setting Register */
-#define R_MIPI_PHY_DPHYPLFCR_OFFSET     0x00000004  /* D-PHY PLL Frequency Control Register */
-#define R_MIPI_PHY_DPHYPLOCR_OFFSET     0x00000008  /* D-PHY PLL Operation Control Register */
-#define R_MIPI_PHY_DPHYESCCR_OFFSET     0x0000000c  /* D-PHY Escape Mode Clock Control Register */
-#define R_MIPI_PHY_DPHYPWRCR_OFFSET     0x00000010  /* D-PHY Power Supplying Control Register */
-#define R_MIPI_PHY_DPHYSFR_OFFSET     0x0000001c  /* D-PHY Status Flag Register */
-#define R_MIPI_PHY_DPHYOCR_OFFSET     0x00000020  /* D-PHY Operation Control Register */
-#define R_MIPI_PHY_DPHYTIM1_OFFSET     0x00000024  /* D-PHY Timing Control Register 1 */
-#define R_MIPI_PHY_DPHYTIM2_OFFSET     0x00000028  /* D-PHY Timing Control Register 2 */
-#define R_MIPI_PHY_DPHYTIM3_OFFSET     0x0000002c  /* D-PHY Timing Control Register 3 */
-#define R_MIPI_PHY_DPHYTIM4_OFFSET     0x00000030  /* D-PHY Timing Control Register 4 */
-#define R_MIPI_PHY_DPHYTIM5_OFFSET     0x00000034  /* D-PHY Timing Control Register 5 */
-#define R_MIPI_PHY_DPHYTIM6_OFFSET     0x00000038  /* D-PHY Timing Control Register 6 */
-#define R_MIPI_PHY_DPHYMDC_OFFSET     0x00000048  /* D-PHY Mode Control Register */
+#define R_MIPI_PHY_DPHYREFCR_OFFSET               0x00000000  /* D-PHY Reference Clock Setting Register */
+#define R_MIPI_PHY_DPHYPLFCR_OFFSET               0x00000004  /* D-PHY PLL Frequency Control Register */
+#define R_MIPI_PHY_DPHYPLOCR_OFFSET               0x00000008  /* D-PHY PLL Operation Control Register */
+#define R_MIPI_PHY_DPHYESCCR_OFFSET               0x0000000c  /* D-PHY Escape Mode Clock Control Register */
+#define R_MIPI_PHY_DPHYPWRCR_OFFSET               0x00000010  /* D-PHY Power Supplying Control Register */
+#define R_MIPI_PHY_DPHYSFR_OFFSET                 0x0000001c  /* D-PHY Status Flag Register */
+#define R_MIPI_PHY_DPHYOCR_OFFSET                 0x00000020  /* D-PHY Operation Control Register */
+#define R_MIPI_PHY_DPHYTIM1_OFFSET                0x00000024  /* D-PHY Timing Control Register 1 */
+#define R_MIPI_PHY_DPHYTIM2_OFFSET                0x00000028  /* D-PHY Timing Control Register 2 */
+#define R_MIPI_PHY_DPHYTIM3_OFFSET                0x0000002c  /* D-PHY Timing Control Register 3 */
+#define R_MIPI_PHY_DPHYTIM4_OFFSET                0x00000030  /* D-PHY Timing Control Register 4 */
+#define R_MIPI_PHY_DPHYTIM5_OFFSET                0x00000034  /* D-PHY Timing Control Register 5 */
+#define R_MIPI_PHY_DPHYTIM6_OFFSET                0x00000038  /* D-PHY Timing Control Register 6 */
+#define R_MIPI_PHY_DPHYMDC_OFFSET                 0x00000048  /* D-PHY Mode Control Register */
 
 /* MIPI_PHY Register Addresses */
 
-#define R_MIPI_PHY_DPHYREFCR                 (R_MIPI_PHY_BASE + R_MIPI_PHY_DPHYREFCR_OFFSET)
-#define R_MIPI_PHY_DPHYPLFCR                 (R_MIPI_PHY_BASE + R_MIPI_PHY_DPHYPLFCR_OFFSET)
-#define R_MIPI_PHY_DPHYPLOCR                 (R_MIPI_PHY_BASE + R_MIPI_PHY_DPHYPLOCR_OFFSET)
-#define R_MIPI_PHY_DPHYESCCR                 (R_MIPI_PHY_BASE + R_MIPI_PHY_DPHYESCCR_OFFSET)
-#define R_MIPI_PHY_DPHYPWRCR                 (R_MIPI_PHY_BASE + R_MIPI_PHY_DPHYPWRCR_OFFSET)
-#define R_MIPI_PHY_DPHYSFR                 (R_MIPI_PHY_BASE + R_MIPI_PHY_DPHYSFR_OFFSET)
-#define R_MIPI_PHY_DPHYOCR                 (R_MIPI_PHY_BASE + R_MIPI_PHY_DPHYOCR_OFFSET)
-#define R_MIPI_PHY_DPHYTIM1                 (R_MIPI_PHY_BASE + R_MIPI_PHY_DPHYTIM1_OFFSET)
-#define R_MIPI_PHY_DPHYTIM2                 (R_MIPI_PHY_BASE + R_MIPI_PHY_DPHYTIM2_OFFSET)
-#define R_MIPI_PHY_DPHYTIM3                 (R_MIPI_PHY_BASE + R_MIPI_PHY_DPHYTIM3_OFFSET)
-#define R_MIPI_PHY_DPHYTIM4                 (R_MIPI_PHY_BASE + R_MIPI_PHY_DPHYTIM4_OFFSET)
-#define R_MIPI_PHY_DPHYTIM5                 (R_MIPI_PHY_BASE + R_MIPI_PHY_DPHYTIM5_OFFSET)
-#define R_MIPI_PHY_DPHYTIM6                 (R_MIPI_PHY_BASE + R_MIPI_PHY_DPHYTIM6_OFFSET)
-#define R_MIPI_PHY_DPHYMDC                 (R_MIPI_PHY_BASE + R_MIPI_PHY_DPHYMDC_OFFSET)
+#define R_MIPI_PHY_DPHYREFCR                      (R_MIPI_PHY_BASE + R_MIPI_PHY_DPHYREFCR_OFFSET)
+#define R_MIPI_PHY_DPHYPLFCR                      (R_MIPI_PHY_BASE + R_MIPI_PHY_DPHYPLFCR_OFFSET)
+#define R_MIPI_PHY_DPHYPLOCR                      (R_MIPI_PHY_BASE + R_MIPI_PHY_DPHYPLOCR_OFFSET)
+#define R_MIPI_PHY_DPHYESCCR                      (R_MIPI_PHY_BASE + R_MIPI_PHY_DPHYESCCR_OFFSET)
+#define R_MIPI_PHY_DPHYPWRCR                      (R_MIPI_PHY_BASE + R_MIPI_PHY_DPHYPWRCR_OFFSET)
+#define R_MIPI_PHY_DPHYSFR                        (R_MIPI_PHY_BASE + R_MIPI_PHY_DPHYSFR_OFFSET)
+#define R_MIPI_PHY_DPHYOCR                        (R_MIPI_PHY_BASE + R_MIPI_PHY_DPHYOCR_OFFSET)
+#define R_MIPI_PHY_DPHYTIM1                       (R_MIPI_PHY_BASE + R_MIPI_PHY_DPHYTIM1_OFFSET)
+#define R_MIPI_PHY_DPHYTIM2                       (R_MIPI_PHY_BASE + R_MIPI_PHY_DPHYTIM2_OFFSET)
+#define R_MIPI_PHY_DPHYTIM3                       (R_MIPI_PHY_BASE + R_MIPI_PHY_DPHYTIM3_OFFSET)
+#define R_MIPI_PHY_DPHYTIM4                       (R_MIPI_PHY_BASE + R_MIPI_PHY_DPHYTIM4_OFFSET)
+#define R_MIPI_PHY_DPHYTIM5                       (R_MIPI_PHY_BASE + R_MIPI_PHY_DPHYTIM5_OFFSET)
+#define R_MIPI_PHY_DPHYTIM6                       (R_MIPI_PHY_BASE + R_MIPI_PHY_DPHYTIM6_OFFSET)
+#define R_MIPI_PHY_DPHYMDC                        (R_MIPI_PHY_BASE + R_MIPI_PHY_DPHYMDC_OFFSET)
 
 /* Register bit definitions */
 /* DPHYREFCR Register bit definitions */

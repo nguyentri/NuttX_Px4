@@ -40,11 +40,11 @@
 
 /* GPT_OPS Register Offsets */
 
-#define R_GPT_OPS_OPSCR_OFFSET     0x00000000  /* Output Phase Switching Control Register */
+#define R_GPT_OPS_OPSCR_OFFSET                    0x00000000  /* Output Phase Switching Control Register */
 
 /* GPT_OPS Register Addresses */
 
-#define R_GPT_OPS_OPSCR                 (R_GPT_OPS_BASE + R_GPT_OPS_OPSCR_OFFSET)
+#define R_GPT_OPS_OPSCR                           (R_GPT_OPS_BASE + R_GPT_OPS_OPSCR_OFFSET)
 
 /* Register bit definitions */
 /* OPSCR Register bit definitions */

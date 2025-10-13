@@ -38,123 +38,87 @@
 #endif
 #endif
 
-/* Channel stride for multi-channel peripherals */
-#define R_DRW_CH_STRIDE    0x00000004
-#define R_DRW_CH_BASE(ch)   (R_DRW_BASE + ((uint32_t)(ch) * R_DRW_CH_STRIDE))
-
 /* DRW Register Offsets */
 
-#define R_DRW_CONTROL_OFFSET     0x00000000  /* Geometry Control Register */
-#define R_DRW_STATUS_OFFSET     0x00000000  /* Status Control Register */
-#define R_DRW_CONTROL2_OFFSET     0x00000004  /* Surface Control Register */
-#define R_DRW_HWREVISION_OFFSET     0x00000004  /* Hardware Version and Feature Set ID Register */
+#define R_DRW_CONTROL_OFFSET                      0x00000000  /* Geometry Control Register */
+#define R_DRW_STATUS_OFFSET                       0x00000000  /* Status Control Register */
+#define R_DRW_CONTROL2_OFFSET                     0x00000004  /* Surface Control Register */
+#define R_DRW_HWREVISION_OFFSET                   0x00000004  /* Hardware Version and Feature Set ID Register */
 /* L%sSTART Registers (1-6) */
-#define R_DRW_L1START_OFFSET     0x00000010  /* Limiter 1 Start Value Register (n = 1 to 6) */
-#define R_DRW_L2START_OFFSET     0x00000014  /* Limiter 2 Start Value Register (n = 1 to 6) */
-#define R_DRW_L3START_OFFSET     0x00000018  /* Limiter 3 Start Value Register (n = 1 to 6) */
-#define R_DRW_L4START_OFFSET     0x0000001c  /* Limiter 4 Start Value Register (n = 1 to 6) */
-#define R_DRW_L5START_OFFSET     0x00000020  /* Limiter 5 Start Value Register (n = 1 to 6) */
-#define R_DRW_L6START_OFFSET     0x00000024  /* Limiter 6 Start Value Register (n = 1 to 6) */
+#define R_DRW_LSTART_OFFSET(m)                    (0x00000010 + ((m) * 0x00000004))  /* Limiter %s Start Value Register (n = 1 to 6) */
 /* L%sXADD Registers (1-6) */
-#define R_DRW_L1XADD_OFFSET     0x00000028  /* Limiter 1 X-Axis Increment Register(n = 1 to 6) */
-#define R_DRW_L2XADD_OFFSET     0x0000002c  /* Limiter 2 X-Axis Increment Register(n = 1 to 6) */
-#define R_DRW_L3XADD_OFFSET     0x00000030  /* Limiter 3 X-Axis Increment Register(n = 1 to 6) */
-#define R_DRW_L4XADD_OFFSET     0x00000034  /* Limiter 4 X-Axis Increment Register(n = 1 to 6) */
-#define R_DRW_L5XADD_OFFSET     0x00000038  /* Limiter 5 X-Axis Increment Register(n = 1 to 6) */
-#define R_DRW_L6XADD_OFFSET     0x0000003c  /* Limiter 6 X-Axis Increment Register(n = 1 to 6) */
+#define R_DRW_LXADD_OFFSET(m)                     (0x00000028 + ((m) * 0x00000004))  /* Limiter %s X-Axis Increment Register(n = 1 to 6) */
 /* L%sYADD Registers (1-6) */
-#define R_DRW_L1YADD_OFFSET     0x00000040  /* Limiter 1 Y-Axis Increment Register(n = 1 to 6) */
-#define R_DRW_L2YADD_OFFSET     0x00000044  /* Limiter 2 Y-Axis Increment Register(n = 1 to 6) */
-#define R_DRW_L3YADD_OFFSET     0x00000048  /* Limiter 3 Y-Axis Increment Register(n = 1 to 6) */
-#define R_DRW_L4YADD_OFFSET     0x0000004c  /* Limiter 4 Y-Axis Increment Register(n = 1 to 6) */
-#define R_DRW_L5YADD_OFFSET     0x00000050  /* Limiter 5 Y-Axis Increment Register(n = 1 to 6) */
-#define R_DRW_L6YADD_OFFSET     0x00000054  /* Limiter 6 Y-Axis Increment Register(n = 1 to 6) */
+#define R_DRW_LYADD_OFFSET(m)                     (0x00000040 + ((m) * 0x00000004))  /* Limiter %s Y-Axis Increment Register(n = 1 to 6) */
 /* L%sBAND Registers (1-2) */
-#define R_DRW_L1BAND_OFFSET     0x00000058  /* Limiter m Band Width Parameter Register(n = 1, 2) */
-#define R_DRW_L2BAND_OFFSET     0x0000005c  /* Limiter m Band Width Parameter Register(n = 1, 2) */
-#define R_DRW_COLOR1_OFFSET     0x00000064  /* Base Color Register */
-#define R_DRW_COLOR2_OFFSET     0x00000068  /* Secondary Color Register */
-#define R_DRW_PATTERN_OFFSET     0x00000074  /* Pattern Register */
-#define R_DRW_SIZE_OFFSET     0x00000078  /* Bounding Box Dimension Register */
-#define R_DRW_PITCH_OFFSET     0x0000007c  /* Framebuffer Pitch And Spanstore Delay Register */
-#define R_DRW_ORIGIN_OFFSET     0x00000080  /* Framebuffer Base Address Register */
-#define R_DRW_LUSTART_OFFSET     0x00000090  /* U Limiter Start Value Register */
-#define R_DRW_LUXADD_OFFSET     0x00000094  /* U Limiter X-Axis Increment Register */
-#define R_DRW_LUYADD_OFFSET     0x00000098  /* U Limiter Y-Axis Increment Register */
-#define R_DRW_LVSTARTI_OFFSET     0x0000009c  /* V Limiter Start Value Integer Part Register */
-#define R_DRW_LVSTARTF_OFFSET     0x000000a0  /* V Limiter Start Value Fractional Part Register */
-#define R_DRW_LVXADDI_OFFSET     0x000000a4  /* V Limiter X-Axis Increment Integer Part Register */
-#define R_DRW_LVYADDI_OFFSET     0x000000a8  /* V Limiter Y-Axis Increment Integer Part Register */
-#define R_DRW_LVYXADDF_OFFSET     0x000000ac  /* V Limiter Increment Fractional Parts Register */
-#define R_DRW_TEXPITCH_OFFSET     0x000000b4  /* Texels Per Texture Line Register */
-#define R_DRW_TEXMASK_OFFSET     0x000000b8  /* Texture Size or Texture Address Mask Register */
-#define R_DRW_TEXORIGIN_OFFSET     0x000000bc  /* Texture Base Address Register */
-#define R_DRW_IRQCTL_OFFSET     0x000000c0  /* Interrupt Control Register */
-#define R_DRW_CACHECTL_OFFSET     0x000000c4  /* Cache Control Register */
-#define R_DRW_DLISTSTART_OFFSET     0x000000c8  /* Display List Start Address Register */
-#define R_DRW_PERFCOUNT1_OFFSET     0x000000cc  /* Performance Counter 1 */
-#define R_DRW_PERFCOUNT2_OFFSET     0x000000d0  /* Performance Counter 2 */
-#define R_DRW_PERFTRIGGER_OFFSET     0x000000d4  /* Performance Counters Control Register */
-#define R_DRW_TEXCLADDR_OFFSET     0x000000dc  /* CLUT Start Address Register */
-#define R_DRW_TEXCLDATA_OFFSET     0x000000e0  /* CLUT Data Register */
-#define R_DRW_TEXCLOFFSET_OFFSET     0x000000e4  /* CLUT Offset Register */
-#define R_DRW_COLKEY_OFFSET     0x000000e8  /* Color Key Register */
-#define R_DRW_DBWER_OFFSET     0x00000100  /* DRW Bufferable Write Enable Register */
+#define R_DRW_LBAND_OFFSET(m)                     (0x00000058 + ((m) * 0x00000004))  /* Limiter m Band Width Parameter Register(n = 1, 2) */
+#define R_DRW_COLOR1_OFFSET                       0x00000064  /* Base Color Register */
+#define R_DRW_COLOR2_OFFSET                       0x00000068  /* Secondary Color Register */
+#define R_DRW_PATTERN_OFFSET                      0x00000074  /* Pattern Register */
+#define R_DRW_SIZE_OFFSET                         0x00000078  /* Bounding Box Dimension Register */
+#define R_DRW_PITCH_OFFSET                        0x0000007c  /* Framebuffer Pitch And Spanstore Delay Register */
+#define R_DRW_ORIGIN_OFFSET                       0x00000080  /* Framebuffer Base Address Register */
+#define R_DRW_LUSTART_OFFSET                      0x00000090  /* U Limiter Start Value Register */
+#define R_DRW_LUXADD_OFFSET                       0x00000094  /* U Limiter X-Axis Increment Register */
+#define R_DRW_LUYADD_OFFSET                       0x00000098  /* U Limiter Y-Axis Increment Register */
+#define R_DRW_LVSTARTI_OFFSET                     0x0000009c  /* V Limiter Start Value Integer Part Register */
+#define R_DRW_LVSTARTF_OFFSET                     0x000000a0  /* V Limiter Start Value Fractional Part Register */
+#define R_DRW_LVXADDI_OFFSET                      0x000000a4  /* V Limiter X-Axis Increment Integer Part Register */
+#define R_DRW_LVYADDI_OFFSET                      0x000000a8  /* V Limiter Y-Axis Increment Integer Part Register */
+#define R_DRW_LVYXADDF_OFFSET                     0x000000ac  /* V Limiter Increment Fractional Parts Register */
+#define R_DRW_TEXPITCH_OFFSET                     0x000000b4  /* Texels Per Texture Line Register */
+#define R_DRW_TEXMASK_OFFSET                      0x000000b8  /* Texture Size or Texture Address Mask Register */
+#define R_DRW_TEXORIGIN_OFFSET                    0x000000bc  /* Texture Base Address Register */
+#define R_DRW_IRQCTL_OFFSET                       0x000000c0  /* Interrupt Control Register */
+#define R_DRW_CACHECTL_OFFSET                     0x000000c4  /* Cache Control Register */
+#define R_DRW_DLISTSTART_OFFSET                   0x000000c8  /* Display List Start Address Register */
+#define R_DRW_PERFCOUNT1_OFFSET                   0x000000cc  /* Performance Counter 1 */
+#define R_DRW_PERFCOUNT2_OFFSET                   0x000000d0  /* Performance Counter 2 */
+#define R_DRW_PERFTRIGGER_OFFSET                  0x000000d4  /* Performance Counters Control Register */
+#define R_DRW_TEXCLADDR_OFFSET                    0x000000dc  /* CLUT Start Address Register */
+#define R_DRW_TEXCLDATA_OFFSET                    0x000000e0  /* CLUT Data Register */
+#define R_DRW_TEXCLOFFSET_OFFSET                  0x000000e4  /* CLUT Offset Register */
+#define R_DRW_COLKEY_OFFSET                       0x000000e8  /* Color Key Register */
+#define R_DRW_DBWER_OFFSET                        0x00000100  /* DRW Bufferable Write Enable Register */
 
 /* DRW Register Addresses */
 
-#define R_DRW_CONTROL                 (R_DRW_BASE + R_DRW_CONTROL_OFFSET)
-#define R_DRW_STATUS                 (R_DRW_BASE + R_DRW_STATUS_OFFSET)
-#define R_DRW_CONTROL2                 (R_DRW_BASE + R_DRW_CONTROL2_OFFSET)
-#define R_DRW_HWREVISION                 (R_DRW_BASE + R_DRW_HWREVISION_OFFSET)
-#define R_DRW_L1START                 (R_DRW_BASE + R_DRW_L1START_OFFSET)
-#define R_DRW_L2START                 (R_DRW_BASE + R_DRW_L2START_OFFSET)
-#define R_DRW_L3START                 (R_DRW_BASE + R_DRW_L3START_OFFSET)
-#define R_DRW_L4START                 (R_DRW_BASE + R_DRW_L4START_OFFSET)
-#define R_DRW_L5START                 (R_DRW_BASE + R_DRW_L5START_OFFSET)
-#define R_DRW_L6START                 (R_DRW_BASE + R_DRW_L6START_OFFSET)
-#define R_DRW_L1XADD                 (R_DRW_BASE + R_DRW_L1XADD_OFFSET)
-#define R_DRW_L2XADD                 (R_DRW_BASE + R_DRW_L2XADD_OFFSET)
-#define R_DRW_L3XADD                 (R_DRW_BASE + R_DRW_L3XADD_OFFSET)
-#define R_DRW_L4XADD                 (R_DRW_BASE + R_DRW_L4XADD_OFFSET)
-#define R_DRW_L5XADD                 (R_DRW_BASE + R_DRW_L5XADD_OFFSET)
-#define R_DRW_L6XADD                 (R_DRW_BASE + R_DRW_L6XADD_OFFSET)
-#define R_DRW_L1YADD                 (R_DRW_BASE + R_DRW_L1YADD_OFFSET)
-#define R_DRW_L2YADD                 (R_DRW_BASE + R_DRW_L2YADD_OFFSET)
-#define R_DRW_L3YADD                 (R_DRW_BASE + R_DRW_L3YADD_OFFSET)
-#define R_DRW_L4YADD                 (R_DRW_BASE + R_DRW_L4YADD_OFFSET)
-#define R_DRW_L5YADD                 (R_DRW_BASE + R_DRW_L5YADD_OFFSET)
-#define R_DRW_L6YADD                 (R_DRW_BASE + R_DRW_L6YADD_OFFSET)
-#define R_DRW_L1BAND                 (R_DRW_BASE + R_DRW_L1BAND_OFFSET)
-#define R_DRW_L2BAND                 (R_DRW_BASE + R_DRW_L2BAND_OFFSET)
-#define R_DRW_COLOR1                 (R_DRW_BASE + R_DRW_COLOR1_OFFSET)
-#define R_DRW_COLOR2                 (R_DRW_BASE + R_DRW_COLOR2_OFFSET)
-#define R_DRW_PATTERN                 (R_DRW_BASE + R_DRW_PATTERN_OFFSET)
-#define R_DRW_SIZE                 (R_DRW_BASE + R_DRW_SIZE_OFFSET)
-#define R_DRW_PITCH                 (R_DRW_BASE + R_DRW_PITCH_OFFSET)
-#define R_DRW_ORIGIN                 (R_DRW_BASE + R_DRW_ORIGIN_OFFSET)
-#define R_DRW_LUSTART                 (R_DRW_BASE + R_DRW_LUSTART_OFFSET)
-#define R_DRW_LUXADD                 (R_DRW_BASE + R_DRW_LUXADD_OFFSET)
-#define R_DRW_LUYADD                 (R_DRW_BASE + R_DRW_LUYADD_OFFSET)
-#define R_DRW_LVSTARTI                 (R_DRW_BASE + R_DRW_LVSTARTI_OFFSET)
-#define R_DRW_LVSTARTF                 (R_DRW_BASE + R_DRW_LVSTARTF_OFFSET)
-#define R_DRW_LVXADDI                 (R_DRW_BASE + R_DRW_LVXADDI_OFFSET)
-#define R_DRW_LVYADDI                 (R_DRW_BASE + R_DRW_LVYADDI_OFFSET)
-#define R_DRW_LVYXADDF                 (R_DRW_BASE + R_DRW_LVYXADDF_OFFSET)
-#define R_DRW_TEXPITCH                 (R_DRW_BASE + R_DRW_TEXPITCH_OFFSET)
-#define R_DRW_TEXMASK                 (R_DRW_BASE + R_DRW_TEXMASK_OFFSET)
-#define R_DRW_TEXORIGIN                 (R_DRW_BASE + R_DRW_TEXORIGIN_OFFSET)
-#define R_DRW_IRQCTL                 (R_DRW_BASE + R_DRW_IRQCTL_OFFSET)
-#define R_DRW_CACHECTL                 (R_DRW_BASE + R_DRW_CACHECTL_OFFSET)
-#define R_DRW_DLISTSTART                 (R_DRW_BASE + R_DRW_DLISTSTART_OFFSET)
-#define R_DRW_PERFCOUNT1                 (R_DRW_BASE + R_DRW_PERFCOUNT1_OFFSET)
-#define R_DRW_PERFCOUNT2                 (R_DRW_BASE + R_DRW_PERFCOUNT2_OFFSET)
-#define R_DRW_PERFTRIGGER                 (R_DRW_BASE + R_DRW_PERFTRIGGER_OFFSET)
-#define R_DRW_TEXCLADDR                 (R_DRW_BASE + R_DRW_TEXCLADDR_OFFSET)
-#define R_DRW_TEXCLDATA                 (R_DRW_BASE + R_DRW_TEXCLDATA_OFFSET)
-#define R_DRW_TEXCLOFFSET                 (R_DRW_BASE + R_DRW_TEXCLOFFSET_OFFSET)
-#define R_DRW_COLKEY                 (R_DRW_BASE + R_DRW_COLKEY_OFFSET)
-#define R_DRW_DBWER                 (R_DRW_BASE + R_DRW_DBWER_OFFSET)
+#define R_DRW_CONTROL                             (R_DRW_BASE + R_DRW_CONTROL_OFFSET)
+#define R_DRW_STATUS                              (R_DRW_BASE + R_DRW_STATUS_OFFSET)
+#define R_DRW_CONTROL2                            (R_DRW_BASE + R_DRW_CONTROL2_OFFSET)
+#define R_DRW_HWREVISION                          (R_DRW_BASE + R_DRW_HWREVISION_OFFSET)
+#define R_DRW_LSTART(m)                           (R_DRW_BASE + R_DRW_LSTART_OFFSET(m))
+#define R_DRW_LXADD(m)                            (R_DRW_BASE + R_DRW_LXADD_OFFSET(m))
+#define R_DRW_LYADD(m)                            (R_DRW_BASE + R_DRW_LYADD_OFFSET(m))
+#define R_DRW_LBAND(m)                            (R_DRW_BASE + R_DRW_LBAND_OFFSET(m))
+#define R_DRW_COLOR1                              (R_DRW_BASE + R_DRW_COLOR1_OFFSET)
+#define R_DRW_COLOR2                              (R_DRW_BASE + R_DRW_COLOR2_OFFSET)
+#define R_DRW_PATTERN                             (R_DRW_BASE + R_DRW_PATTERN_OFFSET)
+#define R_DRW_SIZE                                (R_DRW_BASE + R_DRW_SIZE_OFFSET)
+#define R_DRW_PITCH                               (R_DRW_BASE + R_DRW_PITCH_OFFSET)
+#define R_DRW_ORIGIN                              (R_DRW_BASE + R_DRW_ORIGIN_OFFSET)
+#define R_DRW_LUSTART                             (R_DRW_BASE + R_DRW_LUSTART_OFFSET)
+#define R_DRW_LUXADD                              (R_DRW_BASE + R_DRW_LUXADD_OFFSET)
+#define R_DRW_LUYADD                              (R_DRW_BASE + R_DRW_LUYADD_OFFSET)
+#define R_DRW_LVSTARTI                            (R_DRW_BASE + R_DRW_LVSTARTI_OFFSET)
+#define R_DRW_LVSTARTF                            (R_DRW_BASE + R_DRW_LVSTARTF_OFFSET)
+#define R_DRW_LVXADDI                             (R_DRW_BASE + R_DRW_LVXADDI_OFFSET)
+#define R_DRW_LVYADDI                             (R_DRW_BASE + R_DRW_LVYADDI_OFFSET)
+#define R_DRW_LVYXADDF                            (R_DRW_BASE + R_DRW_LVYXADDF_OFFSET)
+#define R_DRW_TEXPITCH                            (R_DRW_BASE + R_DRW_TEXPITCH_OFFSET)
+#define R_DRW_TEXMASK                             (R_DRW_BASE + R_DRW_TEXMASK_OFFSET)
+#define R_DRW_TEXORIGIN                           (R_DRW_BASE + R_DRW_TEXORIGIN_OFFSET)
+#define R_DRW_IRQCTL                              (R_DRW_BASE + R_DRW_IRQCTL_OFFSET)
+#define R_DRW_CACHECTL                            (R_DRW_BASE + R_DRW_CACHECTL_OFFSET)
+#define R_DRW_DLISTSTART                          (R_DRW_BASE + R_DRW_DLISTSTART_OFFSET)
+#define R_DRW_PERFCOUNT1                          (R_DRW_BASE + R_DRW_PERFCOUNT1_OFFSET)
+#define R_DRW_PERFCOUNT2                          (R_DRW_BASE + R_DRW_PERFCOUNT2_OFFSET)
+#define R_DRW_PERFTRIGGER                         (R_DRW_BASE + R_DRW_PERFTRIGGER_OFFSET)
+#define R_DRW_TEXCLADDR                           (R_DRW_BASE + R_DRW_TEXCLADDR_OFFSET)
+#define R_DRW_TEXCLDATA                           (R_DRW_BASE + R_DRW_TEXCLDATA_OFFSET)
+#define R_DRW_TEXCLOFFSET                         (R_DRW_BASE + R_DRW_TEXCLOFFSET_OFFSET)
+#define R_DRW_COLKEY                              (R_DRW_BASE + R_DRW_COLKEY_OFFSET)
+#define R_DRW_DBWER                               (R_DRW_BASE + R_DRW_DBWER_OFFSET)
 
 /* Register bit definitions */
 /* CONTROL Register bit definitions */
@@ -294,6 +258,12 @@
 #  define R_DRW_CONTROL2_RLEPIXELWIDTH_01                 (1 << R_DRW_CONTROL2_RLEPIXELWIDTH_SHIFT)  /* 2 bytes per texel */
 #  define R_DRW_CONTROL2_RLEPIXELWIDTH_10                 (2 << R_DRW_CONTROL2_RLEPIXELWIDTH_SHIFT)  /* 3 bytes per texel */
 #  define R_DRW_CONTROL2_RLEPIXELWIDTH_11                 (3 << R_DRW_CONTROL2_RLEPIXELWIDTH_SHIFT)  /* 4 bytes per texel */
+
+#define R_DRW_CONTROL2_READFORMAT32_SHIFT         (4)  /* Bit 4 and 3 of the texture buffer format.See READFORMAT above for description */
+#define R_DRW_CONTROL2_READFORMAT32_MASK          0x30
+
+#define R_DRW_CONTROL2_READFORMAT10_SHIFT         (18)  /* Pixel format of the texture buffer{READFORMAT32,READFORMAT10}0000: 8 bpp a(8)0001: 16 bpp RGB(565)0010: 32 bpp aRGB(8888)0011: 16 bpp aRGB(4444)0100: 16 bpp aRGB(1555)0101: 8 bpp aCLUT(44) 4 bit alpha and 4 bit indexed color1001: 8 bpp CLUT(8)/I(8), 8 bit indexed color/luminance1010: 4 bpp CLUT(4)/I(4), 4 bit indexed color/luminance1011: 2 bpp CLUT(2)/I(2), 2 bit indexed color/luminance 1100: 1 bpp CLUT(1)/I(1), 1 bit indexed color/luminance */
+#define R_DRW_CONTROL2_READFORMAT10_MASK          0xc0000
 
 #define R_DRW_CONTROL2_WRITEFORMAT10_SHIFT        (20)  /* Pixel format of the framebuffer */
 #define R_DRW_CONTROL2_WRITEFORMAT10_MASK         0x300000

@@ -38,278 +38,156 @@
 #endif
 #endif
 
-/* Channel stride for multi-channel peripherals */
-#define R_MIPI_DSI_CH_STRIDE    0x00000004
-#define R_MIPI_DSI_CH_BASE(ch)   (R_MIPI_DSI_BASE + ((uint32_t)(ch) * R_MIPI_DSI_CH_STRIDE))
-
 /* MIPI_DSI Register Offsets */
 
-#define R_MIPI_DSI_ISR_OFFSET     0x00000000  /* Interrupt Status Register */
-#define R_MIPI_DSI_LINKSR_OFFSET     0x00000010  /* Link Status Register */
-#define R_MIPI_DSI_TXSETR_OFFSET     0x00000100  /* Transmit Set Register */
-#define R_MIPI_DSI_HSCLKSETR_OFFSET     0x00000104  /* HS Clock Set Register */
-#define R_MIPI_DSI_ULPSSETR_OFFSET     0x00000108  /* ULPS Set Register */
-#define R_MIPI_DSI_ULPSCR_OFFSET     0x0000010c  /* ULPS Control Register */
-#define R_MIPI_DSI_RSTCR_OFFSET     0x00000110  /* Reset Control Register */
-#define R_MIPI_DSI_RSTSR_OFFSET     0x00000114  /* Reset Status Register */
-#define R_MIPI_DSI_DSISETR_OFFSET     0x00000120  /* DSI Set Register */
-#define R_MIPI_DSI_TXPPD0R_OFFSET     0x00000160  /* Transmit Packet Payload Data 0 Register */
-#define R_MIPI_DSI_TXPPD1R_OFFSET     0x00000164  /* Transmit Packet Payload Data 1 Register */
-#define R_MIPI_DSI_TXPPD2R_OFFSET     0x00000168  /* Transmit Packet Payload Data 2 Register */
-#define R_MIPI_DSI_TXPPD3R_OFFSET     0x0000016c  /* Transmit Packet Payload Data 3 Register */
-#define R_MIPI_DSI_RXSR_OFFSET     0x00000200  /* Receive Status Register */
-#define R_MIPI_DSI_RXSCR_OFFSET     0x00000204  /* Receive Status Clear Register */
-#define R_MIPI_DSI_RXIER_OFFSET     0x00000208  /* Receive Interrupt Enable Register */
-#define R_MIPI_DSI_PRESPTOBTASETR_OFFSET     0x00000210  /* Peripheral Response Timeout BTA Set Register */
-#define R_MIPI_DSI_PRESPTOLPSETR_OFFSET     0x00000214  /* Peripheral Response Timeout LP Set Register */
-#define R_MIPI_DSI_PRESPTOHSSETR_OFFSET     0x00000218  /* Peripheral Response Timeout HS Set Register */
-#define R_MIPI_DSI_AKEPLATIR_OFFSET     0x00000220  /* Acknowledge and Error Report Packet Parameter Latest Info Register */
-#define R_MIPI_DSI_AKEPACMSR_OFFSET     0x00000224  /* Acknowledge and Error Report Packet Parameter Accumulate Status Register */
-#define R_MIPI_DSI_AKEPSCR_OFFSET     0x00000228  /* Acknowledge and Error Report Packet Parameter Status Clear Register */
-#define R_MIPI_DSI_RXRSSR_OFFSET     0x00000230  /* Receive Result Saved Status Register */
-#define R_MIPI_DSI_RXRSSCR_OFFSET     0x00000234  /* Receive Result Saved Status Clear Register */
-#define R_MIPI_DSI_RXRINFOOWSR_OFFSET     0x00000238  /* Receive Result Info Overwrite Status Register */
-#define R_MIPI_DSI_RXRINFOOWSCR_OFFSET     0x0000023c  /* Receive Result Info Overwrite Status Clear Register */
+#define R_MIPI_DSI_ISR_OFFSET                     0x00000000  /* Interrupt Status Register */
+#define R_MIPI_DSI_LINKSR_OFFSET                  0x00000010  /* Link Status Register */
+#define R_MIPI_DSI_TXSETR_OFFSET                  0x00000100  /* Transmit Set Register */
+#define R_MIPI_DSI_HSCLKSETR_OFFSET               0x00000104  /* HS Clock Set Register */
+#define R_MIPI_DSI_ULPSSETR_OFFSET                0x00000108  /* ULPS Set Register */
+#define R_MIPI_DSI_ULPSCR_OFFSET                  0x0000010c  /* ULPS Control Register */
+#define R_MIPI_DSI_RSTCR_OFFSET                   0x00000110  /* Reset Control Register */
+#define R_MIPI_DSI_RSTSR_OFFSET                   0x00000114  /* Reset Status Register */
+#define R_MIPI_DSI_DSISETR_OFFSET                 0x00000120  /* DSI Set Register */
+#define R_MIPI_DSI_TXPPD0R_OFFSET                 0x00000160  /* Transmit Packet Payload Data 0 Register */
+#define R_MIPI_DSI_TXPPD1R_OFFSET                 0x00000164  /* Transmit Packet Payload Data 1 Register */
+#define R_MIPI_DSI_TXPPD2R_OFFSET                 0x00000168  /* Transmit Packet Payload Data 2 Register */
+#define R_MIPI_DSI_TXPPD3R_OFFSET                 0x0000016c  /* Transmit Packet Payload Data 3 Register */
+#define R_MIPI_DSI_RXSR_OFFSET                    0x00000200  /* Receive Status Register */
+#define R_MIPI_DSI_RXSCR_OFFSET                   0x00000204  /* Receive Status Clear Register */
+#define R_MIPI_DSI_RXIER_OFFSET                   0x00000208  /* Receive Interrupt Enable Register */
+#define R_MIPI_DSI_PRESPTOBTASETR_OFFSET          0x00000210  /* Peripheral Response Timeout BTA Set Register */
+#define R_MIPI_DSI_PRESPTOLPSETR_OFFSET           0x00000214  /* Peripheral Response Timeout LP Set Register */
+#define R_MIPI_DSI_PRESPTOHSSETR_OFFSET           0x00000218  /* Peripheral Response Timeout HS Set Register */
+#define R_MIPI_DSI_AKEPLATIR_OFFSET               0x00000220  /* Acknowledge and Error Report Packet Parameter Latest Info Register */
+#define R_MIPI_DSI_AKEPACMSR_OFFSET               0x00000224  /* Acknowledge and Error Report Packet Parameter Accumulate Status Register */
+#define R_MIPI_DSI_AKEPSCR_OFFSET                 0x00000228  /* Acknowledge and Error Report Packet Parameter Status Clear Register */
+#define R_MIPI_DSI_RXRSSR_OFFSET                  0x00000230  /* Receive Result Saved Status Register */
+#define R_MIPI_DSI_RXRSSCR_OFFSET                 0x00000234  /* Receive Result Saved Status Clear Register */
+#define R_MIPI_DSI_RXRINFOOWSR_OFFSET             0x00000238  /* Receive Result Info Overwrite Status Register */
+#define R_MIPI_DSI_RXRINFOOWSCR_OFFSET            0x0000023c  /* Receive Result Info Overwrite Status Clear Register */
 /* RXRSS%sR Registers (0-3) */
-#define R_MIPI_DSI_RXRSS0R_OFFSET     0x00000240  /* Receive Result Save Slot-x Register (x = 0 to 3) */
-#define R_MIPI_DSI_RXRSS1R_OFFSET     0x00000244  /* Receive Result Save Slot-x Register (x = 0 to 3) */
-#define R_MIPI_DSI_RXRSS2R_OFFSET     0x00000248  /* Receive Result Save Slot-x Register (x = 0 to 3) */
-#define R_MIPI_DSI_RXRSS3R_OFFSET     0x0000024c  /* Receive Result Save Slot-x Register (x = 0 to 3) */
-#define R_MIPI_DSI_RXPPD0R_OFFSET     0x000002c0  /* Receive Packet Payload Data 0 Register */
-#define R_MIPI_DSI_RXPPD1R_OFFSET     0x000002c4  /* Receive Packet Payload Data 1 Register */
-#define R_MIPI_DSI_RXPPD2R_OFFSET     0x000002c8  /* Receive Packet Payload Data 2 Register */
-#define R_MIPI_DSI_RXPPD3R_OFFSET     0x000002cc  /* Receive Packet Payload Data 3 Register */
-#define R_MIPI_DSI_HSTXTOSETR_OFFSET     0x000002e0  /* HS TX Timeout Set Register */
-#define R_MIPI_DSI_LRXHTOSETR_OFFSET     0x000002e4  /* LRX-H Timeout Set Register */
-#define R_MIPI_DSI_TATOSETR_OFFSET     0x000002e8  /* TA Timeout Set Register */
-#define R_MIPI_DSI_FERRSR_OFFSET     0x00000300  /* Fatal Error Status Register */
-#define R_MIPI_DSI_FERRSCR_OFFSET     0x00000304  /* Fatal Error Status Clear Register */
-#define R_MIPI_DSI_FERRIER_OFFSET     0x00000308  /* Fatal Error Interrupt Enable Register */
-#define R_MIPI_DSI_CLSTPTSETR_OFFSET     0x00000314  /* Clock Lane Stop Time Set Register */
-#define R_MIPI_DSI_LPTRNSTSETR_OFFSET     0x00000318  /* LP Transition Time Set Register */
-#define R_MIPI_DSI_PLSR_OFFSET     0x00000320  /* Physical Lane Status Register */
-#define R_MIPI_DSI_PLSCR_OFFSET     0x00000324  /* Physical Lane Status Clear Register */
-#define R_MIPI_DSI_PLIER_OFFSET     0x00000328  /* Physical Lane Interrupt Enable Register */
-#define R_MIPI_DSI_VMSET0R_OFFSET     0x00000400  /* Video Mode Set 0 Register */
-#define R_MIPI_DSI_VMSET1R_OFFSET     0x00000404  /* Video Mode Set 1 Register */
-#define R_MIPI_DSI_VMSR_OFFSET     0x00000410  /* Video Mode Status Register */
-#define R_MIPI_DSI_VMSCR_OFFSET     0x00000414  /* Video Mode Status Clear Register */
-#define R_MIPI_DSI_VMIER_OFFSET     0x00000418  /* Video Mode Interrupt Enable Register */
-#define R_MIPI_DSI_VMPPSETR_OFFSET     0x00000420  /* Video Mode Pixel Packet Set Register */
-#define R_MIPI_DSI_VMVSSETR_OFFSET     0x00000428  /* Video Mode Vertical Size Set Register */
-#define R_MIPI_DSI_VMVPSETR_OFFSET     0x0000042c  /* Video Mode Vertical Porch Set Register */
-#define R_MIPI_DSI_VMHSSETR_OFFSET     0x00000430  /* Video Mode Horizontal Size Set Register */
-#define R_MIPI_DSI_VMHPSETR_OFFSET     0x00000434  /* Video Mode Horizontal Porch Set Register */
-#define R_MIPI_DSI_SQCH0SET0R_OFFSET     0x000005c0  /* Sequence Channel 0 Set 0 Register */
-#define R_MIPI_DSI_SQCH0SR_OFFSET     0x000005d0  /* Sequence Channel 0 Status Register */
-#define R_MIPI_DSI_SQCH0SCR_OFFSET     0x000005d4  /* Sequence Channel 0 Status Clear Register */
-#define R_MIPI_DSI_SQCH0IER_OFFSET     0x000005d8  /* Sequence Channel 0 Interrupt Enable Register */
-#define R_MIPI_DSI_SQCH1SET0R_OFFSET     0x00000600  /* Sequence Channel 1 Set 0 Register */
-#define R_MIPI_DSI_SQCH1SR_OFFSET     0x00000610  /* Sequence Channel 1 Status Register */
-#define R_MIPI_DSI_SQCH1SCR_OFFSET     0x00000614  /* Sequence Channel 1 Status Clear Register */
-#define R_MIPI_DSI_SQCH1IER_OFFSET     0x00000618  /* Sequence Channel 1 Interrupt Enable Register */
+#define R_MIPI_DSI_RXRSSR_OFFSET(m)               (0x00000240 + ((m) * 0x00000004))  /* Receive Result Save Slot-x Register (x = 0 to 3) */
+#define R_MIPI_DSI_RXPPD0R_OFFSET                 0x000002c0  /* Receive Packet Payload Data 0 Register */
+#define R_MIPI_DSI_RXPPD1R_OFFSET                 0x000002c4  /* Receive Packet Payload Data 1 Register */
+#define R_MIPI_DSI_RXPPD2R_OFFSET                 0x000002c8  /* Receive Packet Payload Data 2 Register */
+#define R_MIPI_DSI_RXPPD3R_OFFSET                 0x000002cc  /* Receive Packet Payload Data 3 Register */
+#define R_MIPI_DSI_HSTXTOSETR_OFFSET              0x000002e0  /* HS TX Timeout Set Register */
+#define R_MIPI_DSI_LRXHTOSETR_OFFSET              0x000002e4  /* LRX-H Timeout Set Register */
+#define R_MIPI_DSI_TATOSETR_OFFSET                0x000002e8  /* TA Timeout Set Register */
+#define R_MIPI_DSI_FERRSR_OFFSET                  0x00000300  /* Fatal Error Status Register */
+#define R_MIPI_DSI_FERRSCR_OFFSET                 0x00000304  /* Fatal Error Status Clear Register */
+#define R_MIPI_DSI_FERRIER_OFFSET                 0x00000308  /* Fatal Error Interrupt Enable Register */
+#define R_MIPI_DSI_CLSTPTSETR_OFFSET              0x00000314  /* Clock Lane Stop Time Set Register */
+#define R_MIPI_DSI_LPTRNSTSETR_OFFSET             0x00000318  /* LP Transition Time Set Register */
+#define R_MIPI_DSI_PLSR_OFFSET                    0x00000320  /* Physical Lane Status Register */
+#define R_MIPI_DSI_PLSCR_OFFSET                   0x00000324  /* Physical Lane Status Clear Register */
+#define R_MIPI_DSI_PLIER_OFFSET                   0x00000328  /* Physical Lane Interrupt Enable Register */
+#define R_MIPI_DSI_VMSET0R_OFFSET                 0x00000400  /* Video Mode Set 0 Register */
+#define R_MIPI_DSI_VMSET1R_OFFSET                 0x00000404  /* Video Mode Set 1 Register */
+#define R_MIPI_DSI_VMSR_OFFSET                    0x00000410  /* Video Mode Status Register */
+#define R_MIPI_DSI_VMSCR_OFFSET                   0x00000414  /* Video Mode Status Clear Register */
+#define R_MIPI_DSI_VMIER_OFFSET                   0x00000418  /* Video Mode Interrupt Enable Register */
+#define R_MIPI_DSI_VMPPSETR_OFFSET                0x00000420  /* Video Mode Pixel Packet Set Register */
+#define R_MIPI_DSI_VMVSSETR_OFFSET                0x00000428  /* Video Mode Vertical Size Set Register */
+#define R_MIPI_DSI_VMVPSETR_OFFSET                0x0000042c  /* Video Mode Vertical Porch Set Register */
+#define R_MIPI_DSI_VMHSSETR_OFFSET                0x00000430  /* Video Mode Horizontal Size Set Register */
+#define R_MIPI_DSI_VMHPSETR_OFFSET                0x00000434  /* Video Mode Horizontal Porch Set Register */
+#define R_MIPI_DSI_SQCH0SET0R_OFFSET              0x000005c0  /* Sequence Channel 0 Set 0 Register */
+#define R_MIPI_DSI_SQCH0SR_OFFSET                 0x000005d0  /* Sequence Channel 0 Status Register */
+#define R_MIPI_DSI_SQCH0SCR_OFFSET                0x000005d4  /* Sequence Channel 0 Status Clear Register */
+#define R_MIPI_DSI_SQCH0IER_OFFSET                0x000005d8  /* Sequence Channel 0 Interrupt Enable Register */
+#define R_MIPI_DSI_SQCH1SET0R_OFFSET              0x00000600  /* Sequence Channel 1 Set 0 Register */
+#define R_MIPI_DSI_SQCH1SR_OFFSET                 0x00000610  /* Sequence Channel 1 Status Register */
+#define R_MIPI_DSI_SQCH1SCR_OFFSET                0x00000614  /* Sequence Channel 1 Status Clear Register */
+#define R_MIPI_DSI_SQCH1IER_OFFSET                0x00000618  /* Sequence Channel 1 Interrupt Enable Register */
 /* SQCH0DSC%sAR Registers (0-7) */
-#define R_MIPI_DSI_SQCH0DSC0AR_OFFSET     0x00000780  /* Sequence Channel 0 Descriptor-m A Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH0DSC1AR_OFFSET     0x00000790  /* Sequence Channel 0 Descriptor-m A Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH0DSC2AR_OFFSET     0x000007a0  /* Sequence Channel 0 Descriptor-m A Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH0DSC3AR_OFFSET     0x000007b0  /* Sequence Channel 0 Descriptor-m A Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH0DSC4AR_OFFSET     0x000007c0  /* Sequence Channel 0 Descriptor-m A Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH0DSC5AR_OFFSET     0x000007d0  /* Sequence Channel 0 Descriptor-m A Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH0DSC6AR_OFFSET     0x000007e0  /* Sequence Channel 0 Descriptor-m A Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH0DSC7AR_OFFSET     0x000007f0  /* Sequence Channel 0 Descriptor-m A Register (m = 0 to 7) */
+#define R_MIPI_DSI_SQCH0DSCAR_OFFSET(m)           (0x00000780 + ((m) * 0x00000010))  /* Sequence Channel 0 Descriptor-m A Register (m = 0 to 7) */
 /* SQCH0DSC%sBR Registers (0-7) */
-#define R_MIPI_DSI_SQCH0DSC0BR_OFFSET     0x00000784  /* Sequence Channel 0 Descriptor-m B Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH0DSC1BR_OFFSET     0x00000794  /* Sequence Channel 0 Descriptor-m B Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH0DSC2BR_OFFSET     0x000007a4  /* Sequence Channel 0 Descriptor-m B Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH0DSC3BR_OFFSET     0x000007b4  /* Sequence Channel 0 Descriptor-m B Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH0DSC4BR_OFFSET     0x000007c4  /* Sequence Channel 0 Descriptor-m B Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH0DSC5BR_OFFSET     0x000007d4  /* Sequence Channel 0 Descriptor-m B Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH0DSC6BR_OFFSET     0x000007e4  /* Sequence Channel 0 Descriptor-m B Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH0DSC7BR_OFFSET     0x000007f4  /* Sequence Channel 0 Descriptor-m B Register (m = 0 to 7) */
+#define R_MIPI_DSI_SQCH0DSCBR_OFFSET(m)           (0x00000784 + ((m) * 0x00000010))  /* Sequence Channel 0 Descriptor-m B Register (m = 0 to 7) */
 /* SQCH0DSC%sCR Registers (0-7) */
-#define R_MIPI_DSI_SQCH0DSC0CR_OFFSET     0x00000788  /* Sequence Channel 0 Descriptor-m C Register */
-#define R_MIPI_DSI_SQCH0DSC1CR_OFFSET     0x00000798  /* Sequence Channel 0 Descriptor-m C Register */
-#define R_MIPI_DSI_SQCH0DSC2CR_OFFSET     0x000007a8  /* Sequence Channel 0 Descriptor-m C Register */
-#define R_MIPI_DSI_SQCH0DSC3CR_OFFSET     0x000007b8  /* Sequence Channel 0 Descriptor-m C Register */
-#define R_MIPI_DSI_SQCH0DSC4CR_OFFSET     0x000007c8  /* Sequence Channel 0 Descriptor-m C Register */
-#define R_MIPI_DSI_SQCH0DSC5CR_OFFSET     0x000007d8  /* Sequence Channel 0 Descriptor-m C Register */
-#define R_MIPI_DSI_SQCH0DSC6CR_OFFSET     0x000007e8  /* Sequence Channel 0 Descriptor-m C Register */
-#define R_MIPI_DSI_SQCH0DSC7CR_OFFSET     0x000007f8  /* Sequence Channel 0 Descriptor-m C Register */
+#define R_MIPI_DSI_SQCH0DSCCR_OFFSET(m)           (0x00000788 + ((m) * 0x00000010))  /* Sequence Channel 0 Descriptor-m C Register */
 /* SQCH0DSC%sDR Registers (0-7) */
-#define R_MIPI_DSI_SQCH0DSC0DR_OFFSET     0x0000078c  /* Sequence Channel 0 Descriptor-m D Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH0DSC1DR_OFFSET     0x0000079c  /* Sequence Channel 0 Descriptor-m D Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH0DSC2DR_OFFSET     0x000007ac  /* Sequence Channel 0 Descriptor-m D Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH0DSC3DR_OFFSET     0x000007bc  /* Sequence Channel 0 Descriptor-m D Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH0DSC4DR_OFFSET     0x000007cc  /* Sequence Channel 0 Descriptor-m D Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH0DSC5DR_OFFSET     0x000007dc  /* Sequence Channel 0 Descriptor-m D Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH0DSC6DR_OFFSET     0x000007ec  /* Sequence Channel 0 Descriptor-m D Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH0DSC7DR_OFFSET     0x000007fc  /* Sequence Channel 0 Descriptor-m D Register (m = 0 to 7) */
+#define R_MIPI_DSI_SQCH0DSCDR_OFFSET(m)           (0x0000078c + ((m) * 0x00000010))  /* Sequence Channel 0 Descriptor-m D Register (m = 0 to 7) */
 /* SQCH1DSC%sAR Registers (0-7) */
-#define R_MIPI_DSI_SQCH1DSC0AR_OFFSET     0x00000800  /* Sequence Channel 1 Descriptor-m A Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH1DSC1AR_OFFSET     0x00000810  /* Sequence Channel 1 Descriptor-m A Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH1DSC2AR_OFFSET     0x00000820  /* Sequence Channel 1 Descriptor-m A Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH1DSC3AR_OFFSET     0x00000830  /* Sequence Channel 1 Descriptor-m A Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH1DSC4AR_OFFSET     0x00000840  /* Sequence Channel 1 Descriptor-m A Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH1DSC5AR_OFFSET     0x00000850  /* Sequence Channel 1 Descriptor-m A Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH1DSC6AR_OFFSET     0x00000860  /* Sequence Channel 1 Descriptor-m A Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH1DSC7AR_OFFSET     0x00000870  /* Sequence Channel 1 Descriptor-m A Register (m = 0 to 7) */
+#define R_MIPI_DSI_SQCH1DSCAR_OFFSET(m)           (0x00000800 + ((m) * 0x00000010))  /* Sequence Channel 1 Descriptor-m A Register (m = 0 to 7) */
 /* SQCH1DSC%sBR Registers (0-7) */
-#define R_MIPI_DSI_SQCH1DSC0BR_OFFSET     0x00000804  /* Sequence Channel 1 Descriptor-m B Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH1DSC1BR_OFFSET     0x00000814  /* Sequence Channel 1 Descriptor-m B Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH1DSC2BR_OFFSET     0x00000824  /* Sequence Channel 1 Descriptor-m B Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH1DSC3BR_OFFSET     0x00000834  /* Sequence Channel 1 Descriptor-m B Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH1DSC4BR_OFFSET     0x00000844  /* Sequence Channel 1 Descriptor-m B Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH1DSC5BR_OFFSET     0x00000854  /* Sequence Channel 1 Descriptor-m B Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH1DSC6BR_OFFSET     0x00000864  /* Sequence Channel 1 Descriptor-m B Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH1DSC7BR_OFFSET     0x00000874  /* Sequence Channel 1 Descriptor-m B Register (m = 0 to 7) */
+#define R_MIPI_DSI_SQCH1DSCBR_OFFSET(m)           (0x00000804 + ((m) * 0x00000010))  /* Sequence Channel 1 Descriptor-m B Register (m = 0 to 7) */
 /* SQCH1DSC%sCR Registers (0-7) */
-#define R_MIPI_DSI_SQCH1DSC0CR_OFFSET     0x00000808  /* Sequence Channel 1 Descriptor-m C Register */
-#define R_MIPI_DSI_SQCH1DSC1CR_OFFSET     0x00000818  /* Sequence Channel 1 Descriptor-m C Register */
-#define R_MIPI_DSI_SQCH1DSC2CR_OFFSET     0x00000828  /* Sequence Channel 1 Descriptor-m C Register */
-#define R_MIPI_DSI_SQCH1DSC3CR_OFFSET     0x00000838  /* Sequence Channel 1 Descriptor-m C Register */
-#define R_MIPI_DSI_SQCH1DSC4CR_OFFSET     0x00000848  /* Sequence Channel 1 Descriptor-m C Register */
-#define R_MIPI_DSI_SQCH1DSC5CR_OFFSET     0x00000858  /* Sequence Channel 1 Descriptor-m C Register */
-#define R_MIPI_DSI_SQCH1DSC6CR_OFFSET     0x00000868  /* Sequence Channel 1 Descriptor-m C Register */
-#define R_MIPI_DSI_SQCH1DSC7CR_OFFSET     0x00000878  /* Sequence Channel 1 Descriptor-m C Register */
+#define R_MIPI_DSI_SQCH1DSCCR_OFFSET(m)           (0x00000808 + ((m) * 0x00000010))  /* Sequence Channel 1 Descriptor-m C Register */
 /* SQCH1DSC%sDR Registers (0-7) */
-#define R_MIPI_DSI_SQCH1DSC0DR_OFFSET     0x0000080c  /* Sequence Channel 1 Descriptor-m D Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH1DSC1DR_OFFSET     0x0000081c  /* Sequence Channel 1 Descriptor-m D Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH1DSC2DR_OFFSET     0x0000082c  /* Sequence Channel 1 Descriptor-m D Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH1DSC3DR_OFFSET     0x0000083c  /* Sequence Channel 1 Descriptor-m D Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH1DSC4DR_OFFSET     0x0000084c  /* Sequence Channel 1 Descriptor-m D Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH1DSC5DR_OFFSET     0x0000085c  /* Sequence Channel 1 Descriptor-m D Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH1DSC6DR_OFFSET     0x0000086c  /* Sequence Channel 1 Descriptor-m D Register (m = 0 to 7) */
-#define R_MIPI_DSI_SQCH1DSC7DR_OFFSET     0x0000087c  /* Sequence Channel 1 Descriptor-m D Register (m = 0 to 7) */
+#define R_MIPI_DSI_SQCH1DSCDR_OFFSET(m)           (0x0000080c + ((m) * 0x00000010))  /* Sequence Channel 1 Descriptor-m D Register (m = 0 to 7) */
 
 /* MIPI_DSI Register Addresses */
 
-#define R_MIPI_DSI_ISR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_ISR_OFFSET)
-#define R_MIPI_DSI_LINKSR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_LINKSR_OFFSET)
-#define R_MIPI_DSI_TXSETR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_TXSETR_OFFSET)
-#define R_MIPI_DSI_HSCLKSETR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_HSCLKSETR_OFFSET)
-#define R_MIPI_DSI_ULPSSETR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_ULPSSETR_OFFSET)
-#define R_MIPI_DSI_ULPSCR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_ULPSCR_OFFSET)
-#define R_MIPI_DSI_RSTCR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_RSTCR_OFFSET)
-#define R_MIPI_DSI_RSTSR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_RSTSR_OFFSET)
-#define R_MIPI_DSI_DSISETR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_DSISETR_OFFSET)
-#define R_MIPI_DSI_TXPPD0R                 (R_MIPI_DSI_BASE + R_MIPI_DSI_TXPPD0R_OFFSET)
-#define R_MIPI_DSI_TXPPD1R                 (R_MIPI_DSI_BASE + R_MIPI_DSI_TXPPD1R_OFFSET)
-#define R_MIPI_DSI_TXPPD2R                 (R_MIPI_DSI_BASE + R_MIPI_DSI_TXPPD2R_OFFSET)
-#define R_MIPI_DSI_TXPPD3R                 (R_MIPI_DSI_BASE + R_MIPI_DSI_TXPPD3R_OFFSET)
-#define R_MIPI_DSI_RXSR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_RXSR_OFFSET)
-#define R_MIPI_DSI_RXSCR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_RXSCR_OFFSET)
-#define R_MIPI_DSI_RXIER                 (R_MIPI_DSI_BASE + R_MIPI_DSI_RXIER_OFFSET)
+#define R_MIPI_DSI_ISR                            (R_MIPI_DSI_BASE + R_MIPI_DSI_ISR_OFFSET)
+#define R_MIPI_DSI_LINKSR                         (R_MIPI_DSI_BASE + R_MIPI_DSI_LINKSR_OFFSET)
+#define R_MIPI_DSI_TXSETR                         (R_MIPI_DSI_BASE + R_MIPI_DSI_TXSETR_OFFSET)
+#define R_MIPI_DSI_HSCLKSETR                      (R_MIPI_DSI_BASE + R_MIPI_DSI_HSCLKSETR_OFFSET)
+#define R_MIPI_DSI_ULPSSETR                       (R_MIPI_DSI_BASE + R_MIPI_DSI_ULPSSETR_OFFSET)
+#define R_MIPI_DSI_ULPSCR                         (R_MIPI_DSI_BASE + R_MIPI_DSI_ULPSCR_OFFSET)
+#define R_MIPI_DSI_RSTCR                          (R_MIPI_DSI_BASE + R_MIPI_DSI_RSTCR_OFFSET)
+#define R_MIPI_DSI_RSTSR                          (R_MIPI_DSI_BASE + R_MIPI_DSI_RSTSR_OFFSET)
+#define R_MIPI_DSI_DSISETR                        (R_MIPI_DSI_BASE + R_MIPI_DSI_DSISETR_OFFSET)
+#define R_MIPI_DSI_TXPPD0R                        (R_MIPI_DSI_BASE + R_MIPI_DSI_TXPPD0R_OFFSET)
+#define R_MIPI_DSI_TXPPD1R                        (R_MIPI_DSI_BASE + R_MIPI_DSI_TXPPD1R_OFFSET)
+#define R_MIPI_DSI_TXPPD2R                        (R_MIPI_DSI_BASE + R_MIPI_DSI_TXPPD2R_OFFSET)
+#define R_MIPI_DSI_TXPPD3R                        (R_MIPI_DSI_BASE + R_MIPI_DSI_TXPPD3R_OFFSET)
+#define R_MIPI_DSI_RXSR                           (R_MIPI_DSI_BASE + R_MIPI_DSI_RXSR_OFFSET)
+#define R_MIPI_DSI_RXSCR                          (R_MIPI_DSI_BASE + R_MIPI_DSI_RXSCR_OFFSET)
+#define R_MIPI_DSI_RXIER                          (R_MIPI_DSI_BASE + R_MIPI_DSI_RXIER_OFFSET)
 #define R_MIPI_DSI_PRESPTOBTASETR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_PRESPTOBTASETR_OFFSET)
-#define R_MIPI_DSI_PRESPTOLPSETR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_PRESPTOLPSETR_OFFSET)
-#define R_MIPI_DSI_PRESPTOHSSETR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_PRESPTOHSSETR_OFFSET)
-#define R_MIPI_DSI_AKEPLATIR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_AKEPLATIR_OFFSET)
-#define R_MIPI_DSI_AKEPACMSR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_AKEPACMSR_OFFSET)
-#define R_MIPI_DSI_AKEPSCR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_AKEPSCR_OFFSET)
-#define R_MIPI_DSI_RXRSSR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_RXRSSR_OFFSET)
-#define R_MIPI_DSI_RXRSSCR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_RXRSSCR_OFFSET)
-#define R_MIPI_DSI_RXRINFOOWSR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_RXRINFOOWSR_OFFSET)
-#define R_MIPI_DSI_RXRINFOOWSCR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_RXRINFOOWSCR_OFFSET)
-#define R_MIPI_DSI_RXRSS0R                 (R_MIPI_DSI_BASE + R_MIPI_DSI_RXRSS0R_OFFSET)
-#define R_MIPI_DSI_RXRSS1R                 (R_MIPI_DSI_BASE + R_MIPI_DSI_RXRSS1R_OFFSET)
-#define R_MIPI_DSI_RXRSS2R                 (R_MIPI_DSI_BASE + R_MIPI_DSI_RXRSS2R_OFFSET)
-#define R_MIPI_DSI_RXRSS3R                 (R_MIPI_DSI_BASE + R_MIPI_DSI_RXRSS3R_OFFSET)
-#define R_MIPI_DSI_RXPPD0R                 (R_MIPI_DSI_BASE + R_MIPI_DSI_RXPPD0R_OFFSET)
-#define R_MIPI_DSI_RXPPD1R                 (R_MIPI_DSI_BASE + R_MIPI_DSI_RXPPD1R_OFFSET)
-#define R_MIPI_DSI_RXPPD2R                 (R_MIPI_DSI_BASE + R_MIPI_DSI_RXPPD2R_OFFSET)
-#define R_MIPI_DSI_RXPPD3R                 (R_MIPI_DSI_BASE + R_MIPI_DSI_RXPPD3R_OFFSET)
-#define R_MIPI_DSI_HSTXTOSETR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_HSTXTOSETR_OFFSET)
-#define R_MIPI_DSI_LRXHTOSETR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_LRXHTOSETR_OFFSET)
-#define R_MIPI_DSI_TATOSETR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_TATOSETR_OFFSET)
-#define R_MIPI_DSI_FERRSR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_FERRSR_OFFSET)
-#define R_MIPI_DSI_FERRSCR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_FERRSCR_OFFSET)
-#define R_MIPI_DSI_FERRIER                 (R_MIPI_DSI_BASE + R_MIPI_DSI_FERRIER_OFFSET)
-#define R_MIPI_DSI_CLSTPTSETR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_CLSTPTSETR_OFFSET)
-#define R_MIPI_DSI_LPTRNSTSETR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_LPTRNSTSETR_OFFSET)
-#define R_MIPI_DSI_PLSR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_PLSR_OFFSET)
-#define R_MIPI_DSI_PLSCR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_PLSCR_OFFSET)
-#define R_MIPI_DSI_PLIER                 (R_MIPI_DSI_BASE + R_MIPI_DSI_PLIER_OFFSET)
-#define R_MIPI_DSI_VMSET0R                 (R_MIPI_DSI_BASE + R_MIPI_DSI_VMSET0R_OFFSET)
-#define R_MIPI_DSI_VMSET1R                 (R_MIPI_DSI_BASE + R_MIPI_DSI_VMSET1R_OFFSET)
-#define R_MIPI_DSI_VMSR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_VMSR_OFFSET)
-#define R_MIPI_DSI_VMSCR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_VMSCR_OFFSET)
-#define R_MIPI_DSI_VMIER                 (R_MIPI_DSI_BASE + R_MIPI_DSI_VMIER_OFFSET)
-#define R_MIPI_DSI_VMPPSETR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_VMPPSETR_OFFSET)
-#define R_MIPI_DSI_VMVSSETR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_VMVSSETR_OFFSET)
-#define R_MIPI_DSI_VMVPSETR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_VMVPSETR_OFFSET)
-#define R_MIPI_DSI_VMHSSETR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_VMHSSETR_OFFSET)
-#define R_MIPI_DSI_VMHPSETR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_VMHPSETR_OFFSET)
-#define R_MIPI_DSI_SQCH0SET0R                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0SET0R_OFFSET)
-#define R_MIPI_DSI_SQCH0SR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0SR_OFFSET)
-#define R_MIPI_DSI_SQCH0SCR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0SCR_OFFSET)
-#define R_MIPI_DSI_SQCH0IER                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0IER_OFFSET)
-#define R_MIPI_DSI_SQCH1SET0R                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1SET0R_OFFSET)
-#define R_MIPI_DSI_SQCH1SR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1SR_OFFSET)
-#define R_MIPI_DSI_SQCH1SCR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1SCR_OFFSET)
-#define R_MIPI_DSI_SQCH1IER                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1IER_OFFSET)
-#define R_MIPI_DSI_SQCH0DSC0AR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSC0AR_OFFSET)
-#define R_MIPI_DSI_SQCH0DSC1AR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSC1AR_OFFSET)
-#define R_MIPI_DSI_SQCH0DSC2AR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSC2AR_OFFSET)
-#define R_MIPI_DSI_SQCH0DSC3AR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSC3AR_OFFSET)
-#define R_MIPI_DSI_SQCH0DSC4AR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSC4AR_OFFSET)
-#define R_MIPI_DSI_SQCH0DSC5AR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSC5AR_OFFSET)
-#define R_MIPI_DSI_SQCH0DSC6AR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSC6AR_OFFSET)
-#define R_MIPI_DSI_SQCH0DSC7AR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSC7AR_OFFSET)
-#define R_MIPI_DSI_SQCH0DSC0BR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSC0BR_OFFSET)
-#define R_MIPI_DSI_SQCH0DSC1BR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSC1BR_OFFSET)
-#define R_MIPI_DSI_SQCH0DSC2BR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSC2BR_OFFSET)
-#define R_MIPI_DSI_SQCH0DSC3BR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSC3BR_OFFSET)
-#define R_MIPI_DSI_SQCH0DSC4BR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSC4BR_OFFSET)
-#define R_MIPI_DSI_SQCH0DSC5BR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSC5BR_OFFSET)
-#define R_MIPI_DSI_SQCH0DSC6BR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSC6BR_OFFSET)
-#define R_MIPI_DSI_SQCH0DSC7BR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSC7BR_OFFSET)
-#define R_MIPI_DSI_SQCH0DSC0CR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSC0CR_OFFSET)
-#define R_MIPI_DSI_SQCH0DSC1CR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSC1CR_OFFSET)
-#define R_MIPI_DSI_SQCH0DSC2CR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSC2CR_OFFSET)
-#define R_MIPI_DSI_SQCH0DSC3CR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSC3CR_OFFSET)
-#define R_MIPI_DSI_SQCH0DSC4CR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSC4CR_OFFSET)
-#define R_MIPI_DSI_SQCH0DSC5CR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSC5CR_OFFSET)
-#define R_MIPI_DSI_SQCH0DSC6CR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSC6CR_OFFSET)
-#define R_MIPI_DSI_SQCH0DSC7CR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSC7CR_OFFSET)
-#define R_MIPI_DSI_SQCH0DSC0DR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSC0DR_OFFSET)
-#define R_MIPI_DSI_SQCH0DSC1DR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSC1DR_OFFSET)
-#define R_MIPI_DSI_SQCH0DSC2DR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSC2DR_OFFSET)
-#define R_MIPI_DSI_SQCH0DSC3DR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSC3DR_OFFSET)
-#define R_MIPI_DSI_SQCH0DSC4DR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSC4DR_OFFSET)
-#define R_MIPI_DSI_SQCH0DSC5DR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSC5DR_OFFSET)
-#define R_MIPI_DSI_SQCH0DSC6DR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSC6DR_OFFSET)
-#define R_MIPI_DSI_SQCH0DSC7DR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSC7DR_OFFSET)
-#define R_MIPI_DSI_SQCH1DSC0AR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSC0AR_OFFSET)
-#define R_MIPI_DSI_SQCH1DSC1AR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSC1AR_OFFSET)
-#define R_MIPI_DSI_SQCH1DSC2AR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSC2AR_OFFSET)
-#define R_MIPI_DSI_SQCH1DSC3AR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSC3AR_OFFSET)
-#define R_MIPI_DSI_SQCH1DSC4AR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSC4AR_OFFSET)
-#define R_MIPI_DSI_SQCH1DSC5AR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSC5AR_OFFSET)
-#define R_MIPI_DSI_SQCH1DSC6AR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSC6AR_OFFSET)
-#define R_MIPI_DSI_SQCH1DSC7AR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSC7AR_OFFSET)
-#define R_MIPI_DSI_SQCH1DSC0BR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSC0BR_OFFSET)
-#define R_MIPI_DSI_SQCH1DSC1BR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSC1BR_OFFSET)
-#define R_MIPI_DSI_SQCH1DSC2BR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSC2BR_OFFSET)
-#define R_MIPI_DSI_SQCH1DSC3BR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSC3BR_OFFSET)
-#define R_MIPI_DSI_SQCH1DSC4BR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSC4BR_OFFSET)
-#define R_MIPI_DSI_SQCH1DSC5BR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSC5BR_OFFSET)
-#define R_MIPI_DSI_SQCH1DSC6BR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSC6BR_OFFSET)
-#define R_MIPI_DSI_SQCH1DSC7BR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSC7BR_OFFSET)
-#define R_MIPI_DSI_SQCH1DSC0CR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSC0CR_OFFSET)
-#define R_MIPI_DSI_SQCH1DSC1CR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSC1CR_OFFSET)
-#define R_MIPI_DSI_SQCH1DSC2CR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSC2CR_OFFSET)
-#define R_MIPI_DSI_SQCH1DSC3CR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSC3CR_OFFSET)
-#define R_MIPI_DSI_SQCH1DSC4CR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSC4CR_OFFSET)
-#define R_MIPI_DSI_SQCH1DSC5CR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSC5CR_OFFSET)
-#define R_MIPI_DSI_SQCH1DSC6CR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSC6CR_OFFSET)
-#define R_MIPI_DSI_SQCH1DSC7CR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSC7CR_OFFSET)
-#define R_MIPI_DSI_SQCH1DSC0DR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSC0DR_OFFSET)
-#define R_MIPI_DSI_SQCH1DSC1DR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSC1DR_OFFSET)
-#define R_MIPI_DSI_SQCH1DSC2DR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSC2DR_OFFSET)
-#define R_MIPI_DSI_SQCH1DSC3DR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSC3DR_OFFSET)
-#define R_MIPI_DSI_SQCH1DSC4DR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSC4DR_OFFSET)
-#define R_MIPI_DSI_SQCH1DSC5DR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSC5DR_OFFSET)
-#define R_MIPI_DSI_SQCH1DSC6DR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSC6DR_OFFSET)
-#define R_MIPI_DSI_SQCH1DSC7DR                 (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSC7DR_OFFSET)
+#define R_MIPI_DSI_PRESPTOLPSETR                  (R_MIPI_DSI_BASE + R_MIPI_DSI_PRESPTOLPSETR_OFFSET)
+#define R_MIPI_DSI_PRESPTOHSSETR                  (R_MIPI_DSI_BASE + R_MIPI_DSI_PRESPTOHSSETR_OFFSET)
+#define R_MIPI_DSI_AKEPLATIR                      (R_MIPI_DSI_BASE + R_MIPI_DSI_AKEPLATIR_OFFSET)
+#define R_MIPI_DSI_AKEPACMSR                      (R_MIPI_DSI_BASE + R_MIPI_DSI_AKEPACMSR_OFFSET)
+#define R_MIPI_DSI_AKEPSCR                        (R_MIPI_DSI_BASE + R_MIPI_DSI_AKEPSCR_OFFSET)
+#define R_MIPI_DSI_RXRSSR                         (R_MIPI_DSI_BASE + R_MIPI_DSI_RXRSSR_OFFSET)
+#define R_MIPI_DSI_RXRSSCR                        (R_MIPI_DSI_BASE + R_MIPI_DSI_RXRSSCR_OFFSET)
+#define R_MIPI_DSI_RXRINFOOWSR                    (R_MIPI_DSI_BASE + R_MIPI_DSI_RXRINFOOWSR_OFFSET)
+#define R_MIPI_DSI_RXRINFOOWSCR                   (R_MIPI_DSI_BASE + R_MIPI_DSI_RXRINFOOWSCR_OFFSET)
+#define R_MIPI_DSI_RXRSSR(m)                      (R_MIPI_DSI_BASE + R_MIPI_DSI_RXRSSR_OFFSET(m))
+#define R_MIPI_DSI_RXPPD0R                        (R_MIPI_DSI_BASE + R_MIPI_DSI_RXPPD0R_OFFSET)
+#define R_MIPI_DSI_RXPPD1R                        (R_MIPI_DSI_BASE + R_MIPI_DSI_RXPPD1R_OFFSET)
+#define R_MIPI_DSI_RXPPD2R                        (R_MIPI_DSI_BASE + R_MIPI_DSI_RXPPD2R_OFFSET)
+#define R_MIPI_DSI_RXPPD3R                        (R_MIPI_DSI_BASE + R_MIPI_DSI_RXPPD3R_OFFSET)
+#define R_MIPI_DSI_HSTXTOSETR                     (R_MIPI_DSI_BASE + R_MIPI_DSI_HSTXTOSETR_OFFSET)
+#define R_MIPI_DSI_LRXHTOSETR                     (R_MIPI_DSI_BASE + R_MIPI_DSI_LRXHTOSETR_OFFSET)
+#define R_MIPI_DSI_TATOSETR                       (R_MIPI_DSI_BASE + R_MIPI_DSI_TATOSETR_OFFSET)
+#define R_MIPI_DSI_FERRSR                         (R_MIPI_DSI_BASE + R_MIPI_DSI_FERRSR_OFFSET)
+#define R_MIPI_DSI_FERRSCR                        (R_MIPI_DSI_BASE + R_MIPI_DSI_FERRSCR_OFFSET)
+#define R_MIPI_DSI_FERRIER                        (R_MIPI_DSI_BASE + R_MIPI_DSI_FERRIER_OFFSET)
+#define R_MIPI_DSI_CLSTPTSETR                     (R_MIPI_DSI_BASE + R_MIPI_DSI_CLSTPTSETR_OFFSET)
+#define R_MIPI_DSI_LPTRNSTSETR                    (R_MIPI_DSI_BASE + R_MIPI_DSI_LPTRNSTSETR_OFFSET)
+#define R_MIPI_DSI_PLSR                           (R_MIPI_DSI_BASE + R_MIPI_DSI_PLSR_OFFSET)
+#define R_MIPI_DSI_PLSCR                          (R_MIPI_DSI_BASE + R_MIPI_DSI_PLSCR_OFFSET)
+#define R_MIPI_DSI_PLIER                          (R_MIPI_DSI_BASE + R_MIPI_DSI_PLIER_OFFSET)
+#define R_MIPI_DSI_VMSET0R                        (R_MIPI_DSI_BASE + R_MIPI_DSI_VMSET0R_OFFSET)
+#define R_MIPI_DSI_VMSET1R                        (R_MIPI_DSI_BASE + R_MIPI_DSI_VMSET1R_OFFSET)
+#define R_MIPI_DSI_VMSR                           (R_MIPI_DSI_BASE + R_MIPI_DSI_VMSR_OFFSET)
+#define R_MIPI_DSI_VMSCR                          (R_MIPI_DSI_BASE + R_MIPI_DSI_VMSCR_OFFSET)
+#define R_MIPI_DSI_VMIER                          (R_MIPI_DSI_BASE + R_MIPI_DSI_VMIER_OFFSET)
+#define R_MIPI_DSI_VMPPSETR                       (R_MIPI_DSI_BASE + R_MIPI_DSI_VMPPSETR_OFFSET)
+#define R_MIPI_DSI_VMVSSETR                       (R_MIPI_DSI_BASE + R_MIPI_DSI_VMVSSETR_OFFSET)
+#define R_MIPI_DSI_VMVPSETR                       (R_MIPI_DSI_BASE + R_MIPI_DSI_VMVPSETR_OFFSET)
+#define R_MIPI_DSI_VMHSSETR                       (R_MIPI_DSI_BASE + R_MIPI_DSI_VMHSSETR_OFFSET)
+#define R_MIPI_DSI_VMHPSETR                       (R_MIPI_DSI_BASE + R_MIPI_DSI_VMHPSETR_OFFSET)
+#define R_MIPI_DSI_SQCH0SET0R                     (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0SET0R_OFFSET)
+#define R_MIPI_DSI_SQCH0SR                        (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0SR_OFFSET)
+#define R_MIPI_DSI_SQCH0SCR                       (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0SCR_OFFSET)
+#define R_MIPI_DSI_SQCH0IER                       (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0IER_OFFSET)
+#define R_MIPI_DSI_SQCH1SET0R                     (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1SET0R_OFFSET)
+#define R_MIPI_DSI_SQCH1SR                        (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1SR_OFFSET)
+#define R_MIPI_DSI_SQCH1SCR                       (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1SCR_OFFSET)
+#define R_MIPI_DSI_SQCH1IER                       (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1IER_OFFSET)
+#define R_MIPI_DSI_SQCH0DSCAR(m)                  (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSCAR_OFFSET(m))
+#define R_MIPI_DSI_SQCH0DSCBR(m)                  (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSCBR_OFFSET(m))
+#define R_MIPI_DSI_SQCH0DSCCR(m)                  (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSCCR_OFFSET(m))
+#define R_MIPI_DSI_SQCH0DSCDR(m)                  (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSCDR_OFFSET(m))
+#define R_MIPI_DSI_SQCH1DSCAR(m)                  (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSCAR_OFFSET(m))
+#define R_MIPI_DSI_SQCH1DSCBR(m)                  (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSCBR_OFFSET(m))
+#define R_MIPI_DSI_SQCH1DSCCR(m)                  (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSCCR_OFFSET(m))
+#define R_MIPI_DSI_SQCH1DSCDR(m)                  (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSCDR_OFFSET(m))
 
 /* Register bit definitions */
 /* ISR Register bit definitions */
@@ -606,10 +484,10 @@
 #define R_MIPI_DSI_AKEPLATIR_VC_SHIFT             (16)  /* Virtual Channel ID */
 #define R_MIPI_DSI_AKEPLATIR_VC_MASK              0xf0000
 #  define R_MIPI_DSI_AKEPLATIR_VC_0X0                     (0 << R_MIPI_DSI_AKEPLATIR_VC_SHIFT)  /* No Error Report received */
-#  define R_MIPI_DSI_AKEPLATIR_VC_0X1                     (0 << R_MIPI_DSI_AKEPLATIR_VC_SHIFT)  /* From VC-0 */
-#  define R_MIPI_DSI_AKEPLATIR_VC_0X2                     (0 << R_MIPI_DSI_AKEPLATIR_VC_SHIFT)  /* From VC-1 */
-#  define R_MIPI_DSI_AKEPLATIR_VC_0X4                     (0 << R_MIPI_DSI_AKEPLATIR_VC_SHIFT)  /* From VC-2 */
-#  define R_MIPI_DSI_AKEPLATIR_VC_0X8                     (0 << R_MIPI_DSI_AKEPLATIR_VC_SHIFT)  /* From VC-3 */
+#  define R_MIPI_DSI_AKEPLATIR_VC_0X1                     (1 << R_MIPI_DSI_AKEPLATIR_VC_SHIFT)  /* From VC-0 */
+#  define R_MIPI_DSI_AKEPLATIR_VC_0X2                     (2 << R_MIPI_DSI_AKEPLATIR_VC_SHIFT)  /* From VC-1 */
+#  define R_MIPI_DSI_AKEPLATIR_VC_0X4                     (4 << R_MIPI_DSI_AKEPLATIR_VC_SHIFT)  /* From VC-2 */
+#  define R_MIPI_DSI_AKEPLATIR_VC_0X8                     (8 << R_MIPI_DSI_AKEPLATIR_VC_SHIFT)  /* From VC-3 */
 
 /* AKEPACMSR Register bit definitions */
 #define R_MIPI_DSI_AKEPACMSR_AEREP_SHIFT          (0)  /* Accumulated Error Report */
@@ -979,9 +857,9 @@
 
 #define R_MIPI_DSI_VMPPSETR_DT_SHIFT              (16)  /* Video Mode Data Type */
 #define R_MIPI_DSI_VMPPSETR_DT_MASK               0x3f0000
-#  define R_MIPI_DSI_VMPPSETR_DT_0X0E                     (0 << R_MIPI_DSI_VMPPSETR_DT_SHIFT)  /* Packed Pixel Stream, 16-bit RGB */
-#  define R_MIPI_DSI_VMPPSETR_DT_0X1E                     (0 << R_MIPI_DSI_VMPPSETR_DT_SHIFT)  /* Packed Pixel Stream, 18-bit RGB */
-#  define R_MIPI_DSI_VMPPSETR_DT_0X3E                     (0 << R_MIPI_DSI_VMPPSETR_DT_SHIFT)  /* Packed Pixel Stream, 24-bit RGB */
+#  define R_MIPI_DSI_VMPPSETR_DT_0X0E                     (14 << R_MIPI_DSI_VMPPSETR_DT_SHIFT)  /* Packed Pixel Stream, 16-bit RGB */
+#  define R_MIPI_DSI_VMPPSETR_DT_0X1E                     (30 << R_MIPI_DSI_VMPPSETR_DT_SHIFT)  /* Packed Pixel Stream, 18-bit RGB */
+#  define R_MIPI_DSI_VMPPSETR_DT_0X3E                     (62 << R_MIPI_DSI_VMPPSETR_DT_SHIFT)  /* Packed Pixel Stream, 24-bit RGB */
 
 #define R_MIPI_DSI_VMPPSETR_VC_SHIFT              (22)  /* Video Mode Virtual Channel */
 #define R_MIPI_DSI_VMPPSETR_VC_MASK               0xc00000

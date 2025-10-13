@@ -44,17 +44,17 @@
 
 /* ECCMB Register Offsets */
 
-#define R_ECCMB_EC710CTL_OFFSET     0x00000000  /* ECC Control Register */
-#define R_ECCMB_EC710TMC_OFFSET     0x00000004  /* ECC Test Mode Control Register */
-#define R_ECCMB_EC710TED_OFFSET     0x0000000c  /* ECC Test Substitute Data Register */
-#define R_ECCMB_EC710EAD0_OFFSET     0x00000010  /* ECC Error Address Register */
+#define R_ECCMB_EC710CTL_OFFSET                   0x00000000  /* ECC Control Register */
+#define R_ECCMB_EC710TMC_OFFSET                   0x00000004  /* ECC Test Mode Control Register */
+#define R_ECCMB_EC710TED_OFFSET                   0x0000000c  /* ECC Test Substitute Data Register */
+#define R_ECCMB_EC710EAD0_OFFSET                  0x00000010  /* ECC Error Address Register */
 
 /* ECCMB Register Addresses */
 
-#define R_ECCMB_EC710CTL                 (R_ECCMB_BASE + R_ECCMB_EC710CTL_OFFSET)
-#define R_ECCMB_EC710TMC                 (R_ECCMB_BASE + R_ECCMB_EC710TMC_OFFSET)
-#define R_ECCMB_EC710TED                 (R_ECCMB_BASE + R_ECCMB_EC710TED_OFFSET)
-#define R_ECCMB_EC710EAD0                 (R_ECCMB_BASE + R_ECCMB_EC710EAD0_OFFSET)
+#define R_ECCMB_EC710CTL(n)                       (R_ECCMB_CH_BASE(n) + R_ECCMB_EC710CTL_OFFSET)
+#define R_ECCMB_EC710TMC(n)                       (R_ECCMB_CH_BASE(n) + R_ECCMB_EC710TMC_OFFSET)
+#define R_ECCMB_EC710TED(n)                       (R_ECCMB_CH_BASE(n) + R_ECCMB_EC710TED_OFFSET)
+#define R_ECCMB_EC710EAD0(n)                      (R_ECCMB_CH_BASE(n) + R_ECCMB_EC710EAD0_OFFSET)
 
 /* Register bit definitions */
 /* EC710CTL Register bit definitions */

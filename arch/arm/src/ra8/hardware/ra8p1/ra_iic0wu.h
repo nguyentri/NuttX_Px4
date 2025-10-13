@@ -40,13 +40,13 @@
 
 /* IIC0WU Register Offsets */
 
-#define R_IIC0WU_ICWUR_OFFSET     0x00000002  /* I2C Bus Wakeup Unit Register */
-#define R_IIC0WU_ICWUR2_OFFSET     0x00000003  /* I2C Bus Wakeup Unit Register 2 */
+#define R_IIC0WU_ICWUR_OFFSET                     0x00000002  /* I2C Bus Wakeup Unit Register */
+#define R_IIC0WU_ICWUR2_OFFSET                    0x00000003  /* I2C Bus Wakeup Unit Register 2 */
 
 /* IIC0WU Register Addresses */
 
-#define R_IIC0WU_ICWUR                 (R_IIC0WU_BASE + R_IIC0WU_ICWUR_OFFSET)
-#define R_IIC0WU_ICWUR2                 (R_IIC0WU_BASE + R_IIC0WU_ICWUR2_OFFSET)
+#define R_IIC0WU_ICWUR                            (R_IIC0WU_BASE + R_IIC0WU_ICWUR_OFFSET)
+#define R_IIC0WU_ICWUR2                           (R_IIC0WU_BASE + R_IIC0WU_ICWUR2_OFFSET)
 
 /* Register bit definitions */
 /* ICWUR Register bit definitions */

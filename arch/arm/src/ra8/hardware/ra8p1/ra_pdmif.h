@@ -38,415 +38,195 @@
 #endif
 #endif
 
-/* Channel stride for multi-channel peripherals */
-#define R_PDMIF_CH_STRIDE    0x00000100
-#define R_PDMIF_CH_BASE(ch)   (R_PDMIF_BASE + ((uint32_t)(ch) * R_PDMIF_CH_STRIDE))
-
 /* PDMIF Register Offsets */
 
-#define R_PDMIF_PDCSTRTR_OFFSET     0x00000000  /* Channel Software Start Trigger Register */
-#define R_PDMIF_PDCSTPTR_OFFSET     0x00000004  /* Channel Software Stop Trigger Register */
-#define R_PDMIF_PDCCHGTR_OFFSET     0x00000008  /* Channel Software Change Trigger Register */
-#define R_PDMIF_PDCICR_OFFSET     0x0000000c  /* Channel Interrupt Control Register */
-#define R_PDMIF_PDCSR_OFFSET     0x00000010  /* Channel Status Register */
-#define R_PDMIF_PDCSCR_OFFSET     0x00000014  /* Channel Status Clear Register */
-#define R_PDMIF_PDCSDCR_OFFSET     0x00000020  /* Channel Sound Detection Control Register */
-#define R_PDMIF_PDCDRCR_OFFSET     0x00000024  /* Channel Data Read Control Register */
-#define R_PDMIF_PDCDCR_OFFSET     0x00000028  /* Channel Data Clear Register */
-#define R_PDMIF_PDVR_OFFSET     0x00000080  /* Version Register */
+#define R_PDMIF_PDCSTRTR_OFFSET                   0x00000000  /* Channel Software Start Trigger Register */
+#define R_PDMIF_PDCSTPTR_OFFSET                   0x00000004  /* Channel Software Stop Trigger Register */
+#define R_PDMIF_PDCCHGTR_OFFSET                   0x00000008  /* Channel Software Change Trigger Register */
+#define R_PDMIF_PDCICR_OFFSET                     0x0000000c  /* Channel Interrupt Control Register */
+#define R_PDMIF_PDCSR_OFFSET                      0x00000010  /* Channel Status Register */
+#define R_PDMIF_PDCSCR_OFFSET                     0x00000014  /* Channel Status Clear Register */
+#define R_PDMIF_PDCSDCR_OFFSET                    0x00000020  /* Channel Sound Detection Control Register */
+#define R_PDMIF_PDCDRCR_OFFSET                    0x00000024  /* Channel Data Read Control Register */
+#define R_PDMIF_PDCDCR_OFFSET                     0x00000028  /* Channel Data Clear Register */
+#define R_PDMIF_PDVR_OFFSET                       0x00000080  /* Version Register */
 /* PDSTRTRCH%s Registers (0-2) */
-#define R_PDMIF_PDSTRTRCH0_OFFSET     0x00000100  /* Software Start Trigger Register Channel 0 */
-#define R_PDMIF_PDSTRTRCH1_OFFSET     0x00000200  /* Software Start Trigger Register Channel 1 */
-#define R_PDMIF_PDSTRTRCH2_OFFSET     0x00000300  /* Software Start Trigger Register Channel 2 */
+#define R_PDMIF_PDSTRTRCH_OFFSET(m)               (0x00000100 + ((m) * 0x00000100))  /* Software Start Trigger Register Channel %s */
 /* PDSTPTRCH%s Registers (0-2) */
-#define R_PDMIF_PDSTPTRCH0_OFFSET     0x00000104  /* Software Stop Trigger Register Channel 0 */
-#define R_PDMIF_PDSTPTRCH1_OFFSET     0x00000204  /* Software Stop Trigger Register Channel 1 */
-#define R_PDMIF_PDSTPTRCH2_OFFSET     0x00000304  /* Software Stop Trigger Register Channel 2 */
+#define R_PDMIF_PDSTPTRCH_OFFSET(m)               (0x00000104 + ((m) * 0x00000100))  /* Software Stop Trigger Register Channel %s */
 /* PDCHGTRCH%s Registers (0-2) */
-#define R_PDMIF_PDCHGTRCH0_OFFSET     0x00000108  /* Software Change Trigger Register Channel 0 */
-#define R_PDMIF_PDCHGTRCH1_OFFSET     0x00000208  /* Software Change Trigger Register Channel 1 */
-#define R_PDMIF_PDCHGTRCH2_OFFSET     0x00000308  /* Software Change Trigger Register Channel 2 */
+#define R_PDMIF_PDCHGTRCH_OFFSET(m)               (0x00000108 + ((m) * 0x00000100))  /* Software Change Trigger Register Channel %s */
 /* PDICRCH%s Registers (0-2) */
-#define R_PDMIF_PDICRCH0_OFFSET     0x0000010c  /* Interrupt Control Register Channel 0 */
-#define R_PDMIF_PDICRCH1_OFFSET     0x0000020c  /* Interrupt Control Register Channel 1 */
-#define R_PDMIF_PDICRCH2_OFFSET     0x0000030c  /* Interrupt Control Register Channel 2 */
+#define R_PDMIF_PDICRCH_OFFSET(m)                 (0x0000010c + ((m) * 0x00000100))  /* Interrupt Control Register Channel %s */
 /* PDSDCRCH%s Registers (0-2) */
-#define R_PDMIF_PDSDCRCH0_OFFSET     0x00000110  /* Status Detection Control Register Channel 0 */
-#define R_PDMIF_PDSDCRCH1_OFFSET     0x00000210  /* Status Detection Control Register Channel 1 */
-#define R_PDMIF_PDSDCRCH2_OFFSET     0x00000310  /* Status Detection Control Register Channel 2 */
+#define R_PDMIF_PDSDCRCH_OFFSET(m)                (0x00000110 + ((m) * 0x00000100))  /* Status Detection Control Register Channel %s */
 /* PDSRCH%s Registers (0-2) */
-#define R_PDMIF_PDSRCH0_OFFSET     0x00000114  /* Status Register Channel 0 */
-#define R_PDMIF_PDSRCH1_OFFSET     0x00000214  /* Status Register Channel 1 */
-#define R_PDMIF_PDSRCH2_OFFSET     0x00000314  /* Status Register Channel 2 */
+#define R_PDMIF_PDSRCH_OFFSET(m)                  (0x00000114 + ((m) * 0x00000100))  /* Status Register Channel %s */
 /* PDSCRCH%s Registers (0-2) */
-#define R_PDMIF_PDSCRCH0_OFFSET     0x00000118  /* Status Clear Register Channel 0 */
-#define R_PDMIF_PDSCRCH1_OFFSET     0x00000218  /* Status Clear Register Channel 1 */
-#define R_PDMIF_PDSCRCH2_OFFSET     0x00000318  /* Status Clear Register Channel 2 */
+#define R_PDMIF_PDSCRCH_OFFSET(m)                 (0x00000118 + ((m) * 0x00000100))  /* Status Clear Register Channel %s */
 /* PDMDSRCH%s Registers (0-2) */
-#define R_PDMIF_PDMDSRCH0_OFFSET     0x00000120  /* Mode Setting Register Channel 0 */
-#define R_PDMIF_PDMDSRCH1_OFFSET     0x00000220  /* Mode Setting Register Channel 1 */
-#define R_PDMIF_PDMDSRCH2_OFFSET     0x00000320  /* Mode Setting Register Channel 2 */
+#define R_PDMIF_PDMDSRCH_OFFSET(m)                (0x00000120 + ((m) * 0x00000100))  /* Mode Setting Register Channel %s */
 /* PDSFCRCH%s Registers (0-2) */
-#define R_PDMIF_PDSFCRCH0_OFFSET     0x00000124  /* Sinc Filter Control Register Channel 0 */
-#define R_PDMIF_PDSFCRCH1_OFFSET     0x00000224  /* Sinc Filter Control Register Channel 1 */
-#define R_PDMIF_PDSFCRCH2_OFFSET     0x00000324  /* Sinc Filter Control Register Channel 2 */
+#define R_PDMIF_PDSFCRCH_OFFSET(m)                (0x00000124 + ((m) * 0x00000100))  /* Sinc Filter Control Register Channel %s */
 /* PDHFCS0RCH%s Registers (0-2) */
-#define R_PDMIF_PDHFCS0RCH0_OFFSET     0x00000128  /* High-pass Filter Coefficient s(0) Register Channel 0 */
-#define R_PDMIF_PDHFCS0RCH1_OFFSET     0x00000228  /* High-pass Filter Coefficient s(0) Register Channel 1 */
-#define R_PDMIF_PDHFCS0RCH2_OFFSET     0x00000328  /* High-pass Filter Coefficient s(0) Register Channel 2 */
+#define R_PDMIF_PDHFCS0RCH_OFFSET(m)              (0x00000128 + ((m) * 0x00000100))  /* High-pass Filter Coefficient s(0) Register Channel %s */
 /* PDHFCK1RCH%s Registers (0-2) */
-#define R_PDMIF_PDHFCK1RCH0_OFFSET     0x0000012c  /* High-pass Filter Coefficient k(1) Register Channel 0 */
-#define R_PDMIF_PDHFCK1RCH1_OFFSET     0x0000022c  /* High-pass Filter Coefficient k(1) Register Channel 1 */
-#define R_PDMIF_PDHFCK1RCH2_OFFSET     0x0000032c  /* High-pass Filter Coefficient k(1) Register Channel 2 */
+#define R_PDMIF_PDHFCK1RCH_OFFSET(m)              (0x0000012c + ((m) * 0x00000100))  /* High-pass Filter Coefficient k(1) Register Channel %s */
 /* PDHFCH0RCH%s Registers (0-2) */
-#define R_PDMIF_PDHFCH0RCH0_OFFSET     0x00000130  /* High-pass Filter Coefficient h(0) Register Channel 0 */
-#define R_PDMIF_PDHFCH0RCH1_OFFSET     0x00000230  /* High-pass Filter Coefficient h(0) Register Channel 1 */
-#define R_PDMIF_PDHFCH0RCH2_OFFSET     0x00000330  /* High-pass Filter Coefficient h(0) Register Channel 2 */
+#define R_PDMIF_PDHFCH0RCH_OFFSET(m)              (0x00000130 + ((m) * 0x00000100))  /* High-pass Filter Coefficient h(0) Register Channel %s */
 /* PDHFCH1RCH%s Registers (0-2) */
-#define R_PDMIF_PDHFCH1RCH0_OFFSET     0x00000134  /* High-pass Filter Coefficient h(1) Register Channel 0 */
-#define R_PDMIF_PDHFCH1RCH1_OFFSET     0x00000234  /* High-pass Filter Coefficient h(1) Register Channel 1 */
-#define R_PDMIF_PDHFCH1RCH2_OFFSET     0x00000334  /* High-pass Filter Coefficient h(1) Register Channel 2 */
+#define R_PDMIF_PDHFCH1RCH_OFFSET(m)              (0x00000134 + ((m) * 0x00000100))  /* High-pass Filter Coefficient h(1) Register Channel %s */
 /* PDCFCH00RCH%s Registers (0-2) */
-#define R_PDMIF_PDCFCH00RCH0_OFFSET     0x00000138  /* Compensation Filter Coefficient h(0) Register Channel 0 */
-#define R_PDMIF_PDCFCH00RCH1_OFFSET     0x00000238  /* Compensation Filter Coefficient h(0) Register Channel 1 */
-#define R_PDMIF_PDCFCH00RCH2_OFFSET     0x00000338  /* Compensation Filter Coefficient h(0) Register Channel 2 */
+#define R_PDMIF_PDCFCH00RCH_OFFSET(m)             (0x00000138 + ((m) * 0x00000100))  /* Compensation Filter Coefficient h(0) Register Channel %s */
 /* PDCFCH01RCH%s Registers (0-2) */
-#define R_PDMIF_PDCFCH01RCH0_OFFSET     0x0000013c  /* Compensation Filter Coefficient h(1) Register Channel 0 */
-#define R_PDMIF_PDCFCH01RCH1_OFFSET     0x0000023c  /* Compensation Filter Coefficient h(1) Register Channel 1 */
-#define R_PDMIF_PDCFCH01RCH2_OFFSET     0x0000033c  /* Compensation Filter Coefficient h(1) Register Channel 2 */
+#define R_PDMIF_PDCFCH01RCH_OFFSET(m)             (0x0000013c + ((m) * 0x00000100))  /* Compensation Filter Coefficient h(1) Register Channel %s */
 /* PDCFCH02RCH%s Registers (0-2) */
-#define R_PDMIF_PDCFCH02RCH0_OFFSET     0x00000140  /* Compensation Filter Coefficient h(2) Register Channel 0 */
-#define R_PDMIF_PDCFCH02RCH1_OFFSET     0x00000240  /* Compensation Filter Coefficient h(2) Register Channel 1 */
-#define R_PDMIF_PDCFCH02RCH2_OFFSET     0x00000340  /* Compensation Filter Coefficient h(2) Register Channel 2 */
+#define R_PDMIF_PDCFCH02RCH_OFFSET(m)             (0x00000140 + ((m) * 0x00000100))  /* Compensation Filter Coefficient h(2) Register Channel %s */
 /* PDCFCH03RCH%s Registers (0-2) */
-#define R_PDMIF_PDCFCH03RCH0_OFFSET     0x00000144  /* Compensation Filter Coefficient h(3) Register Channel 0 */
-#define R_PDMIF_PDCFCH03RCH1_OFFSET     0x00000244  /* Compensation Filter Coefficient h(3) Register Channel 1 */
-#define R_PDMIF_PDCFCH03RCH2_OFFSET     0x00000344  /* Compensation Filter Coefficient h(3) Register Channel 2 */
+#define R_PDMIF_PDCFCH03RCH_OFFSET(m)             (0x00000144 + ((m) * 0x00000100))  /* Compensation Filter Coefficient h(3) Register Channel %s */
 /* PDCFCH04RCH%s Registers (0-2) */
-#define R_PDMIF_PDCFCH04RCH0_OFFSET     0x00000148  /* Compensation Filter Coefficient h(4) Register Channel 0 */
-#define R_PDMIF_PDCFCH04RCH1_OFFSET     0x00000248  /* Compensation Filter Coefficient h(4) Register Channel 1 */
-#define R_PDMIF_PDCFCH04RCH2_OFFSET     0x00000348  /* Compensation Filter Coefficient h(4) Register Channel 2 */
+#define R_PDMIF_PDCFCH04RCH_OFFSET(m)             (0x00000148 + ((m) * 0x00000100))  /* Compensation Filter Coefficient h(4) Register Channel %s */
 /* PDCFCH05RCH%s Registers (0-2) */
-#define R_PDMIF_PDCFCH05RCH0_OFFSET     0x0000014c  /* Compensation Filter Coefficient h(5) Register Channel 0 */
-#define R_PDMIF_PDCFCH05RCH1_OFFSET     0x0000024c  /* Compensation Filter Coefficient h(5) Register Channel 1 */
-#define R_PDMIF_PDCFCH05RCH2_OFFSET     0x0000034c  /* Compensation Filter Coefficient h(5) Register Channel 2 */
-#define R_PDMIF_PDCFCH06RCHN_OFFSET     0x00000150  /* Compensation Filter Coefficient h(6) Register Channel n */
+#define R_PDMIF_PDCFCH05RCH_OFFSET(m)             (0x0000014c + ((m) * 0x00000100))  /* Compensation Filter Coefficient h(5) Register Channel %s */
+#define R_PDMIF_PDCFCH06RCHN_OFFSET               0x00000150  /* Compensation Filter Coefficient h(6) Register Channel n */
 /* PDCFCH07RCH%s Registers (0-2) */
-#define R_PDMIF_PDCFCH07RCH0_OFFSET     0x00000154  /* Compensation Filter Coefficient h(7) Register Channel 0 */
-#define R_PDMIF_PDCFCH07RCH1_OFFSET     0x00000254  /* Compensation Filter Coefficient h(7) Register Channel 1 */
-#define R_PDMIF_PDCFCH07RCH2_OFFSET     0x00000354  /* Compensation Filter Coefficient h(7) Register Channel 2 */
+#define R_PDMIF_PDCFCH07RCH_OFFSET(m)             (0x00000154 + ((m) * 0x00000100))  /* Compensation Filter Coefficient h(7) Register Channel %s */
 /* PDCFCH08RCH%s Registers (0-2) */
-#define R_PDMIF_PDCFCH08RCH0_OFFSET     0x00000158  /* Compensation Filter Coefficient h(8) Register Channel 0 */
-#define R_PDMIF_PDCFCH08RCH1_OFFSET     0x00000258  /* Compensation Filter Coefficient h(8) Register Channel 1 */
-#define R_PDMIF_PDCFCH08RCH2_OFFSET     0x00000358  /* Compensation Filter Coefficient h(8) Register Channel 2 */
+#define R_PDMIF_PDCFCH08RCH_OFFSET(m)             (0x00000158 + ((m) * 0x00000100))  /* Compensation Filter Coefficient h(8) Register Channel %s */
 /* PDCFCH09RCH%s Registers (0-2) */
-#define R_PDMIF_PDCFCH09RCH0_OFFSET     0x0000015c  /* Compensation Filter Coefficient h(9) Register Channel 0 */
-#define R_PDMIF_PDCFCH09RCH1_OFFSET     0x0000025c  /* Compensation Filter Coefficient h(9) Register Channel 1 */
-#define R_PDMIF_PDCFCH09RCH2_OFFSET     0x0000035c  /* Compensation Filter Coefficient h(9) Register Channel 2 */
+#define R_PDMIF_PDCFCH09RCH_OFFSET(m)             (0x0000015c + ((m) * 0x00000100))  /* Compensation Filter Coefficient h(9) Register Channel %s */
 /* PDCFCH10RCH%s Registers (0-2) */
-#define R_PDMIF_PDCFCH10RCH0_OFFSET     0x00000160  /* Compensation Filter Coefficient h(10) Register Channel 0 */
-#define R_PDMIF_PDCFCH10RCH1_OFFSET     0x00000260  /* Compensation Filter Coefficient h(10) Register Channel 1 */
-#define R_PDMIF_PDCFCH10RCH2_OFFSET     0x00000360  /* Compensation Filter Coefficient h(10) Register Channel 2 */
+#define R_PDMIF_PDCFCH10RCH_OFFSET(m)             (0x00000160 + ((m) * 0x00000100))  /* Compensation Filter Coefficient h(10) Register Channel %s */
 /* PDLFCH010RCH%s Registers (0-2) */
-#define R_PDMIF_PDLFCH010RCH0_OFFSET     0x00000164  /* Low-pass Filter Coefficient h0(10) Register Channel 0 */
-#define R_PDMIF_PDLFCH010RCH1_OFFSET     0x00000264  /* Low-pass Filter Coefficient h0(10) Register Channel 1 */
-#define R_PDMIF_PDLFCH010RCH2_OFFSET     0x00000364  /* Low-pass Filter Coefficient h0(10) Register Channel 2 */
+#define R_PDMIF_PDLFCH010RCH_OFFSET(m)            (0x00000164 + ((m) * 0x00000100))  /* Low-pass Filter Coefficient h0(10) Register Channel %s */
 /* PDLFCH100RCH%s Registers (0-2) */
-#define R_PDMIF_PDLFCH100RCH0_OFFSET     0x00000168  /* Low-pass Filter Coefficient h1(0) Register Channel 0 */
-#define R_PDMIF_PDLFCH100RCH1_OFFSET     0x00000268  /* Low-pass Filter Coefficient h1(0) Register Channel 1 */
-#define R_PDMIF_PDLFCH100RCH2_OFFSET     0x00000368  /* Low-pass Filter Coefficient h1(0) Register Channel 2 */
+#define R_PDMIF_PDLFCH100RCH_OFFSET(m)            (0x00000168 + ((m) * 0x00000100))  /* Low-pass Filter Coefficient h1(0) Register Channel %s */
 /* PDLFCH101RCH%s Registers (0-2) */
-#define R_PDMIF_PDLFCH101RCH0_OFFSET     0x0000016c  /* Low-pass Filter Coefficient h1(1) Register Channel 0 */
-#define R_PDMIF_PDLFCH101RCH1_OFFSET     0x0000026c  /* Low-pass Filter Coefficient h1(1) Register Channel 1 */
-#define R_PDMIF_PDLFCH101RCH2_OFFSET     0x0000036c  /* Low-pass Filter Coefficient h1(1) Register Channel 2 */
+#define R_PDMIF_PDLFCH101RCH_OFFSET(m)            (0x0000016c + ((m) * 0x00000100))  /* Low-pass Filter Coefficient h1(1) Register Channel %s */
 /* PDLFCH102RCH%s Registers (0-2) */
-#define R_PDMIF_PDLFCH102RCH0_OFFSET     0x00000170  /* Low-pass Filter Coefficient h1 (2) Register Channel 0 */
-#define R_PDMIF_PDLFCH102RCH1_OFFSET     0x00000270  /* Low-pass Filter Coefficient h1 (2) Register Channel 1 */
-#define R_PDMIF_PDLFCH102RCH2_OFFSET     0x00000370  /* Low-pass Filter Coefficient h1 (2) Register Channel 2 */
+#define R_PDMIF_PDLFCH102RCH_OFFSET(m)            (0x00000170 + ((m) * 0x00000100))  /* Low-pass Filter Coefficient h1 (2) Register Channel %s */
 /* PDLFCH103RCH%s Registers (0-2) */
-#define R_PDMIF_PDLFCH103RCH0_OFFSET     0x00000174  /* Low-pass Filter Coefficient h1(3) Register Channel 0 */
-#define R_PDMIF_PDLFCH103RCH1_OFFSET     0x00000274  /* Low-pass Filter Coefficient h1(3) Register Channel 1 */
-#define R_PDMIF_PDLFCH103RCH2_OFFSET     0x00000374  /* Low-pass Filter Coefficient h1(3) Register Channel 2 */
+#define R_PDMIF_PDLFCH103RCH_OFFSET(m)            (0x00000174 + ((m) * 0x00000100))  /* Low-pass Filter Coefficient h1(3) Register Channel %s */
 /* PDLFCH104RCH%s Registers (0-2) */
-#define R_PDMIF_PDLFCH104RCH0_OFFSET     0x00000178  /* Low-pass Filter Coefficient h1(4) Register Channel 0 */
-#define R_PDMIF_PDLFCH104RCH1_OFFSET     0x00000278  /* Low-pass Filter Coefficient h1(4) Register Channel 1 */
-#define R_PDMIF_PDLFCH104RCH2_OFFSET     0x00000378  /* Low-pass Filter Coefficient h1(4) Register Channel 2 */
+#define R_PDMIF_PDLFCH104RCH_OFFSET(m)            (0x00000178 + ((m) * 0x00000100))  /* Low-pass Filter Coefficient h1(4) Register Channel %s */
 /* PDLFCH105RCH%s Registers (0-2) */
-#define R_PDMIF_PDLFCH105RCH0_OFFSET     0x0000017c  /* Low-pass Filter Coefficient h1(5) Register Channel 0 */
-#define R_PDMIF_PDLFCH105RCH1_OFFSET     0x0000027c  /* Low-pass Filter Coefficient h1(5) Register Channel 1 */
-#define R_PDMIF_PDLFCH105RCH2_OFFSET     0x0000037c  /* Low-pass Filter Coefficient h1(5) Register Channel 2 */
+#define R_PDMIF_PDLFCH105RCH_OFFSET(m)            (0x0000017c + ((m) * 0x00000100))  /* Low-pass Filter Coefficient h1(5) Register Channel %s */
 /* PDLFCH106RCH%s Registers (0-2) */
-#define R_PDMIF_PDLFCH106RCH0_OFFSET     0x00000180  /* Low-pass Filter Coefficient h1(6) Register Channel 0 */
-#define R_PDMIF_PDLFCH106RCH1_OFFSET     0x00000280  /* Low-pass Filter Coefficient h1(6) Register Channel 1 */
-#define R_PDMIF_PDLFCH106RCH2_OFFSET     0x00000380  /* Low-pass Filter Coefficient h1(6) Register Channel 2 */
+#define R_PDMIF_PDLFCH106RCH_OFFSET(m)            (0x00000180 + ((m) * 0x00000100))  /* Low-pass Filter Coefficient h1(6) Register Channel %s */
 /* PDLFCH107RCH%s Registers (0-2) */
-#define R_PDMIF_PDLFCH107RCH0_OFFSET     0x00000184  /* Low-pass Filter Coefficient h1(7) Register Channel 0 */
-#define R_PDMIF_PDLFCH107RCH1_OFFSET     0x00000284  /* Low-pass Filter Coefficient h1(7) Register Channel 1 */
-#define R_PDMIF_PDLFCH107RCH2_OFFSET     0x00000384  /* Low-pass Filter Coefficient h1(7) Register Channel 2 */
+#define R_PDMIF_PDLFCH107RCH_OFFSET(m)            (0x00000184 + ((m) * 0x00000100))  /* Low-pass Filter Coefficient h1(7) Register Channel %s */
 /* PDLFCH108RCH%s Registers (0-2) */
-#define R_PDMIF_PDLFCH108RCH0_OFFSET     0x00000188  /* Low-pass Filter Coefficient h1(8) Register Channel 0 */
-#define R_PDMIF_PDLFCH108RCH1_OFFSET     0x00000288  /* Low-pass Filter Coefficient h1(8) Register Channel 1 */
-#define R_PDMIF_PDLFCH108RCH2_OFFSET     0x00000388  /* Low-pass Filter Coefficient h1(8) Register Channel 2 */
+#define R_PDMIF_PDLFCH108RCH_OFFSET(m)            (0x00000188 + ((m) * 0x00000100))  /* Low-pass Filter Coefficient h1(8) Register Channel %s */
 /* PDLFCH109RCH%s Registers (0-2) */
-#define R_PDMIF_PDLFCH109RCH0_OFFSET     0x0000018c  /* Low-pass Filter Coefficient h1(9) Register Channel 0 */
-#define R_PDMIF_PDLFCH109RCH1_OFFSET     0x0000028c  /* Low-pass Filter Coefficient h1(9) Register Channel 1 */
-#define R_PDMIF_PDLFCH109RCH2_OFFSET     0x0000038c  /* Low-pass Filter Coefficient h1(9) Register Channel 2 */
+#define R_PDMIF_PDLFCH109RCH_OFFSET(m)            (0x0000018c + ((m) * 0x00000100))  /* Low-pass Filter Coefficient h1(9) Register Channel %s */
 /* PDLFCH110RCH%s Registers (0-2) */
-#define R_PDMIF_PDLFCH110RCH0_OFFSET     0x00000190  /* Low-pass Filter Coefficient h1(10) Register Channel 0 */
-#define R_PDMIF_PDLFCH110RCH1_OFFSET     0x00000290  /* Low-pass Filter Coefficient h1(10) Register Channel 1 */
-#define R_PDMIF_PDLFCH110RCH2_OFFSET     0x00000390  /* Low-pass Filter Coefficient h1(10) Register Channel 2 */
+#define R_PDMIF_PDLFCH110RCH_OFFSET(m)            (0x00000190 + ((m) * 0x00000100))  /* Low-pass Filter Coefficient h1(10) Register Channel %s */
 /* PDLFCH111RCH%s Registers (0-2) */
-#define R_PDMIF_PDLFCH111RCH0_OFFSET     0x00000194  /* Low-pass Filter Coefficient h1(11) Register Channel 0 */
-#define R_PDMIF_PDLFCH111RCH1_OFFSET     0x00000294  /* Low-pass Filter Coefficient h1(11) Register Channel 1 */
-#define R_PDMIF_PDLFCH111RCH2_OFFSET     0x00000394  /* Low-pass Filter Coefficient h1(11) Register Channel 2 */
+#define R_PDMIF_PDLFCH111RCH_OFFSET(m)            (0x00000194 + ((m) * 0x00000100))  /* Low-pass Filter Coefficient h1(11) Register Channel %s */
 /* PDLFCH112RCH%s Registers (0-2) */
-#define R_PDMIF_PDLFCH112RCH0_OFFSET     0x00000198  /* Low-pass Filter Coefficient h1(12) Register Channel 0 */
-#define R_PDMIF_PDLFCH112RCH1_OFFSET     0x00000298  /* Low-pass Filter Coefficient h1(12) Register Channel 1 */
-#define R_PDMIF_PDLFCH112RCH2_OFFSET     0x00000398  /* Low-pass Filter Coefficient h1(12) Register Channel 2 */
+#define R_PDMIF_PDLFCH112RCH_OFFSET(m)            (0x00000198 + ((m) * 0x00000100))  /* Low-pass Filter Coefficient h1(12) Register Channel %s */
 /* PDLFCH113RCH%s Registers (0-2) */
-#define R_PDMIF_PDLFCH113RCH0_OFFSET     0x0000019c  /* Low-pass Filter Coefficient h1(13) Register Channel 0 */
-#define R_PDMIF_PDLFCH113RCH1_OFFSET     0x0000029c  /* Low-pass Filter Coefficient h1(13) Register Channel 1 */
-#define R_PDMIF_PDLFCH113RCH2_OFFSET     0x0000039c  /* Low-pass Filter Coefficient h1(13) Register Channel 2 */
+#define R_PDMIF_PDLFCH113RCH_OFFSET(m)            (0x0000019c + ((m) * 0x00000100))  /* Low-pass Filter Coefficient h1(13) Register Channel %s */
 /* PDLFCH114RCH%s Registers (0-2) */
-#define R_PDMIF_PDLFCH114RCH0_OFFSET     0x000001a0  /* Low-pass Filter Coefficient h1(14) Register Channel 0 */
-#define R_PDMIF_PDLFCH114RCH1_OFFSET     0x000002a0  /* Low-pass Filter Coefficient h1(14) Register Channel 1 */
-#define R_PDMIF_PDLFCH114RCH2_OFFSET     0x000003a0  /* Low-pass Filter Coefficient h1(14) Register Channel 2 */
+#define R_PDMIF_PDLFCH114RCH_OFFSET(m)            (0x000001a0 + ((m) * 0x00000100))  /* Low-pass Filter Coefficient h1(14) Register Channel %s */
 /* PDLFCH115RCH%s Registers (0-2) */
-#define R_PDMIF_PDLFCH115RCH0_OFFSET     0x000001a4  /* Low-pass Filter Coefficient h1(15) Register Channel 0 */
-#define R_PDMIF_PDLFCH115RCH1_OFFSET     0x000002a4  /* Low-pass Filter Coefficient h1(15) Register Channel 1 */
-#define R_PDMIF_PDLFCH115RCH2_OFFSET     0x000003a4  /* Low-pass Filter Coefficient h1(15) Register Channel 2 */
+#define R_PDMIF_PDLFCH115RCH_OFFSET(m)            (0x000001a4 + ((m) * 0x00000100))  /* Low-pass Filter Coefficient h1(15) Register Channel %s */
 /* PDLFCH116RCH%s Registers (0-2) */
-#define R_PDMIF_PDLFCH116RCH0_OFFSET     0x000001a8  /* Low-pass Filter Coefficient h1(16) Register Channel 0 */
-#define R_PDMIF_PDLFCH116RCH1_OFFSET     0x000002a8  /* Low-pass Filter Coefficient h1(16) Register Channel 1 */
-#define R_PDMIF_PDLFCH116RCH2_OFFSET     0x000003a8  /* Low-pass Filter Coefficient h1(16) Register Channel 2 */
+#define R_PDMIF_PDLFCH116RCH_OFFSET(m)            (0x000001a8 + ((m) * 0x00000100))  /* Low-pass Filter Coefficient h1(16) Register Channel %s */
 /* PDLFCH117RCH%s Registers (0-2) */
-#define R_PDMIF_PDLFCH117RCH0_OFFSET     0x000001ac  /* Low-pass Filter Coefficient h1(17) Register Channel 0 */
-#define R_PDMIF_PDLFCH117RCH1_OFFSET     0x000002ac  /* Low-pass Filter Coefficient h1(17) Register Channel 1 */
-#define R_PDMIF_PDLFCH117RCH2_OFFSET     0x000003ac  /* Low-pass Filter Coefficient h1(17) Register Channel 2 */
+#define R_PDMIF_PDLFCH117RCH_OFFSET(m)            (0x000001ac + ((m) * 0x00000100))  /* Low-pass Filter Coefficient h1(17) Register Channel %s */
 /* PDLFCH118RCH%s Registers (0-2) */
-#define R_PDMIF_PDLFCH118RCH0_OFFSET     0x000001b0  /* Low-pass Filter Coefficient h1(18) Register Channel 0 */
-#define R_PDMIF_PDLFCH118RCH1_OFFSET     0x000002b0  /* Low-pass Filter Coefficient h1(18) Register Channel 1 */
-#define R_PDMIF_PDLFCH118RCH2_OFFSET     0x000003b0  /* Low-pass Filter Coefficient h1(18) Register Channel 2 */
+#define R_PDMIF_PDLFCH118RCH_OFFSET(m)            (0x000001b0 + ((m) * 0x00000100))  /* Low-pass Filter Coefficient h1(18) Register Channel %s */
 /* PDLFCH119RCH%s Registers (0-2) */
-#define R_PDMIF_PDLFCH119RCH0_OFFSET     0x000001b4  /* Low-pass Filter Coefficient h1(19) Register Channel 0 */
-#define R_PDMIF_PDLFCH119RCH1_OFFSET     0x000002b4  /* Low-pass Filter Coefficient h1(19) Register Channel 1 */
-#define R_PDMIF_PDLFCH119RCH2_OFFSET     0x000003b4  /* Low-pass Filter Coefficient h1(19) Register Channel 2 */
+#define R_PDMIF_PDLFCH119RCH_OFFSET(m)            (0x000001b4 + ((m) * 0x00000100))  /* Low-pass Filter Coefficient h1(19) Register Channel %s */
 /* PDSDLTRCH%s Registers (0-2) */
-#define R_PDMIF_PDSDLTRCH0_OFFSET     0x000001b8  /* Sound Detection Lower Threshold Register Channel 0 */
-#define R_PDMIF_PDSDLTRCH1_OFFSET     0x000002b8  /* Sound Detection Lower Threshold Register Channel 1 */
-#define R_PDMIF_PDSDLTRCH2_OFFSET     0x000003b8  /* Sound Detection Lower Threshold Register Channel 2 */
+#define R_PDMIF_PDSDLTRCH_OFFSET(m)               (0x000001b8 + ((m) * 0x00000100))  /* Sound Detection Lower Threshold Register Channel %s */
 /* PDSDUTRCH%s Registers (0-2) */
-#define R_PDMIF_PDSDUTRCH0_OFFSET     0x000001bc  /* Sound Detection Upper Threshold Register Channel 0 */
-#define R_PDMIF_PDSDUTRCH1_OFFSET     0x000002bc  /* Sound Detection Upper Threshold Register Channel 1 */
-#define R_PDMIF_PDSDUTRCH2_OFFSET     0x000003bc  /* Sound Detection Upper Threshold Register Channel 2 */
+#define R_PDMIF_PDSDUTRCH_OFFSET(m)               (0x000001bc + ((m) * 0x00000100))  /* Sound Detection Upper Threshold Register Channel %s */
 /* PDDBCRCH%s Registers (0-2) */
-#define R_PDMIF_PDDBCRCH0_OFFSET     0x000001c0  /* Data Buffer Control Register Channel 0 */
-#define R_PDMIF_PDDBCRCH1_OFFSET     0x000002c0  /* Data Buffer Control Register Channel 1 */
-#define R_PDMIF_PDDBCRCH2_OFFSET     0x000003c0  /* Data Buffer Control Register Channel 2 */
+#define R_PDMIF_PDDBCRCH_OFFSET(m)                (0x000001c0 + ((m) * 0x00000100))  /* Data Buffer Control Register Channel %s */
 /* PDSCTSRCH%s Registers (0-2) */
-#define R_PDMIF_PDSCTSRCH0_OFFSET     0x000001c4  /* Short Circuit Threshold Setting Register Channel 0 */
-#define R_PDMIF_PDSCTSRCH1_OFFSET     0x000002c4  /* Short Circuit Threshold Setting Register Channel 1 */
-#define R_PDMIF_PDSCTSRCH2_OFFSET     0x000003c4  /* Short Circuit Threshold Setting Register Channel 2 */
+#define R_PDMIF_PDSCTSRCH_OFFSET(m)               (0x000001c4 + ((m) * 0x00000100))  /* Short Circuit Threshold Setting Register Channel %s */
 /* PDOVLTRCH%s Registers (0-2) */
-#define R_PDMIF_PDOVLTRCH0_OFFSET     0x000001c8  /* Overvoltage Lower Threshold Register Channel 0 */
-#define R_PDMIF_PDOVLTRCH1_OFFSET     0x000002c8  /* Overvoltage Lower Threshold Register Channel 1 */
-#define R_PDMIF_PDOVLTRCH2_OFFSET     0x000003c8  /* Overvoltage Lower Threshold Register Channel 2 */
+#define R_PDMIF_PDOVLTRCH_OFFSET(m)               (0x000001c8 + ((m) * 0x00000100))  /* Overvoltage Lower Threshold Register Channel %s */
 /* PDOVUTRCH%s Registers (0-2) */
-#define R_PDMIF_PDOVUTRCH0_OFFSET     0x000001cc  /* Overvoltage Upper Threshold Register Channel 0 */
-#define R_PDMIF_PDOVUTRCH1_OFFSET     0x000002cc  /* Overvoltage Upper Threshold Register Channel 1 */
-#define R_PDMIF_PDOVUTRCH2_OFFSET     0x000003cc  /* Overvoltage Upper Threshold Register Channel 2 */
+#define R_PDMIF_PDOVUTRCH_OFFSET(m)               (0x000001cc + ((m) * 0x00000100))  /* Overvoltage Upper Threshold Register Channel %s */
 /* PDDRCRCH%s Registers (0-2) */
-#define R_PDMIF_PDDRCRCH0_OFFSET     0x000001e0  /* Data Read Control Register Channel 0 */
-#define R_PDMIF_PDDRCRCH1_OFFSET     0x000002e0  /* Data Read Control Register Channel 1 */
-#define R_PDMIF_PDDRCRCH2_OFFSET     0x000003e0  /* Data Read Control Register Channel 2 */
+#define R_PDMIF_PDDRCRCH_OFFSET(m)                (0x000001e0 + ((m) * 0x00000100))  /* Data Read Control Register Channel %s */
 /* PDDCRCH%s Registers (0-2) */
-#define R_PDMIF_PDDCRCH0_OFFSET     0x000001e4  /* Data Clear Register Channel 0 */
-#define R_PDMIF_PDDCRCH1_OFFSET     0x000002e4  /* Data Clear Register Channel 1 */
-#define R_PDMIF_PDDCRCH2_OFFSET     0x000003e4  /* Data Clear Register Channel 2 */
+#define R_PDMIF_PDDCRCH_OFFSET(m)                 (0x000001e4 + ((m) * 0x00000100))  /* Data Clear Register Channel %s */
 /* PDDRRCH%s Registers (0-2) */
-#define R_PDMIF_PDDRRCH0_OFFSET     0x000001e8  /* Data Read Register Channel 0 */
-#define R_PDMIF_PDDRRCH1_OFFSET     0x000002e8  /* Data Read Register Channel 1 */
-#define R_PDMIF_PDDRRCH2_OFFSET     0x000003e8  /* Data Read Register Channel 2 */
+#define R_PDMIF_PDDRRCH_OFFSET(m)                 (0x000001e8 + ((m) * 0x00000100))  /* Data Read Register Channel %s */
 /* PDDSRCH%s Registers (0-2) */
-#define R_PDMIF_PDDSRCH0_OFFSET     0x000001ec  /* Data Status Register Channel 0 */
-#define R_PDMIF_PDDSRCH1_OFFSET     0x000002ec  /* Data Status Register Channel 1 */
-#define R_PDMIF_PDDSRCH2_OFFSET     0x000003ec  /* Data Status Register Channel 2 */
+#define R_PDMIF_PDDSRCH_OFFSET(m)                 (0x000001ec + ((m) * 0x00000100))  /* Data Status Register Channel %s */
 
 /* PDMIF Register Addresses */
 
-#define R_PDMIF_PDCSTRTR                 (R_PDMIF_BASE + R_PDMIF_PDCSTRTR_OFFSET)
-#define R_PDMIF_PDCSTPTR                 (R_PDMIF_BASE + R_PDMIF_PDCSTPTR_OFFSET)
-#define R_PDMIF_PDCCHGTR                 (R_PDMIF_BASE + R_PDMIF_PDCCHGTR_OFFSET)
-#define R_PDMIF_PDCICR                 (R_PDMIF_BASE + R_PDMIF_PDCICR_OFFSET)
-#define R_PDMIF_PDCSR                 (R_PDMIF_BASE + R_PDMIF_PDCSR_OFFSET)
-#define R_PDMIF_PDCSCR                 (R_PDMIF_BASE + R_PDMIF_PDCSCR_OFFSET)
-#define R_PDMIF_PDCSDCR                 (R_PDMIF_BASE + R_PDMIF_PDCSDCR_OFFSET)
-#define R_PDMIF_PDCDRCR                 (R_PDMIF_BASE + R_PDMIF_PDCDRCR_OFFSET)
-#define R_PDMIF_PDCDCR                 (R_PDMIF_BASE + R_PDMIF_PDCDCR_OFFSET)
-#define R_PDMIF_PDVR                 (R_PDMIF_BASE + R_PDMIF_PDVR_OFFSET)
-#define R_PDMIF_PDSTRTRCH0                 (R_PDMIF_BASE + R_PDMIF_PDSTRTRCH0_OFFSET)
-#define R_PDMIF_PDSTRTRCH1                 (R_PDMIF_BASE + R_PDMIF_PDSTRTRCH1_OFFSET)
-#define R_PDMIF_PDSTRTRCH2                 (R_PDMIF_BASE + R_PDMIF_PDSTRTRCH2_OFFSET)
-#define R_PDMIF_PDSTPTRCH0                 (R_PDMIF_BASE + R_PDMIF_PDSTPTRCH0_OFFSET)
-#define R_PDMIF_PDSTPTRCH1                 (R_PDMIF_BASE + R_PDMIF_PDSTPTRCH1_OFFSET)
-#define R_PDMIF_PDSTPTRCH2                 (R_PDMIF_BASE + R_PDMIF_PDSTPTRCH2_OFFSET)
-#define R_PDMIF_PDCHGTRCH0                 (R_PDMIF_BASE + R_PDMIF_PDCHGTRCH0_OFFSET)
-#define R_PDMIF_PDCHGTRCH1                 (R_PDMIF_BASE + R_PDMIF_PDCHGTRCH1_OFFSET)
-#define R_PDMIF_PDCHGTRCH2                 (R_PDMIF_BASE + R_PDMIF_PDCHGTRCH2_OFFSET)
-#define R_PDMIF_PDICRCH0                 (R_PDMIF_BASE + R_PDMIF_PDICRCH0_OFFSET)
-#define R_PDMIF_PDICRCH1                 (R_PDMIF_BASE + R_PDMIF_PDICRCH1_OFFSET)
-#define R_PDMIF_PDICRCH2                 (R_PDMIF_BASE + R_PDMIF_PDICRCH2_OFFSET)
-#define R_PDMIF_PDSDCRCH0                 (R_PDMIF_BASE + R_PDMIF_PDSDCRCH0_OFFSET)
-#define R_PDMIF_PDSDCRCH1                 (R_PDMIF_BASE + R_PDMIF_PDSDCRCH1_OFFSET)
-#define R_PDMIF_PDSDCRCH2                 (R_PDMIF_BASE + R_PDMIF_PDSDCRCH2_OFFSET)
-#define R_PDMIF_PDSRCH0                 (R_PDMIF_BASE + R_PDMIF_PDSRCH0_OFFSET)
-#define R_PDMIF_PDSRCH1                 (R_PDMIF_BASE + R_PDMIF_PDSRCH1_OFFSET)
-#define R_PDMIF_PDSRCH2                 (R_PDMIF_BASE + R_PDMIF_PDSRCH2_OFFSET)
-#define R_PDMIF_PDSCRCH0                 (R_PDMIF_BASE + R_PDMIF_PDSCRCH0_OFFSET)
-#define R_PDMIF_PDSCRCH1                 (R_PDMIF_BASE + R_PDMIF_PDSCRCH1_OFFSET)
-#define R_PDMIF_PDSCRCH2                 (R_PDMIF_BASE + R_PDMIF_PDSCRCH2_OFFSET)
-#define R_PDMIF_PDMDSRCH0                 (R_PDMIF_BASE + R_PDMIF_PDMDSRCH0_OFFSET)
-#define R_PDMIF_PDMDSRCH1                 (R_PDMIF_BASE + R_PDMIF_PDMDSRCH1_OFFSET)
-#define R_PDMIF_PDMDSRCH2                 (R_PDMIF_BASE + R_PDMIF_PDMDSRCH2_OFFSET)
-#define R_PDMIF_PDSFCRCH0                 (R_PDMIF_BASE + R_PDMIF_PDSFCRCH0_OFFSET)
-#define R_PDMIF_PDSFCRCH1                 (R_PDMIF_BASE + R_PDMIF_PDSFCRCH1_OFFSET)
-#define R_PDMIF_PDSFCRCH2                 (R_PDMIF_BASE + R_PDMIF_PDSFCRCH2_OFFSET)
-#define R_PDMIF_PDHFCS0RCH0                 (R_PDMIF_BASE + R_PDMIF_PDHFCS0RCH0_OFFSET)
-#define R_PDMIF_PDHFCS0RCH1                 (R_PDMIF_BASE + R_PDMIF_PDHFCS0RCH1_OFFSET)
-#define R_PDMIF_PDHFCS0RCH2                 (R_PDMIF_BASE + R_PDMIF_PDHFCS0RCH2_OFFSET)
-#define R_PDMIF_PDHFCK1RCH0                 (R_PDMIF_BASE + R_PDMIF_PDHFCK1RCH0_OFFSET)
-#define R_PDMIF_PDHFCK1RCH1                 (R_PDMIF_BASE + R_PDMIF_PDHFCK1RCH1_OFFSET)
-#define R_PDMIF_PDHFCK1RCH2                 (R_PDMIF_BASE + R_PDMIF_PDHFCK1RCH2_OFFSET)
-#define R_PDMIF_PDHFCH0RCH0                 (R_PDMIF_BASE + R_PDMIF_PDHFCH0RCH0_OFFSET)
-#define R_PDMIF_PDHFCH0RCH1                 (R_PDMIF_BASE + R_PDMIF_PDHFCH0RCH1_OFFSET)
-#define R_PDMIF_PDHFCH0RCH2                 (R_PDMIF_BASE + R_PDMIF_PDHFCH0RCH2_OFFSET)
-#define R_PDMIF_PDHFCH1RCH0                 (R_PDMIF_BASE + R_PDMIF_PDHFCH1RCH0_OFFSET)
-#define R_PDMIF_PDHFCH1RCH1                 (R_PDMIF_BASE + R_PDMIF_PDHFCH1RCH1_OFFSET)
-#define R_PDMIF_PDHFCH1RCH2                 (R_PDMIF_BASE + R_PDMIF_PDHFCH1RCH2_OFFSET)
-#define R_PDMIF_PDCFCH00RCH0                 (R_PDMIF_BASE + R_PDMIF_PDCFCH00RCH0_OFFSET)
-#define R_PDMIF_PDCFCH00RCH1                 (R_PDMIF_BASE + R_PDMIF_PDCFCH00RCH1_OFFSET)
-#define R_PDMIF_PDCFCH00RCH2                 (R_PDMIF_BASE + R_PDMIF_PDCFCH00RCH2_OFFSET)
-#define R_PDMIF_PDCFCH01RCH0                 (R_PDMIF_BASE + R_PDMIF_PDCFCH01RCH0_OFFSET)
-#define R_PDMIF_PDCFCH01RCH1                 (R_PDMIF_BASE + R_PDMIF_PDCFCH01RCH1_OFFSET)
-#define R_PDMIF_PDCFCH01RCH2                 (R_PDMIF_BASE + R_PDMIF_PDCFCH01RCH2_OFFSET)
-#define R_PDMIF_PDCFCH02RCH0                 (R_PDMIF_BASE + R_PDMIF_PDCFCH02RCH0_OFFSET)
-#define R_PDMIF_PDCFCH02RCH1                 (R_PDMIF_BASE + R_PDMIF_PDCFCH02RCH1_OFFSET)
-#define R_PDMIF_PDCFCH02RCH2                 (R_PDMIF_BASE + R_PDMIF_PDCFCH02RCH2_OFFSET)
-#define R_PDMIF_PDCFCH03RCH0                 (R_PDMIF_BASE + R_PDMIF_PDCFCH03RCH0_OFFSET)
-#define R_PDMIF_PDCFCH03RCH1                 (R_PDMIF_BASE + R_PDMIF_PDCFCH03RCH1_OFFSET)
-#define R_PDMIF_PDCFCH03RCH2                 (R_PDMIF_BASE + R_PDMIF_PDCFCH03RCH2_OFFSET)
-#define R_PDMIF_PDCFCH04RCH0                 (R_PDMIF_BASE + R_PDMIF_PDCFCH04RCH0_OFFSET)
-#define R_PDMIF_PDCFCH04RCH1                 (R_PDMIF_BASE + R_PDMIF_PDCFCH04RCH1_OFFSET)
-#define R_PDMIF_PDCFCH04RCH2                 (R_PDMIF_BASE + R_PDMIF_PDCFCH04RCH2_OFFSET)
-#define R_PDMIF_PDCFCH05RCH0                 (R_PDMIF_BASE + R_PDMIF_PDCFCH05RCH0_OFFSET)
-#define R_PDMIF_PDCFCH05RCH1                 (R_PDMIF_BASE + R_PDMIF_PDCFCH05RCH1_OFFSET)
-#define R_PDMIF_PDCFCH05RCH2                 (R_PDMIF_BASE + R_PDMIF_PDCFCH05RCH2_OFFSET)
-#define R_PDMIF_PDCFCH06RCHN                 (R_PDMIF_BASE + R_PDMIF_PDCFCH06RCHN_OFFSET)
-#define R_PDMIF_PDCFCH07RCH0                 (R_PDMIF_BASE + R_PDMIF_PDCFCH07RCH0_OFFSET)
-#define R_PDMIF_PDCFCH07RCH1                 (R_PDMIF_BASE + R_PDMIF_PDCFCH07RCH1_OFFSET)
-#define R_PDMIF_PDCFCH07RCH2                 (R_PDMIF_BASE + R_PDMIF_PDCFCH07RCH2_OFFSET)
-#define R_PDMIF_PDCFCH08RCH0                 (R_PDMIF_BASE + R_PDMIF_PDCFCH08RCH0_OFFSET)
-#define R_PDMIF_PDCFCH08RCH1                 (R_PDMIF_BASE + R_PDMIF_PDCFCH08RCH1_OFFSET)
-#define R_PDMIF_PDCFCH08RCH2                 (R_PDMIF_BASE + R_PDMIF_PDCFCH08RCH2_OFFSET)
-#define R_PDMIF_PDCFCH09RCH0                 (R_PDMIF_BASE + R_PDMIF_PDCFCH09RCH0_OFFSET)
-#define R_PDMIF_PDCFCH09RCH1                 (R_PDMIF_BASE + R_PDMIF_PDCFCH09RCH1_OFFSET)
-#define R_PDMIF_PDCFCH09RCH2                 (R_PDMIF_BASE + R_PDMIF_PDCFCH09RCH2_OFFSET)
-#define R_PDMIF_PDCFCH10RCH0                 (R_PDMIF_BASE + R_PDMIF_PDCFCH10RCH0_OFFSET)
-#define R_PDMIF_PDCFCH10RCH1                 (R_PDMIF_BASE + R_PDMIF_PDCFCH10RCH1_OFFSET)
-#define R_PDMIF_PDCFCH10RCH2                 (R_PDMIF_BASE + R_PDMIF_PDCFCH10RCH2_OFFSET)
-#define R_PDMIF_PDLFCH010RCH0                 (R_PDMIF_BASE + R_PDMIF_PDLFCH010RCH0_OFFSET)
-#define R_PDMIF_PDLFCH010RCH1                 (R_PDMIF_BASE + R_PDMIF_PDLFCH010RCH1_OFFSET)
-#define R_PDMIF_PDLFCH010RCH2                 (R_PDMIF_BASE + R_PDMIF_PDLFCH010RCH2_OFFSET)
-#define R_PDMIF_PDLFCH100RCH0                 (R_PDMIF_BASE + R_PDMIF_PDLFCH100RCH0_OFFSET)
-#define R_PDMIF_PDLFCH100RCH1                 (R_PDMIF_BASE + R_PDMIF_PDLFCH100RCH1_OFFSET)
-#define R_PDMIF_PDLFCH100RCH2                 (R_PDMIF_BASE + R_PDMIF_PDLFCH100RCH2_OFFSET)
-#define R_PDMIF_PDLFCH101RCH0                 (R_PDMIF_BASE + R_PDMIF_PDLFCH101RCH0_OFFSET)
-#define R_PDMIF_PDLFCH101RCH1                 (R_PDMIF_BASE + R_PDMIF_PDLFCH101RCH1_OFFSET)
-#define R_PDMIF_PDLFCH101RCH2                 (R_PDMIF_BASE + R_PDMIF_PDLFCH101RCH2_OFFSET)
-#define R_PDMIF_PDLFCH102RCH0                 (R_PDMIF_BASE + R_PDMIF_PDLFCH102RCH0_OFFSET)
-#define R_PDMIF_PDLFCH102RCH1                 (R_PDMIF_BASE + R_PDMIF_PDLFCH102RCH1_OFFSET)
-#define R_PDMIF_PDLFCH102RCH2                 (R_PDMIF_BASE + R_PDMIF_PDLFCH102RCH2_OFFSET)
-#define R_PDMIF_PDLFCH103RCH0                 (R_PDMIF_BASE + R_PDMIF_PDLFCH103RCH0_OFFSET)
-#define R_PDMIF_PDLFCH103RCH1                 (R_PDMIF_BASE + R_PDMIF_PDLFCH103RCH1_OFFSET)
-#define R_PDMIF_PDLFCH103RCH2                 (R_PDMIF_BASE + R_PDMIF_PDLFCH103RCH2_OFFSET)
-#define R_PDMIF_PDLFCH104RCH0                 (R_PDMIF_BASE + R_PDMIF_PDLFCH104RCH0_OFFSET)
-#define R_PDMIF_PDLFCH104RCH1                 (R_PDMIF_BASE + R_PDMIF_PDLFCH104RCH1_OFFSET)
-#define R_PDMIF_PDLFCH104RCH2                 (R_PDMIF_BASE + R_PDMIF_PDLFCH104RCH2_OFFSET)
-#define R_PDMIF_PDLFCH105RCH0                 (R_PDMIF_BASE + R_PDMIF_PDLFCH105RCH0_OFFSET)
-#define R_PDMIF_PDLFCH105RCH1                 (R_PDMIF_BASE + R_PDMIF_PDLFCH105RCH1_OFFSET)
-#define R_PDMIF_PDLFCH105RCH2                 (R_PDMIF_BASE + R_PDMIF_PDLFCH105RCH2_OFFSET)
-#define R_PDMIF_PDLFCH106RCH0                 (R_PDMIF_BASE + R_PDMIF_PDLFCH106RCH0_OFFSET)
-#define R_PDMIF_PDLFCH106RCH1                 (R_PDMIF_BASE + R_PDMIF_PDLFCH106RCH1_OFFSET)
-#define R_PDMIF_PDLFCH106RCH2                 (R_PDMIF_BASE + R_PDMIF_PDLFCH106RCH2_OFFSET)
-#define R_PDMIF_PDLFCH107RCH0                 (R_PDMIF_BASE + R_PDMIF_PDLFCH107RCH0_OFFSET)
-#define R_PDMIF_PDLFCH107RCH1                 (R_PDMIF_BASE + R_PDMIF_PDLFCH107RCH1_OFFSET)
-#define R_PDMIF_PDLFCH107RCH2                 (R_PDMIF_BASE + R_PDMIF_PDLFCH107RCH2_OFFSET)
-#define R_PDMIF_PDLFCH108RCH0                 (R_PDMIF_BASE + R_PDMIF_PDLFCH108RCH0_OFFSET)
-#define R_PDMIF_PDLFCH108RCH1                 (R_PDMIF_BASE + R_PDMIF_PDLFCH108RCH1_OFFSET)
-#define R_PDMIF_PDLFCH108RCH2                 (R_PDMIF_BASE + R_PDMIF_PDLFCH108RCH2_OFFSET)
-#define R_PDMIF_PDLFCH109RCH0                 (R_PDMIF_BASE + R_PDMIF_PDLFCH109RCH0_OFFSET)
-#define R_PDMIF_PDLFCH109RCH1                 (R_PDMIF_BASE + R_PDMIF_PDLFCH109RCH1_OFFSET)
-#define R_PDMIF_PDLFCH109RCH2                 (R_PDMIF_BASE + R_PDMIF_PDLFCH109RCH2_OFFSET)
-#define R_PDMIF_PDLFCH110RCH0                 (R_PDMIF_BASE + R_PDMIF_PDLFCH110RCH0_OFFSET)
-#define R_PDMIF_PDLFCH110RCH1                 (R_PDMIF_BASE + R_PDMIF_PDLFCH110RCH1_OFFSET)
-#define R_PDMIF_PDLFCH110RCH2                 (R_PDMIF_BASE + R_PDMIF_PDLFCH110RCH2_OFFSET)
-#define R_PDMIF_PDLFCH111RCH0                 (R_PDMIF_BASE + R_PDMIF_PDLFCH111RCH0_OFFSET)
-#define R_PDMIF_PDLFCH111RCH1                 (R_PDMIF_BASE + R_PDMIF_PDLFCH111RCH1_OFFSET)
-#define R_PDMIF_PDLFCH111RCH2                 (R_PDMIF_BASE + R_PDMIF_PDLFCH111RCH2_OFFSET)
-#define R_PDMIF_PDLFCH112RCH0                 (R_PDMIF_BASE + R_PDMIF_PDLFCH112RCH0_OFFSET)
-#define R_PDMIF_PDLFCH112RCH1                 (R_PDMIF_BASE + R_PDMIF_PDLFCH112RCH1_OFFSET)
-#define R_PDMIF_PDLFCH112RCH2                 (R_PDMIF_BASE + R_PDMIF_PDLFCH112RCH2_OFFSET)
-#define R_PDMIF_PDLFCH113RCH0                 (R_PDMIF_BASE + R_PDMIF_PDLFCH113RCH0_OFFSET)
-#define R_PDMIF_PDLFCH113RCH1                 (R_PDMIF_BASE + R_PDMIF_PDLFCH113RCH1_OFFSET)
-#define R_PDMIF_PDLFCH113RCH2                 (R_PDMIF_BASE + R_PDMIF_PDLFCH113RCH2_OFFSET)
-#define R_PDMIF_PDLFCH114RCH0                 (R_PDMIF_BASE + R_PDMIF_PDLFCH114RCH0_OFFSET)
-#define R_PDMIF_PDLFCH114RCH1                 (R_PDMIF_BASE + R_PDMIF_PDLFCH114RCH1_OFFSET)
-#define R_PDMIF_PDLFCH114RCH2                 (R_PDMIF_BASE + R_PDMIF_PDLFCH114RCH2_OFFSET)
-#define R_PDMIF_PDLFCH115RCH0                 (R_PDMIF_BASE + R_PDMIF_PDLFCH115RCH0_OFFSET)
-#define R_PDMIF_PDLFCH115RCH1                 (R_PDMIF_BASE + R_PDMIF_PDLFCH115RCH1_OFFSET)
-#define R_PDMIF_PDLFCH115RCH2                 (R_PDMIF_BASE + R_PDMIF_PDLFCH115RCH2_OFFSET)
-#define R_PDMIF_PDLFCH116RCH0                 (R_PDMIF_BASE + R_PDMIF_PDLFCH116RCH0_OFFSET)
-#define R_PDMIF_PDLFCH116RCH1                 (R_PDMIF_BASE + R_PDMIF_PDLFCH116RCH1_OFFSET)
-#define R_PDMIF_PDLFCH116RCH2                 (R_PDMIF_BASE + R_PDMIF_PDLFCH116RCH2_OFFSET)
-#define R_PDMIF_PDLFCH117RCH0                 (R_PDMIF_BASE + R_PDMIF_PDLFCH117RCH0_OFFSET)
-#define R_PDMIF_PDLFCH117RCH1                 (R_PDMIF_BASE + R_PDMIF_PDLFCH117RCH1_OFFSET)
-#define R_PDMIF_PDLFCH117RCH2                 (R_PDMIF_BASE + R_PDMIF_PDLFCH117RCH2_OFFSET)
-#define R_PDMIF_PDLFCH118RCH0                 (R_PDMIF_BASE + R_PDMIF_PDLFCH118RCH0_OFFSET)
-#define R_PDMIF_PDLFCH118RCH1                 (R_PDMIF_BASE + R_PDMIF_PDLFCH118RCH1_OFFSET)
-#define R_PDMIF_PDLFCH118RCH2                 (R_PDMIF_BASE + R_PDMIF_PDLFCH118RCH2_OFFSET)
-#define R_PDMIF_PDLFCH119RCH0                 (R_PDMIF_BASE + R_PDMIF_PDLFCH119RCH0_OFFSET)
-#define R_PDMIF_PDLFCH119RCH1                 (R_PDMIF_BASE + R_PDMIF_PDLFCH119RCH1_OFFSET)
-#define R_PDMIF_PDLFCH119RCH2                 (R_PDMIF_BASE + R_PDMIF_PDLFCH119RCH2_OFFSET)
-#define R_PDMIF_PDSDLTRCH0                 (R_PDMIF_BASE + R_PDMIF_PDSDLTRCH0_OFFSET)
-#define R_PDMIF_PDSDLTRCH1                 (R_PDMIF_BASE + R_PDMIF_PDSDLTRCH1_OFFSET)
-#define R_PDMIF_PDSDLTRCH2                 (R_PDMIF_BASE + R_PDMIF_PDSDLTRCH2_OFFSET)
-#define R_PDMIF_PDSDUTRCH0                 (R_PDMIF_BASE + R_PDMIF_PDSDUTRCH0_OFFSET)
-#define R_PDMIF_PDSDUTRCH1                 (R_PDMIF_BASE + R_PDMIF_PDSDUTRCH1_OFFSET)
-#define R_PDMIF_PDSDUTRCH2                 (R_PDMIF_BASE + R_PDMIF_PDSDUTRCH2_OFFSET)
-#define R_PDMIF_PDDBCRCH0                 (R_PDMIF_BASE + R_PDMIF_PDDBCRCH0_OFFSET)
-#define R_PDMIF_PDDBCRCH1                 (R_PDMIF_BASE + R_PDMIF_PDDBCRCH1_OFFSET)
-#define R_PDMIF_PDDBCRCH2                 (R_PDMIF_BASE + R_PDMIF_PDDBCRCH2_OFFSET)
-#define R_PDMIF_PDSCTSRCH0                 (R_PDMIF_BASE + R_PDMIF_PDSCTSRCH0_OFFSET)
-#define R_PDMIF_PDSCTSRCH1                 (R_PDMIF_BASE + R_PDMIF_PDSCTSRCH1_OFFSET)
-#define R_PDMIF_PDSCTSRCH2                 (R_PDMIF_BASE + R_PDMIF_PDSCTSRCH2_OFFSET)
-#define R_PDMIF_PDOVLTRCH0                 (R_PDMIF_BASE + R_PDMIF_PDOVLTRCH0_OFFSET)
-#define R_PDMIF_PDOVLTRCH1                 (R_PDMIF_BASE + R_PDMIF_PDOVLTRCH1_OFFSET)
-#define R_PDMIF_PDOVLTRCH2                 (R_PDMIF_BASE + R_PDMIF_PDOVLTRCH2_OFFSET)
-#define R_PDMIF_PDOVUTRCH0                 (R_PDMIF_BASE + R_PDMIF_PDOVUTRCH0_OFFSET)
-#define R_PDMIF_PDOVUTRCH1                 (R_PDMIF_BASE + R_PDMIF_PDOVUTRCH1_OFFSET)
-#define R_PDMIF_PDOVUTRCH2                 (R_PDMIF_BASE + R_PDMIF_PDOVUTRCH2_OFFSET)
-#define R_PDMIF_PDDRCRCH0                 (R_PDMIF_BASE + R_PDMIF_PDDRCRCH0_OFFSET)
-#define R_PDMIF_PDDRCRCH1                 (R_PDMIF_BASE + R_PDMIF_PDDRCRCH1_OFFSET)
-#define R_PDMIF_PDDRCRCH2                 (R_PDMIF_BASE + R_PDMIF_PDDRCRCH2_OFFSET)
-#define R_PDMIF_PDDCRCH0                 (R_PDMIF_BASE + R_PDMIF_PDDCRCH0_OFFSET)
-#define R_PDMIF_PDDCRCH1                 (R_PDMIF_BASE + R_PDMIF_PDDCRCH1_OFFSET)
-#define R_PDMIF_PDDCRCH2                 (R_PDMIF_BASE + R_PDMIF_PDDCRCH2_OFFSET)
-#define R_PDMIF_PDDRRCH0                 (R_PDMIF_BASE + R_PDMIF_PDDRRCH0_OFFSET)
-#define R_PDMIF_PDDRRCH1                 (R_PDMIF_BASE + R_PDMIF_PDDRRCH1_OFFSET)
-#define R_PDMIF_PDDRRCH2                 (R_PDMIF_BASE + R_PDMIF_PDDRRCH2_OFFSET)
-#define R_PDMIF_PDDSRCH0                 (R_PDMIF_BASE + R_PDMIF_PDDSRCH0_OFFSET)
-#define R_PDMIF_PDDSRCH1                 (R_PDMIF_BASE + R_PDMIF_PDDSRCH1_OFFSET)
-#define R_PDMIF_PDDSRCH2                 (R_PDMIF_BASE + R_PDMIF_PDDSRCH2_OFFSET)
+#define R_PDMIF_PDCSTRTR                          (R_PDMIF_BASE + R_PDMIF_PDCSTRTR_OFFSET)
+#define R_PDMIF_PDCSTPTR                          (R_PDMIF_BASE + R_PDMIF_PDCSTPTR_OFFSET)
+#define R_PDMIF_PDCCHGTR                          (R_PDMIF_BASE + R_PDMIF_PDCCHGTR_OFFSET)
+#define R_PDMIF_PDCICR                            (R_PDMIF_BASE + R_PDMIF_PDCICR_OFFSET)
+#define R_PDMIF_PDCSR                             (R_PDMIF_BASE + R_PDMIF_PDCSR_OFFSET)
+#define R_PDMIF_PDCSCR                            (R_PDMIF_BASE + R_PDMIF_PDCSCR_OFFSET)
+#define R_PDMIF_PDCSDCR                           (R_PDMIF_BASE + R_PDMIF_PDCSDCR_OFFSET)
+#define R_PDMIF_PDCDRCR                           (R_PDMIF_BASE + R_PDMIF_PDCDRCR_OFFSET)
+#define R_PDMIF_PDCDCR                            (R_PDMIF_BASE + R_PDMIF_PDCDCR_OFFSET)
+#define R_PDMIF_PDVR                              (R_PDMIF_BASE + R_PDMIF_PDVR_OFFSET)
+#define R_PDMIF_PDSTRTRCH(m)                      (R_PDMIF_BASE + R_PDMIF_PDSTRTRCH_OFFSET(m))
+#define R_PDMIF_PDSTPTRCH(m)                      (R_PDMIF_BASE + R_PDMIF_PDSTPTRCH_OFFSET(m))
+#define R_PDMIF_PDCHGTRCH(m)                      (R_PDMIF_BASE + R_PDMIF_PDCHGTRCH_OFFSET(m))
+#define R_PDMIF_PDICRCH(m)                        (R_PDMIF_BASE + R_PDMIF_PDICRCH_OFFSET(m))
+#define R_PDMIF_PDSDCRCH(m)                       (R_PDMIF_BASE + R_PDMIF_PDSDCRCH_OFFSET(m))
+#define R_PDMIF_PDSRCH(m)                         (R_PDMIF_BASE + R_PDMIF_PDSRCH_OFFSET(m))
+#define R_PDMIF_PDSCRCH(m)                        (R_PDMIF_BASE + R_PDMIF_PDSCRCH_OFFSET(m))
+#define R_PDMIF_PDMDSRCH(m)                       (R_PDMIF_BASE + R_PDMIF_PDMDSRCH_OFFSET(m))
+#define R_PDMIF_PDSFCRCH(m)                       (R_PDMIF_BASE + R_PDMIF_PDSFCRCH_OFFSET(m))
+#define R_PDMIF_PDHFCS0RCH(m)                     (R_PDMIF_BASE + R_PDMIF_PDHFCS0RCH_OFFSET(m))
+#define R_PDMIF_PDHFCK1RCH(m)                     (R_PDMIF_BASE + R_PDMIF_PDHFCK1RCH_OFFSET(m))
+#define R_PDMIF_PDHFCH0RCH(m)                     (R_PDMIF_BASE + R_PDMIF_PDHFCH0RCH_OFFSET(m))
+#define R_PDMIF_PDHFCH1RCH(m)                     (R_PDMIF_BASE + R_PDMIF_PDHFCH1RCH_OFFSET(m))
+#define R_PDMIF_PDCFCH00RCH(m)                    (R_PDMIF_BASE + R_PDMIF_PDCFCH00RCH_OFFSET(m))
+#define R_PDMIF_PDCFCH01RCH(m)                    (R_PDMIF_BASE + R_PDMIF_PDCFCH01RCH_OFFSET(m))
+#define R_PDMIF_PDCFCH02RCH(m)                    (R_PDMIF_BASE + R_PDMIF_PDCFCH02RCH_OFFSET(m))
+#define R_PDMIF_PDCFCH03RCH(m)                    (R_PDMIF_BASE + R_PDMIF_PDCFCH03RCH_OFFSET(m))
+#define R_PDMIF_PDCFCH04RCH(m)                    (R_PDMIF_BASE + R_PDMIF_PDCFCH04RCH_OFFSET(m))
+#define R_PDMIF_PDCFCH05RCH(m)                    (R_PDMIF_BASE + R_PDMIF_PDCFCH05RCH_OFFSET(m))
+#define R_PDMIF_PDCFCH06RCHN                      (R_PDMIF_BASE + R_PDMIF_PDCFCH06RCHN_OFFSET)
+#define R_PDMIF_PDCFCH07RCH(m)                    (R_PDMIF_BASE + R_PDMIF_PDCFCH07RCH_OFFSET(m))
+#define R_PDMIF_PDCFCH08RCH(m)                    (R_PDMIF_BASE + R_PDMIF_PDCFCH08RCH_OFFSET(m))
+#define R_PDMIF_PDCFCH09RCH(m)                    (R_PDMIF_BASE + R_PDMIF_PDCFCH09RCH_OFFSET(m))
+#define R_PDMIF_PDCFCH10RCH(m)                    (R_PDMIF_BASE + R_PDMIF_PDCFCH10RCH_OFFSET(m))
+#define R_PDMIF_PDLFCH010RCH(m)                   (R_PDMIF_BASE + R_PDMIF_PDLFCH010RCH_OFFSET(m))
+#define R_PDMIF_PDLFCH100RCH(m)                   (R_PDMIF_BASE + R_PDMIF_PDLFCH100RCH_OFFSET(m))
+#define R_PDMIF_PDLFCH101RCH(m)                   (R_PDMIF_BASE + R_PDMIF_PDLFCH101RCH_OFFSET(m))
+#define R_PDMIF_PDLFCH102RCH(m)                   (R_PDMIF_BASE + R_PDMIF_PDLFCH102RCH_OFFSET(m))
+#define R_PDMIF_PDLFCH103RCH(m)                   (R_PDMIF_BASE + R_PDMIF_PDLFCH103RCH_OFFSET(m))
+#define R_PDMIF_PDLFCH104RCH(m)                   (R_PDMIF_BASE + R_PDMIF_PDLFCH104RCH_OFFSET(m))
+#define R_PDMIF_PDLFCH105RCH(m)                   (R_PDMIF_BASE + R_PDMIF_PDLFCH105RCH_OFFSET(m))
+#define R_PDMIF_PDLFCH106RCH(m)                   (R_PDMIF_BASE + R_PDMIF_PDLFCH106RCH_OFFSET(m))
+#define R_PDMIF_PDLFCH107RCH(m)                   (R_PDMIF_BASE + R_PDMIF_PDLFCH107RCH_OFFSET(m))
+#define R_PDMIF_PDLFCH108RCH(m)                   (R_PDMIF_BASE + R_PDMIF_PDLFCH108RCH_OFFSET(m))
+#define R_PDMIF_PDLFCH109RCH(m)                   (R_PDMIF_BASE + R_PDMIF_PDLFCH109RCH_OFFSET(m))
+#define R_PDMIF_PDLFCH110RCH(m)                   (R_PDMIF_BASE + R_PDMIF_PDLFCH110RCH_OFFSET(m))
+#define R_PDMIF_PDLFCH111RCH(m)                   (R_PDMIF_BASE + R_PDMIF_PDLFCH111RCH_OFFSET(m))
+#define R_PDMIF_PDLFCH112RCH(m)                   (R_PDMIF_BASE + R_PDMIF_PDLFCH112RCH_OFFSET(m))
+#define R_PDMIF_PDLFCH113RCH(m)                   (R_PDMIF_BASE + R_PDMIF_PDLFCH113RCH_OFFSET(m))
+#define R_PDMIF_PDLFCH114RCH(m)                   (R_PDMIF_BASE + R_PDMIF_PDLFCH114RCH_OFFSET(m))
+#define R_PDMIF_PDLFCH115RCH(m)                   (R_PDMIF_BASE + R_PDMIF_PDLFCH115RCH_OFFSET(m))
+#define R_PDMIF_PDLFCH116RCH(m)                   (R_PDMIF_BASE + R_PDMIF_PDLFCH116RCH_OFFSET(m))
+#define R_PDMIF_PDLFCH117RCH(m)                   (R_PDMIF_BASE + R_PDMIF_PDLFCH117RCH_OFFSET(m))
+#define R_PDMIF_PDLFCH118RCH(m)                   (R_PDMIF_BASE + R_PDMIF_PDLFCH118RCH_OFFSET(m))
+#define R_PDMIF_PDLFCH119RCH(m)                   (R_PDMIF_BASE + R_PDMIF_PDLFCH119RCH_OFFSET(m))
+#define R_PDMIF_PDSDLTRCH(m)                      (R_PDMIF_BASE + R_PDMIF_PDSDLTRCH_OFFSET(m))
+#define R_PDMIF_PDSDUTRCH(m)                      (R_PDMIF_BASE + R_PDMIF_PDSDUTRCH_OFFSET(m))
+#define R_PDMIF_PDDBCRCH(m)                       (R_PDMIF_BASE + R_PDMIF_PDDBCRCH_OFFSET(m))
+#define R_PDMIF_PDSCTSRCH(m)                      (R_PDMIF_BASE + R_PDMIF_PDSCTSRCH_OFFSET(m))
+#define R_PDMIF_PDOVLTRCH(m)                      (R_PDMIF_BASE + R_PDMIF_PDOVLTRCH_OFFSET(m))
+#define R_PDMIF_PDOVUTRCH(m)                      (R_PDMIF_BASE + R_PDMIF_PDOVUTRCH_OFFSET(m))
+#define R_PDMIF_PDDRCRCH(m)                       (R_PDMIF_BASE + R_PDMIF_PDDRCRCH_OFFSET(m))
+#define R_PDMIF_PDDCRCH(m)                        (R_PDMIF_BASE + R_PDMIF_PDDCRCH_OFFSET(m))
+#define R_PDMIF_PDDRRCH(m)                        (R_PDMIF_BASE + R_PDMIF_PDDRRCH_OFFSET(m))
+#define R_PDMIF_PDDSRCH(m)                        (R_PDMIF_BASE + R_PDMIF_PDDSRCH_OFFSET(m))
 
 /* Register bit definitions */
 /* PDCSTRTR Register bit definitions */
@@ -639,14 +419,14 @@
 #define R_PDMIF_PDMDSRCH_DBIS_SHIFT               (28)  /* Data Buffer Input Shift Setting */
 #define R_PDMIF_PDMDSRCH_DBIS_MASK                0xf0000000
 #  define R_PDMIF_PDMDSRCH_DBIS_0X0                       (0 << R_PDMIF_PDMDSRCH_DBIS_SHIFT)  /* 20-bit mode, {1{S}, [18:0]} */
-#  define R_PDMIF_PDMDSRCH_DBIS_0X1                       (0 << R_PDMIF_PDMDSRCH_DBIS_SHIFT)  /* 20-bit mode, {2{S}, [18:1]} */
-#  define R_PDMIF_PDMDSRCH_DBIS_0X2                       (0 << R_PDMIF_PDMDSRCH_DBIS_SHIFT)  /* 20-bit mode, {3{S}, [18:2]} */
-#  define R_PDMIF_PDMDSRCH_DBIS_0X3                       (0 << R_PDMIF_PDMDSRCH_DBIS_SHIFT)  /* 20-bit mode, {4{S}, [18:3]} */
-#  define R_PDMIF_PDMDSRCH_DBIS_0X8                       (0 << R_PDMIF_PDMDSRCH_DBIS_SHIFT)  /* 16-bit mode, {S,D[18:4]} */
-#  define R_PDMIF_PDMDSRCH_DBIS_0X9                       (0 << R_PDMIF_PDMDSRCH_DBIS_SHIFT)  /* 16-bit mode, {S,D[17:3]} */
-#  define R_PDMIF_PDMDSRCH_DBIS_0XA                       (0 << R_PDMIF_PDMDSRCH_DBIS_SHIFT)  /* 16-bit mode, {S,D[16:2]} */
-#  define R_PDMIF_PDMDSRCH_DBIS_0XB                       (0 << R_PDMIF_PDMDSRCH_DBIS_SHIFT)  /* 16-bit mode, {S,D[15:1]} */
-#  define R_PDMIF_PDMDSRCH_DBIS_0XC                       (0 << R_PDMIF_PDMDSRCH_DBIS_SHIFT)  /* 16-bit mode, {S,D[14:0]} */
+#  define R_PDMIF_PDMDSRCH_DBIS_0X1                       (1 << R_PDMIF_PDMDSRCH_DBIS_SHIFT)  /* 20-bit mode, {2{S}, [18:1]} */
+#  define R_PDMIF_PDMDSRCH_DBIS_0X2                       (2 << R_PDMIF_PDMDSRCH_DBIS_SHIFT)  /* 20-bit mode, {3{S}, [18:2]} */
+#  define R_PDMIF_PDMDSRCH_DBIS_0X3                       (3 << R_PDMIF_PDMDSRCH_DBIS_SHIFT)  /* 20-bit mode, {4{S}, [18:3]} */
+#  define R_PDMIF_PDMDSRCH_DBIS_0X8                       (8 << R_PDMIF_PDMDSRCH_DBIS_SHIFT)  /* 16-bit mode, {S,D[18:4]} */
+#  define R_PDMIF_PDMDSRCH_DBIS_0X9                       (9 << R_PDMIF_PDMDSRCH_DBIS_SHIFT)  /* 16-bit mode, {S,D[17:3]} */
+#  define R_PDMIF_PDMDSRCH_DBIS_0XA                       (10 << R_PDMIF_PDMDSRCH_DBIS_SHIFT)  /* 16-bit mode, {S,D[16:2]} */
+#  define R_PDMIF_PDMDSRCH_DBIS_0XB                       (11 << R_PDMIF_PDMDSRCH_DBIS_SHIFT)  /* 16-bit mode, {S,D[15:1]} */
+#  define R_PDMIF_PDMDSRCH_DBIS_0XC                       (12 << R_PDMIF_PDMDSRCH_DBIS_SHIFT)  /* 16-bit mode, {S,D[14:0]} */
 
 /* PDSFCRCH Register bit definitions */
 #define R_PDMIF_PDSFCRCH_CKDIV_SHIFT              (0)  /* PDM_CLKn Dividend Ratio to Core Clock */
@@ -658,37 +438,37 @@
 #define R_PDMIF_PDSFCRCH_SINCRNG_SHIFT            (24)  /* Sinc Filter Output Valid Range */
 #define R_PDMIF_PDSFCRCH_SINCRNG_MASK             0x1f000000
 #  define R_PDMIF_PDSFCRCH_SINCRNG_0X00                   (0 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [32:14]} */
-#  define R_PDMIF_PDSFCRCH_SINCRNG_0X01                   (0 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [31:13]} */
-#  define R_PDMIF_PDSFCRCH_SINCRNG_0X02                   (0 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [30:12]} */
-#  define R_PDMIF_PDSFCRCH_SINCRNG_0X03                   (0 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [29:11]} */
-#  define R_PDMIF_PDSFCRCH_SINCRNG_0X04                   (0 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [28:10]} */
-#  define R_PDMIF_PDSFCRCH_SINCRNG_0X05                   (0 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [27:9]} (default) */
-#  define R_PDMIF_PDSFCRCH_SINCRNG_0X06                   (0 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [26:8]} */
-#  define R_PDMIF_PDSFCRCH_SINCRNG_0X07                   (0 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [25:7]} */
-#  define R_PDMIF_PDSFCRCH_SINCRNG_0X08                   (0 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [24:6]} */
-#  define R_PDMIF_PDSFCRCH_SINCRNG_0X09                   (0 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [23:5]} */
-#  define R_PDMIF_PDSFCRCH_SINCRNG_0X0A                   (0 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [22:4]} */
-#  define R_PDMIF_PDSFCRCH_SINCRNG_0X0B                   (0 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [21:3]} */
-#  define R_PDMIF_PDSFCRCH_SINCRNG_0X0C                   (0 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [20:2]} */
-#  define R_PDMIF_PDSFCRCH_SINCRNG_0X0D                   (0 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [19:1]} */
-#  define R_PDMIF_PDSFCRCH_SINCRNG_0X0E                   (0 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [18:0]} */
-#  define R_PDMIF_PDSFCRCH_SINCRNG_0X0F                   (0 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [17:0], 0} */
-#  define R_PDMIF_PDSFCRCH_SINCRNG_0X10                   (0 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [16:0], 00} */
-#  define R_PDMIF_PDSFCRCH_SINCRNG_0X11                   (0 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [15:0], 000} */
-#  define R_PDMIF_PDSFCRCH_SINCRNG_0X12                   (0 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [14:0], 0000} */
-#  define R_PDMIF_PDSFCRCH_SINCRNG_0X13                   (0 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [13:0], 00000} */
-#  define R_PDMIF_PDSFCRCH_SINCRNG_0X14                   (0 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [12:0], 000000} */
-#  define R_PDMIF_PDSFCRCH_SINCRNG_0X15                   (0 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [11:0], 0000000} */
-#  define R_PDMIF_PDSFCRCH_SINCRNG_0X16                   (0 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [10:0], 00000000} */
-#  define R_PDMIF_PDSFCRCH_SINCRNG_0X17                   (0 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [9:0], 000000000} */
-#  define R_PDMIF_PDSFCRCH_SINCRNG_0X18                   (0 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [8:0], 0000000000} */
-#  define R_PDMIF_PDSFCRCH_SINCRNG_0X19                   (0 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [7:0], 00000000000} */
-#  define R_PDMIF_PDSFCRCH_SINCRNG_0X1A                   (0 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [6:0], 000000000000} */
-#  define R_PDMIF_PDSFCRCH_SINCRNG_0X1B                   (0 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [5:0], 0000000000000} */
-#  define R_PDMIF_PDSFCRCH_SINCRNG_0X1C                   (0 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [4:0], 00000000000000} */
-#  define R_PDMIF_PDSFCRCH_SINCRNG_0X1D                   (0 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [3:0], 000000000000000} */
-#  define R_PDMIF_PDSFCRCH_SINCRNG_0X1E                   (0 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [2:0], 0000000000000000} */
-#  define R_PDMIF_PDSFCRCH_SINCRNG_0X1F                   (0 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [1:0], 00000000000000000} (prohibited) */
+#  define R_PDMIF_PDSFCRCH_SINCRNG_0X01                   (1 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [31:13]} */
+#  define R_PDMIF_PDSFCRCH_SINCRNG_0X02                   (2 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [30:12]} */
+#  define R_PDMIF_PDSFCRCH_SINCRNG_0X03                   (3 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [29:11]} */
+#  define R_PDMIF_PDSFCRCH_SINCRNG_0X04                   (4 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [28:10]} */
+#  define R_PDMIF_PDSFCRCH_SINCRNG_0X05                   (5 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [27:9]} (default) */
+#  define R_PDMIF_PDSFCRCH_SINCRNG_0X06                   (6 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [26:8]} */
+#  define R_PDMIF_PDSFCRCH_SINCRNG_0X07                   (7 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [25:7]} */
+#  define R_PDMIF_PDSFCRCH_SINCRNG_0X08                   (8 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [24:6]} */
+#  define R_PDMIF_PDSFCRCH_SINCRNG_0X09                   (9 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [23:5]} */
+#  define R_PDMIF_PDSFCRCH_SINCRNG_0X0A                   (10 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [22:4]} */
+#  define R_PDMIF_PDSFCRCH_SINCRNG_0X0B                   (11 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [21:3]} */
+#  define R_PDMIF_PDSFCRCH_SINCRNG_0X0C                   (12 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [20:2]} */
+#  define R_PDMIF_PDSFCRCH_SINCRNG_0X0D                   (13 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [19:1]} */
+#  define R_PDMIF_PDSFCRCH_SINCRNG_0X0E                   (14 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [18:0]} */
+#  define R_PDMIF_PDSFCRCH_SINCRNG_0X0F                   (15 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [17:0], 0} */
+#  define R_PDMIF_PDSFCRCH_SINCRNG_0X10                   (16 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [16:0], 00} */
+#  define R_PDMIF_PDSFCRCH_SINCRNG_0X11                   (17 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [15:0], 000} */
+#  define R_PDMIF_PDSFCRCH_SINCRNG_0X12                   (18 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [14:0], 0000} */
+#  define R_PDMIF_PDSFCRCH_SINCRNG_0X13                   (19 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [13:0], 00000} */
+#  define R_PDMIF_PDSFCRCH_SINCRNG_0X14                   (20 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [12:0], 000000} */
+#  define R_PDMIF_PDSFCRCH_SINCRNG_0X15                   (21 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [11:0], 0000000} */
+#  define R_PDMIF_PDSFCRCH_SINCRNG_0X16                   (22 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [10:0], 00000000} */
+#  define R_PDMIF_PDSFCRCH_SINCRNG_0X17                   (23 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [9:0], 000000000} */
+#  define R_PDMIF_PDSFCRCH_SINCRNG_0X18                   (24 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [8:0], 0000000000} */
+#  define R_PDMIF_PDSFCRCH_SINCRNG_0X19                   (25 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [7:0], 00000000000} */
+#  define R_PDMIF_PDSFCRCH_SINCRNG_0X1A                   (26 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [6:0], 000000000000} */
+#  define R_PDMIF_PDSFCRCH_SINCRNG_0X1B                   (27 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [5:0], 0000000000000} */
+#  define R_PDMIF_PDSFCRCH_SINCRNG_0X1C                   (28 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [4:0], 00000000000000} */
+#  define R_PDMIF_PDSFCRCH_SINCRNG_0X1D                   (29 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [3:0], 000000000000000} */
+#  define R_PDMIF_PDSFCRCH_SINCRNG_0X1E                   (30 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [2:0], 0000000000000000} */
+#  define R_PDMIF_PDSFCRCH_SINCRNG_0X1F                   (31 << R_PDMIF_PDSFCRCH_SINCRNG_SHIFT)  /* {S, [1:0], 00000000000000000} (prohibited) */
 
 /* PDHFCS0RCH Register bit definitions */
 #define R_PDMIF_PDHFCS0RCH_HFS_SHIFT              (0)  /* High-pass Filter Coefficient s(0) */

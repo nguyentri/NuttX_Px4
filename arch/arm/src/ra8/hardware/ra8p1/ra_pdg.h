@@ -38,55 +38,27 @@
 #endif
 #endif
 
-/* Channel stride for multi-channel peripherals */
-#define R_PDG_CH_STRIDE    0x00000004
-#define R_PDG_CH_BASE(ch)   (R_PDG_BASE + ((uint32_t)(ch) * R_PDG_CH_STRIDE))
-
 /* PDG Register Offsets */
 
-#define R_PDG_GTDLYCR_OFFSET     0x00000000  /* PWM Output Delay Control Register */
-#define R_PDG_GTDLYCR2_OFFSET     0x00000002  /* PWM Output Delay Control Register 2 */
+#define R_PDG_GTDLYCR_OFFSET                      0x00000000  /* PWM Output Delay Control Register */
+#define R_PDG_GTDLYCR2_OFFSET                     0x00000002  /* PWM Output Delay Control Register 2 */
 /* GTDLYR%sA Registers (0-3) */
-#define R_PDG_GTDLYR0A_OFFSET     0x00000018  /* GTIOCnA Rising Output Delay Register */
-#define R_PDG_GTDLYR1A_OFFSET     0x0000001c  /* GTIOCnA Rising Output Delay Register */
-#define R_PDG_GTDLYR2A_OFFSET     0x00000020  /* GTIOCnA Rising Output Delay Register */
-#define R_PDG_GTDLYR3A_OFFSET     0x00000024  /* GTIOCnA Rising Output Delay Register */
+#define R_PDG_GTDLYRA_OFFSET(m)                   (0x00000018 + ((m) * 0x00000004))  /* GTIOCnA Rising Output Delay Register */
 /* GTDLYR%sB Registers (0-3) */
-#define R_PDG_GTDLYR0B_OFFSET     0x0000001a  /* GTIOCnB Rising Output Delay Register */
-#define R_PDG_GTDLYR1B_OFFSET     0x0000001e  /* GTIOCnB Rising Output Delay Register */
-#define R_PDG_GTDLYR2B_OFFSET     0x00000022  /* GTIOCnB Rising Output Delay Register */
-#define R_PDG_GTDLYR3B_OFFSET     0x00000026  /* GTIOCnB Rising Output Delay Register */
+#define R_PDG_GTDLYRB_OFFSET(m)                   (0x0000001a + ((m) * 0x00000004))  /* GTIOCnB Rising Output Delay Register */
 /* GTDLYF%sA Registers (0-3) */
-#define R_PDG_GTDLYF0A_OFFSET     0x00000028  /* GTIOCnA Falling Output Delay Register */
-#define R_PDG_GTDLYF1A_OFFSET     0x0000002c  /* GTIOCnA Falling Output Delay Register */
-#define R_PDG_GTDLYF2A_OFFSET     0x00000030  /* GTIOCnA Falling Output Delay Register */
-#define R_PDG_GTDLYF3A_OFFSET     0x00000034  /* GTIOCnA Falling Output Delay Register */
+#define R_PDG_GTDLYFA_OFFSET(m)                   (0x00000028 + ((m) * 0x00000004))  /* GTIOCnA Falling Output Delay Register */
 /* GTDLYF%sB Registers (0-3) */
-#define R_PDG_GTDLYF0B_OFFSET     0x0000002a  /* GTIOCnB Falling Output Delay Register */
-#define R_PDG_GTDLYF1B_OFFSET     0x0000002e  /* GTIOCnB Falling Output Delay Register */
-#define R_PDG_GTDLYF2B_OFFSET     0x00000032  /* GTIOCnB Falling Output Delay Register */
-#define R_PDG_GTDLYF3B_OFFSET     0x00000036  /* GTIOCnB Falling Output Delay Register */
+#define R_PDG_GTDLYFB_OFFSET(m)                   (0x0000002a + ((m) * 0x00000004))  /* GTIOCnB Falling Output Delay Register */
 
 /* PDG Register Addresses */
 
-#define R_PDG_GTDLYCR                 (R_PDG_BASE + R_PDG_GTDLYCR_OFFSET)
-#define R_PDG_GTDLYCR2                 (R_PDG_BASE + R_PDG_GTDLYCR2_OFFSET)
-#define R_PDG_GTDLYR0A                 (R_PDG_BASE + R_PDG_GTDLYR0A_OFFSET)
-#define R_PDG_GTDLYR1A                 (R_PDG_BASE + R_PDG_GTDLYR1A_OFFSET)
-#define R_PDG_GTDLYR2A                 (R_PDG_BASE + R_PDG_GTDLYR2A_OFFSET)
-#define R_PDG_GTDLYR3A                 (R_PDG_BASE + R_PDG_GTDLYR3A_OFFSET)
-#define R_PDG_GTDLYR0B                 (R_PDG_BASE + R_PDG_GTDLYR0B_OFFSET)
-#define R_PDG_GTDLYR1B                 (R_PDG_BASE + R_PDG_GTDLYR1B_OFFSET)
-#define R_PDG_GTDLYR2B                 (R_PDG_BASE + R_PDG_GTDLYR2B_OFFSET)
-#define R_PDG_GTDLYR3B                 (R_PDG_BASE + R_PDG_GTDLYR3B_OFFSET)
-#define R_PDG_GTDLYF0A                 (R_PDG_BASE + R_PDG_GTDLYF0A_OFFSET)
-#define R_PDG_GTDLYF1A                 (R_PDG_BASE + R_PDG_GTDLYF1A_OFFSET)
-#define R_PDG_GTDLYF2A                 (R_PDG_BASE + R_PDG_GTDLYF2A_OFFSET)
-#define R_PDG_GTDLYF3A                 (R_PDG_BASE + R_PDG_GTDLYF3A_OFFSET)
-#define R_PDG_GTDLYF0B                 (R_PDG_BASE + R_PDG_GTDLYF0B_OFFSET)
-#define R_PDG_GTDLYF1B                 (R_PDG_BASE + R_PDG_GTDLYF1B_OFFSET)
-#define R_PDG_GTDLYF2B                 (R_PDG_BASE + R_PDG_GTDLYF2B_OFFSET)
-#define R_PDG_GTDLYF3B                 (R_PDG_BASE + R_PDG_GTDLYF3B_OFFSET)
+#define R_PDG_GTDLYCR                             (R_PDG_BASE + R_PDG_GTDLYCR_OFFSET)
+#define R_PDG_GTDLYCR2                            (R_PDG_BASE + R_PDG_GTDLYCR2_OFFSET)
+#define R_PDG_GTDLYRA(m)                          (R_PDG_BASE + R_PDG_GTDLYRA_OFFSET(m))
+#define R_PDG_GTDLYRB(m)                          (R_PDG_BASE + R_PDG_GTDLYRB_OFFSET(m))
+#define R_PDG_GTDLYFA(m)                          (R_PDG_BASE + R_PDG_GTDLYFA_OFFSET(m))
+#define R_PDG_GTDLYFB(m)                          (R_PDG_BASE + R_PDG_GTDLYFB_OFFSET(m))
 
 /* Register bit definitions */
 /* GTDLYCR Register bit definitions */

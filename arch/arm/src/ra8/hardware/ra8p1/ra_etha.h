@@ -35,269 +35,143 @@
 #endif
 
 /* Channel stride for multi-channel peripherals */
-#define R_ETHA_CH_STRIDE    0x00000004
+#define R_ETHA_CH_STRIDE    0x00002000
 #define R_ETHA_CH_BASE(ch)   (R_ETHA_BASE + ((uint32_t)(ch) * R_ETHA_CH_STRIDE))
 
 /* ETHA Register Offsets */
 
-#define R_ETHA_EAMC_OFFSET     0x00000000  /* Mode Configuration Register */
-#define R_ETHA_EAMS_OFFSET     0x00000004  /* Mode Status Register */
-#define R_ETHA_EAIRC_OFFSET     0x00000010  /* IPV Remapping Configuration Register [802.1Q] */
-#define R_ETHA_EATDQSC_OFFSET     0x00000014  /* TX Descriptor Queue Security Configuration Register */
-#define R_ETHA_EATDQC_OFFSET     0x00000018  /* TX Descriptor Queue Configuration Register */
-#define R_ETHA_EATDQAC_OFFSET     0x0000001c  /* TX Descriptor Queue Arbitration Configuration Register */
-#define R_ETHA_EATPEC_OFFSET     0x00000020  /* TX Preemption Configuration Register */
+#define R_ETHA_EAMC_OFFSET                        0x00000000  /* Mode Configuration Register */
+#define R_ETHA_EAMS_OFFSET                        0x00000004  /* Mode Status Register */
+#define R_ETHA_EAIRC_OFFSET                       0x00000010  /* IPV Remapping Configuration Register [802.1Q] */
+#define R_ETHA_EATDQSC_OFFSET                     0x00000014  /* TX Descriptor Queue Security Configuration Register */
+#define R_ETHA_EATDQC_OFFSET                      0x00000018  /* TX Descriptor Queue Configuration Register */
+#define R_ETHA_EATDQAC_OFFSET                     0x0000001c  /* TX Descriptor Queue Arbitration Configuration Register */
+#define R_ETHA_EATPEC_OFFSET                      0x00000020  /* TX Preemption Configuration Register */
 /* EATMFSC%s Registers (0-7) */
-#define R_ETHA_EATMFSC0_OFFSET     0x00000040  /* Transmission Maximum Frame Size Configuration Register 0 */
-#define R_ETHA_EATMFSC1_OFFSET     0x00000044  /* Transmission Maximum Frame Size Configuration Register 1 */
-#define R_ETHA_EATMFSC2_OFFSET     0x00000048  /* Transmission Maximum Frame Size Configuration Register 2 */
-#define R_ETHA_EATMFSC3_OFFSET     0x0000004c  /* Transmission Maximum Frame Size Configuration Register 3 */
-#define R_ETHA_EATMFSC4_OFFSET     0x00000050  /* Transmission Maximum Frame Size Configuration Register 4 */
-#define R_ETHA_EATMFSC5_OFFSET     0x00000054  /* Transmission Maximum Frame Size Configuration Register 5 */
-#define R_ETHA_EATMFSC6_OFFSET     0x00000058  /* Transmission Maximum Frame Size Configuration Register 6 */
-#define R_ETHA_EATMFSC7_OFFSET     0x0000005c  /* Transmission Maximum Frame Size Configuration Register 7 */
+#define R_ETHA_EATMFSC_OFFSET(m)                  (0x00000040 + ((m) * 0x00000004))  /* Transmission Maximum Frame Size Configuration Register %s */
 /* EATDQDC%s Registers (0-7) */
-#define R_ETHA_EATDQDC0_OFFSET     0x00000060  /* Transmission Descriptor Queue Depth Configuration Register 0 */
-#define R_ETHA_EATDQDC1_OFFSET     0x00000064  /* Transmission Descriptor Queue Depth Configuration Register 1 */
-#define R_ETHA_EATDQDC2_OFFSET     0x00000068  /* Transmission Descriptor Queue Depth Configuration Register 2 */
-#define R_ETHA_EATDQDC3_OFFSET     0x0000006c  /* Transmission Descriptor Queue Depth Configuration Register 3 */
-#define R_ETHA_EATDQDC4_OFFSET     0x00000070  /* Transmission Descriptor Queue Depth Configuration Register 4 */
-#define R_ETHA_EATDQDC5_OFFSET     0x00000074  /* Transmission Descriptor Queue Depth Configuration Register 5 */
-#define R_ETHA_EATDQDC6_OFFSET     0x00000078  /* Transmission Descriptor Queue Depth Configuration Register 6 */
-#define R_ETHA_EATDQDC7_OFFSET     0x0000007c  /* Transmission Descriptor Queue Depth Configuration Register 7 */
+#define R_ETHA_EATDQDC_OFFSET(m)                  (0x00000060 + ((m) * 0x00000004))  /* Transmission Descriptor Queue Depth Configuration Register %s */
 /* EATDQM%s Registers (0-7) */
-#define R_ETHA_EATDQM0_OFFSET     0x00000080  /* Transmission Descriptor Queue 0 Monitoring Register */
-#define R_ETHA_EATDQM1_OFFSET     0x00000084  /* Transmission Descriptor Queue 1 Monitoring Register */
-#define R_ETHA_EATDQM2_OFFSET     0x00000088  /* Transmission Descriptor Queue 2 Monitoring Register */
-#define R_ETHA_EATDQM3_OFFSET     0x0000008c  /* Transmission Descriptor Queue 3 Monitoring Register */
-#define R_ETHA_EATDQM4_OFFSET     0x00000090  /* Transmission Descriptor Queue 4 Monitoring Register */
-#define R_ETHA_EATDQM5_OFFSET     0x00000094  /* Transmission Descriptor Queue 5 Monitoring Register */
-#define R_ETHA_EATDQM6_OFFSET     0x00000098  /* Transmission Descriptor Queue 6 Monitoring Register */
-#define R_ETHA_EATDQM7_OFFSET     0x0000009c  /* Transmission Descriptor Queue 7 Monitoring Register */
+#define R_ETHA_EATDQM_OFFSET(m)                   (0x00000080 + ((m) * 0x00000004))  /* Transmission Descriptor Queue %s Monitoring Register */
 /* EATDQMLM%s Registers (0-7) */
-#define R_ETHA_EATDQMLM0_OFFSET     0x000000a0  /* Transmission Descriptor Queue 0 Max Level Monitoring Register */
-#define R_ETHA_EATDQMLM1_OFFSET     0x000000a4  /* Transmission Descriptor Queue 1 Max Level Monitoring Register */
-#define R_ETHA_EATDQMLM2_OFFSET     0x000000a8  /* Transmission Descriptor Queue 2 Max Level Monitoring Register */
-#define R_ETHA_EATDQMLM3_OFFSET     0x000000ac  /* Transmission Descriptor Queue 3 Max Level Monitoring Register */
-#define R_ETHA_EATDQMLM4_OFFSET     0x000000b0  /* Transmission Descriptor Queue 4 Max Level Monitoring Register */
-#define R_ETHA_EATDQMLM5_OFFSET     0x000000b4  /* Transmission Descriptor Queue 5 Max Level Monitoring Register */
-#define R_ETHA_EATDQMLM6_OFFSET     0x000000b8  /* Transmission Descriptor Queue 6 Max Level Monitoring Register */
-#define R_ETHA_EATDQMLM7_OFFSET     0x000000bc  /* Transmission Descriptor Queue 7 Max Level Monitoring Register */
-#define R_ETHA_EACTQC_OFFSET     0x00000100  /* Cut-Through Queue Configuration Register */
-#define R_ETHA_EACTDQDC_OFFSET     0x00000104  /* Cut-Through Descriptor Queue Depth Configuration Register */
-#define R_ETHA_EACTDQM_OFFSET     0x00000108  /* Cut-Through Descriptor Queue Monitoring Register */
-#define R_ETHA_EACTDQMLM_OFFSET     0x0000010c  /* Cut-Through Descriptor Queue Max Level Monitoring Register */
-#define R_ETHA_EAVCC_OFFSET     0x00000130  /* VLAN Control Configuration Register */
-#define R_ETHA_EAVTC_OFFSET     0x00000134  /* VLAN TAG Configuration Register */
-#define R_ETHA_EARTFC_OFFSET     0x00000138  /* Reception TAG Filtering Configuration Register */
-#define R_ETHA_EACAEC_OFFSET     0x00000200  /* CBS Admin Enable Configuration Register */
-#define R_ETHA_EACC_OFFSET     0x00000204  /* CBS Configuration Register */
+#define R_ETHA_EATDQMLM_OFFSET(m)                 (0x000000a0 + ((m) * 0x00000004))  /* Transmission Descriptor Queue %s Max Level Monitoring Register */
+#define R_ETHA_EACTQC_OFFSET                      0x00000100  /* Cut-Through Queue Configuration Register */
+#define R_ETHA_EACTDQDC_OFFSET                    0x00000104  /* Cut-Through Descriptor Queue Depth Configuration Register */
+#define R_ETHA_EACTDQM_OFFSET                     0x00000108  /* Cut-Through Descriptor Queue Monitoring Register */
+#define R_ETHA_EACTDQMLM_OFFSET                   0x0000010c  /* Cut-Through Descriptor Queue Max Level Monitoring Register */
+#define R_ETHA_EAVCC_OFFSET                       0x00000130  /* VLAN Control Configuration Register */
+#define R_ETHA_EAVTC_OFFSET                       0x00000134  /* VLAN TAG Configuration Register */
+#define R_ETHA_EARTFC_OFFSET                      0x00000138  /* Reception TAG Filtering Configuration Register */
+#define R_ETHA_EACAEC_OFFSET                      0x00000200  /* CBS Admin Enable Configuration Register */
+#define R_ETHA_EACC_OFFSET                        0x00000204  /* CBS Configuration Register */
 /* EACAIVC%s Registers (0-7) */
-#define R_ETHA_EACAIVC0_OFFSET     0x00000220  /* CBS Admin Increment Value Configuration Register 0 */
-#define R_ETHA_EACAIVC1_OFFSET     0x00000224  /* CBS Admin Increment Value Configuration Register 1 */
-#define R_ETHA_EACAIVC2_OFFSET     0x00000228  /* CBS Admin Increment Value Configuration Register 2 */
-#define R_ETHA_EACAIVC3_OFFSET     0x0000022c  /* CBS Admin Increment Value Configuration Register 3 */
-#define R_ETHA_EACAIVC4_OFFSET     0x00000230  /* CBS Admin Increment Value Configuration Register 4 */
-#define R_ETHA_EACAIVC5_OFFSET     0x00000234  /* CBS Admin Increment Value Configuration Register 5 */
-#define R_ETHA_EACAIVC6_OFFSET     0x00000238  /* CBS Admin Increment Value Configuration Register 6 */
-#define R_ETHA_EACAIVC7_OFFSET     0x0000023c  /* CBS Admin Increment Value Configuration Register 7 */
-#define R_ETHA_EACAULCQ_OFFSET     0x00000240  /* CBS Admin Upper Limit Configuration Register q */
-#define R_ETHA_EACOEM_OFFSET     0x00000260  /* CBS Oper Enable Monitoring Register */
+#define R_ETHA_EACAIVC_OFFSET(m)                  (0x00000220 + ((m) * 0x00000004))  /* CBS Admin Increment Value Configuration Register %s */
+#define R_ETHA_EACAULCQ_OFFSET                    0x00000240  /* CBS Admin Upper Limit Configuration Register q */
+#define R_ETHA_EACOEM_OFFSET                      0x00000260  /* CBS Oper Enable Monitoring Register */
 /* EACOIVM%s Registers (0-7) */
-#define R_ETHA_EACOIVM0_OFFSET     0x00000280  /* CBS Oper Increment Value Monitoring Register 0 */
-#define R_ETHA_EACOIVM1_OFFSET     0x00000284  /* CBS Oper Increment Value Monitoring Register 1 */
-#define R_ETHA_EACOIVM2_OFFSET     0x00000288  /* CBS Oper Increment Value Monitoring Register 2 */
-#define R_ETHA_EACOIVM3_OFFSET     0x0000028c  /* CBS Oper Increment Value Monitoring Register 3 */
-#define R_ETHA_EACOIVM4_OFFSET     0x00000290  /* CBS Oper Increment Value Monitoring Register 4 */
-#define R_ETHA_EACOIVM5_OFFSET     0x00000294  /* CBS Oper Increment Value Monitoring Register 5 */
-#define R_ETHA_EACOIVM6_OFFSET     0x00000298  /* CBS Oper Increment Value Monitoring Register 6 */
-#define R_ETHA_EACOIVM7_OFFSET     0x0000029c  /* CBS Oper Increment Value Monitoring Register 7 */
+#define R_ETHA_EACOIVM_OFFSET(m)                  (0x00000280 + ((m) * 0x00000004))  /* CBS Oper Increment Value Monitoring Register %s */
 /* EACOULM%s Registers (0-7) */
-#define R_ETHA_EACOULM0_OFFSET     0x000002a0  /* CBS Oper Upper Limit Monitoring Register 0 */
-#define R_ETHA_EACOULM1_OFFSET     0x000002a4  /* CBS Oper Upper Limit Monitoring Register 1 */
-#define R_ETHA_EACOULM2_OFFSET     0x000002a8  /* CBS Oper Upper Limit Monitoring Register 2 */
-#define R_ETHA_EACOULM3_OFFSET     0x000002ac  /* CBS Oper Upper Limit Monitoring Register 3 */
-#define R_ETHA_EACOULM4_OFFSET     0x000002b0  /* CBS Oper Upper Limit Monitoring Register 4 */
-#define R_ETHA_EACOULM5_OFFSET     0x000002b4  /* CBS Oper Upper Limit Monitoring Register 5 */
-#define R_ETHA_EACOULM6_OFFSET     0x000002b8  /* CBS Oper Upper Limit Monitoring Register 6 */
-#define R_ETHA_EACOULM7_OFFSET     0x000002bc  /* CBS Oper Upper Limit Monitoring Register 7 */
-#define R_ETHA_EACGSM_OFFSET     0x000002c0  /* CBS Gate State Monitoring Register */
-#define R_ETHA_EATASC_OFFSET     0x00000300  /* TAS Configuration Register */
-#define R_ETHA_EATASIGSC_OFFSET     0x00000304  /* TAS Initial Gate State Configuration Register */
+#define R_ETHA_EACOULM_OFFSET(m)                  (0x000002a0 + ((m) * 0x00000004))  /* CBS Oper Upper Limit Monitoring Register %s */
+#define R_ETHA_EACGSM_OFFSET                      0x000002c0  /* CBS Gate State Monitoring Register */
+#define R_ETHA_EATASC_OFFSET                      0x00000300  /* TAS Configuration Register */
+#define R_ETHA_EATASIGSC_OFFSET                   0x00000304  /* TAS Initial Gate State Configuration Register */
 /* EATASENC%s Registers (0-7) */
-#define R_ETHA_EATASENC0_OFFSET     0x00000320  /* TAS Entry Number Configuration Register 0 */
-#define R_ETHA_EATASENC1_OFFSET     0x00000324  /* TAS Entry Number Configuration Register 1 */
-#define R_ETHA_EATASENC2_OFFSET     0x00000328  /* TAS Entry Number Configuration Register 2 */
-#define R_ETHA_EATASENC3_OFFSET     0x0000032c  /* TAS Entry Number Configuration Register 3 */
-#define R_ETHA_EATASENC4_OFFSET     0x00000330  /* TAS Entry Number Configuration Register 4 */
-#define R_ETHA_EATASENC5_OFFSET     0x00000334  /* TAS Entry Number Configuration Register 5 */
-#define R_ETHA_EATASENC6_OFFSET     0x00000338  /* TAS Entry Number Configuration Register 6 */
-#define R_ETHA_EATASENC7_OFFSET     0x0000033c  /* TAS Entry Number Configuration Register 7 */
-#define R_ETHA_EATASCTENC_OFFSET     0x00000340  /* TAS Cut-Through Entry Number Configuration Register */
+#define R_ETHA_EATASENC_OFFSET(m)                 (0x00000320 + ((m) * 0x00000004))  /* TAS Entry Number Configuration Register %s */
+#define R_ETHA_EATASCTENC_OFFSET                  0x00000340  /* TAS Cut-Through Entry Number Configuration Register */
 /* EATASENM%s Registers (0-7) */
-#define R_ETHA_EATASENM0_OFFSET     0x00000360  /* TAS Entry Number Monitoring Register 0 */
-#define R_ETHA_EATASENM1_OFFSET     0x00000364  /* TAS Entry Number Monitoring Register 1 */
-#define R_ETHA_EATASENM2_OFFSET     0x00000368  /* TAS Entry Number Monitoring Register 2 */
-#define R_ETHA_EATASENM3_OFFSET     0x0000036c  /* TAS Entry Number Monitoring Register 3 */
-#define R_ETHA_EATASENM4_OFFSET     0x00000370  /* TAS Entry Number Monitoring Register 4 */
-#define R_ETHA_EATASENM5_OFFSET     0x00000374  /* TAS Entry Number Monitoring Register 5 */
-#define R_ETHA_EATASENM6_OFFSET     0x00000378  /* TAS Entry Number Monitoring Register 6 */
-#define R_ETHA_EATASENM7_OFFSET     0x0000037c  /* TAS Entry Number Monitoring Register 7 */
-#define R_ETHA_EATASCTENM_OFFSET     0x00000380  /* TAS Cut-Through Entry Number Monitoring Register */
-#define R_ETHA_EATASCSTC0_OFFSET     0x000003a0  /* TAS Cycle Start Time Configuration Register 0 */
-#define R_ETHA_EATASCSTC1_OFFSET     0x000003a4  /* TAS Cycle Start Time Configuration Register 1 */
-#define R_ETHA_EATASCSTM0_OFFSET     0x000003a8  /* TAS Cycle Start Time Monitoring Register 0 */
-#define R_ETHA_EATASCSTM1_OFFSET     0x000003ac  /* TAS Cycle Start Time Monitoring Register 1 */
-#define R_ETHA_EATASCTC_OFFSET     0x000003b0  /* TAS Cycle Time Configuration Register */
-#define R_ETHA_EATASCTM_OFFSET     0x000003b4  /* TAS Cycle Time Monitoring Register */
-#define R_ETHA_EATASGL0_OFFSET     0x000003c0  /* TAS Gate Learn Register 0 */
-#define R_ETHA_EATASGL1_OFFSET     0x000003c4  /* TAS Gate Learn Register 1 */
-#define R_ETHA_EATASGLR_OFFSET     0x000003c8  /* TAS Gate Learn Result Register */
-#define R_ETHA_EATASGR_OFFSET     0x000003d0  /* TAS Gate Read Register */
-#define R_ETHA_EATASGRR_OFFSET     0x000003d4  /* TAS Gate Read Result Register */
-#define R_ETHA_EATASHCC_OFFSET     0x000003e0  /* TAS Hardware Calibration Configuration Register */
-#define R_ETHA_EATASRIRM_OFFSET     0x000003e4  /* TAS RAM Initialization Register Monitoring Register */
-#define R_ETHA_EATASSM_OFFSET     0x000003e8  /* TAS Status Monitoring Register */
-#define R_ETHA_EAUSMFSECN_OFFSET     0x00000400  /* Under Minimum Frame Size Error Counter Register */
-#define R_ETHA_EATFECN_OFFSET     0x00000404  /* TAG Filtering Error Counter Register */
-#define R_ETHA_EAFSECN_OFFSET     0x00000408  /* Frame Size Error Counter Register */
-#define R_ETHA_EADQOECN_OFFSET     0x0000040c  /* Descriptor Queue Overflow Error Counter Register */
-#define R_ETHA_EADQSECN_OFFSET     0x00000410  /* Descriptor Queue Security Error Counter Register */
-#define R_ETHA_EAEIS0_OFFSET     0x00000500  /* Error Interrupt Status Register 0 */
-#define R_ETHA_EAEIE0_OFFSET     0x00000504  /* Error Interrupt Enable Register 0 */
-#define R_ETHA_EAEID0_OFFSET     0x00000508  /* Error Interrupt Disable Register 0 */
-#define R_ETHA_EAEIS1_OFFSET     0x00000510  /* Error Interrupt Status Register 1 */
-#define R_ETHA_EAEIE1_OFFSET     0x00000514  /* Error Interrupt Enable Register 1 */
-#define R_ETHA_EAEID1_OFFSET     0x00000518  /* Error Interrupt Disable Register 1 */
-#define R_ETHA_EAEIS2_OFFSET     0x00000520  /* Error Interrupt Status Register 2 */
-#define R_ETHA_EAEIE2_OFFSET     0x00000524  /* Error Interrupt Enable Register 2 */
-#define R_ETHA_EAEID2_OFFSET     0x00000528  /* Error Interrupt Disable Register 2 */
+#define R_ETHA_EATASENM_OFFSET(m)                 (0x00000360 + ((m) * 0x00000004))  /* TAS Entry Number Monitoring Register %s */
+#define R_ETHA_EATASCTENM_OFFSET                  0x00000380  /* TAS Cut-Through Entry Number Monitoring Register */
+#define R_ETHA_EATASCSTC0_OFFSET                  0x000003a0  /* TAS Cycle Start Time Configuration Register 0 */
+#define R_ETHA_EATASCSTC1_OFFSET                  0x000003a4  /* TAS Cycle Start Time Configuration Register 1 */
+#define R_ETHA_EATASCSTM0_OFFSET                  0x000003a8  /* TAS Cycle Start Time Monitoring Register 0 */
+#define R_ETHA_EATASCSTM1_OFFSET                  0x000003ac  /* TAS Cycle Start Time Monitoring Register 1 */
+#define R_ETHA_EATASCTC_OFFSET                    0x000003b0  /* TAS Cycle Time Configuration Register */
+#define R_ETHA_EATASCTM_OFFSET                    0x000003b4  /* TAS Cycle Time Monitoring Register */
+#define R_ETHA_EATASGL0_OFFSET                    0x000003c0  /* TAS Gate Learn Register 0 */
+#define R_ETHA_EATASGL1_OFFSET                    0x000003c4  /* TAS Gate Learn Register 1 */
+#define R_ETHA_EATASGLR_OFFSET                    0x000003c8  /* TAS Gate Learn Result Register */
+#define R_ETHA_EATASGR_OFFSET                     0x000003d0  /* TAS Gate Read Register */
+#define R_ETHA_EATASGRR_OFFSET                    0x000003d4  /* TAS Gate Read Result Register */
+#define R_ETHA_EATASHCC_OFFSET                    0x000003e0  /* TAS Hardware Calibration Configuration Register */
+#define R_ETHA_EATASRIRM_OFFSET                   0x000003e4  /* TAS RAM Initialization Register Monitoring Register */
+#define R_ETHA_EATASSM_OFFSET                     0x000003e8  /* TAS Status Monitoring Register */
+#define R_ETHA_EAUSMFSECN_OFFSET                  0x00000400  /* Under Minimum Frame Size Error Counter Register */
+#define R_ETHA_EATFECN_OFFSET                     0x00000404  /* TAG Filtering Error Counter Register */
+#define R_ETHA_EAFSECN_OFFSET                     0x00000408  /* Frame Size Error Counter Register */
+#define R_ETHA_EADQOECN_OFFSET                    0x0000040c  /* Descriptor Queue Overflow Error Counter Register */
+#define R_ETHA_EADQSECN_OFFSET                    0x00000410  /* Descriptor Queue Security Error Counter Register */
+#define R_ETHA_EAEIS0_OFFSET                      0x00000500  /* Error Interrupt Status Register 0 */
+#define R_ETHA_EAEIE0_OFFSET                      0x00000504  /* Error Interrupt Enable Register 0 */
+#define R_ETHA_EAEID0_OFFSET                      0x00000508  /* Error Interrupt Disable Register 0 */
+#define R_ETHA_EAEIS1_OFFSET                      0x00000510  /* Error Interrupt Status Register 1 */
+#define R_ETHA_EAEIE1_OFFSET                      0x00000514  /* Error Interrupt Enable Register 1 */
+#define R_ETHA_EAEID1_OFFSET                      0x00000518  /* Error Interrupt Disable Register 1 */
+#define R_ETHA_EAEIS2_OFFSET                      0x00000520  /* Error Interrupt Status Register 2 */
+#define R_ETHA_EAEIE2_OFFSET                      0x00000524  /* Error Interrupt Enable Register 2 */
+#define R_ETHA_EAEID2_OFFSET                      0x00000528  /* Error Interrupt Disable Register 2 */
 
 /* ETHA Register Addresses */
 
-#define R_ETHA_EAMC                 (R_ETHA_BASE + R_ETHA_EAMC_OFFSET)
-#define R_ETHA_EAMS                 (R_ETHA_BASE + R_ETHA_EAMS_OFFSET)
-#define R_ETHA_EAIRC                 (R_ETHA_BASE + R_ETHA_EAIRC_OFFSET)
-#define R_ETHA_EATDQSC                 (R_ETHA_BASE + R_ETHA_EATDQSC_OFFSET)
-#define R_ETHA_EATDQC                 (R_ETHA_BASE + R_ETHA_EATDQC_OFFSET)
-#define R_ETHA_EATDQAC                 (R_ETHA_BASE + R_ETHA_EATDQAC_OFFSET)
-#define R_ETHA_EATPEC                 (R_ETHA_BASE + R_ETHA_EATPEC_OFFSET)
-#define R_ETHA_EATMFSC0                 (R_ETHA_BASE + R_ETHA_EATMFSC0_OFFSET)
-#define R_ETHA_EATMFSC1                 (R_ETHA_BASE + R_ETHA_EATMFSC1_OFFSET)
-#define R_ETHA_EATMFSC2                 (R_ETHA_BASE + R_ETHA_EATMFSC2_OFFSET)
-#define R_ETHA_EATMFSC3                 (R_ETHA_BASE + R_ETHA_EATMFSC3_OFFSET)
-#define R_ETHA_EATMFSC4                 (R_ETHA_BASE + R_ETHA_EATMFSC4_OFFSET)
-#define R_ETHA_EATMFSC5                 (R_ETHA_BASE + R_ETHA_EATMFSC5_OFFSET)
-#define R_ETHA_EATMFSC6                 (R_ETHA_BASE + R_ETHA_EATMFSC6_OFFSET)
-#define R_ETHA_EATMFSC7                 (R_ETHA_BASE + R_ETHA_EATMFSC7_OFFSET)
-#define R_ETHA_EATDQDC0                 (R_ETHA_BASE + R_ETHA_EATDQDC0_OFFSET)
-#define R_ETHA_EATDQDC1                 (R_ETHA_BASE + R_ETHA_EATDQDC1_OFFSET)
-#define R_ETHA_EATDQDC2                 (R_ETHA_BASE + R_ETHA_EATDQDC2_OFFSET)
-#define R_ETHA_EATDQDC3                 (R_ETHA_BASE + R_ETHA_EATDQDC3_OFFSET)
-#define R_ETHA_EATDQDC4                 (R_ETHA_BASE + R_ETHA_EATDQDC4_OFFSET)
-#define R_ETHA_EATDQDC5                 (R_ETHA_BASE + R_ETHA_EATDQDC5_OFFSET)
-#define R_ETHA_EATDQDC6                 (R_ETHA_BASE + R_ETHA_EATDQDC6_OFFSET)
-#define R_ETHA_EATDQDC7                 (R_ETHA_BASE + R_ETHA_EATDQDC7_OFFSET)
-#define R_ETHA_EATDQM0                 (R_ETHA_BASE + R_ETHA_EATDQM0_OFFSET)
-#define R_ETHA_EATDQM1                 (R_ETHA_BASE + R_ETHA_EATDQM1_OFFSET)
-#define R_ETHA_EATDQM2                 (R_ETHA_BASE + R_ETHA_EATDQM2_OFFSET)
-#define R_ETHA_EATDQM3                 (R_ETHA_BASE + R_ETHA_EATDQM3_OFFSET)
-#define R_ETHA_EATDQM4                 (R_ETHA_BASE + R_ETHA_EATDQM4_OFFSET)
-#define R_ETHA_EATDQM5                 (R_ETHA_BASE + R_ETHA_EATDQM5_OFFSET)
-#define R_ETHA_EATDQM6                 (R_ETHA_BASE + R_ETHA_EATDQM6_OFFSET)
-#define R_ETHA_EATDQM7                 (R_ETHA_BASE + R_ETHA_EATDQM7_OFFSET)
-#define R_ETHA_EATDQMLM0                 (R_ETHA_BASE + R_ETHA_EATDQMLM0_OFFSET)
-#define R_ETHA_EATDQMLM1                 (R_ETHA_BASE + R_ETHA_EATDQMLM1_OFFSET)
-#define R_ETHA_EATDQMLM2                 (R_ETHA_BASE + R_ETHA_EATDQMLM2_OFFSET)
-#define R_ETHA_EATDQMLM3                 (R_ETHA_BASE + R_ETHA_EATDQMLM3_OFFSET)
-#define R_ETHA_EATDQMLM4                 (R_ETHA_BASE + R_ETHA_EATDQMLM4_OFFSET)
-#define R_ETHA_EATDQMLM5                 (R_ETHA_BASE + R_ETHA_EATDQMLM5_OFFSET)
-#define R_ETHA_EATDQMLM6                 (R_ETHA_BASE + R_ETHA_EATDQMLM6_OFFSET)
-#define R_ETHA_EATDQMLM7                 (R_ETHA_BASE + R_ETHA_EATDQMLM7_OFFSET)
-#define R_ETHA_EACTQC                 (R_ETHA_BASE + R_ETHA_EACTQC_OFFSET)
-#define R_ETHA_EACTDQDC                 (R_ETHA_BASE + R_ETHA_EACTDQDC_OFFSET)
-#define R_ETHA_EACTDQM                 (R_ETHA_BASE + R_ETHA_EACTDQM_OFFSET)
-#define R_ETHA_EACTDQMLM                 (R_ETHA_BASE + R_ETHA_EACTDQMLM_OFFSET)
-#define R_ETHA_EAVCC                 (R_ETHA_BASE + R_ETHA_EAVCC_OFFSET)
-#define R_ETHA_EAVTC                 (R_ETHA_BASE + R_ETHA_EAVTC_OFFSET)
-#define R_ETHA_EARTFC                 (R_ETHA_BASE + R_ETHA_EARTFC_OFFSET)
-#define R_ETHA_EACAEC                 (R_ETHA_BASE + R_ETHA_EACAEC_OFFSET)
-#define R_ETHA_EACC                 (R_ETHA_BASE + R_ETHA_EACC_OFFSET)
-#define R_ETHA_EACAIVC0                 (R_ETHA_BASE + R_ETHA_EACAIVC0_OFFSET)
-#define R_ETHA_EACAIVC1                 (R_ETHA_BASE + R_ETHA_EACAIVC1_OFFSET)
-#define R_ETHA_EACAIVC2                 (R_ETHA_BASE + R_ETHA_EACAIVC2_OFFSET)
-#define R_ETHA_EACAIVC3                 (R_ETHA_BASE + R_ETHA_EACAIVC3_OFFSET)
-#define R_ETHA_EACAIVC4                 (R_ETHA_BASE + R_ETHA_EACAIVC4_OFFSET)
-#define R_ETHA_EACAIVC5                 (R_ETHA_BASE + R_ETHA_EACAIVC5_OFFSET)
-#define R_ETHA_EACAIVC6                 (R_ETHA_BASE + R_ETHA_EACAIVC6_OFFSET)
-#define R_ETHA_EACAIVC7                 (R_ETHA_BASE + R_ETHA_EACAIVC7_OFFSET)
-#define R_ETHA_EACAULCQ                 (R_ETHA_BASE + R_ETHA_EACAULCQ_OFFSET)
-#define R_ETHA_EACOEM                 (R_ETHA_BASE + R_ETHA_EACOEM_OFFSET)
-#define R_ETHA_EACOIVM0                 (R_ETHA_BASE + R_ETHA_EACOIVM0_OFFSET)
-#define R_ETHA_EACOIVM1                 (R_ETHA_BASE + R_ETHA_EACOIVM1_OFFSET)
-#define R_ETHA_EACOIVM2                 (R_ETHA_BASE + R_ETHA_EACOIVM2_OFFSET)
-#define R_ETHA_EACOIVM3                 (R_ETHA_BASE + R_ETHA_EACOIVM3_OFFSET)
-#define R_ETHA_EACOIVM4                 (R_ETHA_BASE + R_ETHA_EACOIVM4_OFFSET)
-#define R_ETHA_EACOIVM5                 (R_ETHA_BASE + R_ETHA_EACOIVM5_OFFSET)
-#define R_ETHA_EACOIVM6                 (R_ETHA_BASE + R_ETHA_EACOIVM6_OFFSET)
-#define R_ETHA_EACOIVM7                 (R_ETHA_BASE + R_ETHA_EACOIVM7_OFFSET)
-#define R_ETHA_EACOULM0                 (R_ETHA_BASE + R_ETHA_EACOULM0_OFFSET)
-#define R_ETHA_EACOULM1                 (R_ETHA_BASE + R_ETHA_EACOULM1_OFFSET)
-#define R_ETHA_EACOULM2                 (R_ETHA_BASE + R_ETHA_EACOULM2_OFFSET)
-#define R_ETHA_EACOULM3                 (R_ETHA_BASE + R_ETHA_EACOULM3_OFFSET)
-#define R_ETHA_EACOULM4                 (R_ETHA_BASE + R_ETHA_EACOULM4_OFFSET)
-#define R_ETHA_EACOULM5                 (R_ETHA_BASE + R_ETHA_EACOULM5_OFFSET)
-#define R_ETHA_EACOULM6                 (R_ETHA_BASE + R_ETHA_EACOULM6_OFFSET)
-#define R_ETHA_EACOULM7                 (R_ETHA_BASE + R_ETHA_EACOULM7_OFFSET)
-#define R_ETHA_EACGSM                 (R_ETHA_BASE + R_ETHA_EACGSM_OFFSET)
-#define R_ETHA_EATASC                 (R_ETHA_BASE + R_ETHA_EATASC_OFFSET)
-#define R_ETHA_EATASIGSC                 (R_ETHA_BASE + R_ETHA_EATASIGSC_OFFSET)
-#define R_ETHA_EATASENC0                 (R_ETHA_BASE + R_ETHA_EATASENC0_OFFSET)
-#define R_ETHA_EATASENC1                 (R_ETHA_BASE + R_ETHA_EATASENC1_OFFSET)
-#define R_ETHA_EATASENC2                 (R_ETHA_BASE + R_ETHA_EATASENC2_OFFSET)
-#define R_ETHA_EATASENC3                 (R_ETHA_BASE + R_ETHA_EATASENC3_OFFSET)
-#define R_ETHA_EATASENC4                 (R_ETHA_BASE + R_ETHA_EATASENC4_OFFSET)
-#define R_ETHA_EATASENC5                 (R_ETHA_BASE + R_ETHA_EATASENC5_OFFSET)
-#define R_ETHA_EATASENC6                 (R_ETHA_BASE + R_ETHA_EATASENC6_OFFSET)
-#define R_ETHA_EATASENC7                 (R_ETHA_BASE + R_ETHA_EATASENC7_OFFSET)
-#define R_ETHA_EATASCTENC                 (R_ETHA_BASE + R_ETHA_EATASCTENC_OFFSET)
-#define R_ETHA_EATASENM0                 (R_ETHA_BASE + R_ETHA_EATASENM0_OFFSET)
-#define R_ETHA_EATASENM1                 (R_ETHA_BASE + R_ETHA_EATASENM1_OFFSET)
-#define R_ETHA_EATASENM2                 (R_ETHA_BASE + R_ETHA_EATASENM2_OFFSET)
-#define R_ETHA_EATASENM3                 (R_ETHA_BASE + R_ETHA_EATASENM3_OFFSET)
-#define R_ETHA_EATASENM4                 (R_ETHA_BASE + R_ETHA_EATASENM4_OFFSET)
-#define R_ETHA_EATASENM5                 (R_ETHA_BASE + R_ETHA_EATASENM5_OFFSET)
-#define R_ETHA_EATASENM6                 (R_ETHA_BASE + R_ETHA_EATASENM6_OFFSET)
-#define R_ETHA_EATASENM7                 (R_ETHA_BASE + R_ETHA_EATASENM7_OFFSET)
-#define R_ETHA_EATASCTENM                 (R_ETHA_BASE + R_ETHA_EATASCTENM_OFFSET)
-#define R_ETHA_EATASCSTC0                 (R_ETHA_BASE + R_ETHA_EATASCSTC0_OFFSET)
-#define R_ETHA_EATASCSTC1                 (R_ETHA_BASE + R_ETHA_EATASCSTC1_OFFSET)
-#define R_ETHA_EATASCSTM0                 (R_ETHA_BASE + R_ETHA_EATASCSTM0_OFFSET)
-#define R_ETHA_EATASCSTM1                 (R_ETHA_BASE + R_ETHA_EATASCSTM1_OFFSET)
-#define R_ETHA_EATASCTC                 (R_ETHA_BASE + R_ETHA_EATASCTC_OFFSET)
-#define R_ETHA_EATASCTM                 (R_ETHA_BASE + R_ETHA_EATASCTM_OFFSET)
-#define R_ETHA_EATASGL0                 (R_ETHA_BASE + R_ETHA_EATASGL0_OFFSET)
-#define R_ETHA_EATASGL1                 (R_ETHA_BASE + R_ETHA_EATASGL1_OFFSET)
-#define R_ETHA_EATASGLR                 (R_ETHA_BASE + R_ETHA_EATASGLR_OFFSET)
-#define R_ETHA_EATASGR                 (R_ETHA_BASE + R_ETHA_EATASGR_OFFSET)
-#define R_ETHA_EATASGRR                 (R_ETHA_BASE + R_ETHA_EATASGRR_OFFSET)
-#define R_ETHA_EATASHCC                 (R_ETHA_BASE + R_ETHA_EATASHCC_OFFSET)
-#define R_ETHA_EATASRIRM                 (R_ETHA_BASE + R_ETHA_EATASRIRM_OFFSET)
-#define R_ETHA_EATASSM                 (R_ETHA_BASE + R_ETHA_EATASSM_OFFSET)
-#define R_ETHA_EAUSMFSECN                 (R_ETHA_BASE + R_ETHA_EAUSMFSECN_OFFSET)
-#define R_ETHA_EATFECN                 (R_ETHA_BASE + R_ETHA_EATFECN_OFFSET)
-#define R_ETHA_EAFSECN                 (R_ETHA_BASE + R_ETHA_EAFSECN_OFFSET)
-#define R_ETHA_EADQOECN                 (R_ETHA_BASE + R_ETHA_EADQOECN_OFFSET)
-#define R_ETHA_EADQSECN                 (R_ETHA_BASE + R_ETHA_EADQSECN_OFFSET)
-#define R_ETHA_EAEIS0                 (R_ETHA_BASE + R_ETHA_EAEIS0_OFFSET)
-#define R_ETHA_EAEIE0                 (R_ETHA_BASE + R_ETHA_EAEIE0_OFFSET)
-#define R_ETHA_EAEID0                 (R_ETHA_BASE + R_ETHA_EAEID0_OFFSET)
-#define R_ETHA_EAEIS1                 (R_ETHA_BASE + R_ETHA_EAEIS1_OFFSET)
-#define R_ETHA_EAEIE1                 (R_ETHA_BASE + R_ETHA_EAEIE1_OFFSET)
-#define R_ETHA_EAEID1                 (R_ETHA_BASE + R_ETHA_EAEID1_OFFSET)
-#define R_ETHA_EAEIS2                 (R_ETHA_BASE + R_ETHA_EAEIS2_OFFSET)
-#define R_ETHA_EAEIE2                 (R_ETHA_BASE + R_ETHA_EAEIE2_OFFSET)
-#define R_ETHA_EAEID2                 (R_ETHA_BASE + R_ETHA_EAEID2_OFFSET)
+#define R_ETHA_EAMC(n)                            (R_ETHA_CH_BASE(n) + R_ETHA_EAMC_OFFSET)
+#define R_ETHA_EAMS(n)                            (R_ETHA_CH_BASE(n) + R_ETHA_EAMS_OFFSET)
+#define R_ETHA_EAIRC(n)                           (R_ETHA_CH_BASE(n) + R_ETHA_EAIRC_OFFSET)
+#define R_ETHA_EATDQSC(n)                         (R_ETHA_CH_BASE(n) + R_ETHA_EATDQSC_OFFSET)
+#define R_ETHA_EATDQC(n)                          (R_ETHA_CH_BASE(n) + R_ETHA_EATDQC_OFFSET)
+#define R_ETHA_EATDQAC(n)                         (R_ETHA_CH_BASE(n) + R_ETHA_EATDQAC_OFFSET)
+#define R_ETHA_EATPEC(n)                          (R_ETHA_CH_BASE(n) + R_ETHA_EATPEC_OFFSET)
+#define R_ETHA_EATMFSC(n, m)                      (R_ETHA_CH_BASE(n) + R_ETHA_EATMFSC_OFFSET(m))
+#define R_ETHA_EATDQDC(n, m)                      (R_ETHA_CH_BASE(n) + R_ETHA_EATDQDC_OFFSET(m))
+#define R_ETHA_EATDQM(n, m)                       (R_ETHA_CH_BASE(n) + R_ETHA_EATDQM_OFFSET(m))
+#define R_ETHA_EATDQMLM(n, m)                     (R_ETHA_CH_BASE(n) + R_ETHA_EATDQMLM_OFFSET(m))
+#define R_ETHA_EACTQC(n)                          (R_ETHA_CH_BASE(n) + R_ETHA_EACTQC_OFFSET)
+#define R_ETHA_EACTDQDC(n)                        (R_ETHA_CH_BASE(n) + R_ETHA_EACTDQDC_OFFSET)
+#define R_ETHA_EACTDQM(n)                         (R_ETHA_CH_BASE(n) + R_ETHA_EACTDQM_OFFSET)
+#define R_ETHA_EACTDQMLM(n)                       (R_ETHA_CH_BASE(n) + R_ETHA_EACTDQMLM_OFFSET)
+#define R_ETHA_EAVCC(n)                           (R_ETHA_CH_BASE(n) + R_ETHA_EAVCC_OFFSET)
+#define R_ETHA_EAVTC(n)                           (R_ETHA_CH_BASE(n) + R_ETHA_EAVTC_OFFSET)
+#define R_ETHA_EARTFC(n)                          (R_ETHA_CH_BASE(n) + R_ETHA_EARTFC_OFFSET)
+#define R_ETHA_EACAEC(n)                          (R_ETHA_CH_BASE(n) + R_ETHA_EACAEC_OFFSET)
+#define R_ETHA_EACC(n)                            (R_ETHA_CH_BASE(n) + R_ETHA_EACC_OFFSET)
+#define R_ETHA_EACAIVC(n, m)                      (R_ETHA_CH_BASE(n) + R_ETHA_EACAIVC_OFFSET(m))
+#define R_ETHA_EACAULCQ(n)                        (R_ETHA_CH_BASE(n) + R_ETHA_EACAULCQ_OFFSET)
+#define R_ETHA_EACOEM(n)                          (R_ETHA_CH_BASE(n) + R_ETHA_EACOEM_OFFSET)
+#define R_ETHA_EACOIVM(n, m)                      (R_ETHA_CH_BASE(n) + R_ETHA_EACOIVM_OFFSET(m))
+#define R_ETHA_EACOULM(n, m)                      (R_ETHA_CH_BASE(n) + R_ETHA_EACOULM_OFFSET(m))
+#define R_ETHA_EACGSM(n)                          (R_ETHA_CH_BASE(n) + R_ETHA_EACGSM_OFFSET)
+#define R_ETHA_EATASC(n)                          (R_ETHA_CH_BASE(n) + R_ETHA_EATASC_OFFSET)
+#define R_ETHA_EATASIGSC(n)                       (R_ETHA_CH_BASE(n) + R_ETHA_EATASIGSC_OFFSET)
+#define R_ETHA_EATASENC(n, m)                     (R_ETHA_CH_BASE(n) + R_ETHA_EATASENC_OFFSET(m))
+#define R_ETHA_EATASCTENC(n)                      (R_ETHA_CH_BASE(n) + R_ETHA_EATASCTENC_OFFSET)
+#define R_ETHA_EATASENM(n, m)                     (R_ETHA_CH_BASE(n) + R_ETHA_EATASENM_OFFSET(m))
+#define R_ETHA_EATASCTENM(n)                      (R_ETHA_CH_BASE(n) + R_ETHA_EATASCTENM_OFFSET)
+#define R_ETHA_EATASCSTC0(n)                      (R_ETHA_CH_BASE(n) + R_ETHA_EATASCSTC0_OFFSET)
+#define R_ETHA_EATASCSTC1(n)                      (R_ETHA_CH_BASE(n) + R_ETHA_EATASCSTC1_OFFSET)
+#define R_ETHA_EATASCSTM0(n)                      (R_ETHA_CH_BASE(n) + R_ETHA_EATASCSTM0_OFFSET)
+#define R_ETHA_EATASCSTM1(n)                      (R_ETHA_CH_BASE(n) + R_ETHA_EATASCSTM1_OFFSET)
+#define R_ETHA_EATASCTC(n)                        (R_ETHA_CH_BASE(n) + R_ETHA_EATASCTC_OFFSET)
+#define R_ETHA_EATASCTM(n)                        (R_ETHA_CH_BASE(n) + R_ETHA_EATASCTM_OFFSET)
+#define R_ETHA_EATASGL0(n)                        (R_ETHA_CH_BASE(n) + R_ETHA_EATASGL0_OFFSET)
+#define R_ETHA_EATASGL1(n)                        (R_ETHA_CH_BASE(n) + R_ETHA_EATASGL1_OFFSET)
+#define R_ETHA_EATASGLR(n)                        (R_ETHA_CH_BASE(n) + R_ETHA_EATASGLR_OFFSET)
+#define R_ETHA_EATASGR(n)                         (R_ETHA_CH_BASE(n) + R_ETHA_EATASGR_OFFSET)
+#define R_ETHA_EATASGRR(n)                        (R_ETHA_CH_BASE(n) + R_ETHA_EATASGRR_OFFSET)
+#define R_ETHA_EATASHCC(n)                        (R_ETHA_CH_BASE(n) + R_ETHA_EATASHCC_OFFSET)
+#define R_ETHA_EATASRIRM(n)                       (R_ETHA_CH_BASE(n) + R_ETHA_EATASRIRM_OFFSET)
+#define R_ETHA_EATASSM(n)                         (R_ETHA_CH_BASE(n) + R_ETHA_EATASSM_OFFSET)
+#define R_ETHA_EAUSMFSECN(n)                      (R_ETHA_CH_BASE(n) + R_ETHA_EAUSMFSECN_OFFSET)
+#define R_ETHA_EATFECN(n)                         (R_ETHA_CH_BASE(n) + R_ETHA_EATFECN_OFFSET)
+#define R_ETHA_EAFSECN(n)                         (R_ETHA_CH_BASE(n) + R_ETHA_EAFSECN_OFFSET)
+#define R_ETHA_EADQOECN(n)                        (R_ETHA_CH_BASE(n) + R_ETHA_EADQOECN_OFFSET)
+#define R_ETHA_EADQSECN(n)                        (R_ETHA_CH_BASE(n) + R_ETHA_EADQSECN_OFFSET)
+#define R_ETHA_EAEIS0(n)                          (R_ETHA_CH_BASE(n) + R_ETHA_EAEIS0_OFFSET)
+#define R_ETHA_EAEIE0(n)                          (R_ETHA_CH_BASE(n) + R_ETHA_EAEIE0_OFFSET)
+#define R_ETHA_EAEID0(n)                          (R_ETHA_CH_BASE(n) + R_ETHA_EAEID0_OFFSET)
+#define R_ETHA_EAEIS1(n)                          (R_ETHA_CH_BASE(n) + R_ETHA_EAEIS1_OFFSET)
+#define R_ETHA_EAEIE1(n)                          (R_ETHA_CH_BASE(n) + R_ETHA_EAEIE1_OFFSET)
+#define R_ETHA_EAEID1(n)                          (R_ETHA_CH_BASE(n) + R_ETHA_EAEID1_OFFSET)
+#define R_ETHA_EAEIS2(n)                          (R_ETHA_CH_BASE(n) + R_ETHA_EAEIS2_OFFSET)
+#define R_ETHA_EAEIE2(n)                          (R_ETHA_CH_BASE(n) + R_ETHA_EAEIE2_OFFSET)
+#define R_ETHA_EAEID2(n)                          (R_ETHA_CH_BASE(n) + R_ETHA_EAEID2_OFFSET)
 
 /* Register bit definitions */
 /* EAMC Register bit definitions */

@@ -40,21 +40,21 @@
 
 /* DTC Register Offsets */
 
-#define R_DTC_DTCST_OFFSET     0x0000000c  /* DTC Module Start Register */
-#define R_DTC_DTCSTS_OFFSET     0x0000000e  /* DTC Status Register */
-#define R_DTC_DTCCR_SEC_OFFSET     0x00000010  /* DTC Control Register for Secure Region */
-#define R_DTC_DTCVBR_SEC_OFFSET     0x00000014  /* DTC Vector Base Register for Secure Region */
-#define R_DTC_DTCDISP_OFFSET     0x00000018  /* DTC Address Displacement Register */
-#define R_DTC_DTEVR_OFFSET     0x00000020  /* DTC Error Vector Register */
+#define R_DTC_DTCST_OFFSET                        0x0000000c  /* DTC Module Start Register */
+#define R_DTC_DTCSTS_OFFSET                       0x0000000e  /* DTC Status Register */
+#define R_DTC_DTCCR_SEC_OFFSET                    0x00000010  /* DTC Control Register for Secure Region */
+#define R_DTC_DTCVBR_SEC_OFFSET                   0x00000014  /* DTC Vector Base Register for Secure Region */
+#define R_DTC_DTCDISP_OFFSET                      0x00000018  /* DTC Address Displacement Register */
+#define R_DTC_DTEVR_OFFSET                        0x00000020  /* DTC Error Vector Register */
 
 /* DTC Register Addresses */
 
-#define R_DTC_DTCST                 (R_DTC_BASE + R_DTC_DTCST_OFFSET)
-#define R_DTC_DTCSTS                 (R_DTC_BASE + R_DTC_DTCSTS_OFFSET)
-#define R_DTC_DTCCR_SEC                 (R_DTC_BASE + R_DTC_DTCCR_SEC_OFFSET)
-#define R_DTC_DTCVBR_SEC                 (R_DTC_BASE + R_DTC_DTCVBR_SEC_OFFSET)
-#define R_DTC_DTCDISP                 (R_DTC_BASE + R_DTC_DTCDISP_OFFSET)
-#define R_DTC_DTEVR                 (R_DTC_BASE + R_DTC_DTEVR_OFFSET)
+#define R_DTC_DTCST                               (R_DTC_BASE + R_DTC_DTCST_OFFSET)
+#define R_DTC_DTCSTS                              (R_DTC_BASE + R_DTC_DTCSTS_OFFSET)
+#define R_DTC_DTCCR_SEC                           (R_DTC_BASE + R_DTC_DTCCR_SEC_OFFSET)
+#define R_DTC_DTCVBR_SEC                          (R_DTC_BASE + R_DTC_DTCVBR_SEC_OFFSET)
+#define R_DTC_DTCDISP                             (R_DTC_BASE + R_DTC_DTCDISP_OFFSET)
+#define R_DTC_DTEVR                               (R_DTC_BASE + R_DTC_DTEVR_OFFSET)
 
 /* Register bit definitions */
 /* DTCST Register bit definitions */

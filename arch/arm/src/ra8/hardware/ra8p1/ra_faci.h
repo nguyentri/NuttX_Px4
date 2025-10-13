@@ -36,13 +36,13 @@
 
 /* FACI Register Offsets */
 
-#define R_FACI_FBPROT0_OFFSET     0x00000078  /* Flash Block Protection Register */
-#define R_FACI_FBPROT1_OFFSET     0x0000007c  /* Flash Block Protection for Secure Register */
+#define R_FACI_FBPROT0_OFFSET                     0x00000078  /* Flash Block Protection Register */
+#define R_FACI_FBPROT1_OFFSET                     0x0000007c  /* Flash Block Protection for Secure Register */
 
 /* FACI Register Addresses */
 
-#define R_FACI_FBPROT0                 (R_FACI_BASE + R_FACI_FBPROT0_OFFSET)
-#define R_FACI_FBPROT1                 (R_FACI_BASE + R_FACI_FBPROT1_OFFSET)
+#define R_FACI_FBPROT0                            (R_FACI_BASE + R_FACI_FBPROT0_OFFSET)
+#define R_FACI_FBPROT1                            (R_FACI_BASE + R_FACI_FBPROT1_OFFSET)
 
 /* Register bit definitions */
 /* FBPROT0 Register bit definitions */

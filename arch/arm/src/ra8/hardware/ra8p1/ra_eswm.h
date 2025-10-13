@@ -38,69 +38,49 @@
 #endif
 #endif
 
-/* Channel stride for multi-channel peripherals */
-#define R_ESWM_CH_STRIDE    0x00000004
-#define R_ESWM_CH_BASE(ch)   (R_ESWM_BASE + ((uint32_t)(ch) * R_ESWM_CH_STRIDE))
-
 /* ESWM Register Offsets */
 
-#define R_ESWM_TPEMIMC0_OFFSET     0x00000000  /* Error and Monitoring Interrupt Mapping Configuration Register 0 */
-#define R_ESWM_TPEMIMC1_OFFSET     0x00000004  /* Error and Monitoring Interrupt Mapping Configuration Register 1 */
-#define R_ESWM_TPEMIMC2_OFFSET     0x00000008  /* Error and Monitoring Interrupt Mapping Configuration Register 2 */
-#define R_ESWM_TPEMIMC3_OFFSET     0x0000000c  /* Error and Monitoring Interrupt Mapping Configuration Register 3 */
-#define R_ESWM_TPEMIMC4_OFFSET     0x00000010  /* Error and Monitoring Interrupt Mapping Configuration Register 4 */
+#define R_ESWM_TPEMIMC0_OFFSET                    0x00000000  /* Error and Monitoring Interrupt Mapping Configuration Register 0 */
+#define R_ESWM_TPEMIMC1_OFFSET                    0x00000004  /* Error and Monitoring Interrupt Mapping Configuration Register 1 */
+#define R_ESWM_TPEMIMC2_OFFSET                    0x00000008  /* Error and Monitoring Interrupt Mapping Configuration Register 2 */
+#define R_ESWM_TPEMIMC3_OFFSET                    0x0000000c  /* Error and Monitoring Interrupt Mapping Configuration Register 3 */
+#define R_ESWM_TPEMIMC4_OFFSET                    0x00000010  /* Error and Monitoring Interrupt Mapping Configuration Register 4 */
 /* TPEMIMC6%s Registers (0-4) */
-#define R_ESWM_TPEMIMC60_OFFSET     0x00000080  /* Error and Monitoring Interrupt Mapping Configuration Register 60 */
-#define R_ESWM_TPEMIMC61_OFFSET     0x00000084  /* Error and Monitoring Interrupt Mapping Configuration Register 61 */
-#define R_ESWM_TPEMIMC62_OFFSET     0x00000088  /* Error and Monitoring Interrupt Mapping Configuration Register 62 */
-#define R_ESWM_TPEMIMC63_OFFSET     0x0000008c  /* Error and Monitoring Interrupt Mapping Configuration Register 63 */
-#define R_ESWM_TPEMIMC64_OFFSET     0x00000090  /* Error and Monitoring Interrupt Mapping Configuration Register 64 */
+#define R_ESWM_TPEMIMC6_OFFSET(m)                 (0x00000080 + ((m) * 0x00000004))  /* Error and Monitoring Interrupt Mapping Configuration Register 6%s */
 /* TPEMIMC7%s Registers (0-4) */
-#define R_ESWM_TPEMIMC70_OFFSET     0x00000100  /* Error and Monitoring Interrupt Mapping Configuration Register 70 */
-#define R_ESWM_TPEMIMC71_OFFSET     0x00000104  /* Error and Monitoring Interrupt Mapping Configuration Register 71 */
-#define R_ESWM_TPEMIMC72_OFFSET     0x00000108  /* Error and Monitoring Interrupt Mapping Configuration Register 72 */
-#define R_ESWM_TPEMIMC73_OFFSET     0x0000010c  /* Error and Monitoring Interrupt Mapping Configuration Register 73 */
-#define R_ESWM_TPEMIMC74_OFFSET     0x00000110  /* Error and Monitoring Interrupt Mapping Configuration Register 74 */
-#define R_ESWM_TSIM_OFFSET     0x00000700  /* Summarized Interrupt Mirroring Register */
-#define R_ESWM_TFIM_OFFSET     0x00000704  /* MFWD Interrupt Mirroring Register */
-#define R_ESWM_TCIM_OFFSET     0x00000708  /* COMA Interrupt Mirroring Register */
-#define R_ESWM_TGIM0_OFFSET     0x00000710  /* GWCA0 Interrupt Mirroring Register */
-#define R_ESWM_TEIM0_OFFSET     0x00000720  /* ETHA0 Interrupt Mirroring Register */
-#define R_ESWM_TEIM1_OFFSET     0x00000724  /* ETHA1 Interrupt Mirroring Register */
-#define R_ESWM_MIIRR_OFFSET     0x00019400  /* Media-independent Interface Reset Register */
-#define R_ESWM_MIICR0_OFFSET     0x00019404  /* Media-independent Interface Control Register 0 */
-#define R_ESWM_MIICR1_OFFSET     0x00019408  /* Media-independent Interface Control Register 1 */
-#define R_ESWM_MCCESR_OFFSET     0x00019410  /* Media Clock Capture Event Select Register */
-#define R_ESWM_TASSTSR_OFFSET     0x00019420  /* TAS Status Monitor Signal Select Register */
+#define R_ESWM_TPEMIMC7_OFFSET(m)                 (0x00000100 + ((m) * 0x00000004))  /* Error and Monitoring Interrupt Mapping Configuration Register 7%s */
+#define R_ESWM_TSIM_OFFSET                        0x00000700  /* Summarized Interrupt Mirroring Register */
+#define R_ESWM_TFIM_OFFSET                        0x00000704  /* MFWD Interrupt Mirroring Register */
+#define R_ESWM_TCIM_OFFSET                        0x00000708  /* COMA Interrupt Mirroring Register */
+#define R_ESWM_TGIM0_OFFSET                       0x00000710  /* GWCA0 Interrupt Mirroring Register */
+#define R_ESWM_TEIM0_OFFSET                       0x00000720  /* ETHA0 Interrupt Mirroring Register */
+#define R_ESWM_TEIM1_OFFSET                       0x00000724  /* ETHA1 Interrupt Mirroring Register */
+#define R_ESWM_MIIRR_OFFSET                       0x00019400  /* Media-independent Interface Reset Register */
+#define R_ESWM_MIICR0_OFFSET                      0x00019404  /* Media-independent Interface Control Register 0 */
+#define R_ESWM_MIICR1_OFFSET                      0x00019408  /* Media-independent Interface Control Register 1 */
+#define R_ESWM_MCCESR_OFFSET                      0x00019410  /* Media Clock Capture Event Select Register */
+#define R_ESWM_TASSTSR_OFFSET                     0x00019420  /* TAS Status Monitor Signal Select Register */
 
 /* ESWM Register Addresses */
 
-#define R_ESWM_TPEMIMC0                 (R_ESWM_BASE + R_ESWM_TPEMIMC0_OFFSET)
-#define R_ESWM_TPEMIMC1                 (R_ESWM_BASE + R_ESWM_TPEMIMC1_OFFSET)
-#define R_ESWM_TPEMIMC2                 (R_ESWM_BASE + R_ESWM_TPEMIMC2_OFFSET)
-#define R_ESWM_TPEMIMC3                 (R_ESWM_BASE + R_ESWM_TPEMIMC3_OFFSET)
-#define R_ESWM_TPEMIMC4                 (R_ESWM_BASE + R_ESWM_TPEMIMC4_OFFSET)
-#define R_ESWM_TPEMIMC60                 (R_ESWM_BASE + R_ESWM_TPEMIMC60_OFFSET)
-#define R_ESWM_TPEMIMC61                 (R_ESWM_BASE + R_ESWM_TPEMIMC61_OFFSET)
-#define R_ESWM_TPEMIMC62                 (R_ESWM_BASE + R_ESWM_TPEMIMC62_OFFSET)
-#define R_ESWM_TPEMIMC63                 (R_ESWM_BASE + R_ESWM_TPEMIMC63_OFFSET)
-#define R_ESWM_TPEMIMC64                 (R_ESWM_BASE + R_ESWM_TPEMIMC64_OFFSET)
-#define R_ESWM_TPEMIMC70                 (R_ESWM_BASE + R_ESWM_TPEMIMC70_OFFSET)
-#define R_ESWM_TPEMIMC71                 (R_ESWM_BASE + R_ESWM_TPEMIMC71_OFFSET)
-#define R_ESWM_TPEMIMC72                 (R_ESWM_BASE + R_ESWM_TPEMIMC72_OFFSET)
-#define R_ESWM_TPEMIMC73                 (R_ESWM_BASE + R_ESWM_TPEMIMC73_OFFSET)
-#define R_ESWM_TPEMIMC74                 (R_ESWM_BASE + R_ESWM_TPEMIMC74_OFFSET)
-#define R_ESWM_TSIM                 (R_ESWM_BASE + R_ESWM_TSIM_OFFSET)
-#define R_ESWM_TFIM                 (R_ESWM_BASE + R_ESWM_TFIM_OFFSET)
-#define R_ESWM_TCIM                 (R_ESWM_BASE + R_ESWM_TCIM_OFFSET)
-#define R_ESWM_TGIM0                 (R_ESWM_BASE + R_ESWM_TGIM0_OFFSET)
-#define R_ESWM_TEIM0                 (R_ESWM_BASE + R_ESWM_TEIM0_OFFSET)
-#define R_ESWM_TEIM1                 (R_ESWM_BASE + R_ESWM_TEIM1_OFFSET)
-#define R_ESWM_MIIRR                 (R_ESWM_BASE + R_ESWM_MIIRR_OFFSET)
-#define R_ESWM_MIICR0                 (R_ESWM_BASE + R_ESWM_MIICR0_OFFSET)
-#define R_ESWM_MIICR1                 (R_ESWM_BASE + R_ESWM_MIICR1_OFFSET)
-#define R_ESWM_MCCESR                 (R_ESWM_BASE + R_ESWM_MCCESR_OFFSET)
-#define R_ESWM_TASSTSR                 (R_ESWM_BASE + R_ESWM_TASSTSR_OFFSET)
+#define R_ESWM_TPEMIMC0                           (R_ESWM_BASE + R_ESWM_TPEMIMC0_OFFSET)
+#define R_ESWM_TPEMIMC1                           (R_ESWM_BASE + R_ESWM_TPEMIMC1_OFFSET)
+#define R_ESWM_TPEMIMC2                           (R_ESWM_BASE + R_ESWM_TPEMIMC2_OFFSET)
+#define R_ESWM_TPEMIMC3                           (R_ESWM_BASE + R_ESWM_TPEMIMC3_OFFSET)
+#define R_ESWM_TPEMIMC4                           (R_ESWM_BASE + R_ESWM_TPEMIMC4_OFFSET)
+#define R_ESWM_TPEMIMC6(m)                        (R_ESWM_BASE + R_ESWM_TPEMIMC6_OFFSET(m))
+#define R_ESWM_TPEMIMC7(m)                        (R_ESWM_BASE + R_ESWM_TPEMIMC7_OFFSET(m))
+#define R_ESWM_TSIM                               (R_ESWM_BASE + R_ESWM_TSIM_OFFSET)
+#define R_ESWM_TFIM                               (R_ESWM_BASE + R_ESWM_TFIM_OFFSET)
+#define R_ESWM_TCIM                               (R_ESWM_BASE + R_ESWM_TCIM_OFFSET)
+#define R_ESWM_TGIM0                              (R_ESWM_BASE + R_ESWM_TGIM0_OFFSET)
+#define R_ESWM_TEIM0                              (R_ESWM_BASE + R_ESWM_TEIM0_OFFSET)
+#define R_ESWM_TEIM1                              (R_ESWM_BASE + R_ESWM_TEIM1_OFFSET)
+#define R_ESWM_MIIRR                              (R_ESWM_BASE + R_ESWM_MIIRR_OFFSET)
+#define R_ESWM_MIICR0                             (R_ESWM_BASE + R_ESWM_MIICR0_OFFSET)
+#define R_ESWM_MIICR1                             (R_ESWM_BASE + R_ESWM_MIICR1_OFFSET)
+#define R_ESWM_MCCESR                             (R_ESWM_BASE + R_ESWM_MCCESR_OFFSET)
+#define R_ESWM_TASSTSR                            (R_ESWM_BASE + R_ESWM_TASSTSR_OFFSET)
 
 /* Register bit definitions */
 /* TPEMIMC0 Register bit definitions */

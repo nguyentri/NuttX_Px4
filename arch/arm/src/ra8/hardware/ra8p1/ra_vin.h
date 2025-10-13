@@ -40,87 +40,87 @@
 
 /* VIN Register Offsets */
 
-#define R_VIN_MC_OFFSET     0x00000000  /* Main Control Register */
-#define R_VIN_MS_OFFSET     0x00000004  /* Module Status Register */
-#define R_VIN_FC_OFFSET     0x00000008  /* Frame Capture Register */
-#define R_VIN_SLPRC_OFFSET     0x0000000c  /* Start Line Pre-Clip Register */
-#define R_VIN_ELPRC_OFFSET     0x00000010  /* End Line Pre-Clip Register */
-#define R_VIN_SPPRC_OFFSET     0x00000014  /* Start Pixel Pre-Clip Register */
-#define R_VIN_EPPRC_OFFSET     0x00000018  /* End Pixel Pre-Clip Register */
-#define R_VIN_CSI_IFMD_OFFSET     0x00000020  /* CSI2 Interface Mode Register */
-#define R_VIN_CSIFLD_OFFSET     0x00000024  /* Field Detection Control Register */
-#define R_VIN_IS_OFFSET     0x0000002c  /* Image Stride Register */
-#define R_VIN_MB1_OFFSET     0x00000030  /* Memory Base 1 Register */
-#define R_VIN_MB2_OFFSET     0x00000034  /* Memory Base 2 Register */
-#define R_VIN_MB3_OFFSET     0x00000038  /* Memory Base 3 Register */
-#define R_VIN_LC_OFFSET     0x0000003c  /* Line Count Register */
-#define R_VIN_IE_OFFSET     0x00000040  /* Interrupt Enable Register */
-#define R_VIN_INTS_OFFSET     0x00000044  /* Interrupt Status Register */
-#define R_VIN_SI_OFFSET     0x00000048  /* Scanline Interrupt Register */
-#define R_VIN_MTCSTOP_OFFSET     0x00000054  /* AXI Transfer Stop Control Register */
-#define R_VIN_DMR_OFFSET     0x00000058  /* Data Mode Register */
-#define R_VIN_UVAOF_OFFSET     0x00000060  /* UV Address Offset Register */
-#define R_VIN_UDS_CTRL_OFFSET     0x00000080  /* Scaling Control Registers */
-#define R_VIN_UDS_SCALE_OFFSET     0x00000084  /* Scaling Factor Registers */
-#define R_VIN_UDS_PASS_BWIDTH_OFFSET     0x00000090  /* Passband Registers */
-#define R_VIN_UDS_CLIP_SIZE_OFFSET     0x000000a4  /* UDS Output Size Clipping Registers */
-#define R_VIN_LUTP_OFFSET     0x00000100  /* Lookup Table Pointer Register */
-#define R_VIN_LUTD_OFFSET     0x00000104  /* Lookup Table Data Register */
-#define R_VIN_YCCR1_OFFSET     0x00000228  /* RGB to Y Calculation Setting Register 1 */
-#define R_VIN_YCCR2_OFFSET     0x0000022c  /* RGB to Y Calculation Setting Register 2 */
-#define R_VIN_YCCR3_OFFSET     0x00000230  /* RGB to Y Calculation Setting Register 3 */
-#define R_VIN_CBCCR1_OFFSET     0x00000234  /* RGB to Cb Calculation Setting Register 1 */
-#define R_VIN_CBCCR2_OFFSET     0x00000238  /* RGB to Cb Calculation Setting Register 2 */
-#define R_VIN_CBCCR3_OFFSET     0x0000023c  /* RGB to Cb Calculation Setting Register 3 */
-#define R_VIN_CRCCR1_OFFSET     0x00000240  /* RGB to Cr Calculation Setting Register 1 */
-#define R_VIN_CRCCR2_OFFSET     0x00000244  /* RGB to Cr Calculation Setting Register 2 */
-#define R_VIN_CRCCR3_OFFSET     0x00000248  /* RGB to Cr Calculation Setting Register 3 */
-#define R_VIN_CSCE1_OFFSET     0x00000300  /* YC to RGB Calculation Setting Extension Register 1 */
-#define R_VIN_CSCE2_OFFSET     0x00000304  /* YC to RGB Calculation Setting Extension Register 2 */
-#define R_VIN_CSCE3_OFFSET     0x00000308  /* YC to RGB Calculation Setting Extension Register 3 */
-#define R_VIN_CSCE4_OFFSET     0x0000030c  /* YC to RGB Calculation Setting Extension Register 4 */
+#define R_VIN_MC_OFFSET                           0x00000000  /* Main Control Register */
+#define R_VIN_MS_OFFSET                           0x00000004  /* Module Status Register */
+#define R_VIN_FC_OFFSET                           0x00000008  /* Frame Capture Register */
+#define R_VIN_SLPRC_OFFSET                        0x0000000c  /* Start Line Pre-Clip Register */
+#define R_VIN_ELPRC_OFFSET                        0x00000010  /* End Line Pre-Clip Register */
+#define R_VIN_SPPRC_OFFSET                        0x00000014  /* Start Pixel Pre-Clip Register */
+#define R_VIN_EPPRC_OFFSET                        0x00000018  /* End Pixel Pre-Clip Register */
+#define R_VIN_CSI_IFMD_OFFSET                     0x00000020  /* CSI2 Interface Mode Register */
+#define R_VIN_CSIFLD_OFFSET                       0x00000024  /* Field Detection Control Register */
+#define R_VIN_IS_OFFSET                           0x0000002c  /* Image Stride Register */
+#define R_VIN_MB1_OFFSET                          0x00000030  /* Memory Base 1 Register */
+#define R_VIN_MB2_OFFSET                          0x00000034  /* Memory Base 2 Register */
+#define R_VIN_MB3_OFFSET                          0x00000038  /* Memory Base 3 Register */
+#define R_VIN_LC_OFFSET                           0x0000003c  /* Line Count Register */
+#define R_VIN_IE_OFFSET                           0x00000040  /* Interrupt Enable Register */
+#define R_VIN_INTS_OFFSET                         0x00000044  /* Interrupt Status Register */
+#define R_VIN_SI_OFFSET                           0x00000048  /* Scanline Interrupt Register */
+#define R_VIN_MTCSTOP_OFFSET                      0x00000054  /* AXI Transfer Stop Control Register */
+#define R_VIN_DMR_OFFSET                          0x00000058  /* Data Mode Register */
+#define R_VIN_UVAOF_OFFSET                        0x00000060  /* UV Address Offset Register */
+#define R_VIN_UDS_CTRL_OFFSET                     0x00000080  /* Scaling Control Registers */
+#define R_VIN_UDS_SCALE_OFFSET                    0x00000084  /* Scaling Factor Registers */
+#define R_VIN_UDS_PASS_BWIDTH_OFFSET              0x00000090  /* Passband Registers */
+#define R_VIN_UDS_CLIP_SIZE_OFFSET                0x000000a4  /* UDS Output Size Clipping Registers */
+#define R_VIN_LUTP_OFFSET                         0x00000100  /* Lookup Table Pointer Register */
+#define R_VIN_LUTD_OFFSET                         0x00000104  /* Lookup Table Data Register */
+#define R_VIN_YCCR1_OFFSET                        0x00000228  /* RGB to Y Calculation Setting Register 1 */
+#define R_VIN_YCCR2_OFFSET                        0x0000022c  /* RGB to Y Calculation Setting Register 2 */
+#define R_VIN_YCCR3_OFFSET                        0x00000230  /* RGB to Y Calculation Setting Register 3 */
+#define R_VIN_CBCCR1_OFFSET                       0x00000234  /* RGB to Cb Calculation Setting Register 1 */
+#define R_VIN_CBCCR2_OFFSET                       0x00000238  /* RGB to Cb Calculation Setting Register 2 */
+#define R_VIN_CBCCR3_OFFSET                       0x0000023c  /* RGB to Cb Calculation Setting Register 3 */
+#define R_VIN_CRCCR1_OFFSET                       0x00000240  /* RGB to Cr Calculation Setting Register 1 */
+#define R_VIN_CRCCR2_OFFSET                       0x00000244  /* RGB to Cr Calculation Setting Register 2 */
+#define R_VIN_CRCCR3_OFFSET                       0x00000248  /* RGB to Cr Calculation Setting Register 3 */
+#define R_VIN_CSCE1_OFFSET                        0x00000300  /* YC to RGB Calculation Setting Extension Register 1 */
+#define R_VIN_CSCE2_OFFSET                        0x00000304  /* YC to RGB Calculation Setting Extension Register 2 */
+#define R_VIN_CSCE3_OFFSET                        0x00000308  /* YC to RGB Calculation Setting Extension Register 3 */
+#define R_VIN_CSCE4_OFFSET                        0x0000030c  /* YC to RGB Calculation Setting Extension Register 4 */
 
 /* VIN Register Addresses */
 
-#define R_VIN_MC                 (R_VIN_BASE + R_VIN_MC_OFFSET)
-#define R_VIN_MS                 (R_VIN_BASE + R_VIN_MS_OFFSET)
-#define R_VIN_FC                 (R_VIN_BASE + R_VIN_FC_OFFSET)
-#define R_VIN_SLPRC                 (R_VIN_BASE + R_VIN_SLPRC_OFFSET)
-#define R_VIN_ELPRC                 (R_VIN_BASE + R_VIN_ELPRC_OFFSET)
-#define R_VIN_SPPRC                 (R_VIN_BASE + R_VIN_SPPRC_OFFSET)
-#define R_VIN_EPPRC                 (R_VIN_BASE + R_VIN_EPPRC_OFFSET)
-#define R_VIN_CSI_IFMD                 (R_VIN_BASE + R_VIN_CSI_IFMD_OFFSET)
-#define R_VIN_CSIFLD                 (R_VIN_BASE + R_VIN_CSIFLD_OFFSET)
-#define R_VIN_IS                 (R_VIN_BASE + R_VIN_IS_OFFSET)
-#define R_VIN_MB1                 (R_VIN_BASE + R_VIN_MB1_OFFSET)
-#define R_VIN_MB2                 (R_VIN_BASE + R_VIN_MB2_OFFSET)
-#define R_VIN_MB3                 (R_VIN_BASE + R_VIN_MB3_OFFSET)
-#define R_VIN_LC                 (R_VIN_BASE + R_VIN_LC_OFFSET)
-#define R_VIN_IE                 (R_VIN_BASE + R_VIN_IE_OFFSET)
-#define R_VIN_INTS                 (R_VIN_BASE + R_VIN_INTS_OFFSET)
-#define R_VIN_SI                 (R_VIN_BASE + R_VIN_SI_OFFSET)
-#define R_VIN_MTCSTOP                 (R_VIN_BASE + R_VIN_MTCSTOP_OFFSET)
-#define R_VIN_DMR                 (R_VIN_BASE + R_VIN_DMR_OFFSET)
-#define R_VIN_UVAOF                 (R_VIN_BASE + R_VIN_UVAOF_OFFSET)
-#define R_VIN_UDS_CTRL                 (R_VIN_BASE + R_VIN_UDS_CTRL_OFFSET)
-#define R_VIN_UDS_SCALE                 (R_VIN_BASE + R_VIN_UDS_SCALE_OFFSET)
-#define R_VIN_UDS_PASS_BWIDTH                 (R_VIN_BASE + R_VIN_UDS_PASS_BWIDTH_OFFSET)
-#define R_VIN_UDS_CLIP_SIZE                 (R_VIN_BASE + R_VIN_UDS_CLIP_SIZE_OFFSET)
-#define R_VIN_LUTP                 (R_VIN_BASE + R_VIN_LUTP_OFFSET)
-#define R_VIN_LUTD                 (R_VIN_BASE + R_VIN_LUTD_OFFSET)
-#define R_VIN_YCCR1                 (R_VIN_BASE + R_VIN_YCCR1_OFFSET)
-#define R_VIN_YCCR2                 (R_VIN_BASE + R_VIN_YCCR2_OFFSET)
-#define R_VIN_YCCR3                 (R_VIN_BASE + R_VIN_YCCR3_OFFSET)
-#define R_VIN_CBCCR1                 (R_VIN_BASE + R_VIN_CBCCR1_OFFSET)
-#define R_VIN_CBCCR2                 (R_VIN_BASE + R_VIN_CBCCR2_OFFSET)
-#define R_VIN_CBCCR3                 (R_VIN_BASE + R_VIN_CBCCR3_OFFSET)
-#define R_VIN_CRCCR1                 (R_VIN_BASE + R_VIN_CRCCR1_OFFSET)
-#define R_VIN_CRCCR2                 (R_VIN_BASE + R_VIN_CRCCR2_OFFSET)
-#define R_VIN_CRCCR3                 (R_VIN_BASE + R_VIN_CRCCR3_OFFSET)
-#define R_VIN_CSCE1                 (R_VIN_BASE + R_VIN_CSCE1_OFFSET)
-#define R_VIN_CSCE2                 (R_VIN_BASE + R_VIN_CSCE2_OFFSET)
-#define R_VIN_CSCE3                 (R_VIN_BASE + R_VIN_CSCE3_OFFSET)
-#define R_VIN_CSCE4                 (R_VIN_BASE + R_VIN_CSCE4_OFFSET)
+#define R_VIN_MC                                  (R_VIN_BASE + R_VIN_MC_OFFSET)
+#define R_VIN_MS                                  (R_VIN_BASE + R_VIN_MS_OFFSET)
+#define R_VIN_FC                                  (R_VIN_BASE + R_VIN_FC_OFFSET)
+#define R_VIN_SLPRC                               (R_VIN_BASE + R_VIN_SLPRC_OFFSET)
+#define R_VIN_ELPRC                               (R_VIN_BASE + R_VIN_ELPRC_OFFSET)
+#define R_VIN_SPPRC                               (R_VIN_BASE + R_VIN_SPPRC_OFFSET)
+#define R_VIN_EPPRC                               (R_VIN_BASE + R_VIN_EPPRC_OFFSET)
+#define R_VIN_CSI_IFMD                            (R_VIN_BASE + R_VIN_CSI_IFMD_OFFSET)
+#define R_VIN_CSIFLD                              (R_VIN_BASE + R_VIN_CSIFLD_OFFSET)
+#define R_VIN_IS                                  (R_VIN_BASE + R_VIN_IS_OFFSET)
+#define R_VIN_MB1                                 (R_VIN_BASE + R_VIN_MB1_OFFSET)
+#define R_VIN_MB2                                 (R_VIN_BASE + R_VIN_MB2_OFFSET)
+#define R_VIN_MB3                                 (R_VIN_BASE + R_VIN_MB3_OFFSET)
+#define R_VIN_LC                                  (R_VIN_BASE + R_VIN_LC_OFFSET)
+#define R_VIN_IE                                  (R_VIN_BASE + R_VIN_IE_OFFSET)
+#define R_VIN_INTS                                (R_VIN_BASE + R_VIN_INTS_OFFSET)
+#define R_VIN_SI                                  (R_VIN_BASE + R_VIN_SI_OFFSET)
+#define R_VIN_MTCSTOP                             (R_VIN_BASE + R_VIN_MTCSTOP_OFFSET)
+#define R_VIN_DMR                                 (R_VIN_BASE + R_VIN_DMR_OFFSET)
+#define R_VIN_UVAOF                               (R_VIN_BASE + R_VIN_UVAOF_OFFSET)
+#define R_VIN_UDS_CTRL                            (R_VIN_BASE + R_VIN_UDS_CTRL_OFFSET)
+#define R_VIN_UDS_SCALE                           (R_VIN_BASE + R_VIN_UDS_SCALE_OFFSET)
+#define R_VIN_UDS_PASS_BWIDTH                     (R_VIN_BASE + R_VIN_UDS_PASS_BWIDTH_OFFSET)
+#define R_VIN_UDS_CLIP_SIZE                       (R_VIN_BASE + R_VIN_UDS_CLIP_SIZE_OFFSET)
+#define R_VIN_LUTP                                (R_VIN_BASE + R_VIN_LUTP_OFFSET)
+#define R_VIN_LUTD                                (R_VIN_BASE + R_VIN_LUTD_OFFSET)
+#define R_VIN_YCCR1                               (R_VIN_BASE + R_VIN_YCCR1_OFFSET)
+#define R_VIN_YCCR2                               (R_VIN_BASE + R_VIN_YCCR2_OFFSET)
+#define R_VIN_YCCR3                               (R_VIN_BASE + R_VIN_YCCR3_OFFSET)
+#define R_VIN_CBCCR1                              (R_VIN_BASE + R_VIN_CBCCR1_OFFSET)
+#define R_VIN_CBCCR2                              (R_VIN_BASE + R_VIN_CBCCR2_OFFSET)
+#define R_VIN_CBCCR3                              (R_VIN_BASE + R_VIN_CBCCR3_OFFSET)
+#define R_VIN_CRCCR1                              (R_VIN_BASE + R_VIN_CRCCR1_OFFSET)
+#define R_VIN_CRCCR2                              (R_VIN_BASE + R_VIN_CRCCR2_OFFSET)
+#define R_VIN_CRCCR3                              (R_VIN_BASE + R_VIN_CRCCR3_OFFSET)
+#define R_VIN_CSCE1                               (R_VIN_BASE + R_VIN_CSCE1_OFFSET)
+#define R_VIN_CSCE2                               (R_VIN_BASE + R_VIN_CSCE2_OFFSET)
+#define R_VIN_CSCE3                               (R_VIN_BASE + R_VIN_CSCE3_OFFSET)
+#define R_VIN_CSCE4                               (R_VIN_BASE + R_VIN_CSCE4_OFFSET)
 
 /* Register bit definitions */
 /* MC Register bit definitions */
@@ -216,10 +216,10 @@
 
 #define R_VIN_CSI_IFMD_DT_SHIFT                   (8)  /* Data Type select */
 #define R_VIN_CSI_IFMD_DT_MASK                    0x3f00
-#  define R_VIN_CSI_IFMD_DT_0X1E                          (0 << R_VIN_CSI_IFMD_DT_SHIFT)  /* YUV422 8-bit */
-#  define R_VIN_CSI_IFMD_DT_0X1F                          (0 << R_VIN_CSI_IFMD_DT_SHIFT)  /* YUV422 10-bit */
-#  define R_VIN_CSI_IFMD_DT_0X24                          (0 << R_VIN_CSI_IFMD_DT_SHIFT)  /* RGB888 */
-#  define R_VIN_CSI_IFMD_DT_0X2A                          (0 << R_VIN_CSI_IFMD_DT_SHIFT)  /* RAW 8-bit */
+#  define R_VIN_CSI_IFMD_DT_0X1E                          (30 << R_VIN_CSI_IFMD_DT_SHIFT)  /* YUV422 8-bit */
+#  define R_VIN_CSI_IFMD_DT_0X1F                          (31 << R_VIN_CSI_IFMD_DT_SHIFT)  /* YUV422 10-bit */
+#  define R_VIN_CSI_IFMD_DT_0X24                          (36 << R_VIN_CSI_IFMD_DT_SHIFT)  /* RGB888 */
+#  define R_VIN_CSI_IFMD_DT_0X2A                          (42 << R_VIN_CSI_IFMD_DT_SHIFT)  /* RAW 8-bit */
 
 #define R_VIN_CSI_IFMD_DES0                       (1 << 25)  /* Data Extension Select */
 

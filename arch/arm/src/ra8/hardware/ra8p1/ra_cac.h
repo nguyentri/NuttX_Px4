@@ -40,25 +40,25 @@
 
 /* CAC Register Offsets */
 
-#define R_CAC_CACR0_OFFSET     0x00000000  /* CAC Control Register 0 */
-#define R_CAC_CACR1_OFFSET     0x00000001  /* CAC Control Register 1 */
-#define R_CAC_CACR2_OFFSET     0x00000002  /* CAC Control Register 2 */
-#define R_CAC_CAICR_OFFSET     0x00000003  /* CAC Interrupt Control Register */
-#define R_CAC_CASTR_OFFSET     0x00000004  /* CAC Status Register */
-#define R_CAC_CAULVR_OFFSET     0x00000006  /* CAC Upper-Limit Value Setting Register */
-#define R_CAC_CALLVR_OFFSET     0x00000008  /* CAC Lower-Limit Value Setting Register */
-#define R_CAC_CACNTBR_OFFSET     0x0000000a  /* CAC Counter Buffer Register */
+#define R_CAC_CACR0_OFFSET                        0x00000000  /* CAC Control Register 0 */
+#define R_CAC_CACR1_OFFSET                        0x00000001  /* CAC Control Register 1 */
+#define R_CAC_CACR2_OFFSET                        0x00000002  /* CAC Control Register 2 */
+#define R_CAC_CAICR_OFFSET                        0x00000003  /* CAC Interrupt Control Register */
+#define R_CAC_CASTR_OFFSET                        0x00000004  /* CAC Status Register */
+#define R_CAC_CAULVR_OFFSET                       0x00000006  /* CAC Upper-Limit Value Setting Register */
+#define R_CAC_CALLVR_OFFSET                       0x00000008  /* CAC Lower-Limit Value Setting Register */
+#define R_CAC_CACNTBR_OFFSET                      0x0000000a  /* CAC Counter Buffer Register */
 
 /* CAC Register Addresses */
 
-#define R_CAC_CACR0                 (R_CAC_BASE + R_CAC_CACR0_OFFSET)
-#define R_CAC_CACR1                 (R_CAC_BASE + R_CAC_CACR1_OFFSET)
-#define R_CAC_CACR2                 (R_CAC_BASE + R_CAC_CACR2_OFFSET)
-#define R_CAC_CAICR                 (R_CAC_BASE + R_CAC_CAICR_OFFSET)
-#define R_CAC_CASTR                 (R_CAC_BASE + R_CAC_CASTR_OFFSET)
-#define R_CAC_CAULVR                 (R_CAC_BASE + R_CAC_CAULVR_OFFSET)
-#define R_CAC_CALLVR                 (R_CAC_BASE + R_CAC_CALLVR_OFFSET)
-#define R_CAC_CACNTBR                 (R_CAC_BASE + R_CAC_CACNTBR_OFFSET)
+#define R_CAC_CACR0                               (R_CAC_BASE + R_CAC_CACR0_OFFSET)
+#define R_CAC_CACR1                               (R_CAC_BASE + R_CAC_CACR1_OFFSET)
+#define R_CAC_CACR2                               (R_CAC_BASE + R_CAC_CACR2_OFFSET)
+#define R_CAC_CAICR                               (R_CAC_BASE + R_CAC_CAICR_OFFSET)
+#define R_CAC_CASTR                               (R_CAC_BASE + R_CAC_CASTR_OFFSET)
+#define R_CAC_CAULVR                              (R_CAC_BASE + R_CAC_CAULVR_OFFSET)
+#define R_CAC_CALLVR                              (R_CAC_BASE + R_CAC_CALLVR_OFFSET)
+#define R_CAC_CACNTBR                             (R_CAC_BASE + R_CAC_CACNTBR_OFFSET)
 
 /* Register bit definitions */
 /* CACR0 Register bit definitions */
@@ -139,6 +139,18 @@
 #define R_CAC_CASTR_MENDF                         (1 << 1)  /* Measurement End Flag */
 
 #define R_CAC_CASTR_OVFF                          (1 << 2)  /* Overflow Flag */
+
+/* CAULVR Register bit definitions */
+#define R_CAC_CAULVR_CAULVR_SHIFT                 (0)  /* CAULVR is a 16-bit readable/writable register that stores the upper-limit value of the frequency. */
+#define R_CAC_CAULVR_CAULVR_MASK                  0xffff
+
+/* CALLVR Register bit definitions */
+#define R_CAC_CALLVR_CALLVR_SHIFT                 (0)  /* CALLVR is a 16-bit readable/writable register that stores the lower-limit value of the frequency. */
+#define R_CAC_CALLVR_CALLVR_MASK                  0xffff
+
+/* CACNTBR Register bit definitions */
+#define R_CAC_CACNTBR_CACNTBR_SHIFT               (0)  /* CACNTBR is a 16-bit read-only register that retains the counter value at the time a valid reference signal edge is input */
+#define R_CAC_CACNTBR_CACNTBR_MASK                0xffff
 
 
 /* Maximum number of channels */

@@ -44,17 +44,17 @@
 
 /* DAC_B Register Offsets */
 
-#define R_DAC_B_DADR_OFFSET     0x00000000  /* D/A Data Register */
-#define R_DAC_B_DACR0_OFFSET     0x00000004  /* D/A Control 0 Register */
-#define R_DAC_B_DACR1_OFFSET     0x00000008  /* D/A Control 1 Register */
-#define R_DAC_B_DACR2_OFFSET     0x0000000c  /* D/A Control 2 Register */
+#define R_DAC_B_DADR_OFFSET                       0x00000000  /* D/A Data Register */
+#define R_DAC_B_DACR0_OFFSET                      0x00000004  /* D/A Control 0 Register */
+#define R_DAC_B_DACR1_OFFSET                      0x00000008  /* D/A Control 1 Register */
+#define R_DAC_B_DACR2_OFFSET                      0x0000000c  /* D/A Control 2 Register */
 
 /* DAC_B Register Addresses */
 
-#define R_DAC_B_DADR                 (R_DAC_B_BASE + R_DAC_B_DADR_OFFSET)
-#define R_DAC_B_DACR0                 (R_DAC_B_BASE + R_DAC_B_DACR0_OFFSET)
-#define R_DAC_B_DACR1                 (R_DAC_B_BASE + R_DAC_B_DACR1_OFFSET)
-#define R_DAC_B_DACR2                 (R_DAC_B_BASE + R_DAC_B_DACR2_OFFSET)
+#define R_DAC_B_DADR(n)                           (R_DAC_B_CH_BASE(n) + R_DAC_B_DADR_OFFSET)
+#define R_DAC_B_DACR0(n)                          (R_DAC_B_CH_BASE(n) + R_DAC_B_DACR0_OFFSET)
+#define R_DAC_B_DACR1(n)                          (R_DAC_B_CH_BASE(n) + R_DAC_B_DACR1_OFFSET)
+#define R_DAC_B_DACR2(n)                          (R_DAC_B_CH_BASE(n) + R_DAC_B_DACR2_OFFSET)
 
 /* Register bit definitions */
 /* DADR Register bit definitions */

@@ -40,27 +40,27 @@
 
 /* TCM Register Offsets */
 
-#define R_TCM_TCMPRCR_S_OFFSET     0x00000000  /* TCM Protection Control Register for Secure */
-#define R_TCM_TCMCRC_OFFSET     0x00000010  /* TCM Control Register */
-#define R_TCM_TCMCRS_OFFSET     0x00000014  /* TCM Control Register */
-#define R_TCM_TCMESR_OFFSET     0x00000040  /* TCM Error Status Register */
-#define R_TCM_TCMESCLR_OFFSET     0x00000048  /* TCM Error Status Clear Register */
-#define R_TCM_TCMEARC0_OFFSET     0x00000050  /* TCM Error Address Register */
-#define R_TCM_TCMEARC1_OFFSET     0x00000054  /* TCM Error Address Register */
-#define R_TCM_TCMEARS0_OFFSET     0x00000058  /* TCM Error Address Register */
-#define R_TCM_TCMEARS1_OFFSET     0x0000005c  /* TCM Error Address Register */
+#define R_TCM_TCMPRCR_S_OFFSET                    0x00000000  /* TCM Protection Control Register for Secure */
+#define R_TCM_TCMCRC_OFFSET                       0x00000010  /* TCM Control Register */
+#define R_TCM_TCMCRS_OFFSET                       0x00000014  /* TCM Control Register */
+#define R_TCM_TCMESR_OFFSET                       0x00000040  /* TCM Error Status Register */
+#define R_TCM_TCMESCLR_OFFSET                     0x00000048  /* TCM Error Status Clear Register */
+#define R_TCM_TCMEARC0_OFFSET                     0x00000050  /* TCM Error Address Register */
+#define R_TCM_TCMEARC1_OFFSET                     0x00000054  /* TCM Error Address Register */
+#define R_TCM_TCMEARS0_OFFSET                     0x00000058  /* TCM Error Address Register */
+#define R_TCM_TCMEARS1_OFFSET                     0x0000005c  /* TCM Error Address Register */
 
 /* TCM Register Addresses */
 
-#define R_TCM_TCMPRCR_S                 (R_TCM_BASE + R_TCM_TCMPRCR_S_OFFSET)
-#define R_TCM_TCMCRC                 (R_TCM_BASE + R_TCM_TCMCRC_OFFSET)
-#define R_TCM_TCMCRS                 (R_TCM_BASE + R_TCM_TCMCRS_OFFSET)
-#define R_TCM_TCMESR                 (R_TCM_BASE + R_TCM_TCMESR_OFFSET)
-#define R_TCM_TCMESCLR                 (R_TCM_BASE + R_TCM_TCMESCLR_OFFSET)
-#define R_TCM_TCMEARC0                 (R_TCM_BASE + R_TCM_TCMEARC0_OFFSET)
-#define R_TCM_TCMEARC1                 (R_TCM_BASE + R_TCM_TCMEARC1_OFFSET)
-#define R_TCM_TCMEARS0                 (R_TCM_BASE + R_TCM_TCMEARS0_OFFSET)
-#define R_TCM_TCMEARS1                 (R_TCM_BASE + R_TCM_TCMEARS1_OFFSET)
+#define R_TCM_TCMPRCR_S                           (R_TCM_BASE + R_TCM_TCMPRCR_S_OFFSET)
+#define R_TCM_TCMCRC                              (R_TCM_BASE + R_TCM_TCMCRC_OFFSET)
+#define R_TCM_TCMCRS                              (R_TCM_BASE + R_TCM_TCMCRS_OFFSET)
+#define R_TCM_TCMESR                              (R_TCM_BASE + R_TCM_TCMESR_OFFSET)
+#define R_TCM_TCMESCLR                            (R_TCM_BASE + R_TCM_TCMESCLR_OFFSET)
+#define R_TCM_TCMEARC0                            (R_TCM_BASE + R_TCM_TCMEARC0_OFFSET)
+#define R_TCM_TCMEARC1                            (R_TCM_BASE + R_TCM_TCMEARC1_OFFSET)
+#define R_TCM_TCMEARS0                            (R_TCM_BASE + R_TCM_TCMEARS0_OFFSET)
+#define R_TCM_TCMEARS1                            (R_TCM_BASE + R_TCM_TCMEARS1_OFFSET)
 
 /* Register bit definitions */
 /* TCMPRCR_S Register bit definitions */

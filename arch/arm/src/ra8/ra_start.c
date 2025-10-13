@@ -40,7 +40,7 @@
 #include "ra_clock.h"
 #include "ra_lowputc.h"
 #include "ra_start.h"
-#include "hardware/ra_system.h"
+#include "hardware/ra_hardware.h"
 #include "hardware/ra_memorymap.h"
 
 /****************************************************************************
@@ -383,7 +383,7 @@ static void ra_cortex_m85_init(void)
 #endif
   /* Enable flash cache and wait for it to be ready */
   putreg16(1U, R_FCACHE_FCACHEIV);
-  RA_HARDWARE_REGISTER_WAIT(getreg16(R_FCACHE_FCACHEIV), 0U);
+  RA_HARDWARE_WAIT(getreg16(R_FCACHE_FCACHEIV), 0U);
   putreg16(1U, R_FCACHE_FCACHEE);
 }
 
@@ -760,7 +760,7 @@ void ra_register_protect_enable(ra_reg_protect_t regs_to_protect)
   if (g_register_protect_counters[regs_to_protect] == 0)
     {
       uint16_t prcr_value = getreg16(R_SYSC_PRCR_S);
-      prcr_value = (prcr_value | R_SYSC_PRCR_PRKEY) &
+      prcr_value = (prcr_value | RA_PRCR_KEY) &
                    (~prcr_masks[regs_to_protect]);
       putreg16(prcr_value, R_SYSC_PRCR_S);
     }
@@ -790,7 +790,7 @@ void ra_register_protect_disable(ra_reg_protect_t regs_to_unprotect)
   if (g_register_protect_counters[regs_to_unprotect] == 0)
     {
       uint16_t prcr_value = getreg16(R_SYSC_PRCR_S);
-      prcr_value = (prcr_value | R_SYSC_PRCR_PRKEY) |
+      prcr_value = (prcr_value | RA_PRCR_KEY) |
                    prcr_masks[regs_to_unprotect];
       putreg16(prcr_value, R_SYSC_PRCR_S);
     }

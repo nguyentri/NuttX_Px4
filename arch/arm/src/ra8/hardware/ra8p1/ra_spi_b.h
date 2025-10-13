@@ -39,57 +39,43 @@
 #endif
 
 /* Channel stride for multi-channel peripherals */
-#define R_SPI_B_CH_STRIDE    0x00000004
+#define R_SPI_B_CH_STRIDE    0x00000100
 #define R_SPI_B_CH_BASE(ch)   (R_SPI_B_BASE + ((uint32_t)(ch) * R_SPI_B_CH_STRIDE))
 
 /* SPI_B Register Offsets */
 
-#define R_SPI_B_SPDR_OFFSET     0x00000000  /* SPI Data Register */
-#define R_SPI_B_SPDECR_OFFSET     0x00000004  /* SPI Delay Control Register */
-#define R_SPI_B_SPCR_OFFSET     0x00000008  /* SPI Control Register */
-#define R_SPI_B_SPCR2_OFFSET     0x0000000c  /* SPI Control Register 2 */
-#define R_SPI_B_SPCR3_OFFSET     0x00000010  /* SPI Control Register 3 */
+#define R_SPI_B_SPDR_OFFSET                       0x00000000  /* SPI Data Register */
+#define R_SPI_B_SPDECR_OFFSET                     0x00000004  /* SPI Delay Control Register */
+#define R_SPI_B_SPCR_OFFSET                       0x00000008  /* SPI Control Register */
+#define R_SPI_B_SPCR2_OFFSET                      0x0000000c  /* SPI Control Register 2 */
+#define R_SPI_B_SPCR3_OFFSET                      0x00000010  /* SPI Control Register 3 */
 /* SPCMD%s Registers (0-7) */
-#define R_SPI_B_SPCMD0_OFFSET     0x00000014  /* SPI Command Register */
-#define R_SPI_B_SPCMD1_OFFSET     0x00000018  /* SPI Command Register */
-#define R_SPI_B_SPCMD2_OFFSET     0x0000001c  /* SPI Command Register */
-#define R_SPI_B_SPCMD3_OFFSET     0x00000020  /* SPI Command Register */
-#define R_SPI_B_SPCMD4_OFFSET     0x00000024  /* SPI Command Register */
-#define R_SPI_B_SPCMD5_OFFSET     0x00000028  /* SPI Command Register */
-#define R_SPI_B_SPCMD6_OFFSET     0x0000002c  /* SPI Command Register */
-#define R_SPI_B_SPCMD7_OFFSET     0x00000030  /* SPI Command Register */
-#define R_SPI_B_SPDCR_OFFSET     0x00000040  /* SPI Data Control Register */
-#define R_SPI_B_SPDCR2_OFFSET     0x00000044  /* SPI Data Control Register 2 */
-#define R_SPI_B_SPSR_OFFSET     0x00000050  /* SPI Status Register */
-#define R_SPI_B_SPTFSR_OFFSET     0x00000058  /* SPI Transfer FIFO Status Register */
-#define R_SPI_B_SPRFSR_OFFSET     0x0000005c  /* SPI Receive FIFO Status Register */
-#define R_SPI_B_SPPSR_OFFSET     0x00000060  /* SPI Polling Register */
-#define R_SPI_B_SPSRC_OFFSET     0x00000068  /* SPI Status Clear Register */
-#define R_SPI_B_SPFCR_OFFSET     0x0000006c  /* SPI FIFO Clear Register */
+#define R_SPI_B_SPCMD_OFFSET(m)                   (0x00000014 + ((m) * 0x00000004))  /* SPI Command Register */
+#define R_SPI_B_SPDCR_OFFSET                      0x00000040  /* SPI Data Control Register */
+#define R_SPI_B_SPDCR2_OFFSET                     0x00000044  /* SPI Data Control Register 2 */
+#define R_SPI_B_SPSR_OFFSET                       0x00000050  /* SPI Status Register */
+#define R_SPI_B_SPTFSR_OFFSET                     0x00000058  /* SPI Transfer FIFO Status Register */
+#define R_SPI_B_SPRFSR_OFFSET                     0x0000005c  /* SPI Receive FIFO Status Register */
+#define R_SPI_B_SPPSR_OFFSET                      0x00000060  /* SPI Polling Register */
+#define R_SPI_B_SPSRC_OFFSET                      0x00000068  /* SPI Status Clear Register */
+#define R_SPI_B_SPFCR_OFFSET                      0x0000006c  /* SPI FIFO Clear Register */
 
 /* SPI_B Register Addresses */
 
-#define R_SPI_B_SPDR                 (R_SPI_B_BASE + R_SPI_B_SPDR_OFFSET)
-#define R_SPI_B_SPDECR                 (R_SPI_B_BASE + R_SPI_B_SPDECR_OFFSET)
-#define R_SPI_B_SPCR                 (R_SPI_B_BASE + R_SPI_B_SPCR_OFFSET)
-#define R_SPI_B_SPCR2                 (R_SPI_B_BASE + R_SPI_B_SPCR2_OFFSET)
-#define R_SPI_B_SPCR3                 (R_SPI_B_BASE + R_SPI_B_SPCR3_OFFSET)
-#define R_SPI_B_SPCMD0                 (R_SPI_B_BASE + R_SPI_B_SPCMD0_OFFSET)
-#define R_SPI_B_SPCMD1                 (R_SPI_B_BASE + R_SPI_B_SPCMD1_OFFSET)
-#define R_SPI_B_SPCMD2                 (R_SPI_B_BASE + R_SPI_B_SPCMD2_OFFSET)
-#define R_SPI_B_SPCMD3                 (R_SPI_B_BASE + R_SPI_B_SPCMD3_OFFSET)
-#define R_SPI_B_SPCMD4                 (R_SPI_B_BASE + R_SPI_B_SPCMD4_OFFSET)
-#define R_SPI_B_SPCMD5                 (R_SPI_B_BASE + R_SPI_B_SPCMD5_OFFSET)
-#define R_SPI_B_SPCMD6                 (R_SPI_B_BASE + R_SPI_B_SPCMD6_OFFSET)
-#define R_SPI_B_SPCMD7                 (R_SPI_B_BASE + R_SPI_B_SPCMD7_OFFSET)
-#define R_SPI_B_SPDCR                 (R_SPI_B_BASE + R_SPI_B_SPDCR_OFFSET)
-#define R_SPI_B_SPDCR2                 (R_SPI_B_BASE + R_SPI_B_SPDCR2_OFFSET)
-#define R_SPI_B_SPSR                 (R_SPI_B_BASE + R_SPI_B_SPSR_OFFSET)
-#define R_SPI_B_SPTFSR                 (R_SPI_B_BASE + R_SPI_B_SPTFSR_OFFSET)
-#define R_SPI_B_SPRFSR                 (R_SPI_B_BASE + R_SPI_B_SPRFSR_OFFSET)
-#define R_SPI_B_SPPSR                 (R_SPI_B_BASE + R_SPI_B_SPPSR_OFFSET)
-#define R_SPI_B_SPSRC                 (R_SPI_B_BASE + R_SPI_B_SPSRC_OFFSET)
-#define R_SPI_B_SPFCR                 (R_SPI_B_BASE + R_SPI_B_SPFCR_OFFSET)
+#define R_SPI_B_SPDR(n)                           (R_SPI_B_CH_BASE(n) + R_SPI_B_SPDR_OFFSET)
+#define R_SPI_B_SPDECR(n)                         (R_SPI_B_CH_BASE(n) + R_SPI_B_SPDECR_OFFSET)
+#define R_SPI_B_SPCR(n)                           (R_SPI_B_CH_BASE(n) + R_SPI_B_SPCR_OFFSET)
+#define R_SPI_B_SPCR2(n)                          (R_SPI_B_CH_BASE(n) + R_SPI_B_SPCR2_OFFSET)
+#define R_SPI_B_SPCR3(n)                          (R_SPI_B_CH_BASE(n) + R_SPI_B_SPCR3_OFFSET)
+#define R_SPI_B_SPCMD(n, m)                       (R_SPI_B_CH_BASE(n) + R_SPI_B_SPCMD_OFFSET(m))
+#define R_SPI_B_SPDCR(n)                          (R_SPI_B_CH_BASE(n) + R_SPI_B_SPDCR_OFFSET)
+#define R_SPI_B_SPDCR2(n)                         (R_SPI_B_CH_BASE(n) + R_SPI_B_SPDCR2_OFFSET)
+#define R_SPI_B_SPSR(n)                           (R_SPI_B_CH_BASE(n) + R_SPI_B_SPSR_OFFSET)
+#define R_SPI_B_SPTFSR(n)                         (R_SPI_B_CH_BASE(n) + R_SPI_B_SPTFSR_OFFSET)
+#define R_SPI_B_SPRFSR(n)                         (R_SPI_B_CH_BASE(n) + R_SPI_B_SPRFSR_OFFSET)
+#define R_SPI_B_SPPSR(n)                          (R_SPI_B_CH_BASE(n) + R_SPI_B_SPPSR_OFFSET)
+#define R_SPI_B_SPSRC(n)                          (R_SPI_B_CH_BASE(n) + R_SPI_B_SPSRC_OFFSET)
+#define R_SPI_B_SPFCR(n)                          (R_SPI_B_CH_BASE(n) + R_SPI_B_SPFCR_OFFSET)
 
 /* Register bit definitions */
 /* SPDR Register bit definitions */

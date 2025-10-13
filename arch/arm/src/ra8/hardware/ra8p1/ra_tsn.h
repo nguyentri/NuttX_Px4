@@ -40,11 +40,11 @@
 
 /* TSN Register Offsets */
 
-#define R_TSN_TSCR_OFFSET     0x00000000  /* Temperature Sensor Control Register */
+#define R_TSN_TSCR_OFFSET                         0x00000000  /* Temperature Sensor Control Register */
 
 /* TSN Register Addresses */
 
-#define R_TSN_TSCR                 (R_TSN_BASE + R_TSN_TSCR_OFFSET)
+#define R_TSN_TSCR                                (R_TSN_BASE + R_TSN_TSCR_OFFSET)
 
 /* Register bit definitions */
 /* TSCR Register bit definitions */

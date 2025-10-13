@@ -44,63 +44,63 @@
 
 /* SCI_B Register Offsets */
 
-#define R_SCI_B_RDR_OFFSET     0x00000000  /* Receive Data Register */
-#define R_SCI_B_TDR_OFFSET     0x00000004  /* Transmit Data Register */
-#define R_SCI_B_CCR0_OFFSET     0x00000008  /* Common Control Register 0 */
-#define R_SCI_B_CCR1_OFFSET     0x0000000c  /* Common Control Register 1 */
-#define R_SCI_B_CCR2_OFFSET     0x00000010  /* Common Control Register 2 */
-#define R_SCI_B_CCR3_OFFSET     0x00000014  /* Common Control Register 3 */
-#define R_SCI_B_CCR4_OFFSET     0x00000018  /* Common Control Register 4 */
-#define R_SCI_B_CESR_OFFSET     0x0000001c  /* Communication Enable Status Register */
-#define R_SCI_B_ICR_OFFSET     0x00000020  /* Simple IIC Control Register */
-#define R_SCI_B_FCR_OFFSET     0x00000024  /* FIFO Control Register */
-#define R_SCI_B_MCR_OFFSET     0x0000002c  /* Manchester Control Register */
-#define R_SCI_B_DCR_OFFSET     0x00000030  /* Driver Control Register */
-#define R_SCI_B_XCR0_OFFSET     0x00000034  /* Simple LIN Control Register 0 */
-#define R_SCI_B_XCR1_OFFSET     0x00000038  /* Simple LIN Control Register 1 */
-#define R_SCI_B_XCR2_OFFSET     0x0000003c  /* Simple LIN Control Register 2 */
-#define R_SCI_B_CSR_OFFSET     0x00000048  /* Common Status Register */
-#define R_SCI_B_ISR_OFFSET     0x0000004c  /* Simple IIC Status Register */
-#define R_SCI_B_FRSR_OFFSET     0x00000050  /* FIFO Receive Status Register */
-#define R_SCI_B_FTSR_OFFSET     0x00000054  /* FIFO Transmit Status Register */
-#define R_SCI_B_MSR_OFFSET     0x00000058  /* Manchester Status Register */
-#define R_SCI_B_XSR0_OFFSET     0x0000005c  /* Simple LIN Status Register 0 */
-#define R_SCI_B_XSR1_OFFSET     0x00000060  /* Simple LIN Status Register 1 */
-#define R_SCI_B_CFCLR_OFFSET     0x00000068  /* Common Flag Clear Register */
-#define R_SCI_B_ICFCLR_OFFSET     0x0000006c  /* Simple IIC Flag Clear Register */
-#define R_SCI_B_FFCLR_OFFSET     0x00000070  /* FIFO Flag Clear Register */
-#define R_SCI_B_MFCLR_OFFSET     0x00000074  /* Manchester Flag Clear Register */
-#define R_SCI_B_XFCLR_OFFSET     0x00000078  /* Simple LIN Flag Clear Register */
+#define R_SCI_B_RDR_OFFSET                        0x00000000  /* Receive Data Register */
+#define R_SCI_B_TDR_OFFSET                        0x00000004  /* Transmit Data Register */
+#define R_SCI_B_CCR0_OFFSET                       0x00000008  /* Common Control Register 0 */
+#define R_SCI_B_CCR1_OFFSET                       0x0000000c  /* Common Control Register 1 */
+#define R_SCI_B_CCR2_OFFSET                       0x00000010  /* Common Control Register 2 */
+#define R_SCI_B_CCR3_OFFSET                       0x00000014  /* Common Control Register 3 */
+#define R_SCI_B_CCR4_OFFSET                       0x00000018  /* Common Control Register 4 */
+#define R_SCI_B_CESR_OFFSET                       0x0000001c  /* Communication Enable Status Register */
+#define R_SCI_B_ICR_OFFSET                        0x00000020  /* Simple IIC Control Register */
+#define R_SCI_B_FCR_OFFSET                        0x00000024  /* FIFO Control Register */
+#define R_SCI_B_MCR_OFFSET                        0x0000002c  /* Manchester Control Register */
+#define R_SCI_B_DCR_OFFSET                        0x00000030  /* Driver Control Register */
+#define R_SCI_B_XCR0_OFFSET                       0x00000034  /* Simple LIN Control Register 0 */
+#define R_SCI_B_XCR1_OFFSET                       0x00000038  /* Simple LIN Control Register 1 */
+#define R_SCI_B_XCR2_OFFSET                       0x0000003c  /* Simple LIN Control Register 2 */
+#define R_SCI_B_CSR_OFFSET                        0x00000048  /* Common Status Register */
+#define R_SCI_B_ISR_OFFSET                        0x0000004c  /* Simple IIC Status Register */
+#define R_SCI_B_FRSR_OFFSET                       0x00000050  /* FIFO Receive Status Register */
+#define R_SCI_B_FTSR_OFFSET                       0x00000054  /* FIFO Transmit Status Register */
+#define R_SCI_B_MSR_OFFSET                        0x00000058  /* Manchester Status Register */
+#define R_SCI_B_XSR0_OFFSET                       0x0000005c  /* Simple LIN Status Register 0 */
+#define R_SCI_B_XSR1_OFFSET                       0x00000060  /* Simple LIN Status Register 1 */
+#define R_SCI_B_CFCLR_OFFSET                      0x00000068  /* Common Flag Clear Register */
+#define R_SCI_B_ICFCLR_OFFSET                     0x0000006c  /* Simple IIC Flag Clear Register */
+#define R_SCI_B_FFCLR_OFFSET                      0x00000070  /* FIFO Flag Clear Register */
+#define R_SCI_B_MFCLR_OFFSET                      0x00000074  /* Manchester Flag Clear Register */
+#define R_SCI_B_XFCLR_OFFSET                      0x00000078  /* Simple LIN Flag Clear Register */
 
 /* SCI_B Register Addresses */
 
-#define R_SCI_B_RDR                 (R_SCI_B_BASE + R_SCI_B_RDR_OFFSET)
-#define R_SCI_B_TDR                 (R_SCI_B_BASE + R_SCI_B_TDR_OFFSET)
-#define R_SCI_B_CCR0                 (R_SCI_B_BASE + R_SCI_B_CCR0_OFFSET)
-#define R_SCI_B_CCR1                 (R_SCI_B_BASE + R_SCI_B_CCR1_OFFSET)
-#define R_SCI_B_CCR2                 (R_SCI_B_BASE + R_SCI_B_CCR2_OFFSET)
-#define R_SCI_B_CCR3                 (R_SCI_B_BASE + R_SCI_B_CCR3_OFFSET)
-#define R_SCI_B_CCR4                 (R_SCI_B_BASE + R_SCI_B_CCR4_OFFSET)
-#define R_SCI_B_CESR                 (R_SCI_B_BASE + R_SCI_B_CESR_OFFSET)
-#define R_SCI_B_ICR                 (R_SCI_B_BASE + R_SCI_B_ICR_OFFSET)
-#define R_SCI_B_FCR                 (R_SCI_B_BASE + R_SCI_B_FCR_OFFSET)
-#define R_SCI_B_MCR                 (R_SCI_B_BASE + R_SCI_B_MCR_OFFSET)
-#define R_SCI_B_DCR                 (R_SCI_B_BASE + R_SCI_B_DCR_OFFSET)
-#define R_SCI_B_XCR0                 (R_SCI_B_BASE + R_SCI_B_XCR0_OFFSET)
-#define R_SCI_B_XCR1                 (R_SCI_B_BASE + R_SCI_B_XCR1_OFFSET)
-#define R_SCI_B_XCR2                 (R_SCI_B_BASE + R_SCI_B_XCR2_OFFSET)
-#define R_SCI_B_CSR                 (R_SCI_B_BASE + R_SCI_B_CSR_OFFSET)
-#define R_SCI_B_ISR                 (R_SCI_B_BASE + R_SCI_B_ISR_OFFSET)
-#define R_SCI_B_FRSR                 (R_SCI_B_BASE + R_SCI_B_FRSR_OFFSET)
-#define R_SCI_B_FTSR                 (R_SCI_B_BASE + R_SCI_B_FTSR_OFFSET)
-#define R_SCI_B_MSR                 (R_SCI_B_BASE + R_SCI_B_MSR_OFFSET)
-#define R_SCI_B_XSR0                 (R_SCI_B_BASE + R_SCI_B_XSR0_OFFSET)
-#define R_SCI_B_XSR1                 (R_SCI_B_BASE + R_SCI_B_XSR1_OFFSET)
-#define R_SCI_B_CFCLR                 (R_SCI_B_BASE + R_SCI_B_CFCLR_OFFSET)
-#define R_SCI_B_ICFCLR                 (R_SCI_B_BASE + R_SCI_B_ICFCLR_OFFSET)
-#define R_SCI_B_FFCLR                 (R_SCI_B_BASE + R_SCI_B_FFCLR_OFFSET)
-#define R_SCI_B_MFCLR                 (R_SCI_B_BASE + R_SCI_B_MFCLR_OFFSET)
-#define R_SCI_B_XFCLR                 (R_SCI_B_BASE + R_SCI_B_XFCLR_OFFSET)
+#define R_SCI_B_RDR(n)                            (R_SCI_B_CH_BASE(n) + R_SCI_B_RDR_OFFSET)
+#define R_SCI_B_TDR(n)                            (R_SCI_B_CH_BASE(n) + R_SCI_B_TDR_OFFSET)
+#define R_SCI_B_CCR0(n)                           (R_SCI_B_CH_BASE(n) + R_SCI_B_CCR0_OFFSET)
+#define R_SCI_B_CCR1(n)                           (R_SCI_B_CH_BASE(n) + R_SCI_B_CCR1_OFFSET)
+#define R_SCI_B_CCR2(n)                           (R_SCI_B_CH_BASE(n) + R_SCI_B_CCR2_OFFSET)
+#define R_SCI_B_CCR3(n)                           (R_SCI_B_CH_BASE(n) + R_SCI_B_CCR3_OFFSET)
+#define R_SCI_B_CCR4(n)                           (R_SCI_B_CH_BASE(n) + R_SCI_B_CCR4_OFFSET)
+#define R_SCI_B_CESR(n)                           (R_SCI_B_CH_BASE(n) + R_SCI_B_CESR_OFFSET)
+#define R_SCI_B_ICR(n)                            (R_SCI_B_CH_BASE(n) + R_SCI_B_ICR_OFFSET)
+#define R_SCI_B_FCR(n)                            (R_SCI_B_CH_BASE(n) + R_SCI_B_FCR_OFFSET)
+#define R_SCI_B_MCR(n)                            (R_SCI_B_CH_BASE(n) + R_SCI_B_MCR_OFFSET)
+#define R_SCI_B_DCR(n)                            (R_SCI_B_CH_BASE(n) + R_SCI_B_DCR_OFFSET)
+#define R_SCI_B_XCR0(n)                           (R_SCI_B_CH_BASE(n) + R_SCI_B_XCR0_OFFSET)
+#define R_SCI_B_XCR1(n)                           (R_SCI_B_CH_BASE(n) + R_SCI_B_XCR1_OFFSET)
+#define R_SCI_B_XCR2(n)                           (R_SCI_B_CH_BASE(n) + R_SCI_B_XCR2_OFFSET)
+#define R_SCI_B_CSR(n)                            (R_SCI_B_CH_BASE(n) + R_SCI_B_CSR_OFFSET)
+#define R_SCI_B_ISR(n)                            (R_SCI_B_CH_BASE(n) + R_SCI_B_ISR_OFFSET)
+#define R_SCI_B_FRSR(n)                           (R_SCI_B_CH_BASE(n) + R_SCI_B_FRSR_OFFSET)
+#define R_SCI_B_FTSR(n)                           (R_SCI_B_CH_BASE(n) + R_SCI_B_FTSR_OFFSET)
+#define R_SCI_B_MSR(n)                            (R_SCI_B_CH_BASE(n) + R_SCI_B_MSR_OFFSET)
+#define R_SCI_B_XSR0(n)                           (R_SCI_B_CH_BASE(n) + R_SCI_B_XSR0_OFFSET)
+#define R_SCI_B_XSR1(n)                           (R_SCI_B_CH_BASE(n) + R_SCI_B_XSR1_OFFSET)
+#define R_SCI_B_CFCLR(n)                          (R_SCI_B_CH_BASE(n) + R_SCI_B_CFCLR_OFFSET)
+#define R_SCI_B_ICFCLR(n)                         (R_SCI_B_CH_BASE(n) + R_SCI_B_ICFCLR_OFFSET)
+#define R_SCI_B_FFCLR(n)                          (R_SCI_B_CH_BASE(n) + R_SCI_B_FFCLR_OFFSET)
+#define R_SCI_B_MFCLR(n)                          (R_SCI_B_CH_BASE(n) + R_SCI_B_MFCLR_OFFSET)
+#define R_SCI_B_XFCLR(n)                          (R_SCI_B_CH_BASE(n) + R_SCI_B_XFCLR_OFFSET)
 
 /* Register bit definitions */
 /* RDR Register bit definitions */

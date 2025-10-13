@@ -40,25 +40,25 @@
 
 /* CPU_OCD Register Offsets */
 
-#define R_CPU_OCD_MCUERRSTAT_OFFSET     0x00000000  /* MCU Error Status Register */
-#define R_CPU_OCD_MCUCTRL_OFFSET     0x00000004  /* MCU Control Register */
-#define R_CPU_OCD_JBMDR_OFFSET     0x00000100  /* JTAG Boot Mode Entry Register */
-#define R_CPU_OCD_JBRDR_OFFSET     0x00000120  /* JTAG Boot Receive Data Register */
-#define R_CPU_OCD_JBTDR_OFFSET     0x00000130  /* JTAG Boot Transmit Data Register */
-#define R_CPU_OCD_JBSTR_OFFSET     0x00000140  /* JTAG Boot Status Register */
-#define R_CPU_OCD_JBICR_OFFSET     0x00000150  /* JTAG Boot Interrupt Control Register */
-#define R_CPU_OCD_FSBLSTATM_OFFSET     0x00000300  /* First Stage Boot Loader Status Monitor Register */
+#define R_CPU_OCD_MCUERRSTAT_OFFSET               0x00000000  /* MCU Error Status Register */
+#define R_CPU_OCD_MCUCTRL_OFFSET                  0x00000004  /* MCU Control Register */
+#define R_CPU_OCD_JBMDR_OFFSET                    0x00000100  /* JTAG Boot Mode Entry Register */
+#define R_CPU_OCD_JBRDR_OFFSET                    0x00000120  /* JTAG Boot Receive Data Register */
+#define R_CPU_OCD_JBTDR_OFFSET                    0x00000130  /* JTAG Boot Transmit Data Register */
+#define R_CPU_OCD_JBSTR_OFFSET                    0x00000140  /* JTAG Boot Status Register */
+#define R_CPU_OCD_JBICR_OFFSET                    0x00000150  /* JTAG Boot Interrupt Control Register */
+#define R_CPU_OCD_FSBLSTATM_OFFSET                0x00000300  /* First Stage Boot Loader Status Monitor Register */
 
 /* CPU_OCD Register Addresses */
 
-#define R_CPU_OCD_MCUERRSTAT                 (R_CPU_OCD_BASE + R_CPU_OCD_MCUERRSTAT_OFFSET)
-#define R_CPU_OCD_MCUCTRL                 (R_CPU_OCD_BASE + R_CPU_OCD_MCUCTRL_OFFSET)
-#define R_CPU_OCD_JBMDR                 (R_CPU_OCD_BASE + R_CPU_OCD_JBMDR_OFFSET)
-#define R_CPU_OCD_JBRDR                 (R_CPU_OCD_BASE + R_CPU_OCD_JBRDR_OFFSET)
-#define R_CPU_OCD_JBTDR                 (R_CPU_OCD_BASE + R_CPU_OCD_JBTDR_OFFSET)
-#define R_CPU_OCD_JBSTR                 (R_CPU_OCD_BASE + R_CPU_OCD_JBSTR_OFFSET)
-#define R_CPU_OCD_JBICR                 (R_CPU_OCD_BASE + R_CPU_OCD_JBICR_OFFSET)
-#define R_CPU_OCD_FSBLSTATM                 (R_CPU_OCD_BASE + R_CPU_OCD_FSBLSTATM_OFFSET)
+#define R_CPU_OCD_MCUERRSTAT                      (R_CPU_OCD_BASE + R_CPU_OCD_MCUERRSTAT_OFFSET)
+#define R_CPU_OCD_MCUCTRL                         (R_CPU_OCD_BASE + R_CPU_OCD_MCUCTRL_OFFSET)
+#define R_CPU_OCD_JBMDR                           (R_CPU_OCD_BASE + R_CPU_OCD_JBMDR_OFFSET)
+#define R_CPU_OCD_JBRDR                           (R_CPU_OCD_BASE + R_CPU_OCD_JBRDR_OFFSET)
+#define R_CPU_OCD_JBTDR                           (R_CPU_OCD_BASE + R_CPU_OCD_JBTDR_OFFSET)
+#define R_CPU_OCD_JBSTR                           (R_CPU_OCD_BASE + R_CPU_OCD_JBSTR_OFFSET)
+#define R_CPU_OCD_JBICR                           (R_CPU_OCD_BASE + R_CPU_OCD_JBICR_OFFSET)
+#define R_CPU_OCD_FSBLSTATM                       (R_CPU_OCD_BASE + R_CPU_OCD_FSBLSTATM_OFFSET)
 
 /* Register bit definitions */
 /* MCUERRSTAT Register bit definitions */

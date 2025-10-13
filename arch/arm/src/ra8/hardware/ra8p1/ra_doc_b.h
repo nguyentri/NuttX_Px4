@@ -40,21 +40,21 @@
 
 /* DOC_B Register Offsets */
 
-#define R_DOC_B_DOCR_OFFSET     0x00000000  /* DOC Control Register */
-#define R_DOC_B_DOSR_OFFSET     0x00000004  /* DOC Flag Status Register */
-#define R_DOC_B_DOSCR_OFFSET     0x00000008  /* DOC Flag Status Clear Register */
-#define R_DOC_B_DODIR_OFFSET     0x0000000c  /* DOC Data Input Register */
-#define R_DOC_B_DODSR0_OFFSET     0x00000010  /* DOC Data Setting Register 0 */
-#define R_DOC_B_DODSR1_OFFSET     0x00000014  /* DOC Data Setting Register 1 */
+#define R_DOC_B_DOCR_OFFSET                       0x00000000  /* DOC Control Register */
+#define R_DOC_B_DOSR_OFFSET                       0x00000004  /* DOC Flag Status Register */
+#define R_DOC_B_DOSCR_OFFSET                      0x00000008  /* DOC Flag Status Clear Register */
+#define R_DOC_B_DODIR_OFFSET                      0x0000000c  /* DOC Data Input Register */
+#define R_DOC_B_DODSR0_OFFSET                     0x00000010  /* DOC Data Setting Register 0 */
+#define R_DOC_B_DODSR1_OFFSET                     0x00000014  /* DOC Data Setting Register 1 */
 
 /* DOC_B Register Addresses */
 
-#define R_DOC_B_DOCR                 (R_DOC_B_BASE + R_DOC_B_DOCR_OFFSET)
-#define R_DOC_B_DOSR                 (R_DOC_B_BASE + R_DOC_B_DOSR_OFFSET)
-#define R_DOC_B_DOSCR                 (R_DOC_B_BASE + R_DOC_B_DOSCR_OFFSET)
-#define R_DOC_B_DODIR                 (R_DOC_B_BASE + R_DOC_B_DODIR_OFFSET)
-#define R_DOC_B_DODSR0                 (R_DOC_B_BASE + R_DOC_B_DODSR0_OFFSET)
-#define R_DOC_B_DODSR1                 (R_DOC_B_BASE + R_DOC_B_DODSR1_OFFSET)
+#define R_DOC_B_DOCR                              (R_DOC_B_BASE + R_DOC_B_DOCR_OFFSET)
+#define R_DOC_B_DOSR                              (R_DOC_B_BASE + R_DOC_B_DOSR_OFFSET)
+#define R_DOC_B_DOSCR                             (R_DOC_B_BASE + R_DOC_B_DOSCR_OFFSET)
+#define R_DOC_B_DODIR                             (R_DOC_B_BASE + R_DOC_B_DODIR_OFFSET)
+#define R_DOC_B_DODSR0                            (R_DOC_B_BASE + R_DOC_B_DODSR0_OFFSET)
+#define R_DOC_B_DODSR1                            (R_DOC_B_BASE + R_DOC_B_DODSR1_OFFSET)
 
 /* Register bit definitions */
 /* DOCR Register bit definitions */

@@ -44,33 +44,25 @@
 
 /* PORT Register Offsets */
 
-#define R_PORT_PCNTR1_OFFSET     0x00000000  /* Port Control Register 1 */
-#define R_PORT_PDR_OFFSET     0x00000000  /* Port Control Register 1 */
-#define R_PORT_PODR_OFFSET     0x00000002  /* Port Control Register 1 */
-#define R_PORT_PCNTR2_OFFSET     0x00000004  /* Port Control Register 2 */
-#define R_PORT_PIDR_OFFSET     0x00000004  /* Port Control Register 2 */
-#define R_PORT_EIDR_OFFSET     0x00000006  /* Port Control Register 2 */
-#define R_PORT_PCNTR3_OFFSET     0x00000008  /* Port Control Register 3 */
-#define R_PORT_POSR_OFFSET     0x00000008  /* Port Control Register 3 */
-#define R_PORT_PORR_OFFSET     0x0000000a  /* Port Control Register 3 */
+#define R_PORT_PCNTR1_OFFSET                      0x00000000  /* Port Control Register 1 */
+#define R_PORT_PDR_OFFSET                         0x00000000  /* Port Control Register 1 */
+#define R_PORT_PODR_OFFSET                        0x00000002  /* Port Control Register 1 */
+#define R_PORT_PCNTR2_OFFSET                      0x00000004  /* Port Control Register 2 */
+#define R_PORT_PIDR_OFFSET                        0x00000004  /* Port Control Register 2 */
+#define R_PORT_EIDR_OFFSET                        0x00000006  /* Port Control Register 2 */
+#define R_PORT_PCNTR3_OFFSET                      0x00000008  /* Port Control Register 3 */
+#define R_PORT_POSR_OFFSET                        0x00000008  /* Port Control Register 3 */
+#define R_PORT_PORR_OFFSET                        0x0000000a  /* Port Control Register 3 */
 
 /* PORT Register Addresses */
 
-#define R_PORT_PCNTR1                 (R_PORT_BASE + R_PORT_PCNTR1_OFFSET)
-#define R_PORT_PDR                 (R_PORT_BASE + R_PORT_PDR_OFFSET)
-#define R_PORT_PODR                 (R_PORT_BASE + R_PORT_PODR_OFFSET)
-#define R_PORT_PCNTR2                 (R_PORT_BASE + R_PORT_PCNTR2_OFFSET)
-#define R_PORT_PIDR                 (R_PORT_BASE + R_PORT_PIDR_OFFSET)
-#define R_PORT_EIDR                 (R_PORT_BASE + R_PORT_EIDR_OFFSET)
-#define R_PORT_PCNTR3                 (R_PORT_BASE + R_PORT_PCNTR3_OFFSET)
-#define R_PORT_POSR                 (R_PORT_BASE + R_PORT_POSR_OFFSET)
-#define R_PORT_PORR                 (R_PORT_BASE + R_PORT_PORR_OFFSET)
-
-/* Parameterized PORT Register Macros (per-port access) */
+#define R_PORT_PCNTR1(port)                       (R_PORT_CH_BASE(port) + R_PORT_PCNTR1_OFFSET)
 #define R_PORT_PDR(port)                          (R_PORT_CH_BASE(port) + R_PORT_PDR_OFFSET)
 #define R_PORT_PODR(port)                         (R_PORT_CH_BASE(port) + R_PORT_PODR_OFFSET)
+#define R_PORT_PCNTR2(port)                       (R_PORT_CH_BASE(port) + R_PORT_PCNTR2_OFFSET)
 #define R_PORT_PIDR(port)                         (R_PORT_CH_BASE(port) + R_PORT_PIDR_OFFSET)
 #define R_PORT_EIDR(port)                         (R_PORT_CH_BASE(port) + R_PORT_EIDR_OFFSET)
+#define R_PORT_PCNTR3(port)                       (R_PORT_CH_BASE(port) + R_PORT_PCNTR3_OFFSET)
 #define R_PORT_POSR(port)                         (R_PORT_CH_BASE(port) + R_PORT_POSR_OFFSET)
 #define R_PORT_PORR(port)                         (R_PORT_CH_BASE(port) + R_PORT_PORR_OFFSET)
 

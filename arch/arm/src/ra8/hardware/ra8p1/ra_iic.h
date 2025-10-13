@@ -44,11 +44,11 @@
 
 /* IIC Register Offsets */
 
-#define R_IIC_ICCR1_OFFSET     0x00000000  /* I2C Bus Control Register 1 */
+#define R_IIC_ICCR1_OFFSET                        0x00000000  /* I2C Bus Control Register 1 */
 
 /* IIC Register Addresses */
 
-#define R_IIC_ICCR1                 (R_IIC_BASE + R_IIC_ICCR1_OFFSET)
+#define R_IIC_ICCR1(n)                            (R_IIC_CH_BASE(n) + R_IIC_ICCR1_OFFSET)
 
 /* Register bit definitions */
 /* ICCR1 Register bit definitions */

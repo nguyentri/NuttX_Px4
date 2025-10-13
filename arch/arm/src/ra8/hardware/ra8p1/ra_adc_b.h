@@ -38,718 +38,258 @@
 #endif
 #endif
 
-/* Channel stride for multi-channel peripherals */
-#define R_ADC_B_CH_STRIDE    0x00000010
-#define R_ADC_B_CH_BASE(ch)   (R_ADC_B_BASE + ((uint32_t)(ch) * R_ADC_B_CH_STRIDE))
-
 /* ADC_B Register Offsets */
 
-#define R_ADC_B_ADCLKENR_OFFSET     0x00000000  /* A/D Conversion Clock Enable Register */
-#define R_ADC_B_ADCLKSR_OFFSET     0x00000004  /* A/D Conversion Clock Status Register */
-#define R_ADC_B_ADCLKCR_OFFSET     0x00000008  /* A/D Conversion Clock Control Register */
-#define R_ADC_B_ADSYCR_OFFSET     0x0000000c  /* A/D Converter Synchronous Operation Control Register */
-#define R_ADC_B_ADUSLPCR0_OFFSET     0x00000010  /* A/D Converter Unit Sleep Control Register 0 */
-#define R_ADC_B_ADUSLPCR1_OFFSET     0x00000014  /* A/D Converter Unit Sleep Control Register 1 */
-#define R_ADC_B_ADERINTCR_OFFSET     0x00000020  /* A/D Conversion Error Interrupt Enable Register */
-#define R_ADC_B_ADOVFINTCR_OFFSET     0x00000024  /* A/D Conversion Overflow Interrupt Enable Register */
-#define R_ADC_B_ADCALINTCR_OFFSET     0x00000028  /* Calibration Interrupt Enable Register */
-#define R_ADC_B_ADMDR_OFFSET     0x00000040  /* A/D Converter Mode Selection Register */
-#define R_ADC_B_ADGSPCR_OFFSET     0x00000044  /* A/D Group Scan Priority Control Register */
-#define R_ADC_B_ADSGER_OFFSET     0x00000048  /* Scan Group Enable Register */
-#define R_ADC_B_ADSGCR0_OFFSET     0x0000004c  /* Scan Group Control Register 0 */
-#define R_ADC_B_ADSGCR1_OFFSET     0x00000050  /* Scan Group Control Register 1 */
-#define R_ADC_B_ADSGCR2_OFFSET     0x00000054  /* Scan Group Control Register 2 */
-#define R_ADC_B_ADINTCR_OFFSET     0x0000005c  /* Scan End Interrupt Enable Register */
-#define R_ADC_B_ADSWNR0_OFFSET     0x00000060  /* A/D conversion times per scan Register 0 */
-#define R_ADC_B_ADSWNR1_OFFSET     0x00000064  /* A/D conversion times per scan Register 1 */
-#define R_ADC_B_ADDECCR_OFFSET     0x00000080  /* One-channel Continuous Scan Mode Decimation Control Register */
-#define R_ADC_B_ADACMDR_OFFSET     0x00000084  /* A/D Converter Accuracy Mode Register */
+#define R_ADC_B_ADCLKENR_OFFSET                   0x00000000  /* A/D Conversion Clock Enable Register */
+#define R_ADC_B_ADCLKSR_OFFSET                    0x00000004  /* A/D Conversion Clock Status Register */
+#define R_ADC_B_ADCLKCR_OFFSET                    0x00000008  /* A/D Conversion Clock Control Register */
+#define R_ADC_B_ADSYCR_OFFSET                     0x0000000c  /* A/D Converter Synchronous Operation Control Register */
+#define R_ADC_B_ADUSLPCR0_OFFSET                  0x00000010  /* A/D Converter Unit Sleep Control Register 0 */
+#define R_ADC_B_ADUSLPCR1_OFFSET                  0x00000014  /* A/D Converter Unit Sleep Control Register 1 */
+#define R_ADC_B_ADERINTCR_OFFSET                  0x00000020  /* A/D Conversion Error Interrupt Enable Register */
+#define R_ADC_B_ADOVFINTCR_OFFSET                 0x00000024  /* A/D Conversion Overflow Interrupt Enable Register */
+#define R_ADC_B_ADCALINTCR_OFFSET                 0x00000028  /* Calibration Interrupt Enable Register */
+#define R_ADC_B_ADMDR_OFFSET                      0x00000040  /* A/D Converter Mode Selection Register */
+#define R_ADC_B_ADGSPCR_OFFSET                    0x00000044  /* A/D Group Scan Priority Control Register */
+#define R_ADC_B_ADSGER_OFFSET                     0x00000048  /* Scan Group Enable Register */
+#define R_ADC_B_ADSGCR0_OFFSET                    0x0000004c  /* Scan Group Control Register 0 */
+#define R_ADC_B_ADSGCR1_OFFSET                    0x00000050  /* Scan Group Control Register 1 */
+#define R_ADC_B_ADSGCR2_OFFSET                    0x00000054  /* Scan Group Control Register 2 */
+#define R_ADC_B_ADINTCR_OFFSET                    0x0000005c  /* Scan End Interrupt Enable Register */
+#define R_ADC_B_ADSWNR0_OFFSET                    0x00000060  /* A/D conversion times per scan Register 0 */
+#define R_ADC_B_ADSWNR1_OFFSET                    0x00000064  /* A/D conversion times per scan Register 1 */
+#define R_ADC_B_ADDECCR_OFFSET                    0x00000080  /* One-channel Continuous Scan Mode Decimation Control Register */
+#define R_ADC_B_ADACMDR_OFFSET                    0x00000084  /* A/D Converter Accuracy Mode Register */
 /* ADTRGEXT%s Registers (0-8) */
-#define R_ADC_B_ADTRGEXT0_OFFSET     0x000000c0  /* External Trigger Enable Register 0 */
-#define R_ADC_B_ADTRGEXT1_OFFSET     0x000000d0  /* External Trigger Enable Register 1 */
-#define R_ADC_B_ADTRGEXT2_OFFSET     0x000000e0  /* External Trigger Enable Register 2 */
-#define R_ADC_B_ADTRGEXT3_OFFSET     0x000000f0  /* External Trigger Enable Register 3 */
-#define R_ADC_B_ADTRGEXT4_OFFSET     0x00000100  /* External Trigger Enable Register 4 */
-#define R_ADC_B_ADTRGEXT5_OFFSET     0x00000110  /* External Trigger Enable Register 5 */
-#define R_ADC_B_ADTRGEXT6_OFFSET     0x00000120  /* External Trigger Enable Register 6 */
-#define R_ADC_B_ADTRGEXT7_OFFSET     0x00000130  /* External Trigger Enable Register 7 */
-#define R_ADC_B_ADTRGEXT8_OFFSET     0x00000140  /* External Trigger Enable Register 8 */
+#define R_ADC_B_ADTRGEXT_OFFSET(m)                (0x000000c0 + ((m) * 0x00000010))  /* External Trigger Enable Register %s */
 /* ADTRGELC%s Registers (0-8) */
-#define R_ADC_B_ADTRGELC0_OFFSET     0x000000c4  /* ELC Trigger Enable Register 0 */
-#define R_ADC_B_ADTRGELC1_OFFSET     0x000000d4  /* ELC Trigger Enable Register 1 */
-#define R_ADC_B_ADTRGELC2_OFFSET     0x000000e4  /* ELC Trigger Enable Register 2 */
-#define R_ADC_B_ADTRGELC3_OFFSET     0x000000f4  /* ELC Trigger Enable Register 3 */
-#define R_ADC_B_ADTRGELC4_OFFSET     0x00000104  /* ELC Trigger Enable Register 4 */
-#define R_ADC_B_ADTRGELC5_OFFSET     0x00000114  /* ELC Trigger Enable Register 5 */
-#define R_ADC_B_ADTRGELC6_OFFSET     0x00000124  /* ELC Trigger Enable Register 6 */
-#define R_ADC_B_ADTRGELC7_OFFSET     0x00000134  /* ELC Trigger Enable Register 7 */
-#define R_ADC_B_ADTRGELC8_OFFSET     0x00000144  /* ELC Trigger Enable Register 8 */
+#define R_ADC_B_ADTRGELC_OFFSET(m)                (0x000000c4 + ((m) * 0x00000010))  /* ELC Trigger Enable Register %s */
 /* ADTRGGPT%s Registers (0-8) */
-#define R_ADC_B_ADTRGGPT0_OFFSET     0x000000c8  /* GPT Trigger Enable Register 0 */
-#define R_ADC_B_ADTRGGPT1_OFFSET     0x000000d8  /* GPT Trigger Enable Register 1 */
-#define R_ADC_B_ADTRGGPT2_OFFSET     0x000000e8  /* GPT Trigger Enable Register 2 */
-#define R_ADC_B_ADTRGGPT3_OFFSET     0x000000f8  /* GPT Trigger Enable Register 3 */
-#define R_ADC_B_ADTRGGPT4_OFFSET     0x00000108  /* GPT Trigger Enable Register 4 */
-#define R_ADC_B_ADTRGGPT5_OFFSET     0x00000118  /* GPT Trigger Enable Register 5 */
-#define R_ADC_B_ADTRGGPT6_OFFSET     0x00000128  /* GPT Trigger Enable Register 6 */
-#define R_ADC_B_ADTRGGPT7_OFFSET     0x00000138  /* GPT Trigger Enable Register 7 */
-#define R_ADC_B_ADTRGGPT8_OFFSET     0x00000148  /* GPT Trigger Enable Register 8 */
-#define R_ADC_B_ADTRGDLR0_OFFSET     0x000001c0  /* A/D Conversion Start Trigger Delay Register 0 */
-#define R_ADC_B_ADTRGDLR1_OFFSET     0x000001c4  /* A/D Conversion Start Trigger Delay Register 1 */
-#define R_ADC_B_ADTRGDLR2_OFFSET     0x000001c8  /* A/D Conversion Start Trigger Delay Register 2 */
-#define R_ADC_B_ADTRGDLR3_OFFSET     0x000001cc  /* A/D Conversion Start Trigger Delay Register 3 */
-#define R_ADC_B_ADTRGDLR4_OFFSET     0x000001d0  /* A/D Conversion Start Trigger Delay Register 4 */
+#define R_ADC_B_ADTRGGPT_OFFSET(m)                (0x000000c8 + ((m) * 0x00000010))  /* GPT Trigger Enable Register %s */
+#define R_ADC_B_ADTRGDLR0_OFFSET                  0x000001c0  /* A/D Conversion Start Trigger Delay Register 0 */
+#define R_ADC_B_ADTRGDLR1_OFFSET                  0x000001c4  /* A/D Conversion Start Trigger Delay Register 1 */
+#define R_ADC_B_ADTRGDLR2_OFFSET                  0x000001c8  /* A/D Conversion Start Trigger Delay Register 2 */
+#define R_ADC_B_ADTRGDLR3_OFFSET                  0x000001cc  /* A/D Conversion Start Trigger Delay Register 3 */
+#define R_ADC_B_ADTRGDLR4_OFFSET                  0x000001d0  /* A/D Conversion Start Trigger Delay Register 4 */
 /* ADSGDCR%s Registers (0-8) */
-#define R_ADC_B_ADSGDCR0_OFFSET     0x00000200  /* Scan Group Diagnosis Function Control Register 0 */
-#define R_ADC_B_ADSGDCR1_OFFSET     0x00000204  /* Scan Group Diagnosis Function Control Register 1 */
-#define R_ADC_B_ADSGDCR2_OFFSET     0x00000208  /* Scan Group Diagnosis Function Control Register 2 */
-#define R_ADC_B_ADSGDCR3_OFFSET     0x0000020c  /* Scan Group Diagnosis Function Control Register 3 */
-#define R_ADC_B_ADSGDCR4_OFFSET     0x00000210  /* Scan Group Diagnosis Function Control Register 4 */
-#define R_ADC_B_ADSGDCR5_OFFSET     0x00000214  /* Scan Group Diagnosis Function Control Register 5 */
-#define R_ADC_B_ADSGDCR6_OFFSET     0x00000218  /* Scan Group Diagnosis Function Control Register 6 */
-#define R_ADC_B_ADSGDCR7_OFFSET     0x0000021c  /* Scan Group Diagnosis Function Control Register 7 */
-#define R_ADC_B_ADSGDCR8_OFFSET     0x00000220  /* Scan Group Diagnosis Function Control Register 8 */
-#define R_ADC_B_ADSSTR0_OFFSET     0x00000240  /* Sampling State Table Register 0 */
-#define R_ADC_B_ADSSTR1_OFFSET     0x00000244  /* Sampling State Table Register 1 */
-#define R_ADC_B_ADSSTR2_OFFSET     0x00000248  /* Sampling State Table Register 2 */
-#define R_ADC_B_ADSSTR3_OFFSET     0x0000024c  /* Sampling State Table Register 3 */
-#define R_ADC_B_ADSSTR4_OFFSET     0x00000250  /* Sampling State Table Register 4 */
-#define R_ADC_B_ADSSTR5_OFFSET     0x00000254  /* Sampling State Table Register 5 */
-#define R_ADC_B_ADSSTR6_OFFSET     0x00000258  /* Sampling State Table Register 6 */
-#define R_ADC_B_ADSSTR7_OFFSET     0x0000025c  /* Sampling State Table Register 7 */
-#define R_ADC_B_ADCNVSTR_OFFSET     0x00000260  /* A/D Conversion State Register */
-#define R_ADC_B_ADCALSTCR_OFFSET     0x00000264  /* A/D Converter Self-calibration State Register */
-#define R_ADC_B_ADSHCR0_OFFSET     0x00000280  /* Channel-dedicated Sample-and-hold Circuit Control Register 0 */
-#define R_ADC_B_ADSHDCR0_OFFSET     0x00000284  /* Channel-dedicated Sample-and-hold Circuit Diagnosis Control Register 0 */
-#define R_ADC_B_ADSHSTR0_OFFSET     0x00000288  /* Channel-dedicated Sample-and-hold Circuit State Register 0 */
-#define R_ADC_B_ADSHCR1_OFFSET     0x0000028c  /* Channel-dedicated Sample-and-hold Circuit Control Register 1 */
-#define R_ADC_B_ADSHDCR1_OFFSET     0x00000290  /* Channel-dedicated Sample-and-hold Circuit Diagnosis Control Register 1 */
-#define R_ADC_B_ADSHSTR1_OFFSET     0x00000294  /* Channel-dedicated Sample-and-hold Circuit State Register 1 */
-#define R_ADC_B_ADCALSHCR_OFFSET     0x000002b0  /* Channel-dedicated Sample-and-hold Circuit Self-calibration State Register */
-#define R_ADC_B_ADSHSBPCR_OFFSET     0x00000310  /* Channel-dedicated Sample-and-hold Circuit Single-ended Input Mode Bypass Control Register */
-#define R_ADC_B_ADSHDBPCR_OFFSET     0x00000314  /* Channel-dedicated Sample-and-hold Circuit Differential Input Mode Bypass Control Register */
-#define R_ADC_B_ADSHSDCR0_OFFSET     0x00000318  /* Channel-dedicated Sample-and-hold Circuit Self-diagnosis Control Register 0 */
-#define R_ADC_B_ADSHSDCR1_OFFSET     0x0000031c  /* Channel-dedicated Sample-and-hold Circuit Self-diagnosis Control Register 1 */
-#define R_ADC_B_ADREFCR_OFFSET     0x00000320  /* Internal Reference Voltage Monitor Enable Register */
+#define R_ADC_B_ADSGDCR_OFFSET(m)                 (0x00000200 + ((m) * 0x00000004))  /* Scan Group Diagnosis Function Control Register %s */
+#define R_ADC_B_ADSSTR0_OFFSET                    0x00000240  /* Sampling State Table Register 0 */
+#define R_ADC_B_ADSSTR1_OFFSET                    0x00000244  /* Sampling State Table Register 1 */
+#define R_ADC_B_ADSSTR2_OFFSET                    0x00000248  /* Sampling State Table Register 2 */
+#define R_ADC_B_ADSSTR3_OFFSET                    0x0000024c  /* Sampling State Table Register 3 */
+#define R_ADC_B_ADSSTR4_OFFSET                    0x00000250  /* Sampling State Table Register 4 */
+#define R_ADC_B_ADSSTR5_OFFSET                    0x00000254  /* Sampling State Table Register 5 */
+#define R_ADC_B_ADSSTR6_OFFSET                    0x00000258  /* Sampling State Table Register 6 */
+#define R_ADC_B_ADSSTR7_OFFSET                    0x0000025c  /* Sampling State Table Register 7 */
+#define R_ADC_B_ADCNVSTR_OFFSET                   0x00000260  /* A/D Conversion State Register */
+#define R_ADC_B_ADCALSTCR_OFFSET                  0x00000264  /* A/D Converter Self-calibration State Register */
+#define R_ADC_B_ADSHCR0_OFFSET                    0x00000280  /* Channel-dedicated Sample-and-hold Circuit Control Register 0 */
+#define R_ADC_B_ADSHDCR0_OFFSET                   0x00000284  /* Channel-dedicated Sample-and-hold Circuit Diagnosis Control Register 0 */
+#define R_ADC_B_ADSHSTR0_OFFSET                   0x00000288  /* Channel-dedicated Sample-and-hold Circuit State Register 0 */
+#define R_ADC_B_ADSHCR1_OFFSET                    0x0000028c  /* Channel-dedicated Sample-and-hold Circuit Control Register 1 */
+#define R_ADC_B_ADSHDCR1_OFFSET                   0x00000290  /* Channel-dedicated Sample-and-hold Circuit Diagnosis Control Register 1 */
+#define R_ADC_B_ADSHSTR1_OFFSET                   0x00000294  /* Channel-dedicated Sample-and-hold Circuit State Register 1 */
+#define R_ADC_B_ADCALSHCR_OFFSET                  0x000002b0  /* Channel-dedicated Sample-and-hold Circuit Self-calibration State Register */
+#define R_ADC_B_ADSHSBPCR_OFFSET                  0x00000310  /* Channel-dedicated Sample-and-hold Circuit Single-ended Input Mode Bypass Control Register */
+#define R_ADC_B_ADSHDBPCR_OFFSET                  0x00000314  /* Channel-dedicated Sample-and-hold Circuit Differential Input Mode Bypass Control Register */
+#define R_ADC_B_ADSHSDCR0_OFFSET                  0x00000318  /* Channel-dedicated Sample-and-hold Circuit Self-diagnosis Control Register 0 */
+#define R_ADC_B_ADSHSDCR1_OFFSET                  0x0000031c  /* Channel-dedicated Sample-and-hold Circuit Self-diagnosis Control Register 1 */
+#define R_ADC_B_ADREFCR_OFFSET                    0x00000320  /* Internal Reference Voltage Monitor Enable Register */
 /* ADDFSR%s Registers (0-1) */
-#define R_ADC_B_ADDFSR0_OFFSET     0x00000340  /* A/D Converter Digital Filter Selection Register 0 */
-#define R_ADC_B_ADDFSR1_OFFSET     0x00000344  /* A/D Converter Digital Filter Selection Register 1 */
+#define R_ADC_B_ADDFSR_OFFSET(m)                  (0x00000340 + ((m) * 0x00000004))  /* A/D Converter Digital Filter Selection Register %s */
 /* ADUOFTR%s Registers (0-7) */
-#define R_ADC_B_ADUOFTR0_OFFSET     0x00000360  /* User Offset Table Register 0 */
-#define R_ADC_B_ADUOFTR1_OFFSET     0x00000364  /* User Offset Table Register 1 */
-#define R_ADC_B_ADUOFTR2_OFFSET     0x00000368  /* User Offset Table Register 2 */
-#define R_ADC_B_ADUOFTR3_OFFSET     0x0000036c  /* User Offset Table Register 3 */
-#define R_ADC_B_ADUOFTR4_OFFSET     0x00000370  /* User Offset Table Register 4 */
-#define R_ADC_B_ADUOFTR5_OFFSET     0x00000374  /* User Offset Table Register 5 */
-#define R_ADC_B_ADUOFTR6_OFFSET     0x00000378  /* User Offset Table Register 6 */
-#define R_ADC_B_ADUOFTR7_OFFSET     0x0000037c  /* User Offset Table Register 7 */
+#define R_ADC_B_ADUOFTR_OFFSET(m)                 (0x00000360 + ((m) * 0x00000004))  /* User Offset Table Register %s */
 /* ADUGTR%s Registers (0-7) */
-#define R_ADC_B_ADUGTR0_OFFSET     0x00000380  /* User Gain Table Register 0 */
-#define R_ADC_B_ADUGTR1_OFFSET     0x00000384  /* User Gain Table Register 1 */
-#define R_ADC_B_ADUGTR2_OFFSET     0x00000388  /* User Gain Table Register 2 */
-#define R_ADC_B_ADUGTR3_OFFSET     0x0000038c  /* User Gain Table Register 3 */
-#define R_ADC_B_ADUGTR4_OFFSET     0x00000390  /* User Gain Table Register 4 */
-#define R_ADC_B_ADUGTR5_OFFSET     0x00000394  /* User Gain Table Register 5 */
-#define R_ADC_B_ADUGTR6_OFFSET     0x00000398  /* User Gain Table Register 6 */
-#define R_ADC_B_ADUGTR7_OFFSET     0x0000039c  /* User Gain Table Register 7 */
-#define R_ADC_B_ADLIMINTCR_OFFSET     0x000003a0  /* Limiter Clip Interrupt Enable Register */
+#define R_ADC_B_ADUGTR_OFFSET(m)                  (0x00000380 + ((m) * 0x00000004))  /* User Gain Table Register %s */
+#define R_ADC_B_ADLIMINTCR_OFFSET                 0x000003a0  /* Limiter Clip Interrupt Enable Register */
 /* ADLIMTR%s Registers (0-7) */
-#define R_ADC_B_ADLIMTR0_OFFSET     0x000003a4  /* Limiter Clip Table Register 0 */
-#define R_ADC_B_ADLIMTR1_OFFSET     0x000003a8  /* Limiter Clip Table Register 1 */
-#define R_ADC_B_ADLIMTR2_OFFSET     0x000003ac  /* Limiter Clip Table Register 2 */
-#define R_ADC_B_ADLIMTR3_OFFSET     0x000003b0  /* Limiter Clip Table Register 3 */
-#define R_ADC_B_ADLIMTR4_OFFSET     0x000003b4  /* Limiter Clip Table Register 4 */
-#define R_ADC_B_ADLIMTR5_OFFSET     0x000003b8  /* Limiter Clip Table Register 5 */
-#define R_ADC_B_ADLIMTR6_OFFSET     0x000003bc  /* Limiter Clip Table Register 6 */
-#define R_ADC_B_ADLIMTR7_OFFSET     0x000003c0  /* Limiter Clip Table Register 7 */
-#define R_ADC_B_ADCMPENR_OFFSET     0x00000400  /* Compare Match Enable Register */
-#define R_ADC_B_ADCMPINTCR_OFFSET     0x00000404  /* Compare Match Interrupt Enable Register */
+#define R_ADC_B_ADLIMTR_OFFSET(m)                 (0x000003a4 + ((m) * 0x00000004))  /* Limiter Clip Table Register %s */
+#define R_ADC_B_ADCMPENR_OFFSET                   0x00000400  /* Compare Match Enable Register */
+#define R_ADC_B_ADCMPINTCR_OFFSET                 0x00000404  /* Compare Match Interrupt Enable Register */
 /* ADCCMPCR%s Registers (0-1) */
-#define R_ADC_B_ADCCMPCR0_OFFSET     0x00000408  /* Composite Compare Match Configuration Register 0 */
-#define R_ADC_B_ADCCMPCR1_OFFSET     0x0000040c  /* Composite Compare Match Configuration Register 1 */
-#define R_ADC_B_ADCMPMDR0_OFFSET     0x00000448  /* Compare Match Mode Selection Register 0 */
-#define R_ADC_B_ADCMPMDR1_OFFSET     0x0000044c  /* Compare Match Mode Selection Register 1 */
+#define R_ADC_B_ADCCMPCR_OFFSET(m)                (0x00000408 + ((m) * 0x00000004))  /* Composite Compare Match Configuration Register %s */
+#define R_ADC_B_ADCMPMDR0_OFFSET                  0x00000448  /* Compare Match Mode Selection Register 0 */
+#define R_ADC_B_ADCMPMDR1_OFFSET                  0x0000044c  /* Compare Match Mode Selection Register 1 */
 /* ADCMPTBR%s Registers (0-7) */
-#define R_ADC_B_ADCMPTBR0_OFFSET     0x00000458  /* Compare Match Table Register 0 */
-#define R_ADC_B_ADCMPTBR1_OFFSET     0x0000045c  /* Compare Match Table Register 1 */
-#define R_ADC_B_ADCMPTBR2_OFFSET     0x00000460  /* Compare Match Table Register 2 */
-#define R_ADC_B_ADCMPTBR3_OFFSET     0x00000464  /* Compare Match Table Register 3 */
-#define R_ADC_B_ADCMPTBR4_OFFSET     0x00000468  /* Compare Match Table Register 4 */
-#define R_ADC_B_ADCMPTBR5_OFFSET     0x0000046c  /* Compare Match Table Register 5 */
-#define R_ADC_B_ADCMPTBR6_OFFSET     0x00000470  /* Compare Match Table Register 6 */
-#define R_ADC_B_ADCMPTBR7_OFFSET     0x00000474  /* Compare Match Table Register 7 */
-#define R_ADC_B_ADFIFOCR_OFFSET     0x000004c0  /* FIFO Control Register */
-#define R_ADC_B_ADFIFOINTCR_OFFSET     0x000004c4  /* FIFO Interrupt Control Register */
-#define R_ADC_B_ADFIFOINTLR0_OFFSET     0x000004c8  /* FIFO Interrupt Generation Level Register 0 */
-#define R_ADC_B_ADFIFOINTLR1_OFFSET     0x000004cc  /* FIFO Interrupt Generation Level Register 1 */
-#define R_ADC_B_ADFIFOINTLR2_OFFSET     0x000004d0  /* FIFO Interrupt Generation Level Register 2 */
-#define R_ADC_B_ADFIFOINTLR3_OFFSET     0x000004d4  /* FIFO Interrupt Generation Level Register 3 */
-#define R_ADC_B_ADFIFOINTLR4_OFFSET     0x000004d8  /* FIFO Interrupt Generation Level Register 4 */
+#define R_ADC_B_ADCMPTBR_OFFSET(m)                (0x00000458 + ((m) * 0x00000004))  /* Compare Match Table Register %s */
+#define R_ADC_B_ADFIFOCR_OFFSET                   0x000004c0  /* FIFO Control Register */
+#define R_ADC_B_ADFIFOINTCR_OFFSET                0x000004c4  /* FIFO Interrupt Control Register */
+#define R_ADC_B_ADFIFOINTLR0_OFFSET               0x000004c8  /* FIFO Interrupt Generation Level Register 0 */
+#define R_ADC_B_ADFIFOINTLR1_OFFSET               0x000004cc  /* FIFO Interrupt Generation Level Register 1 */
+#define R_ADC_B_ADFIFOINTLR2_OFFSET               0x000004d0  /* FIFO Interrupt Generation Level Register 2 */
+#define R_ADC_B_ADFIFOINTLR3_OFFSET               0x000004d4  /* FIFO Interrupt Generation Level Register 3 */
+#define R_ADC_B_ADFIFOINTLR4_OFFSET               0x000004d8  /* FIFO Interrupt Generation Level Register 4 */
 /* ADCHCR%s Registers (0-32) */
-#define R_ADC_B_ADCHCR00_OFFSET     0x00000600  /* A/D Conversion Channel Configuration Register 00 */
-#define R_ADC_B_ADCHCR01_OFFSET     0x00000610  /* A/D Conversion Channel Configuration Register 01 */
-#define R_ADC_B_ADCHCR02_OFFSET     0x00000620  /* A/D Conversion Channel Configuration Register 02 */
-#define R_ADC_B_ADCHCR03_OFFSET     0x00000630  /* A/D Conversion Channel Configuration Register 03 */
-#define R_ADC_B_ADCHCR04_OFFSET     0x00000640  /* A/D Conversion Channel Configuration Register 04 */
-#define R_ADC_B_ADCHCR05_OFFSET     0x00000650  /* A/D Conversion Channel Configuration Register 05 */
-#define R_ADC_B_ADCHCR06_OFFSET     0x00000660  /* A/D Conversion Channel Configuration Register 06 */
-#define R_ADC_B_ADCHCR07_OFFSET     0x00000670  /* A/D Conversion Channel Configuration Register 07 */
-#define R_ADC_B_ADCHCR08_OFFSET     0x00000680  /* A/D Conversion Channel Configuration Register 08 */
-#define R_ADC_B_ADCHCR09_OFFSET     0x00000690  /* A/D Conversion Channel Configuration Register 09 */
-#define R_ADC_B_ADCHCR10_OFFSET     0x000006a0  /* A/D Conversion Channel Configuration Register 10 */
-#define R_ADC_B_ADCHCR11_OFFSET     0x000006b0  /* A/D Conversion Channel Configuration Register 11 */
-#define R_ADC_B_ADCHCR12_OFFSET     0x000006c0  /* A/D Conversion Channel Configuration Register 12 */
-#define R_ADC_B_ADCHCR13_OFFSET     0x000006d0  /* A/D Conversion Channel Configuration Register 13 */
-#define R_ADC_B_ADCHCR14_OFFSET     0x000006e0  /* A/D Conversion Channel Configuration Register 14 */
-#define R_ADC_B_ADCHCR15_OFFSET     0x000006f0  /* A/D Conversion Channel Configuration Register 15 */
-#define R_ADC_B_ADCHCR16_OFFSET     0x00000700  /* A/D Conversion Channel Configuration Register 16 */
-#define R_ADC_B_ADCHCR17_OFFSET     0x00000710  /* A/D Conversion Channel Configuration Register 17 */
-#define R_ADC_B_ADCHCR18_OFFSET     0x00000720  /* A/D Conversion Channel Configuration Register 18 */
-#define R_ADC_B_ADCHCR19_OFFSET     0x00000730  /* A/D Conversion Channel Configuration Register 19 */
-#define R_ADC_B_ADCHCR20_OFFSET     0x00000740  /* A/D Conversion Channel Configuration Register 20 */
-#define R_ADC_B_ADCHCR21_OFFSET     0x00000750  /* A/D Conversion Channel Configuration Register 21 */
-#define R_ADC_B_ADCHCR22_OFFSET     0x00000760  /* A/D Conversion Channel Configuration Register 22 */
-#define R_ADC_B_ADCHCR23_OFFSET     0x00000770  /* A/D Conversion Channel Configuration Register 23 */
-#define R_ADC_B_ADCHCR24_OFFSET     0x00000780  /* A/D Conversion Channel Configuration Register 24 */
-#define R_ADC_B_ADCHCR25_OFFSET     0x00000790  /* A/D Conversion Channel Configuration Register 25 */
-#define R_ADC_B_ADCHCR26_OFFSET     0x000007a0  /* A/D Conversion Channel Configuration Register 26 */
-#define R_ADC_B_ADCHCR27_OFFSET     0x000007b0  /* A/D Conversion Channel Configuration Register 27 */
-#define R_ADC_B_ADCHCR28_OFFSET     0x000007c0  /* A/D Conversion Channel Configuration Register 28 */
-#define R_ADC_B_ADCHCR29_OFFSET     0x000007d0  /* A/D Conversion Channel Configuration Register 29 */
-#define R_ADC_B_ADCHCR30_OFFSET     0x000007e0  /* A/D Conversion Channel Configuration Register 30 */
-#define R_ADC_B_ADCHCR31_OFFSET     0x000007f0  /* A/D Conversion Channel Configuration Register 31 */
-#define R_ADC_B_ADCHCR32_OFFSET     0x00000800  /* A/D Conversion Channel Configuration Register 32 */
+#define R_ADC_B_ADCHCR_OFFSET(m)                  (0x00000600 + ((m) * 0x00000010))  /* A/D Conversion Channel Configuration Register %s */
 /* ADDOPCRA%s Registers (0-32) */
-#define R_ADC_B_ADDOPCRA00_OFFSET     0x00000604  /* A/D Conversion Data Operation Control A Register 00 */
-#define R_ADC_B_ADDOPCRA01_OFFSET     0x00000614  /* A/D Conversion Data Operation Control A Register 01 */
-#define R_ADC_B_ADDOPCRA02_OFFSET     0x00000624  /* A/D Conversion Data Operation Control A Register 02 */
-#define R_ADC_B_ADDOPCRA03_OFFSET     0x00000634  /* A/D Conversion Data Operation Control A Register 03 */
-#define R_ADC_B_ADDOPCRA04_OFFSET     0x00000644  /* A/D Conversion Data Operation Control A Register 04 */
-#define R_ADC_B_ADDOPCRA05_OFFSET     0x00000654  /* A/D Conversion Data Operation Control A Register 05 */
-#define R_ADC_B_ADDOPCRA06_OFFSET     0x00000664  /* A/D Conversion Data Operation Control A Register 06 */
-#define R_ADC_B_ADDOPCRA07_OFFSET     0x00000674  /* A/D Conversion Data Operation Control A Register 07 */
-#define R_ADC_B_ADDOPCRA08_OFFSET     0x00000684  /* A/D Conversion Data Operation Control A Register 08 */
-#define R_ADC_B_ADDOPCRA09_OFFSET     0x00000694  /* A/D Conversion Data Operation Control A Register 09 */
-#define R_ADC_B_ADDOPCRA10_OFFSET     0x000006a4  /* A/D Conversion Data Operation Control A Register 10 */
-#define R_ADC_B_ADDOPCRA11_OFFSET     0x000006b4  /* A/D Conversion Data Operation Control A Register 11 */
-#define R_ADC_B_ADDOPCRA12_OFFSET     0x000006c4  /* A/D Conversion Data Operation Control A Register 12 */
-#define R_ADC_B_ADDOPCRA13_OFFSET     0x000006d4  /* A/D Conversion Data Operation Control A Register 13 */
-#define R_ADC_B_ADDOPCRA14_OFFSET     0x000006e4  /* A/D Conversion Data Operation Control A Register 14 */
-#define R_ADC_B_ADDOPCRA15_OFFSET     0x000006f4  /* A/D Conversion Data Operation Control A Register 15 */
-#define R_ADC_B_ADDOPCRA16_OFFSET     0x00000704  /* A/D Conversion Data Operation Control A Register 16 */
-#define R_ADC_B_ADDOPCRA17_OFFSET     0x00000714  /* A/D Conversion Data Operation Control A Register 17 */
-#define R_ADC_B_ADDOPCRA18_OFFSET     0x00000724  /* A/D Conversion Data Operation Control A Register 18 */
-#define R_ADC_B_ADDOPCRA19_OFFSET     0x00000734  /* A/D Conversion Data Operation Control A Register 19 */
-#define R_ADC_B_ADDOPCRA20_OFFSET     0x00000744  /* A/D Conversion Data Operation Control A Register 20 */
-#define R_ADC_B_ADDOPCRA21_OFFSET     0x00000754  /* A/D Conversion Data Operation Control A Register 21 */
-#define R_ADC_B_ADDOPCRA22_OFFSET     0x00000764  /* A/D Conversion Data Operation Control A Register 22 */
-#define R_ADC_B_ADDOPCRA23_OFFSET     0x00000774  /* A/D Conversion Data Operation Control A Register 23 */
-#define R_ADC_B_ADDOPCRA24_OFFSET     0x00000784  /* A/D Conversion Data Operation Control A Register 24 */
-#define R_ADC_B_ADDOPCRA25_OFFSET     0x00000794  /* A/D Conversion Data Operation Control A Register 25 */
-#define R_ADC_B_ADDOPCRA26_OFFSET     0x000007a4  /* A/D Conversion Data Operation Control A Register 26 */
-#define R_ADC_B_ADDOPCRA27_OFFSET     0x000007b4  /* A/D Conversion Data Operation Control A Register 27 */
-#define R_ADC_B_ADDOPCRA28_OFFSET     0x000007c4  /* A/D Conversion Data Operation Control A Register 28 */
-#define R_ADC_B_ADDOPCRA29_OFFSET     0x000007d4  /* A/D Conversion Data Operation Control A Register 29 */
-#define R_ADC_B_ADDOPCRA30_OFFSET     0x000007e4  /* A/D Conversion Data Operation Control A Register 30 */
-#define R_ADC_B_ADDOPCRA31_OFFSET     0x000007f4  /* A/D Conversion Data Operation Control A Register 31 */
-#define R_ADC_B_ADDOPCRA32_OFFSET     0x00000804  /* A/D Conversion Data Operation Control A Register 32 */
+#define R_ADC_B_ADDOPCRA_OFFSET(m)                (0x00000604 + ((m) * 0x00000010))  /* A/D Conversion Data Operation Control A Register %s */
 /* ADDOPCRB%s Registers (0-32) */
-#define R_ADC_B_ADDOPCRB00_OFFSET     0x00000608  /* A/D Conversion Data Operation Control B Register 00 */
-#define R_ADC_B_ADDOPCRB01_OFFSET     0x00000618  /* A/D Conversion Data Operation Control B Register 01 */
-#define R_ADC_B_ADDOPCRB02_OFFSET     0x00000628  /* A/D Conversion Data Operation Control B Register 02 */
-#define R_ADC_B_ADDOPCRB03_OFFSET     0x00000638  /* A/D Conversion Data Operation Control B Register 03 */
-#define R_ADC_B_ADDOPCRB04_OFFSET     0x00000648  /* A/D Conversion Data Operation Control B Register 04 */
-#define R_ADC_B_ADDOPCRB05_OFFSET     0x00000658  /* A/D Conversion Data Operation Control B Register 05 */
-#define R_ADC_B_ADDOPCRB06_OFFSET     0x00000668  /* A/D Conversion Data Operation Control B Register 06 */
-#define R_ADC_B_ADDOPCRB07_OFFSET     0x00000678  /* A/D Conversion Data Operation Control B Register 07 */
-#define R_ADC_B_ADDOPCRB08_OFFSET     0x00000688  /* A/D Conversion Data Operation Control B Register 08 */
-#define R_ADC_B_ADDOPCRB09_OFFSET     0x00000698  /* A/D Conversion Data Operation Control B Register 09 */
-#define R_ADC_B_ADDOPCRB10_OFFSET     0x000006a8  /* A/D Conversion Data Operation Control B Register 10 */
-#define R_ADC_B_ADDOPCRB11_OFFSET     0x000006b8  /* A/D Conversion Data Operation Control B Register 11 */
-#define R_ADC_B_ADDOPCRB12_OFFSET     0x000006c8  /* A/D Conversion Data Operation Control B Register 12 */
-#define R_ADC_B_ADDOPCRB13_OFFSET     0x000006d8  /* A/D Conversion Data Operation Control B Register 13 */
-#define R_ADC_B_ADDOPCRB14_OFFSET     0x000006e8  /* A/D Conversion Data Operation Control B Register 14 */
-#define R_ADC_B_ADDOPCRB15_OFFSET     0x000006f8  /* A/D Conversion Data Operation Control B Register 15 */
-#define R_ADC_B_ADDOPCRB16_OFFSET     0x00000708  /* A/D Conversion Data Operation Control B Register 16 */
-#define R_ADC_B_ADDOPCRB17_OFFSET     0x00000718  /* A/D Conversion Data Operation Control B Register 17 */
-#define R_ADC_B_ADDOPCRB18_OFFSET     0x00000728  /* A/D Conversion Data Operation Control B Register 18 */
-#define R_ADC_B_ADDOPCRB19_OFFSET     0x00000738  /* A/D Conversion Data Operation Control B Register 19 */
-#define R_ADC_B_ADDOPCRB20_OFFSET     0x00000748  /* A/D Conversion Data Operation Control B Register 20 */
-#define R_ADC_B_ADDOPCRB21_OFFSET     0x00000758  /* A/D Conversion Data Operation Control B Register 21 */
-#define R_ADC_B_ADDOPCRB22_OFFSET     0x00000768  /* A/D Conversion Data Operation Control B Register 22 */
-#define R_ADC_B_ADDOPCRB23_OFFSET     0x00000778  /* A/D Conversion Data Operation Control B Register 23 */
-#define R_ADC_B_ADDOPCRB24_OFFSET     0x00000788  /* A/D Conversion Data Operation Control B Register 24 */
-#define R_ADC_B_ADDOPCRB25_OFFSET     0x00000798  /* A/D Conversion Data Operation Control B Register 25 */
-#define R_ADC_B_ADDOPCRB26_OFFSET     0x000007a8  /* A/D Conversion Data Operation Control B Register 26 */
-#define R_ADC_B_ADDOPCRB27_OFFSET     0x000007b8  /* A/D Conversion Data Operation Control B Register 27 */
-#define R_ADC_B_ADDOPCRB28_OFFSET     0x000007c8  /* A/D Conversion Data Operation Control B Register 28 */
-#define R_ADC_B_ADDOPCRB29_OFFSET     0x000007d8  /* A/D Conversion Data Operation Control B Register 29 */
-#define R_ADC_B_ADDOPCRB30_OFFSET     0x000007e8  /* A/D Conversion Data Operation Control B Register 30 */
-#define R_ADC_B_ADDOPCRB31_OFFSET     0x000007f8  /* A/D Conversion Data Operation Control B Register 31 */
-#define R_ADC_B_ADDOPCRB32_OFFSET     0x00000808  /* A/D Conversion Data Operation Control B Register 32 */
+#define R_ADC_B_ADDOPCRB_OFFSET(m)                (0x00000608 + ((m) * 0x00000010))  /* A/D Conversion Data Operation Control B Register %s */
 /* ADDOPCRC%s Registers (0-32) */
-#define R_ADC_B_ADDOPCRC00_OFFSET     0x0000060c  /* A/D Conversion Data Operation Control C Register 00 */
-#define R_ADC_B_ADDOPCRC01_OFFSET     0x0000061c  /* A/D Conversion Data Operation Control C Register 01 */
-#define R_ADC_B_ADDOPCRC02_OFFSET     0x0000062c  /* A/D Conversion Data Operation Control C Register 02 */
-#define R_ADC_B_ADDOPCRC03_OFFSET     0x0000063c  /* A/D Conversion Data Operation Control C Register 03 */
-#define R_ADC_B_ADDOPCRC04_OFFSET     0x0000064c  /* A/D Conversion Data Operation Control C Register 04 */
-#define R_ADC_B_ADDOPCRC05_OFFSET     0x0000065c  /* A/D Conversion Data Operation Control C Register 05 */
-#define R_ADC_B_ADDOPCRC06_OFFSET     0x0000066c  /* A/D Conversion Data Operation Control C Register 06 */
-#define R_ADC_B_ADDOPCRC07_OFFSET     0x0000067c  /* A/D Conversion Data Operation Control C Register 07 */
-#define R_ADC_B_ADDOPCRC08_OFFSET     0x0000068c  /* A/D Conversion Data Operation Control C Register 08 */
-#define R_ADC_B_ADDOPCRC09_OFFSET     0x0000069c  /* A/D Conversion Data Operation Control C Register 09 */
-#define R_ADC_B_ADDOPCRC10_OFFSET     0x000006ac  /* A/D Conversion Data Operation Control C Register 10 */
-#define R_ADC_B_ADDOPCRC11_OFFSET     0x000006bc  /* A/D Conversion Data Operation Control C Register 11 */
-#define R_ADC_B_ADDOPCRC12_OFFSET     0x000006cc  /* A/D Conversion Data Operation Control C Register 12 */
-#define R_ADC_B_ADDOPCRC13_OFFSET     0x000006dc  /* A/D Conversion Data Operation Control C Register 13 */
-#define R_ADC_B_ADDOPCRC14_OFFSET     0x000006ec  /* A/D Conversion Data Operation Control C Register 14 */
-#define R_ADC_B_ADDOPCRC15_OFFSET     0x000006fc  /* A/D Conversion Data Operation Control C Register 15 */
-#define R_ADC_B_ADDOPCRC16_OFFSET     0x0000070c  /* A/D Conversion Data Operation Control C Register 16 */
-#define R_ADC_B_ADDOPCRC17_OFFSET     0x0000071c  /* A/D Conversion Data Operation Control C Register 17 */
-#define R_ADC_B_ADDOPCRC18_OFFSET     0x0000072c  /* A/D Conversion Data Operation Control C Register 18 */
-#define R_ADC_B_ADDOPCRC19_OFFSET     0x0000073c  /* A/D Conversion Data Operation Control C Register 19 */
-#define R_ADC_B_ADDOPCRC20_OFFSET     0x0000074c  /* A/D Conversion Data Operation Control C Register 20 */
-#define R_ADC_B_ADDOPCRC21_OFFSET     0x0000075c  /* A/D Conversion Data Operation Control C Register 21 */
-#define R_ADC_B_ADDOPCRC22_OFFSET     0x0000076c  /* A/D Conversion Data Operation Control C Register 22 */
-#define R_ADC_B_ADDOPCRC23_OFFSET     0x0000077c  /* A/D Conversion Data Operation Control C Register 23 */
-#define R_ADC_B_ADDOPCRC24_OFFSET     0x0000078c  /* A/D Conversion Data Operation Control C Register 24 */
-#define R_ADC_B_ADDOPCRC25_OFFSET     0x0000079c  /* A/D Conversion Data Operation Control C Register 25 */
-#define R_ADC_B_ADDOPCRC26_OFFSET     0x000007ac  /* A/D Conversion Data Operation Control C Register 26 */
-#define R_ADC_B_ADDOPCRC27_OFFSET     0x000007bc  /* A/D Conversion Data Operation Control C Register 27 */
-#define R_ADC_B_ADDOPCRC28_OFFSET     0x000007cc  /* A/D Conversion Data Operation Control C Register 28 */
-#define R_ADC_B_ADDOPCRC29_OFFSET     0x000007dc  /* A/D Conversion Data Operation Control C Register 29 */
-#define R_ADC_B_ADDOPCRC30_OFFSET     0x000007ec  /* A/D Conversion Data Operation Control C Register 30 */
-#define R_ADC_B_ADDOPCRC31_OFFSET     0x000007fc  /* A/D Conversion Data Operation Control C Register 31 */
-#define R_ADC_B_ADDOPCRC32_OFFSET     0x0000080c  /* A/D Conversion Data Operation Control C Register 32 */
-#define R_ADC_B_ADCALSTR_OFFSET     0x00000c00  /* A/D Converter Self-calibration Start Register */
-#define R_ADC_B_ADSHCSCR_OFFSET     0x00000c04  /* Channel-Dedicated Sample & Hold Circuit Constant Sampling Control Register */
-#define R_ADC_B_ADTRGENR_OFFSET     0x00000c08  /* A/D Conversion Start Trigger Enable Register */
-#define R_ADC_B_ADSYSTR_OFFSET     0x00000c10  /* A/D Conversion Synchronous Software Start Register */
+#define R_ADC_B_ADDOPCRC_OFFSET(m)                (0x0000060c + ((m) * 0x00000010))  /* A/D Conversion Data Operation Control C Register %s */
+#define R_ADC_B_ADCALSTR_OFFSET                   0x00000c00  /* A/D Converter Self-calibration Start Register */
+#define R_ADC_B_ADSHCSCR_OFFSET                   0x00000c04  /* Channel-Dedicated Sample & Hold Circuit Constant Sampling Control Register */
+#define R_ADC_B_ADTRGENR_OFFSET                   0x00000c08  /* A/D Conversion Start Trigger Enable Register */
+#define R_ADC_B_ADSYSTR_OFFSET                    0x00000c10  /* A/D Conversion Synchronous Software Start Register */
 /* ADSTR%s Registers (0-8) */
-#define R_ADC_B_ADSTR0_OFFSET     0x00000c20  /* A/D Conversion Software Start Register 0 */
-#define R_ADC_B_ADSTR1_OFFSET     0x00000c24  /* A/D Conversion Software Start Register 1 */
-#define R_ADC_B_ADSTR2_OFFSET     0x00000c28  /* A/D Conversion Software Start Register 2 */
-#define R_ADC_B_ADSTR3_OFFSET     0x00000c2c  /* A/D Conversion Software Start Register 3 */
-#define R_ADC_B_ADSTR4_OFFSET     0x00000c30  /* A/D Conversion Software Start Register 4 */
-#define R_ADC_B_ADSTR5_OFFSET     0x00000c34  /* A/D Conversion Software Start Register 5 */
-#define R_ADC_B_ADSTR6_OFFSET     0x00000c38  /* A/D Conversion Software Start Register 6 */
-#define R_ADC_B_ADSTR7_OFFSET     0x00000c3c  /* A/D Conversion Software Start Register 7 */
-#define R_ADC_B_ADSTR8_OFFSET     0x00000c40  /* A/D Conversion Software Start Register 8 */
-#define R_ADC_B_ADSTOPR_OFFSET     0x00000c60  /* A/D Conversion Stop Register */
-#define R_ADC_B_ADSR_OFFSET     0x00000c80  /* A/D Conversion Status Register */
-#define R_ADC_B_ADGRSR_OFFSET     0x00000c84  /* Scan Group Status Register */
-#define R_ADC_B_ADERSR_OFFSET     0x00000c88  /* A/D Conversion Error Status Register */
-#define R_ADC_B_ADERSCR_OFFSET     0x00000c8c  /* A/D Conversion Error Status Clear Register */
-#define R_ADC_B_ADCALENDSR_OFFSET     0x00000c98  /* A/D Converter Self-calibration End Status Register */
-#define R_ADC_B_ADCALENDSCR_OFFSET     0x00000c9c  /* A/D Converter Self-calibration End Status Clear Register */
-#define R_ADC_B_ADOVFERSR_OFFSET     0x00000ca0  /* A/D Conversion Overflow Error Status Register */
-#define R_ADC_B_ADOVFCHSR0_OFFSET     0x00000ca4  /* A/D Conversion Overflow Channel Status Register 0 */
-#define R_ADC_B_ADOVFEXSR_OFFSET     0x00000cb0  /* Extended Analog A/D Conversion Overflow Status Register */
-#define R_ADC_B_ADOVFERSCR_OFFSET     0x00000cb4  /* A/D Conversion Overflow Error Status Clear Register */
-#define R_ADC_B_ADOVFCHSCR0_OFFSET     0x00000cb8  /* A/D Conversion Overflow Channel Status Clear Register 0 */
-#define R_ADC_B_ADOVFEXSCR_OFFSET     0x00000cc4  /* Extended Analog A/D Conversion Overflow Status Clear Register */
-#define R_ADC_B_ADFIFOSR0_OFFSET     0x00000cd0  /* FIFO Status Register 0 */
-#define R_ADC_B_ADFIFOSR1_OFFSET     0x00000cd4  /* FIFO Status Register 1 */
-#define R_ADC_B_ADFIFOSR2_OFFSET     0x00000cd8  /* FIFO Status Register 2 */
-#define R_ADC_B_ADFIFOSR3_OFFSET     0x00000cdc  /* FIFO Status Register 3 */
-#define R_ADC_B_ADFIFOSR4_OFFSET     0x00000ce0  /* FIFO Status Register 4 */
-#define R_ADC_B_ADFIFODCR_OFFSET     0x00000cf0  /* FIFO Data Clear Register */
-#define R_ADC_B_ADFIFOERSR_OFFSET     0x00000cf4  /* FIFO Error Status Register */
-#define R_ADC_B_ADFIFOERSCR_OFFSET     0x00000cf8  /* FIFO Error Status Clear Register */
-#define R_ADC_B_ADCMPTBSR_OFFSET     0x00000d00  /* Compare Match Table Status Register */
-#define R_ADC_B_ADCMPTBSCR_OFFSET     0x00000d04  /* Compare Match Table Status Clear Register */
-#define R_ADC_B_ADCMPCHSR0_OFFSET     0x00000d08  /* Compare Match Channel Status Register 0 */
-#define R_ADC_B_ADCMPEXSR_OFFSET     0x00000d14  /* Extended Analog Compare Match Status Register */
-#define R_ADC_B_ADCMPCHSCR0_OFFSET     0x00000d18  /* Compare Match Channel Status Clear Register 0 */
-#define R_ADC_B_ADCMPEXSCR_OFFSET     0x00000d24  /* Extended Analog Compare Match Status Clear Register */
-#define R_ADC_B_ADLIMGRSR_OFFSET     0x00000d28  /* Limiter Clip Scan Group Status Register */
-#define R_ADC_B_ADLIMCHSR0_OFFSET     0x00000d2c  /* Limiter Clip Channel Status Register 0 */
-#define R_ADC_B_ADLIMEXSR_OFFSET     0x00000d38  /* Extended Analog Limiter Clip Status Register */
-#define R_ADC_B_ADLIMGRSCR_OFFSET     0x00000d3c  /* Limiter Clip Scan Group Status Clear Register */
-#define R_ADC_B_ADLIMCHSCR0_OFFSET     0x00000d40  /* Limiter Clip Channel Status Clear Register 0 */
-#define R_ADC_B_ADLIMEXSCR_OFFSET     0x00000d4c  /* Extended Analog Limiter Clip Status Clear Register */
-#define R_ADC_B_ADSCANENDSR_OFFSET     0x00000d50  /* Scan End Status Register */
-#define R_ADC_B_ADSCANENDSCR_OFFSET     0x00000d54  /* Scan End Status Clear Register */
+#define R_ADC_B_ADSTR_OFFSET(m)                   (0x00000c20 + ((m) * 0x00000004))  /* A/D Conversion Software Start Register %s */
+#define R_ADC_B_ADSTOPR_OFFSET                    0x00000c60  /* A/D Conversion Stop Register */
+#define R_ADC_B_ADSR_OFFSET                       0x00000c80  /* A/D Conversion Status Register */
+#define R_ADC_B_ADGRSR_OFFSET                     0x00000c84  /* Scan Group Status Register */
+#define R_ADC_B_ADERSR_OFFSET                     0x00000c88  /* A/D Conversion Error Status Register */
+#define R_ADC_B_ADERSCR_OFFSET                    0x00000c8c  /* A/D Conversion Error Status Clear Register */
+#define R_ADC_B_ADCALENDSR_OFFSET                 0x00000c98  /* A/D Converter Self-calibration End Status Register */
+#define R_ADC_B_ADCALENDSCR_OFFSET                0x00000c9c  /* A/D Converter Self-calibration End Status Clear Register */
+#define R_ADC_B_ADOVFERSR_OFFSET                  0x00000ca0  /* A/D Conversion Overflow Error Status Register */
+#define R_ADC_B_ADOVFCHSR0_OFFSET                 0x00000ca4  /* A/D Conversion Overflow Channel Status Register 0 */
+#define R_ADC_B_ADOVFEXSR_OFFSET                  0x00000cb0  /* Extended Analog A/D Conversion Overflow Status Register */
+#define R_ADC_B_ADOVFERSCR_OFFSET                 0x00000cb4  /* A/D Conversion Overflow Error Status Clear Register */
+#define R_ADC_B_ADOVFCHSCR0_OFFSET                0x00000cb8  /* A/D Conversion Overflow Channel Status Clear Register 0 */
+#define R_ADC_B_ADOVFEXSCR_OFFSET                 0x00000cc4  /* Extended Analog A/D Conversion Overflow Status Clear Register */
+#define R_ADC_B_ADFIFOSR0_OFFSET                  0x00000cd0  /* FIFO Status Register 0 */
+#define R_ADC_B_ADFIFOSR1_OFFSET                  0x00000cd4  /* FIFO Status Register 1 */
+#define R_ADC_B_ADFIFOSR2_OFFSET                  0x00000cd8  /* FIFO Status Register 2 */
+#define R_ADC_B_ADFIFOSR3_OFFSET                  0x00000cdc  /* FIFO Status Register 3 */
+#define R_ADC_B_ADFIFOSR4_OFFSET                  0x00000ce0  /* FIFO Status Register 4 */
+#define R_ADC_B_ADFIFODCR_OFFSET                  0x00000cf0  /* FIFO Data Clear Register */
+#define R_ADC_B_ADFIFOERSR_OFFSET                 0x00000cf4  /* FIFO Error Status Register */
+#define R_ADC_B_ADFIFOERSCR_OFFSET                0x00000cf8  /* FIFO Error Status Clear Register */
+#define R_ADC_B_ADCMPTBSR_OFFSET                  0x00000d00  /* Compare Match Table Status Register */
+#define R_ADC_B_ADCMPTBSCR_OFFSET                 0x00000d04  /* Compare Match Table Status Clear Register */
+#define R_ADC_B_ADCMPCHSR0_OFFSET                 0x00000d08  /* Compare Match Channel Status Register 0 */
+#define R_ADC_B_ADCMPEXSR_OFFSET                  0x00000d14  /* Extended Analog Compare Match Status Register */
+#define R_ADC_B_ADCMPCHSCR0_OFFSET                0x00000d18  /* Compare Match Channel Status Clear Register 0 */
+#define R_ADC_B_ADCMPEXSCR_OFFSET                 0x00000d24  /* Extended Analog Compare Match Status Clear Register */
+#define R_ADC_B_ADLIMGRSR_OFFSET                  0x00000d28  /* Limiter Clip Scan Group Status Register */
+#define R_ADC_B_ADLIMCHSR0_OFFSET                 0x00000d2c  /* Limiter Clip Channel Status Register 0 */
+#define R_ADC_B_ADLIMEXSR_OFFSET                  0x00000d38  /* Extended Analog Limiter Clip Status Register */
+#define R_ADC_B_ADLIMGRSCR_OFFSET                 0x00000d3c  /* Limiter Clip Scan Group Status Clear Register */
+#define R_ADC_B_ADLIMCHSCR0_OFFSET                0x00000d40  /* Limiter Clip Channel Status Clear Register 0 */
+#define R_ADC_B_ADLIMEXSCR_OFFSET                 0x00000d4c  /* Extended Analog Limiter Clip Status Clear Register */
+#define R_ADC_B_ADSCANENDSR_OFFSET                0x00000d50  /* Scan End Status Register */
+#define R_ADC_B_ADSCANENDSCR_OFFSET               0x00000d54  /* Scan End Status Clear Register */
 /* ADDR%s Registers (0-22) */
-#define R_ADC_B_ADDR00_OFFSET     0x00002000  /* A/D Data Register 00 */
-#define R_ADC_B_ADDR01_OFFSET     0x00002004  /* A/D Data Register 01 */
-#define R_ADC_B_ADDR02_OFFSET     0x00002008  /* A/D Data Register 02 */
-#define R_ADC_B_ADDR03_OFFSET     0x0000200c  /* A/D Data Register 03 */
-#define R_ADC_B_ADDR04_OFFSET     0x00002010  /* A/D Data Register 04 */
-#define R_ADC_B_ADDR05_OFFSET     0x00002014  /* A/D Data Register 05 */
-#define R_ADC_B_ADDR06_OFFSET     0x00002018  /* A/D Data Register 06 */
-#define R_ADC_B_ADDR07_OFFSET     0x0000201c  /* A/D Data Register 07 */
-#define R_ADC_B_ADDR08_OFFSET     0x00002020  /* A/D Data Register 08 */
-#define R_ADC_B_ADDR09_OFFSET     0x00002024  /* A/D Data Register 09 */
-#define R_ADC_B_ADDR10_OFFSET     0x00002028  /* A/D Data Register 10 */
-#define R_ADC_B_ADDR11_OFFSET     0x0000202c  /* A/D Data Register 11 */
-#define R_ADC_B_ADDR12_OFFSET     0x00002030  /* A/D Data Register 12 */
-#define R_ADC_B_ADDR13_OFFSET     0x00002034  /* A/D Data Register 13 */
-#define R_ADC_B_ADDR14_OFFSET     0x00002038  /* A/D Data Register 14 */
-#define R_ADC_B_ADDR15_OFFSET     0x0000203c  /* A/D Data Register 15 */
-#define R_ADC_B_ADDR16_OFFSET     0x00002040  /* A/D Data Register 16 */
-#define R_ADC_B_ADDR17_OFFSET     0x00002044  /* A/D Data Register 17 */
-#define R_ADC_B_ADDR18_OFFSET     0x00002048  /* A/D Data Register 18 */
-#define R_ADC_B_ADDR19_OFFSET     0x0000204c  /* A/D Data Register 19 */
-#define R_ADC_B_ADDR20_OFFSET     0x00002050  /* A/D Data Register 20 */
-#define R_ADC_B_ADDR21_OFFSET     0x00002054  /* A/D Data Register 21 */
-#define R_ADC_B_ADDR22_OFFSET     0x00002058  /* A/D Data Register 22 */
+#define R_ADC_B_ADDR_OFFSET(m)                    (0x00002000 + ((m) * 0x00000004))  /* A/D Data Register %s */
 /* ADFIFODR%s Registers (0-8) */
-#define R_ADC_B_ADFIFODR0_OFFSET     0x00002200  /* FIFO Data Register 0 */
-#define R_ADC_B_ADFIFODR1_OFFSET     0x00002204  /* FIFO Data Register 1 */
-#define R_ADC_B_ADFIFODR2_OFFSET     0x00002208  /* FIFO Data Register 2 */
-#define R_ADC_B_ADFIFODR3_OFFSET     0x0000220c  /* FIFO Data Register 3 */
-#define R_ADC_B_ADFIFODR4_OFFSET     0x00002210  /* FIFO Data Register 4 */
-#define R_ADC_B_ADFIFODR5_OFFSET     0x00002214  /* FIFO Data Register 5 */
-#define R_ADC_B_ADFIFODR6_OFFSET     0x00002218  /* FIFO Data Register 6 */
-#define R_ADC_B_ADFIFODR7_OFFSET     0x0000221c  /* FIFO Data Register 7 */
-#define R_ADC_B_ADFIFODR8_OFFSET     0x00002220  /* FIFO Data Register 8 */
+#define R_ADC_B_ADFIFODR_OFFSET(m)                (0x00002200 + ((m) * 0x00000004))  /* FIFO Data Register %s */
 
 /* ADC_B Register Addresses */
 
-#define R_ADC_B_ADCLKENR                 (R_ADC_B_BASE + R_ADC_B_ADCLKENR_OFFSET)
-#define R_ADC_B_ADCLKSR                 (R_ADC_B_BASE + R_ADC_B_ADCLKSR_OFFSET)
-#define R_ADC_B_ADCLKCR                 (R_ADC_B_BASE + R_ADC_B_ADCLKCR_OFFSET)
-#define R_ADC_B_ADSYCR                 (R_ADC_B_BASE + R_ADC_B_ADSYCR_OFFSET)
-#define R_ADC_B_ADUSLPCR0                 (R_ADC_B_BASE + R_ADC_B_ADUSLPCR0_OFFSET)
-#define R_ADC_B_ADUSLPCR1                 (R_ADC_B_BASE + R_ADC_B_ADUSLPCR1_OFFSET)
-#define R_ADC_B_ADERINTCR                 (R_ADC_B_BASE + R_ADC_B_ADERINTCR_OFFSET)
-#define R_ADC_B_ADOVFINTCR                 (R_ADC_B_BASE + R_ADC_B_ADOVFINTCR_OFFSET)
-#define R_ADC_B_ADCALINTCR                 (R_ADC_B_BASE + R_ADC_B_ADCALINTCR_OFFSET)
-#define R_ADC_B_ADMDR                 (R_ADC_B_BASE + R_ADC_B_ADMDR_OFFSET)
-#define R_ADC_B_ADGSPCR                 (R_ADC_B_BASE + R_ADC_B_ADGSPCR_OFFSET)
-#define R_ADC_B_ADSGER                 (R_ADC_B_BASE + R_ADC_B_ADSGER_OFFSET)
-#define R_ADC_B_ADSGCR0                 (R_ADC_B_BASE + R_ADC_B_ADSGCR0_OFFSET)
-#define R_ADC_B_ADSGCR1                 (R_ADC_B_BASE + R_ADC_B_ADSGCR1_OFFSET)
-#define R_ADC_B_ADSGCR2                 (R_ADC_B_BASE + R_ADC_B_ADSGCR2_OFFSET)
-#define R_ADC_B_ADINTCR                 (R_ADC_B_BASE + R_ADC_B_ADINTCR_OFFSET)
-#define R_ADC_B_ADSWNR0                 (R_ADC_B_BASE + R_ADC_B_ADSWNR0_OFFSET)
-#define R_ADC_B_ADSWNR1                 (R_ADC_B_BASE + R_ADC_B_ADSWNR1_OFFSET)
-#define R_ADC_B_ADDECCR                 (R_ADC_B_BASE + R_ADC_B_ADDECCR_OFFSET)
-#define R_ADC_B_ADACMDR                 (R_ADC_B_BASE + R_ADC_B_ADACMDR_OFFSET)
-#define R_ADC_B_ADTRGEXT0                 (R_ADC_B_BASE + R_ADC_B_ADTRGEXT0_OFFSET)
-#define R_ADC_B_ADTRGEXT1                 (R_ADC_B_BASE + R_ADC_B_ADTRGEXT1_OFFSET)
-#define R_ADC_B_ADTRGEXT2                 (R_ADC_B_BASE + R_ADC_B_ADTRGEXT2_OFFSET)
-#define R_ADC_B_ADTRGEXT3                 (R_ADC_B_BASE + R_ADC_B_ADTRGEXT3_OFFSET)
-#define R_ADC_B_ADTRGEXT4                 (R_ADC_B_BASE + R_ADC_B_ADTRGEXT4_OFFSET)
-#define R_ADC_B_ADTRGEXT5                 (R_ADC_B_BASE + R_ADC_B_ADTRGEXT5_OFFSET)
-#define R_ADC_B_ADTRGEXT6                 (R_ADC_B_BASE + R_ADC_B_ADTRGEXT6_OFFSET)
-#define R_ADC_B_ADTRGEXT7                 (R_ADC_B_BASE + R_ADC_B_ADTRGEXT7_OFFSET)
-#define R_ADC_B_ADTRGEXT8                 (R_ADC_B_BASE + R_ADC_B_ADTRGEXT8_OFFSET)
-#define R_ADC_B_ADTRGELC0                 (R_ADC_B_BASE + R_ADC_B_ADTRGELC0_OFFSET)
-#define R_ADC_B_ADTRGELC1                 (R_ADC_B_BASE + R_ADC_B_ADTRGELC1_OFFSET)
-#define R_ADC_B_ADTRGELC2                 (R_ADC_B_BASE + R_ADC_B_ADTRGELC2_OFFSET)
-#define R_ADC_B_ADTRGELC3                 (R_ADC_B_BASE + R_ADC_B_ADTRGELC3_OFFSET)
-#define R_ADC_B_ADTRGELC4                 (R_ADC_B_BASE + R_ADC_B_ADTRGELC4_OFFSET)
-#define R_ADC_B_ADTRGELC5                 (R_ADC_B_BASE + R_ADC_B_ADTRGELC5_OFFSET)
-#define R_ADC_B_ADTRGELC6                 (R_ADC_B_BASE + R_ADC_B_ADTRGELC6_OFFSET)
-#define R_ADC_B_ADTRGELC7                 (R_ADC_B_BASE + R_ADC_B_ADTRGELC7_OFFSET)
-#define R_ADC_B_ADTRGELC8                 (R_ADC_B_BASE + R_ADC_B_ADTRGELC8_OFFSET)
-#define R_ADC_B_ADTRGGPT0                 (R_ADC_B_BASE + R_ADC_B_ADTRGGPT0_OFFSET)
-#define R_ADC_B_ADTRGGPT1                 (R_ADC_B_BASE + R_ADC_B_ADTRGGPT1_OFFSET)
-#define R_ADC_B_ADTRGGPT2                 (R_ADC_B_BASE + R_ADC_B_ADTRGGPT2_OFFSET)
-#define R_ADC_B_ADTRGGPT3                 (R_ADC_B_BASE + R_ADC_B_ADTRGGPT3_OFFSET)
-#define R_ADC_B_ADTRGGPT4                 (R_ADC_B_BASE + R_ADC_B_ADTRGGPT4_OFFSET)
-#define R_ADC_B_ADTRGGPT5                 (R_ADC_B_BASE + R_ADC_B_ADTRGGPT5_OFFSET)
-#define R_ADC_B_ADTRGGPT6                 (R_ADC_B_BASE + R_ADC_B_ADTRGGPT6_OFFSET)
-#define R_ADC_B_ADTRGGPT7                 (R_ADC_B_BASE + R_ADC_B_ADTRGGPT7_OFFSET)
-#define R_ADC_B_ADTRGGPT8                 (R_ADC_B_BASE + R_ADC_B_ADTRGGPT8_OFFSET)
-#define R_ADC_B_ADTRGDLR0                 (R_ADC_B_BASE + R_ADC_B_ADTRGDLR0_OFFSET)
-#define R_ADC_B_ADTRGDLR1                 (R_ADC_B_BASE + R_ADC_B_ADTRGDLR1_OFFSET)
-#define R_ADC_B_ADTRGDLR2                 (R_ADC_B_BASE + R_ADC_B_ADTRGDLR2_OFFSET)
-#define R_ADC_B_ADTRGDLR3                 (R_ADC_B_BASE + R_ADC_B_ADTRGDLR3_OFFSET)
-#define R_ADC_B_ADTRGDLR4                 (R_ADC_B_BASE + R_ADC_B_ADTRGDLR4_OFFSET)
-#define R_ADC_B_ADSGDCR0                 (R_ADC_B_BASE + R_ADC_B_ADSGDCR0_OFFSET)
-#define R_ADC_B_ADSGDCR1                 (R_ADC_B_BASE + R_ADC_B_ADSGDCR1_OFFSET)
-#define R_ADC_B_ADSGDCR2                 (R_ADC_B_BASE + R_ADC_B_ADSGDCR2_OFFSET)
-#define R_ADC_B_ADSGDCR3                 (R_ADC_B_BASE + R_ADC_B_ADSGDCR3_OFFSET)
-#define R_ADC_B_ADSGDCR4                 (R_ADC_B_BASE + R_ADC_B_ADSGDCR4_OFFSET)
-#define R_ADC_B_ADSGDCR5                 (R_ADC_B_BASE + R_ADC_B_ADSGDCR5_OFFSET)
-#define R_ADC_B_ADSGDCR6                 (R_ADC_B_BASE + R_ADC_B_ADSGDCR6_OFFSET)
-#define R_ADC_B_ADSGDCR7                 (R_ADC_B_BASE + R_ADC_B_ADSGDCR7_OFFSET)
-#define R_ADC_B_ADSGDCR8                 (R_ADC_B_BASE + R_ADC_B_ADSGDCR8_OFFSET)
-#define R_ADC_B_ADSSTR0                 (R_ADC_B_BASE + R_ADC_B_ADSSTR0_OFFSET)
-#define R_ADC_B_ADSSTR1                 (R_ADC_B_BASE + R_ADC_B_ADSSTR1_OFFSET)
-#define R_ADC_B_ADSSTR2                 (R_ADC_B_BASE + R_ADC_B_ADSSTR2_OFFSET)
-#define R_ADC_B_ADSSTR3                 (R_ADC_B_BASE + R_ADC_B_ADSSTR3_OFFSET)
-#define R_ADC_B_ADSSTR4                 (R_ADC_B_BASE + R_ADC_B_ADSSTR4_OFFSET)
-#define R_ADC_B_ADSSTR5                 (R_ADC_B_BASE + R_ADC_B_ADSSTR5_OFFSET)
-#define R_ADC_B_ADSSTR6                 (R_ADC_B_BASE + R_ADC_B_ADSSTR6_OFFSET)
-#define R_ADC_B_ADSSTR7                 (R_ADC_B_BASE + R_ADC_B_ADSSTR7_OFFSET)
-#define R_ADC_B_ADCNVSTR                 (R_ADC_B_BASE + R_ADC_B_ADCNVSTR_OFFSET)
-#define R_ADC_B_ADCALSTCR                 (R_ADC_B_BASE + R_ADC_B_ADCALSTCR_OFFSET)
-#define R_ADC_B_ADSHCR0                 (R_ADC_B_BASE + R_ADC_B_ADSHCR0_OFFSET)
-#define R_ADC_B_ADSHDCR0                 (R_ADC_B_BASE + R_ADC_B_ADSHDCR0_OFFSET)
-#define R_ADC_B_ADSHSTR0                 (R_ADC_B_BASE + R_ADC_B_ADSHSTR0_OFFSET)
-#define R_ADC_B_ADSHCR1                 (R_ADC_B_BASE + R_ADC_B_ADSHCR1_OFFSET)
-#define R_ADC_B_ADSHDCR1                 (R_ADC_B_BASE + R_ADC_B_ADSHDCR1_OFFSET)
-#define R_ADC_B_ADSHSTR1                 (R_ADC_B_BASE + R_ADC_B_ADSHSTR1_OFFSET)
-#define R_ADC_B_ADCALSHCR                 (R_ADC_B_BASE + R_ADC_B_ADCALSHCR_OFFSET)
-#define R_ADC_B_ADSHSBPCR                 (R_ADC_B_BASE + R_ADC_B_ADSHSBPCR_OFFSET)
-#define R_ADC_B_ADSHDBPCR                 (R_ADC_B_BASE + R_ADC_B_ADSHDBPCR_OFFSET)
-#define R_ADC_B_ADSHSDCR0                 (R_ADC_B_BASE + R_ADC_B_ADSHSDCR0_OFFSET)
-#define R_ADC_B_ADSHSDCR1                 (R_ADC_B_BASE + R_ADC_B_ADSHSDCR1_OFFSET)
-#define R_ADC_B_ADREFCR                 (R_ADC_B_BASE + R_ADC_B_ADREFCR_OFFSET)
-#define R_ADC_B_ADDFSR0                 (R_ADC_B_BASE + R_ADC_B_ADDFSR0_OFFSET)
-#define R_ADC_B_ADDFSR1                 (R_ADC_B_BASE + R_ADC_B_ADDFSR1_OFFSET)
-#define R_ADC_B_ADUOFTR0                 (R_ADC_B_BASE + R_ADC_B_ADUOFTR0_OFFSET)
-#define R_ADC_B_ADUOFTR1                 (R_ADC_B_BASE + R_ADC_B_ADUOFTR1_OFFSET)
-#define R_ADC_B_ADUOFTR2                 (R_ADC_B_BASE + R_ADC_B_ADUOFTR2_OFFSET)
-#define R_ADC_B_ADUOFTR3                 (R_ADC_B_BASE + R_ADC_B_ADUOFTR3_OFFSET)
-#define R_ADC_B_ADUOFTR4                 (R_ADC_B_BASE + R_ADC_B_ADUOFTR4_OFFSET)
-#define R_ADC_B_ADUOFTR5                 (R_ADC_B_BASE + R_ADC_B_ADUOFTR5_OFFSET)
-#define R_ADC_B_ADUOFTR6                 (R_ADC_B_BASE + R_ADC_B_ADUOFTR6_OFFSET)
-#define R_ADC_B_ADUOFTR7                 (R_ADC_B_BASE + R_ADC_B_ADUOFTR7_OFFSET)
-#define R_ADC_B_ADUGTR0                 (R_ADC_B_BASE + R_ADC_B_ADUGTR0_OFFSET)
-#define R_ADC_B_ADUGTR1                 (R_ADC_B_BASE + R_ADC_B_ADUGTR1_OFFSET)
-#define R_ADC_B_ADUGTR2                 (R_ADC_B_BASE + R_ADC_B_ADUGTR2_OFFSET)
-#define R_ADC_B_ADUGTR3                 (R_ADC_B_BASE + R_ADC_B_ADUGTR3_OFFSET)
-#define R_ADC_B_ADUGTR4                 (R_ADC_B_BASE + R_ADC_B_ADUGTR4_OFFSET)
-#define R_ADC_B_ADUGTR5                 (R_ADC_B_BASE + R_ADC_B_ADUGTR5_OFFSET)
-#define R_ADC_B_ADUGTR6                 (R_ADC_B_BASE + R_ADC_B_ADUGTR6_OFFSET)
-#define R_ADC_B_ADUGTR7                 (R_ADC_B_BASE + R_ADC_B_ADUGTR7_OFFSET)
-#define R_ADC_B_ADLIMINTCR                 (R_ADC_B_BASE + R_ADC_B_ADLIMINTCR_OFFSET)
-#define R_ADC_B_ADLIMTR0                 (R_ADC_B_BASE + R_ADC_B_ADLIMTR0_OFFSET)
-#define R_ADC_B_ADLIMTR1                 (R_ADC_B_BASE + R_ADC_B_ADLIMTR1_OFFSET)
-#define R_ADC_B_ADLIMTR2                 (R_ADC_B_BASE + R_ADC_B_ADLIMTR2_OFFSET)
-#define R_ADC_B_ADLIMTR3                 (R_ADC_B_BASE + R_ADC_B_ADLIMTR3_OFFSET)
-#define R_ADC_B_ADLIMTR4                 (R_ADC_B_BASE + R_ADC_B_ADLIMTR4_OFFSET)
-#define R_ADC_B_ADLIMTR5                 (R_ADC_B_BASE + R_ADC_B_ADLIMTR5_OFFSET)
-#define R_ADC_B_ADLIMTR6                 (R_ADC_B_BASE + R_ADC_B_ADLIMTR6_OFFSET)
-#define R_ADC_B_ADLIMTR7                 (R_ADC_B_BASE + R_ADC_B_ADLIMTR7_OFFSET)
-#define R_ADC_B_ADCMPENR                 (R_ADC_B_BASE + R_ADC_B_ADCMPENR_OFFSET)
-#define R_ADC_B_ADCMPINTCR                 (R_ADC_B_BASE + R_ADC_B_ADCMPINTCR_OFFSET)
-#define R_ADC_B_ADCCMPCR0                 (R_ADC_B_BASE + R_ADC_B_ADCCMPCR0_OFFSET)
-#define R_ADC_B_ADCCMPCR1                 (R_ADC_B_BASE + R_ADC_B_ADCCMPCR1_OFFSET)
-#define R_ADC_B_ADCMPMDR0                 (R_ADC_B_BASE + R_ADC_B_ADCMPMDR0_OFFSET)
-#define R_ADC_B_ADCMPMDR1                 (R_ADC_B_BASE + R_ADC_B_ADCMPMDR1_OFFSET)
-#define R_ADC_B_ADCMPTBR0                 (R_ADC_B_BASE + R_ADC_B_ADCMPTBR0_OFFSET)
-#define R_ADC_B_ADCMPTBR1                 (R_ADC_B_BASE + R_ADC_B_ADCMPTBR1_OFFSET)
-#define R_ADC_B_ADCMPTBR2                 (R_ADC_B_BASE + R_ADC_B_ADCMPTBR2_OFFSET)
-#define R_ADC_B_ADCMPTBR3                 (R_ADC_B_BASE + R_ADC_B_ADCMPTBR3_OFFSET)
-#define R_ADC_B_ADCMPTBR4                 (R_ADC_B_BASE + R_ADC_B_ADCMPTBR4_OFFSET)
-#define R_ADC_B_ADCMPTBR5                 (R_ADC_B_BASE + R_ADC_B_ADCMPTBR5_OFFSET)
-#define R_ADC_B_ADCMPTBR6                 (R_ADC_B_BASE + R_ADC_B_ADCMPTBR6_OFFSET)
-#define R_ADC_B_ADCMPTBR7                 (R_ADC_B_BASE + R_ADC_B_ADCMPTBR7_OFFSET)
-#define R_ADC_B_ADFIFOCR                 (R_ADC_B_BASE + R_ADC_B_ADFIFOCR_OFFSET)
-#define R_ADC_B_ADFIFOINTCR                 (R_ADC_B_BASE + R_ADC_B_ADFIFOINTCR_OFFSET)
-#define R_ADC_B_ADFIFOINTLR0                 (R_ADC_B_BASE + R_ADC_B_ADFIFOINTLR0_OFFSET)
-#define R_ADC_B_ADFIFOINTLR1                 (R_ADC_B_BASE + R_ADC_B_ADFIFOINTLR1_OFFSET)
-#define R_ADC_B_ADFIFOINTLR2                 (R_ADC_B_BASE + R_ADC_B_ADFIFOINTLR2_OFFSET)
-#define R_ADC_B_ADFIFOINTLR3                 (R_ADC_B_BASE + R_ADC_B_ADFIFOINTLR3_OFFSET)
-#define R_ADC_B_ADFIFOINTLR4                 (R_ADC_B_BASE + R_ADC_B_ADFIFOINTLR4_OFFSET)
-#define R_ADC_B_ADCHCR00                 (R_ADC_B_BASE + R_ADC_B_ADCHCR00_OFFSET)
-#define R_ADC_B_ADCHCR01                 (R_ADC_B_BASE + R_ADC_B_ADCHCR01_OFFSET)
-#define R_ADC_B_ADCHCR02                 (R_ADC_B_BASE + R_ADC_B_ADCHCR02_OFFSET)
-#define R_ADC_B_ADCHCR03                 (R_ADC_B_BASE + R_ADC_B_ADCHCR03_OFFSET)
-#define R_ADC_B_ADCHCR04                 (R_ADC_B_BASE + R_ADC_B_ADCHCR04_OFFSET)
-#define R_ADC_B_ADCHCR05                 (R_ADC_B_BASE + R_ADC_B_ADCHCR05_OFFSET)
-#define R_ADC_B_ADCHCR06                 (R_ADC_B_BASE + R_ADC_B_ADCHCR06_OFFSET)
-#define R_ADC_B_ADCHCR07                 (R_ADC_B_BASE + R_ADC_B_ADCHCR07_OFFSET)
-#define R_ADC_B_ADCHCR08                 (R_ADC_B_BASE + R_ADC_B_ADCHCR08_OFFSET)
-#define R_ADC_B_ADCHCR09                 (R_ADC_B_BASE + R_ADC_B_ADCHCR09_OFFSET)
-#define R_ADC_B_ADCHCR10                 (R_ADC_B_BASE + R_ADC_B_ADCHCR10_OFFSET)
-#define R_ADC_B_ADCHCR11                 (R_ADC_B_BASE + R_ADC_B_ADCHCR11_OFFSET)
-#define R_ADC_B_ADCHCR12                 (R_ADC_B_BASE + R_ADC_B_ADCHCR12_OFFSET)
-#define R_ADC_B_ADCHCR13                 (R_ADC_B_BASE + R_ADC_B_ADCHCR13_OFFSET)
-#define R_ADC_B_ADCHCR14                 (R_ADC_B_BASE + R_ADC_B_ADCHCR14_OFFSET)
-#define R_ADC_B_ADCHCR15                 (R_ADC_B_BASE + R_ADC_B_ADCHCR15_OFFSET)
-#define R_ADC_B_ADCHCR16                 (R_ADC_B_BASE + R_ADC_B_ADCHCR16_OFFSET)
-#define R_ADC_B_ADCHCR17                 (R_ADC_B_BASE + R_ADC_B_ADCHCR17_OFFSET)
-#define R_ADC_B_ADCHCR18                 (R_ADC_B_BASE + R_ADC_B_ADCHCR18_OFFSET)
-#define R_ADC_B_ADCHCR19                 (R_ADC_B_BASE + R_ADC_B_ADCHCR19_OFFSET)
-#define R_ADC_B_ADCHCR20                 (R_ADC_B_BASE + R_ADC_B_ADCHCR20_OFFSET)
-#define R_ADC_B_ADCHCR21                 (R_ADC_B_BASE + R_ADC_B_ADCHCR21_OFFSET)
-#define R_ADC_B_ADCHCR22                 (R_ADC_B_BASE + R_ADC_B_ADCHCR22_OFFSET)
-#define R_ADC_B_ADCHCR23                 (R_ADC_B_BASE + R_ADC_B_ADCHCR23_OFFSET)
-#define R_ADC_B_ADCHCR24                 (R_ADC_B_BASE + R_ADC_B_ADCHCR24_OFFSET)
-#define R_ADC_B_ADCHCR25                 (R_ADC_B_BASE + R_ADC_B_ADCHCR25_OFFSET)
-#define R_ADC_B_ADCHCR26                 (R_ADC_B_BASE + R_ADC_B_ADCHCR26_OFFSET)
-#define R_ADC_B_ADCHCR27                 (R_ADC_B_BASE + R_ADC_B_ADCHCR27_OFFSET)
-#define R_ADC_B_ADCHCR28                 (R_ADC_B_BASE + R_ADC_B_ADCHCR28_OFFSET)
-#define R_ADC_B_ADCHCR29                 (R_ADC_B_BASE + R_ADC_B_ADCHCR29_OFFSET)
-#define R_ADC_B_ADCHCR30                 (R_ADC_B_BASE + R_ADC_B_ADCHCR30_OFFSET)
-#define R_ADC_B_ADCHCR31                 (R_ADC_B_BASE + R_ADC_B_ADCHCR31_OFFSET)
-#define R_ADC_B_ADCHCR32                 (R_ADC_B_BASE + R_ADC_B_ADCHCR32_OFFSET)
-#define R_ADC_B_ADDOPCRA00                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRA00_OFFSET)
-#define R_ADC_B_ADDOPCRA01                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRA01_OFFSET)
-#define R_ADC_B_ADDOPCRA02                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRA02_OFFSET)
-#define R_ADC_B_ADDOPCRA03                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRA03_OFFSET)
-#define R_ADC_B_ADDOPCRA04                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRA04_OFFSET)
-#define R_ADC_B_ADDOPCRA05                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRA05_OFFSET)
-#define R_ADC_B_ADDOPCRA06                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRA06_OFFSET)
-#define R_ADC_B_ADDOPCRA07                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRA07_OFFSET)
-#define R_ADC_B_ADDOPCRA08                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRA08_OFFSET)
-#define R_ADC_B_ADDOPCRA09                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRA09_OFFSET)
-#define R_ADC_B_ADDOPCRA10                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRA10_OFFSET)
-#define R_ADC_B_ADDOPCRA11                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRA11_OFFSET)
-#define R_ADC_B_ADDOPCRA12                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRA12_OFFSET)
-#define R_ADC_B_ADDOPCRA13                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRA13_OFFSET)
-#define R_ADC_B_ADDOPCRA14                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRA14_OFFSET)
-#define R_ADC_B_ADDOPCRA15                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRA15_OFFSET)
-#define R_ADC_B_ADDOPCRA16                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRA16_OFFSET)
-#define R_ADC_B_ADDOPCRA17                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRA17_OFFSET)
-#define R_ADC_B_ADDOPCRA18                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRA18_OFFSET)
-#define R_ADC_B_ADDOPCRA19                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRA19_OFFSET)
-#define R_ADC_B_ADDOPCRA20                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRA20_OFFSET)
-#define R_ADC_B_ADDOPCRA21                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRA21_OFFSET)
-#define R_ADC_B_ADDOPCRA22                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRA22_OFFSET)
-#define R_ADC_B_ADDOPCRA23                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRA23_OFFSET)
-#define R_ADC_B_ADDOPCRA24                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRA24_OFFSET)
-#define R_ADC_B_ADDOPCRA25                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRA25_OFFSET)
-#define R_ADC_B_ADDOPCRA26                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRA26_OFFSET)
-#define R_ADC_B_ADDOPCRA27                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRA27_OFFSET)
-#define R_ADC_B_ADDOPCRA28                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRA28_OFFSET)
-#define R_ADC_B_ADDOPCRA29                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRA29_OFFSET)
-#define R_ADC_B_ADDOPCRA30                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRA30_OFFSET)
-#define R_ADC_B_ADDOPCRA31                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRA31_OFFSET)
-#define R_ADC_B_ADDOPCRA32                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRA32_OFFSET)
-#define R_ADC_B_ADDOPCRB00                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRB00_OFFSET)
-#define R_ADC_B_ADDOPCRB01                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRB01_OFFSET)
-#define R_ADC_B_ADDOPCRB02                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRB02_OFFSET)
-#define R_ADC_B_ADDOPCRB03                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRB03_OFFSET)
-#define R_ADC_B_ADDOPCRB04                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRB04_OFFSET)
-#define R_ADC_B_ADDOPCRB05                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRB05_OFFSET)
-#define R_ADC_B_ADDOPCRB06                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRB06_OFFSET)
-#define R_ADC_B_ADDOPCRB07                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRB07_OFFSET)
-#define R_ADC_B_ADDOPCRB08                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRB08_OFFSET)
-#define R_ADC_B_ADDOPCRB09                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRB09_OFFSET)
-#define R_ADC_B_ADDOPCRB10                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRB10_OFFSET)
-#define R_ADC_B_ADDOPCRB11                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRB11_OFFSET)
-#define R_ADC_B_ADDOPCRB12                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRB12_OFFSET)
-#define R_ADC_B_ADDOPCRB13                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRB13_OFFSET)
-#define R_ADC_B_ADDOPCRB14                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRB14_OFFSET)
-#define R_ADC_B_ADDOPCRB15                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRB15_OFFSET)
-#define R_ADC_B_ADDOPCRB16                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRB16_OFFSET)
-#define R_ADC_B_ADDOPCRB17                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRB17_OFFSET)
-#define R_ADC_B_ADDOPCRB18                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRB18_OFFSET)
-#define R_ADC_B_ADDOPCRB19                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRB19_OFFSET)
-#define R_ADC_B_ADDOPCRB20                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRB20_OFFSET)
-#define R_ADC_B_ADDOPCRB21                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRB21_OFFSET)
-#define R_ADC_B_ADDOPCRB22                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRB22_OFFSET)
-#define R_ADC_B_ADDOPCRB23                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRB23_OFFSET)
-#define R_ADC_B_ADDOPCRB24                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRB24_OFFSET)
-#define R_ADC_B_ADDOPCRB25                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRB25_OFFSET)
-#define R_ADC_B_ADDOPCRB26                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRB26_OFFSET)
-#define R_ADC_B_ADDOPCRB27                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRB27_OFFSET)
-#define R_ADC_B_ADDOPCRB28                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRB28_OFFSET)
-#define R_ADC_B_ADDOPCRB29                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRB29_OFFSET)
-#define R_ADC_B_ADDOPCRB30                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRB30_OFFSET)
-#define R_ADC_B_ADDOPCRB31                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRB31_OFFSET)
-#define R_ADC_B_ADDOPCRB32                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRB32_OFFSET)
-#define R_ADC_B_ADDOPCRC00                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRC00_OFFSET)
-#define R_ADC_B_ADDOPCRC01                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRC01_OFFSET)
-#define R_ADC_B_ADDOPCRC02                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRC02_OFFSET)
-#define R_ADC_B_ADDOPCRC03                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRC03_OFFSET)
-#define R_ADC_B_ADDOPCRC04                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRC04_OFFSET)
-#define R_ADC_B_ADDOPCRC05                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRC05_OFFSET)
-#define R_ADC_B_ADDOPCRC06                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRC06_OFFSET)
-#define R_ADC_B_ADDOPCRC07                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRC07_OFFSET)
-#define R_ADC_B_ADDOPCRC08                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRC08_OFFSET)
-#define R_ADC_B_ADDOPCRC09                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRC09_OFFSET)
-#define R_ADC_B_ADDOPCRC10                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRC10_OFFSET)
-#define R_ADC_B_ADDOPCRC11                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRC11_OFFSET)
-#define R_ADC_B_ADDOPCRC12                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRC12_OFFSET)
-#define R_ADC_B_ADDOPCRC13                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRC13_OFFSET)
-#define R_ADC_B_ADDOPCRC14                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRC14_OFFSET)
-#define R_ADC_B_ADDOPCRC15                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRC15_OFFSET)
-#define R_ADC_B_ADDOPCRC16                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRC16_OFFSET)
-#define R_ADC_B_ADDOPCRC17                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRC17_OFFSET)
-#define R_ADC_B_ADDOPCRC18                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRC18_OFFSET)
-#define R_ADC_B_ADDOPCRC19                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRC19_OFFSET)
-#define R_ADC_B_ADDOPCRC20                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRC20_OFFSET)
-#define R_ADC_B_ADDOPCRC21                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRC21_OFFSET)
-#define R_ADC_B_ADDOPCRC22                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRC22_OFFSET)
-#define R_ADC_B_ADDOPCRC23                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRC23_OFFSET)
-#define R_ADC_B_ADDOPCRC24                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRC24_OFFSET)
-#define R_ADC_B_ADDOPCRC25                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRC25_OFFSET)
-#define R_ADC_B_ADDOPCRC26                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRC26_OFFSET)
-#define R_ADC_B_ADDOPCRC27                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRC27_OFFSET)
-#define R_ADC_B_ADDOPCRC28                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRC28_OFFSET)
-#define R_ADC_B_ADDOPCRC29                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRC29_OFFSET)
-#define R_ADC_B_ADDOPCRC30                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRC30_OFFSET)
-#define R_ADC_B_ADDOPCRC31                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRC31_OFFSET)
-#define R_ADC_B_ADDOPCRC32                 (R_ADC_B_BASE + R_ADC_B_ADDOPCRC32_OFFSET)
-#define R_ADC_B_ADCALSTR                 (R_ADC_B_BASE + R_ADC_B_ADCALSTR_OFFSET)
-#define R_ADC_B_ADSHCSCR                 (R_ADC_B_BASE + R_ADC_B_ADSHCSCR_OFFSET)
-#define R_ADC_B_ADTRGENR                 (R_ADC_B_BASE + R_ADC_B_ADTRGENR_OFFSET)
-#define R_ADC_B_ADSYSTR                 (R_ADC_B_BASE + R_ADC_B_ADSYSTR_OFFSET)
-#define R_ADC_B_ADSTR0                 (R_ADC_B_BASE + R_ADC_B_ADSTR0_OFFSET)
-#define R_ADC_B_ADSTR1                 (R_ADC_B_BASE + R_ADC_B_ADSTR1_OFFSET)
-#define R_ADC_B_ADSTR2                 (R_ADC_B_BASE + R_ADC_B_ADSTR2_OFFSET)
-#define R_ADC_B_ADSTR3                 (R_ADC_B_BASE + R_ADC_B_ADSTR3_OFFSET)
-#define R_ADC_B_ADSTR4                 (R_ADC_B_BASE + R_ADC_B_ADSTR4_OFFSET)
-#define R_ADC_B_ADSTR5                 (R_ADC_B_BASE + R_ADC_B_ADSTR5_OFFSET)
-#define R_ADC_B_ADSTR6                 (R_ADC_B_BASE + R_ADC_B_ADSTR6_OFFSET)
-#define R_ADC_B_ADSTR7                 (R_ADC_B_BASE + R_ADC_B_ADSTR7_OFFSET)
-#define R_ADC_B_ADSTR8                 (R_ADC_B_BASE + R_ADC_B_ADSTR8_OFFSET)
-#define R_ADC_B_ADSTOPR                 (R_ADC_B_BASE + R_ADC_B_ADSTOPR_OFFSET)
-#define R_ADC_B_ADSR                 (R_ADC_B_BASE + R_ADC_B_ADSR_OFFSET)
-#define R_ADC_B_ADGRSR                 (R_ADC_B_BASE + R_ADC_B_ADGRSR_OFFSET)
-#define R_ADC_B_ADERSR                 (R_ADC_B_BASE + R_ADC_B_ADERSR_OFFSET)
-#define R_ADC_B_ADERSCR                 (R_ADC_B_BASE + R_ADC_B_ADERSCR_OFFSET)
-#define R_ADC_B_ADCALENDSR                 (R_ADC_B_BASE + R_ADC_B_ADCALENDSR_OFFSET)
-#define R_ADC_B_ADCALENDSCR                 (R_ADC_B_BASE + R_ADC_B_ADCALENDSCR_OFFSET)
-#define R_ADC_B_ADOVFERSR                 (R_ADC_B_BASE + R_ADC_B_ADOVFERSR_OFFSET)
-#define R_ADC_B_ADOVFCHSR0                 (R_ADC_B_BASE + R_ADC_B_ADOVFCHSR0_OFFSET)
-#define R_ADC_B_ADOVFEXSR                 (R_ADC_B_BASE + R_ADC_B_ADOVFEXSR_OFFSET)
-#define R_ADC_B_ADOVFERSCR                 (R_ADC_B_BASE + R_ADC_B_ADOVFERSCR_OFFSET)
-#define R_ADC_B_ADOVFCHSCR0                 (R_ADC_B_BASE + R_ADC_B_ADOVFCHSCR0_OFFSET)
-#define R_ADC_B_ADOVFEXSCR                 (R_ADC_B_BASE + R_ADC_B_ADOVFEXSCR_OFFSET)
-#define R_ADC_B_ADFIFOSR0                 (R_ADC_B_BASE + R_ADC_B_ADFIFOSR0_OFFSET)
-#define R_ADC_B_ADFIFOSR1                 (R_ADC_B_BASE + R_ADC_B_ADFIFOSR1_OFFSET)
-#define R_ADC_B_ADFIFOSR2                 (R_ADC_B_BASE + R_ADC_B_ADFIFOSR2_OFFSET)
-#define R_ADC_B_ADFIFOSR3                 (R_ADC_B_BASE + R_ADC_B_ADFIFOSR3_OFFSET)
-#define R_ADC_B_ADFIFOSR4                 (R_ADC_B_BASE + R_ADC_B_ADFIFOSR4_OFFSET)
-#define R_ADC_B_ADFIFODCR                 (R_ADC_B_BASE + R_ADC_B_ADFIFODCR_OFFSET)
-#define R_ADC_B_ADFIFOERSR                 (R_ADC_B_BASE + R_ADC_B_ADFIFOERSR_OFFSET)
-#define R_ADC_B_ADFIFOERSCR                 (R_ADC_B_BASE + R_ADC_B_ADFIFOERSCR_OFFSET)
-#define R_ADC_B_ADCMPTBSR                 (R_ADC_B_BASE + R_ADC_B_ADCMPTBSR_OFFSET)
-#define R_ADC_B_ADCMPTBSCR                 (R_ADC_B_BASE + R_ADC_B_ADCMPTBSCR_OFFSET)
-#define R_ADC_B_ADCMPCHSR0                 (R_ADC_B_BASE + R_ADC_B_ADCMPCHSR0_OFFSET)
-#define R_ADC_B_ADCMPEXSR                 (R_ADC_B_BASE + R_ADC_B_ADCMPEXSR_OFFSET)
-#define R_ADC_B_ADCMPCHSCR0                 (R_ADC_B_BASE + R_ADC_B_ADCMPCHSCR0_OFFSET)
-#define R_ADC_B_ADCMPEXSCR                 (R_ADC_B_BASE + R_ADC_B_ADCMPEXSCR_OFFSET)
-#define R_ADC_B_ADLIMGRSR                 (R_ADC_B_BASE + R_ADC_B_ADLIMGRSR_OFFSET)
-#define R_ADC_B_ADLIMCHSR0                 (R_ADC_B_BASE + R_ADC_B_ADLIMCHSR0_OFFSET)
-#define R_ADC_B_ADLIMEXSR                 (R_ADC_B_BASE + R_ADC_B_ADLIMEXSR_OFFSET)
-#define R_ADC_B_ADLIMGRSCR                 (R_ADC_B_BASE + R_ADC_B_ADLIMGRSCR_OFFSET)
-#define R_ADC_B_ADLIMCHSCR0                 (R_ADC_B_BASE + R_ADC_B_ADLIMCHSCR0_OFFSET)
-#define R_ADC_B_ADLIMEXSCR                 (R_ADC_B_BASE + R_ADC_B_ADLIMEXSCR_OFFSET)
-#define R_ADC_B_ADSCANENDSR                 (R_ADC_B_BASE + R_ADC_B_ADSCANENDSR_OFFSET)
-#define R_ADC_B_ADSCANENDSCR                 (R_ADC_B_BASE + R_ADC_B_ADSCANENDSCR_OFFSET)
-#define R_ADC_B_ADDR00                 (R_ADC_B_BASE + R_ADC_B_ADDR00_OFFSET)
-#define R_ADC_B_ADDR01                 (R_ADC_B_BASE + R_ADC_B_ADDR01_OFFSET)
-#define R_ADC_B_ADDR02                 (R_ADC_B_BASE + R_ADC_B_ADDR02_OFFSET)
-#define R_ADC_B_ADDR03                 (R_ADC_B_BASE + R_ADC_B_ADDR03_OFFSET)
-#define R_ADC_B_ADDR04                 (R_ADC_B_BASE + R_ADC_B_ADDR04_OFFSET)
-#define R_ADC_B_ADDR05                 (R_ADC_B_BASE + R_ADC_B_ADDR05_OFFSET)
-#define R_ADC_B_ADDR06                 (R_ADC_B_BASE + R_ADC_B_ADDR06_OFFSET)
-#define R_ADC_B_ADDR07                 (R_ADC_B_BASE + R_ADC_B_ADDR07_OFFSET)
-#define R_ADC_B_ADDR08                 (R_ADC_B_BASE + R_ADC_B_ADDR08_OFFSET)
-#define R_ADC_B_ADDR09                 (R_ADC_B_BASE + R_ADC_B_ADDR09_OFFSET)
-#define R_ADC_B_ADDR10                 (R_ADC_B_BASE + R_ADC_B_ADDR10_OFFSET)
-#define R_ADC_B_ADDR11                 (R_ADC_B_BASE + R_ADC_B_ADDR11_OFFSET)
-#define R_ADC_B_ADDR12                 (R_ADC_B_BASE + R_ADC_B_ADDR12_OFFSET)
-#define R_ADC_B_ADDR13                 (R_ADC_B_BASE + R_ADC_B_ADDR13_OFFSET)
-#define R_ADC_B_ADDR14                 (R_ADC_B_BASE + R_ADC_B_ADDR14_OFFSET)
-#define R_ADC_B_ADDR15                 (R_ADC_B_BASE + R_ADC_B_ADDR15_OFFSET)
-#define R_ADC_B_ADDR16                 (R_ADC_B_BASE + R_ADC_B_ADDR16_OFFSET)
-#define R_ADC_B_ADDR17                 (R_ADC_B_BASE + R_ADC_B_ADDR17_OFFSET)
-#define R_ADC_B_ADDR18                 (R_ADC_B_BASE + R_ADC_B_ADDR18_OFFSET)
-#define R_ADC_B_ADDR19                 (R_ADC_B_BASE + R_ADC_B_ADDR19_OFFSET)
-#define R_ADC_B_ADDR20                 (R_ADC_B_BASE + R_ADC_B_ADDR20_OFFSET)
-#define R_ADC_B_ADDR21                 (R_ADC_B_BASE + R_ADC_B_ADDR21_OFFSET)
-#define R_ADC_B_ADDR22                 (R_ADC_B_BASE + R_ADC_B_ADDR22_OFFSET)
-#define R_ADC_B_ADFIFODR0                 (R_ADC_B_BASE + R_ADC_B_ADFIFODR0_OFFSET)
-#define R_ADC_B_ADFIFODR1                 (R_ADC_B_BASE + R_ADC_B_ADFIFODR1_OFFSET)
-#define R_ADC_B_ADFIFODR2                 (R_ADC_B_BASE + R_ADC_B_ADFIFODR2_OFFSET)
-#define R_ADC_B_ADFIFODR3                 (R_ADC_B_BASE + R_ADC_B_ADFIFODR3_OFFSET)
-#define R_ADC_B_ADFIFODR4                 (R_ADC_B_BASE + R_ADC_B_ADFIFODR4_OFFSET)
-#define R_ADC_B_ADFIFODR5                 (R_ADC_B_BASE + R_ADC_B_ADFIFODR5_OFFSET)
-#define R_ADC_B_ADFIFODR6                 (R_ADC_B_BASE + R_ADC_B_ADFIFODR6_OFFSET)
-#define R_ADC_B_ADFIFODR7                 (R_ADC_B_BASE + R_ADC_B_ADFIFODR7_OFFSET)
-#define R_ADC_B_ADFIFODR8                 (R_ADC_B_BASE + R_ADC_B_ADFIFODR8_OFFSET)
+#define R_ADC_B_ADCLKENR                          (R_ADC_B_BASE + R_ADC_B_ADCLKENR_OFFSET)
+#define R_ADC_B_ADCLKSR                           (R_ADC_B_BASE + R_ADC_B_ADCLKSR_OFFSET)
+#define R_ADC_B_ADCLKCR                           (R_ADC_B_BASE + R_ADC_B_ADCLKCR_OFFSET)
+#define R_ADC_B_ADSYCR                            (R_ADC_B_BASE + R_ADC_B_ADSYCR_OFFSET)
+#define R_ADC_B_ADUSLPCR0                         (R_ADC_B_BASE + R_ADC_B_ADUSLPCR0_OFFSET)
+#define R_ADC_B_ADUSLPCR1                         (R_ADC_B_BASE + R_ADC_B_ADUSLPCR1_OFFSET)
+#define R_ADC_B_ADERINTCR                         (R_ADC_B_BASE + R_ADC_B_ADERINTCR_OFFSET)
+#define R_ADC_B_ADOVFINTCR                        (R_ADC_B_BASE + R_ADC_B_ADOVFINTCR_OFFSET)
+#define R_ADC_B_ADCALINTCR                        (R_ADC_B_BASE + R_ADC_B_ADCALINTCR_OFFSET)
+#define R_ADC_B_ADMDR                             (R_ADC_B_BASE + R_ADC_B_ADMDR_OFFSET)
+#define R_ADC_B_ADGSPCR                           (R_ADC_B_BASE + R_ADC_B_ADGSPCR_OFFSET)
+#define R_ADC_B_ADSGER                            (R_ADC_B_BASE + R_ADC_B_ADSGER_OFFSET)
+#define R_ADC_B_ADSGCR0                           (R_ADC_B_BASE + R_ADC_B_ADSGCR0_OFFSET)
+#define R_ADC_B_ADSGCR1                           (R_ADC_B_BASE + R_ADC_B_ADSGCR1_OFFSET)
+#define R_ADC_B_ADSGCR2                           (R_ADC_B_BASE + R_ADC_B_ADSGCR2_OFFSET)
+#define R_ADC_B_ADINTCR                           (R_ADC_B_BASE + R_ADC_B_ADINTCR_OFFSET)
+#define R_ADC_B_ADSWNR0                           (R_ADC_B_BASE + R_ADC_B_ADSWNR0_OFFSET)
+#define R_ADC_B_ADSWNR1                           (R_ADC_B_BASE + R_ADC_B_ADSWNR1_OFFSET)
+#define R_ADC_B_ADDECCR                           (R_ADC_B_BASE + R_ADC_B_ADDECCR_OFFSET)
+#define R_ADC_B_ADACMDR                           (R_ADC_B_BASE + R_ADC_B_ADACMDR_OFFSET)
+#define R_ADC_B_ADTRGEXT(m)                       (R_ADC_B_BASE + R_ADC_B_ADTRGEXT_OFFSET(m))
+#define R_ADC_B_ADTRGELC(m)                       (R_ADC_B_BASE + R_ADC_B_ADTRGELC_OFFSET(m))
+#define R_ADC_B_ADTRGGPT(m)                       (R_ADC_B_BASE + R_ADC_B_ADTRGGPT_OFFSET(m))
+#define R_ADC_B_ADTRGDLR0                         (R_ADC_B_BASE + R_ADC_B_ADTRGDLR0_OFFSET)
+#define R_ADC_B_ADTRGDLR1                         (R_ADC_B_BASE + R_ADC_B_ADTRGDLR1_OFFSET)
+#define R_ADC_B_ADTRGDLR2                         (R_ADC_B_BASE + R_ADC_B_ADTRGDLR2_OFFSET)
+#define R_ADC_B_ADTRGDLR3                         (R_ADC_B_BASE + R_ADC_B_ADTRGDLR3_OFFSET)
+#define R_ADC_B_ADTRGDLR4                         (R_ADC_B_BASE + R_ADC_B_ADTRGDLR4_OFFSET)
+#define R_ADC_B_ADSGDCR(m)                        (R_ADC_B_BASE + R_ADC_B_ADSGDCR_OFFSET(m))
+#define R_ADC_B_ADSSTR0                           (R_ADC_B_BASE + R_ADC_B_ADSSTR0_OFFSET)
+#define R_ADC_B_ADSSTR1                           (R_ADC_B_BASE + R_ADC_B_ADSSTR1_OFFSET)
+#define R_ADC_B_ADSSTR2                           (R_ADC_B_BASE + R_ADC_B_ADSSTR2_OFFSET)
+#define R_ADC_B_ADSSTR3                           (R_ADC_B_BASE + R_ADC_B_ADSSTR3_OFFSET)
+#define R_ADC_B_ADSSTR4                           (R_ADC_B_BASE + R_ADC_B_ADSSTR4_OFFSET)
+#define R_ADC_B_ADSSTR5                           (R_ADC_B_BASE + R_ADC_B_ADSSTR5_OFFSET)
+#define R_ADC_B_ADSSTR6                           (R_ADC_B_BASE + R_ADC_B_ADSSTR6_OFFSET)
+#define R_ADC_B_ADSSTR7                           (R_ADC_B_BASE + R_ADC_B_ADSSTR7_OFFSET)
+#define R_ADC_B_ADCNVSTR                          (R_ADC_B_BASE + R_ADC_B_ADCNVSTR_OFFSET)
+#define R_ADC_B_ADCALSTCR                         (R_ADC_B_BASE + R_ADC_B_ADCALSTCR_OFFSET)
+#define R_ADC_B_ADSHCR0                           (R_ADC_B_BASE + R_ADC_B_ADSHCR0_OFFSET)
+#define R_ADC_B_ADSHDCR0                          (R_ADC_B_BASE + R_ADC_B_ADSHDCR0_OFFSET)
+#define R_ADC_B_ADSHSTR0                          (R_ADC_B_BASE + R_ADC_B_ADSHSTR0_OFFSET)
+#define R_ADC_B_ADSHCR1                           (R_ADC_B_BASE + R_ADC_B_ADSHCR1_OFFSET)
+#define R_ADC_B_ADSHDCR1                          (R_ADC_B_BASE + R_ADC_B_ADSHDCR1_OFFSET)
+#define R_ADC_B_ADSHSTR1                          (R_ADC_B_BASE + R_ADC_B_ADSHSTR1_OFFSET)
+#define R_ADC_B_ADCALSHCR                         (R_ADC_B_BASE + R_ADC_B_ADCALSHCR_OFFSET)
+#define R_ADC_B_ADSHSBPCR                         (R_ADC_B_BASE + R_ADC_B_ADSHSBPCR_OFFSET)
+#define R_ADC_B_ADSHDBPCR                         (R_ADC_B_BASE + R_ADC_B_ADSHDBPCR_OFFSET)
+#define R_ADC_B_ADSHSDCR0                         (R_ADC_B_BASE + R_ADC_B_ADSHSDCR0_OFFSET)
+#define R_ADC_B_ADSHSDCR1                         (R_ADC_B_BASE + R_ADC_B_ADSHSDCR1_OFFSET)
+#define R_ADC_B_ADREFCR                           (R_ADC_B_BASE + R_ADC_B_ADREFCR_OFFSET)
+#define R_ADC_B_ADDFSR(m)                         (R_ADC_B_BASE + R_ADC_B_ADDFSR_OFFSET(m))
+#define R_ADC_B_ADUOFTR(m)                        (R_ADC_B_BASE + R_ADC_B_ADUOFTR_OFFSET(m))
+#define R_ADC_B_ADUGTR(m)                         (R_ADC_B_BASE + R_ADC_B_ADUGTR_OFFSET(m))
+#define R_ADC_B_ADLIMINTCR                        (R_ADC_B_BASE + R_ADC_B_ADLIMINTCR_OFFSET)
+#define R_ADC_B_ADLIMTR(m)                        (R_ADC_B_BASE + R_ADC_B_ADLIMTR_OFFSET(m))
+#define R_ADC_B_ADCMPENR                          (R_ADC_B_BASE + R_ADC_B_ADCMPENR_OFFSET)
+#define R_ADC_B_ADCMPINTCR                        (R_ADC_B_BASE + R_ADC_B_ADCMPINTCR_OFFSET)
+#define R_ADC_B_ADCCMPCR(m)                       (R_ADC_B_BASE + R_ADC_B_ADCCMPCR_OFFSET(m))
+#define R_ADC_B_ADCMPMDR0                         (R_ADC_B_BASE + R_ADC_B_ADCMPMDR0_OFFSET)
+#define R_ADC_B_ADCMPMDR1                         (R_ADC_B_BASE + R_ADC_B_ADCMPMDR1_OFFSET)
+#define R_ADC_B_ADCMPTBR(m)                       (R_ADC_B_BASE + R_ADC_B_ADCMPTBR_OFFSET(m))
+#define R_ADC_B_ADFIFOCR                          (R_ADC_B_BASE + R_ADC_B_ADFIFOCR_OFFSET)
+#define R_ADC_B_ADFIFOINTCR                       (R_ADC_B_BASE + R_ADC_B_ADFIFOINTCR_OFFSET)
+#define R_ADC_B_ADFIFOINTLR0                      (R_ADC_B_BASE + R_ADC_B_ADFIFOINTLR0_OFFSET)
+#define R_ADC_B_ADFIFOINTLR1                      (R_ADC_B_BASE + R_ADC_B_ADFIFOINTLR1_OFFSET)
+#define R_ADC_B_ADFIFOINTLR2                      (R_ADC_B_BASE + R_ADC_B_ADFIFOINTLR2_OFFSET)
+#define R_ADC_B_ADFIFOINTLR3                      (R_ADC_B_BASE + R_ADC_B_ADFIFOINTLR3_OFFSET)
+#define R_ADC_B_ADFIFOINTLR4                      (R_ADC_B_BASE + R_ADC_B_ADFIFOINTLR4_OFFSET)
+#define R_ADC_B_ADCHCR(m)                         (R_ADC_B_BASE + R_ADC_B_ADCHCR_OFFSET(m))
+#define R_ADC_B_ADDOPCRA(m)                       (R_ADC_B_BASE + R_ADC_B_ADDOPCRA_OFFSET(m))
+#define R_ADC_B_ADDOPCRB(m)                       (R_ADC_B_BASE + R_ADC_B_ADDOPCRB_OFFSET(m))
+#define R_ADC_B_ADDOPCRC(m)                       (R_ADC_B_BASE + R_ADC_B_ADDOPCRC_OFFSET(m))
+#define R_ADC_B_ADCALSTR                          (R_ADC_B_BASE + R_ADC_B_ADCALSTR_OFFSET)
+#define R_ADC_B_ADSHCSCR                          (R_ADC_B_BASE + R_ADC_B_ADSHCSCR_OFFSET)
+#define R_ADC_B_ADTRGENR                          (R_ADC_B_BASE + R_ADC_B_ADTRGENR_OFFSET)
+#define R_ADC_B_ADSYSTR                           (R_ADC_B_BASE + R_ADC_B_ADSYSTR_OFFSET)
+#define R_ADC_B_ADSTR(m)                          (R_ADC_B_BASE + R_ADC_B_ADSTR_OFFSET(m))
+#define R_ADC_B_ADSTOPR                           (R_ADC_B_BASE + R_ADC_B_ADSTOPR_OFFSET)
+#define R_ADC_B_ADSR                              (R_ADC_B_BASE + R_ADC_B_ADSR_OFFSET)
+#define R_ADC_B_ADGRSR                            (R_ADC_B_BASE + R_ADC_B_ADGRSR_OFFSET)
+#define R_ADC_B_ADERSR                            (R_ADC_B_BASE + R_ADC_B_ADERSR_OFFSET)
+#define R_ADC_B_ADERSCR                           (R_ADC_B_BASE + R_ADC_B_ADERSCR_OFFSET)
+#define R_ADC_B_ADCALENDSR                        (R_ADC_B_BASE + R_ADC_B_ADCALENDSR_OFFSET)
+#define R_ADC_B_ADCALENDSCR                       (R_ADC_B_BASE + R_ADC_B_ADCALENDSCR_OFFSET)
+#define R_ADC_B_ADOVFERSR                         (R_ADC_B_BASE + R_ADC_B_ADOVFERSR_OFFSET)
+#define R_ADC_B_ADOVFCHSR0                        (R_ADC_B_BASE + R_ADC_B_ADOVFCHSR0_OFFSET)
+#define R_ADC_B_ADOVFEXSR                         (R_ADC_B_BASE + R_ADC_B_ADOVFEXSR_OFFSET)
+#define R_ADC_B_ADOVFERSCR                        (R_ADC_B_BASE + R_ADC_B_ADOVFERSCR_OFFSET)
+#define R_ADC_B_ADOVFCHSCR0                       (R_ADC_B_BASE + R_ADC_B_ADOVFCHSCR0_OFFSET)
+#define R_ADC_B_ADOVFEXSCR                        (R_ADC_B_BASE + R_ADC_B_ADOVFEXSCR_OFFSET)
+#define R_ADC_B_ADFIFOSR0                         (R_ADC_B_BASE + R_ADC_B_ADFIFOSR0_OFFSET)
+#define R_ADC_B_ADFIFOSR1                         (R_ADC_B_BASE + R_ADC_B_ADFIFOSR1_OFFSET)
+#define R_ADC_B_ADFIFOSR2                         (R_ADC_B_BASE + R_ADC_B_ADFIFOSR2_OFFSET)
+#define R_ADC_B_ADFIFOSR3                         (R_ADC_B_BASE + R_ADC_B_ADFIFOSR3_OFFSET)
+#define R_ADC_B_ADFIFOSR4                         (R_ADC_B_BASE + R_ADC_B_ADFIFOSR4_OFFSET)
+#define R_ADC_B_ADFIFODCR                         (R_ADC_B_BASE + R_ADC_B_ADFIFODCR_OFFSET)
+#define R_ADC_B_ADFIFOERSR                        (R_ADC_B_BASE + R_ADC_B_ADFIFOERSR_OFFSET)
+#define R_ADC_B_ADFIFOERSCR                       (R_ADC_B_BASE + R_ADC_B_ADFIFOERSCR_OFFSET)
+#define R_ADC_B_ADCMPTBSR                         (R_ADC_B_BASE + R_ADC_B_ADCMPTBSR_OFFSET)
+#define R_ADC_B_ADCMPTBSCR                        (R_ADC_B_BASE + R_ADC_B_ADCMPTBSCR_OFFSET)
+#define R_ADC_B_ADCMPCHSR0                        (R_ADC_B_BASE + R_ADC_B_ADCMPCHSR0_OFFSET)
+#define R_ADC_B_ADCMPEXSR                         (R_ADC_B_BASE + R_ADC_B_ADCMPEXSR_OFFSET)
+#define R_ADC_B_ADCMPCHSCR0                       (R_ADC_B_BASE + R_ADC_B_ADCMPCHSCR0_OFFSET)
+#define R_ADC_B_ADCMPEXSCR                        (R_ADC_B_BASE + R_ADC_B_ADCMPEXSCR_OFFSET)
+#define R_ADC_B_ADLIMGRSR                         (R_ADC_B_BASE + R_ADC_B_ADLIMGRSR_OFFSET)
+#define R_ADC_B_ADLIMCHSR0                        (R_ADC_B_BASE + R_ADC_B_ADLIMCHSR0_OFFSET)
+#define R_ADC_B_ADLIMEXSR                         (R_ADC_B_BASE + R_ADC_B_ADLIMEXSR_OFFSET)
+#define R_ADC_B_ADLIMGRSCR                        (R_ADC_B_BASE + R_ADC_B_ADLIMGRSCR_OFFSET)
+#define R_ADC_B_ADLIMCHSCR0                       (R_ADC_B_BASE + R_ADC_B_ADLIMCHSCR0_OFFSET)
+#define R_ADC_B_ADLIMEXSCR                        (R_ADC_B_BASE + R_ADC_B_ADLIMEXSCR_OFFSET)
+#define R_ADC_B_ADSCANENDSR                       (R_ADC_B_BASE + R_ADC_B_ADSCANENDSR_OFFSET)
+#define R_ADC_B_ADSCANENDSCR                      (R_ADC_B_BASE + R_ADC_B_ADSCANENDSCR_OFFSET)
+#define R_ADC_B_ADDR(m)                           (R_ADC_B_BASE + R_ADC_B_ADDR_OFFSET(m))
+#define R_ADC_B_ADFIFODR(m)                       (R_ADC_B_BASE + R_ADC_B_ADFIFODR_OFFSET(m))
 
 /* Register bit definitions */
 /* ADCLKENR Register bit definitions */
@@ -807,26 +347,26 @@
 #define R_ADC_B_ADMDR_ADMD0_SHIFT                 (0)  /* ADC0 Mode Selection */
 #define R_ADC_B_ADMDR_ADMD0_MASK                  0xf
 #  define R_ADC_B_ADMDR_ADMD0_0X0                         (0 << R_ADC_B_ADMDR_ADMD0_SHIFT)  /* SAR mode – Single scan mode */
-#  define R_ADC_B_ADMDR_ADMD0_0X1                         (0 << R_ADC_B_ADMDR_ADMD0_SHIFT)  /* SAR mode – Continuous scan mode */
-#  define R_ADC_B_ADMDR_ADMD0_0X4                         (0 << R_ADC_B_ADMDR_ADMD0_SHIFT)  /* Oversampling mode – Single scan mode */
-#  define R_ADC_B_ADMDR_ADMD0_0X5                         (0 << R_ADC_B_ADMDR_ADMD0_SHIFT)  /* Oversampling mode – Continuous scan mode */
-#  define R_ADC_B_ADMDR_ADMD0_0X6                         (0 << R_ADC_B_ADMDR_ADMD0_SHIFT)  /* Oversampling mode – One-channel continuous scan mode */
-#  define R_ADC_B_ADMDR_ADMD0_0X8                         (0 << R_ADC_B_ADMDR_ADMD0_SHIFT)  /* Hybrid mode – Single scan mode */
-#  define R_ADC_B_ADMDR_ADMD0_0X9                         (0 << R_ADC_B_ADMDR_ADMD0_SHIFT)  /* Hybrid mode – Continuous scan mode */
-#  define R_ADC_B_ADMDR_ADMD0_0XA                         (0 << R_ADC_B_ADMDR_ADMD0_SHIFT)  /* Hybrid mode – Background continuous scan mode */
-#  define R_ADC_B_ADMDR_ADMD0_0XB                         (0 << R_ADC_B_ADMDR_ADMD0_SHIFT)  /* Hybrid mode – Fixed-channel continuous scan mode */
+#  define R_ADC_B_ADMDR_ADMD0_0X1                         (1 << R_ADC_B_ADMDR_ADMD0_SHIFT)  /* SAR mode – Continuous scan mode */
+#  define R_ADC_B_ADMDR_ADMD0_0X4                         (4 << R_ADC_B_ADMDR_ADMD0_SHIFT)  /* Oversampling mode – Single scan mode */
+#  define R_ADC_B_ADMDR_ADMD0_0X5                         (5 << R_ADC_B_ADMDR_ADMD0_SHIFT)  /* Oversampling mode – Continuous scan mode */
+#  define R_ADC_B_ADMDR_ADMD0_0X6                         (6 << R_ADC_B_ADMDR_ADMD0_SHIFT)  /* Oversampling mode – One-channel continuous scan mode */
+#  define R_ADC_B_ADMDR_ADMD0_0X8                         (8 << R_ADC_B_ADMDR_ADMD0_SHIFT)  /* Hybrid mode – Single scan mode */
+#  define R_ADC_B_ADMDR_ADMD0_0X9                         (9 << R_ADC_B_ADMDR_ADMD0_SHIFT)  /* Hybrid mode – Continuous scan mode */
+#  define R_ADC_B_ADMDR_ADMD0_0XA                         (10 << R_ADC_B_ADMDR_ADMD0_SHIFT)  /* Hybrid mode – Background continuous scan mode */
+#  define R_ADC_B_ADMDR_ADMD0_0XB                         (11 << R_ADC_B_ADMDR_ADMD0_SHIFT)  /* Hybrid mode – Fixed-channel continuous scan mode */
 
 #define R_ADC_B_ADMDR_ADMD1_SHIFT                 (8)  /* ADC1 Mode Selection */
 #define R_ADC_B_ADMDR_ADMD1_MASK                  0xf00
 #  define R_ADC_B_ADMDR_ADMD1_0X0                         (0 << R_ADC_B_ADMDR_ADMD1_SHIFT)  /* SAR mode – Single scan mode */
-#  define R_ADC_B_ADMDR_ADMD1_0X1                         (0 << R_ADC_B_ADMDR_ADMD1_SHIFT)  /* SAR mode – Continuous scan mode */
-#  define R_ADC_B_ADMDR_ADMD1_0X4                         (0 << R_ADC_B_ADMDR_ADMD1_SHIFT)  /* Oversampling mode – Single scan mode */
-#  define R_ADC_B_ADMDR_ADMD1_0X5                         (0 << R_ADC_B_ADMDR_ADMD1_SHIFT)  /* Oversampling mode – Continuous scan mode */
-#  define R_ADC_B_ADMDR_ADMD1_0X6                         (0 << R_ADC_B_ADMDR_ADMD1_SHIFT)  /* Oversampling mode – One-channel continuous scan mode */
-#  define R_ADC_B_ADMDR_ADMD1_0X8                         (0 << R_ADC_B_ADMDR_ADMD1_SHIFT)  /* Hybrid mode – Single scan mode */
-#  define R_ADC_B_ADMDR_ADMD1_0X9                         (0 << R_ADC_B_ADMDR_ADMD1_SHIFT)  /* Hybrid mode – Continuous scan mode */
-#  define R_ADC_B_ADMDR_ADMD1_0XA                         (0 << R_ADC_B_ADMDR_ADMD1_SHIFT)  /* Hybrid mode – Background continuous scan mode */
-#  define R_ADC_B_ADMDR_ADMD1_0XB                         (0 << R_ADC_B_ADMDR_ADMD1_SHIFT)  /* Hybrid mode – Fixed-channel continuous scan mode */
+#  define R_ADC_B_ADMDR_ADMD1_0X1                         (1 << R_ADC_B_ADMDR_ADMD1_SHIFT)  /* SAR mode – Continuous scan mode */
+#  define R_ADC_B_ADMDR_ADMD1_0X4                         (4 << R_ADC_B_ADMDR_ADMD1_SHIFT)  /* Oversampling mode – Single scan mode */
+#  define R_ADC_B_ADMDR_ADMD1_0X5                         (5 << R_ADC_B_ADMDR_ADMD1_SHIFT)  /* Oversampling mode – Continuous scan mode */
+#  define R_ADC_B_ADMDR_ADMD1_0X6                         (6 << R_ADC_B_ADMDR_ADMD1_SHIFT)  /* Oversampling mode – One-channel continuous scan mode */
+#  define R_ADC_B_ADMDR_ADMD1_0X8                         (8 << R_ADC_B_ADMDR_ADMD1_SHIFT)  /* Hybrid mode – Single scan mode */
+#  define R_ADC_B_ADMDR_ADMD1_0X9                         (9 << R_ADC_B_ADMDR_ADMD1_SHIFT)  /* Hybrid mode – Continuous scan mode */
+#  define R_ADC_B_ADMDR_ADMD1_0XA                         (10 << R_ADC_B_ADMDR_ADMD1_SHIFT)  /* Hybrid mode – Background continuous scan mode */
+#  define R_ADC_B_ADMDR_ADMD1_0XB                         (11 << R_ADC_B_ADMDR_ADMD1_SHIFT)  /* Hybrid mode – Fixed-channel continuous scan mode */
 
 /* ADGSPCR Register bit definitions */
 #define R_ADC_B_ADGSPCR_PGS0                      (1 << 0)  /* ADC0 Group Priority Control Setting */
@@ -947,13 +487,13 @@
 #define R_ADC_B_ADSWNR0_SWFIX_SHIFT               (16)  /* Fixed channel Number */
 #define R_ADC_B_ADSWNR0_SWFIX_MASK                0x30000
 #  define R_ADC_B_ADSWNR0_SWFIX_0X0                       (0 << R_ADC_B_ADSWNR0_SWFIX_SHIFT)  /* 1 fixed channel */
-#  define R_ADC_B_ADSWNR0_SWFIX_0X1                       (0 << R_ADC_B_ADSWNR0_SWFIX_SHIFT)  /* 2 fixed channels */
-#  define R_ADC_B_ADSWNR0_SWFIX_0X2                       (0 << R_ADC_B_ADSWNR0_SWFIX_SHIFT)  /* 3 fixed channels */
-#  define R_ADC_B_ADSWNR0_SWFIX_0X3                       (0 << R_ADC_B_ADSWNR0_SWFIX_SHIFT)  /* Setting prohibited */
+#  define R_ADC_B_ADSWNR0_SWFIX_0X1                       (1 << R_ADC_B_ADSWNR0_SWFIX_SHIFT)  /* 2 fixed channels */
+#  define R_ADC_B_ADSWNR0_SWFIX_0X2                       (2 << R_ADC_B_ADSWNR0_SWFIX_SHIFT)  /* 3 fixed channels */
+#  define R_ADC_B_ADSWNR0_SWFIX_0X3                       (3 << R_ADC_B_ADSWNR0_SWFIX_SHIFT)  /* Setting prohibited */
 
 #define R_ADC_B_ADSWNR0_SWNOFIX_SHIFT             (24)  /* Non-Fixed Channel Number */
 #define R_ADC_B_ADSWNR0_SWNOFIX_MASK              0x7000000
-#  define R_ADC_B_ADSWNR0_SWNOFIX_0X1                     (0 << R_ADC_B_ADSWNR0_SWNOFIX_SHIFT)  /* 1 channels */
+#  define R_ADC_B_ADSWNR0_SWNOFIX_0X1                     (1 << R_ADC_B_ADSWNR0_SWNOFIX_SHIFT)  /* 1 channels */
 
 /* ADSWNR1 Register bit definitions */
 #define R_ADC_B_ADSWNR1_SWNUM_SHIFT               (0)  /* Sweep Conversion Channel Number per scan */
@@ -965,26 +505,26 @@
 #define R_ADC_B_ADSWNR1_SWFIX_SHIFT               (16)  /* Fixed channel Number */
 #define R_ADC_B_ADSWNR1_SWFIX_MASK                0x30000
 #  define R_ADC_B_ADSWNR1_SWFIX_0X0                       (0 << R_ADC_B_ADSWNR1_SWFIX_SHIFT)  /* 1 fixed channel */
-#  define R_ADC_B_ADSWNR1_SWFIX_0X1                       (0 << R_ADC_B_ADSWNR1_SWFIX_SHIFT)  /* 2 fixed channels */
-#  define R_ADC_B_ADSWNR1_SWFIX_0X2                       (0 << R_ADC_B_ADSWNR1_SWFIX_SHIFT)  /* 3 fixed channels */
-#  define R_ADC_B_ADSWNR1_SWFIX_0X3                       (0 << R_ADC_B_ADSWNR1_SWFIX_SHIFT)  /* Setting prohibited */
+#  define R_ADC_B_ADSWNR1_SWFIX_0X1                       (1 << R_ADC_B_ADSWNR1_SWFIX_SHIFT)  /* 2 fixed channels */
+#  define R_ADC_B_ADSWNR1_SWFIX_0X2                       (2 << R_ADC_B_ADSWNR1_SWFIX_SHIFT)  /* 3 fixed channels */
+#  define R_ADC_B_ADSWNR1_SWFIX_0X3                       (3 << R_ADC_B_ADSWNR1_SWFIX_SHIFT)  /* Setting prohibited */
 
 #define R_ADC_B_ADSWNR1_SWNOFIX_SHIFT             (24)  /* Non-Fixed Channel Number */
 #define R_ADC_B_ADSWNR1_SWNOFIX_MASK              0x7000000
-#  define R_ADC_B_ADSWNR1_SWNOFIX_0X1                     (0 << R_ADC_B_ADSWNR1_SWNOFIX_SHIFT)  /* 1 channels */
+#  define R_ADC_B_ADSWNR1_SWNOFIX_0X1                     (1 << R_ADC_B_ADSWNR1_SWNOFIX_SHIFT)  /* 1 channels */
 
 /* ADDECCR Register bit definitions */
 #define R_ADC_B_ADDECCR_DCIM0_SHIFT               (0)  /* One-channel continuous scan mode output decimation setting for A/D converter unit 0 */
 #define R_ADC_B_ADDECCR_DCIM0_MASK                0x1f
 #  define R_ADC_B_ADDECCR_DCIM0_0X0                       (0 << R_ADC_B_ADDECCR_DCIM0_SHIFT)  /* No decimation */
-#  define R_ADC_B_ADDECCR_DCIM0_0X3                       (0 << R_ADC_B_ADDECCR_DCIM0_SHIFT)  /* Output data once for every 4 conversions (thinned 3 times) */
-#  define R_ADC_B_ADDECCR_DCIM0_0X7                       (0 << R_ADC_B_ADDECCR_DCIM0_SHIFT)  /* Output data once for every 8 conversions (thinned out 7 times) */
+#  define R_ADC_B_ADDECCR_DCIM0_0X3                       (3 << R_ADC_B_ADDECCR_DCIM0_SHIFT)  /* Output data once for every 4 conversions (thinned 3 times) */
+#  define R_ADC_B_ADDECCR_DCIM0_0X7                       (7 << R_ADC_B_ADDECCR_DCIM0_SHIFT)  /* Output data once for every 8 conversions (thinned out 7 times) */
 
 #define R_ADC_B_ADDECCR_DCIM1_SHIFT               (8)  /* One-channel continuous scan mode output decimation setting for A/D converter unit 1 */
 #define R_ADC_B_ADDECCR_DCIM1_MASK                0x1f00
 #  define R_ADC_B_ADDECCR_DCIM1_0X0                       (0 << R_ADC_B_ADDECCR_DCIM1_SHIFT)  /* No decimation */
-#  define R_ADC_B_ADDECCR_DCIM1_0X3                       (0 << R_ADC_B_ADDECCR_DCIM1_SHIFT)  /* Output data once for every 4 conversions (thinned 3 times) */
-#  define R_ADC_B_ADDECCR_DCIM1_0X7                       (0 << R_ADC_B_ADDECCR_DCIM1_SHIFT)  /* Output data once for every 8 conversions (thinned out 7 times) */
+#  define R_ADC_B_ADDECCR_DCIM1_0X3                       (3 << R_ADC_B_ADDECCR_DCIM1_SHIFT)  /* Output data once for every 4 conversions (thinned 3 times) */
+#  define R_ADC_B_ADDECCR_DCIM1_0X7                       (7 << R_ADC_B_ADDECCR_DCIM1_SHIFT)  /* Output data once for every 8 conversions (thinned out 7 times) */
 
 /* ADACMDR Register bit definitions */
 #define R_ADC_B_ADACMDR_ADHACMD0                  (1 << 0)  /* A/D converter unit 0 high accuracy mode setting */
@@ -1115,9 +655,9 @@
 #define R_ADC_B_ADSGDCR_ADNDIS_SHIFT              (24)  /* Disconnection Detection Assist Period */
 #define R_ADC_B_ADSGDCR_ADNDIS_MASK               0xff000000
 #  define R_ADC_B_ADSGDCR_ADNDIS_0X0                      (0 << R_ADC_B_ADSGDCR_ADNDIS_SHIFT)  /* Setting prohibited when the disconnection detection assist function is enabled */
-#  define R_ADC_B_ADSGDCR_ADNDIS_0X1                      (0 << R_ADC_B_ADSGDCR_ADNDIS_SHIFT)  /* Setting prohibited */
-#  define R_ADC_B_ADSGDCR_ADNDIS_0X2                      (0 << R_ADC_B_ADSGDCR_ADNDIS_SHIFT)  /* Setting prohibited */
-#  define R_ADC_B_ADSGDCR_ADNDIS_0X3                      (0 << R_ADC_B_ADSGDCR_ADNDIS_SHIFT)  /* Setting prohibited */
+#  define R_ADC_B_ADSGDCR_ADNDIS_0X1                      (1 << R_ADC_B_ADSGDCR_ADNDIS_SHIFT)  /* Setting prohibited */
+#  define R_ADC_B_ADSGDCR_ADNDIS_0X2                      (2 << R_ADC_B_ADSGDCR_ADNDIS_SHIFT)  /* Setting prohibited */
+#  define R_ADC_B_ADSGDCR_ADNDIS_0X3                      (3 << R_ADC_B_ADSGDCR_ADNDIS_SHIFT)  /* Setting prohibited */
 
 /* ADSSTR0 Register bit definitions */
 #define R_ADC_B_ADSSTR0_SST0_SHIFT                (0)  /* Sampling State Table 0 */
@@ -1670,10 +1210,10 @@
 #define R_ADC_B_ADDOPCRA_DFSEL_SHIFT              (0)  /* Digital Filter Selection */
 #define R_ADC_B_ADDOPCRA_DFSEL_MASK               0x7
 #  define R_ADC_B_ADDOPCRA_DFSEL_0X0                      (0 << R_ADC_B_ADDOPCRA_DFSEL_SHIFT)  /* Not use the digital filter */
-#  define R_ADC_B_ADDOPCRA_DFSEL_0X1                      (0 << R_ADC_B_ADDOPCRA_DFSEL_SHIFT)  /* Use the 1st digital filter */
-#  define R_ADC_B_ADDOPCRA_DFSEL_0X2                      (0 << R_ADC_B_ADDOPCRA_DFSEL_SHIFT)  /* Use the 2nd digital filter */
-#  define R_ADC_B_ADDOPCRA_DFSEL_0X3                      (0 << R_ADC_B_ADDOPCRA_DFSEL_SHIFT)  /* Use the 3rd digital filter */
-#  define R_ADC_B_ADDOPCRA_DFSEL_0X4                      (0 << R_ADC_B_ADDOPCRA_DFSEL_SHIFT)  /* Use the 4th digital filter */
+#  define R_ADC_B_ADDOPCRA_DFSEL_0X1                      (1 << R_ADC_B_ADDOPCRA_DFSEL_SHIFT)  /* Use the 1st digital filter */
+#  define R_ADC_B_ADDOPCRA_DFSEL_0X2                      (2 << R_ADC_B_ADDOPCRA_DFSEL_SHIFT)  /* Use the 2nd digital filter */
+#  define R_ADC_B_ADDOPCRA_DFSEL_0X3                      (3 << R_ADC_B_ADDOPCRA_DFSEL_SHIFT)  /* Use the 3rd digital filter */
+#  define R_ADC_B_ADDOPCRA_DFSEL_0X4                      (4 << R_ADC_B_ADDOPCRA_DFSEL_SHIFT)  /* Use the 4th digital filter */
 
 #define R_ADC_B_ADDOPCRA_GAINSEL_SHIFT            (16)  /* User Gain Table Selection */
 #define R_ADC_B_ADDOPCRA_GAINSEL_MASK             0xf0000
@@ -1692,16 +1232,16 @@
 #define R_ADC_B_ADDOPCRB_ADC_SHIFT                (8)  /* Addition/Averaging Times Selection */
 #define R_ADC_B_ADDOPCRB_ADC_MASK                 0xf00
 #  define R_ADC_B_ADDOPCRB_ADC_0X0                        (0 << R_ADC_B_ADDOPCRB_ADC_SHIFT)  /* 1-time conversion (no addition, same as normal conversion) */
-#  define R_ADC_B_ADDOPCRB_ADC_0X1                        (0 << R_ADC_B_ADDOPCRB_ADC_SHIFT)  /* 2-time conversion (1 addition) */
-#  define R_ADC_B_ADDOPCRB_ADC_0X3                        (0 << R_ADC_B_ADDOPCRB_ADC_SHIFT)  /* 4-time conversion (3 additions) */
-#  define R_ADC_B_ADDOPCRB_ADC_0X4                        (0 << R_ADC_B_ADDOPCRB_ADC_SHIFT)  /* 8-time conversion (7 additions) */
-#  define R_ADC_B_ADDOPCRB_ADC_0X5                        (0 << R_ADC_B_ADDOPCRB_ADC_SHIFT)  /* 16-time conversion (15 additions) */
-#  define R_ADC_B_ADDOPCRB_ADC_0X6                        (0 << R_ADC_B_ADDOPCRB_ADC_SHIFT)  /* 32-time conversion (31 additions) */
-#  define R_ADC_B_ADDOPCRB_ADC_0X7                        (0 << R_ADC_B_ADDOPCRB_ADC_SHIFT)  /* 64-time conversion (63 additions) */
-#  define R_ADC_B_ADDOPCRB_ADC_0X8                        (0 << R_ADC_B_ADDOPCRB_ADC_SHIFT)  /* 128-time conversion (127 additions) */
-#  define R_ADC_B_ADDOPCRB_ADC_0X9                        (0 << R_ADC_B_ADDOPCRB_ADC_SHIFT)  /* 256-time conversion (255 additions) */
-#  define R_ADC_B_ADDOPCRB_ADC_0XA                        (0 << R_ADC_B_ADDOPCRB_ADC_SHIFT)  /* 512-time conversion (511 additions) */
-#  define R_ADC_B_ADDOPCRB_ADC_0XB                        (0 << R_ADC_B_ADDOPCRB_ADC_SHIFT)  /* 1024-time conversion (1023 additions) */
+#  define R_ADC_B_ADDOPCRB_ADC_0X1                        (1 << R_ADC_B_ADDOPCRB_ADC_SHIFT)  /* 2-time conversion (1 addition) */
+#  define R_ADC_B_ADDOPCRB_ADC_0X3                        (3 << R_ADC_B_ADDOPCRB_ADC_SHIFT)  /* 4-time conversion (3 additions) */
+#  define R_ADC_B_ADDOPCRB_ADC_0X4                        (4 << R_ADC_B_ADDOPCRB_ADC_SHIFT)  /* 8-time conversion (7 additions) */
+#  define R_ADC_B_ADDOPCRB_ADC_0X5                        (5 << R_ADC_B_ADDOPCRB_ADC_SHIFT)  /* 16-time conversion (15 additions) */
+#  define R_ADC_B_ADDOPCRB_ADC_0X6                        (6 << R_ADC_B_ADDOPCRB_ADC_SHIFT)  /* 32-time conversion (31 additions) */
+#  define R_ADC_B_ADDOPCRB_ADC_0X7                        (7 << R_ADC_B_ADDOPCRB_ADC_SHIFT)  /* 64-time conversion (63 additions) */
+#  define R_ADC_B_ADDOPCRB_ADC_0X8                        (8 << R_ADC_B_ADDOPCRB_ADC_SHIFT)  /* 128-time conversion (127 additions) */
+#  define R_ADC_B_ADDOPCRB_ADC_0X9                        (9 << R_ADC_B_ADDOPCRB_ADC_SHIFT)  /* 256-time conversion (255 additions) */
+#  define R_ADC_B_ADDOPCRB_ADC_0XA                        (10 << R_ADC_B_ADDOPCRB_ADC_SHIFT)  /* 512-time conversion (511 additions) */
+#  define R_ADC_B_ADDOPCRB_ADC_0XB                        (11 << R_ADC_B_ADDOPCRB_ADC_SHIFT)  /* 1024-time conversion (1023 additions) */
 
 #define R_ADC_B_ADDOPCRB_CMPTBLE0                 (1 << 16)  /* Compare Match Enable */
 
@@ -2014,6 +1554,10 @@
 #define R_ADC_B_ADOVFEXSCR_OVFEXC8                (1 << 8)  /* D/A Converter 0 Channel: Compare Match Flag Clear */
 
 #define R_ADC_B_ADOVFEXSCR_OVFEXC9                (1 << 9)  /* D/A Converter 1 Channel: Compare Match Flag Clear */
+
+#define R_ADC_B_ADOVFEXSCR_OVFEXC16               (1 << 16)  /* Self-diagnosis Channel for Sample-and-hold circuit unit0: Compare Match Flag Clear */
+
+#define R_ADC_B_ADOVFEXSCR_OVFEXC17               (1 << 17)  /* Self-diagnosis Channel for Sample-and-hold circuit unit1: Compare Match Flag Clear */
 
 /* ADFIFOSR0 Register bit definitions */
 #define R_ADC_B_ADFIFOSR0_FIFOST0_SHIFT           (0)  /* Number of vacant stages in FIFO for Scan Group 0 */
@@ -2547,11 +2091,31 @@
 
 #define R_ADC_B_ADLIMEXSCR_LIMEXC22               (1 << 22)  /* Self-diagnosis channel for sample-and-hold circuit unit 6: Limiter Clip Flag Clear */
 
+#define R_ADC_B_ADLIMEXSCR_LIMEXF0                (1 << 0)  /* Self-diagnosis Channel for A/D unit 0: Limiter Clip Flag Clear */
+
+#define R_ADC_B_ADLIMEXSCR_LIMEXF1                (1 << 1)  /* Self-diagnosis Channel for A/D unit 1: Limiter Clip Flag Clear */
+
 #define R_ADC_B_ADLIMEXSCR_LIMEXF4                (1 << 4)  /* Temperature Sensor Channel: Limiter Clip Flag Clear */
+
+#define R_ADC_B_ADLIMEXSCR_LIMEXF5                (1 << 5)  /* Internal Reference Voltage Channel: Limiter Clip Flag Clear */
+
+#define R_ADC_B_ADLIMEXSCR_LIMEXF6                (1 << 6)  /* VBATT 1/3 voltage monitor output Channel: Limiter Clip Flag Clear */
 
 #define R_ADC_B_ADLIMEXSCR_LIMEXF8                (1 << 8)  /* D/A Converter 0 Channel: Limiter Clip Flag Clear */
 
 #define R_ADC_B_ADLIMEXSCR_LIMEXF9                (1 << 9)  /* D/A Converter 1 Channel: Limiter Clip Flag Clear */
+
+#define R_ADC_B_ADLIMEXSCR_LIMEXF16               (1 << 16)  /* Self-diagnosis Channel for Sample-and-hold circuit unit0: Limiter Clip Flag Clear */
+
+#define R_ADC_B_ADLIMEXSCR_LIMEXF17               (1 << 17)  /* Self-diagnosis Channel for Sample-and-hold circuit unit1: Limiter Clip Flag Clear */
+
+#define R_ADC_B_ADLIMEXSCR_LIMEXF18               (1 << 18)  /* Self-diagnosis Channel for Sample-and-hold circuit unit2: Limiter Clip Flag Clear */
+
+#define R_ADC_B_ADLIMEXSCR_LIMEXF20               (1 << 20)  /* Self-diagnosis Channel for Sample-and-hold circuit unit4: Limiter Clip Flag Clear */
+
+#define R_ADC_B_ADLIMEXSCR_LIMEXF21               (1 << 21)  /* Self-diagnosis Channel for Sample-and-hold circuit unit5: Limiter Clip Flag Clear */
+
+#define R_ADC_B_ADLIMEXSCR_LIMEXF22               (1 << 22)  /* Self-diagnosis Channel for Sample-and-hold circuit unit6: Limiter Clip Flag Clear */
 
 /* ADSCANENDSR Register bit definitions */
 #define R_ADC_B_ADSCANENDSR_SCENDF0               (1 << 0)  /* Scan Group n Scan End Flag */

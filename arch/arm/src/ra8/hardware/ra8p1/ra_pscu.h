@@ -40,35 +40,35 @@
 
 /* PSCU Register Offsets */
 
-#define R_PSCU_PSARB_OFFSET     0x00000004  /* Peripheral Security Attribution Register B */
-#define R_PSCU_PSARC_OFFSET     0x00000008  /* Peripheral Security Attribution Register C */
-#define R_PSCU_PSARD_OFFSET     0x0000000c  /* Peripheral Security Attribution Register D */
-#define R_PSCU_PSARE_OFFSET     0x00000010  /* Peripheral Security Attribution Register E */
-#define R_PSCU_MSSAR_OFFSET     0x00000014  /* Module Stop Security Attribution Register */
-#define R_PSCU_PPARB_OFFSET     0x0000001c  /* Peripheral Privilege Attribution Register B */
-#define R_PSCU_PPARC_OFFSET     0x00000020  /* Peripheral Privilege Attribution Register C */
-#define R_PSCU_PPARD_OFFSET     0x00000024  /* Peripheral Privilege Attribution Register D */
-#define R_PSCU_PPARE_OFFSET     0x00000028  /* Peripheral Privilege Attribution Register E */
-#define R_PSCU_MSPAR_OFFSET     0x0000002c  /* Module Stop Privilege Attribution Register */
-#define R_PSCU_CMSAMON_OFFSET     0x00000030  /* Code MRAM Security Attribution Monitor Register */
-#define R_PSCU_DLMMON_OFFSET     0x00000038  /* Device Lifecycle Management State Monitor Register */
-#define R_PSCU_SFSAMON_OFFSET     0x0000003c  /* SiP Flash Security Attribution Monitor Register */
+#define R_PSCU_PSARB_OFFSET                       0x00000004  /* Peripheral Security Attribution Register B */
+#define R_PSCU_PSARC_OFFSET                       0x00000008  /* Peripheral Security Attribution Register C */
+#define R_PSCU_PSARD_OFFSET                       0x0000000c  /* Peripheral Security Attribution Register D */
+#define R_PSCU_PSARE_OFFSET                       0x00000010  /* Peripheral Security Attribution Register E */
+#define R_PSCU_MSSAR_OFFSET                       0x00000014  /* Module Stop Security Attribution Register */
+#define R_PSCU_PPARB_OFFSET                       0x0000001c  /* Peripheral Privilege Attribution Register B */
+#define R_PSCU_PPARC_OFFSET                       0x00000020  /* Peripheral Privilege Attribution Register C */
+#define R_PSCU_PPARD_OFFSET                       0x00000024  /* Peripheral Privilege Attribution Register D */
+#define R_PSCU_PPARE_OFFSET                       0x00000028  /* Peripheral Privilege Attribution Register E */
+#define R_PSCU_MSPAR_OFFSET                       0x0000002c  /* Module Stop Privilege Attribution Register */
+#define R_PSCU_CMSAMON_OFFSET                     0x00000030  /* Code MRAM Security Attribution Monitor Register */
+#define R_PSCU_DLMMON_OFFSET                      0x00000038  /* Device Lifecycle Management State Monitor Register */
+#define R_PSCU_SFSAMON_OFFSET                     0x0000003c  /* SiP Flash Security Attribution Monitor Register */
 
 /* PSCU Register Addresses */
 
-#define R_PSCU_PSARB                 (R_PSCU_BASE + R_PSCU_PSARB_OFFSET)
-#define R_PSCU_PSARC                 (R_PSCU_BASE + R_PSCU_PSARC_OFFSET)
-#define R_PSCU_PSARD                 (R_PSCU_BASE + R_PSCU_PSARD_OFFSET)
-#define R_PSCU_PSARE                 (R_PSCU_BASE + R_PSCU_PSARE_OFFSET)
-#define R_PSCU_MSSAR                 (R_PSCU_BASE + R_PSCU_MSSAR_OFFSET)
-#define R_PSCU_PPARB                 (R_PSCU_BASE + R_PSCU_PPARB_OFFSET)
-#define R_PSCU_PPARC                 (R_PSCU_BASE + R_PSCU_PPARC_OFFSET)
-#define R_PSCU_PPARD                 (R_PSCU_BASE + R_PSCU_PPARD_OFFSET)
-#define R_PSCU_PPARE                 (R_PSCU_BASE + R_PSCU_PPARE_OFFSET)
-#define R_PSCU_MSPAR                 (R_PSCU_BASE + R_PSCU_MSPAR_OFFSET)
-#define R_PSCU_CMSAMON                 (R_PSCU_BASE + R_PSCU_CMSAMON_OFFSET)
-#define R_PSCU_DLMMON                 (R_PSCU_BASE + R_PSCU_DLMMON_OFFSET)
-#define R_PSCU_SFSAMON                 (R_PSCU_BASE + R_PSCU_SFSAMON_OFFSET)
+#define R_PSCU_PSARB                              (R_PSCU_BASE + R_PSCU_PSARB_OFFSET)
+#define R_PSCU_PSARC                              (R_PSCU_BASE + R_PSCU_PSARC_OFFSET)
+#define R_PSCU_PSARD                              (R_PSCU_BASE + R_PSCU_PSARD_OFFSET)
+#define R_PSCU_PSARE                              (R_PSCU_BASE + R_PSCU_PSARE_OFFSET)
+#define R_PSCU_MSSAR                              (R_PSCU_BASE + R_PSCU_MSSAR_OFFSET)
+#define R_PSCU_PPARB                              (R_PSCU_BASE + R_PSCU_PPARB_OFFSET)
+#define R_PSCU_PPARC                              (R_PSCU_BASE + R_PSCU_PPARC_OFFSET)
+#define R_PSCU_PPARD                              (R_PSCU_BASE + R_PSCU_PPARD_OFFSET)
+#define R_PSCU_PPARE                              (R_PSCU_BASE + R_PSCU_PPARE_OFFSET)
+#define R_PSCU_MSPAR                              (R_PSCU_BASE + R_PSCU_MSPAR_OFFSET)
+#define R_PSCU_CMSAMON                            (R_PSCU_BASE + R_PSCU_CMSAMON_OFFSET)
+#define R_PSCU_DLMMON                             (R_PSCU_BASE + R_PSCU_DLMMON_OFFSET)
+#define R_PSCU_SFSAMON                            (R_PSCU_BASE + R_PSCU_SFSAMON_OFFSET)
 
 /* Register bit definitions */
 /* PSARB Register bit definitions */
@@ -728,11 +728,11 @@
 /* DLMMON Register bit definitions */
 #define R_PSCU_DLMMON_DLMMON_SHIFT                (0)  /* Device Lifecycle Management State Monitor */
 #define R_PSCU_DLMMON_DLMMON_MASK                 0xf
-#  define R_PSCU_DLMMON_DLMMON_0X4                        (0 << R_PSCU_DLMMON_DLMMON_SHIFT)  /* OEM */
-#  define R_PSCU_DLMMON_DLMMON_0X6                        (0 << R_PSCU_DLMMON_DLMMON_SHIFT)  /* LCK_BOOT */
-#  define R_PSCU_DLMMON_DLMMON_0X7                        (0 << R_PSCU_DLMMON_DLMMON_SHIFT)  /* RMA_REQ */
-#  define R_PSCU_DLMMON_DLMMON_0X8                        (0 << R_PSCU_DLMMON_DLMMON_SHIFT)  /* RMA_ACK */
-#  define R_PSCU_DLMMON_DLMMON_0X9                        (0 << R_PSCU_DLMMON_DLMMON_SHIFT)  /* RMA_RET */
+#  define R_PSCU_DLMMON_DLMMON_0X4                        (4 << R_PSCU_DLMMON_DLMMON_SHIFT)  /* OEM */
+#  define R_PSCU_DLMMON_DLMMON_0X6                        (6 << R_PSCU_DLMMON_DLMMON_SHIFT)  /* LCK_BOOT */
+#  define R_PSCU_DLMMON_DLMMON_0X7                        (7 << R_PSCU_DLMMON_DLMMON_SHIFT)  /* RMA_REQ */
+#  define R_PSCU_DLMMON_DLMMON_0X8                        (8 << R_PSCU_DLMMON_DLMMON_SHIFT)  /* RMA_ACK */
+#  define R_PSCU_DLMMON_DLMMON_0X9                        (9 << R_PSCU_DLMMON_DLMMON_SHIFT)  /* RMA_RET */
 
 /* SFSAMON Register bit definitions */
 #define R_PSCU_SFSAMON_SFS_SHIFT                  (15)  /* SiP Flash Secure Area */

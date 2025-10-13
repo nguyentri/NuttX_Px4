@@ -44,29 +44,29 @@
 
 /* ULPT Register Offsets */
 
-#define R_ULPT_ULPTCNT_OFFSET     0x00000000  /* ULPT Counter Register */
-#define R_ULPT_ULPTCMA_OFFSET     0x00000004  /* ULPT Compare Match A Register */
-#define R_ULPT_ULPTCMB_OFFSET     0x00000008  /* ULPT Compare Match B Register */
-#define R_ULPT_ULPTCR_OFFSET     0x0000000c  /* ULPT Control Register */
-#define R_ULPT_ULPTMR1_OFFSET     0x0000000d  /* ULPT Mode Register 1 */
-#define R_ULPT_ULPTMR2_OFFSET     0x0000000e  /* ULPT Mode Register 2 */
-#define R_ULPT_ULPTMR3_OFFSET     0x0000000f  /* ULPT Mode Register 3 */
-#define R_ULPT_ULPTIOC_OFFSET     0x00000010  /* ULPT I/O Control Register */
-#define R_ULPT_ULPTISR_OFFSET     0x00000011  /* ULPT Event Pin Select Register */
-#define R_ULPT_ULPTCMSR_OFFSET     0x00000012  /* ULPT Compare Match Function Select Register */
+#define R_ULPT_ULPTCNT_OFFSET                     0x00000000  /* ULPT Counter Register */
+#define R_ULPT_ULPTCMA_OFFSET                     0x00000004  /* ULPT Compare Match A Register */
+#define R_ULPT_ULPTCMB_OFFSET                     0x00000008  /* ULPT Compare Match B Register */
+#define R_ULPT_ULPTCR_OFFSET                      0x0000000c  /* ULPT Control Register */
+#define R_ULPT_ULPTMR1_OFFSET                     0x0000000d  /* ULPT Mode Register 1 */
+#define R_ULPT_ULPTMR2_OFFSET                     0x0000000e  /* ULPT Mode Register 2 */
+#define R_ULPT_ULPTMR3_OFFSET                     0x0000000f  /* ULPT Mode Register 3 */
+#define R_ULPT_ULPTIOC_OFFSET                     0x00000010  /* ULPT I/O Control Register */
+#define R_ULPT_ULPTISR_OFFSET                     0x00000011  /* ULPT Event Pin Select Register */
+#define R_ULPT_ULPTCMSR_OFFSET                    0x00000012  /* ULPT Compare Match Function Select Register */
 
 /* ULPT Register Addresses */
 
-#define R_ULPT_ULPTCNT                 (R_ULPT_BASE + R_ULPT_ULPTCNT_OFFSET)
-#define R_ULPT_ULPTCMA                 (R_ULPT_BASE + R_ULPT_ULPTCMA_OFFSET)
-#define R_ULPT_ULPTCMB                 (R_ULPT_BASE + R_ULPT_ULPTCMB_OFFSET)
-#define R_ULPT_ULPTCR                 (R_ULPT_BASE + R_ULPT_ULPTCR_OFFSET)
-#define R_ULPT_ULPTMR1                 (R_ULPT_BASE + R_ULPT_ULPTMR1_OFFSET)
-#define R_ULPT_ULPTMR2                 (R_ULPT_BASE + R_ULPT_ULPTMR2_OFFSET)
-#define R_ULPT_ULPTMR3                 (R_ULPT_BASE + R_ULPT_ULPTMR3_OFFSET)
-#define R_ULPT_ULPTIOC                 (R_ULPT_BASE + R_ULPT_ULPTIOC_OFFSET)
-#define R_ULPT_ULPTISR                 (R_ULPT_BASE + R_ULPT_ULPTISR_OFFSET)
-#define R_ULPT_ULPTCMSR                 (R_ULPT_BASE + R_ULPT_ULPTCMSR_OFFSET)
+#define R_ULPT_ULPTCNT(n)                         (R_ULPT_CH_BASE(n) + R_ULPT_ULPTCNT_OFFSET)
+#define R_ULPT_ULPTCMA(n)                         (R_ULPT_CH_BASE(n) + R_ULPT_ULPTCMA_OFFSET)
+#define R_ULPT_ULPTCMB(n)                         (R_ULPT_CH_BASE(n) + R_ULPT_ULPTCMB_OFFSET)
+#define R_ULPT_ULPTCR(n)                          (R_ULPT_CH_BASE(n) + R_ULPT_ULPTCR_OFFSET)
+#define R_ULPT_ULPTMR1(n)                         (R_ULPT_CH_BASE(n) + R_ULPT_ULPTMR1_OFFSET)
+#define R_ULPT_ULPTMR2(n)                         (R_ULPT_CH_BASE(n) + R_ULPT_ULPTMR2_OFFSET)
+#define R_ULPT_ULPTMR3(n)                         (R_ULPT_CH_BASE(n) + R_ULPT_ULPTMR3_OFFSET)
+#define R_ULPT_ULPTIOC(n)                         (R_ULPT_CH_BASE(n) + R_ULPT_ULPTIOC_OFFSET)
+#define R_ULPT_ULPTISR(n)                         (R_ULPT_CH_BASE(n) + R_ULPT_ULPTISR_OFFSET)
+#define R_ULPT_ULPTCMSR(n)                        (R_ULPT_CH_BASE(n) + R_ULPT_ULPTCMSR_OFFSET)
 
 /* Register bit definitions */
 /* ULPTCNT Register bit definitions */

@@ -38,123 +38,83 @@
 #endif
 #endif
 
-/* Channel stride for multi-channel peripherals */
-#define R_COMA_CH_STRIDE    0x00000004
-#define R_COMA_CH_BASE(ch)   (R_COMA_BASE + ((uint32_t)(ch) * R_COMA_CH_STRIDE))
-
 /* COMA Register Offsets */
 
-#define R_COMA_RIPV_OFFSET     0x00000000  /* IP Version Register */
-#define R_COMA_RRC_OFFSET     0x00000004  /* Reset Configuration Register */
-#define R_COMA_RCEC_OFFSET     0x00000008  /* Clock Enable Configuration Register */
-#define R_COMA_RCDC_OFFSET     0x0000000c  /* Clock Disable Configuration Register */
+#define R_COMA_RIPV_OFFSET                        0x00000000  /* IP Version Register */
+#define R_COMA_RRC_OFFSET                         0x00000004  /* Reset Configuration Register */
+#define R_COMA_RCEC_OFFSET                        0x00000008  /* Clock Enable Configuration Register */
+#define R_COMA_RCDC_OFFSET                        0x0000000c  /* Clock Disable Configuration Register */
 /* CABPIBWMC%s Registers (0-7) */
-#define R_COMA_CABPIBWMC0_OFFSET     0x00000020  /* Buffer Pool IPV Based Watermark Configuration Register 0 */
-#define R_COMA_CABPIBWMC1_OFFSET     0x00000024  /* Buffer Pool IPV Based Watermark Configuration Register 1 */
-#define R_COMA_CABPIBWMC2_OFFSET     0x00000028  /* Buffer Pool IPV Based Watermark Configuration Register 2 */
-#define R_COMA_CABPIBWMC3_OFFSET     0x0000002c  /* Buffer Pool IPV Based Watermark Configuration Register 3 */
-#define R_COMA_CABPIBWMC4_OFFSET     0x00000030  /* Buffer Pool IPV Based Watermark Configuration Register 4 */
-#define R_COMA_CABPIBWMC5_OFFSET     0x00000034  /* Buffer Pool IPV Based Watermark Configuration Register 5 */
-#define R_COMA_CABPIBWMC6_OFFSET     0x00000038  /* Buffer Pool IPV Based Watermark Configuration Register 6 */
-#define R_COMA_CABPIBWMC7_OFFSET     0x0000003c  /* Buffer Pool IPV Based Watermark Configuration Register 7 */
-#define R_COMA_CABPWMLC_OFFSET     0x00000040  /* Buffer Pool Watermark Level Configuration Register */
-#define R_COMA_CABPPFLCI_OFFSET     0x00000050  /* Buffer Pointer Pause Frame Level i Configuration Register */
+#define R_COMA_CABPIBWMC_OFFSET(m)                (0x00000020 + ((m) * 0x00000004))  /* Buffer Pool IPV Based Watermark Configuration Register %s */
+#define R_COMA_CABPWMLC_OFFSET                    0x00000040  /* Buffer Pool Watermark Level Configuration Register */
+#define R_COMA_CABPPFLCI_OFFSET                   0x00000050  /* Buffer Pointer Pause Frame Level i Configuration Register */
 /* CABPPWMLC%s Registers (0-2) */
-#define R_COMA_CABPPWMLC0_OFFSET     0x00000060  /* Port 0 Buffer Pool Watermark Level Configuration Register */
-#define R_COMA_CABPPWMLC1_OFFSET     0x00000064  /* Port 1 Buffer Pool Watermark Level Configuration Register */
-#define R_COMA_CABPPWMLC2_OFFSET     0x00000068  /* Port 2 Buffer Pool Watermark Level Configuration Register */
+#define R_COMA_CABPPWMLC_OFFSET(m)                (0x00000060 + ((m) * 0x00000004))  /* Port %s Buffer Pool Watermark Level Configuration Register */
 /* CABPPPFLC0%s Registers (0-1) */
-#define R_COMA_CABPPPFLC00_OFFSET     0x000000a0  /* Port i Buffer Pointer Pause Frame Level 0 Configuration Register  */
-#define R_COMA_CABPPPFLC01_OFFSET     0x000000a4  /* Port i Buffer Pointer Pause Frame Level 1 Configuration Register  */
+#define R_COMA_CABPPPFLC0_OFFSET(m)               (0x000000a0 + ((m) * 0x00000004))  /* Port i Buffer Pointer Pause Frame Level %s Configuration Register  */
 /* CABPPPFLC1%s Registers (0-1) */
-#define R_COMA_CABPPPFLC10_OFFSET     0x000000a8  /* Port i Buffer Pointer Pause Frame Level 0 Configuration Register  */
-#define R_COMA_CABPPPFLC11_OFFSET     0x000000ac  /* Port i Buffer Pointer Pause Frame Level 1 Configuration Register  */
+#define R_COMA_CABPPPFLC1_OFFSET(m)               (0x000000a8 + ((m) * 0x00000004))  /* Port i Buffer Pointer Pause Frame Level %s Configuration Register  */
 /* CABPPPFLC2%s Registers (0-1) */
-#define R_COMA_CABPPPFLC20_OFFSET     0x000000b0  /* Port i Buffer Pointer Pause Frame Level 0 Configuration Register  */
-#define R_COMA_CABPPPFLC21_OFFSET     0x000000b4  /* Port i Buffer Pointer Pause Frame Level 1 Configuration Register  */
+#define R_COMA_CABPPPFLC2_OFFSET(m)               (0x000000b0 + ((m) * 0x00000004))  /* Port i Buffer Pointer Pause Frame Level %s Configuration Register  */
 /* CABPULC%s Registers (0-2) */
-#define R_COMA_CABPULC0_OFFSET     0x00000100  /* Port 0 Buffer Pointer Utilization Level Configuration Register i */
-#define R_COMA_CABPULC1_OFFSET     0x00000104  /* Port 1 Buffer Pointer Utilization Level Configuration Register i */
-#define R_COMA_CABPULC2_OFFSET     0x00000108  /* Port 2 Buffer Pointer Utilization Level Configuration Register i */
-#define R_COMA_CABPIRM_OFFSET     0x00000140  /* Buffer Pool Initialization Register Monitoring Register */
-#define R_COMA_CABPPCM_OFFSET     0x00000144  /* Buffer Pool Pointer Count Monitoring Register */
-#define R_COMA_CABPLCM_OFFSET     0x00000148  /* Buffer Pool Pointer Least Count Monitoring Register */
+#define R_COMA_CABPULC_OFFSET(m)                  (0x00000100 + ((m) * 0x00000004))  /* Port %s Buffer Pointer Utilization Level Configuration Register i */
+#define R_COMA_CABPIRM_OFFSET                     0x00000140  /* Buffer Pool Initialization Register Monitoring Register */
+#define R_COMA_CABPPCM_OFFSET                     0x00000144  /* Buffer Pool Pointer Count Monitoring Register */
+#define R_COMA_CABPLCM_OFFSET                     0x00000148  /* Buffer Pool Pointer Least Count Monitoring Register */
 /* CABPCPM%s Registers (0-2) */
-#define R_COMA_CABPCPM0_OFFSET     0x00000180  /* Port 0 Buffer Pointer Count Monitoring Register */
-#define R_COMA_CABPCPM1_OFFSET     0x00000184  /* Port 1 Buffer Pointer Count Monitoring Register */
-#define R_COMA_CABPCPM2_OFFSET     0x00000188  /* Port 2 Buffer Pointer Count Monitoring Register */
+#define R_COMA_CABPCPM_OFFSET(m)                  (0x00000180 + ((m) * 0x00000004))  /* Port %s Buffer Pointer Count Monitoring Register */
 /* CABPMCPM%s Registers (0-2) */
-#define R_COMA_CABPMCPM0_OFFSET     0x00000200  /* Port 0 Buffer Pointer Maximum Count Monitoring Register */
-#define R_COMA_CABPMCPM1_OFFSET     0x00000204  /* Port 1 Buffer Pointer Maximum Count Monitoring Register */
-#define R_COMA_CABPMCPM2_OFFSET     0x00000208  /* Port 2 Buffer Pointer Maximum Count Monitoring Register */
-#define R_COMA_CARDNM_OFFSET     0x00000300  /* Rejected Descriptor Number Monitoring Register */
-#define R_COMA_CARDMNM_OFFSET     0x00000304  /* Rejected Descriptor Maximum Number Monitoring Register */
-#define R_COMA_CARDCN_OFFSET     0x00000310  /* Rejected Descriptor Counter Register */
-#define R_COMA_CAEIS0_OFFSET     0x00000400  /* Error Interrupt Status Register 0 */
-#define R_COMA_CAEIE0_OFFSET     0x00000404  /* Error Interrupt Enable Register 0 */
-#define R_COMA_CAEID0_OFFSET     0x00000408  /* Error Interrupt Disable Register 0 */
-#define R_COMA_CAEIS1_OFFSET     0x00000410  /* Error Interrupt Status Register 1 */
-#define R_COMA_CAEIE1_OFFSET     0x00000414  /* Error Interrupt Enable Register 1 */
-#define R_COMA_CAEID1_OFFSET     0x00000418  /* Error Interrupt Disable Register 1 */
-#define R_COMA_CAMIS0_OFFSET     0x00000440  /* Monitoring Interrupt Status Register 0 */
-#define R_COMA_CAMIE0_OFFSET     0x00000444  /* Monitoring Interrupt Enable Register 0 */
-#define R_COMA_CAMID0_OFFSET     0x00000448  /* Monitoring Interrupt Disable Register 0 */
-#define R_COMA_CAMIS1_OFFSET     0x00000450  /* Monitoring Interrupt Status Register 1 */
-#define R_COMA_CAMIE1_OFFSET     0x00000454  /* Monitoring Interrupt Enable Register 1 */
-#define R_COMA_CAMID1_OFFSET     0x00000458  /* Monitoring Interrupt Disable Register 1 */
+#define R_COMA_CABPMCPM_OFFSET(m)                 (0x00000200 + ((m) * 0x00000004))  /* Port %s Buffer Pointer Maximum Count Monitoring Register */
+#define R_COMA_CARDNM_OFFSET                      0x00000300  /* Rejected Descriptor Number Monitoring Register */
+#define R_COMA_CARDMNM_OFFSET                     0x00000304  /* Rejected Descriptor Maximum Number Monitoring Register */
+#define R_COMA_CARDCN_OFFSET                      0x00000310  /* Rejected Descriptor Counter Register */
+#define R_COMA_CAEIS0_OFFSET                      0x00000400  /* Error Interrupt Status Register 0 */
+#define R_COMA_CAEIE0_OFFSET                      0x00000404  /* Error Interrupt Enable Register 0 */
+#define R_COMA_CAEID0_OFFSET                      0x00000408  /* Error Interrupt Disable Register 0 */
+#define R_COMA_CAEIS1_OFFSET                      0x00000410  /* Error Interrupt Status Register 1 */
+#define R_COMA_CAEIE1_OFFSET                      0x00000414  /* Error Interrupt Enable Register 1 */
+#define R_COMA_CAEID1_OFFSET                      0x00000418  /* Error Interrupt Disable Register 1 */
+#define R_COMA_CAMIS0_OFFSET                      0x00000440  /* Monitoring Interrupt Status Register 0 */
+#define R_COMA_CAMIE0_OFFSET                      0x00000444  /* Monitoring Interrupt Enable Register 0 */
+#define R_COMA_CAMID0_OFFSET                      0x00000448  /* Monitoring Interrupt Disable Register 0 */
+#define R_COMA_CAMIS1_OFFSET                      0x00000450  /* Monitoring Interrupt Status Register 1 */
+#define R_COMA_CAMIE1_OFFSET                      0x00000454  /* Monitoring Interrupt Enable Register 1 */
+#define R_COMA_CAMID1_OFFSET                      0x00000458  /* Monitoring Interrupt Disable Register 1 */
 
 /* COMA Register Addresses */
 
-#define R_COMA_RIPV                 (R_COMA_BASE + R_COMA_RIPV_OFFSET)
-#define R_COMA_RRC                 (R_COMA_BASE + R_COMA_RRC_OFFSET)
-#define R_COMA_RCEC                 (R_COMA_BASE + R_COMA_RCEC_OFFSET)
-#define R_COMA_RCDC                 (R_COMA_BASE + R_COMA_RCDC_OFFSET)
-#define R_COMA_CABPIBWMC0                 (R_COMA_BASE + R_COMA_CABPIBWMC0_OFFSET)
-#define R_COMA_CABPIBWMC1                 (R_COMA_BASE + R_COMA_CABPIBWMC1_OFFSET)
-#define R_COMA_CABPIBWMC2                 (R_COMA_BASE + R_COMA_CABPIBWMC2_OFFSET)
-#define R_COMA_CABPIBWMC3                 (R_COMA_BASE + R_COMA_CABPIBWMC3_OFFSET)
-#define R_COMA_CABPIBWMC4                 (R_COMA_BASE + R_COMA_CABPIBWMC4_OFFSET)
-#define R_COMA_CABPIBWMC5                 (R_COMA_BASE + R_COMA_CABPIBWMC5_OFFSET)
-#define R_COMA_CABPIBWMC6                 (R_COMA_BASE + R_COMA_CABPIBWMC6_OFFSET)
-#define R_COMA_CABPIBWMC7                 (R_COMA_BASE + R_COMA_CABPIBWMC7_OFFSET)
-#define R_COMA_CABPWMLC                 (R_COMA_BASE + R_COMA_CABPWMLC_OFFSET)
-#define R_COMA_CABPPFLCI                 (R_COMA_BASE + R_COMA_CABPPFLCI_OFFSET)
-#define R_COMA_CABPPWMLC0                 (R_COMA_BASE + R_COMA_CABPPWMLC0_OFFSET)
-#define R_COMA_CABPPWMLC1                 (R_COMA_BASE + R_COMA_CABPPWMLC1_OFFSET)
-#define R_COMA_CABPPWMLC2                 (R_COMA_BASE + R_COMA_CABPPWMLC2_OFFSET)
-#define R_COMA_CABPPPFLC00                 (R_COMA_BASE + R_COMA_CABPPPFLC00_OFFSET)
-#define R_COMA_CABPPPFLC01                 (R_COMA_BASE + R_COMA_CABPPPFLC01_OFFSET)
-#define R_COMA_CABPPPFLC10                 (R_COMA_BASE + R_COMA_CABPPPFLC10_OFFSET)
-#define R_COMA_CABPPPFLC11                 (R_COMA_BASE + R_COMA_CABPPPFLC11_OFFSET)
-#define R_COMA_CABPPPFLC20                 (R_COMA_BASE + R_COMA_CABPPPFLC20_OFFSET)
-#define R_COMA_CABPPPFLC21                 (R_COMA_BASE + R_COMA_CABPPPFLC21_OFFSET)
-#define R_COMA_CABPULC0                 (R_COMA_BASE + R_COMA_CABPULC0_OFFSET)
-#define R_COMA_CABPULC1                 (R_COMA_BASE + R_COMA_CABPULC1_OFFSET)
-#define R_COMA_CABPULC2                 (R_COMA_BASE + R_COMA_CABPULC2_OFFSET)
-#define R_COMA_CABPIRM                 (R_COMA_BASE + R_COMA_CABPIRM_OFFSET)
-#define R_COMA_CABPPCM                 (R_COMA_BASE + R_COMA_CABPPCM_OFFSET)
-#define R_COMA_CABPLCM                 (R_COMA_BASE + R_COMA_CABPLCM_OFFSET)
-#define R_COMA_CABPCPM0                 (R_COMA_BASE + R_COMA_CABPCPM0_OFFSET)
-#define R_COMA_CABPCPM1                 (R_COMA_BASE + R_COMA_CABPCPM1_OFFSET)
-#define R_COMA_CABPCPM2                 (R_COMA_BASE + R_COMA_CABPCPM2_OFFSET)
-#define R_COMA_CABPMCPM0                 (R_COMA_BASE + R_COMA_CABPMCPM0_OFFSET)
-#define R_COMA_CABPMCPM1                 (R_COMA_BASE + R_COMA_CABPMCPM1_OFFSET)
-#define R_COMA_CABPMCPM2                 (R_COMA_BASE + R_COMA_CABPMCPM2_OFFSET)
-#define R_COMA_CARDNM                 (R_COMA_BASE + R_COMA_CARDNM_OFFSET)
-#define R_COMA_CARDMNM                 (R_COMA_BASE + R_COMA_CARDMNM_OFFSET)
-#define R_COMA_CARDCN                 (R_COMA_BASE + R_COMA_CARDCN_OFFSET)
-#define R_COMA_CAEIS0                 (R_COMA_BASE + R_COMA_CAEIS0_OFFSET)
-#define R_COMA_CAEIE0                 (R_COMA_BASE + R_COMA_CAEIE0_OFFSET)
-#define R_COMA_CAEID0                 (R_COMA_BASE + R_COMA_CAEID0_OFFSET)
-#define R_COMA_CAEIS1                 (R_COMA_BASE + R_COMA_CAEIS1_OFFSET)
-#define R_COMA_CAEIE1                 (R_COMA_BASE + R_COMA_CAEIE1_OFFSET)
-#define R_COMA_CAEID1                 (R_COMA_BASE + R_COMA_CAEID1_OFFSET)
-#define R_COMA_CAMIS0                 (R_COMA_BASE + R_COMA_CAMIS0_OFFSET)
-#define R_COMA_CAMIE0                 (R_COMA_BASE + R_COMA_CAMIE0_OFFSET)
-#define R_COMA_CAMID0                 (R_COMA_BASE + R_COMA_CAMID0_OFFSET)
-#define R_COMA_CAMIS1                 (R_COMA_BASE + R_COMA_CAMIS1_OFFSET)
-#define R_COMA_CAMIE1                 (R_COMA_BASE + R_COMA_CAMIE1_OFFSET)
-#define R_COMA_CAMID1                 (R_COMA_BASE + R_COMA_CAMID1_OFFSET)
+#define R_COMA_RIPV                               (R_COMA_BASE + R_COMA_RIPV_OFFSET)
+#define R_COMA_RRC                                (R_COMA_BASE + R_COMA_RRC_OFFSET)
+#define R_COMA_RCEC                               (R_COMA_BASE + R_COMA_RCEC_OFFSET)
+#define R_COMA_RCDC                               (R_COMA_BASE + R_COMA_RCDC_OFFSET)
+#define R_COMA_CABPIBWMC(m)                       (R_COMA_BASE + R_COMA_CABPIBWMC_OFFSET(m))
+#define R_COMA_CABPWMLC                           (R_COMA_BASE + R_COMA_CABPWMLC_OFFSET)
+#define R_COMA_CABPPFLCI                          (R_COMA_BASE + R_COMA_CABPPFLCI_OFFSET)
+#define R_COMA_CABPPWMLC(m)                       (R_COMA_BASE + R_COMA_CABPPWMLC_OFFSET(m))
+#define R_COMA_CABPPPFLC0(m)                      (R_COMA_BASE + R_COMA_CABPPPFLC0_OFFSET(m))
+#define R_COMA_CABPPPFLC1(m)                      (R_COMA_BASE + R_COMA_CABPPPFLC1_OFFSET(m))
+#define R_COMA_CABPPPFLC2(m)                      (R_COMA_BASE + R_COMA_CABPPPFLC2_OFFSET(m))
+#define R_COMA_CABPULC(m)                         (R_COMA_BASE + R_COMA_CABPULC_OFFSET(m))
+#define R_COMA_CABPIRM                            (R_COMA_BASE + R_COMA_CABPIRM_OFFSET)
+#define R_COMA_CABPPCM                            (R_COMA_BASE + R_COMA_CABPPCM_OFFSET)
+#define R_COMA_CABPLCM                            (R_COMA_BASE + R_COMA_CABPLCM_OFFSET)
+#define R_COMA_CABPCPM(m)                         (R_COMA_BASE + R_COMA_CABPCPM_OFFSET(m))
+#define R_COMA_CABPMCPM(m)                        (R_COMA_BASE + R_COMA_CABPMCPM_OFFSET(m))
+#define R_COMA_CARDNM                             (R_COMA_BASE + R_COMA_CARDNM_OFFSET)
+#define R_COMA_CARDMNM                            (R_COMA_BASE + R_COMA_CARDMNM_OFFSET)
+#define R_COMA_CARDCN                             (R_COMA_BASE + R_COMA_CARDCN_OFFSET)
+#define R_COMA_CAEIS0                             (R_COMA_BASE + R_COMA_CAEIS0_OFFSET)
+#define R_COMA_CAEIE0                             (R_COMA_BASE + R_COMA_CAEIE0_OFFSET)
+#define R_COMA_CAEID0                             (R_COMA_BASE + R_COMA_CAEID0_OFFSET)
+#define R_COMA_CAEIS1                             (R_COMA_BASE + R_COMA_CAEIS1_OFFSET)
+#define R_COMA_CAEIE1                             (R_COMA_BASE + R_COMA_CAEIE1_OFFSET)
+#define R_COMA_CAEID1                             (R_COMA_BASE + R_COMA_CAEID1_OFFSET)
+#define R_COMA_CAMIS0                             (R_COMA_BASE + R_COMA_CAMIS0_OFFSET)
+#define R_COMA_CAMIE0                             (R_COMA_BASE + R_COMA_CAMIE0_OFFSET)
+#define R_COMA_CAMID0                             (R_COMA_BASE + R_COMA_CAMID0_OFFSET)
+#define R_COMA_CAMIS1                             (R_COMA_BASE + R_COMA_CAMIS1_OFFSET)
+#define R_COMA_CAMIE1                             (R_COMA_BASE + R_COMA_CAMIE1_OFFSET)
+#define R_COMA_CAMID1                             (R_COMA_BASE + R_COMA_CAMID1_OFFSET)
 
 /* Register bit definitions */
 /* RIPV Register bit definitions */
@@ -225,10 +185,10 @@
 
 /* CABPPWMLC Register bit definitions */
 #define R_COMA_CABPPWMLC_PWMFL_SHIFT              (0)  /* Watermark Flush Level */
-#define R_COMA_CABPPWMLC_PWMFL_MASK               0x3ff
+#define R_COMA_CABPPWMLC_PWMFL_MASK               0x1fff
 
 #define R_COMA_CABPPWMLC_PWMCL_SHIFT              (16)  /* Watermark Critical Level */
-#define R_COMA_CABPPWMLC_PWMCL_MASK               0x3ff0000
+#define R_COMA_CABPPWMLC_PWMCL_MASK               0x1fff0000
 
 /* CABPPPFLC Register bit definitions */
 #define R_COMA_CABPPPFLC_PPDL_SHIFT               (0)  /* Pause De-Assertion Level */
@@ -253,10 +213,10 @@
 
 /* CABPULC Register bit definitions */
 #define R_COMA_CABPULC_MXNPN_SHIFT                (0)  /* Maximum Number of Pointer */
-#define R_COMA_CABPULC_MXNPN_MASK                 0x3ff
+#define R_COMA_CABPULC_MXNPN_MASK                 0x1fff
 
 #define R_COMA_CABPULC_MNNPN_SHIFT                (16)  /* Minimum Number of Pointer */
-#define R_COMA_CABPULC_MNNPN_MASK                 0x3ff0000
+#define R_COMA_CABPULC_MNNPN_MASK                 0x1fff0000
 
 /* CABPIRM Register bit definitions */
 #define R_COMA_CABPIRM_BPIOG                      (1 << 0)  /* Buffer Pool Initialization Ongoing */

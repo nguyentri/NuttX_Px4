@@ -44,29 +44,29 @@
 
 /* AGT Register Offsets */
 
-#define R_AGT_AGT_OFFSET     0x00000000  /* AGT Counter Register */
-#define R_AGT_AGTCMA_OFFSET     0x00000002  /* AGT Compare Match A Register */
-#define R_AGT_AGTCMB_OFFSET     0x00000004  /* AGT Compare Match B Register */
-#define R_AGT_AGTCR_OFFSET     0x00000008  /* AGT Control Register */
-#define R_AGT_AGTMR1_OFFSET     0x00000009  /* AGT Mode Register 1 */
-#define R_AGT_AGTMR2_OFFSET     0x0000000a  /* AGT Mode Register 2 */
-#define R_AGT_AGTIOC_OFFSET     0x0000000c  /* AGT I/O Control Register */
-#define R_AGT_AGTISR_OFFSET     0x0000000d  /* AGT Event Pin Select Register */
-#define R_AGT_AGTCMSR_OFFSET     0x0000000e  /* AGT Compare Match Function Select Register */
-#define R_AGT_AGTIOSEL_OFFSET     0x0000000f  /* AGT Pin Select Register */
+#define R_AGT_AGT_OFFSET                          0x00000000  /* AGT Counter Register */
+#define R_AGT_AGTCMA_OFFSET                       0x00000002  /* AGT Compare Match A Register */
+#define R_AGT_AGTCMB_OFFSET                       0x00000004  /* AGT Compare Match B Register */
+#define R_AGT_AGTCR_OFFSET                        0x00000008  /* AGT Control Register */
+#define R_AGT_AGTMR1_OFFSET                       0x00000009  /* AGT Mode Register 1 */
+#define R_AGT_AGTMR2_OFFSET                       0x0000000a  /* AGT Mode Register 2 */
+#define R_AGT_AGTIOC_OFFSET                       0x0000000c  /* AGT I/O Control Register */
+#define R_AGT_AGTISR_OFFSET                       0x0000000d  /* AGT Event Pin Select Register */
+#define R_AGT_AGTCMSR_OFFSET                      0x0000000e  /* AGT Compare Match Function Select Register */
+#define R_AGT_AGTIOSEL_OFFSET                     0x0000000f  /* AGT Pin Select Register */
 
 /* AGT Register Addresses */
 
-#define R_AGT_AGT                 (R_AGT_BASE + R_AGT_AGT_OFFSET)
-#define R_AGT_AGTCMA                 (R_AGT_BASE + R_AGT_AGTCMA_OFFSET)
-#define R_AGT_AGTCMB                 (R_AGT_BASE + R_AGT_AGTCMB_OFFSET)
-#define R_AGT_AGTCR                 (R_AGT_BASE + R_AGT_AGTCR_OFFSET)
-#define R_AGT_AGTMR1                 (R_AGT_BASE + R_AGT_AGTMR1_OFFSET)
-#define R_AGT_AGTMR2                 (R_AGT_BASE + R_AGT_AGTMR2_OFFSET)
-#define R_AGT_AGTIOC                 (R_AGT_BASE + R_AGT_AGTIOC_OFFSET)
-#define R_AGT_AGTISR                 (R_AGT_BASE + R_AGT_AGTISR_OFFSET)
-#define R_AGT_AGTCMSR                 (R_AGT_BASE + R_AGT_AGTCMSR_OFFSET)
-#define R_AGT_AGTIOSEL                 (R_AGT_BASE + R_AGT_AGTIOSEL_OFFSET)
+#define R_AGT_AGT(n)                              (R_AGT_CH_BASE(n) + R_AGT_AGT_OFFSET)
+#define R_AGT_AGTCMA(n)                           (R_AGT_CH_BASE(n) + R_AGT_AGTCMA_OFFSET)
+#define R_AGT_AGTCMB(n)                           (R_AGT_CH_BASE(n) + R_AGT_AGTCMB_OFFSET)
+#define R_AGT_AGTCR(n)                            (R_AGT_CH_BASE(n) + R_AGT_AGTCR_OFFSET)
+#define R_AGT_AGTMR1(n)                           (R_AGT_CH_BASE(n) + R_AGT_AGTMR1_OFFSET)
+#define R_AGT_AGTMR2(n)                           (R_AGT_CH_BASE(n) + R_AGT_AGTMR2_OFFSET)
+#define R_AGT_AGTIOC(n)                           (R_AGT_CH_BASE(n) + R_AGT_AGTIOC_OFFSET)
+#define R_AGT_AGTISR(n)                           (R_AGT_CH_BASE(n) + R_AGT_AGTISR_OFFSET)
+#define R_AGT_AGTCMSR(n)                          (R_AGT_CH_BASE(n) + R_AGT_AGTCMSR_OFFSET)
+#define R_AGT_AGTIOSEL(n)                         (R_AGT_CH_BASE(n) + R_AGT_AGTIOSEL_OFFSET)
 
 /* Register bit definitions */
 /* AGTCR Register bit definitions */

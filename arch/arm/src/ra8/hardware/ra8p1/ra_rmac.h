@@ -39,204 +39,168 @@
 #endif
 
 /* Channel stride for multi-channel peripherals */
-#define R_RMAC_CH_STRIDE    0x00000004
+#define R_RMAC_CH_STRIDE    0x00002000
 #define R_RMAC_CH_BASE(ch)   (R_RMAC_BASE + ((uint32_t)(ch) * R_RMAC_CH_STRIDE))
 
 /* RMAC Register Offsets */
 
-#define R_RMAC_MPSM_OFFSET     0x00000000  /* PHY Station Management Register */
-#define R_RMAC_MPIC_OFFSET     0x00000004  /* PHY Interfaces Configuration Register */
-#define R_RMAC_MPIM_OFFSET     0x00000008  /* PHY Interfaces Monitoring Register */
-#define R_RMAC_MIOC_OFFSET     0x00000010  /* I/O Configuration Register */
-#define R_RMAC_MTFFC_OFFSET     0x00000020  /* Transmission Frame Format Configuration Register */
-#define R_RMAC_MTPFC_OFFSET     0x00000024  /* Transmission Pause or PFC Frame Configuration Register */
-#define R_RMAC_MTPFC2_OFFSET     0x00000028  /* Transmission Pause or PFC Frame Configuration Register 2 */
-#define R_RMAC_MTPFC3T_OFFSET     0x00000030  /* Transmission Pause or PFC Frame Configuration Register 3 for Priority Group t */
-#define R_RMAC_MRGC_OFFSET     0x00000080  /* Reception General Configuration Register */
-#define R_RMAC_MRMAC0_OFFSET     0x00000084  /* Reception MAC Address Configuration Register 0 */
-#define R_RMAC_MRMAC1_OFFSET     0x00000088  /* Reception MAC Address Configuration Register 1 */
-#define R_RMAC_MRAFC_OFFSET     0x0000008c  /* Reception Address Filter Configuration Register */
-#define R_RMAC_MRSCE_OFFSET     0x00000090  /* Reception Storm Configuration for E-Frames Register */
-#define R_RMAC_MRSCP_OFFSET     0x00000094  /* Reception Storm Configuration for P-Frames Register */
-#define R_RMAC_MRSCC_OFFSET     0x00000098  /* Reception Storm Counter Configuration Register */
-#define R_RMAC_MRFSCE_OFFSET     0x0000009c  /* Reception Frame Size Configuration for E-Frames Register */
-#define R_RMAC_MRFSCP_OFFSET     0x000000a0  /* Reception Frame Size Configuration for P-Frames Register */
-#define R_RMAC_MTRC_OFFSET     0x000000a4  /* Timestamp Reception Configuration Register */
-#define R_RMAC_MRPFM_OFFSET     0x000000ac  /* Reception Pause or PFC Frame Monitoring Register */
+#define R_RMAC_MPSM_OFFSET                        0x00000000  /* PHY Station Management Register */
+#define R_RMAC_MPIC_OFFSET                        0x00000004  /* PHY Interfaces Configuration Register */
+#define R_RMAC_MPIM_OFFSET                        0x00000008  /* PHY Interfaces Monitoring Register */
+#define R_RMAC_MIOC_OFFSET                        0x00000010  /* I/O Configuration Register */
+#define R_RMAC_MTFFC_OFFSET                       0x00000020  /* Transmission Frame Format Configuration Register */
+#define R_RMAC_MTPFC_OFFSET                       0x00000024  /* Transmission Pause or PFC Frame Configuration Register */
+#define R_RMAC_MTPFC2_OFFSET                      0x00000028  /* Transmission Pause or PFC Frame Configuration Register 2 */
+#define R_RMAC_MTPFC3T_OFFSET                     0x00000030  /* Transmission Pause or PFC Frame Configuration Register 3 for Priority Group t */
+#define R_RMAC_MRGC_OFFSET                        0x00000080  /* Reception General Configuration Register */
+#define R_RMAC_MRMAC0_OFFSET                      0x00000084  /* Reception MAC Address Configuration Register 0 */
+#define R_RMAC_MRMAC1_OFFSET                      0x00000088  /* Reception MAC Address Configuration Register 1 */
+#define R_RMAC_MRAFC_OFFSET                       0x0000008c  /* Reception Address Filter Configuration Register */
+#define R_RMAC_MRSCE_OFFSET                       0x00000090  /* Reception Storm Configuration for E-Frames Register */
+#define R_RMAC_MRSCP_OFFSET                       0x00000094  /* Reception Storm Configuration for P-Frames Register */
+#define R_RMAC_MRSCC_OFFSET                       0x00000098  /* Reception Storm Counter Configuration Register */
+#define R_RMAC_MRFSCE_OFFSET                      0x0000009c  /* Reception Frame Size Configuration for E-Frames Register */
+#define R_RMAC_MRFSCP_OFFSET                      0x000000a0  /* Reception Frame Size Configuration for P-Frames Register */
+#define R_RMAC_MTRC_OFFSET                        0x000000a4  /* Timestamp Reception Configuration Register */
+#define R_RMAC_MRPFM_OFFSET                       0x000000ac  /* Reception Pause or PFC Frame Monitoring Register */
 /* MPFC%s Registers (0-15) */
-#define R_RMAC_MPFC00_OFFSET     0x00000100  /* PTP Filtering Register Configuration Register 00 */
-#define R_RMAC_MPFC01_OFFSET     0x00000104  /* PTP Filtering Register Configuration Register 01 */
-#define R_RMAC_MPFC02_OFFSET     0x00000108  /* PTP Filtering Register Configuration Register 02 */
-#define R_RMAC_MPFC03_OFFSET     0x0000010c  /* PTP Filtering Register Configuration Register 03 */
-#define R_RMAC_MPFC04_OFFSET     0x00000110  /* PTP Filtering Register Configuration Register 04 */
-#define R_RMAC_MPFC05_OFFSET     0x00000114  /* PTP Filtering Register Configuration Register 05 */
-#define R_RMAC_MPFC06_OFFSET     0x00000118  /* PTP Filtering Register Configuration Register 06 */
-#define R_RMAC_MPFC07_OFFSET     0x0000011c  /* PTP Filtering Register Configuration Register 07 */
-#define R_RMAC_MPFC08_OFFSET     0x00000120  /* PTP Filtering Register Configuration Register 08 */
-#define R_RMAC_MPFC09_OFFSET     0x00000124  /* PTP Filtering Register Configuration Register 09 */
-#define R_RMAC_MPFC10_OFFSET     0x00000128  /* PTP Filtering Register Configuration Register 10 */
-#define R_RMAC_MPFC11_OFFSET     0x0000012c  /* PTP Filtering Register Configuration Register 11 */
-#define R_RMAC_MPFC12_OFFSET     0x00000130  /* PTP Filtering Register Configuration Register 12 */
-#define R_RMAC_MPFC13_OFFSET     0x00000134  /* PTP Filtering Register Configuration Register 13 */
-#define R_RMAC_MPFC14_OFFSET     0x00000138  /* PTP Filtering Register Configuration Register 14 */
-#define R_RMAC_MPFC15_OFFSET     0x0000013c  /* PTP Filtering Register Configuration Register 15 */
-#define R_RMAC_MLVC_OFFSET     0x00000180  /* Link Verification Configuration Register */
-#define R_RMAC_MEEEC_OFFSET     0x00000184  /* Energy Efficient Ethernet Configuration Register */
-#define R_RMAC_MLBC_OFFSET     0x00000188  /* Loopback Configuration Register */
-#define R_RMAC_MEIS_OFFSET     0x00000200  /* Error Interrupt Status Register */
-#define R_RMAC_MEIE_OFFSET     0x00000204  /* Error Interrupt Enable Register */
-#define R_RMAC_MEID_OFFSET     0x00000208  /* Error Interrupt Disable Register */
-#define R_RMAC_MMIS0_OFFSET     0x00000210  /* Monitoring Interrupt Status Register 0 */
-#define R_RMAC_MMIE0_OFFSET     0x00000214  /* Monitoring Interrupt Enable Register 0 */
-#define R_RMAC_MMID0_OFFSET     0x00000218  /* Monitoring Interrupt Disable Register 0 */
-#define R_RMAC_MMIS1_OFFSET     0x00000220  /* Monitoring Interrupt Status Register 1 */
-#define R_RMAC_MMIE1_OFFSET     0x00000224  /* Monitoring Interrupt Enable Register 1 */
-#define R_RMAC_MMID1_OFFSET     0x00000228  /* Monitoring Interrupt Disable Register 1 */
-#define R_RMAC_MMIS2_OFFSET     0x00000230  /* Monitoring Interrupt Status Register 2 */
-#define R_RMAC_MMIE2_OFFSET     0x00000234  /* Monitoring Interrupt Enable Register 2 */
-#define R_RMAC_MMID2_OFFSET     0x00000238  /* Monitoring Interrupt Disable Register 2 */
-#define R_RMAC_MMPFTCT_OFFSET     0x00000300  /* Manual Pause Frame Transmit Counter Register */
-#define R_RMAC_MAPFTCT_OFFSET     0x00000304  /* Automatic Pause Frame Transmit Counter Register */
-#define R_RMAC_MPFRCT_OFFSET     0x00000308  /* Pause Frame Receive Counter Register */
-#define R_RMAC_MFCICT_OFFSET     0x0000030c  /* False Carrier Indication Counter Register */
-#define R_RMAC_MEEECT_OFFSET     0x00000310  /* Energy Efficient Ethernet Counter Register */
+#define R_RMAC_MPFC_OFFSET(m)                     (0x00000100 + ((m) * 0x00000004))  /* PTP Filtering Register Configuration Register %s */
+#define R_RMAC_MLVC_OFFSET                        0x00000180  /* Link Verification Configuration Register */
+#define R_RMAC_MEEEC_OFFSET                       0x00000184  /* Energy Efficient Ethernet Configuration Register */
+#define R_RMAC_MLBC_OFFSET                        0x00000188  /* Loopback Configuration Register */
+#define R_RMAC_MEIS_OFFSET                        0x00000200  /* Error Interrupt Status Register */
+#define R_RMAC_MEIE_OFFSET                        0x00000204  /* Error Interrupt Enable Register */
+#define R_RMAC_MEID_OFFSET                        0x00000208  /* Error Interrupt Disable Register */
+#define R_RMAC_MMIS0_OFFSET                       0x00000210  /* Monitoring Interrupt Status Register 0 */
+#define R_RMAC_MMIE0_OFFSET                       0x00000214  /* Monitoring Interrupt Enable Register 0 */
+#define R_RMAC_MMID0_OFFSET                       0x00000218  /* Monitoring Interrupt Disable Register 0 */
+#define R_RMAC_MMIS1_OFFSET                       0x00000220  /* Monitoring Interrupt Status Register 1 */
+#define R_RMAC_MMIE1_OFFSET                       0x00000224  /* Monitoring Interrupt Enable Register 1 */
+#define R_RMAC_MMID1_OFFSET                       0x00000228  /* Monitoring Interrupt Disable Register 1 */
+#define R_RMAC_MMIS2_OFFSET                       0x00000230  /* Monitoring Interrupt Status Register 2 */
+#define R_RMAC_MMIE2_OFFSET                       0x00000234  /* Monitoring Interrupt Enable Register 2 */
+#define R_RMAC_MMID2_OFFSET                       0x00000238  /* Monitoring Interrupt Disable Register 2 */
+#define R_RMAC_MMPFTCT_OFFSET                     0x00000300  /* Manual Pause Frame Transmit Counter Register */
+#define R_RMAC_MAPFTCT_OFFSET                     0x00000304  /* Automatic Pause Frame Transmit Counter Register */
+#define R_RMAC_MPFRCT_OFFSET                      0x00000308  /* Pause Frame Receive Counter Register */
+#define R_RMAC_MFCICT_OFFSET                      0x0000030c  /* False Carrier Indication Counter Register */
+#define R_RMAC_MEEECT_OFFSET                      0x00000310  /* Energy Efficient Ethernet Counter Register */
 /* MMPCFTCT%s Registers (0-1) */
-#define R_RMAC_MMPCFTCT0_OFFSET     0x00000320  /* Manual PFC Frame Transmit Counter Register */
-#define R_RMAC_MMPCFTCT1_OFFSET     0x00000324  /* Manual PFC Frame Transmit Counter Register */
+#define R_RMAC_MMPCFTCT_OFFSET(m)                 (0x00000320 + ((m) * 0x00000004))  /* Manual PFC Frame Transmit Counter Register */
 /* MAPCFTCT%s Registers (0-1) */
-#define R_RMAC_MAPCFTCT0_OFFSET     0x00000330  /* Automatic PFC Frame Transmit Counter Register */
-#define R_RMAC_MAPCFTCT1_OFFSET     0x00000334  /* Automatic PFC Frame Transmit Counter Register */
+#define R_RMAC_MAPCFTCT_OFFSET(m)                 (0x00000330 + ((m) * 0x00000004))  /* Automatic PFC Frame Transmit Counter Register */
 /* MPCFRCT%s Registers (0-1) */
-#define R_RMAC_MPCFRCT0_OFFSET     0x00000340  /* PFC Frame Receive Counter Register */
-#define R_RMAC_MPCFRCT1_OFFSET     0x00000344  /* PFC Frame Receive Counter Register */
-#define R_RMAC_MROVFC_OFFSET     0x00000360  /* Receive Overflow Counter Register */
-#define R_RMAC_MRGFCE_OFFSET     0x00000408  /* Received Good Frame Counter E-Frames Register */
-#define R_RMAC_MRGFCP_OFFSET     0x0000040c  /* Received Good Frame Counter P-Frames Register */
-#define R_RMAC_MRBFC_OFFSET     0x00000410  /* Received Good Broadcast Frame Counter Register */
-#define R_RMAC_MRMFC_OFFSET     0x00000414  /* Received Good Multicast Frame Counter Register */
-#define R_RMAC_MRUFC_OFFSET     0x00000418  /* Received Good Unicast Frame Counter Register */
-#define R_RMAC_MRPEFC_OFFSET     0x0000041c  /* Received PHY Error Frame Count Register */
-#define R_RMAC_MRNEFC_OFFSET     0x00000420  /* Received Nibble Error Frame Count Register */
-#define R_RMAC_MRFMEFC_OFFSET     0x00000424  /* Received FCS/mCRC Error Frame Count Register */
-#define R_RMAC_MRFFMEFC_OFFSET     0x00000428  /* Received Final Fragment Missing Error Frame Count Register */
-#define R_RMAC_MRCFCEFC_OFFSET     0x0000042c  /* Received C-Fragment Count Error Frame Count Register */
-#define R_RMAC_MRFCEFC_OFFSET     0x00000430  /* Received Fragment Count Error Frame Count Register */
-#define R_RMAC_MRRCFEFC_OFFSET     0x00000434  /* Received RMAC Filter Error Frame Count Register */
-#define R_RMAC_MRFC_OFFSET     0x00000438  /* Received Frame Count Register */
-#define R_RMAC_MRGUEFC_OFFSET     0x0000043c  /* Received Good Undersize Error Frame Count Register */
-#define R_RMAC_MRBUEFC_OFFSET     0x00000440  /* Received Bad Undersize Error Frame Count Register */
-#define R_RMAC_MRGOEFC_OFFSET     0x00000444  /* Received Good Oversize Error Frame Count Register */
-#define R_RMAC_MRBOEFC_OFFSET     0x00000448  /* Received Bad Oversize Error Frame Count Register */
-#define R_RMAC_MRXBCEU_OFFSET     0x0000044c  /* Received Byte Counter E-Frames Upper Side Register */
-#define R_RMAC_MRXBCEL_OFFSET     0x00000450  /* Received Byte Counter E-Frames Lower Side Register */
-#define R_RMAC_MRXBCPU_OFFSET     0x00000454  /* Received Byte Counter P-Frames Upper Side Register */
-#define R_RMAC_MRXBCPL_OFFSET     0x00000458  /* Received Byte Counter P-Frames Lower Side Register */
-#define R_RMAC_MTGFCE_OFFSET     0x00000508  /* Transmitted Good Frame Counter E-Frames Register */
-#define R_RMAC_MTGFCP_OFFSET     0x0000050c  /* Transmitted Good Frame Counter P-Frames Register */
-#define R_RMAC_MTBFC_OFFSET     0x00000510  /* Transmitted Broadcast Frame Counter Register */
-#define R_RMAC_MTMFC_OFFSET     0x00000514  /* Transmitted Multicast Frame Counter Register */
-#define R_RMAC_MTUFC_OFFSET     0x00000518  /* Transmitted Unicast Frame Counter Register */
-#define R_RMAC_MTEFC_OFFSET     0x0000051c  /* Transmitted Error Frame Counter Register */
-#define R_RMAC_MTXBCEU_OFFSET     0x00000520  /* Transmitted Byte Counter E-Frames Upper Side Register */
-#define R_RMAC_MTXBCEL_OFFSET     0x00000524  /* Transmitted Byte Counter E-Frames Lower Side Register */
-#define R_RMAC_MTXBCPU_OFFSET     0x00000528  /* Transmitted Byte Counter P-Frames Upper Side Register */
-#define R_RMAC_MTXBCPL_OFFSET     0x0000052c  /* Transmitted Byte Counter P-Frames Lower Side Register */
+#define R_RMAC_MPCFRCT_OFFSET(m)                  (0x00000340 + ((m) * 0x00000004))  /* PFC Frame Receive Counter Register */
+#define R_RMAC_MROVFC_OFFSET                      0x00000360  /* Receive Overflow Counter Register */
+#define R_RMAC_MRGFCE_OFFSET                      0x00000408  /* Received Good Frame Counter E-Frames Register */
+#define R_RMAC_MRGFCP_OFFSET                      0x0000040c  /* Received Good Frame Counter P-Frames Register */
+#define R_RMAC_MRBFC_OFFSET                       0x00000410  /* Received Good Broadcast Frame Counter Register */
+#define R_RMAC_MRMFC_OFFSET                       0x00000414  /* Received Good Multicast Frame Counter Register */
+#define R_RMAC_MRUFC_OFFSET                       0x00000418  /* Received Good Unicast Frame Counter Register */
+#define R_RMAC_MRPEFC_OFFSET                      0x0000041c  /* Received PHY Error Frame Count Register */
+#define R_RMAC_MRNEFC_OFFSET                      0x00000420  /* Received Nibble Error Frame Count Register */
+#define R_RMAC_MRFMEFC_OFFSET                     0x00000424  /* Received FCS/mCRC Error Frame Count Register */
+#define R_RMAC_MRFFMEFC_OFFSET                    0x00000428  /* Received Final Fragment Missing Error Frame Count Register */
+#define R_RMAC_MRCFCEFC_OFFSET                    0x0000042c  /* Received C-Fragment Count Error Frame Count Register */
+#define R_RMAC_MRFCEFC_OFFSET                     0x00000430  /* Received Fragment Count Error Frame Count Register */
+#define R_RMAC_MRRCFEFC_OFFSET                    0x00000434  /* Received RMAC Filter Error Frame Count Register */
+#define R_RMAC_MRFC_OFFSET                        0x00000438  /* Received Frame Count Register */
+#define R_RMAC_MRGUEFC_OFFSET                     0x0000043c  /* Received Good Undersize Error Frame Count Register */
+#define R_RMAC_MRBUEFC_OFFSET                     0x00000440  /* Received Bad Undersize Error Frame Count Register */
+#define R_RMAC_MRGOEFC_OFFSET                     0x00000444  /* Received Good Oversize Error Frame Count Register */
+#define R_RMAC_MRBOEFC_OFFSET                     0x00000448  /* Received Bad Oversize Error Frame Count Register */
+#define R_RMAC_MRXBCEU_OFFSET                     0x0000044c  /* Received Byte Counter E-Frames Upper Side Register */
+#define R_RMAC_MRXBCEL_OFFSET                     0x00000450  /* Received Byte Counter E-Frames Lower Side Register */
+#define R_RMAC_MRXBCPU_OFFSET                     0x00000454  /* Received Byte Counter P-Frames Upper Side Register */
+#define R_RMAC_MRXBCPL_OFFSET                     0x00000458  /* Received Byte Counter P-Frames Lower Side Register */
+#define R_RMAC_MTGFCE_OFFSET                      0x00000508  /* Transmitted Good Frame Counter E-Frames Register */
+#define R_RMAC_MTGFCP_OFFSET                      0x0000050c  /* Transmitted Good Frame Counter P-Frames Register */
+#define R_RMAC_MTBFC_OFFSET                       0x00000510  /* Transmitted Broadcast Frame Counter Register */
+#define R_RMAC_MTMFC_OFFSET                       0x00000514  /* Transmitted Multicast Frame Counter Register */
+#define R_RMAC_MTUFC_OFFSET                       0x00000518  /* Transmitted Unicast Frame Counter Register */
+#define R_RMAC_MTEFC_OFFSET                       0x0000051c  /* Transmitted Error Frame Counter Register */
+#define R_RMAC_MTXBCEU_OFFSET                     0x00000520  /* Transmitted Byte Counter E-Frames Upper Side Register */
+#define R_RMAC_MTXBCEL_OFFSET                     0x00000524  /* Transmitted Byte Counter E-Frames Lower Side Register */
+#define R_RMAC_MTXBCPU_OFFSET                     0x00000528  /* Transmitted Byte Counter P-Frames Upper Side Register */
+#define R_RMAC_MTXBCPL_OFFSET                     0x0000052c  /* Transmitted Byte Counter P-Frames Lower Side Register */
 
 /* RMAC Register Addresses */
 
-#define R_RMAC_MPSM                 (R_RMAC_BASE + R_RMAC_MPSM_OFFSET)
-#define R_RMAC_MPIC                 (R_RMAC_BASE + R_RMAC_MPIC_OFFSET)
-#define R_RMAC_MPIM                 (R_RMAC_BASE + R_RMAC_MPIM_OFFSET)
-#define R_RMAC_MIOC                 (R_RMAC_BASE + R_RMAC_MIOC_OFFSET)
-#define R_RMAC_MTFFC                 (R_RMAC_BASE + R_RMAC_MTFFC_OFFSET)
-#define R_RMAC_MTPFC                 (R_RMAC_BASE + R_RMAC_MTPFC_OFFSET)
-#define R_RMAC_MTPFC2                 (R_RMAC_BASE + R_RMAC_MTPFC2_OFFSET)
-#define R_RMAC_MTPFC3T                 (R_RMAC_BASE + R_RMAC_MTPFC3T_OFFSET)
-#define R_RMAC_MRGC                 (R_RMAC_BASE + R_RMAC_MRGC_OFFSET)
-#define R_RMAC_MRMAC0                 (R_RMAC_BASE + R_RMAC_MRMAC0_OFFSET)
-#define R_RMAC_MRMAC1                 (R_RMAC_BASE + R_RMAC_MRMAC1_OFFSET)
-#define R_RMAC_MRAFC                 (R_RMAC_BASE + R_RMAC_MRAFC_OFFSET)
-#define R_RMAC_MRSCE                 (R_RMAC_BASE + R_RMAC_MRSCE_OFFSET)
-#define R_RMAC_MRSCP                 (R_RMAC_BASE + R_RMAC_MRSCP_OFFSET)
-#define R_RMAC_MRSCC                 (R_RMAC_BASE + R_RMAC_MRSCC_OFFSET)
-#define R_RMAC_MRFSCE                 (R_RMAC_BASE + R_RMAC_MRFSCE_OFFSET)
-#define R_RMAC_MRFSCP                 (R_RMAC_BASE + R_RMAC_MRFSCP_OFFSET)
-#define R_RMAC_MTRC                 (R_RMAC_BASE + R_RMAC_MTRC_OFFSET)
-#define R_RMAC_MRPFM                 (R_RMAC_BASE + R_RMAC_MRPFM_OFFSET)
-#define R_RMAC_MPFC00                 (R_RMAC_BASE + R_RMAC_MPFC00_OFFSET)
-#define R_RMAC_MPFC01                 (R_RMAC_BASE + R_RMAC_MPFC01_OFFSET)
-#define R_RMAC_MPFC02                 (R_RMAC_BASE + R_RMAC_MPFC02_OFFSET)
-#define R_RMAC_MPFC03                 (R_RMAC_BASE + R_RMAC_MPFC03_OFFSET)
-#define R_RMAC_MPFC04                 (R_RMAC_BASE + R_RMAC_MPFC04_OFFSET)
-#define R_RMAC_MPFC05                 (R_RMAC_BASE + R_RMAC_MPFC05_OFFSET)
-#define R_RMAC_MPFC06                 (R_RMAC_BASE + R_RMAC_MPFC06_OFFSET)
-#define R_RMAC_MPFC07                 (R_RMAC_BASE + R_RMAC_MPFC07_OFFSET)
-#define R_RMAC_MPFC08                 (R_RMAC_BASE + R_RMAC_MPFC08_OFFSET)
-#define R_RMAC_MPFC09                 (R_RMAC_BASE + R_RMAC_MPFC09_OFFSET)
-#define R_RMAC_MPFC10                 (R_RMAC_BASE + R_RMAC_MPFC10_OFFSET)
-#define R_RMAC_MPFC11                 (R_RMAC_BASE + R_RMAC_MPFC11_OFFSET)
-#define R_RMAC_MPFC12                 (R_RMAC_BASE + R_RMAC_MPFC12_OFFSET)
-#define R_RMAC_MPFC13                 (R_RMAC_BASE + R_RMAC_MPFC13_OFFSET)
-#define R_RMAC_MPFC14                 (R_RMAC_BASE + R_RMAC_MPFC14_OFFSET)
-#define R_RMAC_MPFC15                 (R_RMAC_BASE + R_RMAC_MPFC15_OFFSET)
-#define R_RMAC_MLVC                 (R_RMAC_BASE + R_RMAC_MLVC_OFFSET)
-#define R_RMAC_MEEEC                 (R_RMAC_BASE + R_RMAC_MEEEC_OFFSET)
-#define R_RMAC_MLBC                 (R_RMAC_BASE + R_RMAC_MLBC_OFFSET)
-#define R_RMAC_MEIS                 (R_RMAC_BASE + R_RMAC_MEIS_OFFSET)
-#define R_RMAC_MEIE                 (R_RMAC_BASE + R_RMAC_MEIE_OFFSET)
-#define R_RMAC_MEID                 (R_RMAC_BASE + R_RMAC_MEID_OFFSET)
-#define R_RMAC_MMIS0                 (R_RMAC_BASE + R_RMAC_MMIS0_OFFSET)
-#define R_RMAC_MMIE0                 (R_RMAC_BASE + R_RMAC_MMIE0_OFFSET)
-#define R_RMAC_MMID0                 (R_RMAC_BASE + R_RMAC_MMID0_OFFSET)
-#define R_RMAC_MMIS1                 (R_RMAC_BASE + R_RMAC_MMIS1_OFFSET)
-#define R_RMAC_MMIE1                 (R_RMAC_BASE + R_RMAC_MMIE1_OFFSET)
-#define R_RMAC_MMID1                 (R_RMAC_BASE + R_RMAC_MMID1_OFFSET)
-#define R_RMAC_MMIS2                 (R_RMAC_BASE + R_RMAC_MMIS2_OFFSET)
-#define R_RMAC_MMIE2                 (R_RMAC_BASE + R_RMAC_MMIE2_OFFSET)
-#define R_RMAC_MMID2                 (R_RMAC_BASE + R_RMAC_MMID2_OFFSET)
-#define R_RMAC_MMPFTCT                 (R_RMAC_BASE + R_RMAC_MMPFTCT_OFFSET)
-#define R_RMAC_MAPFTCT                 (R_RMAC_BASE + R_RMAC_MAPFTCT_OFFSET)
-#define R_RMAC_MPFRCT                 (R_RMAC_BASE + R_RMAC_MPFRCT_OFFSET)
-#define R_RMAC_MFCICT                 (R_RMAC_BASE + R_RMAC_MFCICT_OFFSET)
-#define R_RMAC_MEEECT                 (R_RMAC_BASE + R_RMAC_MEEECT_OFFSET)
-#define R_RMAC_MMPCFTCT0                 (R_RMAC_BASE + R_RMAC_MMPCFTCT0_OFFSET)
-#define R_RMAC_MMPCFTCT1                 (R_RMAC_BASE + R_RMAC_MMPCFTCT1_OFFSET)
-#define R_RMAC_MAPCFTCT0                 (R_RMAC_BASE + R_RMAC_MAPCFTCT0_OFFSET)
-#define R_RMAC_MAPCFTCT1                 (R_RMAC_BASE + R_RMAC_MAPCFTCT1_OFFSET)
-#define R_RMAC_MPCFRCT0                 (R_RMAC_BASE + R_RMAC_MPCFRCT0_OFFSET)
-#define R_RMAC_MPCFRCT1                 (R_RMAC_BASE + R_RMAC_MPCFRCT1_OFFSET)
-#define R_RMAC_MROVFC                 (R_RMAC_BASE + R_RMAC_MROVFC_OFFSET)
-#define R_RMAC_MRGFCE                 (R_RMAC_BASE + R_RMAC_MRGFCE_OFFSET)
-#define R_RMAC_MRGFCP                 (R_RMAC_BASE + R_RMAC_MRGFCP_OFFSET)
-#define R_RMAC_MRBFC                 (R_RMAC_BASE + R_RMAC_MRBFC_OFFSET)
-#define R_RMAC_MRMFC                 (R_RMAC_BASE + R_RMAC_MRMFC_OFFSET)
-#define R_RMAC_MRUFC                 (R_RMAC_BASE + R_RMAC_MRUFC_OFFSET)
-#define R_RMAC_MRPEFC                 (R_RMAC_BASE + R_RMAC_MRPEFC_OFFSET)
-#define R_RMAC_MRNEFC                 (R_RMAC_BASE + R_RMAC_MRNEFC_OFFSET)
-#define R_RMAC_MRFMEFC                 (R_RMAC_BASE + R_RMAC_MRFMEFC_OFFSET)
-#define R_RMAC_MRFFMEFC                 (R_RMAC_BASE + R_RMAC_MRFFMEFC_OFFSET)
-#define R_RMAC_MRCFCEFC                 (R_RMAC_BASE + R_RMAC_MRCFCEFC_OFFSET)
-#define R_RMAC_MRFCEFC                 (R_RMAC_BASE + R_RMAC_MRFCEFC_OFFSET)
-#define R_RMAC_MRRCFEFC                 (R_RMAC_BASE + R_RMAC_MRRCFEFC_OFFSET)
-#define R_RMAC_MRFC                 (R_RMAC_BASE + R_RMAC_MRFC_OFFSET)
-#define R_RMAC_MRGUEFC                 (R_RMAC_BASE + R_RMAC_MRGUEFC_OFFSET)
-#define R_RMAC_MRBUEFC                 (R_RMAC_BASE + R_RMAC_MRBUEFC_OFFSET)
-#define R_RMAC_MRGOEFC                 (R_RMAC_BASE + R_RMAC_MRGOEFC_OFFSET)
-#define R_RMAC_MRBOEFC                 (R_RMAC_BASE + R_RMAC_MRBOEFC_OFFSET)
-#define R_RMAC_MRXBCEU                 (R_RMAC_BASE + R_RMAC_MRXBCEU_OFFSET)
-#define R_RMAC_MRXBCEL                 (R_RMAC_BASE + R_RMAC_MRXBCEL_OFFSET)
-#define R_RMAC_MRXBCPU                 (R_RMAC_BASE + R_RMAC_MRXBCPU_OFFSET)
-#define R_RMAC_MRXBCPL                 (R_RMAC_BASE + R_RMAC_MRXBCPL_OFFSET)
-#define R_RMAC_MTGFCE                 (R_RMAC_BASE + R_RMAC_MTGFCE_OFFSET)
-#define R_RMAC_MTGFCP                 (R_RMAC_BASE + R_RMAC_MTGFCP_OFFSET)
-#define R_RMAC_MTBFC                 (R_RMAC_BASE + R_RMAC_MTBFC_OFFSET)
-#define R_RMAC_MTMFC                 (R_RMAC_BASE + R_RMAC_MTMFC_OFFSET)
-#define R_RMAC_MTUFC                 (R_RMAC_BASE + R_RMAC_MTUFC_OFFSET)
-#define R_RMAC_MTEFC                 (R_RMAC_BASE + R_RMAC_MTEFC_OFFSET)
-#define R_RMAC_MTXBCEU                 (R_RMAC_BASE + R_RMAC_MTXBCEU_OFFSET)
-#define R_RMAC_MTXBCEL                 (R_RMAC_BASE + R_RMAC_MTXBCEL_OFFSET)
-#define R_RMAC_MTXBCPU                 (R_RMAC_BASE + R_RMAC_MTXBCPU_OFFSET)
-#define R_RMAC_MTXBCPL                 (R_RMAC_BASE + R_RMAC_MTXBCPL_OFFSET)
+#define R_RMAC_MPSM(n)                            (R_RMAC_CH_BASE(n) + R_RMAC_MPSM_OFFSET)
+#define R_RMAC_MPIC(n)                            (R_RMAC_CH_BASE(n) + R_RMAC_MPIC_OFFSET)
+#define R_RMAC_MPIM(n)                            (R_RMAC_CH_BASE(n) + R_RMAC_MPIM_OFFSET)
+#define R_RMAC_MIOC(n)                            (R_RMAC_CH_BASE(n) + R_RMAC_MIOC_OFFSET)
+#define R_RMAC_MTFFC(n)                           (R_RMAC_CH_BASE(n) + R_RMAC_MTFFC_OFFSET)
+#define R_RMAC_MTPFC(n)                           (R_RMAC_CH_BASE(n) + R_RMAC_MTPFC_OFFSET)
+#define R_RMAC_MTPFC2(n)                          (R_RMAC_CH_BASE(n) + R_RMAC_MTPFC2_OFFSET)
+#define R_RMAC_MTPFC3T(n)                         (R_RMAC_CH_BASE(n) + R_RMAC_MTPFC3T_OFFSET)
+#define R_RMAC_MRGC(n)                            (R_RMAC_CH_BASE(n) + R_RMAC_MRGC_OFFSET)
+#define R_RMAC_MRMAC0(n)                          (R_RMAC_CH_BASE(n) + R_RMAC_MRMAC0_OFFSET)
+#define R_RMAC_MRMAC1(n)                          (R_RMAC_CH_BASE(n) + R_RMAC_MRMAC1_OFFSET)
+#define R_RMAC_MRAFC(n)                           (R_RMAC_CH_BASE(n) + R_RMAC_MRAFC_OFFSET)
+#define R_RMAC_MRSCE(n)                           (R_RMAC_CH_BASE(n) + R_RMAC_MRSCE_OFFSET)
+#define R_RMAC_MRSCP(n)                           (R_RMAC_CH_BASE(n) + R_RMAC_MRSCP_OFFSET)
+#define R_RMAC_MRSCC(n)                           (R_RMAC_CH_BASE(n) + R_RMAC_MRSCC_OFFSET)
+#define R_RMAC_MRFSCE(n)                          (R_RMAC_CH_BASE(n) + R_RMAC_MRFSCE_OFFSET)
+#define R_RMAC_MRFSCP(n)                          (R_RMAC_CH_BASE(n) + R_RMAC_MRFSCP_OFFSET)
+#define R_RMAC_MTRC(n)                            (R_RMAC_CH_BASE(n) + R_RMAC_MTRC_OFFSET)
+#define R_RMAC_MRPFM(n)                           (R_RMAC_CH_BASE(n) + R_RMAC_MRPFM_OFFSET)
+#define R_RMAC_MPFC(n, m)                         (R_RMAC_CH_BASE(n) + R_RMAC_MPFC_OFFSET(m))
+#define R_RMAC_MLVC(n)                            (R_RMAC_CH_BASE(n) + R_RMAC_MLVC_OFFSET)
+#define R_RMAC_MEEEC(n)                           (R_RMAC_CH_BASE(n) + R_RMAC_MEEEC_OFFSET)
+#define R_RMAC_MLBC(n)                            (R_RMAC_CH_BASE(n) + R_RMAC_MLBC_OFFSET)
+#define R_RMAC_MEIS(n)                            (R_RMAC_CH_BASE(n) + R_RMAC_MEIS_OFFSET)
+#define R_RMAC_MEIE(n)                            (R_RMAC_CH_BASE(n) + R_RMAC_MEIE_OFFSET)
+#define R_RMAC_MEID(n)                            (R_RMAC_CH_BASE(n) + R_RMAC_MEID_OFFSET)
+#define R_RMAC_MMIS0(n)                           (R_RMAC_CH_BASE(n) + R_RMAC_MMIS0_OFFSET)
+#define R_RMAC_MMIE0(n)                           (R_RMAC_CH_BASE(n) + R_RMAC_MMIE0_OFFSET)
+#define R_RMAC_MMID0(n)                           (R_RMAC_CH_BASE(n) + R_RMAC_MMID0_OFFSET)
+#define R_RMAC_MMIS1(n)                           (R_RMAC_CH_BASE(n) + R_RMAC_MMIS1_OFFSET)
+#define R_RMAC_MMIE1(n)                           (R_RMAC_CH_BASE(n) + R_RMAC_MMIE1_OFFSET)
+#define R_RMAC_MMID1(n)                           (R_RMAC_CH_BASE(n) + R_RMAC_MMID1_OFFSET)
+#define R_RMAC_MMIS2(n)                           (R_RMAC_CH_BASE(n) + R_RMAC_MMIS2_OFFSET)
+#define R_RMAC_MMIE2(n)                           (R_RMAC_CH_BASE(n) + R_RMAC_MMIE2_OFFSET)
+#define R_RMAC_MMID2(n)                           (R_RMAC_CH_BASE(n) + R_RMAC_MMID2_OFFSET)
+#define R_RMAC_MMPFTCT(n)                         (R_RMAC_CH_BASE(n) + R_RMAC_MMPFTCT_OFFSET)
+#define R_RMAC_MAPFTCT(n)                         (R_RMAC_CH_BASE(n) + R_RMAC_MAPFTCT_OFFSET)
+#define R_RMAC_MPFRCT(n)                          (R_RMAC_CH_BASE(n) + R_RMAC_MPFRCT_OFFSET)
+#define R_RMAC_MFCICT(n)                          (R_RMAC_CH_BASE(n) + R_RMAC_MFCICT_OFFSET)
+#define R_RMAC_MEEECT(n)                          (R_RMAC_CH_BASE(n) + R_RMAC_MEEECT_OFFSET)
+#define R_RMAC_MMPCFTCT(n, m)                     (R_RMAC_CH_BASE(n) + R_RMAC_MMPCFTCT_OFFSET(m))
+#define R_RMAC_MAPCFTCT(n, m)                     (R_RMAC_CH_BASE(n) + R_RMAC_MAPCFTCT_OFFSET(m))
+#define R_RMAC_MPCFRCT(n, m)                      (R_RMAC_CH_BASE(n) + R_RMAC_MPCFRCT_OFFSET(m))
+#define R_RMAC_MROVFC(n)                          (R_RMAC_CH_BASE(n) + R_RMAC_MROVFC_OFFSET)
+#define R_RMAC_MRGFCE(n)                          (R_RMAC_CH_BASE(n) + R_RMAC_MRGFCE_OFFSET)
+#define R_RMAC_MRGFCP(n)                          (R_RMAC_CH_BASE(n) + R_RMAC_MRGFCP_OFFSET)
+#define R_RMAC_MRBFC(n)                           (R_RMAC_CH_BASE(n) + R_RMAC_MRBFC_OFFSET)
+#define R_RMAC_MRMFC(n)                           (R_RMAC_CH_BASE(n) + R_RMAC_MRMFC_OFFSET)
+#define R_RMAC_MRUFC(n)                           (R_RMAC_CH_BASE(n) + R_RMAC_MRUFC_OFFSET)
+#define R_RMAC_MRPEFC(n)                          (R_RMAC_CH_BASE(n) + R_RMAC_MRPEFC_OFFSET)
+#define R_RMAC_MRNEFC(n)                          (R_RMAC_CH_BASE(n) + R_RMAC_MRNEFC_OFFSET)
+#define R_RMAC_MRFMEFC(n)                         (R_RMAC_CH_BASE(n) + R_RMAC_MRFMEFC_OFFSET)
+#define R_RMAC_MRFFMEFC(n)                        (R_RMAC_CH_BASE(n) + R_RMAC_MRFFMEFC_OFFSET)
+#define R_RMAC_MRCFCEFC(n)                        (R_RMAC_CH_BASE(n) + R_RMAC_MRCFCEFC_OFFSET)
+#define R_RMAC_MRFCEFC(n)                         (R_RMAC_CH_BASE(n) + R_RMAC_MRFCEFC_OFFSET)
+#define R_RMAC_MRRCFEFC(n)                        (R_RMAC_CH_BASE(n) + R_RMAC_MRRCFEFC_OFFSET)
+#define R_RMAC_MRFC(n)                            (R_RMAC_CH_BASE(n) + R_RMAC_MRFC_OFFSET)
+#define R_RMAC_MRGUEFC(n)                         (R_RMAC_CH_BASE(n) + R_RMAC_MRGUEFC_OFFSET)
+#define R_RMAC_MRBUEFC(n)                         (R_RMAC_CH_BASE(n) + R_RMAC_MRBUEFC_OFFSET)
+#define R_RMAC_MRGOEFC(n)                         (R_RMAC_CH_BASE(n) + R_RMAC_MRGOEFC_OFFSET)
+#define R_RMAC_MRBOEFC(n)                         (R_RMAC_CH_BASE(n) + R_RMAC_MRBOEFC_OFFSET)
+#define R_RMAC_MRXBCEU(n)                         (R_RMAC_CH_BASE(n) + R_RMAC_MRXBCEU_OFFSET)
+#define R_RMAC_MRXBCEL(n)                         (R_RMAC_CH_BASE(n) + R_RMAC_MRXBCEL_OFFSET)
+#define R_RMAC_MRXBCPU(n)                         (R_RMAC_CH_BASE(n) + R_RMAC_MRXBCPU_OFFSET)
+#define R_RMAC_MRXBCPL(n)                         (R_RMAC_CH_BASE(n) + R_RMAC_MRXBCPL_OFFSET)
+#define R_RMAC_MTGFCE(n)                          (R_RMAC_CH_BASE(n) + R_RMAC_MTGFCE_OFFSET)
+#define R_RMAC_MTGFCP(n)                          (R_RMAC_CH_BASE(n) + R_RMAC_MTGFCP_OFFSET)
+#define R_RMAC_MTBFC(n)                           (R_RMAC_CH_BASE(n) + R_RMAC_MTBFC_OFFSET)
+#define R_RMAC_MTMFC(n)                           (R_RMAC_CH_BASE(n) + R_RMAC_MTMFC_OFFSET)
+#define R_RMAC_MTUFC(n)                           (R_RMAC_CH_BASE(n) + R_RMAC_MTUFC_OFFSET)
+#define R_RMAC_MTEFC(n)                           (R_RMAC_CH_BASE(n) + R_RMAC_MTEFC_OFFSET)
+#define R_RMAC_MTXBCEU(n)                         (R_RMAC_CH_BASE(n) + R_RMAC_MTXBCEU_OFFSET)
+#define R_RMAC_MTXBCEL(n)                         (R_RMAC_CH_BASE(n) + R_RMAC_MTXBCEL_OFFSET)
+#define R_RMAC_MTXBCPU(n)                         (R_RMAC_CH_BASE(n) + R_RMAC_MTXBCPU_OFFSET)
+#define R_RMAC_MTXBCPL(n)                         (R_RMAC_CH_BASE(n) + R_RMAC_MTXBCPL_OFFSET)
 
 /* Register bit definitions */
 /* MPSM Register bit definitions */

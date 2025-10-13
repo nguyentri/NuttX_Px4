@@ -44,13 +44,13 @@
 
 /* DOTF Register Offsets */
 
-#define R_DOTF_CONVAREAST_OFFSET     0x00000000  /* DOTF Conversion Area Start Address Register */
-#define R_DOTF_CONVAREAD_OFFSET     0x00000004  /* DOTF Conversion Area End Address Register */
+#define R_DOTF_CONVAREAST_OFFSET                  0x00000000  /* DOTF Conversion Area Start Address Register */
+#define R_DOTF_CONVAREAD_OFFSET                   0x00000004  /* DOTF Conversion Area End Address Register */
 
 /* DOTF Register Addresses */
 
-#define R_DOTF_CONVAREAST                 (R_DOTF_BASE + R_DOTF_CONVAREAST_OFFSET)
-#define R_DOTF_CONVAREAD                 (R_DOTF_BASE + R_DOTF_CONVAREAD_OFFSET)
+#define R_DOTF_CONVAREAST(n)                      (R_DOTF_CH_BASE(n) + R_DOTF_CONVAREAST_OFFSET)
+#define R_DOTF_CONVAREAD(n)                       (R_DOTF_CH_BASE(n) + R_DOTF_CONVAREAD_OFFSET)
 
 /* Register bit definitions */
 /* CONVAREAST Register bit definitions */

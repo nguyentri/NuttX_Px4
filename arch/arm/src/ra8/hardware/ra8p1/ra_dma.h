@@ -38,19 +38,17 @@
 #endif
 #endif
 
-#define R_DMA_CH_BASE(ch)   (R_DMA_BASE + ((uint32_t)(ch) * R_DMA_CH_STRIDE))
-
 /* DMA Register Offsets */
 
-#define R_DMA_DMAST_OFFSET     0x00000000  /* DMA Module Activation Register */
-#define R_DMA_DMCTL_OFFSET     0x00000010  /* DMAC Control Register */
-#define R_DMA_DMECHR_OFFSET     0x00000040  /* DMAC Error Channel Register */
+#define R_DMA_DMAST_OFFSET                        0x00000000  /* DMA Module Activation Register */
+#define R_DMA_DMCTL_OFFSET                        0x00000010  /* DMAC Control Register */
+#define R_DMA_DMECHR_OFFSET                       0x00000040  /* DMAC Error Channel Register */
 
 /* DMA Register Addresses */
 
-#define R_DMA_DMAST                 (R_DMA_BASE + R_DMA_DMAST_OFFSET)
-#define R_DMA_DMCTL                 (R_DMA_BASE + R_DMA_DMCTL_OFFSET)
-#define R_DMA_DMECHR                 (R_DMA_BASE + R_DMA_DMECHR_OFFSET)
+#define R_DMA_DMAST                               (R_DMA_BASE + R_DMA_DMAST_OFFSET)
+#define R_DMA_DMCTL                               (R_DMA_BASE + R_DMA_DMCTL_OFFSET)
+#define R_DMA_DMECHR                              (R_DMA_BASE + R_DMA_DMECHR_OFFSET)
 
 /* Register bit definitions */
 /* DMAST Register bit definitions */

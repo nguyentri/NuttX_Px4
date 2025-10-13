@@ -38,236 +38,164 @@
 #endif
 #endif
 
-/* Channel stride for multi-channel peripherals */
-#define R_BUS_CH_STRIDE    0x00000010
-#define R_BUS_CH_BASE(ch)   (R_BUS_BASE + ((uint32_t)(ch) * R_BUS_CH_STRIDE))
-
 /* BUS Register Offsets */
 
 /* CS%sMOD Registers (0-7) */
-#define R_BUS_CS0MOD_OFFSET     0x00000002  /* CS0 Mode Register (n = 0 to 7) */
-#define R_BUS_CS1MOD_OFFSET     0x00000012  /* CS1 Mode Register (n = 0 to 7) */
-#define R_BUS_CS2MOD_OFFSET     0x00000022  /* CS2 Mode Register (n = 0 to 7) */
-#define R_BUS_CS3MOD_OFFSET     0x00000032  /* CS3 Mode Register (n = 0 to 7) */
-#define R_BUS_CS4MOD_OFFSET     0x00000042  /* CS4 Mode Register (n = 0 to 7) */
-#define R_BUS_CS5MOD_OFFSET     0x00000052  /* CS5 Mode Register (n = 0 to 7) */
-#define R_BUS_CS6MOD_OFFSET     0x00000062  /* CS6 Mode Register (n = 0 to 7) */
-#define R_BUS_CS7MOD_OFFSET     0x00000072  /* CS7 Mode Register (n = 0 to 7) */
+#define R_BUS_CSMOD_OFFSET(m)                     (0x00000002 + ((m) * 0x00000010))  /* CS%s Mode Register (n = 0 to 7) */
 /* CS%sWCR1 Registers (0-7) */
-#define R_BUS_CS0WCR1_OFFSET     0x00000004  /* CS0 Wait Control Register 1 (n = 0 to 7) */
-#define R_BUS_CS1WCR1_OFFSET     0x00000014  /* CS1 Wait Control Register 1 (n = 0 to 7) */
-#define R_BUS_CS2WCR1_OFFSET     0x00000024  /* CS2 Wait Control Register 1 (n = 0 to 7) */
-#define R_BUS_CS3WCR1_OFFSET     0x00000034  /* CS3 Wait Control Register 1 (n = 0 to 7) */
-#define R_BUS_CS4WCR1_OFFSET     0x00000044  /* CS4 Wait Control Register 1 (n = 0 to 7) */
-#define R_BUS_CS5WCR1_OFFSET     0x00000054  /* CS5 Wait Control Register 1 (n = 0 to 7) */
-#define R_BUS_CS6WCR1_OFFSET     0x00000064  /* CS6 Wait Control Register 1 (n = 0 to 7) */
-#define R_BUS_CS7WCR1_OFFSET     0x00000074  /* CS7 Wait Control Register 1 (n = 0 to 7) */
+#define R_BUS_CSWCR1_OFFSET(m)                    (0x00000004 + ((m) * 0x00000010))  /* CS%s Wait Control Register 1 (n = 0 to 7) */
 /* CS%sWCR2 Registers (0-7) */
-#define R_BUS_CS0WCR2_OFFSET     0x00000008  /* CS0 Wait Control Register 2 (n = 0 to 7) */
-#define R_BUS_CS1WCR2_OFFSET     0x00000018  /* CS1 Wait Control Register 2 (n = 0 to 7) */
-#define R_BUS_CS2WCR2_OFFSET     0x00000028  /* CS2 Wait Control Register 2 (n = 0 to 7) */
-#define R_BUS_CS3WCR2_OFFSET     0x00000038  /* CS3 Wait Control Register 2 (n = 0 to 7) */
-#define R_BUS_CS4WCR2_OFFSET     0x00000048  /* CS4 Wait Control Register 2 (n = 0 to 7) */
-#define R_BUS_CS5WCR2_OFFSET     0x00000058  /* CS5 Wait Control Register 2 (n = 0 to 7) */
-#define R_BUS_CS6WCR2_OFFSET     0x00000068  /* CS6 Wait Control Register 2 (n = 0 to 7) */
-#define R_BUS_CS7WCR2_OFFSET     0x00000078  /* CS7 Wait Control Register 2 (n = 0 to 7) */
-#define R_BUS_CS0CR_OFFSET     0x00000802  /* CS0 Control Register */
+#define R_BUS_CSWCR2_OFFSET(m)                    (0x00000008 + ((m) * 0x00000010))  /* CS%s Wait Control Register 2 (n = 0 to 7) */
+#define R_BUS_CS0CR_OFFSET                        0x00000802  /* CS0 Control Register */
 /* CS%sREC Registers (0-7) */
-#define R_BUS_CS0REC_OFFSET     0x0000080a  /* CS0 Recovery Cycle Register (n = 0 to 7) */
-#define R_BUS_CS1REC_OFFSET     0x0000081a  /* CS1 Recovery Cycle Register (n = 0 to 7) */
-#define R_BUS_CS2REC_OFFSET     0x0000082a  /* CS2 Recovery Cycle Register (n = 0 to 7) */
-#define R_BUS_CS3REC_OFFSET     0x0000083a  /* CS3 Recovery Cycle Register (n = 0 to 7) */
-#define R_BUS_CS4REC_OFFSET     0x0000084a  /* CS4 Recovery Cycle Register (n = 0 to 7) */
-#define R_BUS_CS5REC_OFFSET     0x0000085a  /* CS5 Recovery Cycle Register (n = 0 to 7) */
-#define R_BUS_CS6REC_OFFSET     0x0000086a  /* CS6 Recovery Cycle Register (n = 0 to 7) */
-#define R_BUS_CS7REC_OFFSET     0x0000087a  /* CS7 Recovery Cycle Register (n = 0 to 7) */
+#define R_BUS_CSREC_OFFSET(m)                     (0x0000080a + ((m) * 0x00000010))  /* CS%s Recovery Cycle Register (n = 0 to 7) */
 /* CS%sCR Registers (1-7) */
-#define R_BUS_CS1CR_OFFSET     0x00000812  /* CS1 Control Register */
-#define R_BUS_CS2CR_OFFSET     0x00000822  /* CS2 Control Register */
-#define R_BUS_CS3CR_OFFSET     0x00000832  /* CS3 Control Register */
-#define R_BUS_CS4CR_OFFSET     0x00000842  /* CS4 Control Register */
-#define R_BUS_CS5CR_OFFSET     0x00000852  /* CS5 Control Register */
-#define R_BUS_CS6CR_OFFSET     0x00000862  /* CS6 Control Register */
-#define R_BUS_CS7CR_OFFSET     0x00000872  /* CS7 Control Register */
-#define R_BUS_CSRECEN_OFFSET     0x00000880  /* CS Recovery Cycle Insertion Enable Register */
-#define R_BUS_SDCCR_OFFSET     0x00000c00  /* SDC Control Register */
-#define R_BUS_SDCMOD_OFFSET     0x00000c01  /* SDC Mode Register */
-#define R_BUS_SDAMOD_OFFSET     0x00000c02  /* SDRAM Access Mode Register */
-#define R_BUS_SDSELF_OFFSET     0x00000c10  /* SDRAM Self-Refresh Control Register */
-#define R_BUS_SDRFCR_OFFSET     0x00000c14  /* SDRAM Refresh Control Register */
-#define R_BUS_SDRFEN_OFFSET     0x00000c16  /* SDRAM Auto-Refresh Control Register */
-#define R_BUS_SDICR_OFFSET     0x00000c20  /* SDRAM Initialization Sequence Control Register */
-#define R_BUS_SDIR_OFFSET     0x00000c24  /* SDRAM Initialization Register */
-#define R_BUS_SDADR_OFFSET     0x00000c40  /* SDRAM Address Register */
-#define R_BUS_SDTR_OFFSET     0x00000c44  /* SDRAM Timing Register */
-#define R_BUS_SDMOD_OFFSET     0x00000c48  /* SDRAM Mode Register */
-#define R_BUS_SDSR_OFFSET     0x00000c50  /* SDRAM Status Register */
-#define R_BUS_BUSOAD_OFFSET     0x00001000  /* BUS Operation After Detection Register */
-#define R_BUS_BUSOADPT_OFFSET     0x00001004  /* BUS Operation After Detection Protect Register */
-#define R_BUS_MSAOAD_OFFSET     0x00001010  /* Master Security Attribution Operation After Detection Register */
-#define R_BUS_MSAPT_OFFSET     0x00001014  /* Master Security Attribution Protect Register */
-#define R_BUS_BUSMABTGRAPHBI_OFFSET     0x00001100  /* Bus Master Arbitration Control Register */
-#define R_BUS_BUSSABT1MRC0BI_OFFSET     0x00001200  /* Bus Slave Arbitration Control Register 1 */
-#define R_BUS_BUSSABT0MRE0BI_OFFSET     0x00001208  /* Bus Slave Arbitration Control Register 0 */
-#define R_BUS_BUSSABT0S0BI_OFFSET     0x00001220  /* Bus Slave Arbitration Control Register 0 */
-#define R_BUS_BUSSABT0S1BI_OFFSET     0x00001228  /* Bus Slave Arbitration Control Register 0 */
-#define R_BUS_BUSSABT0S2BI_OFFSET     0x00001230  /* Bus Slave Arbitration Control Register 0 */
-#define R_BUS_BUSSABT0S3BI_OFFSET     0x00001238  /* Bus Slave Arbitration Control Register 0 */
-#define R_BUS_BUSSABT0ECBI_OFFSET     0x00001250  /* Bus Slave Arbitration Control Register 0 */
-#define R_BUS_BUSSABT0OSPI0BI_OFFSET     0x00001258  /* Bus Slave Arbitration Control Register 0 */
-#define R_BUS_BUSSABT0OSPI1BI_OFFSET     0x00001260  /* Bus Slave Arbitration Control Register 0 */
-#define R_BUS_BUSSABT0CPU0SAHBI_OFFSET     0x00001268  /* Bus Slave Arbitration Control Register 0 */
-#define R_BUS_BUSSABT0CPU1TCMBI_OFFSET     0x00001270  /* Bus Slave Arbitration Control Register 0 */
-#define R_BUS_BUSSABT0PBBI_OFFSET     0x00001278  /* Bus Slave Arbitration Control Register 0 */
-#define R_BUS_BUSSABT0PABI_OFFSET     0x00001280  /* Bus Slave Arbitration Control Register 0 */
-#define R_BUS_BUSSABT0PIBI_OFFSET     0x00001288  /* Bus Slave Arbitration Control Register 0 */
-#define R_BUS_BUSSABT0PSBI_OFFSET     0x00001290  /* Bus Slave Arbitration Control Register 0 */
-#define R_BUS_BUSERRSTATCPU0_OFFSET     0x00001a00  /* BUS Error Status Register */
-#define R_BUS_BUSERRCLRCPU0_OFFSET     0x00001a04  /* BUS Error Clear Register */
-#define R_BUS_BUSIRQENCPU0_OFFSET     0x00001a08  /* BUS Error Interrupt Enable Register */
-#define R_BUS_BUSERRSTATCPU1_OFFSET     0x00001a10  /* BUS Error Status Register */
-#define R_BUS_BUSERRCLRCPU1_OFFSET     0x00001a14  /* BUS Error Clear Register */
-#define R_BUS_BUSIRQENCPU1_OFFSET     0x00001a18  /* BUS Error Interrupt Enable Register */
-#define R_BUS_BUSERRSTATDMAC0_OFFSET     0x00001a20  /* BUS Error Status Register */
-#define R_BUS_BUSERRCLRDMAC0_OFFSET     0x00001a24  /* BUS Error Clear Register */
-#define R_BUS_BUSIRQENDMAC0_OFFSET     0x00001a28  /* BUS Error Interrupt Enable Register */
-#define R_BUS_BUSERRSTATDMAC1_OFFSET     0x00001a30  /* BUS Error Status Register */
-#define R_BUS_BUSERRCLRDMAC1_OFFSET     0x00001a34  /* BUS Error Clear Register */
-#define R_BUS_BUSIRQENDMAC1_OFFSET     0x00001a38  /* BUS Error Interrupt Enable Register */
-#define R_BUS_BUSERRSTATNPU_OFFSET     0x00001a40  /* BUS Error Status Register */
-#define R_BUS_BUSERRCLRNPU_OFFSET     0x00001a44  /* BUS Error Clear Register */
-#define R_BUS_BUSIRQENNPU_OFFSET     0x00001a48  /* BUS Error Interrupt Enable Register */
-#define R_BUS_BUSERRSTATEDMAC_OFFSET     0x00001a50  /* BUS Error Status Register */
-#define R_BUS_BUSERRCLREDMAC_OFFSET     0x00001a54  /* BUS Error Clear Register */
-#define R_BUS_BUSIRQENEDMAC_OFFSET     0x00001a58  /* BUS Error Interrupt Enable Register */
-#define R_BUS_BUSERRSTATGLCDC_OFFSET     0x00001a60  /* BUS Error Status Register */
-#define R_BUS_BUSERRCLRGLCDC_OFFSET     0x00001a64  /* BUS Error Clear Register */
-#define R_BUS_BUSIRQENGLCDC_OFFSET     0x00001a68  /* BUS Error Interrupt Enable Register */
-#define R_BUS_BUSERRSTATTDRW_OFFSET     0x00001a70  /* BUS Error Status Register */
-#define R_BUS_BUSERRCLRTDRW_OFFSET     0x00001a74  /* BUS Error Clear Register */
-#define R_BUS_BUSIRQENTDRW_OFFSET     0x00001a78  /* BUS Error Interrupt Enable Register */
-#define R_BUS_BUSERRSTATMIPI0_OFFSET     0x00001a80  /* BUS Error Status Register */
-#define R_BUS_BUSERRCLRMIPI0_OFFSET     0x00001a84  /* BUS Error Clear Register */
-#define R_BUS_BUSIRQENMIPI0_OFFSET     0x00001a88  /* BUS Error Interrupt Enable Register */
-#define R_BUS_BUSERRSTATMIPI1_OFFSET     0x00001a90  /* BUS Error Status Register */
-#define R_BUS_BUSERRCLRMIPI1_OFFSET     0x00001a94  /* BUS Error Clear Register */
-#define R_BUS_BUSIRQENMIPI1_OFFSET     0x00001a98  /* BUS Error Interrupt Enable Register */
-#define R_BUS_BUSERRSTATCEU_OFFSET     0x00001aa0  /* BUS Error Status Register */
-#define R_BUS_BUSERRCLRCEU_OFFSET     0x00001aa4  /* BUS Error Clear Register */
-#define R_BUS_BUSIRQENCEU_OFFSET     0x00001aa8  /* BUS Error Interrupt Enable Register */
-#define R_BUS_MBWERRSTAT_OFFSET     0x00001b00  /* Master Bufferable Write Error Status Register */
-#define R_BUS_MBWERRCLR_OFFSET     0x00001b08  /* Master Bufferable Write Error Clear Register */
+#define R_BUS_CSCR_OFFSET(m)                      (0x00000812 + ((m) * 0x00000010))  /* CS%s Control Register */
+#define R_BUS_CSRECEN_OFFSET                      0x00000880  /* CS Recovery Cycle Insertion Enable Register */
+#define R_BUS_SDCCR_OFFSET                        0x00000c00  /* SDC Control Register */
+#define R_BUS_SDCMOD_OFFSET                       0x00000c01  /* SDC Mode Register */
+#define R_BUS_SDAMOD_OFFSET                       0x00000c02  /* SDRAM Access Mode Register */
+#define R_BUS_SDSELF_OFFSET                       0x00000c10  /* SDRAM Self-Refresh Control Register */
+#define R_BUS_SDRFCR_OFFSET                       0x00000c14  /* SDRAM Refresh Control Register */
+#define R_BUS_SDRFEN_OFFSET                       0x00000c16  /* SDRAM Auto-Refresh Control Register */
+#define R_BUS_SDICR_OFFSET                        0x00000c20  /* SDRAM Initialization Sequence Control Register */
+#define R_BUS_SDIR_OFFSET                         0x00000c24  /* SDRAM Initialization Register */
+#define R_BUS_SDADR_OFFSET                        0x00000c40  /* SDRAM Address Register */
+#define R_BUS_SDTR_OFFSET                         0x00000c44  /* SDRAM Timing Register */
+#define R_BUS_SDMOD_OFFSET                        0x00000c48  /* SDRAM Mode Register */
+#define R_BUS_SDSR_OFFSET                         0x00000c50  /* SDRAM Status Register */
+#define R_BUS_BUSOAD_OFFSET                       0x00001000  /* BUS Operation After Detection Register */
+#define R_BUS_BUSOADPT_OFFSET                     0x00001004  /* BUS Operation After Detection Protect Register */
+#define R_BUS_MSAOAD_OFFSET                       0x00001010  /* Master Security Attribution Operation After Detection Register */
+#define R_BUS_MSAPT_OFFSET                        0x00001014  /* Master Security Attribution Protect Register */
+#define R_BUS_BUSMABTGRAPHBI_OFFSET               0x00001100  /* Bus Master Arbitration Control Register */
+#define R_BUS_BUSSABT1MRC0BI_OFFSET               0x00001200  /* Bus Slave Arbitration Control Register 1 */
+#define R_BUS_BUSSABT0MRE0BI_OFFSET               0x00001208  /* Bus Slave Arbitration Control Register 0 */
+#define R_BUS_BUSSABT0S0BI_OFFSET                 0x00001220  /* Bus Slave Arbitration Control Register 0 */
+#define R_BUS_BUSSABT0S1BI_OFFSET                 0x00001228  /* Bus Slave Arbitration Control Register 0 */
+#define R_BUS_BUSSABT0S2BI_OFFSET                 0x00001230  /* Bus Slave Arbitration Control Register 0 */
+#define R_BUS_BUSSABT0S3BI_OFFSET                 0x00001238  /* Bus Slave Arbitration Control Register 0 */
+#define R_BUS_BUSSABT0ECBI_OFFSET                 0x00001250  /* Bus Slave Arbitration Control Register 0 */
+#define R_BUS_BUSSABT0OSPI0BI_OFFSET              0x00001258  /* Bus Slave Arbitration Control Register 0 */
+#define R_BUS_BUSSABT0OSPI1BI_OFFSET              0x00001260  /* Bus Slave Arbitration Control Register 0 */
+#define R_BUS_BUSSABT0CPU0SAHBI_OFFSET            0x00001268  /* Bus Slave Arbitration Control Register 0 */
+#define R_BUS_BUSSABT0CPU1TCMBI_OFFSET            0x00001270  /* Bus Slave Arbitration Control Register 0 */
+#define R_BUS_BUSSABT0PBBI_OFFSET                 0x00001278  /* Bus Slave Arbitration Control Register 0 */
+#define R_BUS_BUSSABT0PABI_OFFSET                 0x00001280  /* Bus Slave Arbitration Control Register 0 */
+#define R_BUS_BUSSABT0PIBI_OFFSET                 0x00001288  /* Bus Slave Arbitration Control Register 0 */
+#define R_BUS_BUSSABT0PSBI_OFFSET                 0x00001290  /* Bus Slave Arbitration Control Register 0 */
+#define R_BUS_BUSERRSTATCPU0_OFFSET               0x00001a00  /* BUS Error Status Register */
+#define R_BUS_BUSERRCLRCPU0_OFFSET                0x00001a04  /* BUS Error Clear Register */
+#define R_BUS_BUSIRQENCPU0_OFFSET                 0x00001a08  /* BUS Error Interrupt Enable Register */
+#define R_BUS_BUSERRSTATCPU1_OFFSET               0x00001a10  /* BUS Error Status Register */
+#define R_BUS_BUSERRCLRCPU1_OFFSET                0x00001a14  /* BUS Error Clear Register */
+#define R_BUS_BUSIRQENCPU1_OFFSET                 0x00001a18  /* BUS Error Interrupt Enable Register */
+#define R_BUS_BUSERRSTATDMAC0_OFFSET              0x00001a20  /* BUS Error Status Register */
+#define R_BUS_BUSERRCLRDMAC0_OFFSET               0x00001a24  /* BUS Error Clear Register */
+#define R_BUS_BUSIRQENDMAC0_OFFSET                0x00001a28  /* BUS Error Interrupt Enable Register */
+#define R_BUS_BUSERRSTATDMAC1_OFFSET              0x00001a30  /* BUS Error Status Register */
+#define R_BUS_BUSERRCLRDMAC1_OFFSET               0x00001a34  /* BUS Error Clear Register */
+#define R_BUS_BUSIRQENDMAC1_OFFSET                0x00001a38  /* BUS Error Interrupt Enable Register */
+#define R_BUS_BUSERRSTATNPU_OFFSET                0x00001a40  /* BUS Error Status Register */
+#define R_BUS_BUSERRCLRNPU_OFFSET                 0x00001a44  /* BUS Error Clear Register */
+#define R_BUS_BUSIRQENNPU_OFFSET                  0x00001a48  /* BUS Error Interrupt Enable Register */
+#define R_BUS_BUSERRSTATEDMAC_OFFSET              0x00001a50  /* BUS Error Status Register */
+#define R_BUS_BUSERRCLREDMAC_OFFSET               0x00001a54  /* BUS Error Clear Register */
+#define R_BUS_BUSIRQENEDMAC_OFFSET                0x00001a58  /* BUS Error Interrupt Enable Register */
+#define R_BUS_BUSERRSTATGLCDC_OFFSET              0x00001a60  /* BUS Error Status Register */
+#define R_BUS_BUSERRCLRGLCDC_OFFSET               0x00001a64  /* BUS Error Clear Register */
+#define R_BUS_BUSIRQENGLCDC_OFFSET                0x00001a68  /* BUS Error Interrupt Enable Register */
+#define R_BUS_BUSERRSTATTDRW_OFFSET               0x00001a70  /* BUS Error Status Register */
+#define R_BUS_BUSERRCLRTDRW_OFFSET                0x00001a74  /* BUS Error Clear Register */
+#define R_BUS_BUSIRQENTDRW_OFFSET                 0x00001a78  /* BUS Error Interrupt Enable Register */
+#define R_BUS_BUSERRSTATMIPI0_OFFSET              0x00001a80  /* BUS Error Status Register */
+#define R_BUS_BUSERRCLRMIPI0_OFFSET               0x00001a84  /* BUS Error Clear Register */
+#define R_BUS_BUSIRQENMIPI0_OFFSET                0x00001a88  /* BUS Error Interrupt Enable Register */
+#define R_BUS_BUSERRSTATMIPI1_OFFSET              0x00001a90  /* BUS Error Status Register */
+#define R_BUS_BUSERRCLRMIPI1_OFFSET               0x00001a94  /* BUS Error Clear Register */
+#define R_BUS_BUSIRQENMIPI1_OFFSET                0x00001a98  /* BUS Error Interrupt Enable Register */
+#define R_BUS_BUSERRSTATCEU_OFFSET                0x00001aa0  /* BUS Error Status Register */
+#define R_BUS_BUSERRCLRCEU_OFFSET                 0x00001aa4  /* BUS Error Clear Register */
+#define R_BUS_BUSIRQENCEU_OFFSET                  0x00001aa8  /* BUS Error Interrupt Enable Register */
+#define R_BUS_MBWERRSTAT_OFFSET                   0x00001b00  /* Master Bufferable Write Error Status Register */
+#define R_BUS_MBWERRCLR_OFFSET                    0x00001b08  /* Master Bufferable Write Error Clear Register */
 
 /* BUS Register Addresses */
 
-#define R_BUS_CS0MOD                 (R_BUS_BASE + R_BUS_CS0MOD_OFFSET)
-#define R_BUS_CS1MOD                 (R_BUS_BASE + R_BUS_CS1MOD_OFFSET)
-#define R_BUS_CS2MOD                 (R_BUS_BASE + R_BUS_CS2MOD_OFFSET)
-#define R_BUS_CS3MOD                 (R_BUS_BASE + R_BUS_CS3MOD_OFFSET)
-#define R_BUS_CS4MOD                 (R_BUS_BASE + R_BUS_CS4MOD_OFFSET)
-#define R_BUS_CS5MOD                 (R_BUS_BASE + R_BUS_CS5MOD_OFFSET)
-#define R_BUS_CS6MOD                 (R_BUS_BASE + R_BUS_CS6MOD_OFFSET)
-#define R_BUS_CS7MOD                 (R_BUS_BASE + R_BUS_CS7MOD_OFFSET)
-#define R_BUS_CS0WCR1                 (R_BUS_BASE + R_BUS_CS0WCR1_OFFSET)
-#define R_BUS_CS1WCR1                 (R_BUS_BASE + R_BUS_CS1WCR1_OFFSET)
-#define R_BUS_CS2WCR1                 (R_BUS_BASE + R_BUS_CS2WCR1_OFFSET)
-#define R_BUS_CS3WCR1                 (R_BUS_BASE + R_BUS_CS3WCR1_OFFSET)
-#define R_BUS_CS4WCR1                 (R_BUS_BASE + R_BUS_CS4WCR1_OFFSET)
-#define R_BUS_CS5WCR1                 (R_BUS_BASE + R_BUS_CS5WCR1_OFFSET)
-#define R_BUS_CS6WCR1                 (R_BUS_BASE + R_BUS_CS6WCR1_OFFSET)
-#define R_BUS_CS7WCR1                 (R_BUS_BASE + R_BUS_CS7WCR1_OFFSET)
-#define R_BUS_CS0WCR2                 (R_BUS_BASE + R_BUS_CS0WCR2_OFFSET)
-#define R_BUS_CS1WCR2                 (R_BUS_BASE + R_BUS_CS1WCR2_OFFSET)
-#define R_BUS_CS2WCR2                 (R_BUS_BASE + R_BUS_CS2WCR2_OFFSET)
-#define R_BUS_CS3WCR2                 (R_BUS_BASE + R_BUS_CS3WCR2_OFFSET)
-#define R_BUS_CS4WCR2                 (R_BUS_BASE + R_BUS_CS4WCR2_OFFSET)
-#define R_BUS_CS5WCR2                 (R_BUS_BASE + R_BUS_CS5WCR2_OFFSET)
-#define R_BUS_CS6WCR2                 (R_BUS_BASE + R_BUS_CS6WCR2_OFFSET)
-#define R_BUS_CS7WCR2                 (R_BUS_BASE + R_BUS_CS7WCR2_OFFSET)
-#define R_BUS_CS0CR                 (R_BUS_BASE + R_BUS_CS0CR_OFFSET)
-#define R_BUS_CS0REC                 (R_BUS_BASE + R_BUS_CS0REC_OFFSET)
-#define R_BUS_CS1REC                 (R_BUS_BASE + R_BUS_CS1REC_OFFSET)
-#define R_BUS_CS2REC                 (R_BUS_BASE + R_BUS_CS2REC_OFFSET)
-#define R_BUS_CS3REC                 (R_BUS_BASE + R_BUS_CS3REC_OFFSET)
-#define R_BUS_CS4REC                 (R_BUS_BASE + R_BUS_CS4REC_OFFSET)
-#define R_BUS_CS5REC                 (R_BUS_BASE + R_BUS_CS5REC_OFFSET)
-#define R_BUS_CS6REC                 (R_BUS_BASE + R_BUS_CS6REC_OFFSET)
-#define R_BUS_CS7REC                 (R_BUS_BASE + R_BUS_CS7REC_OFFSET)
-#define R_BUS_CS1CR                 (R_BUS_BASE + R_BUS_CS1CR_OFFSET)
-#define R_BUS_CS2CR                 (R_BUS_BASE + R_BUS_CS2CR_OFFSET)
-#define R_BUS_CS3CR                 (R_BUS_BASE + R_BUS_CS3CR_OFFSET)
-#define R_BUS_CS4CR                 (R_BUS_BASE + R_BUS_CS4CR_OFFSET)
-#define R_BUS_CS5CR                 (R_BUS_BASE + R_BUS_CS5CR_OFFSET)
-#define R_BUS_CS6CR                 (R_BUS_BASE + R_BUS_CS6CR_OFFSET)
-#define R_BUS_CS7CR                 (R_BUS_BASE + R_BUS_CS7CR_OFFSET)
-#define R_BUS_CSRECEN                 (R_BUS_BASE + R_BUS_CSRECEN_OFFSET)
-#define R_BUS_SDCCR                 (R_BUS_BASE + R_BUS_SDCCR_OFFSET)
-#define R_BUS_SDCMOD                 (R_BUS_BASE + R_BUS_SDCMOD_OFFSET)
-#define R_BUS_SDAMOD                 (R_BUS_BASE + R_BUS_SDAMOD_OFFSET)
-#define R_BUS_SDSELF                 (R_BUS_BASE + R_BUS_SDSELF_OFFSET)
-#define R_BUS_SDRFCR                 (R_BUS_BASE + R_BUS_SDRFCR_OFFSET)
-#define R_BUS_SDRFEN                 (R_BUS_BASE + R_BUS_SDRFEN_OFFSET)
-#define R_BUS_SDICR                 (R_BUS_BASE + R_BUS_SDICR_OFFSET)
-#define R_BUS_SDIR                 (R_BUS_BASE + R_BUS_SDIR_OFFSET)
-#define R_BUS_SDADR                 (R_BUS_BASE + R_BUS_SDADR_OFFSET)
-#define R_BUS_SDTR                 (R_BUS_BASE + R_BUS_SDTR_OFFSET)
-#define R_BUS_SDMOD                 (R_BUS_BASE + R_BUS_SDMOD_OFFSET)
-#define R_BUS_SDSR                 (R_BUS_BASE + R_BUS_SDSR_OFFSET)
-#define R_BUS_BUSOAD                 (R_BUS_BASE + R_BUS_BUSOAD_OFFSET)
-#define R_BUS_BUSOADPT                 (R_BUS_BASE + R_BUS_BUSOADPT_OFFSET)
-#define R_BUS_MSAOAD                 (R_BUS_BASE + R_BUS_MSAOAD_OFFSET)
-#define R_BUS_MSAPT                 (R_BUS_BASE + R_BUS_MSAPT_OFFSET)
-#define R_BUS_BUSMABTGRAPHBI                 (R_BUS_BASE + R_BUS_BUSMABTGRAPHBI_OFFSET)
-#define R_BUS_BUSSABT1MRC0BI                 (R_BUS_BASE + R_BUS_BUSSABT1MRC0BI_OFFSET)
-#define R_BUS_BUSSABT0MRE0BI                 (R_BUS_BASE + R_BUS_BUSSABT0MRE0BI_OFFSET)
-#define R_BUS_BUSSABT0S0BI                 (R_BUS_BASE + R_BUS_BUSSABT0S0BI_OFFSET)
-#define R_BUS_BUSSABT0S1BI                 (R_BUS_BASE + R_BUS_BUSSABT0S1BI_OFFSET)
-#define R_BUS_BUSSABT0S2BI                 (R_BUS_BASE + R_BUS_BUSSABT0S2BI_OFFSET)
-#define R_BUS_BUSSABT0S3BI                 (R_BUS_BASE + R_BUS_BUSSABT0S3BI_OFFSET)
-#define R_BUS_BUSSABT0ECBI                 (R_BUS_BASE + R_BUS_BUSSABT0ECBI_OFFSET)
-#define R_BUS_BUSSABT0OSPI0BI                 (R_BUS_BASE + R_BUS_BUSSABT0OSPI0BI_OFFSET)
-#define R_BUS_BUSSABT0OSPI1BI                 (R_BUS_BASE + R_BUS_BUSSABT0OSPI1BI_OFFSET)
-#define R_BUS_BUSSABT0CPU0SAHBI                 (R_BUS_BASE + R_BUS_BUSSABT0CPU0SAHBI_OFFSET)
-#define R_BUS_BUSSABT0CPU1TCMBI                 (R_BUS_BASE + R_BUS_BUSSABT0CPU1TCMBI_OFFSET)
-#define R_BUS_BUSSABT0PBBI                 (R_BUS_BASE + R_BUS_BUSSABT0PBBI_OFFSET)
-#define R_BUS_BUSSABT0PABI                 (R_BUS_BASE + R_BUS_BUSSABT0PABI_OFFSET)
-#define R_BUS_BUSSABT0PIBI                 (R_BUS_BASE + R_BUS_BUSSABT0PIBI_OFFSET)
-#define R_BUS_BUSSABT0PSBI                 (R_BUS_BASE + R_BUS_BUSSABT0PSBI_OFFSET)
-#define R_BUS_BUSERRSTATCPU0                 (R_BUS_BASE + R_BUS_BUSERRSTATCPU0_OFFSET)
-#define R_BUS_BUSERRCLRCPU0                 (R_BUS_BASE + R_BUS_BUSERRCLRCPU0_OFFSET)
-#define R_BUS_BUSIRQENCPU0                 (R_BUS_BASE + R_BUS_BUSIRQENCPU0_OFFSET)
-#define R_BUS_BUSERRSTATCPU1                 (R_BUS_BASE + R_BUS_BUSERRSTATCPU1_OFFSET)
-#define R_BUS_BUSERRCLRCPU1                 (R_BUS_BASE + R_BUS_BUSERRCLRCPU1_OFFSET)
-#define R_BUS_BUSIRQENCPU1                 (R_BUS_BASE + R_BUS_BUSIRQENCPU1_OFFSET)
-#define R_BUS_BUSERRSTATDMAC0                 (R_BUS_BASE + R_BUS_BUSERRSTATDMAC0_OFFSET)
-#define R_BUS_BUSERRCLRDMAC0                 (R_BUS_BASE + R_BUS_BUSERRCLRDMAC0_OFFSET)
-#define R_BUS_BUSIRQENDMAC0                 (R_BUS_BASE + R_BUS_BUSIRQENDMAC0_OFFSET)
-#define R_BUS_BUSERRSTATDMAC1                 (R_BUS_BASE + R_BUS_BUSERRSTATDMAC1_OFFSET)
-#define R_BUS_BUSERRCLRDMAC1                 (R_BUS_BASE + R_BUS_BUSERRCLRDMAC1_OFFSET)
-#define R_BUS_BUSIRQENDMAC1                 (R_BUS_BASE + R_BUS_BUSIRQENDMAC1_OFFSET)
-#define R_BUS_BUSERRSTATNPU                 (R_BUS_BASE + R_BUS_BUSERRSTATNPU_OFFSET)
-#define R_BUS_BUSERRCLRNPU                 (R_BUS_BASE + R_BUS_BUSERRCLRNPU_OFFSET)
-#define R_BUS_BUSIRQENNPU                 (R_BUS_BASE + R_BUS_BUSIRQENNPU_OFFSET)
-#define R_BUS_BUSERRSTATEDMAC                 (R_BUS_BASE + R_BUS_BUSERRSTATEDMAC_OFFSET)
-#define R_BUS_BUSERRCLREDMAC                 (R_BUS_BASE + R_BUS_BUSERRCLREDMAC_OFFSET)
-#define R_BUS_BUSIRQENEDMAC                 (R_BUS_BASE + R_BUS_BUSIRQENEDMAC_OFFSET)
-#define R_BUS_BUSERRSTATGLCDC                 (R_BUS_BASE + R_BUS_BUSERRSTATGLCDC_OFFSET)
-#define R_BUS_BUSERRCLRGLCDC                 (R_BUS_BASE + R_BUS_BUSERRCLRGLCDC_OFFSET)
-#define R_BUS_BUSIRQENGLCDC                 (R_BUS_BASE + R_BUS_BUSIRQENGLCDC_OFFSET)
-#define R_BUS_BUSERRSTATTDRW                 (R_BUS_BASE + R_BUS_BUSERRSTATTDRW_OFFSET)
-#define R_BUS_BUSERRCLRTDRW                 (R_BUS_BASE + R_BUS_BUSERRCLRTDRW_OFFSET)
-#define R_BUS_BUSIRQENTDRW                 (R_BUS_BASE + R_BUS_BUSIRQENTDRW_OFFSET)
-#define R_BUS_BUSERRSTATMIPI0                 (R_BUS_BASE + R_BUS_BUSERRSTATMIPI0_OFFSET)
-#define R_BUS_BUSERRCLRMIPI0                 (R_BUS_BASE + R_BUS_BUSERRCLRMIPI0_OFFSET)
-#define R_BUS_BUSIRQENMIPI0                 (R_BUS_BASE + R_BUS_BUSIRQENMIPI0_OFFSET)
-#define R_BUS_BUSERRSTATMIPI1                 (R_BUS_BASE + R_BUS_BUSERRSTATMIPI1_OFFSET)
-#define R_BUS_BUSERRCLRMIPI1                 (R_BUS_BASE + R_BUS_BUSERRCLRMIPI1_OFFSET)
-#define R_BUS_BUSIRQENMIPI1                 (R_BUS_BASE + R_BUS_BUSIRQENMIPI1_OFFSET)
-#define R_BUS_BUSERRSTATCEU                 (R_BUS_BASE + R_BUS_BUSERRSTATCEU_OFFSET)
-#define R_BUS_BUSERRCLRCEU                 (R_BUS_BASE + R_BUS_BUSERRCLRCEU_OFFSET)
-#define R_BUS_BUSIRQENCEU                 (R_BUS_BASE + R_BUS_BUSIRQENCEU_OFFSET)
-#define R_BUS_MBWERRSTAT                 (R_BUS_BASE + R_BUS_MBWERRSTAT_OFFSET)
-#define R_BUS_MBWERRCLR                 (R_BUS_BASE + R_BUS_MBWERRCLR_OFFSET)
+#define R_BUS_CSMOD(m)                            (R_BUS_BASE + R_BUS_CSMOD_OFFSET(m))
+#define R_BUS_CSWCR1(m)                           (R_BUS_BASE + R_BUS_CSWCR1_OFFSET(m))
+#define R_BUS_CSWCR2(m)                           (R_BUS_BASE + R_BUS_CSWCR2_OFFSET(m))
+#define R_BUS_CS0CR                               (R_BUS_BASE + R_BUS_CS0CR_OFFSET)
+#define R_BUS_CSREC(m)                            (R_BUS_BASE + R_BUS_CSREC_OFFSET(m))
+#define R_BUS_CSCR(m)                             (R_BUS_BASE + R_BUS_CSCR_OFFSET(m))
+#define R_BUS_CSRECEN                             (R_BUS_BASE + R_BUS_CSRECEN_OFFSET)
+#define R_BUS_SDCCR                               (R_BUS_BASE + R_BUS_SDCCR_OFFSET)
+#define R_BUS_SDCMOD                              (R_BUS_BASE + R_BUS_SDCMOD_OFFSET)
+#define R_BUS_SDAMOD                              (R_BUS_BASE + R_BUS_SDAMOD_OFFSET)
+#define R_BUS_SDSELF                              (R_BUS_BASE + R_BUS_SDSELF_OFFSET)
+#define R_BUS_SDRFCR                              (R_BUS_BASE + R_BUS_SDRFCR_OFFSET)
+#define R_BUS_SDRFEN                              (R_BUS_BASE + R_BUS_SDRFEN_OFFSET)
+#define R_BUS_SDICR                               (R_BUS_BASE + R_BUS_SDICR_OFFSET)
+#define R_BUS_SDIR                                (R_BUS_BASE + R_BUS_SDIR_OFFSET)
+#define R_BUS_SDADR                               (R_BUS_BASE + R_BUS_SDADR_OFFSET)
+#define R_BUS_SDTR                                (R_BUS_BASE + R_BUS_SDTR_OFFSET)
+#define R_BUS_SDMOD                               (R_BUS_BASE + R_BUS_SDMOD_OFFSET)
+#define R_BUS_SDSR                                (R_BUS_BASE + R_BUS_SDSR_OFFSET)
+#define R_BUS_BUSOAD                              (R_BUS_BASE + R_BUS_BUSOAD_OFFSET)
+#define R_BUS_BUSOADPT                            (R_BUS_BASE + R_BUS_BUSOADPT_OFFSET)
+#define R_BUS_MSAOAD                              (R_BUS_BASE + R_BUS_MSAOAD_OFFSET)
+#define R_BUS_MSAPT                               (R_BUS_BASE + R_BUS_MSAPT_OFFSET)
+#define R_BUS_BUSMABTGRAPHBI                      (R_BUS_BASE + R_BUS_BUSMABTGRAPHBI_OFFSET)
+#define R_BUS_BUSSABT1MRC0BI                      (R_BUS_BASE + R_BUS_BUSSABT1MRC0BI_OFFSET)
+#define R_BUS_BUSSABT0MRE0BI                      (R_BUS_BASE + R_BUS_BUSSABT0MRE0BI_OFFSET)
+#define R_BUS_BUSSABT0S0BI                        (R_BUS_BASE + R_BUS_BUSSABT0S0BI_OFFSET)
+#define R_BUS_BUSSABT0S1BI                        (R_BUS_BASE + R_BUS_BUSSABT0S1BI_OFFSET)
+#define R_BUS_BUSSABT0S2BI                        (R_BUS_BASE + R_BUS_BUSSABT0S2BI_OFFSET)
+#define R_BUS_BUSSABT0S3BI                        (R_BUS_BASE + R_BUS_BUSSABT0S3BI_OFFSET)
+#define R_BUS_BUSSABT0ECBI                        (R_BUS_BASE + R_BUS_BUSSABT0ECBI_OFFSET)
+#define R_BUS_BUSSABT0OSPI0BI                     (R_BUS_BASE + R_BUS_BUSSABT0OSPI0BI_OFFSET)
+#define R_BUS_BUSSABT0OSPI1BI                     (R_BUS_BASE + R_BUS_BUSSABT0OSPI1BI_OFFSET)
+#define R_BUS_BUSSABT0CPU0SAHBI                   (R_BUS_BASE + R_BUS_BUSSABT0CPU0SAHBI_OFFSET)
+#define R_BUS_BUSSABT0CPU1TCMBI                   (R_BUS_BASE + R_BUS_BUSSABT0CPU1TCMBI_OFFSET)
+#define R_BUS_BUSSABT0PBBI                        (R_BUS_BASE + R_BUS_BUSSABT0PBBI_OFFSET)
+#define R_BUS_BUSSABT0PABI                        (R_BUS_BASE + R_BUS_BUSSABT0PABI_OFFSET)
+#define R_BUS_BUSSABT0PIBI                        (R_BUS_BASE + R_BUS_BUSSABT0PIBI_OFFSET)
+#define R_BUS_BUSSABT0PSBI                        (R_BUS_BASE + R_BUS_BUSSABT0PSBI_OFFSET)
+#define R_BUS_BUSERRSTATCPU0                      (R_BUS_BASE + R_BUS_BUSERRSTATCPU0_OFFSET)
+#define R_BUS_BUSERRCLRCPU0                       (R_BUS_BASE + R_BUS_BUSERRCLRCPU0_OFFSET)
+#define R_BUS_BUSIRQENCPU0                        (R_BUS_BASE + R_BUS_BUSIRQENCPU0_OFFSET)
+#define R_BUS_BUSERRSTATCPU1                      (R_BUS_BASE + R_BUS_BUSERRSTATCPU1_OFFSET)
+#define R_BUS_BUSERRCLRCPU1                       (R_BUS_BASE + R_BUS_BUSERRCLRCPU1_OFFSET)
+#define R_BUS_BUSIRQENCPU1                        (R_BUS_BASE + R_BUS_BUSIRQENCPU1_OFFSET)
+#define R_BUS_BUSERRSTATDMAC0                     (R_BUS_BASE + R_BUS_BUSERRSTATDMAC0_OFFSET)
+#define R_BUS_BUSERRCLRDMAC0                      (R_BUS_BASE + R_BUS_BUSERRCLRDMAC0_OFFSET)
+#define R_BUS_BUSIRQENDMAC0                       (R_BUS_BASE + R_BUS_BUSIRQENDMAC0_OFFSET)
+#define R_BUS_BUSERRSTATDMAC1                     (R_BUS_BASE + R_BUS_BUSERRSTATDMAC1_OFFSET)
+#define R_BUS_BUSERRCLRDMAC1                      (R_BUS_BASE + R_BUS_BUSERRCLRDMAC1_OFFSET)
+#define R_BUS_BUSIRQENDMAC1                       (R_BUS_BASE + R_BUS_BUSIRQENDMAC1_OFFSET)
+#define R_BUS_BUSERRSTATNPU                       (R_BUS_BASE + R_BUS_BUSERRSTATNPU_OFFSET)
+#define R_BUS_BUSERRCLRNPU                        (R_BUS_BASE + R_BUS_BUSERRCLRNPU_OFFSET)
+#define R_BUS_BUSIRQENNPU                         (R_BUS_BASE + R_BUS_BUSIRQENNPU_OFFSET)
+#define R_BUS_BUSERRSTATEDMAC                     (R_BUS_BASE + R_BUS_BUSERRSTATEDMAC_OFFSET)
+#define R_BUS_BUSERRCLREDMAC                      (R_BUS_BASE + R_BUS_BUSERRCLREDMAC_OFFSET)
+#define R_BUS_BUSIRQENEDMAC                       (R_BUS_BASE + R_BUS_BUSIRQENEDMAC_OFFSET)
+#define R_BUS_BUSERRSTATGLCDC                     (R_BUS_BASE + R_BUS_BUSERRSTATGLCDC_OFFSET)
+#define R_BUS_BUSERRCLRGLCDC                      (R_BUS_BASE + R_BUS_BUSERRCLRGLCDC_OFFSET)
+#define R_BUS_BUSIRQENGLCDC                       (R_BUS_BASE + R_BUS_BUSIRQENGLCDC_OFFSET)
+#define R_BUS_BUSERRSTATTDRW                      (R_BUS_BASE + R_BUS_BUSERRSTATTDRW_OFFSET)
+#define R_BUS_BUSERRCLRTDRW                       (R_BUS_BASE + R_BUS_BUSERRCLRTDRW_OFFSET)
+#define R_BUS_BUSIRQENTDRW                        (R_BUS_BASE + R_BUS_BUSIRQENTDRW_OFFSET)
+#define R_BUS_BUSERRSTATMIPI0                     (R_BUS_BASE + R_BUS_BUSERRSTATMIPI0_OFFSET)
+#define R_BUS_BUSERRCLRMIPI0                      (R_BUS_BASE + R_BUS_BUSERRCLRMIPI0_OFFSET)
+#define R_BUS_BUSIRQENMIPI0                       (R_BUS_BASE + R_BUS_BUSIRQENMIPI0_OFFSET)
+#define R_BUS_BUSERRSTATMIPI1                     (R_BUS_BASE + R_BUS_BUSERRSTATMIPI1_OFFSET)
+#define R_BUS_BUSERRCLRMIPI1                      (R_BUS_BASE + R_BUS_BUSERRCLRMIPI1_OFFSET)
+#define R_BUS_BUSIRQENMIPI1                       (R_BUS_BASE + R_BUS_BUSIRQENMIPI1_OFFSET)
+#define R_BUS_BUSERRSTATCEU                       (R_BUS_BASE + R_BUS_BUSERRSTATCEU_OFFSET)
+#define R_BUS_BUSERRCLRCEU                        (R_BUS_BASE + R_BUS_BUSERRCLRCEU_OFFSET)
+#define R_BUS_BUSIRQENCEU                         (R_BUS_BASE + R_BUS_BUSIRQENCEU_OFFSET)
+#define R_BUS_MBWERRSTAT                          (R_BUS_BASE + R_BUS_MBWERRSTAT_OFFSET)
+#define R_BUS_MBWERRCLR                           (R_BUS_BASE + R_BUS_MBWERRCLR_OFFSET)
 
 /* Register bit definitions */
 /* CSMOD Register bit definitions */

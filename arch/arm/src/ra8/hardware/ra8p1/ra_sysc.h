@@ -38,616 +38,314 @@
 #endif
 #endif
 
-/* Channel stride for multi-channel peripherals */
-#define R_SYSC_CH_STRIDE    0x00000002
-#define R_SYSC_CH_BASE(ch)   (R_SYSC_BASE + ((uint32_t)(ch) * R_SYSC_CH_STRIDE))
-
 /* SYSC Register Offsets */
 
-#define R_SYSC_SBYCR_OFFSET     0x0000000c  /* Standby Control Register */
-#define R_SYSC_VSCR_OFFSET     0x00000014  /* Voltage Scaling Control Register */
-#define R_SYSC_SCKDIVCR_OFFSET     0x00000020  /* System Clock Division Control Register */
-#define R_SYSC_SCKDIVCR2_OFFSET     0x00000024  /* System Clock Division Control Register 2 */
-#define R_SYSC_SCKSCR_OFFSET     0x00000026  /* System Clock Source Control Register */
-#define R_SYSC_PLLCR_OFFSET     0x0000002a  /* PLL Control Register */
-#define R_SYSC_BCKCR_OFFSET     0x00000030  /* External Bus Clock Control Register */
-#define R_SYSC_MOSCCR_OFFSET     0x00000032  /* Main Clock Oscillator Control Register */
-#define R_SYSC_HOCOCR_OFFSET     0x00000036  /* High-Speed On-Chip Oscillator Control Register */
-#define R_SYSC_HOCOCR2_OFFSET     0x00000037  /* High-Speed On-Chip Oscillator Control Register2 */
-#define R_SYSC_MOCOCR_OFFSET     0x00000038  /* Middle-Speed On-Chip Oscillator Control Register */
-#define R_SYSC_FLLCR1_OFFSET     0x00000039  /* FLL Control Register1 */
-#define R_SYSC_FLLCR2_OFFSET     0x0000003a  /* FLL Control Register2 */
-#define R_SYSC_OSCSF_OFFSET     0x0000003c  /* Oscillation Stabilization Flag Register */
-#define R_SYSC_CKOCR_OFFSET     0x0000003e  /* Clock Out Control Register */
-#define R_SYSC_TRCKCR_OFFSET     0x0000003f  /* Trace Clock Control Register */
-#define R_SYSC_OSTDCR_OFFSET     0x00000040  /* Oscillation Stop Detection Control Register */
-#define R_SYSC_OSTDSR_OFFSET     0x00000041  /* Oscillation Stop Detection Status Register */
-#define R_SYSC_OSCMONR_OFFSET     0x00000043  /* Oscillator Monitor Register */
-#define R_SYSC_PLL2CR_OFFSET     0x0000004a  /* PLL2 Control Register */
-#define R_SYSC_PLLCCR2_OFFSET     0x0000004c  /* PLL Clock Control Register 2 */
-#define R_SYSC_PLL2CCR2_OFFSET     0x0000004e  /* PLL2 Clock Control Register 2 */
-#define R_SYSC_EBCKOCR_OFFSET     0x00000052  /* External Bus Clock Output Control Register */
-#define R_SYSC_SDCKOCR_OFFSET     0x00000053  /* SDRAM Clock Output Control Register */
-#define R_SYSC_SCICKDIVCR_OFFSET     0x00000054  /* SCI Clock Division Control Register */
-#define R_SYSC_SCICKCR_OFFSET     0x00000055  /* SCI Clock Control Register */
-#define R_SYSC_SPICKDIVCR_OFFSET     0x00000056  /* SPI Clock Division Control Register */
-#define R_SYSC_SPICKCR_OFFSET     0x00000057  /* SPI Clock Control Register */
-#define R_SYSC_ADCCKDIVCR_OFFSET     0x0000005a  /* ADC Clock Division Control Register */
-#define R_SYSC_ADCCKCR_OFFSET     0x0000005b  /* ADC Clock Control Register */
-#define R_SYSC_GPTCKDIVCR_OFFSET     0x0000005c  /* GPT Clock Division Control Register */
-#define R_SYSC_GPTCKCR_OFFSET     0x0000005d  /* GPT Clock Control Register */
-#define R_SYSC_LCDCKDIVCR_OFFSET     0x0000005e  /* LCD Clock Division Control Register */
-#define R_SYSC_LCDCKCR_OFFSET     0x0000005f  /* LCD Clock Control Register */
-#define R_SYSC_MOCOUTCR_OFFSET     0x00000061  /* MOCO User Trimming Control Register */
-#define R_SYSC_HOCOUTCR_OFFSET     0x00000062  /* HOCO User Trimming Control Register */
-#define R_SYSC_USBCKDIVCR_OFFSET     0x0000006c  /* USB Clock Division Control Register */
-#define R_SYSC_OCTACKDIVCR_OFFSET     0x0000006d  /* Octal-SPI Clock Division Control Register */
-#define R_SYSC_CANFDCKDIVCR_OFFSET     0x0000006e  /* CANFD Core Clock Division Control Register */
-#define R_SYSC_USB60CKDIVCR_OFFSET     0x0000006f  /* USB60 Clock Division Control Register */
-#define R_SYSC_I3CCKDIVCR_OFFSET     0x00000070  /* I3C Clock Division Control Register */
-#define R_SYSC_USBCKCR_OFFSET     0x00000074  /* USB Clock Control Register */
-#define R_SYSC_OCTACKCR_OFFSET     0x00000075  /* Octal-SPI Clock Control Register */
-#define R_SYSC_CANFDCKCR_OFFSET     0x00000076  /* CANFD Core Clock Control Register */
-#define R_SYSC_USB60CKCR_OFFSET     0x00000077  /* USB60 Clock Control Register */
-#define R_SYSC_I3CCKCR_OFFSET     0x00000078  /* I3C Clock Control Register */
-#define R_SYSC_MOSCSCR_OFFSET     0x0000007c  /* Main Clock Oscillator Standby Control Register */
-#define R_SYSC_HOCOSCR_OFFSET     0x0000007d  /* High-Speed On-Chip Oscillator Standby Control Register */
-#define R_SYSC_MOCOSCR_OFFSET     0x00000084  /* Middle-Speed On-Chip Oscillator Standby Control Register */
-#define R_SYSC_OPCCR_OFFSET     0x000000a0  /* Operating Power Control Register */
-#define R_SYSC_MOSCWTCR_OFFSET     0x000000a2  /* Main Clock Oscillator Wait Control Register */
-#define R_SYSC_PLLCCR_OFFSET     0x000000ac  /* PLL Clock Control Register */
-#define R_SYSC_RSTSR1_OFFSET     0x000000c0  /* Reset Status Register 1 */
-#define R_SYSC_PLL2CCR_OFFSET     0x000000c8  /* PLL2 Clock Control Register */
-#define R_SYSC_SYRACCR_OFFSET     0x000000cc  /* System Register Access Control Register */
-#define R_SYSC_BCKADIVCR_OFFSET     0x000000d4  /* Asynchronous External Bus Clock Division Control Register */
-#define R_SYSC_ESWCKDIVCR_OFFSET     0x000000d5  /* EtherSW Clock Division Control Register */
-#define R_SYSC_ESWPCKDIVCR_OFFSET     0x000000d6  /* EtherSW-PHY Clock Division Control Register */
-#define R_SYSC_ETHPCKDIVCR_OFFSET     0x000000d8  /* Ether-PHY Clock Division Control Register */
-#define R_SYSC_BCKACR_OFFSET     0x000000da  /* Asynchronous External Bus Clock Control Register */
-#define R_SYSC_ESWCKCR_OFFSET     0x000000db  /* EtherSW Clock Control Register */
-#define R_SYSC_ESWPCKCR_OFFSET     0x000000dc  /* EtherSW-PHY Clock Control Register */
-#define R_SYSC_ETHPCKCR_OFFSET     0x000000de  /* Ether-PHY Clock Control Register */
+#define R_SYSC_SBYCR_OFFSET                       0x0000000c  /* Standby Control Register */
+#define R_SYSC_VSCR_OFFSET                        0x00000014  /* Voltage Scaling Control Register */
+#define R_SYSC_SCKDIVCR_OFFSET                    0x00000020  /* System Clock Division Control Register */
+#define R_SYSC_SCKDIVCR2_OFFSET                   0x00000024  /* System Clock Division Control Register 2 */
+#define R_SYSC_SCKSCR_OFFSET                      0x00000026  /* System Clock Source Control Register */
+#define R_SYSC_PLLCR_OFFSET                       0x0000002a  /* PLL Control Register */
+#define R_SYSC_BCKCR_OFFSET                       0x00000030  /* External Bus Clock Control Register */
+#define R_SYSC_MOSCCR_OFFSET                      0x00000032  /* Main Clock Oscillator Control Register */
+#define R_SYSC_HOCOCR_OFFSET                      0x00000036  /* High-Speed On-Chip Oscillator Control Register */
+#define R_SYSC_HOCOCR2_OFFSET                     0x00000037  /* High-Speed On-Chip Oscillator Control Register2 */
+#define R_SYSC_MOCOCR_OFFSET                      0x00000038  /* Middle-Speed On-Chip Oscillator Control Register */
+#define R_SYSC_FLLCR1_OFFSET                      0x00000039  /* FLL Control Register1 */
+#define R_SYSC_FLLCR2_OFFSET                      0x0000003a  /* FLL Control Register2 */
+#define R_SYSC_OSCSF_OFFSET                       0x0000003c  /* Oscillation Stabilization Flag Register */
+#define R_SYSC_CKOCR_OFFSET                       0x0000003e  /* Clock Out Control Register */
+#define R_SYSC_TRCKCR_OFFSET                      0x0000003f  /* Trace Clock Control Register */
+#define R_SYSC_OSTDCR_OFFSET                      0x00000040  /* Oscillation Stop Detection Control Register */
+#define R_SYSC_OSTDSR_OFFSET                      0x00000041  /* Oscillation Stop Detection Status Register */
+#define R_SYSC_OSCMONR_OFFSET                     0x00000043  /* Oscillator Monitor Register */
+#define R_SYSC_PLL2CR_OFFSET                      0x0000004a  /* PLL2 Control Register */
+#define R_SYSC_PLLCCR2_OFFSET                     0x0000004c  /* PLL Clock Control Register 2 */
+#define R_SYSC_PLL2CCR2_OFFSET                    0x0000004e  /* PLL2 Clock Control Register 2 */
+#define R_SYSC_EBCKOCR_OFFSET                     0x00000052  /* External Bus Clock Output Control Register */
+#define R_SYSC_SDCKOCR_OFFSET                     0x00000053  /* SDRAM Clock Output Control Register */
+#define R_SYSC_SCICKDIVCR_OFFSET                  0x00000054  /* SCI Clock Division Control Register */
+#define R_SYSC_SCICKCR_OFFSET                     0x00000055  /* SCI Clock Control Register */
+#define R_SYSC_SPICKDIVCR_OFFSET                  0x00000056  /* SPI Clock Division Control Register */
+#define R_SYSC_SPICKCR_OFFSET                     0x00000057  /* SPI Clock Control Register */
+#define R_SYSC_ADCCKDIVCR_OFFSET                  0x0000005a  /* ADC Clock Division Control Register */
+#define R_SYSC_ADCCKCR_OFFSET                     0x0000005b  /* ADC Clock Control Register */
+#define R_SYSC_GPTCKDIVCR_OFFSET                  0x0000005c  /* GPT Clock Division Control Register */
+#define R_SYSC_GPTCKCR_OFFSET                     0x0000005d  /* GPT Clock Control Register */
+#define R_SYSC_LCDCKDIVCR_OFFSET                  0x0000005e  /* LCD Clock Division Control Register */
+#define R_SYSC_LCDCKCR_OFFSET                     0x0000005f  /* LCD Clock Control Register */
+#define R_SYSC_MOCOUTCR_OFFSET                    0x00000061  /* MOCO User Trimming Control Register */
+#define R_SYSC_HOCOUTCR_OFFSET                    0x00000062  /* HOCO User Trimming Control Register */
+#define R_SYSC_USBCKDIVCR_OFFSET                  0x0000006c  /* USB Clock Division Control Register */
+#define R_SYSC_OCTACKDIVCR_OFFSET                 0x0000006d  /* Octal-SPI Clock Division Control Register */
+#define R_SYSC_CANFDCKDIVCR_OFFSET                0x0000006e  /* CANFD Core Clock Division Control Register */
+#define R_SYSC_USB60CKDIVCR_OFFSET                0x0000006f  /* USB60 Clock Division Control Register */
+#define R_SYSC_I3CCKDIVCR_OFFSET                  0x00000070  /* I3C Clock Division Control Register */
+#define R_SYSC_USBCKCR_OFFSET                     0x00000074  /* USB Clock Control Register */
+#define R_SYSC_OCTACKCR_OFFSET                    0x00000075  /* Octal-SPI Clock Control Register */
+#define R_SYSC_CANFDCKCR_OFFSET                   0x00000076  /* CANFD Core Clock Control Register */
+#define R_SYSC_USB60CKCR_OFFSET                   0x00000077  /* USB60 Clock Control Register */
+#define R_SYSC_I3CCKCR_OFFSET                     0x00000078  /* I3C Clock Control Register */
+#define R_SYSC_MOSCSCR_OFFSET                     0x0000007c  /* Main Clock Oscillator Standby Control Register */
+#define R_SYSC_HOCOSCR_OFFSET                     0x0000007d  /* High-Speed On-Chip Oscillator Standby Control Register */
+#define R_SYSC_MOCOSCR_OFFSET                     0x00000084  /* Middle-Speed On-Chip Oscillator Standby Control Register */
+#define R_SYSC_OPCCR_OFFSET                       0x000000a0  /* Operating Power Control Register */
+#define R_SYSC_MOSCWTCR_OFFSET                    0x000000a2  /* Main Clock Oscillator Wait Control Register */
+#define R_SYSC_PLLCCR_OFFSET                      0x000000ac  /* PLL Clock Control Register */
+#define R_SYSC_RSTSR1_OFFSET                      0x000000c0  /* Reset Status Register 1 */
+#define R_SYSC_PLL2CCR_OFFSET                     0x000000c8  /* PLL2 Clock Control Register */
+#define R_SYSC_SYRACCR_OFFSET                     0x000000cc  /* System Register Access Control Register */
+#define R_SYSC_BCKADIVCR_OFFSET                   0x000000d4  /* Asynchronous External Bus Clock Division Control Register */
+#define R_SYSC_ESWCKDIVCR_OFFSET                  0x000000d5  /* EtherSW Clock Division Control Register */
+#define R_SYSC_ESWPCKDIVCR_OFFSET                 0x000000d6  /* EtherSW-PHY Clock Division Control Register */
+#define R_SYSC_ETHPCKDIVCR_OFFSET                 0x000000d8  /* Ether-PHY Clock Division Control Register */
+#define R_SYSC_BCKACR_OFFSET                      0x000000da  /* Asynchronous External Bus Clock Control Register */
+#define R_SYSC_ESWCKCR_OFFSET                     0x000000db  /* EtherSW Clock Control Register */
+#define R_SYSC_ESWPCKCR_OFFSET                    0x000000dc  /* EtherSW-PHY Clock Control Register */
+#define R_SYSC_ETHPCKCR_OFFSET                    0x000000de  /* Ether-PHY Clock Control Register */
 /* PVD%sCR1 Registers (1-2) */
-#define R_SYSC_PVD1CR1_OFFSET     0x000000e0  /* Voltage Monitor 1 Circuit Control Register */
-#define R_SYSC_PVD2CR1_OFFSET     0x000000e2  /* Voltage Monitor 2 Circuit Control Register */
+#define R_SYSC_PVDCR1_OFFSET(m)                   (0x000000e0 + ((m) * 0x00000002))  /* Voltage Monitor %s Circuit Control Register */
 /* PVD%sSR Registers (1-2) */
-#define R_SYSC_PVD1SR_OFFSET     0x000000e1  /* Voltage Monitor 1 Circuit Status Register */
-#define R_SYSC_PVD2SR_OFFSET     0x000000e3  /* Voltage Monitor 2 Circuit Status Register */
-#define R_SYSC_CPUDSCR_OFFSET     0x00000100  /* CPU Deep Sleep Control Register */
-#define R_SYSC_PGSCR_OFFSET     0x00000104  /* Power Gating Shift Control Register */
-#define R_SYSC_PDCTRGD_OFFSET     0x00000110  /* Graphics Power Domain Control Register */
-#define R_SYSC_PDCTRNPU_OFFSET     0x00000114  /* NPU Power Domain Control Register */
-#define R_SYSC_PDCTRESWM_OFFSET     0x00000118  /* ESWM Power Domain Control Register */
-#define R_SYSC_PDRAMSCR0_OFFSET     0x00000140  /* SRAM Power Domain Standby Control Register 0 */
-#define R_SYSC_PDRAMSCR1_OFFSET     0x00000142  /* SRAM Power Domain Standby Control Register 1 */
+#define R_SYSC_PVDSR_OFFSET(m)                    (0x000000e1 + ((m) * 0x00000002))  /* Voltage Monitor %s Circuit Status Register */
+#define R_SYSC_CPUDSCR_OFFSET                     0x00000100  /* CPU Deep Sleep Control Register */
+#define R_SYSC_PGSCR_OFFSET                       0x00000104  /* Power Gating Shift Control Register */
+#define R_SYSC_PDCTRGD_OFFSET                     0x00000110  /* Graphics Power Domain Control Register */
+#define R_SYSC_PDCTRNPU_OFFSET                    0x00000114  /* NPU Power Domain Control Register */
+#define R_SYSC_PDCTRESWM_OFFSET                   0x00000118  /* ESWM Power Domain Control Register */
+#define R_SYSC_PDRAMSCR0_OFFSET                   0x00000140  /* SRAM Power Domain Standby Control Register 0 */
+#define R_SYSC_PDRAMSCR1_OFFSET                   0x00000142  /* SRAM Power Domain Standby Control Register 1 */
 /* PSSTCR%s Registers (0-5) */
-#define R_SYSC_PSSTCR0_OFFSET     0x00000210  /* Power Switch Control Start Time Control Register 0 */
-#define R_SYSC_PSSTCR1_OFFSET     0x00000212  /* Power Switch Control Start Time Control Register 1 */
-#define R_SYSC_PSSTCR2_OFFSET     0x00000214  /* Power Switch Control Start Time Control Register 2 */
-#define R_SYSC_PSSTCR3_OFFSET     0x00000216  /* Power Switch Control Start Time Control Register 3 */
-#define R_SYSC_PSSTCR4_OFFSET     0x00000218  /* Power Switch Control Start Time Control Register 4 */
-#define R_SYSC_PSSTCR5_OFFSET     0x0000021a  /* Power Switch Control Start Time Control Register 5 */
+#define R_SYSC_PSSTCR_OFFSET(m)                   (0x00000210 + ((m) * 0x00000002))  /* Power Switch Control Start Time Control Register %s */
 /* PSSTCR%s Registers (0-5) */
-#define R_SYSC_PSSTCR0_OFFSET     0x00000210  /* Power Switch Control Start Time Control Register 0 */
-#define R_SYSC_PSSTCR1_OFFSET     0x00000212  /* Power Switch Control Start Time Control Register 1 */
-#define R_SYSC_PSSTCR2_OFFSET     0x00000214  /* Power Switch Control Start Time Control Register 2 */
-#define R_SYSC_PSSTCR3_OFFSET     0x00000216  /* Power Switch Control Start Time Control Register 3 */
-#define R_SYSC_PSSTCR4_OFFSET     0x00000218  /* Power Switch Control Start Time Control Register 4 */
-#define R_SYSC_PSSTCR5_OFFSET     0x0000021a  /* Power Switch Control Start Time Control Register 5 */
-#define R_SYSC_VBRSABAR_OFFSET     0x000003b0  /* VBATT Backup Register Security Attribute Boundary Address Register */
-#define R_SYSC_VBRPABARS_OFFSET     0x000003b4  /* VBATT Backup Register Privilege Attribute Boundary Address Register for Secure Region */
-#define R_SYSC_CGFSAR_OFFSET     0x000003c0  /* Clock Generation Function Security Attribute Register */
-#define R_SYSC_RSTSAR_OFFSET     0x000003c4  /* Reset Security Attribution Register */
-#define R_SYSC_LPMSAR_OFFSET     0x000003c8  /* Low Power Mode Security Attribution Register */
-#define R_SYSC_PVDSAR_OFFSET     0x000003cc  /* Programable Voltage Detection Security Attribution Register */
-#define R_SYSC_BBFSAR_OFFSET     0x000003d0  /* Battery Backup Function Security Attribute Register */
-#define R_SYSC_PGCSAR_OFFSET     0x000003d8  /* Power Gating Control Security Attribution Register */
-#define R_SYSC_DPFSAR_OFFSET     0x000003e0  /* Deep Software Standby Interrupt Factor Security Attribution Register */
-#define R_SYSC_RSCSAR_OFFSET     0x000003e4  /* RAM Standby Control Security Attribution Register */
-#define R_SYSC_DPFSAR1_OFFSET     0x000003e8  /* Deep Software Standby Interrupt Factor Security Attribution Register 1 */
-#define R_SYSC_PRCR_S_OFFSET     0x000003fa  /* Protect Register for Secure */
-#define R_SYSC_LOCOCR_OFFSET     0x00000400  /* Low-Speed On-Chip Oscillator Control Register */
-#define R_SYSC_LOCOUTCR_OFFSET     0x00000402  /* LOCO User Trimming Control Register */
-#define R_SYSC_DPSBYCR_OFFSET     0x00000a00  /* Deep Software Standby Control Register */
-#define R_SYSC_DPSIER0_OFFSET     0x00000a08  /* Deep Software Standby Interrupt Enable Register 0 */
-#define R_SYSC_DPSIER1_OFFSET     0x00000a0c  /* Deep Software Standby Interrupt Enable Register 1 */
-#define R_SYSC_DPSIER2_OFFSET     0x00000a10  /* Deep Software Standby Interrupt Enable Register 2 */
-#define R_SYSC_DPSIER3_OFFSET     0x00000a14  /* Deep Software Standby Interrupt Enable Register 3 */
-#define R_SYSC_DPSIFR0_OFFSET     0x00000a18  /* Deep Software Standby Interrupt Flag Register 0 */
-#define R_SYSC_DPSIFR1_OFFSET     0x00000a1c  /* Deep Software Standby Interrupt Flag Register 1 */
-#define R_SYSC_DPSIFR2_OFFSET     0x00000a20  /* Deep Software Standby Interrupt Flag Register 2 */
-#define R_SYSC_DPSIFR3_OFFSET     0x00000a24  /* Deep Software Standby Interrupt Flag Register 3 */
-#define R_SYSC_DPSIEGR0_OFFSET     0x00000a28  /* Deep Software Standby Interrupt Edge Register 0 */
-#define R_SYSC_DPSIEGR1_OFFSET     0x00000a2c  /* Deep Software Standby Interrupt Edge Register 1 */
-#define R_SYSC_DPSIEGR2_OFFSET     0x00000a30  /* Deep Software Standby Interrupt Edge Register 2 */
-#define R_SYSC_DPSIEGR3_OFFSET     0x00000a34  /* Deep Software Standby Interrupt Edge Register 3 */
-#define R_SYSC_SYOCDCR_OFFSET     0x00000a38  /* System Control OCD Control Register */
-#define R_SYSC_RSTSR0_OFFSET     0x00000a40  /* Reset Status Register 0 */
-#define R_SYSC_RSTSR2_OFFSET     0x00000a44  /* Reset Status Register 2 */
-#define R_SYSC_RSTSR3_OFFSET     0x00000a48  /* Reset Status Register 3 */
-#define R_SYSC_MOMCR_OFFSET     0x00000a50  /* Main Clock Oscillator Mode Oscillation Control Register */
-#define R_SYSC_FWEPROR_OFFSET     0x00000a54  /* Flash P/E Protect Register */
+#define R_SYSC_VBRSABAR_OFFSET                    0x000003b0  /* VBATT Backup Register Security Attribute Boundary Address Register */
+#define R_SYSC_VBRPABARS_OFFSET                   0x000003b4  /* VBATT Backup Register Privilege Attribute Boundary Address Register for Secure Region */
+#define R_SYSC_CGFSAR_OFFSET                      0x000003c0  /* Clock Generation Function Security Attribute Register */
+#define R_SYSC_RSTSAR_OFFSET                      0x000003c4  /* Reset Security Attribution Register */
+#define R_SYSC_LPMSAR_OFFSET                      0x000003c8  /* Low Power Mode Security Attribution Register */
+#define R_SYSC_PVDSAR_OFFSET                      0x000003cc  /* Programable Voltage Detection Security Attribution Register */
+#define R_SYSC_BBFSAR_OFFSET                      0x000003d0  /* Battery Backup Function Security Attribute Register */
+#define R_SYSC_PGCSAR_OFFSET                      0x000003d8  /* Power Gating Control Security Attribution Register */
+#define R_SYSC_DPFSAR_OFFSET                      0x000003e0  /* Deep Software Standby Interrupt Factor Security Attribution Register */
+#define R_SYSC_RSCSAR_OFFSET                      0x000003e4  /* RAM Standby Control Security Attribution Register */
+#define R_SYSC_DPFSAR1_OFFSET                     0x000003e8  /* Deep Software Standby Interrupt Factor Security Attribution Register 1 */
+#define R_SYSC_PRCR_S_OFFSET                      0x000003fa  /* Protect Register for Secure */
+#define R_SYSC_LOCOCR_OFFSET                      0x00000400  /* Low-Speed On-Chip Oscillator Control Register */
+#define R_SYSC_LOCOUTCR_OFFSET                    0x00000402  /* LOCO User Trimming Control Register */
+#define R_SYSC_DPSBYCR_OFFSET                     0x00000a00  /* Deep Software Standby Control Register */
+#define R_SYSC_DPSIER0_OFFSET                     0x00000a08  /* Deep Software Standby Interrupt Enable Register 0 */
+#define R_SYSC_DPSIER1_OFFSET                     0x00000a0c  /* Deep Software Standby Interrupt Enable Register 1 */
+#define R_SYSC_DPSIER2_OFFSET                     0x00000a10  /* Deep Software Standby Interrupt Enable Register 2 */
+#define R_SYSC_DPSIER3_OFFSET                     0x00000a14  /* Deep Software Standby Interrupt Enable Register 3 */
+#define R_SYSC_DPSIFR0_OFFSET                     0x00000a18  /* Deep Software Standby Interrupt Flag Register 0 */
+#define R_SYSC_DPSIFR1_OFFSET                     0x00000a1c  /* Deep Software Standby Interrupt Flag Register 1 */
+#define R_SYSC_DPSIFR2_OFFSET                     0x00000a20  /* Deep Software Standby Interrupt Flag Register 2 */
+#define R_SYSC_DPSIFR3_OFFSET                     0x00000a24  /* Deep Software Standby Interrupt Flag Register 3 */
+#define R_SYSC_DPSIEGR0_OFFSET                    0x00000a28  /* Deep Software Standby Interrupt Edge Register 0 */
+#define R_SYSC_DPSIEGR1_OFFSET                    0x00000a2c  /* Deep Software Standby Interrupt Edge Register 1 */
+#define R_SYSC_DPSIEGR2_OFFSET                    0x00000a30  /* Deep Software Standby Interrupt Edge Register 2 */
+#define R_SYSC_DPSIEGR3_OFFSET                    0x00000a34  /* Deep Software Standby Interrupt Edge Register 3 */
+#define R_SYSC_SYOCDCR_OFFSET                     0x00000a38  /* System Control OCD Control Register */
+#define R_SYSC_RSTSR0_OFFSET                      0x00000a40  /* Reset Status Register 0 */
+#define R_SYSC_RSTSR2_OFFSET                      0x00000a44  /* Reset Status Register 2 */
+#define R_SYSC_RSTSR3_OFFSET                      0x00000a48  /* Reset Status Register 3 */
+#define R_SYSC_MOMCR_OFFSET                       0x00000a50  /* Main Clock Oscillator Mode Oscillation Control Register */
+#define R_SYSC_FWEPROR_OFFSET                     0x00000a54  /* Flash P/E Protect Register */
 /* PVD%sCMPCR Registers (1-2) */
-#define R_SYSC_PVD1CMPCR_OFFSET     0x00000a58  /* Voltage Monitor 1 Comparator Control Register */
-#define R_SYSC_PVD2CMPCR_OFFSET     0x00000a5c  /* Voltage Monitor 2 Comparator Control Register */
+#define R_SYSC_PVDCMPCR_OFFSET(m)                 (0x00000a58 + ((m) * 0x00000004))  /* Voltage Monitor %s Comparator Control Register */
 /* PVD%sCMPCR Registers (4-5) */
-#define R_SYSC_PVD4CMPCR_OFFSET     0x00000a64  /* Voltage Monitor 4 Comparator Control Register */
-#define R_SYSC_PVD5CMPCR_OFFSET     0x00000a68  /* Voltage Monitor 5 Comparator Control Register */
 /* PVD%sCR0 Registers (1-2) */
-#define R_SYSC_PVD1CR0_OFFSET     0x00000a70  /* Voltage Monitor 1 Circuit Control Register 0 */
-#define R_SYSC_PVD2CR0_OFFSET     0x00000a74  /* Voltage Monitor 2 Circuit Control Register 0 */
+#define R_SYSC_PVDCR0_OFFSET(m)                   (0x00000a70 + ((m) * 0x00000004))  /* Voltage Monitor %s Circuit Control Register 0 */
 /* PVD%sCR0 Registers (4-5) */
-#define R_SYSC_PVD4CR0_OFFSET     0x00000a7c  /* Voltage Monitor 4 Circuit Control Register 0 */
-#define R_SYSC_PVD5CR0_OFFSET     0x00000a80  /* Voltage Monitor 5 Circuit Control Register 0 */
-#define R_SYSC_VBATTMNSELR_OFFSET     0x00000a84  /* Battery Backup Voltage Monitor Function Select Register */
-#define R_SYSC_VBTBPCR1_OFFSET     0x00000a88  /* VBATT Battery Power Supply Control Register 1 */
-#define R_SYSC_LPSCR_OFFSET     0x00000a90  /* Low Power State Control Register */
-#define R_SYSC_SSCR1_OFFSET     0x00000a98  /* Software Standby Control Register 1 */
-#define R_SYSC_SVSCR_OFFSET     0x00000a9c  /* SSTBY Voltage Scaling Control Register */
-#define R_SYSC_LVOCR_OFFSET     0x00000ab0  /* Low Voltage Operation Control Register */
-#define R_SYSC_MWMCR_OFFSET     0x00000ab4  /* OTP Write Mode Control Register */
-#define R_SYSC_SYRSTMSK0_OFFSET     0x00000ad0  /* System Reset Mask Control Register 0 */
-#define R_SYSC_SYRSTMSK1_OFFSET     0x00000ad4  /* System Reset Mask Control Register 1 */
-#define R_SYSC_SYRSTMSK2_OFFSET     0x00000ad8  /* System Reset Mask Control Register 2 */
-#define R_SYSC_TEMPRCR_OFFSET     0x00000adc  /* Temperature Monitor Reset Control Register */
-#define R_SYSC_TEMPRLR_OFFSET     0x00000ae0  /* Temperature Monitor Reset Lock Register */
-#define R_SYSC_PLL1LDOCR_OFFSET     0x00000b04  /* PLL1-LDO Control Register */
-#define R_SYSC_PLL2LDOCR_OFFSET     0x00000b08  /* PLL2-LDO Control Register */
-#define R_SYSC_HOCOLDOCR_OFFSET     0x00000b0c  /* HOCO-LDO Control Register */
+#define R_SYSC_VBATTMNSELR_OFFSET                 0x00000a84  /* Battery Backup Voltage Monitor Function Select Register */
+#define R_SYSC_VBTBPCR1_OFFSET                    0x00000a88  /* VBATT Battery Power Supply Control Register 1 */
+#define R_SYSC_LPSCR_OFFSET                       0x00000a90  /* Low Power State Control Register */
+#define R_SYSC_SSCR1_OFFSET                       0x00000a98  /* Software Standby Control Register 1 */
+#define R_SYSC_SVSCR_OFFSET                       0x00000a9c  /* SSTBY Voltage Scaling Control Register */
+#define R_SYSC_LVOCR_OFFSET                       0x00000ab0  /* Low Voltage Operation Control Register */
+#define R_SYSC_MWMCR_OFFSET                       0x00000ab4  /* OTP Write Mode Control Register */
+#define R_SYSC_SYRSTMSK0_OFFSET                   0x00000ad0  /* System Reset Mask Control Register 0 */
+#define R_SYSC_SYRSTMSK1_OFFSET                   0x00000ad4  /* System Reset Mask Control Register 1 */
+#define R_SYSC_SYRSTMSK2_OFFSET                   0x00000ad8  /* System Reset Mask Control Register 2 */
+#define R_SYSC_TEMPRCR_OFFSET                     0x00000adc  /* Temperature Monitor Reset Control Register */
+#define R_SYSC_TEMPRLR_OFFSET                     0x00000ae0  /* Temperature Monitor Reset Lock Register */
+#define R_SYSC_PLL1LDOCR_OFFSET                   0x00000b04  /* PLL1-LDO Control Register */
+#define R_SYSC_PLL2LDOCR_OFFSET                   0x00000b08  /* PLL2-LDO Control Register */
+#define R_SYSC_HOCOLDOCR_OFFSET                   0x00000b0c  /* HOCO-LDO Control Register */
 /* PVD%sFCR Registers (1-2) */
-#define R_SYSC_PVD1FCR_OFFSET     0x00000b20  /* Voltage Monitor 1 Function Control Register */
-#define R_SYSC_PVD2FCR_OFFSET     0x00000b24  /* Voltage Monitor 2 Function Control Register */
+#define R_SYSC_PVDFCR_OFFSET(m)                   (0x00000b20 + ((m) * 0x00000004))  /* Voltage Monitor %s Function Control Register */
 /* PVD%sFCR Registers (4-5) */
-#define R_SYSC_PVD4FCR_OFFSET     0x00000b2c  /* Voltage Monitor 4 Function Control Register */
-#define R_SYSC_PVD5FCR_OFFSET     0x00000b30  /* Voltage Monitor 5 Function Control Register */
-#define R_SYSC_PVDLR_OFFSET     0x00000b34  /* Voltage Monitor Lock Register */
-#define R_SYSC_DPSIER4_OFFSET     0x00000b40  /* Deep Software Standby Interrupt Enable Register 4 */
-#define R_SYSC_DPSIER5_OFFSET     0x00000b44  /* Deep Software Standby Interrupt Enable Register 5 */
-#define R_SYSC_DPSIFR4_OFFSET     0x00000b48  /* Deep Software Standby Interrupt Flag Register 4 */
-#define R_SYSC_DPSIFR5_OFFSET     0x00000b4c  /* Deep Software Standby Interrupt Flag Register 5 */
-#define R_SYSC_DPSIEGR4_OFFSET     0x00000b50  /* Deep Software Standby Interrupt Edge Register 4 */
-#define R_SYSC_SOSCCR_OFFSET     0x00000c00  /* Sub-Clock Oscillator Control Register */
-#define R_SYSC_SOMCR_OFFSET     0x00000c01  /* Sub-Clock Oscillator Mode Control Register */
-#define R_SYSC_SOSTDCR_OFFSET     0x00000c04  /* Sub-clock Oscillation Stop Detection Control Register */
-#define R_SYSC_SOSTDSR_OFFSET     0x00000c05  /* Sub-clock Oscillation Stop Detection Status Register */
-#define R_SYSC_VBTBER_OFFSET     0x00000c40  /* VBATT Backup Enable Register */
-#define R_SYSC_VBTBPCR2_OFFSET     0x00000c45  /* VBATT Battery Power Supply Control Register 2 */
-#define R_SYSC_VBTBPSR_OFFSET     0x00000c46  /* VBATT Battery Power Supply Status Register */
-#define R_SYSC_VBTADSR_OFFSET     0x00000c48  /* VBATT Tamper Detection Status Register */
-#define R_SYSC_VBTADCR1_OFFSET     0x00000c49  /* VBATT Tamper Detection Control Register 1 */
-#define R_SYSC_VBTADCR2_OFFSET     0x00000c4a  /* VBATT Tamper Detection Control Register 2 */
-#define R_SYSC_VBTICTLR_OFFSET     0x00000c4c  /* VBATT Input Control Register */
-#define R_SYSC_VBTICTLR2_OFFSET     0x00000c4d  /* VBATT Input Control Register 2 */
-#define R_SYSC_VBTIMONR_OFFSET     0x00000c4e  /* VBATT Input Monitor Register */
-#define R_SYSC_VBTNCWCR_OFFSET     0x00000c50  /* VBATT Noise Canceler Width Control Register */
-#define R_SYSC_VBTADCR3_OFFSET     0x00000c54  /* VBATT Tamper Detection Control Register 3 */
+#define R_SYSC_PVDLR_OFFSET                       0x00000b34  /* Voltage Monitor Lock Register */
+#define R_SYSC_DPSIER4_OFFSET                     0x00000b40  /* Deep Software Standby Interrupt Enable Register 4 */
+#define R_SYSC_DPSIER5_OFFSET                     0x00000b44  /* Deep Software Standby Interrupt Enable Register 5 */
+#define R_SYSC_DPSIFR4_OFFSET                     0x00000b48  /* Deep Software Standby Interrupt Flag Register 4 */
+#define R_SYSC_DPSIFR5_OFFSET                     0x00000b4c  /* Deep Software Standby Interrupt Flag Register 5 */
+#define R_SYSC_DPSIEGR4_OFFSET                    0x00000b50  /* Deep Software Standby Interrupt Edge Register 4 */
+#define R_SYSC_SOSCCR_OFFSET                      0x00000c00  /* Sub-Clock Oscillator Control Register */
+#define R_SYSC_SOMCR_OFFSET                       0x00000c01  /* Sub-Clock Oscillator Mode Control Register */
+#define R_SYSC_SOSTDCR_OFFSET                     0x00000c04  /* Sub-clock Oscillation Stop Detection Control Register */
+#define R_SYSC_SOSTDSR_OFFSET                     0x00000c05  /* Sub-clock Oscillation Stop Detection Status Register */
+#define R_SYSC_VBTBER_OFFSET                      0x00000c40  /* VBATT Backup Enable Register */
+#define R_SYSC_VBTBPCR2_OFFSET                    0x00000c45  /* VBATT Battery Power Supply Control Register 2 */
+#define R_SYSC_VBTBPSR_OFFSET                     0x00000c46  /* VBATT Battery Power Supply Status Register */
+#define R_SYSC_VBTADSR_OFFSET                     0x00000c48  /* VBATT Tamper Detection Status Register */
+#define R_SYSC_VBTADCR1_OFFSET                    0x00000c49  /* VBATT Tamper Detection Control Register 1 */
+#define R_SYSC_VBTADCR2_OFFSET                    0x00000c4a  /* VBATT Tamper Detection Control Register 2 */
+#define R_SYSC_VBTICTLR_OFFSET                    0x00000c4c  /* VBATT Input Control Register */
+#define R_SYSC_VBTICTLR2_OFFSET                   0x00000c4d  /* VBATT Input Control Register 2 */
+#define R_SYSC_VBTIMONR_OFFSET                    0x00000c4e  /* VBATT Input Monitor Register */
+#define R_SYSC_VBTNCWCR_OFFSET                    0x00000c50  /* VBATT Noise Canceler Width Control Register */
+#define R_SYSC_VBTADCR3_OFFSET                    0x00000c54  /* VBATT Tamper Detection Control Register 3 */
 /* VBTBKR%s Registers (0-127) */
-#define R_SYSC_VBTBKR000_OFFSET     0x00000d00  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR001_OFFSET     0x00000d01  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR002_OFFSET     0x00000d02  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR003_OFFSET     0x00000d03  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR004_OFFSET     0x00000d04  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR005_OFFSET     0x00000d05  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR006_OFFSET     0x00000d06  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR007_OFFSET     0x00000d07  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR008_OFFSET     0x00000d08  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR009_OFFSET     0x00000d09  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR010_OFFSET     0x00000d0a  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR011_OFFSET     0x00000d0b  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR012_OFFSET     0x00000d0c  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR013_OFFSET     0x00000d0d  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR014_OFFSET     0x00000d0e  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR015_OFFSET     0x00000d0f  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR016_OFFSET     0x00000d10  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR017_OFFSET     0x00000d11  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR018_OFFSET     0x00000d12  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR019_OFFSET     0x00000d13  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR020_OFFSET     0x00000d14  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR021_OFFSET     0x00000d15  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR022_OFFSET     0x00000d16  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR023_OFFSET     0x00000d17  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR024_OFFSET     0x00000d18  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR025_OFFSET     0x00000d19  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR026_OFFSET     0x00000d1a  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR027_OFFSET     0x00000d1b  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR028_OFFSET     0x00000d1c  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR029_OFFSET     0x00000d1d  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR030_OFFSET     0x00000d1e  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR031_OFFSET     0x00000d1f  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR032_OFFSET     0x00000d20  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR033_OFFSET     0x00000d21  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR034_OFFSET     0x00000d22  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR035_OFFSET     0x00000d23  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR036_OFFSET     0x00000d24  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR037_OFFSET     0x00000d25  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR038_OFFSET     0x00000d26  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR039_OFFSET     0x00000d27  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR040_OFFSET     0x00000d28  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR041_OFFSET     0x00000d29  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR042_OFFSET     0x00000d2a  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR043_OFFSET     0x00000d2b  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR044_OFFSET     0x00000d2c  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR045_OFFSET     0x00000d2d  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR046_OFFSET     0x00000d2e  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR047_OFFSET     0x00000d2f  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR048_OFFSET     0x00000d30  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR049_OFFSET     0x00000d31  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR050_OFFSET     0x00000d32  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR051_OFFSET     0x00000d33  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR052_OFFSET     0x00000d34  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR053_OFFSET     0x00000d35  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR054_OFFSET     0x00000d36  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR055_OFFSET     0x00000d37  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR056_OFFSET     0x00000d38  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR057_OFFSET     0x00000d39  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR058_OFFSET     0x00000d3a  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR059_OFFSET     0x00000d3b  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR060_OFFSET     0x00000d3c  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR061_OFFSET     0x00000d3d  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR062_OFFSET     0x00000d3e  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR063_OFFSET     0x00000d3f  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR064_OFFSET     0x00000d40  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR065_OFFSET     0x00000d41  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR066_OFFSET     0x00000d42  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR067_OFFSET     0x00000d43  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR068_OFFSET     0x00000d44  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR069_OFFSET     0x00000d45  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR070_OFFSET     0x00000d46  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR071_OFFSET     0x00000d47  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR072_OFFSET     0x00000d48  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR073_OFFSET     0x00000d49  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR074_OFFSET     0x00000d4a  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR075_OFFSET     0x00000d4b  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR076_OFFSET     0x00000d4c  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR077_OFFSET     0x00000d4d  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR078_OFFSET     0x00000d4e  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR079_OFFSET     0x00000d4f  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR080_OFFSET     0x00000d50  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR081_OFFSET     0x00000d51  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR082_OFFSET     0x00000d52  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR083_OFFSET     0x00000d53  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR084_OFFSET     0x00000d54  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR085_OFFSET     0x00000d55  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR086_OFFSET     0x00000d56  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR087_OFFSET     0x00000d57  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR088_OFFSET     0x00000d58  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR089_OFFSET     0x00000d59  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR090_OFFSET     0x00000d5a  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR091_OFFSET     0x00000d5b  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR092_OFFSET     0x00000d5c  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR093_OFFSET     0x00000d5d  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR094_OFFSET     0x00000d5e  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR095_OFFSET     0x00000d5f  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR096_OFFSET     0x00000d60  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR097_OFFSET     0x00000d61  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR098_OFFSET     0x00000d62  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR099_OFFSET     0x00000d63  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR100_OFFSET     0x00000d64  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR101_OFFSET     0x00000d65  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR102_OFFSET     0x00000d66  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR103_OFFSET     0x00000d67  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR104_OFFSET     0x00000d68  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR105_OFFSET     0x00000d69  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR106_OFFSET     0x00000d6a  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR107_OFFSET     0x00000d6b  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR108_OFFSET     0x00000d6c  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR109_OFFSET     0x00000d6d  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR110_OFFSET     0x00000d6e  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR111_OFFSET     0x00000d6f  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR112_OFFSET     0x00000d70  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR113_OFFSET     0x00000d71  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR114_OFFSET     0x00000d72  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR115_OFFSET     0x00000d73  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR116_OFFSET     0x00000d74  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR117_OFFSET     0x00000d75  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR118_OFFSET     0x00000d76  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR119_OFFSET     0x00000d77  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR120_OFFSET     0x00000d78  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR121_OFFSET     0x00000d79  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR122_OFFSET     0x00000d7a  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR123_OFFSET     0x00000d7b  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR124_OFFSET     0x00000d7c  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR125_OFFSET     0x00000d7d  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR126_OFFSET     0x00000d7e  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR127_OFFSET     0x00000d7f  /* VBATT Backup Register */
+#define R_SYSC_VBTBKR_OFFSET(m)                   (0x00000d00 + ((m) * 0x00000001))  /* VBATT Backup Register */
 
 /* SYSC Register Addresses */
 
-#define R_SYSC_SBYCR                 (R_SYSC_BASE + R_SYSC_SBYCR_OFFSET)
-#define R_SYSC_VSCR                 (R_SYSC_BASE + R_SYSC_VSCR_OFFSET)
-#define R_SYSC_SCKDIVCR                 (R_SYSC_BASE + R_SYSC_SCKDIVCR_OFFSET)
-#define R_SYSC_SCKDIVCR2                 (R_SYSC_BASE + R_SYSC_SCKDIVCR2_OFFSET)
-#define R_SYSC_SCKSCR                 (R_SYSC_BASE + R_SYSC_SCKSCR_OFFSET)
-#define R_SYSC_PLLCR                 (R_SYSC_BASE + R_SYSC_PLLCR_OFFSET)
-#define R_SYSC_BCKCR                 (R_SYSC_BASE + R_SYSC_BCKCR_OFFSET)
-#define R_SYSC_MOSCCR                 (R_SYSC_BASE + R_SYSC_MOSCCR_OFFSET)
-#define R_SYSC_HOCOCR                 (R_SYSC_BASE + R_SYSC_HOCOCR_OFFSET)
-#define R_SYSC_HOCOCR2                 (R_SYSC_BASE + R_SYSC_HOCOCR2_OFFSET)
-#define R_SYSC_MOCOCR                 (R_SYSC_BASE + R_SYSC_MOCOCR_OFFSET)
-#define R_SYSC_FLLCR1                 (R_SYSC_BASE + R_SYSC_FLLCR1_OFFSET)
-#define R_SYSC_FLLCR2                 (R_SYSC_BASE + R_SYSC_FLLCR2_OFFSET)
-#define R_SYSC_OSCSF                 (R_SYSC_BASE + R_SYSC_OSCSF_OFFSET)
-#define R_SYSC_CKOCR                 (R_SYSC_BASE + R_SYSC_CKOCR_OFFSET)
-#define R_SYSC_TRCKCR                 (R_SYSC_BASE + R_SYSC_TRCKCR_OFFSET)
-#define R_SYSC_OSTDCR                 (R_SYSC_BASE + R_SYSC_OSTDCR_OFFSET)
-#define R_SYSC_OSTDSR                 (R_SYSC_BASE + R_SYSC_OSTDSR_OFFSET)
-#define R_SYSC_OSCMONR                 (R_SYSC_BASE + R_SYSC_OSCMONR_OFFSET)
-#define R_SYSC_PLL2CR                 (R_SYSC_BASE + R_SYSC_PLL2CR_OFFSET)
-#define R_SYSC_PLLCCR2                 (R_SYSC_BASE + R_SYSC_PLLCCR2_OFFSET)
-#define R_SYSC_PLL2CCR2                 (R_SYSC_BASE + R_SYSC_PLL2CCR2_OFFSET)
-#define R_SYSC_EBCKOCR                 (R_SYSC_BASE + R_SYSC_EBCKOCR_OFFSET)
-#define R_SYSC_SDCKOCR                 (R_SYSC_BASE + R_SYSC_SDCKOCR_OFFSET)
-#define R_SYSC_SCICKDIVCR                 (R_SYSC_BASE + R_SYSC_SCICKDIVCR_OFFSET)
-#define R_SYSC_SCICKCR                 (R_SYSC_BASE + R_SYSC_SCICKCR_OFFSET)
-#define R_SYSC_SPICKDIVCR                 (R_SYSC_BASE + R_SYSC_SPICKDIVCR_OFFSET)
-#define R_SYSC_SPICKCR                 (R_SYSC_BASE + R_SYSC_SPICKCR_OFFSET)
-#define R_SYSC_ADCCKDIVCR                 (R_SYSC_BASE + R_SYSC_ADCCKDIVCR_OFFSET)
-#define R_SYSC_ADCCKCR                 (R_SYSC_BASE + R_SYSC_ADCCKCR_OFFSET)
-#define R_SYSC_GPTCKDIVCR                 (R_SYSC_BASE + R_SYSC_GPTCKDIVCR_OFFSET)
-#define R_SYSC_GPTCKCR                 (R_SYSC_BASE + R_SYSC_GPTCKCR_OFFSET)
-#define R_SYSC_LCDCKDIVCR                 (R_SYSC_BASE + R_SYSC_LCDCKDIVCR_OFFSET)
-#define R_SYSC_LCDCKCR                 (R_SYSC_BASE + R_SYSC_LCDCKCR_OFFSET)
-#define R_SYSC_MOCOUTCR                 (R_SYSC_BASE + R_SYSC_MOCOUTCR_OFFSET)
-#define R_SYSC_HOCOUTCR                 (R_SYSC_BASE + R_SYSC_HOCOUTCR_OFFSET)
-#define R_SYSC_USBCKDIVCR                 (R_SYSC_BASE + R_SYSC_USBCKDIVCR_OFFSET)
-#define R_SYSC_OCTACKDIVCR                 (R_SYSC_BASE + R_SYSC_OCTACKDIVCR_OFFSET)
-#define R_SYSC_CANFDCKDIVCR                 (R_SYSC_BASE + R_SYSC_CANFDCKDIVCR_OFFSET)
-#define R_SYSC_USB60CKDIVCR                 (R_SYSC_BASE + R_SYSC_USB60CKDIVCR_OFFSET)
-#define R_SYSC_I3CCKDIVCR                 (R_SYSC_BASE + R_SYSC_I3CCKDIVCR_OFFSET)
-#define R_SYSC_USBCKCR                 (R_SYSC_BASE + R_SYSC_USBCKCR_OFFSET)
-#define R_SYSC_OCTACKCR                 (R_SYSC_BASE + R_SYSC_OCTACKCR_OFFSET)
-#define R_SYSC_CANFDCKCR                 (R_SYSC_BASE + R_SYSC_CANFDCKCR_OFFSET)
-#define R_SYSC_USB60CKCR                 (R_SYSC_BASE + R_SYSC_USB60CKCR_OFFSET)
-#define R_SYSC_I3CCKCR                 (R_SYSC_BASE + R_SYSC_I3CCKCR_OFFSET)
-#define R_SYSC_MOSCSCR                 (R_SYSC_BASE + R_SYSC_MOSCSCR_OFFSET)
-#define R_SYSC_HOCOSCR                 (R_SYSC_BASE + R_SYSC_HOCOSCR_OFFSET)
-#define R_SYSC_MOCOSCR                 (R_SYSC_BASE + R_SYSC_MOCOSCR_OFFSET)
-#define R_SYSC_OPCCR                 (R_SYSC_BASE + R_SYSC_OPCCR_OFFSET)
-#define R_SYSC_MOSCWTCR                 (R_SYSC_BASE + R_SYSC_MOSCWTCR_OFFSET)
-#define R_SYSC_PLLCCR                 (R_SYSC_BASE + R_SYSC_PLLCCR_OFFSET)
-#define R_SYSC_RSTSR1                 (R_SYSC_BASE + R_SYSC_RSTSR1_OFFSET)
-#define R_SYSC_PLL2CCR                 (R_SYSC_BASE + R_SYSC_PLL2CCR_OFFSET)
-#define R_SYSC_SYRACCR                 (R_SYSC_BASE + R_SYSC_SYRACCR_OFFSET)
-#define R_SYSC_BCKADIVCR                 (R_SYSC_BASE + R_SYSC_BCKADIVCR_OFFSET)
-#define R_SYSC_ESWCKDIVCR                 (R_SYSC_BASE + R_SYSC_ESWCKDIVCR_OFFSET)
-#define R_SYSC_ESWPCKDIVCR                 (R_SYSC_BASE + R_SYSC_ESWPCKDIVCR_OFFSET)
-#define R_SYSC_ETHPCKDIVCR                 (R_SYSC_BASE + R_SYSC_ETHPCKDIVCR_OFFSET)
-#define R_SYSC_BCKACR                 (R_SYSC_BASE + R_SYSC_BCKACR_OFFSET)
-#define R_SYSC_ESWCKCR                 (R_SYSC_BASE + R_SYSC_ESWCKCR_OFFSET)
-#define R_SYSC_ESWPCKCR                 (R_SYSC_BASE + R_SYSC_ESWPCKCR_OFFSET)
-#define R_SYSC_ETHPCKCR                 (R_SYSC_BASE + R_SYSC_ETHPCKCR_OFFSET)
-#define R_SYSC_PVD1CR1                 (R_SYSC_BASE + R_SYSC_PVD1CR1_OFFSET)
-#define R_SYSC_PVD2CR1                 (R_SYSC_BASE + R_SYSC_PVD2CR1_OFFSET)
-#define R_SYSC_PVD1SR                 (R_SYSC_BASE + R_SYSC_PVD1SR_OFFSET)
-#define R_SYSC_PVD2SR                 (R_SYSC_BASE + R_SYSC_PVD2SR_OFFSET)
-#define R_SYSC_CPUDSCR                 (R_SYSC_BASE + R_SYSC_CPUDSCR_OFFSET)
-#define R_SYSC_PGSCR                 (R_SYSC_BASE + R_SYSC_PGSCR_OFFSET)
-#define R_SYSC_PDCTRGD                 (R_SYSC_BASE + R_SYSC_PDCTRGD_OFFSET)
-#define R_SYSC_PDCTRNPU                 (R_SYSC_BASE + R_SYSC_PDCTRNPU_OFFSET)
-#define R_SYSC_PDCTRESWM                 (R_SYSC_BASE + R_SYSC_PDCTRESWM_OFFSET)
-#define R_SYSC_PDRAMSCR0                 (R_SYSC_BASE + R_SYSC_PDRAMSCR0_OFFSET)
-#define R_SYSC_PDRAMSCR1                 (R_SYSC_BASE + R_SYSC_PDRAMSCR1_OFFSET)
-#define R_SYSC_PSSTCR0                 (R_SYSC_BASE + R_SYSC_PSSTCR0_OFFSET)
-#define R_SYSC_PSSTCR1                 (R_SYSC_BASE + R_SYSC_PSSTCR1_OFFSET)
-#define R_SYSC_PSSTCR2                 (R_SYSC_BASE + R_SYSC_PSSTCR2_OFFSET)
-#define R_SYSC_PSSTCR3                 (R_SYSC_BASE + R_SYSC_PSSTCR3_OFFSET)
-#define R_SYSC_PSSTCR4                 (R_SYSC_BASE + R_SYSC_PSSTCR4_OFFSET)
-#define R_SYSC_PSSTCR5                 (R_SYSC_BASE + R_SYSC_PSSTCR5_OFFSET)
-#define R_SYSC_PSSTCR0                 (R_SYSC_BASE + R_SYSC_PSSTCR0_OFFSET)
-#define R_SYSC_PSSTCR1                 (R_SYSC_BASE + R_SYSC_PSSTCR1_OFFSET)
-#define R_SYSC_PSSTCR2                 (R_SYSC_BASE + R_SYSC_PSSTCR2_OFFSET)
-#define R_SYSC_PSSTCR3                 (R_SYSC_BASE + R_SYSC_PSSTCR3_OFFSET)
-#define R_SYSC_PSSTCR4                 (R_SYSC_BASE + R_SYSC_PSSTCR4_OFFSET)
-#define R_SYSC_PSSTCR5                 (R_SYSC_BASE + R_SYSC_PSSTCR5_OFFSET)
-#define R_SYSC_VBRSABAR                 (R_SYSC_BASE + R_SYSC_VBRSABAR_OFFSET)
-#define R_SYSC_VBRPABARS                 (R_SYSC_BASE + R_SYSC_VBRPABARS_OFFSET)
-#define R_SYSC_CGFSAR                 (R_SYSC_BASE + R_SYSC_CGFSAR_OFFSET)
-#define R_SYSC_RSTSAR                 (R_SYSC_BASE + R_SYSC_RSTSAR_OFFSET)
-#define R_SYSC_LPMSAR                 (R_SYSC_BASE + R_SYSC_LPMSAR_OFFSET)
-#define R_SYSC_PVDSAR                 (R_SYSC_BASE + R_SYSC_PVDSAR_OFFSET)
-#define R_SYSC_BBFSAR                 (R_SYSC_BASE + R_SYSC_BBFSAR_OFFSET)
-#define R_SYSC_PGCSAR                 (R_SYSC_BASE + R_SYSC_PGCSAR_OFFSET)
-#define R_SYSC_DPFSAR                 (R_SYSC_BASE + R_SYSC_DPFSAR_OFFSET)
-#define R_SYSC_RSCSAR                 (R_SYSC_BASE + R_SYSC_RSCSAR_OFFSET)
-#define R_SYSC_DPFSAR1                 (R_SYSC_BASE + R_SYSC_DPFSAR1_OFFSET)
-#define R_SYSC_PRCR_S                 (R_SYSC_BASE + R_SYSC_PRCR_S_OFFSET)
-#define R_SYSC_LOCOCR                 (R_SYSC_BASE + R_SYSC_LOCOCR_OFFSET)
-#define R_SYSC_LOCOUTCR                 (R_SYSC_BASE + R_SYSC_LOCOUTCR_OFFSET)
-#define R_SYSC_DPSBYCR                 (R_SYSC_BASE + R_SYSC_DPSBYCR_OFFSET)
-#define R_SYSC_DPSIER0                 (R_SYSC_BASE + R_SYSC_DPSIER0_OFFSET)
-#define R_SYSC_DPSIER1                 (R_SYSC_BASE + R_SYSC_DPSIER1_OFFSET)
-#define R_SYSC_DPSIER2                 (R_SYSC_BASE + R_SYSC_DPSIER2_OFFSET)
-#define R_SYSC_DPSIER3                 (R_SYSC_BASE + R_SYSC_DPSIER3_OFFSET)
-#define R_SYSC_DPSIFR0                 (R_SYSC_BASE + R_SYSC_DPSIFR0_OFFSET)
-#define R_SYSC_DPSIFR1                 (R_SYSC_BASE + R_SYSC_DPSIFR1_OFFSET)
-#define R_SYSC_DPSIFR2                 (R_SYSC_BASE + R_SYSC_DPSIFR2_OFFSET)
-#define R_SYSC_DPSIFR3                 (R_SYSC_BASE + R_SYSC_DPSIFR3_OFFSET)
-#define R_SYSC_DPSIEGR0                 (R_SYSC_BASE + R_SYSC_DPSIEGR0_OFFSET)
-#define R_SYSC_DPSIEGR1                 (R_SYSC_BASE + R_SYSC_DPSIEGR1_OFFSET)
-#define R_SYSC_DPSIEGR2                 (R_SYSC_BASE + R_SYSC_DPSIEGR2_OFFSET)
-#define R_SYSC_DPSIEGR3                 (R_SYSC_BASE + R_SYSC_DPSIEGR3_OFFSET)
-#define R_SYSC_SYOCDCR                 (R_SYSC_BASE + R_SYSC_SYOCDCR_OFFSET)
-#define R_SYSC_RSTSR0                 (R_SYSC_BASE + R_SYSC_RSTSR0_OFFSET)
-#define R_SYSC_RSTSR2                 (R_SYSC_BASE + R_SYSC_RSTSR2_OFFSET)
-#define R_SYSC_RSTSR3                 (R_SYSC_BASE + R_SYSC_RSTSR3_OFFSET)
-#define R_SYSC_MOMCR                 (R_SYSC_BASE + R_SYSC_MOMCR_OFFSET)
-#define R_SYSC_FWEPROR                 (R_SYSC_BASE + R_SYSC_FWEPROR_OFFSET)
-#define R_SYSC_PVD1CMPCR                 (R_SYSC_BASE + R_SYSC_PVD1CMPCR_OFFSET)
-#define R_SYSC_PVD2CMPCR                 (R_SYSC_BASE + R_SYSC_PVD2CMPCR_OFFSET)
-#define R_SYSC_PVD4CMPCR                 (R_SYSC_BASE + R_SYSC_PVD4CMPCR_OFFSET)
-#define R_SYSC_PVD5CMPCR                 (R_SYSC_BASE + R_SYSC_PVD5CMPCR_OFFSET)
-#define R_SYSC_PVD1CR0                 (R_SYSC_BASE + R_SYSC_PVD1CR0_OFFSET)
-#define R_SYSC_PVD2CR0                 (R_SYSC_BASE + R_SYSC_PVD2CR0_OFFSET)
-#define R_SYSC_PVD4CR0                 (R_SYSC_BASE + R_SYSC_PVD4CR0_OFFSET)
-#define R_SYSC_PVD5CR0                 (R_SYSC_BASE + R_SYSC_PVD5CR0_OFFSET)
-#define R_SYSC_VBATTMNSELR                 (R_SYSC_BASE + R_SYSC_VBATTMNSELR_OFFSET)
-#define R_SYSC_VBTBPCR1                 (R_SYSC_BASE + R_SYSC_VBTBPCR1_OFFSET)
-#define R_SYSC_LPSCR                 (R_SYSC_BASE + R_SYSC_LPSCR_OFFSET)
-#define R_SYSC_SSCR1                 (R_SYSC_BASE + R_SYSC_SSCR1_OFFSET)
-#define R_SYSC_SVSCR                 (R_SYSC_BASE + R_SYSC_SVSCR_OFFSET)
-#define R_SYSC_LVOCR                 (R_SYSC_BASE + R_SYSC_LVOCR_OFFSET)
-#define R_SYSC_MWMCR                 (R_SYSC_BASE + R_SYSC_MWMCR_OFFSET)
-#define R_SYSC_SYRSTMSK0                 (R_SYSC_BASE + R_SYSC_SYRSTMSK0_OFFSET)
-#define R_SYSC_SYRSTMSK1                 (R_SYSC_BASE + R_SYSC_SYRSTMSK1_OFFSET)
-#define R_SYSC_SYRSTMSK2                 (R_SYSC_BASE + R_SYSC_SYRSTMSK2_OFFSET)
-#define R_SYSC_TEMPRCR                 (R_SYSC_BASE + R_SYSC_TEMPRCR_OFFSET)
-#define R_SYSC_TEMPRLR                 (R_SYSC_BASE + R_SYSC_TEMPRLR_OFFSET)
-#define R_SYSC_PLL1LDOCR                 (R_SYSC_BASE + R_SYSC_PLL1LDOCR_OFFSET)
-#define R_SYSC_PLL2LDOCR                 (R_SYSC_BASE + R_SYSC_PLL2LDOCR_OFFSET)
-#define R_SYSC_HOCOLDOCR                 (R_SYSC_BASE + R_SYSC_HOCOLDOCR_OFFSET)
-#define R_SYSC_PVD1FCR                 (R_SYSC_BASE + R_SYSC_PVD1FCR_OFFSET)
-#define R_SYSC_PVD2FCR                 (R_SYSC_BASE + R_SYSC_PVD2FCR_OFFSET)
-#define R_SYSC_PVD4FCR                 (R_SYSC_BASE + R_SYSC_PVD4FCR_OFFSET)
-#define R_SYSC_PVD5FCR                 (R_SYSC_BASE + R_SYSC_PVD5FCR_OFFSET)
-#define R_SYSC_PVDLR                 (R_SYSC_BASE + R_SYSC_PVDLR_OFFSET)
-#define R_SYSC_DPSIER4                 (R_SYSC_BASE + R_SYSC_DPSIER4_OFFSET)
-#define R_SYSC_DPSIER5                 (R_SYSC_BASE + R_SYSC_DPSIER5_OFFSET)
-#define R_SYSC_DPSIFR4                 (R_SYSC_BASE + R_SYSC_DPSIFR4_OFFSET)
-#define R_SYSC_DPSIFR5                 (R_SYSC_BASE + R_SYSC_DPSIFR5_OFFSET)
-#define R_SYSC_DPSIEGR4                 (R_SYSC_BASE + R_SYSC_DPSIEGR4_OFFSET)
-#define R_SYSC_SOSCCR                 (R_SYSC_BASE + R_SYSC_SOSCCR_OFFSET)
-#define R_SYSC_SOMCR                 (R_SYSC_BASE + R_SYSC_SOMCR_OFFSET)
-#define R_SYSC_SOSTDCR                 (R_SYSC_BASE + R_SYSC_SOSTDCR_OFFSET)
-#define R_SYSC_SOSTDSR                 (R_SYSC_BASE + R_SYSC_SOSTDSR_OFFSET)
-#define R_SYSC_VBTBER                 (R_SYSC_BASE + R_SYSC_VBTBER_OFFSET)
-#define R_SYSC_VBTBPCR2                 (R_SYSC_BASE + R_SYSC_VBTBPCR2_OFFSET)
-#define R_SYSC_VBTBPSR                 (R_SYSC_BASE + R_SYSC_VBTBPSR_OFFSET)
-#define R_SYSC_VBTADSR                 (R_SYSC_BASE + R_SYSC_VBTADSR_OFFSET)
-#define R_SYSC_VBTADCR1                 (R_SYSC_BASE + R_SYSC_VBTADCR1_OFFSET)
-#define R_SYSC_VBTADCR2                 (R_SYSC_BASE + R_SYSC_VBTADCR2_OFFSET)
-#define R_SYSC_VBTICTLR                 (R_SYSC_BASE + R_SYSC_VBTICTLR_OFFSET)
-#define R_SYSC_VBTICTLR2                 (R_SYSC_BASE + R_SYSC_VBTICTLR2_OFFSET)
-#define R_SYSC_VBTIMONR                 (R_SYSC_BASE + R_SYSC_VBTIMONR_OFFSET)
-#define R_SYSC_VBTNCWCR                 (R_SYSC_BASE + R_SYSC_VBTNCWCR_OFFSET)
-#define R_SYSC_VBTADCR3                 (R_SYSC_BASE + R_SYSC_VBTADCR3_OFFSET)
-#define R_SYSC_VBTBKR000                 (R_SYSC_BASE + R_SYSC_VBTBKR000_OFFSET)
-#define R_SYSC_VBTBKR001                 (R_SYSC_BASE + R_SYSC_VBTBKR001_OFFSET)
-#define R_SYSC_VBTBKR002                 (R_SYSC_BASE + R_SYSC_VBTBKR002_OFFSET)
-#define R_SYSC_VBTBKR003                 (R_SYSC_BASE + R_SYSC_VBTBKR003_OFFSET)
-#define R_SYSC_VBTBKR004                 (R_SYSC_BASE + R_SYSC_VBTBKR004_OFFSET)
-#define R_SYSC_VBTBKR005                 (R_SYSC_BASE + R_SYSC_VBTBKR005_OFFSET)
-#define R_SYSC_VBTBKR006                 (R_SYSC_BASE + R_SYSC_VBTBKR006_OFFSET)
-#define R_SYSC_VBTBKR007                 (R_SYSC_BASE + R_SYSC_VBTBKR007_OFFSET)
-#define R_SYSC_VBTBKR008                 (R_SYSC_BASE + R_SYSC_VBTBKR008_OFFSET)
-#define R_SYSC_VBTBKR009                 (R_SYSC_BASE + R_SYSC_VBTBKR009_OFFSET)
-#define R_SYSC_VBTBKR010                 (R_SYSC_BASE + R_SYSC_VBTBKR010_OFFSET)
-#define R_SYSC_VBTBKR011                 (R_SYSC_BASE + R_SYSC_VBTBKR011_OFFSET)
-#define R_SYSC_VBTBKR012                 (R_SYSC_BASE + R_SYSC_VBTBKR012_OFFSET)
-#define R_SYSC_VBTBKR013                 (R_SYSC_BASE + R_SYSC_VBTBKR013_OFFSET)
-#define R_SYSC_VBTBKR014                 (R_SYSC_BASE + R_SYSC_VBTBKR014_OFFSET)
-#define R_SYSC_VBTBKR015                 (R_SYSC_BASE + R_SYSC_VBTBKR015_OFFSET)
-#define R_SYSC_VBTBKR016                 (R_SYSC_BASE + R_SYSC_VBTBKR016_OFFSET)
-#define R_SYSC_VBTBKR017                 (R_SYSC_BASE + R_SYSC_VBTBKR017_OFFSET)
-#define R_SYSC_VBTBKR018                 (R_SYSC_BASE + R_SYSC_VBTBKR018_OFFSET)
-#define R_SYSC_VBTBKR019                 (R_SYSC_BASE + R_SYSC_VBTBKR019_OFFSET)
-#define R_SYSC_VBTBKR020                 (R_SYSC_BASE + R_SYSC_VBTBKR020_OFFSET)
-#define R_SYSC_VBTBKR021                 (R_SYSC_BASE + R_SYSC_VBTBKR021_OFFSET)
-#define R_SYSC_VBTBKR022                 (R_SYSC_BASE + R_SYSC_VBTBKR022_OFFSET)
-#define R_SYSC_VBTBKR023                 (R_SYSC_BASE + R_SYSC_VBTBKR023_OFFSET)
-#define R_SYSC_VBTBKR024                 (R_SYSC_BASE + R_SYSC_VBTBKR024_OFFSET)
-#define R_SYSC_VBTBKR025                 (R_SYSC_BASE + R_SYSC_VBTBKR025_OFFSET)
-#define R_SYSC_VBTBKR026                 (R_SYSC_BASE + R_SYSC_VBTBKR026_OFFSET)
-#define R_SYSC_VBTBKR027                 (R_SYSC_BASE + R_SYSC_VBTBKR027_OFFSET)
-#define R_SYSC_VBTBKR028                 (R_SYSC_BASE + R_SYSC_VBTBKR028_OFFSET)
-#define R_SYSC_VBTBKR029                 (R_SYSC_BASE + R_SYSC_VBTBKR029_OFFSET)
-#define R_SYSC_VBTBKR030                 (R_SYSC_BASE + R_SYSC_VBTBKR030_OFFSET)
-#define R_SYSC_VBTBKR031                 (R_SYSC_BASE + R_SYSC_VBTBKR031_OFFSET)
-#define R_SYSC_VBTBKR032                 (R_SYSC_BASE + R_SYSC_VBTBKR032_OFFSET)
-#define R_SYSC_VBTBKR033                 (R_SYSC_BASE + R_SYSC_VBTBKR033_OFFSET)
-#define R_SYSC_VBTBKR034                 (R_SYSC_BASE + R_SYSC_VBTBKR034_OFFSET)
-#define R_SYSC_VBTBKR035                 (R_SYSC_BASE + R_SYSC_VBTBKR035_OFFSET)
-#define R_SYSC_VBTBKR036                 (R_SYSC_BASE + R_SYSC_VBTBKR036_OFFSET)
-#define R_SYSC_VBTBKR037                 (R_SYSC_BASE + R_SYSC_VBTBKR037_OFFSET)
-#define R_SYSC_VBTBKR038                 (R_SYSC_BASE + R_SYSC_VBTBKR038_OFFSET)
-#define R_SYSC_VBTBKR039                 (R_SYSC_BASE + R_SYSC_VBTBKR039_OFFSET)
-#define R_SYSC_VBTBKR040                 (R_SYSC_BASE + R_SYSC_VBTBKR040_OFFSET)
-#define R_SYSC_VBTBKR041                 (R_SYSC_BASE + R_SYSC_VBTBKR041_OFFSET)
-#define R_SYSC_VBTBKR042                 (R_SYSC_BASE + R_SYSC_VBTBKR042_OFFSET)
-#define R_SYSC_VBTBKR043                 (R_SYSC_BASE + R_SYSC_VBTBKR043_OFFSET)
-#define R_SYSC_VBTBKR044                 (R_SYSC_BASE + R_SYSC_VBTBKR044_OFFSET)
-#define R_SYSC_VBTBKR045                 (R_SYSC_BASE + R_SYSC_VBTBKR045_OFFSET)
-#define R_SYSC_VBTBKR046                 (R_SYSC_BASE + R_SYSC_VBTBKR046_OFFSET)
-#define R_SYSC_VBTBKR047                 (R_SYSC_BASE + R_SYSC_VBTBKR047_OFFSET)
-#define R_SYSC_VBTBKR048                 (R_SYSC_BASE + R_SYSC_VBTBKR048_OFFSET)
-#define R_SYSC_VBTBKR049                 (R_SYSC_BASE + R_SYSC_VBTBKR049_OFFSET)
-#define R_SYSC_VBTBKR050                 (R_SYSC_BASE + R_SYSC_VBTBKR050_OFFSET)
-#define R_SYSC_VBTBKR051                 (R_SYSC_BASE + R_SYSC_VBTBKR051_OFFSET)
-#define R_SYSC_VBTBKR052                 (R_SYSC_BASE + R_SYSC_VBTBKR052_OFFSET)
-#define R_SYSC_VBTBKR053                 (R_SYSC_BASE + R_SYSC_VBTBKR053_OFFSET)
-#define R_SYSC_VBTBKR054                 (R_SYSC_BASE + R_SYSC_VBTBKR054_OFFSET)
-#define R_SYSC_VBTBKR055                 (R_SYSC_BASE + R_SYSC_VBTBKR055_OFFSET)
-#define R_SYSC_VBTBKR056                 (R_SYSC_BASE + R_SYSC_VBTBKR056_OFFSET)
-#define R_SYSC_VBTBKR057                 (R_SYSC_BASE + R_SYSC_VBTBKR057_OFFSET)
-#define R_SYSC_VBTBKR058                 (R_SYSC_BASE + R_SYSC_VBTBKR058_OFFSET)
-#define R_SYSC_VBTBKR059                 (R_SYSC_BASE + R_SYSC_VBTBKR059_OFFSET)
-#define R_SYSC_VBTBKR060                 (R_SYSC_BASE + R_SYSC_VBTBKR060_OFFSET)
-#define R_SYSC_VBTBKR061                 (R_SYSC_BASE + R_SYSC_VBTBKR061_OFFSET)
-#define R_SYSC_VBTBKR062                 (R_SYSC_BASE + R_SYSC_VBTBKR062_OFFSET)
-#define R_SYSC_VBTBKR063                 (R_SYSC_BASE + R_SYSC_VBTBKR063_OFFSET)
-#define R_SYSC_VBTBKR064                 (R_SYSC_BASE + R_SYSC_VBTBKR064_OFFSET)
-#define R_SYSC_VBTBKR065                 (R_SYSC_BASE + R_SYSC_VBTBKR065_OFFSET)
-#define R_SYSC_VBTBKR066                 (R_SYSC_BASE + R_SYSC_VBTBKR066_OFFSET)
-#define R_SYSC_VBTBKR067                 (R_SYSC_BASE + R_SYSC_VBTBKR067_OFFSET)
-#define R_SYSC_VBTBKR068                 (R_SYSC_BASE + R_SYSC_VBTBKR068_OFFSET)
-#define R_SYSC_VBTBKR069                 (R_SYSC_BASE + R_SYSC_VBTBKR069_OFFSET)
-#define R_SYSC_VBTBKR070                 (R_SYSC_BASE + R_SYSC_VBTBKR070_OFFSET)
-#define R_SYSC_VBTBKR071                 (R_SYSC_BASE + R_SYSC_VBTBKR071_OFFSET)
-#define R_SYSC_VBTBKR072                 (R_SYSC_BASE + R_SYSC_VBTBKR072_OFFSET)
-#define R_SYSC_VBTBKR073                 (R_SYSC_BASE + R_SYSC_VBTBKR073_OFFSET)
-#define R_SYSC_VBTBKR074                 (R_SYSC_BASE + R_SYSC_VBTBKR074_OFFSET)
-#define R_SYSC_VBTBKR075                 (R_SYSC_BASE + R_SYSC_VBTBKR075_OFFSET)
-#define R_SYSC_VBTBKR076                 (R_SYSC_BASE + R_SYSC_VBTBKR076_OFFSET)
-#define R_SYSC_VBTBKR077                 (R_SYSC_BASE + R_SYSC_VBTBKR077_OFFSET)
-#define R_SYSC_VBTBKR078                 (R_SYSC_BASE + R_SYSC_VBTBKR078_OFFSET)
-#define R_SYSC_VBTBKR079                 (R_SYSC_BASE + R_SYSC_VBTBKR079_OFFSET)
-#define R_SYSC_VBTBKR080                 (R_SYSC_BASE + R_SYSC_VBTBKR080_OFFSET)
-#define R_SYSC_VBTBKR081                 (R_SYSC_BASE + R_SYSC_VBTBKR081_OFFSET)
-#define R_SYSC_VBTBKR082                 (R_SYSC_BASE + R_SYSC_VBTBKR082_OFFSET)
-#define R_SYSC_VBTBKR083                 (R_SYSC_BASE + R_SYSC_VBTBKR083_OFFSET)
-#define R_SYSC_VBTBKR084                 (R_SYSC_BASE + R_SYSC_VBTBKR084_OFFSET)
-#define R_SYSC_VBTBKR085                 (R_SYSC_BASE + R_SYSC_VBTBKR085_OFFSET)
-#define R_SYSC_VBTBKR086                 (R_SYSC_BASE + R_SYSC_VBTBKR086_OFFSET)
-#define R_SYSC_VBTBKR087                 (R_SYSC_BASE + R_SYSC_VBTBKR087_OFFSET)
-#define R_SYSC_VBTBKR088                 (R_SYSC_BASE + R_SYSC_VBTBKR088_OFFSET)
-#define R_SYSC_VBTBKR089                 (R_SYSC_BASE + R_SYSC_VBTBKR089_OFFSET)
-#define R_SYSC_VBTBKR090                 (R_SYSC_BASE + R_SYSC_VBTBKR090_OFFSET)
-#define R_SYSC_VBTBKR091                 (R_SYSC_BASE + R_SYSC_VBTBKR091_OFFSET)
-#define R_SYSC_VBTBKR092                 (R_SYSC_BASE + R_SYSC_VBTBKR092_OFFSET)
-#define R_SYSC_VBTBKR093                 (R_SYSC_BASE + R_SYSC_VBTBKR093_OFFSET)
-#define R_SYSC_VBTBKR094                 (R_SYSC_BASE + R_SYSC_VBTBKR094_OFFSET)
-#define R_SYSC_VBTBKR095                 (R_SYSC_BASE + R_SYSC_VBTBKR095_OFFSET)
-#define R_SYSC_VBTBKR096                 (R_SYSC_BASE + R_SYSC_VBTBKR096_OFFSET)
-#define R_SYSC_VBTBKR097                 (R_SYSC_BASE + R_SYSC_VBTBKR097_OFFSET)
-#define R_SYSC_VBTBKR098                 (R_SYSC_BASE + R_SYSC_VBTBKR098_OFFSET)
-#define R_SYSC_VBTBKR099                 (R_SYSC_BASE + R_SYSC_VBTBKR099_OFFSET)
-#define R_SYSC_VBTBKR100                 (R_SYSC_BASE + R_SYSC_VBTBKR100_OFFSET)
-#define R_SYSC_VBTBKR101                 (R_SYSC_BASE + R_SYSC_VBTBKR101_OFFSET)
-#define R_SYSC_VBTBKR102                 (R_SYSC_BASE + R_SYSC_VBTBKR102_OFFSET)
-#define R_SYSC_VBTBKR103                 (R_SYSC_BASE + R_SYSC_VBTBKR103_OFFSET)
-#define R_SYSC_VBTBKR104                 (R_SYSC_BASE + R_SYSC_VBTBKR104_OFFSET)
-#define R_SYSC_VBTBKR105                 (R_SYSC_BASE + R_SYSC_VBTBKR105_OFFSET)
-#define R_SYSC_VBTBKR106                 (R_SYSC_BASE + R_SYSC_VBTBKR106_OFFSET)
-#define R_SYSC_VBTBKR107                 (R_SYSC_BASE + R_SYSC_VBTBKR107_OFFSET)
-#define R_SYSC_VBTBKR108                 (R_SYSC_BASE + R_SYSC_VBTBKR108_OFFSET)
-#define R_SYSC_VBTBKR109                 (R_SYSC_BASE + R_SYSC_VBTBKR109_OFFSET)
-#define R_SYSC_VBTBKR110                 (R_SYSC_BASE + R_SYSC_VBTBKR110_OFFSET)
-#define R_SYSC_VBTBKR111                 (R_SYSC_BASE + R_SYSC_VBTBKR111_OFFSET)
-#define R_SYSC_VBTBKR112                 (R_SYSC_BASE + R_SYSC_VBTBKR112_OFFSET)
-#define R_SYSC_VBTBKR113                 (R_SYSC_BASE + R_SYSC_VBTBKR113_OFFSET)
-#define R_SYSC_VBTBKR114                 (R_SYSC_BASE + R_SYSC_VBTBKR114_OFFSET)
-#define R_SYSC_VBTBKR115                 (R_SYSC_BASE + R_SYSC_VBTBKR115_OFFSET)
-#define R_SYSC_VBTBKR116                 (R_SYSC_BASE + R_SYSC_VBTBKR116_OFFSET)
-#define R_SYSC_VBTBKR117                 (R_SYSC_BASE + R_SYSC_VBTBKR117_OFFSET)
-#define R_SYSC_VBTBKR118                 (R_SYSC_BASE + R_SYSC_VBTBKR118_OFFSET)
-#define R_SYSC_VBTBKR119                 (R_SYSC_BASE + R_SYSC_VBTBKR119_OFFSET)
-#define R_SYSC_VBTBKR120                 (R_SYSC_BASE + R_SYSC_VBTBKR120_OFFSET)
-#define R_SYSC_VBTBKR121                 (R_SYSC_BASE + R_SYSC_VBTBKR121_OFFSET)
-#define R_SYSC_VBTBKR122                 (R_SYSC_BASE + R_SYSC_VBTBKR122_OFFSET)
-#define R_SYSC_VBTBKR123                 (R_SYSC_BASE + R_SYSC_VBTBKR123_OFFSET)
-#define R_SYSC_VBTBKR124                 (R_SYSC_BASE + R_SYSC_VBTBKR124_OFFSET)
-#define R_SYSC_VBTBKR125                 (R_SYSC_BASE + R_SYSC_VBTBKR125_OFFSET)
-#define R_SYSC_VBTBKR126                 (R_SYSC_BASE + R_SYSC_VBTBKR126_OFFSET)
-#define R_SYSC_VBTBKR127                 (R_SYSC_BASE + R_SYSC_VBTBKR127_OFFSET)
+#define R_SYSC_SBYCR                              (R_SYSC_BASE + R_SYSC_SBYCR_OFFSET)
+#define R_SYSC_VSCR                               (R_SYSC_BASE + R_SYSC_VSCR_OFFSET)
+#define R_SYSC_SCKDIVCR                           (R_SYSC_BASE + R_SYSC_SCKDIVCR_OFFSET)
+#define R_SYSC_SCKDIVCR2                          (R_SYSC_BASE + R_SYSC_SCKDIVCR2_OFFSET)
+#define R_SYSC_SCKSCR                             (R_SYSC_BASE + R_SYSC_SCKSCR_OFFSET)
+#define R_SYSC_PLLCR                              (R_SYSC_BASE + R_SYSC_PLLCR_OFFSET)
+#define R_SYSC_BCKCR                              (R_SYSC_BASE + R_SYSC_BCKCR_OFFSET)
+#define R_SYSC_MOSCCR                             (R_SYSC_BASE + R_SYSC_MOSCCR_OFFSET)
+#define R_SYSC_HOCOCR                             (R_SYSC_BASE + R_SYSC_HOCOCR_OFFSET)
+#define R_SYSC_HOCOCR2                            (R_SYSC_BASE + R_SYSC_HOCOCR2_OFFSET)
+#define R_SYSC_MOCOCR                             (R_SYSC_BASE + R_SYSC_MOCOCR_OFFSET)
+#define R_SYSC_FLLCR1                             (R_SYSC_BASE + R_SYSC_FLLCR1_OFFSET)
+#define R_SYSC_FLLCR2                             (R_SYSC_BASE + R_SYSC_FLLCR2_OFFSET)
+#define R_SYSC_OSCSF                              (R_SYSC_BASE + R_SYSC_OSCSF_OFFSET)
+#define R_SYSC_CKOCR                              (R_SYSC_BASE + R_SYSC_CKOCR_OFFSET)
+#define R_SYSC_TRCKCR                             (R_SYSC_BASE + R_SYSC_TRCKCR_OFFSET)
+#define R_SYSC_OSTDCR                             (R_SYSC_BASE + R_SYSC_OSTDCR_OFFSET)
+#define R_SYSC_OSTDSR                             (R_SYSC_BASE + R_SYSC_OSTDSR_OFFSET)
+#define R_SYSC_OSCMONR                            (R_SYSC_BASE + R_SYSC_OSCMONR_OFFSET)
+#define R_SYSC_PLL2CR                             (R_SYSC_BASE + R_SYSC_PLL2CR_OFFSET)
+#define R_SYSC_PLLCCR2                            (R_SYSC_BASE + R_SYSC_PLLCCR2_OFFSET)
+#define R_SYSC_PLL2CCR2                           (R_SYSC_BASE + R_SYSC_PLL2CCR2_OFFSET)
+#define R_SYSC_EBCKOCR                            (R_SYSC_BASE + R_SYSC_EBCKOCR_OFFSET)
+#define R_SYSC_SDCKOCR                            (R_SYSC_BASE + R_SYSC_SDCKOCR_OFFSET)
+#define R_SYSC_SCICKDIVCR                         (R_SYSC_BASE + R_SYSC_SCICKDIVCR_OFFSET)
+#define R_SYSC_SCICKCR                            (R_SYSC_BASE + R_SYSC_SCICKCR_OFFSET)
+#define R_SYSC_SPICKDIVCR                         (R_SYSC_BASE + R_SYSC_SPICKDIVCR_OFFSET)
+#define R_SYSC_SPICKCR                            (R_SYSC_BASE + R_SYSC_SPICKCR_OFFSET)
+#define R_SYSC_ADCCKDIVCR                         (R_SYSC_BASE + R_SYSC_ADCCKDIVCR_OFFSET)
+#define R_SYSC_ADCCKCR                            (R_SYSC_BASE + R_SYSC_ADCCKCR_OFFSET)
+#define R_SYSC_GPTCKDIVCR                         (R_SYSC_BASE + R_SYSC_GPTCKDIVCR_OFFSET)
+#define R_SYSC_GPTCKCR                            (R_SYSC_BASE + R_SYSC_GPTCKCR_OFFSET)
+#define R_SYSC_LCDCKDIVCR                         (R_SYSC_BASE + R_SYSC_LCDCKDIVCR_OFFSET)
+#define R_SYSC_LCDCKCR                            (R_SYSC_BASE + R_SYSC_LCDCKCR_OFFSET)
+#define R_SYSC_MOCOUTCR                           (R_SYSC_BASE + R_SYSC_MOCOUTCR_OFFSET)
+#define R_SYSC_HOCOUTCR                           (R_SYSC_BASE + R_SYSC_HOCOUTCR_OFFSET)
+#define R_SYSC_USBCKDIVCR                         (R_SYSC_BASE + R_SYSC_USBCKDIVCR_OFFSET)
+#define R_SYSC_OCTACKDIVCR                        (R_SYSC_BASE + R_SYSC_OCTACKDIVCR_OFFSET)
+#define R_SYSC_CANFDCKDIVCR                       (R_SYSC_BASE + R_SYSC_CANFDCKDIVCR_OFFSET)
+#define R_SYSC_USB60CKDIVCR                       (R_SYSC_BASE + R_SYSC_USB60CKDIVCR_OFFSET)
+#define R_SYSC_I3CCKDIVCR                         (R_SYSC_BASE + R_SYSC_I3CCKDIVCR_OFFSET)
+#define R_SYSC_USBCKCR                            (R_SYSC_BASE + R_SYSC_USBCKCR_OFFSET)
+#define R_SYSC_OCTACKCR                           (R_SYSC_BASE + R_SYSC_OCTACKCR_OFFSET)
+#define R_SYSC_CANFDCKCR                          (R_SYSC_BASE + R_SYSC_CANFDCKCR_OFFSET)
+#define R_SYSC_USB60CKCR                          (R_SYSC_BASE + R_SYSC_USB60CKCR_OFFSET)
+#define R_SYSC_I3CCKCR                            (R_SYSC_BASE + R_SYSC_I3CCKCR_OFFSET)
+#define R_SYSC_MOSCSCR                            (R_SYSC_BASE + R_SYSC_MOSCSCR_OFFSET)
+#define R_SYSC_HOCOSCR                            (R_SYSC_BASE + R_SYSC_HOCOSCR_OFFSET)
+#define R_SYSC_MOCOSCR                            (R_SYSC_BASE + R_SYSC_MOCOSCR_OFFSET)
+#define R_SYSC_OPCCR                              (R_SYSC_BASE + R_SYSC_OPCCR_OFFSET)
+#define R_SYSC_MOSCWTCR                           (R_SYSC_BASE + R_SYSC_MOSCWTCR_OFFSET)
+#define R_SYSC_PLLCCR                             (R_SYSC_BASE + R_SYSC_PLLCCR_OFFSET)
+#define R_SYSC_RSTSR1                             (R_SYSC_BASE + R_SYSC_RSTSR1_OFFSET)
+#define R_SYSC_PLL2CCR                            (R_SYSC_BASE + R_SYSC_PLL2CCR_OFFSET)
+#define R_SYSC_SYRACCR                            (R_SYSC_BASE + R_SYSC_SYRACCR_OFFSET)
+#define R_SYSC_BCKADIVCR                          (R_SYSC_BASE + R_SYSC_BCKADIVCR_OFFSET)
+#define R_SYSC_ESWCKDIVCR                         (R_SYSC_BASE + R_SYSC_ESWCKDIVCR_OFFSET)
+#define R_SYSC_ESWPCKDIVCR                        (R_SYSC_BASE + R_SYSC_ESWPCKDIVCR_OFFSET)
+#define R_SYSC_ETHPCKDIVCR                        (R_SYSC_BASE + R_SYSC_ETHPCKDIVCR_OFFSET)
+#define R_SYSC_BCKACR                             (R_SYSC_BASE + R_SYSC_BCKACR_OFFSET)
+#define R_SYSC_ESWCKCR                            (R_SYSC_BASE + R_SYSC_ESWCKCR_OFFSET)
+#define R_SYSC_ESWPCKCR                           (R_SYSC_BASE + R_SYSC_ESWPCKCR_OFFSET)
+#define R_SYSC_ETHPCKCR                           (R_SYSC_BASE + R_SYSC_ETHPCKCR_OFFSET)
+#define R_SYSC_PVDCR1(m)                          (R_SYSC_BASE + R_SYSC_PVDCR1_OFFSET(m))
+#define R_SYSC_PVDSR(m)                           (R_SYSC_BASE + R_SYSC_PVDSR_OFFSET(m))
+#define R_SYSC_CPUDSCR                            (R_SYSC_BASE + R_SYSC_CPUDSCR_OFFSET)
+#define R_SYSC_PGSCR                              (R_SYSC_BASE + R_SYSC_PGSCR_OFFSET)
+#define R_SYSC_PDCTRGD                            (R_SYSC_BASE + R_SYSC_PDCTRGD_OFFSET)
+#define R_SYSC_PDCTRNPU                           (R_SYSC_BASE + R_SYSC_PDCTRNPU_OFFSET)
+#define R_SYSC_PDCTRESWM                          (R_SYSC_BASE + R_SYSC_PDCTRESWM_OFFSET)
+#define R_SYSC_PDRAMSCR0                          (R_SYSC_BASE + R_SYSC_PDRAMSCR0_OFFSET)
+#define R_SYSC_PDRAMSCR1                          (R_SYSC_BASE + R_SYSC_PDRAMSCR1_OFFSET)
+#define R_SYSC_PSSTCR(m)                          (R_SYSC_BASE + R_SYSC_PSSTCR_OFFSET(m))
+#define R_SYSC_VBRSABAR                           (R_SYSC_BASE + R_SYSC_VBRSABAR_OFFSET)
+#define R_SYSC_VBRPABARS                          (R_SYSC_BASE + R_SYSC_VBRPABARS_OFFSET)
+#define R_SYSC_CGFSAR                             (R_SYSC_BASE + R_SYSC_CGFSAR_OFFSET)
+#define R_SYSC_RSTSAR                             (R_SYSC_BASE + R_SYSC_RSTSAR_OFFSET)
+#define R_SYSC_LPMSAR                             (R_SYSC_BASE + R_SYSC_LPMSAR_OFFSET)
+#define R_SYSC_PVDSAR                             (R_SYSC_BASE + R_SYSC_PVDSAR_OFFSET)
+#define R_SYSC_BBFSAR                             (R_SYSC_BASE + R_SYSC_BBFSAR_OFFSET)
+#define R_SYSC_PGCSAR                             (R_SYSC_BASE + R_SYSC_PGCSAR_OFFSET)
+#define R_SYSC_DPFSAR                             (R_SYSC_BASE + R_SYSC_DPFSAR_OFFSET)
+#define R_SYSC_RSCSAR                             (R_SYSC_BASE + R_SYSC_RSCSAR_OFFSET)
+#define R_SYSC_DPFSAR1                            (R_SYSC_BASE + R_SYSC_DPFSAR1_OFFSET)
+#define R_SYSC_PRCR_S                             (R_SYSC_BASE + R_SYSC_PRCR_S_OFFSET)
+#define R_SYSC_LOCOCR                             (R_SYSC_BASE + R_SYSC_LOCOCR_OFFSET)
+#define R_SYSC_LOCOUTCR                           (R_SYSC_BASE + R_SYSC_LOCOUTCR_OFFSET)
+#define R_SYSC_DPSBYCR                            (R_SYSC_BASE + R_SYSC_DPSBYCR_OFFSET)
+#define R_SYSC_DPSIER0                            (R_SYSC_BASE + R_SYSC_DPSIER0_OFFSET)
+#define R_SYSC_DPSIER1                            (R_SYSC_BASE + R_SYSC_DPSIER1_OFFSET)
+#define R_SYSC_DPSIER2                            (R_SYSC_BASE + R_SYSC_DPSIER2_OFFSET)
+#define R_SYSC_DPSIER3                            (R_SYSC_BASE + R_SYSC_DPSIER3_OFFSET)
+#define R_SYSC_DPSIFR0                            (R_SYSC_BASE + R_SYSC_DPSIFR0_OFFSET)
+#define R_SYSC_DPSIFR1                            (R_SYSC_BASE + R_SYSC_DPSIFR1_OFFSET)
+#define R_SYSC_DPSIFR2                            (R_SYSC_BASE + R_SYSC_DPSIFR2_OFFSET)
+#define R_SYSC_DPSIFR3                            (R_SYSC_BASE + R_SYSC_DPSIFR3_OFFSET)
+#define R_SYSC_DPSIEGR0                           (R_SYSC_BASE + R_SYSC_DPSIEGR0_OFFSET)
+#define R_SYSC_DPSIEGR1                           (R_SYSC_BASE + R_SYSC_DPSIEGR1_OFFSET)
+#define R_SYSC_DPSIEGR2                           (R_SYSC_BASE + R_SYSC_DPSIEGR2_OFFSET)
+#define R_SYSC_DPSIEGR3                           (R_SYSC_BASE + R_SYSC_DPSIEGR3_OFFSET)
+#define R_SYSC_SYOCDCR                            (R_SYSC_BASE + R_SYSC_SYOCDCR_OFFSET)
+#define R_SYSC_RSTSR0                             (R_SYSC_BASE + R_SYSC_RSTSR0_OFFSET)
+#define R_SYSC_RSTSR2                             (R_SYSC_BASE + R_SYSC_RSTSR2_OFFSET)
+#define R_SYSC_RSTSR3                             (R_SYSC_BASE + R_SYSC_RSTSR3_OFFSET)
+#define R_SYSC_MOMCR                              (R_SYSC_BASE + R_SYSC_MOMCR_OFFSET)
+#define R_SYSC_FWEPROR                            (R_SYSC_BASE + R_SYSC_FWEPROR_OFFSET)
+#define R_SYSC_PVDCMPCR(m)                        (R_SYSC_BASE + R_SYSC_PVDCMPCR_OFFSET(m))
+#define R_SYSC_PVDCR0(m)                          (R_SYSC_BASE + R_SYSC_PVDCR0_OFFSET(m))
+#define R_SYSC_VBATTMNSELR                        (R_SYSC_BASE + R_SYSC_VBATTMNSELR_OFFSET)
+#define R_SYSC_VBTBPCR1                           (R_SYSC_BASE + R_SYSC_VBTBPCR1_OFFSET)
+#define R_SYSC_LPSCR                              (R_SYSC_BASE + R_SYSC_LPSCR_OFFSET)
+#define R_SYSC_SSCR1                              (R_SYSC_BASE + R_SYSC_SSCR1_OFFSET)
+#define R_SYSC_SVSCR                              (R_SYSC_BASE + R_SYSC_SVSCR_OFFSET)
+#define R_SYSC_LVOCR                              (R_SYSC_BASE + R_SYSC_LVOCR_OFFSET)
+#define R_SYSC_MWMCR                              (R_SYSC_BASE + R_SYSC_MWMCR_OFFSET)
+#define R_SYSC_SYRSTMSK0                          (R_SYSC_BASE + R_SYSC_SYRSTMSK0_OFFSET)
+#define R_SYSC_SYRSTMSK1                          (R_SYSC_BASE + R_SYSC_SYRSTMSK1_OFFSET)
+#define R_SYSC_SYRSTMSK2                          (R_SYSC_BASE + R_SYSC_SYRSTMSK2_OFFSET)
+#define R_SYSC_TEMPRCR                            (R_SYSC_BASE + R_SYSC_TEMPRCR_OFFSET)
+#define R_SYSC_TEMPRLR                            (R_SYSC_BASE + R_SYSC_TEMPRLR_OFFSET)
+#define R_SYSC_PLL1LDOCR                          (R_SYSC_BASE + R_SYSC_PLL1LDOCR_OFFSET)
+#define R_SYSC_PLL2LDOCR                          (R_SYSC_BASE + R_SYSC_PLL2LDOCR_OFFSET)
+#define R_SYSC_HOCOLDOCR                          (R_SYSC_BASE + R_SYSC_HOCOLDOCR_OFFSET)
+#define R_SYSC_PVDFCR(m)                          (R_SYSC_BASE + R_SYSC_PVDFCR_OFFSET(m))
+#define R_SYSC_PVDLR                              (R_SYSC_BASE + R_SYSC_PVDLR_OFFSET)
+#define R_SYSC_DPSIER4                            (R_SYSC_BASE + R_SYSC_DPSIER4_OFFSET)
+#define R_SYSC_DPSIER5                            (R_SYSC_BASE + R_SYSC_DPSIER5_OFFSET)
+#define R_SYSC_DPSIFR4                            (R_SYSC_BASE + R_SYSC_DPSIFR4_OFFSET)
+#define R_SYSC_DPSIFR5                            (R_SYSC_BASE + R_SYSC_DPSIFR5_OFFSET)
+#define R_SYSC_DPSIEGR4                           (R_SYSC_BASE + R_SYSC_DPSIEGR4_OFFSET)
+#define R_SYSC_SOSCCR                             (R_SYSC_BASE + R_SYSC_SOSCCR_OFFSET)
+#define R_SYSC_SOMCR                              (R_SYSC_BASE + R_SYSC_SOMCR_OFFSET)
+#define R_SYSC_SOSTDCR                            (R_SYSC_BASE + R_SYSC_SOSTDCR_OFFSET)
+#define R_SYSC_SOSTDSR                            (R_SYSC_BASE + R_SYSC_SOSTDSR_OFFSET)
+#define R_SYSC_VBTBER                             (R_SYSC_BASE + R_SYSC_VBTBER_OFFSET)
+#define R_SYSC_VBTBPCR2                           (R_SYSC_BASE + R_SYSC_VBTBPCR2_OFFSET)
+#define R_SYSC_VBTBPSR                            (R_SYSC_BASE + R_SYSC_VBTBPSR_OFFSET)
+#define R_SYSC_VBTADSR                            (R_SYSC_BASE + R_SYSC_VBTADSR_OFFSET)
+#define R_SYSC_VBTADCR1                           (R_SYSC_BASE + R_SYSC_VBTADCR1_OFFSET)
+#define R_SYSC_VBTADCR2                           (R_SYSC_BASE + R_SYSC_VBTADCR2_OFFSET)
+#define R_SYSC_VBTICTLR                           (R_SYSC_BASE + R_SYSC_VBTICTLR_OFFSET)
+#define R_SYSC_VBTICTLR2                          (R_SYSC_BASE + R_SYSC_VBTICTLR2_OFFSET)
+#define R_SYSC_VBTIMONR                           (R_SYSC_BASE + R_SYSC_VBTIMONR_OFFSET)
+#define R_SYSC_VBTNCWCR                           (R_SYSC_BASE + R_SYSC_VBTNCWCR_OFFSET)
+#define R_SYSC_VBTADCR3                           (R_SYSC_BASE + R_SYSC_VBTADCR3_OFFSET)
+#define R_SYSC_VBTBKR(m)                          (R_SYSC_BASE + R_SYSC_VBTBKR_OFFSET(m))
 
 /* Register bit definitions */
 /* SBYCR Register bit definitions */
@@ -1370,15 +1068,15 @@
 #define R_SYSC_MOSCWTCR_MSTS_SHIFT                (0)  /* Main Clock Oscillator Wait Time Setting */
 #define R_SYSC_MOSCWTCR_MSTS_MASK                 0xf
 #  define R_SYSC_MOSCWTCR_MSTS_0X0                        (0 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 3 cycles (11.4 us) */
-#  define R_SYSC_MOSCWTCR_MSTS_0X1                        (0 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 35 cycles (133.5 us) */
-#  define R_SYSC_MOSCWTCR_MSTS_0X2                        (0 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 67 cycles (255.6 us) */
-#  define R_SYSC_MOSCWTCR_MSTS_0X3                        (0 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 131 cycles (499.7 us) */
-#  define R_SYSC_MOSCWTCR_MSTS_0X4                        (0 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 259 cycles (988.0 us) */
-#  define R_SYSC_MOSCWTCR_MSTS_0X5                        (0 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 547 cycles (2086.6 us) */
-#  define R_SYSC_MOSCWTCR_MSTS_0X6                        (0 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 1059 cycles (4039.8 us) */
-#  define R_SYSC_MOSCWTCR_MSTS_0X7                        (0 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 2147 cycles (8190.2 us) */
-#  define R_SYSC_MOSCWTCR_MSTS_0X8                        (0 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 4291 cycles (16368.9 us) */
-#  define R_SYSC_MOSCWTCR_MSTS_0X9                        (0 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 8163 cycles (31139.4 us) */
+#  define R_SYSC_MOSCWTCR_MSTS_0X1                        (1 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 35 cycles (133.5 us) */
+#  define R_SYSC_MOSCWTCR_MSTS_0X2                        (2 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 67 cycles (255.6 us) */
+#  define R_SYSC_MOSCWTCR_MSTS_0X3                        (3 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 131 cycles (499.7 us) */
+#  define R_SYSC_MOSCWTCR_MSTS_0X4                        (4 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 259 cycles (988.0 us) */
+#  define R_SYSC_MOSCWTCR_MSTS_0X5                        (5 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 547 cycles (2086.6 us) */
+#  define R_SYSC_MOSCWTCR_MSTS_0X6                        (6 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 1059 cycles (4039.8 us) */
+#  define R_SYSC_MOSCWTCR_MSTS_0X7                        (7 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 2147 cycles (8190.2 us) */
+#  define R_SYSC_MOSCWTCR_MSTS_0X8                        (8 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 4291 cycles (16368.9 us) */
+#  define R_SYSC_MOSCWTCR_MSTS_0X9                        (9 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 8163 cycles (31139.4 us) */
 
 /* PLLCCR Register bit definitions */
 #define R_SYSC_PLLCCR_PLIDIV_SHIFT                (0)  /* PLL1 Input Frequency Division Ratio Select */
@@ -1997,6 +1695,18 @@
 
 #define R_SYSC_DPFSAR_DPFSA31                     (1 << 31)  /* Deep Software Standby Interrupt Factor Security Attribute bit 31 */
 
+#define R_SYSC_DPFSAR_DPFSA8                      (1 << 8)  /* Deep Standby Interrupt Factor Security Attribute bit 8 */
+
+#define R_SYSC_DPFSAR_DPFSA9                      (1 << 9)  /* Deep Standby Interrupt Factor Security Attribute bit 9 */
+
+#define R_SYSC_DPFSAR_DPFSA21                     (1 << 21)  /* Deep Standby Interrupt Factor Security Attribute bit 21 */
+
+#define R_SYSC_DPFSAR_DPFSA22                     (1 << 22)  /* Deep Standby Interrupt Factor Security Attribute bit 22 */
+
+#define R_SYSC_DPFSAR_DPFSA23                     (1 << 23)  /* Deep Standby Interrupt Factor Security Attribute bit 23 */
+
+#define R_SYSC_DPFSAR_DPFSA28                     (1 << 28)  /* Deep Standby Interrupt Factor Security Attribute bit 28 */
+
 /* RSCSAR Register bit definitions */
 #define R_SYSC_RSCSAR_RSCSA_SHIFT                 (0)  /* RAM Standby Control Security Attribute bit n (n = 0 to 17) */
 #define R_SYSC_RSCSAR_RSCSA_MASK                  0x3ffff
@@ -2099,6 +1809,42 @@
 #define R_SYSC_DPFSAR1_DPFSA14                    (1 << 14)  /* Deep Software Standby Interrupt Factor Security Attribute bit n (n = 8 to 15) */
 
 #define R_SYSC_DPFSAR1_DPFSA15                    (1 << 15)  /* Deep Software Standby Interrupt Factor Security Attribute bit n (n = 8 to 15) */
+
+#define R_SYSC_DPFSAR1_DPFSA8                     (1 << 8)  /* Deep Standby Interrupt Factor Security Attribute bit 8 */
+
+#define R_SYSC_DPFSAR1_DPFSA9                     (1 << 9)  /* Deep Standby Interrupt Factor Security Attribute bit 9 */
+
+#define R_SYSC_DPFSAR1_DPFSA16                    (1 << 16)  /* Deep Standby Interrupt Factor Security Attribute bit 16 */
+
+#define R_SYSC_DPFSAR1_DPFSA17                    (1 << 17)  /* Deep Standby Interrupt Factor Security Attribute bit 17 */
+
+#define R_SYSC_DPFSAR1_DPFSA18                    (1 << 18)  /* Deep Standby Interrupt Factor Security Attribute bit 18 */
+
+#define R_SYSC_DPFSAR1_DPFSA19                    (1 << 19)  /* Deep Standby Interrupt Factor Security Attribute bit 19 */
+
+#define R_SYSC_DPFSAR1_DPFSA20                    (1 << 20)  /* Deep Standby Interrupt Factor Security Attribute bit 20 */
+
+#define R_SYSC_DPFSAR1_DPFSA21                    (1 << 21)  /* Deep Standby Interrupt Factor Security Attribute bit 21 */
+
+#define R_SYSC_DPFSAR1_DPFSA22                    (1 << 22)  /* Deep Standby Interrupt Factor Security Attribute bit 22 */
+
+#define R_SYSC_DPFSAR1_DPFSA23                    (1 << 23)  /* Deep Standby Interrupt Factor Security Attribute bit 23 */
+
+#define R_SYSC_DPFSAR1_DPFSA24                    (1 << 24)  /* Deep Standby Interrupt Factor Security Attribute bit 24 */
+
+#define R_SYSC_DPFSAR1_DPFSA25                    (1 << 25)  /* Deep Standby Interrupt Factor Security Attribute bit 25 */
+
+#define R_SYSC_DPFSAR1_DPFSA26                    (1 << 26)  /* Deep Standby Interrupt Factor Security Attribute bit 26 */
+
+#define R_SYSC_DPFSAR1_DPFSA27                    (1 << 27)  /* Deep Standby Interrupt Factor Security Attribute bit 27 */
+
+#define R_SYSC_DPFSAR1_DPFSA28                    (1 << 28)  /* Deep Standby Interrupt Factor Security Attribute bit 28 */
+
+#define R_SYSC_DPFSAR1_DPFSA29                    (1 << 29)  /* Deep Standby Interrupt Factor Security Attribute bit 29 */
+
+#define R_SYSC_DPFSAR1_DPFSA30                    (1 << 30)  /* Deep Standby Interrupt Factor Security Attribute bit 30 */
+
+#define R_SYSC_DPFSAR1_DPFSA31                    (1 << 31)  /* Deep Standby Interrupt Factor Security Attribute bit 31 */
 
 /* PRCR_S Register bit definitions */
 #define R_SYSC_PRCR_S_PRC0                        (1 << 0)  /* Enable writing to the registers related to the clock generation circuit */
@@ -2384,19 +2130,19 @@
 /* PVDCMPCR Register bit definitions */
 #define R_SYSC_PVDCMPCR_PVDLVL_SHIFT              (0)  /* Detection Voltage m Level Select */
 #define R_SYSC_PVDCMPCR_PVDLVL_MASK               0x1f
-#  define R_SYSC_PVDCMPCR_PVDLVL_0X03                     (0 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 3.86 V (Vdetm_3) */
-#  define R_SYSC_PVDCMPCR_PVDLVL_0X04                     (0 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 3.14 V (Vdetm_4) */
-#  define R_SYSC_PVDCMPCR_PVDLVL_0X05                     (0 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 3.10 V (Vdetm_5) */
-#  define R_SYSC_PVDCMPCR_PVDLVL_0X06                     (0 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 3.08 V (Vdetm_6) */
-#  define R_SYSC_PVDCMPCR_PVDLVL_0X07                     (0 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 2.85 V (Vdetm_7) */
-#  define R_SYSC_PVDCMPCR_PVDLVL_0X08                     (0 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 2.83 V (Vdetm_8) */
-#  define R_SYSC_PVDCMPCR_PVDLVL_0X09                     (0 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 2.80 V (Vdetm_9) */
-#  define R_SYSC_PVDCMPCR_PVDLVL_0X0A                     (0 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 2.62V (Vdetm_10) */
-#  define R_SYSC_PVDCMPCR_PVDLVL_0X0B                     (0 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 2.33V (Vdetm_11) */
-#  define R_SYSC_PVDCMPCR_PVDLVL_0X0C                     (0 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 1.90V (Vdetm_12) */
-#  define R_SYSC_PVDCMPCR_PVDLVL_0X0D                     (0 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 1.86V (Vdetm_13) */
-#  define R_SYSC_PVDCMPCR_PVDLVL_0X0E                     (0 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 1.74V (Vdetm_14) */
-#  define R_SYSC_PVDCMPCR_PVDLVL_0X0F                     (0 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 1.71V (Vdetm_15) */
+#  define R_SYSC_PVDCMPCR_PVDLVL_0X03                     (3 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 3.86 V (Vdetm_3) */
+#  define R_SYSC_PVDCMPCR_PVDLVL_0X04                     (4 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 3.14 V (Vdetm_4) */
+#  define R_SYSC_PVDCMPCR_PVDLVL_0X05                     (5 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 3.10 V (Vdetm_5) */
+#  define R_SYSC_PVDCMPCR_PVDLVL_0X06                     (6 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 3.08 V (Vdetm_6) */
+#  define R_SYSC_PVDCMPCR_PVDLVL_0X07                     (7 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 2.85 V (Vdetm_7) */
+#  define R_SYSC_PVDCMPCR_PVDLVL_0X08                     (8 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 2.83 V (Vdetm_8) */
+#  define R_SYSC_PVDCMPCR_PVDLVL_0X09                     (9 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 2.80 V (Vdetm_9) */
+#  define R_SYSC_PVDCMPCR_PVDLVL_0X0A                     (10 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 2.62V (Vdetm_10) */
+#  define R_SYSC_PVDCMPCR_PVDLVL_0X0B                     (11 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 2.33V (Vdetm_11) */
+#  define R_SYSC_PVDCMPCR_PVDLVL_0X0C                     (12 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 1.90V (Vdetm_12) */
+#  define R_SYSC_PVDCMPCR_PVDLVL_0X0D                     (13 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 1.86V (Vdetm_13) */
+#  define R_SYSC_PVDCMPCR_PVDLVL_0X0E                     (14 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 1.74V (Vdetm_14) */
+#  define R_SYSC_PVDCMPCR_PVDLVL_0X0F                     (15 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 1.71V (Vdetm_15) */
 
 #define R_SYSC_PVDCMPCR_PVDE                      (1 << 7)  /* Voltage Detection m Enable */
 
@@ -2450,11 +2196,11 @@
 #define R_SYSC_LPSCR_LPMD_SHIFT                   (0)  /* Low power mode setting */
 #define R_SYSC_LPSCR_LPMD_MASK                    0xf
 #  define R_SYSC_LPSCR_LPMD_0X0                           (0 << R_SYSC_LPSCR_LPMD_SHIFT)  /* System Active */
-#  define R_SYSC_LPSCR_LPMD_0X4                           (0 << R_SYSC_LPSCR_LPMD_SHIFT)  /* Reserved */
-#  define R_SYSC_LPSCR_LPMD_0X5                           (0 << R_SYSC_LPSCR_LPMD_SHIFT)  /* Software Standby mode */
-#  define R_SYSC_LPSCR_LPMD_0X8                           (0 << R_SYSC_LPSCR_LPMD_SHIFT)  /* Deep Software Standby mode 1 */
-#  define R_SYSC_LPSCR_LPMD_0X9                           (0 << R_SYSC_LPSCR_LPMD_SHIFT)  /* Deep Software Standby mode 2 */
-#  define R_SYSC_LPSCR_LPMD_0XA                           (0 << R_SYSC_LPSCR_LPMD_SHIFT)  /* Deep Software Standby mode 3 */
+#  define R_SYSC_LPSCR_LPMD_0X4                           (4 << R_SYSC_LPSCR_LPMD_SHIFT)  /* Reserved */
+#  define R_SYSC_LPSCR_LPMD_0X5                           (5 << R_SYSC_LPSCR_LPMD_SHIFT)  /* Software Standby mode */
+#  define R_SYSC_LPSCR_LPMD_0X8                           (8 << R_SYSC_LPSCR_LPMD_SHIFT)  /* Deep Software Standby mode 1 */
+#  define R_SYSC_LPSCR_LPMD_0X9                           (9 << R_SYSC_LPSCR_LPMD_SHIFT)  /* Deep Software Standby mode 2 */
+#  define R_SYSC_LPSCR_LPMD_0XA                           (10 << R_SYSC_LPSCR_LPMD_SHIFT)  /* Deep Software Standby mode 3 */
 
 /* SSCR1 Register bit definitions */
 #define R_SYSC_SSCR1_SS2FR                        (1 << 0)  /* Software Standby Fast Return */
@@ -2761,6 +2507,9 @@
 /* VBTBKR Register bit definitions */
 #define R_SYSC_VBTBKR_VBTBKRN_SHIFT               (0)  /* VBATT Backup Register */
 #define R_SYSC_VBTBKR_VBTBKRN_MASK                0xff
+
+#define R_SYSC_VBTBKR_VBTBKR_SHIFT                (0)  /* VBTBKR is a 512-byte readable/writable register to store data powered by VBATT.The value of this register is retained even when VCC is not powered but VBATT is powered.VBTBKR is initialized by VBATT selected voltage power-on-reset. */
+#define R_SYSC_VBTBKR_VBTBKR_MASK                 0xff
 
 
 /* Maximum number of channels */

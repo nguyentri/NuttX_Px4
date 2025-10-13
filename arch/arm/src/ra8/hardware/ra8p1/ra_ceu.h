@@ -40,131 +40,131 @@
 
 /* CEU Register Offsets */
 
-#define R_CEU_CAPSR_OFFSET     0x00000000  /* Capture Start Register */
-#define R_CEU_CAPCR_OFFSET     0x00000004  /* Capture Control Register */
-#define R_CEU_CAMCR_OFFSET     0x00000008  /* Capture Interface Control Register */
-#define R_CEU_CMCYR_OFFSET     0x0000000c  /* Capture Interface Cycle Register */
-#define R_CEU_CAMOR_OFFSET     0x00000010  /* Capture Interface Offset Register */
-#define R_CEU_CAPWR_OFFSET     0x00000014  /* Capture Interface Width Register */
-#define R_CEU_CAIFR_OFFSET     0x00000018  /* Capture Interface Input Format Register */
-#define R_CEU_CRCNTR_OFFSET     0x00000028  /* CEU Register Control Register */
-#define R_CEU_CRCMPR_OFFSET     0x0000002c  /* CEU Register Forcible Control Register */
-#define R_CEU_CFLCR_OFFSET     0x00000030  /* Capture Filter Control Register */
-#define R_CEU_CFSZR_OFFSET     0x00000034  /* Capture Filter Size Clip Register */
-#define R_CEU_CDWDR_OFFSET     0x00000038  /* Capture Destination Width Register */
-#define R_CEU_CDAYR_OFFSET     0x0000003c  /* Capture Data Address Y Register */
-#define R_CEU_CDACR_OFFSET     0x00000040  /* Capture Data Address C Register */
-#define R_CEU_CDBYR_OFFSET     0x00000044  /* Capture Data Bottom-Field Address Y Register */
-#define R_CEU_CDBCR_OFFSET     0x00000048  /* Capture Data Bottom-Field Address C Register */
-#define R_CEU_CBDSR_OFFSET     0x0000004c  /* Capture Bundle Destination Size Register */
-#define R_CEU_CFWCR_OFFSET     0x0000005c  /* Firewall Operation Control Register */
-#define R_CEU_CLFCR_OFFSET     0x00000060  /* Capture Low-Pass Filter Control Register */
-#define R_CEU_CDOCR_OFFSET     0x00000064  /* Capture Data Output Control Register */
-#define R_CEU_CEIER_OFFSET     0x00000070  /* Capture Event Interrupt Enable Register */
-#define R_CEU_CETCR_OFFSET     0x00000074  /* Capture Event Flag Clear Register */
-#define R_CEU_CSTSR_OFFSET     0x0000007c  /* Capture Status Register */
-#define R_CEU_CDSSR_OFFSET     0x00000084  /* Capture Data Size Register */
-#define R_CEU_CDAYR2_OFFSET     0x00000090  /* Capture Data Address Y Register 2 */
-#define R_CEU_CDACR2_OFFSET     0x00000094  /* Capture Data Address C Register 2 */
-#define R_CEU_CDBYR2_OFFSET     0x00000098  /* Capture Data Bottom-Field Address Y Register 2 */
-#define R_CEU_CDBCR2_OFFSET     0x0000009c  /* Capture Data Bottom-Field Address C Register 2 */
-#define R_CEU_CBWER_OFFSET     0x000000a0  /* CEU Bufferable Write Enable Register */
-#define R_CEU_CAMOR_B_OFFSET     0x00001010  /* Capture Interface Offset Register */
-#define R_CEU_CAPWR_B_OFFSET     0x00001014  /* Capture Interface Width Register */
-#define R_CEU_CFLCR_B_OFFSET     0x00001030  /* Capture Filter Control Register */
-#define R_CEU_CFSZR_B_OFFSET     0x00001034  /* Capture Filter Size Clip Register */
-#define R_CEU_CDWDR_B_OFFSET     0x00001038  /* Capture Destination Width Register */
-#define R_CEU_CDAYR_B_OFFSET     0x0000103c  /* Capture Data Address Y Register */
-#define R_CEU_CDACR_B_OFFSET     0x00001040  /* Capture Data Address C Register */
-#define R_CEU_CDBYR_B_OFFSET     0x00001044  /* Capture Data Bottom-Field Address Y Register */
-#define R_CEU_CDBCR_B_OFFSET     0x00001048  /* Capture Data Bottom-Field Address C Register */
-#define R_CEU_CBDSR_B_OFFSET     0x0000104c  /* Capture Bundle Destination Size Register */
-#define R_CEU_CLFCR_B_OFFSET     0x00001060  /* Capture Low-Pass Filter Control Register */
-#define R_CEU_CDOCR_B_OFFSET     0x00001064  /* Capture Data Output Control Register */
-#define R_CEU_CDAYR2_B_OFFSET     0x00001090  /* Capture Data Address Y Register 2 */
-#define R_CEU_CDACR2_B_OFFSET     0x00001094  /* Capture Data Address C Register 2 */
-#define R_CEU_CDBYR2_B_OFFSET     0x00001098  /* Capture Data Bottom-Field Address Y Register 2 */
-#define R_CEU_CDBCR2_B_OFFSET     0x0000109c  /* Capture Data Bottom-Field Address C Register 2 */
-#define R_CEU_CAMOR_M_OFFSET     0x00002010  /* Capture Interface Offset Register */
-#define R_CEU_CAPWR_M_OFFSET     0x00002014  /* Capture Interface Width Register */
-#define R_CEU_CFLCR_M_OFFSET     0x00002030  /* Capture Filter Control Register */
-#define R_CEU_CFSZR_M_OFFSET     0x00002034  /* Capture Filter Size Clip Register */
-#define R_CEU_CDWDR_M_OFFSET     0x00002038  /* Capture Destination Width Register */
-#define R_CEU_CDAYR_M_OFFSET     0x0000203c  /* Capture Data Address Y Register */
-#define R_CEU_CDACR_M_OFFSET     0x00002040  /* Capture Data Address C Register */
-#define R_CEU_CDBYR_M_OFFSET     0x00002044  /* Capture Data Bottom-Field Address Y Register */
-#define R_CEU_CDBCR_M_OFFSET     0x00002048  /* Capture Data Bottom-Field Address C Register */
-#define R_CEU_CBDSR_M_OFFSET     0x0000204c  /* Capture Bundle Destination Size Register */
-#define R_CEU_CLFCR_M_OFFSET     0x00002060  /* Capture Low-Pass Filter Control Register */
-#define R_CEU_CDOCR_M_OFFSET     0x00002064  /* Capture Data Output Control Register */
-#define R_CEU_CDAYR2_M_OFFSET     0x00002090  /* Capture Data Address Y Register 2 */
-#define R_CEU_CDACR2_M_OFFSET     0x00002094  /* Capture Data Address C Register 2 */
-#define R_CEU_CDBYR2_M_OFFSET     0x00002098  /* Capture Data Bottom-Field Address Y Register 2 */
-#define R_CEU_CDBCR2_M_OFFSET     0x0000209c  /* Capture Data Bottom-Field Address C Register 2 */
+#define R_CEU_CAPSR_OFFSET                        0x00000000  /* Capture Start Register */
+#define R_CEU_CAPCR_OFFSET                        0x00000004  /* Capture Control Register */
+#define R_CEU_CAMCR_OFFSET                        0x00000008  /* Capture Interface Control Register */
+#define R_CEU_CMCYR_OFFSET                        0x0000000c  /* Capture Interface Cycle Register */
+#define R_CEU_CAMOR_OFFSET                        0x00000010  /* Capture Interface Offset Register */
+#define R_CEU_CAPWR_OFFSET                        0x00000014  /* Capture Interface Width Register */
+#define R_CEU_CAIFR_OFFSET                        0x00000018  /* Capture Interface Input Format Register */
+#define R_CEU_CRCNTR_OFFSET                       0x00000028  /* CEU Register Control Register */
+#define R_CEU_CRCMPR_OFFSET                       0x0000002c  /* CEU Register Forcible Control Register */
+#define R_CEU_CFLCR_OFFSET                        0x00000030  /* Capture Filter Control Register */
+#define R_CEU_CFSZR_OFFSET                        0x00000034  /* Capture Filter Size Clip Register */
+#define R_CEU_CDWDR_OFFSET                        0x00000038  /* Capture Destination Width Register */
+#define R_CEU_CDAYR_OFFSET                        0x0000003c  /* Capture Data Address Y Register */
+#define R_CEU_CDACR_OFFSET                        0x00000040  /* Capture Data Address C Register */
+#define R_CEU_CDBYR_OFFSET                        0x00000044  /* Capture Data Bottom-Field Address Y Register */
+#define R_CEU_CDBCR_OFFSET                        0x00000048  /* Capture Data Bottom-Field Address C Register */
+#define R_CEU_CBDSR_OFFSET                        0x0000004c  /* Capture Bundle Destination Size Register */
+#define R_CEU_CFWCR_OFFSET                        0x0000005c  /* Firewall Operation Control Register */
+#define R_CEU_CLFCR_OFFSET                        0x00000060  /* Capture Low-Pass Filter Control Register */
+#define R_CEU_CDOCR_OFFSET                        0x00000064  /* Capture Data Output Control Register */
+#define R_CEU_CEIER_OFFSET                        0x00000070  /* Capture Event Interrupt Enable Register */
+#define R_CEU_CETCR_OFFSET                        0x00000074  /* Capture Event Flag Clear Register */
+#define R_CEU_CSTSR_OFFSET                        0x0000007c  /* Capture Status Register */
+#define R_CEU_CDSSR_OFFSET                        0x00000084  /* Capture Data Size Register */
+#define R_CEU_CDAYR2_OFFSET                       0x00000090  /* Capture Data Address Y Register 2 */
+#define R_CEU_CDACR2_OFFSET                       0x00000094  /* Capture Data Address C Register 2 */
+#define R_CEU_CDBYR2_OFFSET                       0x00000098  /* Capture Data Bottom-Field Address Y Register 2 */
+#define R_CEU_CDBCR2_OFFSET                       0x0000009c  /* Capture Data Bottom-Field Address C Register 2 */
+#define R_CEU_CBWER_OFFSET                        0x000000a0  /* CEU Bufferable Write Enable Register */
+#define R_CEU_CAMOR_B_OFFSET                      0x00001010  /* Capture Interface Offset Register */
+#define R_CEU_CAPWR_B_OFFSET                      0x00001014  /* Capture Interface Width Register */
+#define R_CEU_CFLCR_B_OFFSET                      0x00001030  /* Capture Filter Control Register */
+#define R_CEU_CFSZR_B_OFFSET                      0x00001034  /* Capture Filter Size Clip Register */
+#define R_CEU_CDWDR_B_OFFSET                      0x00001038  /* Capture Destination Width Register */
+#define R_CEU_CDAYR_B_OFFSET                      0x0000103c  /* Capture Data Address Y Register */
+#define R_CEU_CDACR_B_OFFSET                      0x00001040  /* Capture Data Address C Register */
+#define R_CEU_CDBYR_B_OFFSET                      0x00001044  /* Capture Data Bottom-Field Address Y Register */
+#define R_CEU_CDBCR_B_OFFSET                      0x00001048  /* Capture Data Bottom-Field Address C Register */
+#define R_CEU_CBDSR_B_OFFSET                      0x0000104c  /* Capture Bundle Destination Size Register */
+#define R_CEU_CLFCR_B_OFFSET                      0x00001060  /* Capture Low-Pass Filter Control Register */
+#define R_CEU_CDOCR_B_OFFSET                      0x00001064  /* Capture Data Output Control Register */
+#define R_CEU_CDAYR2_B_OFFSET                     0x00001090  /* Capture Data Address Y Register 2 */
+#define R_CEU_CDACR2_B_OFFSET                     0x00001094  /* Capture Data Address C Register 2 */
+#define R_CEU_CDBYR2_B_OFFSET                     0x00001098  /* Capture Data Bottom-Field Address Y Register 2 */
+#define R_CEU_CDBCR2_B_OFFSET                     0x0000109c  /* Capture Data Bottom-Field Address C Register 2 */
+#define R_CEU_CAMOR_M_OFFSET                      0x00002010  /* Capture Interface Offset Register */
+#define R_CEU_CAPWR_M_OFFSET                      0x00002014  /* Capture Interface Width Register */
+#define R_CEU_CFLCR_M_OFFSET                      0x00002030  /* Capture Filter Control Register */
+#define R_CEU_CFSZR_M_OFFSET                      0x00002034  /* Capture Filter Size Clip Register */
+#define R_CEU_CDWDR_M_OFFSET                      0x00002038  /* Capture Destination Width Register */
+#define R_CEU_CDAYR_M_OFFSET                      0x0000203c  /* Capture Data Address Y Register */
+#define R_CEU_CDACR_M_OFFSET                      0x00002040  /* Capture Data Address C Register */
+#define R_CEU_CDBYR_M_OFFSET                      0x00002044  /* Capture Data Bottom-Field Address Y Register */
+#define R_CEU_CDBCR_M_OFFSET                      0x00002048  /* Capture Data Bottom-Field Address C Register */
+#define R_CEU_CBDSR_M_OFFSET                      0x0000204c  /* Capture Bundle Destination Size Register */
+#define R_CEU_CLFCR_M_OFFSET                      0x00002060  /* Capture Low-Pass Filter Control Register */
+#define R_CEU_CDOCR_M_OFFSET                      0x00002064  /* Capture Data Output Control Register */
+#define R_CEU_CDAYR2_M_OFFSET                     0x00002090  /* Capture Data Address Y Register 2 */
+#define R_CEU_CDACR2_M_OFFSET                     0x00002094  /* Capture Data Address C Register 2 */
+#define R_CEU_CDBYR2_M_OFFSET                     0x00002098  /* Capture Data Bottom-Field Address Y Register 2 */
+#define R_CEU_CDBCR2_M_OFFSET                     0x0000209c  /* Capture Data Bottom-Field Address C Register 2 */
 
 /* CEU Register Addresses */
 
-#define R_CEU_CAPSR                 (R_CEU_BASE + R_CEU_CAPSR_OFFSET)
-#define R_CEU_CAPCR                 (R_CEU_BASE + R_CEU_CAPCR_OFFSET)
-#define R_CEU_CAMCR                 (R_CEU_BASE + R_CEU_CAMCR_OFFSET)
-#define R_CEU_CMCYR                 (R_CEU_BASE + R_CEU_CMCYR_OFFSET)
-#define R_CEU_CAMOR                 (R_CEU_BASE + R_CEU_CAMOR_OFFSET)
-#define R_CEU_CAPWR                 (R_CEU_BASE + R_CEU_CAPWR_OFFSET)
-#define R_CEU_CAIFR                 (R_CEU_BASE + R_CEU_CAIFR_OFFSET)
-#define R_CEU_CRCNTR                 (R_CEU_BASE + R_CEU_CRCNTR_OFFSET)
-#define R_CEU_CRCMPR                 (R_CEU_BASE + R_CEU_CRCMPR_OFFSET)
-#define R_CEU_CFLCR                 (R_CEU_BASE + R_CEU_CFLCR_OFFSET)
-#define R_CEU_CFSZR                 (R_CEU_BASE + R_CEU_CFSZR_OFFSET)
-#define R_CEU_CDWDR                 (R_CEU_BASE + R_CEU_CDWDR_OFFSET)
-#define R_CEU_CDAYR                 (R_CEU_BASE + R_CEU_CDAYR_OFFSET)
-#define R_CEU_CDACR                 (R_CEU_BASE + R_CEU_CDACR_OFFSET)
-#define R_CEU_CDBYR                 (R_CEU_BASE + R_CEU_CDBYR_OFFSET)
-#define R_CEU_CDBCR                 (R_CEU_BASE + R_CEU_CDBCR_OFFSET)
-#define R_CEU_CBDSR                 (R_CEU_BASE + R_CEU_CBDSR_OFFSET)
-#define R_CEU_CFWCR                 (R_CEU_BASE + R_CEU_CFWCR_OFFSET)
-#define R_CEU_CLFCR                 (R_CEU_BASE + R_CEU_CLFCR_OFFSET)
-#define R_CEU_CDOCR                 (R_CEU_BASE + R_CEU_CDOCR_OFFSET)
-#define R_CEU_CEIER                 (R_CEU_BASE + R_CEU_CEIER_OFFSET)
-#define R_CEU_CETCR                 (R_CEU_BASE + R_CEU_CETCR_OFFSET)
-#define R_CEU_CSTSR                 (R_CEU_BASE + R_CEU_CSTSR_OFFSET)
-#define R_CEU_CDSSR                 (R_CEU_BASE + R_CEU_CDSSR_OFFSET)
-#define R_CEU_CDAYR2                 (R_CEU_BASE + R_CEU_CDAYR2_OFFSET)
-#define R_CEU_CDACR2                 (R_CEU_BASE + R_CEU_CDACR2_OFFSET)
-#define R_CEU_CDBYR2                 (R_CEU_BASE + R_CEU_CDBYR2_OFFSET)
-#define R_CEU_CDBCR2                 (R_CEU_BASE + R_CEU_CDBCR2_OFFSET)
-#define R_CEU_CBWER                 (R_CEU_BASE + R_CEU_CBWER_OFFSET)
-#define R_CEU_CAMOR_B                 (R_CEU_BASE + R_CEU_CAMOR_B_OFFSET)
-#define R_CEU_CAPWR_B                 (R_CEU_BASE + R_CEU_CAPWR_B_OFFSET)
-#define R_CEU_CFLCR_B                 (R_CEU_BASE + R_CEU_CFLCR_B_OFFSET)
-#define R_CEU_CFSZR_B                 (R_CEU_BASE + R_CEU_CFSZR_B_OFFSET)
-#define R_CEU_CDWDR_B                 (R_CEU_BASE + R_CEU_CDWDR_B_OFFSET)
-#define R_CEU_CDAYR_B                 (R_CEU_BASE + R_CEU_CDAYR_B_OFFSET)
-#define R_CEU_CDACR_B                 (R_CEU_BASE + R_CEU_CDACR_B_OFFSET)
-#define R_CEU_CDBYR_B                 (R_CEU_BASE + R_CEU_CDBYR_B_OFFSET)
-#define R_CEU_CDBCR_B                 (R_CEU_BASE + R_CEU_CDBCR_B_OFFSET)
-#define R_CEU_CBDSR_B                 (R_CEU_BASE + R_CEU_CBDSR_B_OFFSET)
-#define R_CEU_CLFCR_B                 (R_CEU_BASE + R_CEU_CLFCR_B_OFFSET)
-#define R_CEU_CDOCR_B                 (R_CEU_BASE + R_CEU_CDOCR_B_OFFSET)
-#define R_CEU_CDAYR2_B                 (R_CEU_BASE + R_CEU_CDAYR2_B_OFFSET)
-#define R_CEU_CDACR2_B                 (R_CEU_BASE + R_CEU_CDACR2_B_OFFSET)
-#define R_CEU_CDBYR2_B                 (R_CEU_BASE + R_CEU_CDBYR2_B_OFFSET)
-#define R_CEU_CDBCR2_B                 (R_CEU_BASE + R_CEU_CDBCR2_B_OFFSET)
-#define R_CEU_CAMOR_M                 (R_CEU_BASE + R_CEU_CAMOR_M_OFFSET)
-#define R_CEU_CAPWR_M                 (R_CEU_BASE + R_CEU_CAPWR_M_OFFSET)
-#define R_CEU_CFLCR_M                 (R_CEU_BASE + R_CEU_CFLCR_M_OFFSET)
-#define R_CEU_CFSZR_M                 (R_CEU_BASE + R_CEU_CFSZR_M_OFFSET)
-#define R_CEU_CDWDR_M                 (R_CEU_BASE + R_CEU_CDWDR_M_OFFSET)
-#define R_CEU_CDAYR_M                 (R_CEU_BASE + R_CEU_CDAYR_M_OFFSET)
-#define R_CEU_CDACR_M                 (R_CEU_BASE + R_CEU_CDACR_M_OFFSET)
-#define R_CEU_CDBYR_M                 (R_CEU_BASE + R_CEU_CDBYR_M_OFFSET)
-#define R_CEU_CDBCR_M                 (R_CEU_BASE + R_CEU_CDBCR_M_OFFSET)
-#define R_CEU_CBDSR_M                 (R_CEU_BASE + R_CEU_CBDSR_M_OFFSET)
-#define R_CEU_CLFCR_M                 (R_CEU_BASE + R_CEU_CLFCR_M_OFFSET)
-#define R_CEU_CDOCR_M                 (R_CEU_BASE + R_CEU_CDOCR_M_OFFSET)
-#define R_CEU_CDAYR2_M                 (R_CEU_BASE + R_CEU_CDAYR2_M_OFFSET)
-#define R_CEU_CDACR2_M                 (R_CEU_BASE + R_CEU_CDACR2_M_OFFSET)
-#define R_CEU_CDBYR2_M                 (R_CEU_BASE + R_CEU_CDBYR2_M_OFFSET)
-#define R_CEU_CDBCR2_M                 (R_CEU_BASE + R_CEU_CDBCR2_M_OFFSET)
+#define R_CEU_CAPSR                               (R_CEU_BASE + R_CEU_CAPSR_OFFSET)
+#define R_CEU_CAPCR                               (R_CEU_BASE + R_CEU_CAPCR_OFFSET)
+#define R_CEU_CAMCR                               (R_CEU_BASE + R_CEU_CAMCR_OFFSET)
+#define R_CEU_CMCYR                               (R_CEU_BASE + R_CEU_CMCYR_OFFSET)
+#define R_CEU_CAMOR                               (R_CEU_BASE + R_CEU_CAMOR_OFFSET)
+#define R_CEU_CAPWR                               (R_CEU_BASE + R_CEU_CAPWR_OFFSET)
+#define R_CEU_CAIFR                               (R_CEU_BASE + R_CEU_CAIFR_OFFSET)
+#define R_CEU_CRCNTR                              (R_CEU_BASE + R_CEU_CRCNTR_OFFSET)
+#define R_CEU_CRCMPR                              (R_CEU_BASE + R_CEU_CRCMPR_OFFSET)
+#define R_CEU_CFLCR                               (R_CEU_BASE + R_CEU_CFLCR_OFFSET)
+#define R_CEU_CFSZR                               (R_CEU_BASE + R_CEU_CFSZR_OFFSET)
+#define R_CEU_CDWDR                               (R_CEU_BASE + R_CEU_CDWDR_OFFSET)
+#define R_CEU_CDAYR                               (R_CEU_BASE + R_CEU_CDAYR_OFFSET)
+#define R_CEU_CDACR                               (R_CEU_BASE + R_CEU_CDACR_OFFSET)
+#define R_CEU_CDBYR                               (R_CEU_BASE + R_CEU_CDBYR_OFFSET)
+#define R_CEU_CDBCR                               (R_CEU_BASE + R_CEU_CDBCR_OFFSET)
+#define R_CEU_CBDSR                               (R_CEU_BASE + R_CEU_CBDSR_OFFSET)
+#define R_CEU_CFWCR                               (R_CEU_BASE + R_CEU_CFWCR_OFFSET)
+#define R_CEU_CLFCR                               (R_CEU_BASE + R_CEU_CLFCR_OFFSET)
+#define R_CEU_CDOCR                               (R_CEU_BASE + R_CEU_CDOCR_OFFSET)
+#define R_CEU_CEIER                               (R_CEU_BASE + R_CEU_CEIER_OFFSET)
+#define R_CEU_CETCR                               (R_CEU_BASE + R_CEU_CETCR_OFFSET)
+#define R_CEU_CSTSR                               (R_CEU_BASE + R_CEU_CSTSR_OFFSET)
+#define R_CEU_CDSSR                               (R_CEU_BASE + R_CEU_CDSSR_OFFSET)
+#define R_CEU_CDAYR2                              (R_CEU_BASE + R_CEU_CDAYR2_OFFSET)
+#define R_CEU_CDACR2                              (R_CEU_BASE + R_CEU_CDACR2_OFFSET)
+#define R_CEU_CDBYR2                              (R_CEU_BASE + R_CEU_CDBYR2_OFFSET)
+#define R_CEU_CDBCR2                              (R_CEU_BASE + R_CEU_CDBCR2_OFFSET)
+#define R_CEU_CBWER                               (R_CEU_BASE + R_CEU_CBWER_OFFSET)
+#define R_CEU_CAMOR_B                             (R_CEU_BASE + R_CEU_CAMOR_B_OFFSET)
+#define R_CEU_CAPWR_B                             (R_CEU_BASE + R_CEU_CAPWR_B_OFFSET)
+#define R_CEU_CFLCR_B                             (R_CEU_BASE + R_CEU_CFLCR_B_OFFSET)
+#define R_CEU_CFSZR_B                             (R_CEU_BASE + R_CEU_CFSZR_B_OFFSET)
+#define R_CEU_CDWDR_B                             (R_CEU_BASE + R_CEU_CDWDR_B_OFFSET)
+#define R_CEU_CDAYR_B                             (R_CEU_BASE + R_CEU_CDAYR_B_OFFSET)
+#define R_CEU_CDACR_B                             (R_CEU_BASE + R_CEU_CDACR_B_OFFSET)
+#define R_CEU_CDBYR_B                             (R_CEU_BASE + R_CEU_CDBYR_B_OFFSET)
+#define R_CEU_CDBCR_B                             (R_CEU_BASE + R_CEU_CDBCR_B_OFFSET)
+#define R_CEU_CBDSR_B                             (R_CEU_BASE + R_CEU_CBDSR_B_OFFSET)
+#define R_CEU_CLFCR_B                             (R_CEU_BASE + R_CEU_CLFCR_B_OFFSET)
+#define R_CEU_CDOCR_B                             (R_CEU_BASE + R_CEU_CDOCR_B_OFFSET)
+#define R_CEU_CDAYR2_B                            (R_CEU_BASE + R_CEU_CDAYR2_B_OFFSET)
+#define R_CEU_CDACR2_B                            (R_CEU_BASE + R_CEU_CDACR2_B_OFFSET)
+#define R_CEU_CDBYR2_B                            (R_CEU_BASE + R_CEU_CDBYR2_B_OFFSET)
+#define R_CEU_CDBCR2_B                            (R_CEU_BASE + R_CEU_CDBCR2_B_OFFSET)
+#define R_CEU_CAMOR_M                             (R_CEU_BASE + R_CEU_CAMOR_M_OFFSET)
+#define R_CEU_CAPWR_M                             (R_CEU_BASE + R_CEU_CAPWR_M_OFFSET)
+#define R_CEU_CFLCR_M                             (R_CEU_BASE + R_CEU_CFLCR_M_OFFSET)
+#define R_CEU_CFSZR_M                             (R_CEU_BASE + R_CEU_CFSZR_M_OFFSET)
+#define R_CEU_CDWDR_M                             (R_CEU_BASE + R_CEU_CDWDR_M_OFFSET)
+#define R_CEU_CDAYR_M                             (R_CEU_BASE + R_CEU_CDAYR_M_OFFSET)
+#define R_CEU_CDACR_M                             (R_CEU_BASE + R_CEU_CDACR_M_OFFSET)
+#define R_CEU_CDBYR_M                             (R_CEU_BASE + R_CEU_CDBYR_M_OFFSET)
+#define R_CEU_CDBCR_M                             (R_CEU_BASE + R_CEU_CDBCR_M_OFFSET)
+#define R_CEU_CBDSR_M                             (R_CEU_BASE + R_CEU_CBDSR_M_OFFSET)
+#define R_CEU_CLFCR_M                             (R_CEU_BASE + R_CEU_CLFCR_M_OFFSET)
+#define R_CEU_CDOCR_M                             (R_CEU_BASE + R_CEU_CDOCR_M_OFFSET)
+#define R_CEU_CDAYR2_M                            (R_CEU_BASE + R_CEU_CDAYR2_M_OFFSET)
+#define R_CEU_CDACR2_M                            (R_CEU_BASE + R_CEU_CDACR2_M_OFFSET)
+#define R_CEU_CDBYR2_M                            (R_CEU_BASE + R_CEU_CDBYR2_M_OFFSET)
+#define R_CEU_CDBCR2_M                            (R_CEU_BASE + R_CEU_CDBCR2_M_OFFSET)
 
 /* Register bit definitions */
 /* CAPSR Register bit definitions */

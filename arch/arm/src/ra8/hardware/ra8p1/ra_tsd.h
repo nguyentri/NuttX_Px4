@@ -40,13 +40,13 @@
 
 /* TSD Register Offsets */
 
-#define R_TSD_TSCDR_OFFSET     0x00000000  /* Temperature Sensor Calibration Data Register */
-#define R_TSD_TSCDR2_OFFSET     0x00000004  /* Temperature Sensor Calibration Data Register 2 */
+#define R_TSD_TSCDR_OFFSET                        0x00000000  /* Temperature Sensor Calibration Data Register */
+#define R_TSD_TSCDR2_OFFSET                       0x00000004  /* Temperature Sensor Calibration Data Register 2 */
 
 /* TSD Register Addresses */
 
-#define R_TSD_TSCDR                 (R_TSD_BASE + R_TSD_TSCDR_OFFSET)
-#define R_TSD_TSCDR2                 (R_TSD_BASE + R_TSD_TSCDR2_OFFSET)
+#define R_TSD_TSCDR                               (R_TSD_BASE + R_TSD_TSCDR_OFFSET)
+#define R_TSD_TSCDR2                              (R_TSD_BASE + R_TSD_TSCDR2_OFFSET)
 
 /* Register bit definitions */
 /* TSCDR Register bit definitions */

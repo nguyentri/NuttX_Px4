@@ -38,31 +38,29 @@
 #endif
 #endif
 
-#define R_CPU_DBG_CH_BASE(ch)   (R_CPU_DBG_BASE + ((uint32_t)(ch) * R_CPU_DBG_CH_STRIDE))
-
 /* CPU_DBG Register Offsets */
 
-#define R_CPU_DBG_DBGSTR_OFFSET     0x00000000  /* Debug Status Register */
-#define R_CPU_DBG_DBGSTOPCR_OFFSET     0x00000010  /* Debug Stop Control Register */
-#define R_CPU_DBG_DBGAUTH0_OFFSET     0x00000020  /* Debug Authentication Control Register0 */
-#define R_CPU_DBG_TRPORTCR_OFFSET     0x00000030  /* Trace Port Control Register */
-#define R_CPU_DBG_TRPORTSZ_OFFSET     0x00000038  /* Trace Port Size Control Register */
-#define R_CPU_DBG_CACHEDBGCR_OFFSET     0x00000040  /* Cache Debug Control Register */
-#define R_CPU_DBG_DBGNVMCR_OFFSET     0x00000050  /* Debug Non-volatile Memory Control Register */
-#define R_CPU_DBG_ALCTRL_OFFSET     0x00000100  /* Authentication Level Control Register */
-#define R_CPU_DBG_FSBLSTAT_OFFSET     0x00000200  /* First Stage Boot Loader Status Register */
+#define R_CPU_DBG_DBGSTR_OFFSET                   0x00000000  /* Debug Status Register */
+#define R_CPU_DBG_DBGSTOPCR_OFFSET                0x00000010  /* Debug Stop Control Register */
+#define R_CPU_DBG_DBGAUTH0_OFFSET                 0x00000020  /* Debug Authentication Control Register0 */
+#define R_CPU_DBG_TRPORTCR_OFFSET                 0x00000030  /* Trace Port Control Register */
+#define R_CPU_DBG_TRPORTSZ_OFFSET                 0x00000038  /* Trace Port Size Control Register */
+#define R_CPU_DBG_CACHEDBGCR_OFFSET               0x00000040  /* Cache Debug Control Register */
+#define R_CPU_DBG_DBGNVMCR_OFFSET                 0x00000050  /* Debug Non-volatile Memory Control Register */
+#define R_CPU_DBG_ALCTRL_OFFSET                   0x00000100  /* Authentication Level Control Register */
+#define R_CPU_DBG_FSBLSTAT_OFFSET                 0x00000200  /* First Stage Boot Loader Status Register */
 
 /* CPU_DBG Register Addresses */
 
-#define R_CPU_DBG_DBGSTR                 (R_CPU_DBG_BASE + R_CPU_DBG_DBGSTR_OFFSET)
-#define R_CPU_DBG_DBGSTOPCR                 (R_CPU_DBG_BASE + R_CPU_DBG_DBGSTOPCR_OFFSET)
-#define R_CPU_DBG_DBGAUTH0                 (R_CPU_DBG_BASE + R_CPU_DBG_DBGAUTH0_OFFSET)
-#define R_CPU_DBG_TRPORTCR                 (R_CPU_DBG_BASE + R_CPU_DBG_TRPORTCR_OFFSET)
-#define R_CPU_DBG_TRPORTSZ                 (R_CPU_DBG_BASE + R_CPU_DBG_TRPORTSZ_OFFSET)
-#define R_CPU_DBG_CACHEDBGCR                 (R_CPU_DBG_BASE + R_CPU_DBG_CACHEDBGCR_OFFSET)
-#define R_CPU_DBG_DBGNVMCR                 (R_CPU_DBG_BASE + R_CPU_DBG_DBGNVMCR_OFFSET)
-#define R_CPU_DBG_ALCTRL                 (R_CPU_DBG_BASE + R_CPU_DBG_ALCTRL_OFFSET)
-#define R_CPU_DBG_FSBLSTAT                 (R_CPU_DBG_BASE + R_CPU_DBG_FSBLSTAT_OFFSET)
+#define R_CPU_DBG_DBGSTR                          (R_CPU_DBG_BASE + R_CPU_DBG_DBGSTR_OFFSET)
+#define R_CPU_DBG_DBGSTOPCR                       (R_CPU_DBG_BASE + R_CPU_DBG_DBGSTOPCR_OFFSET)
+#define R_CPU_DBG_DBGAUTH0                        (R_CPU_DBG_BASE + R_CPU_DBG_DBGAUTH0_OFFSET)
+#define R_CPU_DBG_TRPORTCR                        (R_CPU_DBG_BASE + R_CPU_DBG_TRPORTCR_OFFSET)
+#define R_CPU_DBG_TRPORTSZ                        (R_CPU_DBG_BASE + R_CPU_DBG_TRPORTSZ_OFFSET)
+#define R_CPU_DBG_CACHEDBGCR                      (R_CPU_DBG_BASE + R_CPU_DBG_CACHEDBGCR_OFFSET)
+#define R_CPU_DBG_DBGNVMCR                        (R_CPU_DBG_BASE + R_CPU_DBG_DBGNVMCR_OFFSET)
+#define R_CPU_DBG_ALCTRL                          (R_CPU_DBG_BASE + R_CPU_DBG_ALCTRL_OFFSET)
+#define R_CPU_DBG_FSBLSTAT                        (R_CPU_DBG_BASE + R_CPU_DBG_FSBLSTAT_OFFSET)
 
 /* Register bit definitions */
 /* DBGSTR Register bit definitions */
@@ -129,8 +127,8 @@
 #define R_CPU_DBG_ALCTRL_AL_SHIFT                 (0)  /* AL monitor */
 #define R_CPU_DBG_ALCTRL_AL_MASK                  0xff
 #  define R_CPU_DBG_ALCTRL_AL_0X00                        (0 << R_CPU_DBG_ALCTRL_AL_SHIFT)  /* AL0 */
-#  define R_CPU_DBG_ALCTRL_AL_0X05                        (0 << R_CPU_DBG_ALCTRL_AL_SHIFT)  /* AL1 */
-#  define R_CPU_DBG_ALCTRL_AL_0XA5                        (0 << R_CPU_DBG_ALCTRL_AL_SHIFT)  /* AL2 */
+#  define R_CPU_DBG_ALCTRL_AL_0X05                        (5 << R_CPU_DBG_ALCTRL_AL_SHIFT)  /* AL1 */
+#  define R_CPU_DBG_ALCTRL_AL_0XA5                        (165 << R_CPU_DBG_ALCTRL_AL_SHIFT)  /* AL2 */
 
 #define R_CPU_DBG_ALCTRL_FAILCNT_SHIFT            (30)  /* Number of times responding to incorrect response data */
 #define R_CPU_DBG_ALCTRL_FAILCNT_MASK             0xc0000000

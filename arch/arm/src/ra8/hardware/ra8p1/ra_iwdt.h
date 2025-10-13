@@ -40,24 +40,27 @@
 
 /* IWDT Register Offsets */
 
-#define R_IWDT_IWDTRR_OFFSET     0x00000000  /* IWDT Refresh Register */
-#define R_IWDT_IWDTCR_OFFSET     0x00000002  /* IWDT Control Register */
-#define R_IWDT_IWDTSR_OFFSET     0x00000004  /* IWDT Status Register */
-#define R_IWDT_IWDTRCR_OFFSET     0x00000006  /* IWDT Reset Control Register */
-#define R_IWDT_IWDTCSTPR_OFFSET     0x00000008  /* IWDT Count Stop Control Register */
+#define R_IWDT_IWDTRR_OFFSET                      0x00000000  /* IWDT Refresh Register */
+#define R_IWDT_IWDTCR_OFFSET                      0x00000002  /* IWDT Control Register */
+#define R_IWDT_IWDTSR_OFFSET                      0x00000004  /* IWDT Status Register */
+#define R_IWDT_IWDTRCR_OFFSET                     0x00000006  /* IWDT Reset Control Register */
+#define R_IWDT_IWDTCSTPR_OFFSET                   0x00000008  /* IWDT Count Stop Control Register */
 
 /* IWDT Register Addresses */
 
-#define R_IWDT_IWDTRR                 (R_IWDT_BASE + R_IWDT_IWDTRR_OFFSET)
-#define R_IWDT_IWDTCR                 (R_IWDT_BASE + R_IWDT_IWDTCR_OFFSET)
-#define R_IWDT_IWDTSR                 (R_IWDT_BASE + R_IWDT_IWDTSR_OFFSET)
-#define R_IWDT_IWDTRCR                 (R_IWDT_BASE + R_IWDT_IWDTRCR_OFFSET)
-#define R_IWDT_IWDTCSTPR                 (R_IWDT_BASE + R_IWDT_IWDTCSTPR_OFFSET)
+#define R_IWDT_IWDTRR                             (R_IWDT_BASE + R_IWDT_IWDTRR_OFFSET)
+#define R_IWDT_IWDTCR                             (R_IWDT_BASE + R_IWDT_IWDTCR_OFFSET)
+#define R_IWDT_IWDTSR                             (R_IWDT_BASE + R_IWDT_IWDTSR_OFFSET)
+#define R_IWDT_IWDTRCR                            (R_IWDT_BASE + R_IWDT_IWDTRCR_OFFSET)
+#define R_IWDT_IWDTCSTPR                          (R_IWDT_BASE + R_IWDT_IWDTCSTPR_OFFSET)
 
 /* Register bit definitions */
 /* IWDTRR Register bit definitions */
 #define R_IWDT_IWDTRR_REFRESH_SHIFT               (0)  /* Refresh Register */
 #define R_IWDT_IWDTRR_REFRESH_MASK                0xff
+
+#define R_IWDT_IWDTRR_IWDTRR_SHIFT                (0)  /* The counter is refreshed by writing 0x00 and then writing 0xFF to this register. */
+#define R_IWDT_IWDTRR_IWDTRR_MASK                 0xff
 
 /* IWDTCR Register bit definitions */
 #define R_IWDT_IWDTCR_TOPS_SHIFT                  (0)  /* Timeout Period Select */

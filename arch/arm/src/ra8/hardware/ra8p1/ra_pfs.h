@@ -42,10 +42,6 @@
 #define R_PFS_PSEL_PORT_OFFSET          0x40
 #define R_PFS_PSEL_PIN_OFFSET           0x04
 
-/* Channel stride for multi-channel peripherals */
-#define R_PFS_CH_STRIDE    0x00000004
-#define R_PFS_CH_BASE(ch)   (R_PFS_BASE + ((uint32_t)(ch) * R_PFS_CH_STRIDE))
-
 /* PFS Register Offsets */
 
 /* PFS Register Offsets - Use R_PFS_OFFSET(port, pin) macro */

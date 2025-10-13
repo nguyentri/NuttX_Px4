@@ -38,98 +38,92 @@
 #endif
 #endif
 
-/* Channel stride for multi-channel peripherals */
-#define R_MRAM_CH_STRIDE    0x00000004
-#define R_MRAM_CH_BASE(ch)   (R_MRAM_BASE + ((uint32_t)(ch) * R_MRAM_CH_STRIDE))
-
 /* MRAM Register Offsets */
 
-#define R_MRAM_MRCPFB_OFFSET     0x00000000  /* Code MRAM Prefetch Buffer Enable Register */
-#define R_MRAM_MRCFREQ_OFFSET     0x00000004  /* Code MRAM Frequency Notifications Register */
-#define R_MRAM_MREFREQ_OFFSET     0x00000008  /* Extra MRAM Frequency Notifications Register */
-#define R_MRAM_MRCDECC_OFFSET     0x00000010  /* Code MRAM ECC Decoder Control Register */
-#define R_MRAM_MRCRAEINT_OFFSET     0x00000014  /* Code MRAM Read Access Error Interrupt Enable Register */
-#define R_MRAM_MRCRAES_OFFSET     0x00000018  /* Code MRAM Read Access Error Status Register */
-#define R_MRAM_MRCRTEA_OFFSET     0x0000001c  /* Code MRAM TED Error Address Register */
-#define R_MRAM_MRCRDEA_OFFSET     0x00000020  /* Code MRAM DEC Error Address Register */
-#define R_MRAM_MRERAEINT_OFFSET     0x00000034  /* Extra MRAM Read Access Error Interrupt Enable Register */
-#define R_MRAM_MRERAES_OFFSET     0x00000038  /* Extra MRAM Read Access Error Status Register */
-#define R_MRAM_MRERTEA_OFFSET     0x0000003c  /* Extra MRAM TED Error Address Register */
-#define R_MRAM_MRERDEA_OFFSET     0x00000040  /* Extra MRAM DEC Error Address Register */
-#define R_MRAM_MSAR_OFFSET     0x00000100  /* MRAM Security Attribution Register */
-#define R_MRAM_MREZS_OFFSET     0x00000400  /* Extra MRAM Zeroization Status Register */
-#define R_MRAM_MREZC_OFFSET     0x00000404  /* Extra MRAM Zeroization Control Register */
-#define R_MRAM_MASTAT_OFFSET     0x00002010  /* Extra MRAM Access Status Register */
-#define R_MRAM_MPAEINT_OFFSET     0x00002014  /* Extra MRAM Access Error Interrupt Enable Register */
-#define R_MRAM_MRDYIE_OFFSET     0x00002018  /* Extra MRAM Ready Interrupt Enable Register */
-#define R_MRAM_MSADDR_OFFSET     0x00002030  /* MACI Command Start Address Register */
-#define R_MRAM_MCNTSELR_OFFSET     0x00002048  /* MRAM Counter Select Register */
+#define R_MRAM_MRCPFB_OFFSET                      0x00000000  /* Code MRAM Prefetch Buffer Enable Register */
+#define R_MRAM_MRCFREQ_OFFSET                     0x00000004  /* Code MRAM Frequency Notifications Register */
+#define R_MRAM_MREFREQ_OFFSET                     0x00000008  /* Extra MRAM Frequency Notifications Register */
+#define R_MRAM_MRCDECC_OFFSET                     0x00000010  /* Code MRAM ECC Decoder Control Register */
+#define R_MRAM_MRCRAEINT_OFFSET                   0x00000014  /* Code MRAM Read Access Error Interrupt Enable Register */
+#define R_MRAM_MRCRAES_OFFSET                     0x00000018  /* Code MRAM Read Access Error Status Register */
+#define R_MRAM_MRCRTEA_OFFSET                     0x0000001c  /* Code MRAM TED Error Address Register */
+#define R_MRAM_MRCRDEA_OFFSET                     0x00000020  /* Code MRAM DEC Error Address Register */
+#define R_MRAM_MRERAEINT_OFFSET                   0x00000034  /* Extra MRAM Read Access Error Interrupt Enable Register */
+#define R_MRAM_MRERAES_OFFSET                     0x00000038  /* Extra MRAM Read Access Error Status Register */
+#define R_MRAM_MRERTEA_OFFSET                     0x0000003c  /* Extra MRAM TED Error Address Register */
+#define R_MRAM_MRERDEA_OFFSET                     0x00000040  /* Extra MRAM DEC Error Address Register */
+#define R_MRAM_MSAR_OFFSET                        0x00000100  /* MRAM Security Attribution Register */
+#define R_MRAM_MREZS_OFFSET                       0x00000400  /* Extra MRAM Zeroization Status Register */
+#define R_MRAM_MREZC_OFFSET                       0x00000404  /* Extra MRAM Zeroization Control Register */
+#define R_MRAM_MASTAT_OFFSET                      0x00002010  /* Extra MRAM Access Status Register */
+#define R_MRAM_MPAEINT_OFFSET                     0x00002014  /* Extra MRAM Access Error Interrupt Enable Register */
+#define R_MRAM_MRDYIE_OFFSET                      0x00002018  /* Extra MRAM Ready Interrupt Enable Register */
+#define R_MRAM_MSADDR_OFFSET                      0x00002030  /* MACI Command Start Address Register */
+#define R_MRAM_MCNTSELR_OFFSET                    0x00002048  /* MRAM Counter Select Register */
 /* MCNTDTR%s Registers (0-1) */
-#define R_MRAM_MCNTDTR0_OFFSET     0x0000204c  /* MRAM Counter Data Register (n = 0, 1) */
-#define R_MRAM_MCNTDTR1_OFFSET     0x00002050  /* MRAM Counter Data Register (n = 0, 1) */
-#define R_MRAM_MCTRCNTR_OFFSET     0x00002060  /* MRAM Configuration Update Transfer Control Register */
-#define R_MRAM_MCTRLSR_OFFSET     0x00002064  /* MRAM Configuration Update Transfer List Select Register */
-#define R_MRAM_MCTRSTATR_OFFSET     0x0000206c  /* MRAM Configuration Update Transfer Status Register */
-#define R_MRAM_MSTATR_OFFSET     0x00002080  /* Extra MRAM Status Register */
-#define R_MRAM_MENTRYR_OFFSET     0x00002084  /* Extra MRAM Program Mode Entry Register */
-#define R_MRAM_MSUINITR_OFFSET     0x0000208c  /* Extra MRAM Sequencer Setup Initialization Register */
-#define R_MRAM_MCMDR_OFFSET     0x000020a0  /* MACI Command Register */
-#define R_MRAM_MSUASMON_OFFSET     0x000020dc  /* MRAM Startup Area Select Monitor Register */
-#define R_MRAM_MSUACR_OFFSET     0x000020e8  /* MRAM Startup Area Control Register */
-#define R_MRAM_MRPSC_OFFSET     0x00002800  /* MRAM Program Speed Control Register */
-#define R_MRAM_MRCPC0_OFFSET     0x00003000  /* Code MRAM Program Control Register */
-#define R_MRAM_MRCPC1_OFFSET     0x00003004  /* Code MRAM Program Control Register for Secure */
-#define R_MRAM_MRCBPROT0_OFFSET     0x00003008  /* Code MRAM Block Protection Register */
-#define R_MRAM_MRCBPROT1_OFFSET     0x0000300c  /* Code MRAM Block Protection Register for Secure */
-#define R_MRAM_MRCPS_OFFSET     0x00003010  /* Code MRAM Program Status Register */
-#define R_MRAM_MRCPAEINT_OFFSET     0x00003014  /* Code MRAM Program Access Error Interrupt Enable Register */
-#define R_MRAM_MRCPEA_OFFSET     0x00003018  /* Code MRAM Program Error Address Register */
-#define R_MRAM_MRCFLR_OFFSET     0x00003030  /* Code MRAM Flush Register */
-#define R_MRAM_MRCEECC_OFFSET     0x00003804  /* Code MRAM ECC Encoder Control Register */
+#define R_MRAM_MCNTDTR_OFFSET(m)                  (0x0000204c + ((m) * 0x00000004))  /* MRAM Counter Data Register (n = 0, 1) */
+#define R_MRAM_MCTRCNTR_OFFSET                    0x00002060  /* MRAM Configuration Update Transfer Control Register */
+#define R_MRAM_MCTRLSR_OFFSET                     0x00002064  /* MRAM Configuration Update Transfer List Select Register */
+#define R_MRAM_MCTRSTATR_OFFSET                   0x0000206c  /* MRAM Configuration Update Transfer Status Register */
+#define R_MRAM_MSTATR_OFFSET                      0x00002080  /* Extra MRAM Status Register */
+#define R_MRAM_MENTRYR_OFFSET                     0x00002084  /* Extra MRAM Program Mode Entry Register */
+#define R_MRAM_MSUINITR_OFFSET                    0x0000208c  /* Extra MRAM Sequencer Setup Initialization Register */
+#define R_MRAM_MCMDR_OFFSET                       0x000020a0  /* MACI Command Register */
+#define R_MRAM_MSUASMON_OFFSET                    0x000020dc  /* MRAM Startup Area Select Monitor Register */
+#define R_MRAM_MSUACR_OFFSET                      0x000020e8  /* MRAM Startup Area Control Register */
+#define R_MRAM_MRPSC_OFFSET                       0x00002800  /* MRAM Program Speed Control Register */
+#define R_MRAM_MRCPC0_OFFSET                      0x00003000  /* Code MRAM Program Control Register */
+#define R_MRAM_MRCPC1_OFFSET                      0x00003004  /* Code MRAM Program Control Register for Secure */
+#define R_MRAM_MRCBPROT0_OFFSET                   0x00003008  /* Code MRAM Block Protection Register */
+#define R_MRAM_MRCBPROT1_OFFSET                   0x0000300c  /* Code MRAM Block Protection Register for Secure */
+#define R_MRAM_MRCPS_OFFSET                       0x00003010  /* Code MRAM Program Status Register */
+#define R_MRAM_MRCPAEINT_OFFSET                   0x00003014  /* Code MRAM Program Access Error Interrupt Enable Register */
+#define R_MRAM_MRCPEA_OFFSET                      0x00003018  /* Code MRAM Program Error Address Register */
+#define R_MRAM_MRCFLR_OFFSET                      0x00003030  /* Code MRAM Flush Register */
+#define R_MRAM_MRCEECC_OFFSET                     0x00003804  /* Code MRAM ECC Encoder Control Register */
 
 /* MRAM Register Addresses */
 
-#define R_MRAM_MRCPFB                 (R_MRAM_BASE + R_MRAM_MRCPFB_OFFSET)
-#define R_MRAM_MRCFREQ                 (R_MRAM_BASE + R_MRAM_MRCFREQ_OFFSET)
-#define R_MRAM_MREFREQ                 (R_MRAM_BASE + R_MRAM_MREFREQ_OFFSET)
-#define R_MRAM_MRCDECC                 (R_MRAM_BASE + R_MRAM_MRCDECC_OFFSET)
-#define R_MRAM_MRCRAEINT                 (R_MRAM_BASE + R_MRAM_MRCRAEINT_OFFSET)
-#define R_MRAM_MRCRAES                 (R_MRAM_BASE + R_MRAM_MRCRAES_OFFSET)
-#define R_MRAM_MRCRTEA                 (R_MRAM_BASE + R_MRAM_MRCRTEA_OFFSET)
-#define R_MRAM_MRCRDEA                 (R_MRAM_BASE + R_MRAM_MRCRDEA_OFFSET)
-#define R_MRAM_MRERAEINT                 (R_MRAM_BASE + R_MRAM_MRERAEINT_OFFSET)
-#define R_MRAM_MRERAES                 (R_MRAM_BASE + R_MRAM_MRERAES_OFFSET)
-#define R_MRAM_MRERTEA                 (R_MRAM_BASE + R_MRAM_MRERTEA_OFFSET)
-#define R_MRAM_MRERDEA                 (R_MRAM_BASE + R_MRAM_MRERDEA_OFFSET)
-#define R_MRAM_MSAR                 (R_MRAM_BASE + R_MRAM_MSAR_OFFSET)
-#define R_MRAM_MREZS                 (R_MRAM_BASE + R_MRAM_MREZS_OFFSET)
-#define R_MRAM_MREZC                 (R_MRAM_BASE + R_MRAM_MREZC_OFFSET)
-#define R_MRAM_MASTAT                 (R_MRAM_BASE + R_MRAM_MASTAT_OFFSET)
-#define R_MRAM_MPAEINT                 (R_MRAM_BASE + R_MRAM_MPAEINT_OFFSET)
-#define R_MRAM_MRDYIE                 (R_MRAM_BASE + R_MRAM_MRDYIE_OFFSET)
-#define R_MRAM_MSADDR                 (R_MRAM_BASE + R_MRAM_MSADDR_OFFSET)
-#define R_MRAM_MCNTSELR                 (R_MRAM_BASE + R_MRAM_MCNTSELR_OFFSET)
-#define R_MRAM_MCNTDTR0                 (R_MRAM_BASE + R_MRAM_MCNTDTR0_OFFSET)
-#define R_MRAM_MCNTDTR1                 (R_MRAM_BASE + R_MRAM_MCNTDTR1_OFFSET)
-#define R_MRAM_MCTRCNTR                 (R_MRAM_BASE + R_MRAM_MCTRCNTR_OFFSET)
-#define R_MRAM_MCTRLSR                 (R_MRAM_BASE + R_MRAM_MCTRLSR_OFFSET)
-#define R_MRAM_MCTRSTATR                 (R_MRAM_BASE + R_MRAM_MCTRSTATR_OFFSET)
-#define R_MRAM_MSTATR                 (R_MRAM_BASE + R_MRAM_MSTATR_OFFSET)
-#define R_MRAM_MENTRYR                 (R_MRAM_BASE + R_MRAM_MENTRYR_OFFSET)
-#define R_MRAM_MSUINITR                 (R_MRAM_BASE + R_MRAM_MSUINITR_OFFSET)
-#define R_MRAM_MCMDR                 (R_MRAM_BASE + R_MRAM_MCMDR_OFFSET)
-#define R_MRAM_MSUASMON                 (R_MRAM_BASE + R_MRAM_MSUASMON_OFFSET)
-#define R_MRAM_MSUACR                 (R_MRAM_BASE + R_MRAM_MSUACR_OFFSET)
-#define R_MRAM_MRPSC                 (R_MRAM_BASE + R_MRAM_MRPSC_OFFSET)
-#define R_MRAM_MRCPC0                 (R_MRAM_BASE + R_MRAM_MRCPC0_OFFSET)
-#define R_MRAM_MRCPC1                 (R_MRAM_BASE + R_MRAM_MRCPC1_OFFSET)
-#define R_MRAM_MRCBPROT0                 (R_MRAM_BASE + R_MRAM_MRCBPROT0_OFFSET)
-#define R_MRAM_MRCBPROT1                 (R_MRAM_BASE + R_MRAM_MRCBPROT1_OFFSET)
-#define R_MRAM_MRCPS                 (R_MRAM_BASE + R_MRAM_MRCPS_OFFSET)
-#define R_MRAM_MRCPAEINT                 (R_MRAM_BASE + R_MRAM_MRCPAEINT_OFFSET)
-#define R_MRAM_MRCPEA                 (R_MRAM_BASE + R_MRAM_MRCPEA_OFFSET)
-#define R_MRAM_MRCFLR                 (R_MRAM_BASE + R_MRAM_MRCFLR_OFFSET)
-#define R_MRAM_MRCEECC                 (R_MRAM_BASE + R_MRAM_MRCEECC_OFFSET)
+#define R_MRAM_MRCPFB                             (R_MRAM_BASE + R_MRAM_MRCPFB_OFFSET)
+#define R_MRAM_MRCFREQ                            (R_MRAM_BASE + R_MRAM_MRCFREQ_OFFSET)
+#define R_MRAM_MREFREQ                            (R_MRAM_BASE + R_MRAM_MREFREQ_OFFSET)
+#define R_MRAM_MRCDECC                            (R_MRAM_BASE + R_MRAM_MRCDECC_OFFSET)
+#define R_MRAM_MRCRAEINT                          (R_MRAM_BASE + R_MRAM_MRCRAEINT_OFFSET)
+#define R_MRAM_MRCRAES                            (R_MRAM_BASE + R_MRAM_MRCRAES_OFFSET)
+#define R_MRAM_MRCRTEA                            (R_MRAM_BASE + R_MRAM_MRCRTEA_OFFSET)
+#define R_MRAM_MRCRDEA                            (R_MRAM_BASE + R_MRAM_MRCRDEA_OFFSET)
+#define R_MRAM_MRERAEINT                          (R_MRAM_BASE + R_MRAM_MRERAEINT_OFFSET)
+#define R_MRAM_MRERAES                            (R_MRAM_BASE + R_MRAM_MRERAES_OFFSET)
+#define R_MRAM_MRERTEA                            (R_MRAM_BASE + R_MRAM_MRERTEA_OFFSET)
+#define R_MRAM_MRERDEA                            (R_MRAM_BASE + R_MRAM_MRERDEA_OFFSET)
+#define R_MRAM_MSAR                               (R_MRAM_BASE + R_MRAM_MSAR_OFFSET)
+#define R_MRAM_MREZS                              (R_MRAM_BASE + R_MRAM_MREZS_OFFSET)
+#define R_MRAM_MREZC                              (R_MRAM_BASE + R_MRAM_MREZC_OFFSET)
+#define R_MRAM_MASTAT                             (R_MRAM_BASE + R_MRAM_MASTAT_OFFSET)
+#define R_MRAM_MPAEINT                            (R_MRAM_BASE + R_MRAM_MPAEINT_OFFSET)
+#define R_MRAM_MRDYIE                             (R_MRAM_BASE + R_MRAM_MRDYIE_OFFSET)
+#define R_MRAM_MSADDR                             (R_MRAM_BASE + R_MRAM_MSADDR_OFFSET)
+#define R_MRAM_MCNTSELR                           (R_MRAM_BASE + R_MRAM_MCNTSELR_OFFSET)
+#define R_MRAM_MCNTDTR(m)                         (R_MRAM_BASE + R_MRAM_MCNTDTR_OFFSET(m))
+#define R_MRAM_MCTRCNTR                           (R_MRAM_BASE + R_MRAM_MCTRCNTR_OFFSET)
+#define R_MRAM_MCTRLSR                            (R_MRAM_BASE + R_MRAM_MCTRLSR_OFFSET)
+#define R_MRAM_MCTRSTATR                          (R_MRAM_BASE + R_MRAM_MCTRSTATR_OFFSET)
+#define R_MRAM_MSTATR                             (R_MRAM_BASE + R_MRAM_MSTATR_OFFSET)
+#define R_MRAM_MENTRYR                            (R_MRAM_BASE + R_MRAM_MENTRYR_OFFSET)
+#define R_MRAM_MSUINITR                           (R_MRAM_BASE + R_MRAM_MSUINITR_OFFSET)
+#define R_MRAM_MCMDR                              (R_MRAM_BASE + R_MRAM_MCMDR_OFFSET)
+#define R_MRAM_MSUASMON                           (R_MRAM_BASE + R_MRAM_MSUASMON_OFFSET)
+#define R_MRAM_MSUACR                             (R_MRAM_BASE + R_MRAM_MSUACR_OFFSET)
+#define R_MRAM_MRPSC                              (R_MRAM_BASE + R_MRAM_MRPSC_OFFSET)
+#define R_MRAM_MRCPC0                             (R_MRAM_BASE + R_MRAM_MRCPC0_OFFSET)
+#define R_MRAM_MRCPC1                             (R_MRAM_BASE + R_MRAM_MRCPC1_OFFSET)
+#define R_MRAM_MRCBPROT0                          (R_MRAM_BASE + R_MRAM_MRCBPROT0_OFFSET)
+#define R_MRAM_MRCBPROT1                          (R_MRAM_BASE + R_MRAM_MRCBPROT1_OFFSET)
+#define R_MRAM_MRCPS                              (R_MRAM_BASE + R_MRAM_MRCPS_OFFSET)
+#define R_MRAM_MRCPAEINT                          (R_MRAM_BASE + R_MRAM_MRCPAEINT_OFFSET)
+#define R_MRAM_MRCPEA                             (R_MRAM_BASE + R_MRAM_MRCPEA_OFFSET)
+#define R_MRAM_MRCFLR                             (R_MRAM_BASE + R_MRAM_MRCFLR_OFFSET)
+#define R_MRAM_MRCEECC                            (R_MRAM_BASE + R_MRAM_MRCEECC_OFFSET)
 
 /* Register bit definitions */
 /* MRCPFB Register bit definitions */

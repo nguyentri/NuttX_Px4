@@ -38,241 +38,201 @@
 #endif
 #endif
 
-/* Channel stride for multi-channel peripherals */
-#define R_I3C_CH_STRIDE    0x00000008
-#define R_I3C_CH_BASE(ch)   (R_I3C_BASE + ((uint32_t)(ch) * R_I3C_CH_STRIDE))
-
 /* I3C Register Offsets */
 
-#define R_I3C_PRTS_OFFSET     0x00000000  /* Protocol Selection Register */
-#define R_I3C_CECTL_OFFSET     0x00000010  /* Clock Enable Control Resister */
-#define R_I3C_BCTL_OFFSET     0x00000014  /* Bus Control Register */
-#define R_I3C_MSDVAD_OFFSET     0x00000018  /* Master Device Address Register */
-#define R_I3C_RSTCTL_OFFSET     0x00000020  /* Reset Control Register */
-#define R_I3C_PRSST_OFFSET     0x00000024  /* Present State Register */
-#define R_I3C_INST_OFFSET     0x00000030  /* Internal Status Register */
-#define R_I3C_INSTE_OFFSET     0x00000034  /* Internal Status Enable Register */
-#define R_I3C_INIE_OFFSET     0x00000038  /* Internal Interrupt Enable Register */
-#define R_I3C_INSTFC_OFFSET     0x0000003c  /* Internal Status Force Register */
-#define R_I3C_DVCT_OFFSET     0x00000044  /* Device Characteristic Table Register */
-#define R_I3C_IBINCTL_OFFSET     0x00000058  /* IBI Notify Control Register */
-#define R_I3C_BFCTL_OFFSET     0x00000060  /* Bus Function Control Register */
-#define R_I3C_SVCTL_OFFSET     0x00000064  /* Slave Control Register */
-#define R_I3C_REFCKCTL_OFFSET     0x00000070  /* Reference Clock Control Register */
-#define R_I3C_STDBR_OFFSET     0x00000074  /* Standard Bit Rate Register */
-#define R_I3C_EXTBR_OFFSET     0x00000078  /* Extended Bit Rate Register */
-#define R_I3C_BFRECDT_OFFSET     0x0000007c  /* Bus Free Condition Detection Time Register */
-#define R_I3C_BAVLCDT_OFFSET     0x00000080  /* Bus Available Condition Detection Time Register */
-#define R_I3C_BIDLCDT_OFFSET     0x00000084  /* Bus Idle Condition Detection Time Register */
-#define R_I3C_OUTCTL_OFFSET     0x00000088  /* Output Control Register */
-#define R_I3C_INCTL_OFFSET     0x0000008c  /* Input Control Register */
-#define R_I3C_TMOCTL_OFFSET     0x00000090  /* Timeout Control Register */
-#define R_I3C_WUCTL_OFFSET     0x00000098  /* Wake Up Unit Control Register */
-#define R_I3C_ACKCTL_OFFSET     0x000000a0  /* Acknowledge Control Register */
-#define R_I3C_SCSTRCTL_OFFSET     0x000000a4  /* SCL Stretch Control Register */
-#define R_I3C_SCSTLCTL_OFFSET     0x000000b0  /* SCL Stalling Control Register */
-#define R_I3C_SVTDLG0_OFFSET     0x000000c0  /* Slave Transfer Data Length Register 0 */
-#define R_I3C_STCTL_OFFSET     0x00000120  /* Synchronous Timing Control Register */
-#define R_I3C_ATCTL_OFFSET     0x00000124  /* Asynchronous Timing Control Register */
-#define R_I3C_ATTRG_OFFSET     0x00000128  /* Asynchronous Timing Trigger Register */
-#define R_I3C_ATCCNTE_OFFSET     0x0000012c  /* Asynchronous Timing Control Counter Enable Register */
-#define R_I3C_CNDCTL_OFFSET     0x00000140  /* Condition Control Register */
-#define R_I3C_NCMDQP_OFFSET     0x00000150  /* Normal Command Queue Port Register */
-#define R_I3C_NRSPQP_OFFSET     0x00000154  /* Normal Response Queue Port Register */
-#define R_I3C_NTDTBP0_OFFSET     0x00000158  /* Normal Transfer Data Buffer Port Register 0 */
-#define R_I3C_NTDTBP0_BY_OFFSET     0x00000158  /* Normal Transfer Data Buffer Port Register 0 */
-#define R_I3C_NIBIQP_OFFSET     0x0000017c  /* Normal IBI Queue Port Register */
-#define R_I3C_NRSQP_OFFSET     0x00000180  /* Normal Receive Status Queue Port Register */
-#define R_I3C_HCMDQP_OFFSET     0x00000184  /* High Priority Command Queue Port Register */
-#define R_I3C_HRSPQP_OFFSET     0x00000188  /* High Priority Response Queue Port Register */
-#define R_I3C_HTDTBP_OFFSET     0x0000018c  /* High Priority Transfer Data Buffer Port Register */
-#define R_I3C_NQTHCTL_OFFSET     0x00000190  /* Normal Queue Threshold Control Register */
-#define R_I3C_NTBTHCTL0_OFFSET     0x00000194  /* Normal Transfer Data Buffer Threshold Control Register 0 */
-#define R_I3C_NRQTHCTL_OFFSET     0x000001c0  /* Normal Receive Status Queue Threshold Control Register */
-#define R_I3C_HQTHCTL_OFFSET     0x000001c4  /* High Priority Queue Threshold Control Register */
-#define R_I3C_HTBTHCTL_OFFSET     0x000001c8  /* High Priority Transfer Data Buffer Threshold Control Register */
-#define R_I3C_BST_OFFSET     0x000001d0  /* Bus Status Register */
-#define R_I3C_BSTE_OFFSET     0x000001d4  /* Bus Status Enable Register */
-#define R_I3C_BIE_OFFSET     0x000001d8  /* Bus Interrupt Enable Register */
-#define R_I3C_BSTFC_OFFSET     0x000001dc  /* Bus Status Force Register */
-#define R_I3C_NTST_OFFSET     0x000001e0  /* Normal Transfer Status Register */
-#define R_I3C_NTSTE_OFFSET     0x000001e4  /* Normal Transfer Status Enable Register */
-#define R_I3C_NTIE_OFFSET     0x000001e8  /* Normal Transfer Interrupt Enable Register */
-#define R_I3C_NTSTFC_OFFSET     0x000001ec  /* Normal Transfer Status Force Register */
-#define R_I3C_HTST_OFFSET     0x00000200  /* High Priority Transfer Status Register */
-#define R_I3C_HTSTE_OFFSET     0x00000204  /* High Priority Transfer Status Enable Register */
-#define R_I3C_HTIE_OFFSET     0x00000208  /* High Priority Transfer Interrupt Enable Register */
-#define R_I3C_HTSTFC_OFFSET     0x0000020c  /* High Priority Transfer Status Force Register */
-#define R_I3C_BCST_OFFSET     0x00000210  /* Bus Condition Status Register */
-#define R_I3C_SVST_OFFSET     0x00000214  /* Slave Status Register */
-#define R_I3C_WUST_OFFSET     0x00000218  /* Wake Up Unit Operating Status Register */
-#define R_I3C_MRCCPT_OFFSET     0x0000021c  /* MSyncCNT Counter Capture Register */
+#define R_I3C_PRTS_OFFSET                         0x00000000  /* Protocol Selection Register */
+#define R_I3C_CECTL_OFFSET                        0x00000010  /* Clock Enable Control Resister */
+#define R_I3C_BCTL_OFFSET                         0x00000014  /* Bus Control Register */
+#define R_I3C_MSDVAD_OFFSET                       0x00000018  /* Master Device Address Register */
+#define R_I3C_RSTCTL_OFFSET                       0x00000020  /* Reset Control Register */
+#define R_I3C_PRSST_OFFSET                        0x00000024  /* Present State Register */
+#define R_I3C_INST_OFFSET                         0x00000030  /* Internal Status Register */
+#define R_I3C_INSTE_OFFSET                        0x00000034  /* Internal Status Enable Register */
+#define R_I3C_INIE_OFFSET                         0x00000038  /* Internal Interrupt Enable Register */
+#define R_I3C_INSTFC_OFFSET                       0x0000003c  /* Internal Status Force Register */
+#define R_I3C_DVCT_OFFSET                         0x00000044  /* Device Characteristic Table Register */
+#define R_I3C_IBINCTL_OFFSET                      0x00000058  /* IBI Notify Control Register */
+#define R_I3C_BFCTL_OFFSET                        0x00000060  /* Bus Function Control Register */
+#define R_I3C_SVCTL_OFFSET                        0x00000064  /* Slave Control Register */
+#define R_I3C_REFCKCTL_OFFSET                     0x00000070  /* Reference Clock Control Register */
+#define R_I3C_STDBR_OFFSET                        0x00000074  /* Standard Bit Rate Register */
+#define R_I3C_EXTBR_OFFSET                        0x00000078  /* Extended Bit Rate Register */
+#define R_I3C_BFRECDT_OFFSET                      0x0000007c  /* Bus Free Condition Detection Time Register */
+#define R_I3C_BAVLCDT_OFFSET                      0x00000080  /* Bus Available Condition Detection Time Register */
+#define R_I3C_BIDLCDT_OFFSET                      0x00000084  /* Bus Idle Condition Detection Time Register */
+#define R_I3C_OUTCTL_OFFSET                       0x00000088  /* Output Control Register */
+#define R_I3C_INCTL_OFFSET                        0x0000008c  /* Input Control Register */
+#define R_I3C_TMOCTL_OFFSET                       0x00000090  /* Timeout Control Register */
+#define R_I3C_WUCTL_OFFSET                        0x00000098  /* Wake Up Unit Control Register */
+#define R_I3C_ACKCTL_OFFSET                       0x000000a0  /* Acknowledge Control Register */
+#define R_I3C_SCSTRCTL_OFFSET                     0x000000a4  /* SCL Stretch Control Register */
+#define R_I3C_SCSTLCTL_OFFSET                     0x000000b0  /* SCL Stalling Control Register */
+#define R_I3C_SVTDLG0_OFFSET                      0x000000c0  /* Slave Transfer Data Length Register 0 */
+#define R_I3C_STCTL_OFFSET                        0x00000120  /* Synchronous Timing Control Register */
+#define R_I3C_ATCTL_OFFSET                        0x00000124  /* Asynchronous Timing Control Register */
+#define R_I3C_ATTRG_OFFSET                        0x00000128  /* Asynchronous Timing Trigger Register */
+#define R_I3C_ATCCNTE_OFFSET                      0x0000012c  /* Asynchronous Timing Control Counter Enable Register */
+#define R_I3C_CNDCTL_OFFSET                       0x00000140  /* Condition Control Register */
+#define R_I3C_NCMDQP_OFFSET                       0x00000150  /* Normal Command Queue Port Register */
+#define R_I3C_NRSPQP_OFFSET                       0x00000154  /* Normal Response Queue Port Register */
+#define R_I3C_NTDTBP0_OFFSET                      0x00000158  /* Normal Transfer Data Buffer Port Register 0 */
+#define R_I3C_NTDTBP0_BY_OFFSET                   0x00000158  /* Normal Transfer Data Buffer Port Register 0 */
+#define R_I3C_NIBIQP_OFFSET                       0x0000017c  /* Normal IBI Queue Port Register */
+#define R_I3C_NRSQP_OFFSET                        0x00000180  /* Normal Receive Status Queue Port Register */
+#define R_I3C_HCMDQP_OFFSET                       0x00000184  /* High Priority Command Queue Port Register */
+#define R_I3C_HRSPQP_OFFSET                       0x00000188  /* High Priority Response Queue Port Register */
+#define R_I3C_HTDTBP_OFFSET                       0x0000018c  /* High Priority Transfer Data Buffer Port Register */
+#define R_I3C_NQTHCTL_OFFSET                      0x00000190  /* Normal Queue Threshold Control Register */
+#define R_I3C_NTBTHCTL0_OFFSET                    0x00000194  /* Normal Transfer Data Buffer Threshold Control Register 0 */
+#define R_I3C_NRQTHCTL_OFFSET                     0x000001c0  /* Normal Receive Status Queue Threshold Control Register */
+#define R_I3C_HQTHCTL_OFFSET                      0x000001c4  /* High Priority Queue Threshold Control Register */
+#define R_I3C_HTBTHCTL_OFFSET                     0x000001c8  /* High Priority Transfer Data Buffer Threshold Control Register */
+#define R_I3C_BST_OFFSET                          0x000001d0  /* Bus Status Register */
+#define R_I3C_BSTE_OFFSET                         0x000001d4  /* Bus Status Enable Register */
+#define R_I3C_BIE_OFFSET                          0x000001d8  /* Bus Interrupt Enable Register */
+#define R_I3C_BSTFC_OFFSET                        0x000001dc  /* Bus Status Force Register */
+#define R_I3C_NTST_OFFSET                         0x000001e0  /* Normal Transfer Status Register */
+#define R_I3C_NTSTE_OFFSET                        0x000001e4  /* Normal Transfer Status Enable Register */
+#define R_I3C_NTIE_OFFSET                         0x000001e8  /* Normal Transfer Interrupt Enable Register */
+#define R_I3C_NTSTFC_OFFSET                       0x000001ec  /* Normal Transfer Status Force Register */
+#define R_I3C_HTST_OFFSET                         0x00000200  /* High Priority Transfer Status Register */
+#define R_I3C_HTSTE_OFFSET                        0x00000204  /* High Priority Transfer Status Enable Register */
+#define R_I3C_HTIE_OFFSET                         0x00000208  /* High Priority Transfer Interrupt Enable Register */
+#define R_I3C_HTSTFC_OFFSET                       0x0000020c  /* High Priority Transfer Status Force Register */
+#define R_I3C_BCST_OFFSET                         0x00000210  /* Bus Condition Status Register */
+#define R_I3C_SVST_OFFSET                         0x00000214  /* Slave Status Register */
+#define R_I3C_WUST_OFFSET                         0x00000218  /* Wake Up Unit Operating Status Register */
+#define R_I3C_MRCCPT_OFFSET                       0x0000021c  /* MSyncCNT Counter Capture Register */
 /* DATBAS%s Registers (0-7) */
-#define R_I3C_DATBAS0_OFFSET     0x00000224  /* Device Address Table Basic Register 0 */
-#define R_I3C_DATBAS1_OFFSET     0x0000022c  /* Device Address Table Basic Register 1 */
-#define R_I3C_DATBAS2_OFFSET     0x00000234  /* Device Address Table Basic Register 2 */
-#define R_I3C_DATBAS3_OFFSET     0x0000023c  /* Device Address Table Basic Register 3 */
-#define R_I3C_DATBAS4_OFFSET     0x00000244  /* Device Address Table Basic Register 4 */
-#define R_I3C_DATBAS5_OFFSET     0x0000024c  /* Device Address Table Basic Register 5 */
-#define R_I3C_DATBAS6_OFFSET     0x00000254  /* Device Address Table Basic Register 6 */
-#define R_I3C_DATBAS7_OFFSET     0x0000025c  /* Device Address Table Basic Register 7 */
-#define R_I3C_EXDATBAS_OFFSET     0x000002a0  /* Extended Device Address Table Basic Register */
+#define R_I3C_DATBAS_OFFSET(m)                    (0x00000224 + ((m) * 0x00000008))  /* Device Address Table Basic Register %s */
+#define R_I3C_EXDATBAS_OFFSET                     0x000002a0  /* Extended Device Address Table Basic Register */
 /* SDATBAS%s Registers (0-2) */
-#define R_I3C_SDATBAS0_OFFSET     0x000002b0  /* Slave Device Address Table Basic Register 0 */
-#define R_I3C_SDATBAS1_OFFSET     0x000002b4  /* Slave Device Address Table Basic Register 1 */
-#define R_I3C_SDATBAS2_OFFSET     0x000002b8  /* Slave Device Address Table Basic Register 2 */
+#define R_I3C_SDATBAS_OFFSET(m)                   (0x000002b0 + ((m) * 0x00000004))  /* Slave Device Address Table Basic Register %s */
 /* MSDCT%s Registers (0-7) */
-#define R_I3C_MSDCT0_OFFSET     0x000002d0  /* Master Device Characteristic Table Register 0 */
-#define R_I3C_MSDCT1_OFFSET     0x000002d4  /* Master Device Characteristic Table Register 1 */
-#define R_I3C_MSDCT2_OFFSET     0x000002d8  /* Master Device Characteristic Table Register 2 */
-#define R_I3C_MSDCT3_OFFSET     0x000002dc  /* Master Device Characteristic Table Register 3 */
-#define R_I3C_MSDCT4_OFFSET     0x000002e0  /* Master Device Characteristic Table Register 4 */
-#define R_I3C_MSDCT5_OFFSET     0x000002e4  /* Master Device Characteristic Table Register 5 */
-#define R_I3C_MSDCT6_OFFSET     0x000002e8  /* Master Device Characteristic Table Register 6 */
-#define R_I3C_MSDCT7_OFFSET     0x000002ec  /* Master Device Characteristic Table Register 7 */
-#define R_I3C_SVDCT_OFFSET     0x00000320  /* Slave Device Characteristic Table Register */
-#define R_I3C_SDCTPIDL_OFFSET     0x00000324  /* Slave Device Characteristic Table Provisional ID Low Register */
-#define R_I3C_SDCTPIDH_OFFSET     0x00000328  /* Slave Device Characteristic Table Provisional ID High Register */
+#define R_I3C_MSDCT_OFFSET(m)                     (0x000002d0 + ((m) * 0x00000004))  /* Master Device Characteristic Table Register %s */
+#define R_I3C_SVDCT_OFFSET                        0x00000320  /* Slave Device Characteristic Table Register */
+#define R_I3C_SDCTPIDL_OFFSET                     0x00000324  /* Slave Device Characteristic Table Provisional ID Low Register */
+#define R_I3C_SDCTPIDH_OFFSET                     0x00000328  /* Slave Device Characteristic Table Provisional ID High Register */
 /* SVDVAD%s Registers (0-2) */
-#define R_I3C_SVDVAD0_OFFSET     0x00000330  /* Slave Device Address Register 0 */
-#define R_I3C_SVDVAD1_OFFSET     0x00000334  /* Slave Device Address Register 1 */
-#define R_I3C_SVDVAD2_OFFSET     0x00000338  /* Slave Device Address Register 2 */
-#define R_I3C_CSECMD_OFFSET     0x00000350  /* CCC Slave Events Command Register */
-#define R_I3C_CEACTST_OFFSET     0x00000354  /* CCC Enter Activity State Register */
-#define R_I3C_CMWLG_OFFSET     0x00000358  /* CCC Max Write Length Register */
-#define R_I3C_CMRLG_OFFSET     0x0000035c  /* CCC Max Read Length Register */
-#define R_I3C_CETSTMD_OFFSET     0x00000360  /* CCC Enter Test Mode Register */
-#define R_I3C_CGDVST_OFFSET     0x00000364  /* CCC Get Device Status Register */
-#define R_I3C_CMDSPW_OFFSET     0x00000368  /* CCC Max Data Speed W (Write) Register */
-#define R_I3C_CMDSPR_OFFSET     0x0000036c  /* CCC Max Data Speed R (Read) Register */
-#define R_I3C_CMDSPT_OFFSET     0x00000370  /* CCC Max Data Speed T (Turnaround) Register */
-#define R_I3C_CETSM_OFFSET     0x00000374  /* CCC Exchange Timing Support Information M (Mode) Register */
-#define R_I3C_CETSS_OFFSET     0x00000378  /* CCC Exchange Timing Support Information S (State) Register */
-#define R_I3C_CGHDRCAP_OFFSET     0x0000037c  /* CCC Get HDR Capability Register */
-#define R_I3C_BITCNT_OFFSET     0x00000380  /* Bit Count Register */
-#define R_I3C_NQSTLV_OFFSET     0x00000394  /* Normal Queue Status Level Register */
-#define R_I3C_NDBSTLV0_OFFSET     0x00000398  /* Normal Data Buffer Status Level Register 0 */
-#define R_I3C_NRSQSTLV_OFFSET     0x000003c0  /* Normal Receive Status Queue Status Level Register */
-#define R_I3C_HQSTLV_OFFSET     0x000003c4  /* High Priority Queue Status Level Register */
-#define R_I3C_HDBSTLV_OFFSET     0x000003c8  /* High Priority Data Buffer Status Level Register */
-#define R_I3C_PRSTDBG_OFFSET     0x000003cc  /* Present State Debug Register */
-#define R_I3C_MSERRCNT_OFFSET     0x000003d0  /* Master Error Counters Register */
-#define R_I3C_SC1CPT_OFFSET     0x000003e0  /* SC1 Capture Monitor Register */
-#define R_I3C_SC2CPT_OFFSET     0x000003e4  /* SC2 Capture Monitor Register */
+#define R_I3C_SVDVAD_OFFSET(m)                    (0x00000330 + ((m) * 0x00000004))  /* Slave Device Address Register %s */
+#define R_I3C_CSECMD_OFFSET                       0x00000350  /* CCC Slave Events Command Register */
+#define R_I3C_CEACTST_OFFSET                      0x00000354  /* CCC Enter Activity State Register */
+#define R_I3C_CMWLG_OFFSET                        0x00000358  /* CCC Max Write Length Register */
+#define R_I3C_CMRLG_OFFSET                        0x0000035c  /* CCC Max Read Length Register */
+#define R_I3C_CETSTMD_OFFSET                      0x00000360  /* CCC Enter Test Mode Register */
+#define R_I3C_CGDVST_OFFSET                       0x00000364  /* CCC Get Device Status Register */
+#define R_I3C_CMDSPW_OFFSET                       0x00000368  /* CCC Max Data Speed W (Write) Register */
+#define R_I3C_CMDSPR_OFFSET                       0x0000036c  /* CCC Max Data Speed R (Read) Register */
+#define R_I3C_CMDSPT_OFFSET                       0x00000370  /* CCC Max Data Speed T (Turnaround) Register */
+#define R_I3C_CETSM_OFFSET                        0x00000374  /* CCC Exchange Timing Support Information M (Mode) Register */
+#define R_I3C_CETSS_OFFSET                        0x00000378  /* CCC Exchange Timing Support Information S (State) Register */
+#define R_I3C_CGHDRCAP_OFFSET                     0x0000037c  /* CCC Get HDR Capability Register */
+#define R_I3C_BITCNT_OFFSET                       0x00000380  /* Bit Count Register */
+#define R_I3C_NQSTLV_OFFSET                       0x00000394  /* Normal Queue Status Level Register */
+#define R_I3C_NDBSTLV0_OFFSET                     0x00000398  /* Normal Data Buffer Status Level Register 0 */
+#define R_I3C_NRSQSTLV_OFFSET                     0x000003c0  /* Normal Receive Status Queue Status Level Register */
+#define R_I3C_HQSTLV_OFFSET                       0x000003c4  /* High Priority Queue Status Level Register */
+#define R_I3C_HDBSTLV_OFFSET                      0x000003c8  /* High Priority Data Buffer Status Level Register */
+#define R_I3C_PRSTDBG_OFFSET                      0x000003cc  /* Present State Debug Register */
+#define R_I3C_MSERRCNT_OFFSET                     0x000003d0  /* Master Error Counters Register */
+#define R_I3C_SC1CPT_OFFSET                       0x000003e0  /* SC1 Capture Monitor Register */
+#define R_I3C_SC2CPT_OFFSET                       0x000003e4  /* SC2 Capture Monitor Register */
 
 /* I3C Register Addresses */
 
-#define R_I3C_PRTS                 (R_I3C_BASE + R_I3C_PRTS_OFFSET)
-#define R_I3C_CECTL                 (R_I3C_BASE + R_I3C_CECTL_OFFSET)
-#define R_I3C_BCTL                 (R_I3C_BASE + R_I3C_BCTL_OFFSET)
-#define R_I3C_MSDVAD                 (R_I3C_BASE + R_I3C_MSDVAD_OFFSET)
-#define R_I3C_RSTCTL                 (R_I3C_BASE + R_I3C_RSTCTL_OFFSET)
-#define R_I3C_PRSST                 (R_I3C_BASE + R_I3C_PRSST_OFFSET)
-#define R_I3C_INST                 (R_I3C_BASE + R_I3C_INST_OFFSET)
-#define R_I3C_INSTE                 (R_I3C_BASE + R_I3C_INSTE_OFFSET)
-#define R_I3C_INIE                 (R_I3C_BASE + R_I3C_INIE_OFFSET)
-#define R_I3C_INSTFC                 (R_I3C_BASE + R_I3C_INSTFC_OFFSET)
-#define R_I3C_DVCT                 (R_I3C_BASE + R_I3C_DVCT_OFFSET)
-#define R_I3C_IBINCTL                 (R_I3C_BASE + R_I3C_IBINCTL_OFFSET)
-#define R_I3C_BFCTL                 (R_I3C_BASE + R_I3C_BFCTL_OFFSET)
-#define R_I3C_SVCTL                 (R_I3C_BASE + R_I3C_SVCTL_OFFSET)
-#define R_I3C_REFCKCTL                 (R_I3C_BASE + R_I3C_REFCKCTL_OFFSET)
-#define R_I3C_STDBR                 (R_I3C_BASE + R_I3C_STDBR_OFFSET)
-#define R_I3C_EXTBR                 (R_I3C_BASE + R_I3C_EXTBR_OFFSET)
-#define R_I3C_BFRECDT                 (R_I3C_BASE + R_I3C_BFRECDT_OFFSET)
-#define R_I3C_BAVLCDT                 (R_I3C_BASE + R_I3C_BAVLCDT_OFFSET)
-#define R_I3C_BIDLCDT                 (R_I3C_BASE + R_I3C_BIDLCDT_OFFSET)
-#define R_I3C_OUTCTL                 (R_I3C_BASE + R_I3C_OUTCTL_OFFSET)
-#define R_I3C_INCTL                 (R_I3C_BASE + R_I3C_INCTL_OFFSET)
-#define R_I3C_TMOCTL                 (R_I3C_BASE + R_I3C_TMOCTL_OFFSET)
-#define R_I3C_WUCTL                 (R_I3C_BASE + R_I3C_WUCTL_OFFSET)
-#define R_I3C_ACKCTL                 (R_I3C_BASE + R_I3C_ACKCTL_OFFSET)
-#define R_I3C_SCSTRCTL                 (R_I3C_BASE + R_I3C_SCSTRCTL_OFFSET)
-#define R_I3C_SCSTLCTL                 (R_I3C_BASE + R_I3C_SCSTLCTL_OFFSET)
-#define R_I3C_SVTDLG0                 (R_I3C_BASE + R_I3C_SVTDLG0_OFFSET)
-#define R_I3C_STCTL                 (R_I3C_BASE + R_I3C_STCTL_OFFSET)
-#define R_I3C_ATCTL                 (R_I3C_BASE + R_I3C_ATCTL_OFFSET)
-#define R_I3C_ATTRG                 (R_I3C_BASE + R_I3C_ATTRG_OFFSET)
-#define R_I3C_ATCCNTE                 (R_I3C_BASE + R_I3C_ATCCNTE_OFFSET)
-#define R_I3C_CNDCTL                 (R_I3C_BASE + R_I3C_CNDCTL_OFFSET)
-#define R_I3C_NCMDQP                 (R_I3C_BASE + R_I3C_NCMDQP_OFFSET)
-#define R_I3C_NRSPQP                 (R_I3C_BASE + R_I3C_NRSPQP_OFFSET)
-#define R_I3C_NTDTBP0                 (R_I3C_BASE + R_I3C_NTDTBP0_OFFSET)
-#define R_I3C_NTDTBP0_BY                 (R_I3C_BASE + R_I3C_NTDTBP0_BY_OFFSET)
-#define R_I3C_NIBIQP                 (R_I3C_BASE + R_I3C_NIBIQP_OFFSET)
-#define R_I3C_NRSQP                 (R_I3C_BASE + R_I3C_NRSQP_OFFSET)
-#define R_I3C_HCMDQP                 (R_I3C_BASE + R_I3C_HCMDQP_OFFSET)
-#define R_I3C_HRSPQP                 (R_I3C_BASE + R_I3C_HRSPQP_OFFSET)
-#define R_I3C_HTDTBP                 (R_I3C_BASE + R_I3C_HTDTBP_OFFSET)
-#define R_I3C_NQTHCTL                 (R_I3C_BASE + R_I3C_NQTHCTL_OFFSET)
-#define R_I3C_NTBTHCTL0                 (R_I3C_BASE + R_I3C_NTBTHCTL0_OFFSET)
-#define R_I3C_NRQTHCTL                 (R_I3C_BASE + R_I3C_NRQTHCTL_OFFSET)
-#define R_I3C_HQTHCTL                 (R_I3C_BASE + R_I3C_HQTHCTL_OFFSET)
-#define R_I3C_HTBTHCTL                 (R_I3C_BASE + R_I3C_HTBTHCTL_OFFSET)
-#define R_I3C_BST                 (R_I3C_BASE + R_I3C_BST_OFFSET)
-#define R_I3C_BSTE                 (R_I3C_BASE + R_I3C_BSTE_OFFSET)
-#define R_I3C_BIE                 (R_I3C_BASE + R_I3C_BIE_OFFSET)
-#define R_I3C_BSTFC                 (R_I3C_BASE + R_I3C_BSTFC_OFFSET)
-#define R_I3C_NTST                 (R_I3C_BASE + R_I3C_NTST_OFFSET)
-#define R_I3C_NTSTE                 (R_I3C_BASE + R_I3C_NTSTE_OFFSET)
-#define R_I3C_NTIE                 (R_I3C_BASE + R_I3C_NTIE_OFFSET)
-#define R_I3C_NTSTFC                 (R_I3C_BASE + R_I3C_NTSTFC_OFFSET)
-#define R_I3C_HTST                 (R_I3C_BASE + R_I3C_HTST_OFFSET)
-#define R_I3C_HTSTE                 (R_I3C_BASE + R_I3C_HTSTE_OFFSET)
-#define R_I3C_HTIE                 (R_I3C_BASE + R_I3C_HTIE_OFFSET)
-#define R_I3C_HTSTFC                 (R_I3C_BASE + R_I3C_HTSTFC_OFFSET)
-#define R_I3C_BCST                 (R_I3C_BASE + R_I3C_BCST_OFFSET)
-#define R_I3C_SVST                 (R_I3C_BASE + R_I3C_SVST_OFFSET)
-#define R_I3C_WUST                 (R_I3C_BASE + R_I3C_WUST_OFFSET)
-#define R_I3C_MRCCPT                 (R_I3C_BASE + R_I3C_MRCCPT_OFFSET)
-#define R_I3C_DATBAS0                 (R_I3C_BASE + R_I3C_DATBAS0_OFFSET)
-#define R_I3C_DATBAS1                 (R_I3C_BASE + R_I3C_DATBAS1_OFFSET)
-#define R_I3C_DATBAS2                 (R_I3C_BASE + R_I3C_DATBAS2_OFFSET)
-#define R_I3C_DATBAS3                 (R_I3C_BASE + R_I3C_DATBAS3_OFFSET)
-#define R_I3C_DATBAS4                 (R_I3C_BASE + R_I3C_DATBAS4_OFFSET)
-#define R_I3C_DATBAS5                 (R_I3C_BASE + R_I3C_DATBAS5_OFFSET)
-#define R_I3C_DATBAS6                 (R_I3C_BASE + R_I3C_DATBAS6_OFFSET)
-#define R_I3C_DATBAS7                 (R_I3C_BASE + R_I3C_DATBAS7_OFFSET)
-#define R_I3C_EXDATBAS                 (R_I3C_BASE + R_I3C_EXDATBAS_OFFSET)
-#define R_I3C_SDATBAS0                 (R_I3C_BASE + R_I3C_SDATBAS0_OFFSET)
-#define R_I3C_SDATBAS1                 (R_I3C_BASE + R_I3C_SDATBAS1_OFFSET)
-#define R_I3C_SDATBAS2                 (R_I3C_BASE + R_I3C_SDATBAS2_OFFSET)
-#define R_I3C_MSDCT0                 (R_I3C_BASE + R_I3C_MSDCT0_OFFSET)
-#define R_I3C_MSDCT1                 (R_I3C_BASE + R_I3C_MSDCT1_OFFSET)
-#define R_I3C_MSDCT2                 (R_I3C_BASE + R_I3C_MSDCT2_OFFSET)
-#define R_I3C_MSDCT3                 (R_I3C_BASE + R_I3C_MSDCT3_OFFSET)
-#define R_I3C_MSDCT4                 (R_I3C_BASE + R_I3C_MSDCT4_OFFSET)
-#define R_I3C_MSDCT5                 (R_I3C_BASE + R_I3C_MSDCT5_OFFSET)
-#define R_I3C_MSDCT6                 (R_I3C_BASE + R_I3C_MSDCT6_OFFSET)
-#define R_I3C_MSDCT7                 (R_I3C_BASE + R_I3C_MSDCT7_OFFSET)
-#define R_I3C_SVDCT                 (R_I3C_BASE + R_I3C_SVDCT_OFFSET)
-#define R_I3C_SDCTPIDL                 (R_I3C_BASE + R_I3C_SDCTPIDL_OFFSET)
-#define R_I3C_SDCTPIDH                 (R_I3C_BASE + R_I3C_SDCTPIDH_OFFSET)
-#define R_I3C_SVDVAD0                 (R_I3C_BASE + R_I3C_SVDVAD0_OFFSET)
-#define R_I3C_SVDVAD1                 (R_I3C_BASE + R_I3C_SVDVAD1_OFFSET)
-#define R_I3C_SVDVAD2                 (R_I3C_BASE + R_I3C_SVDVAD2_OFFSET)
-#define R_I3C_CSECMD                 (R_I3C_BASE + R_I3C_CSECMD_OFFSET)
-#define R_I3C_CEACTST                 (R_I3C_BASE + R_I3C_CEACTST_OFFSET)
-#define R_I3C_CMWLG                 (R_I3C_BASE + R_I3C_CMWLG_OFFSET)
-#define R_I3C_CMRLG                 (R_I3C_BASE + R_I3C_CMRLG_OFFSET)
-#define R_I3C_CETSTMD                 (R_I3C_BASE + R_I3C_CETSTMD_OFFSET)
-#define R_I3C_CGDVST                 (R_I3C_BASE + R_I3C_CGDVST_OFFSET)
-#define R_I3C_CMDSPW                 (R_I3C_BASE + R_I3C_CMDSPW_OFFSET)
-#define R_I3C_CMDSPR                 (R_I3C_BASE + R_I3C_CMDSPR_OFFSET)
-#define R_I3C_CMDSPT                 (R_I3C_BASE + R_I3C_CMDSPT_OFFSET)
-#define R_I3C_CETSM                 (R_I3C_BASE + R_I3C_CETSM_OFFSET)
-#define R_I3C_CETSS                 (R_I3C_BASE + R_I3C_CETSS_OFFSET)
-#define R_I3C_CGHDRCAP                 (R_I3C_BASE + R_I3C_CGHDRCAP_OFFSET)
-#define R_I3C_BITCNT                 (R_I3C_BASE + R_I3C_BITCNT_OFFSET)
-#define R_I3C_NQSTLV                 (R_I3C_BASE + R_I3C_NQSTLV_OFFSET)
-#define R_I3C_NDBSTLV0                 (R_I3C_BASE + R_I3C_NDBSTLV0_OFFSET)
-#define R_I3C_NRSQSTLV                 (R_I3C_BASE + R_I3C_NRSQSTLV_OFFSET)
-#define R_I3C_HQSTLV                 (R_I3C_BASE + R_I3C_HQSTLV_OFFSET)
-#define R_I3C_HDBSTLV                 (R_I3C_BASE + R_I3C_HDBSTLV_OFFSET)
-#define R_I3C_PRSTDBG                 (R_I3C_BASE + R_I3C_PRSTDBG_OFFSET)
-#define R_I3C_MSERRCNT                 (R_I3C_BASE + R_I3C_MSERRCNT_OFFSET)
-#define R_I3C_SC1CPT                 (R_I3C_BASE + R_I3C_SC1CPT_OFFSET)
-#define R_I3C_SC2CPT                 (R_I3C_BASE + R_I3C_SC2CPT_OFFSET)
+#define R_I3C_PRTS                                (R_I3C_BASE + R_I3C_PRTS_OFFSET)
+#define R_I3C_CECTL                               (R_I3C_BASE + R_I3C_CECTL_OFFSET)
+#define R_I3C_BCTL                                (R_I3C_BASE + R_I3C_BCTL_OFFSET)
+#define R_I3C_MSDVAD                              (R_I3C_BASE + R_I3C_MSDVAD_OFFSET)
+#define R_I3C_RSTCTL                              (R_I3C_BASE + R_I3C_RSTCTL_OFFSET)
+#define R_I3C_PRSST                               (R_I3C_BASE + R_I3C_PRSST_OFFSET)
+#define R_I3C_INST                                (R_I3C_BASE + R_I3C_INST_OFFSET)
+#define R_I3C_INSTE                               (R_I3C_BASE + R_I3C_INSTE_OFFSET)
+#define R_I3C_INIE                                (R_I3C_BASE + R_I3C_INIE_OFFSET)
+#define R_I3C_INSTFC                              (R_I3C_BASE + R_I3C_INSTFC_OFFSET)
+#define R_I3C_DVCT                                (R_I3C_BASE + R_I3C_DVCT_OFFSET)
+#define R_I3C_IBINCTL                             (R_I3C_BASE + R_I3C_IBINCTL_OFFSET)
+#define R_I3C_BFCTL                               (R_I3C_BASE + R_I3C_BFCTL_OFFSET)
+#define R_I3C_SVCTL                               (R_I3C_BASE + R_I3C_SVCTL_OFFSET)
+#define R_I3C_REFCKCTL                            (R_I3C_BASE + R_I3C_REFCKCTL_OFFSET)
+#define R_I3C_STDBR                               (R_I3C_BASE + R_I3C_STDBR_OFFSET)
+#define R_I3C_EXTBR                               (R_I3C_BASE + R_I3C_EXTBR_OFFSET)
+#define R_I3C_BFRECDT                             (R_I3C_BASE + R_I3C_BFRECDT_OFFSET)
+#define R_I3C_BAVLCDT                             (R_I3C_BASE + R_I3C_BAVLCDT_OFFSET)
+#define R_I3C_BIDLCDT                             (R_I3C_BASE + R_I3C_BIDLCDT_OFFSET)
+#define R_I3C_OUTCTL                              (R_I3C_BASE + R_I3C_OUTCTL_OFFSET)
+#define R_I3C_INCTL                               (R_I3C_BASE + R_I3C_INCTL_OFFSET)
+#define R_I3C_TMOCTL                              (R_I3C_BASE + R_I3C_TMOCTL_OFFSET)
+#define R_I3C_WUCTL                               (R_I3C_BASE + R_I3C_WUCTL_OFFSET)
+#define R_I3C_ACKCTL                              (R_I3C_BASE + R_I3C_ACKCTL_OFFSET)
+#define R_I3C_SCSTRCTL                            (R_I3C_BASE + R_I3C_SCSTRCTL_OFFSET)
+#define R_I3C_SCSTLCTL                            (R_I3C_BASE + R_I3C_SCSTLCTL_OFFSET)
+#define R_I3C_SVTDLG0                             (R_I3C_BASE + R_I3C_SVTDLG0_OFFSET)
+#define R_I3C_STCTL                               (R_I3C_BASE + R_I3C_STCTL_OFFSET)
+#define R_I3C_ATCTL                               (R_I3C_BASE + R_I3C_ATCTL_OFFSET)
+#define R_I3C_ATTRG                               (R_I3C_BASE + R_I3C_ATTRG_OFFSET)
+#define R_I3C_ATCCNTE                             (R_I3C_BASE + R_I3C_ATCCNTE_OFFSET)
+#define R_I3C_CNDCTL                              (R_I3C_BASE + R_I3C_CNDCTL_OFFSET)
+#define R_I3C_NCMDQP                              (R_I3C_BASE + R_I3C_NCMDQP_OFFSET)
+#define R_I3C_NRSPQP                              (R_I3C_BASE + R_I3C_NRSPQP_OFFSET)
+#define R_I3C_NTDTBP0                             (R_I3C_BASE + R_I3C_NTDTBP0_OFFSET)
+#define R_I3C_NTDTBP0_BY                          (R_I3C_BASE + R_I3C_NTDTBP0_BY_OFFSET)
+#define R_I3C_NIBIQP                              (R_I3C_BASE + R_I3C_NIBIQP_OFFSET)
+#define R_I3C_NRSQP                               (R_I3C_BASE + R_I3C_NRSQP_OFFSET)
+#define R_I3C_HCMDQP                              (R_I3C_BASE + R_I3C_HCMDQP_OFFSET)
+#define R_I3C_HRSPQP                              (R_I3C_BASE + R_I3C_HRSPQP_OFFSET)
+#define R_I3C_HTDTBP                              (R_I3C_BASE + R_I3C_HTDTBP_OFFSET)
+#define R_I3C_NQTHCTL                             (R_I3C_BASE + R_I3C_NQTHCTL_OFFSET)
+#define R_I3C_NTBTHCTL0                           (R_I3C_BASE + R_I3C_NTBTHCTL0_OFFSET)
+#define R_I3C_NRQTHCTL                            (R_I3C_BASE + R_I3C_NRQTHCTL_OFFSET)
+#define R_I3C_HQTHCTL                             (R_I3C_BASE + R_I3C_HQTHCTL_OFFSET)
+#define R_I3C_HTBTHCTL                            (R_I3C_BASE + R_I3C_HTBTHCTL_OFFSET)
+#define R_I3C_BST                                 (R_I3C_BASE + R_I3C_BST_OFFSET)
+#define R_I3C_BSTE                                (R_I3C_BASE + R_I3C_BSTE_OFFSET)
+#define R_I3C_BIE                                 (R_I3C_BASE + R_I3C_BIE_OFFSET)
+#define R_I3C_BSTFC                               (R_I3C_BASE + R_I3C_BSTFC_OFFSET)
+#define R_I3C_NTST                                (R_I3C_BASE + R_I3C_NTST_OFFSET)
+#define R_I3C_NTSTE                               (R_I3C_BASE + R_I3C_NTSTE_OFFSET)
+#define R_I3C_NTIE                                (R_I3C_BASE + R_I3C_NTIE_OFFSET)
+#define R_I3C_NTSTFC                              (R_I3C_BASE + R_I3C_NTSTFC_OFFSET)
+#define R_I3C_HTST                                (R_I3C_BASE + R_I3C_HTST_OFFSET)
+#define R_I3C_HTSTE                               (R_I3C_BASE + R_I3C_HTSTE_OFFSET)
+#define R_I3C_HTIE                                (R_I3C_BASE + R_I3C_HTIE_OFFSET)
+#define R_I3C_HTSTFC                              (R_I3C_BASE + R_I3C_HTSTFC_OFFSET)
+#define R_I3C_BCST                                (R_I3C_BASE + R_I3C_BCST_OFFSET)
+#define R_I3C_SVST                                (R_I3C_BASE + R_I3C_SVST_OFFSET)
+#define R_I3C_WUST                                (R_I3C_BASE + R_I3C_WUST_OFFSET)
+#define R_I3C_MRCCPT                              (R_I3C_BASE + R_I3C_MRCCPT_OFFSET)
+#define R_I3C_DATBAS(m)                           (R_I3C_BASE + R_I3C_DATBAS_OFFSET(m))
+#define R_I3C_EXDATBAS                            (R_I3C_BASE + R_I3C_EXDATBAS_OFFSET)
+#define R_I3C_SDATBAS(m)                          (R_I3C_BASE + R_I3C_SDATBAS_OFFSET(m))
+#define R_I3C_MSDCT(m)                            (R_I3C_BASE + R_I3C_MSDCT_OFFSET(m))
+#define R_I3C_SVDCT                               (R_I3C_BASE + R_I3C_SVDCT_OFFSET)
+#define R_I3C_SDCTPIDL                            (R_I3C_BASE + R_I3C_SDCTPIDL_OFFSET)
+#define R_I3C_SDCTPIDH                            (R_I3C_BASE + R_I3C_SDCTPIDH_OFFSET)
+#define R_I3C_SVDVAD(m)                           (R_I3C_BASE + R_I3C_SVDVAD_OFFSET(m))
+#define R_I3C_CSECMD                              (R_I3C_BASE + R_I3C_CSECMD_OFFSET)
+#define R_I3C_CEACTST                             (R_I3C_BASE + R_I3C_CEACTST_OFFSET)
+#define R_I3C_CMWLG                               (R_I3C_BASE + R_I3C_CMWLG_OFFSET)
+#define R_I3C_CMRLG                               (R_I3C_BASE + R_I3C_CMRLG_OFFSET)
+#define R_I3C_CETSTMD                             (R_I3C_BASE + R_I3C_CETSTMD_OFFSET)
+#define R_I3C_CGDVST                              (R_I3C_BASE + R_I3C_CGDVST_OFFSET)
+#define R_I3C_CMDSPW                              (R_I3C_BASE + R_I3C_CMDSPW_OFFSET)
+#define R_I3C_CMDSPR                              (R_I3C_BASE + R_I3C_CMDSPR_OFFSET)
+#define R_I3C_CMDSPT                              (R_I3C_BASE + R_I3C_CMDSPT_OFFSET)
+#define R_I3C_CETSM                               (R_I3C_BASE + R_I3C_CETSM_OFFSET)
+#define R_I3C_CETSS                               (R_I3C_BASE + R_I3C_CETSS_OFFSET)
+#define R_I3C_CGHDRCAP                            (R_I3C_BASE + R_I3C_CGHDRCAP_OFFSET)
+#define R_I3C_BITCNT                              (R_I3C_BASE + R_I3C_BITCNT_OFFSET)
+#define R_I3C_NQSTLV                              (R_I3C_BASE + R_I3C_NQSTLV_OFFSET)
+#define R_I3C_NDBSTLV0                            (R_I3C_BASE + R_I3C_NDBSTLV0_OFFSET)
+#define R_I3C_NRSQSTLV                            (R_I3C_BASE + R_I3C_NRSQSTLV_OFFSET)
+#define R_I3C_HQSTLV                              (R_I3C_BASE + R_I3C_HQSTLV_OFFSET)
+#define R_I3C_HDBSTLV                             (R_I3C_BASE + R_I3C_HDBSTLV_OFFSET)
+#define R_I3C_PRSTDBG                             (R_I3C_BASE + R_I3C_PRSTDBG_OFFSET)
+#define R_I3C_MSERRCNT                            (R_I3C_BASE + R_I3C_MSERRCNT_OFFSET)
+#define R_I3C_SC1CPT                              (R_I3C_BASE + R_I3C_SC1CPT_OFFSET)
+#define R_I3C_SC2CPT                              (R_I3C_BASE + R_I3C_SC2CPT_OFFSET)
 
 /* Register bit definitions */
 /* PRTS Register bit definitions */
@@ -962,10 +922,10 @@
 /* CEACTST Register bit definitions */
 #define R_I3C_CEACTST_ACTST_SHIFT                 (0)  /* Activity State */
 #define R_I3C_CEACTST_ACTST_MASK                  0xf
-#  define R_I3C_CEACTST_ACTST_0X1                         (0 << R_I3C_CEACTST_ACTST_SHIFT)  /* ENTAS0 (1µs: Latency-free operation) */
-#  define R_I3C_CEACTST_ACTST_0X2                         (0 << R_I3C_CEACTST_ACTST_SHIFT)  /* ENTAS1 (100 µs) */
-#  define R_I3C_CEACTST_ACTST_0X4                         (0 << R_I3C_CEACTST_ACTST_SHIFT)  /* ENTAS2 (2 ms) */
-#  define R_I3C_CEACTST_ACTST_0X8                         (0 << R_I3C_CEACTST_ACTST_SHIFT)  /* ENTAS3 (50 ms: Lowest-activity operation) */
+#  define R_I3C_CEACTST_ACTST_0X1                         (1 << R_I3C_CEACTST_ACTST_SHIFT)  /* ENTAS0 (1µs: Latency-free operation) */
+#  define R_I3C_CEACTST_ACTST_0X2                         (2 << R_I3C_CEACTST_ACTST_SHIFT)  /* ENTAS1 (100 µs) */
+#  define R_I3C_CEACTST_ACTST_0X4                         (4 << R_I3C_CEACTST_ACTST_SHIFT)  /* ENTAS2 (2 ms) */
+#  define R_I3C_CEACTST_ACTST_0X8                         (8 << R_I3C_CEACTST_ACTST_SHIFT)  /* ENTAS3 (50 ms: Lowest-activity operation) */
 
 /* CMWLG Register bit definitions */
 #define R_I3C_CMWLG_MWLG_SHIFT                    (0)  /* Max Write Length */
@@ -982,7 +942,7 @@
 #define R_I3C_CETSTMD_TSTMD_SHIFT                 (0)  /* Test Mode */
 #define R_I3C_CETSTMD_TSTMD_MASK                  0xff
 #  define R_I3C_CETSTMD_TSTMD_0X00                        (0 << R_I3C_CETSTMD_TSTMD_SHIFT)  /* Exit Test Mode This value removes all I3C devices from Test Mode.  */
-#  define R_I3C_CETSTMD_TSTMD_0X01                        (0 << R_I3C_CETSTMD_TSTMD_SHIFT)  /* Vendor Test Mode This value indicates that I3C devices shall return a random 32bit value in the provisional ID during the Dynamic Address Assignment procedure.  */
+#  define R_I3C_CETSTMD_TSTMD_0X01                        (1 << R_I3C_CETSTMD_TSTMD_SHIFT)  /* Vendor Test Mode This value indicates that I3C devices shall return a random 32bit value in the provisional ID during the Dynamic Address Assignment procedure.  */
 
 /* CGDVST Register bit definitions */
 #define R_I3C_CGDVST_PNDINT_SHIFT                 (0)  /* Pending Interrupt */
