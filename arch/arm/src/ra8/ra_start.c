@@ -83,9 +83,9 @@ extern uint32_t _vectors[]; /* See arm_vectors.S */
 #define RA_CCR_CACHE_ENABLE        (0x000E0201) /* Enable instruction cache, branch prediction and LOB extension */
 
 /* PRCR register unlock keys */
-#define RA_PRCR_KEY                (0xA500U)
-#define RA_PRCR_PRC1_UNLOCK        ((RA_PRCR_KEY) | 0x2U)
-#define RA_PRCR_LOCK               ((RA_PRCR_KEY) | 0x0U)
+#define R_SYSC_PRCR_S_KEY                (0xA500U)
+#define RA_PRCR_PRC1_UNLOCK        ((R_SYSC_PRCR_S_KEY) | 0x2U)
+#define RA_PRCR_LOCK               ((R_SYSC_PRCR_S_KEY) | 0x0U)
 
 /* We use RA_ prefixed macros from ra_start.h to avoid duplicate definitions */
 /* Any usage of macros in this file should be converted to RA_ equivalents */
@@ -760,7 +760,7 @@ void ra_register_protect_enable(ra_reg_protect_t regs_to_protect)
   if (g_register_protect_counters[regs_to_protect] == 0)
     {
       uint16_t prcr_value = getreg16(R_SYSC_PRCR_S);
-      prcr_value = (prcr_value | RA_PRCR_KEY) &
+      prcr_value = (prcr_value | R_SYSC_PRCR_S_KEY) &
                    (~prcr_masks[regs_to_protect]);
       putreg16(prcr_value, R_SYSC_PRCR_S);
     }
@@ -790,7 +790,7 @@ void ra_register_protect_disable(ra_reg_protect_t regs_to_unprotect)
   if (g_register_protect_counters[regs_to_unprotect] == 0)
     {
       uint16_t prcr_value = getreg16(R_SYSC_PRCR_S);
-      prcr_value = (prcr_value | RA_PRCR_KEY) |
+      prcr_value = (prcr_value | R_SYSC_PRCR_S_KEY) |
                    prcr_masks[regs_to_unprotect];
       putreg16(prcr_value, R_SYSC_PRCR_S);
     }

@@ -633,11 +633,4 @@
 #  endif
 #endif
 
-/* Key code for writing PRCR register. */
-#define RA_PRCR_KEY            (0xA500U)
-#define RA_PRCR_PRC1_UNLOCK    ((RA_PRCR_KEY) | 0x2U)
-#define RA_PRCR_UNLOCK         ((RA_PRCR_KEY) | 0x3U)
-#define RA_PRCR_LOCK           ((RA_PRCR_KEY) | 0x0U)
-
-
 #endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_CLOCK_H */

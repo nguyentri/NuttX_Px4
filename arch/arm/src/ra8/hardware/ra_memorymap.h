@@ -27,7 +27,7 @@
 
 #include <nuttx/config.h>
 #include "chip.h"
-#include "hardware/ra_memorymap.h"
+#include "hardware/ra_hardware.h"
 
 /* Include all hardware-dependent headers for the RA8 families here so
  * driver sources can simply include "chip.h" and get the correct
@@ -41,7 +41,6 @@
 #  include "hardware/ra8e1/ra_cac.h"
 #  include "hardware/ra8e1/ra_canfd.h"
 #  include "hardware/ra8e1/ra_ceu.h"
-#  include "hardware/ra8e1/ra_clock.h"
 #  include "hardware/ra8e1/ra_cpscu.h"
 #  include "hardware/ra8e1/ra_cpu_ctrl.h"
 #  include "hardware/ra8e1/ra_cpu_dbg.h"
@@ -69,7 +68,6 @@
 #  include "hardware/ra8e1/ra_ocd_cpu.h"
 #  include "hardware/ra8e1/ra_ospi_b.h"
 #  include "hardware/ra8e1/ra_pfs.h"
-#  include "hardware/ra8e1/ra_pinmap.h"
 #  include "hardware/ra8e1/ra_poeg.h"
 #  include "hardware/ra8e1/ra_port.h"
 #  include "hardware/ra8e1/ra_pscu.h"
@@ -94,7 +92,6 @@
 #  include "hardware/ra8p1/ra_cache.h"
 #  include "hardware/ra8p1/ra_canfd.h"
 #  include "hardware/ra8p1/ra_ceu.h"
-#  include "hardware/ra8p1/ra_clock.h"
 #  include "hardware/ra8p1/ra_coma.h"
 #  include "hardware/ra8p1/ra_cpscu.h"
 #  include "hardware/ra8p1/ra_cpu_ctrl.h"
@@ -139,7 +136,6 @@
 #  include "hardware/ra8p1/ra_pdg.h"
 #  include "hardware/ra8p1/ra_pdmif.h"
 #  include "hardware/ra8p1/ra_pfs.h"
-#  include "hardware/ra8p1/ra_pinmap.h"
 #  include "hardware/ra8p1/ra_poeg.h"
 #  include "hardware/ra8p1/ra_port.h"
 #  include "hardware/ra8p1/ra_pscu.h"

@@ -38,6 +38,7 @@
 #include "nvic.h"
 #include "chip.h"
 #include "arm_internal.h"
+#include "ra_clock.h"
 #include "hardware/ra_memorymap.h"
 
 /****************************************************************************

@@ -32,53 +32,23 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/mutex.h>
+
 #include <arch/board/board.h>
 #include <arch/irq.h>
 
 #include "arm_internal.h"
 #include "chip.h"
+#include "hardware/ra_memorymap.h"
 #include "ra_start.h"
 #include "ra_gpio.h"
 #include "ra_icu.h"
 
-
-/* Register Bitfield Definitions ********************************************/
-
-/* PFS - Pmn Pin Function Control Register */
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 #define R_PFS_PSEL_SHIFT_HW           (24)   /* Hardware PSEL position in PFS register at 28:24 */
-
-/* GPIO Configuration Bit Fields for cfg field in gpio_pinset_t struct */
-/* These align with the R_PFS_* bit positions for direct use */
-/* Note: R_PFS_* macros are already bit masks, not bit positions */
-
-#define GPIO_CFG_OUTPUT                R_PFS_PDR          /* Output direction (bit 2) */
-#define GPIO_CFG_PULLUP                R_PFS_PCR          /* Enable pull-up (bit 4) */
-#define GPIO_CFG_OPENDRAIN             R_PFS_NCODR        /* Open-drain output (bit 6) */
-#define GPIO_CFG_DRIVE_MID             R_PFS_DSCR_01      /* Mid drive strength */
-#define GPIO_CFG_DRIVE_HIGH            R_PFS_DSCR_11      /* High drive */
-#define GPIO_CFG_ANALOG                R_PFS_ASEL         /* Analog mode (bit 15) */
-#define GPIO_CFG_IRQ                   R_PFS_ISEL         /* IRQ input enable (bit 14) */
-#define GPIO_CFG_PERIPHERAL            R_PFS_PMR          /* Peripheral mode (bit 16) */
-
-/* Macros to extract fields from gpio_pinset_t
- * New encoding to avoid conflict with pin map definitions:
- * Bits 31-28: Port number (4 bits, supports ports 0-15)
- * Bits 27-24: Pin number (4 bits, supports pins 0-15)
- * Bits 23-0:  Configuration (24 bits for flags and PSEL)
- */
-#define GPIO_PORT_MASK                  (0xF0000000UL)
-#define GPIO_PIN_MASK                   (0x0F000000UL)
-#define GPIO_CFG_MASK                   (0x00FFFFFFUL)
-
-#define GPIO_PORT_SHIFT                 (28)
-#define GPIO_PIN_SHIFT                  (24)
-#define GPIO_CFG_SHIFT                  (0)
-
-#define GPIO_GET_PORT(pinset)           (((pinset) & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT)
-#define GPIO_GET_PIN(pinset)            (((pinset) & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT)
-#define GPIO_GET_CFG(pinset)            ((pinset) & GPIO_CFG_MASK)
-
 
 /****************************************************************************
  * Private Data
@@ -283,26 +253,25 @@ static uint32_t ra_gpio_get_pfs_config(gpio_pinset_t cfgset)
 
 static int ra_gpio_find_irq_for_pin(gpio_pinset_t pinset)
 {
-  uint16_t cfg = GPIO_GET_CFG(pinset);
+  uint32_t cfg = GPIO_GET_CFG(pinset);
 
-  /* Check if this pin is configured for IRQ functionality */
+  /* Check if this pin is configured for IRQ/input-selection */
   if (!(cfg & R_PFS_ISEL))
     {
       /* Pin is not configured for external interrupts */
       return -1;
     }
 
-  /* Extract IRQ number from lower 5 bits (bits 0-4) */
-  /* IRQ numbers 0-15 fit in 4 bits, but we use 5 bits for safety */
-  int irq_num = cfg & 0x1F;
-
-  /* Validate IRQ number range */
-  if (irq_num > 15)
+  /* EXINT channel on RA devices is determined by the pin number (Pm0 -> EXINT0, Pm1 -> EXINT1, etc.)
+   * Return the pin index (0..15) as the external IRQ channel.
+   */
+  int pin = GPIO_GET_PIN(pinset);
+  if (pin < 0 || pin > 15)
     {
       return -1;
     }
 
-  return irq_num;
+  return pin;
 }
 
 /****************************************************************************
@@ -556,11 +525,11 @@ void ra_gpio_set_direction(gpio_pinset_t pinset, bool direction)
   pfs_value = getreg32(pfs_addr);
   if (direction)
     {
-      pfs_value |= (1 << R_PFS_PDR);  /* Output */
+      pfs_value |= R_PFS_PDR;  /* Output */
     }
   else
     {
-      pfs_value &= ~(1 << R_PFS_PDR); /* Input */
+      pfs_value &= ~R_PFS_PDR; /* Input */
     }
   putreg32(pfs_value, pfs_addr);
 
@@ -606,11 +575,11 @@ void ra_gpio_set_pullup(gpio_pinset_t pinset, bool enable)
   pfs_value = getreg32(pfs_addr);
   if (enable)
     {
-      pfs_value |= (1 << R_PFS_PCR);  /* Enable pull-up */
+      pfs_value |= R_PFS_PCR;  /* Enable pull-up */
     }
   else
     {
-      pfs_value &= ~(1 << R_PFS_PCR); /* Disable pull-up */
+      pfs_value &= ~R_PFS_PCR; /* Disable pull-up */
     }
   putreg32(pfs_value, pfs_addr);
 

@@ -25,18 +25,43 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <stdint.h>
-#include <stdbool.h>
-#include <nuttx/irq.h>
-
-#include "chip.h"
+#include "hardware/ra_pinmap.h"
 #include "hardware/ra_memorymap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* GPIO Configuration Bit Fields for cfg field in gpio_pinset_t struct */
+/* These align with the R_PFS_* bit positions for direct use */
+/* Note: R_PFS_* macros are already bit masks, not bit positions */
+
+#define GPIO_CFG_OUTPUT                GPIO_OUTPUT         /* Output direction */
+#define GPIO_CFG_INPUT                 (0)                 /* Input (default) */
+#define GPIO_CFG_PULLUP                GPIO_INPUT          /* Enable pull-up */
+#define GPIO_CFG_OPENDRAIN             GPIO_OPENDRAIN      /* Open-drain output */
+#define GPIO_CFG_DRIVE_LOW             GPIO_DRIVE_LOW      /* Low drive strength */
+#define GPIO_CFG_DRIVE_MID             GPIO_DRIVE_MID      /* Mid drive strength */
+#define GPIO_CFG_DRIVE_HIGH            GPIO_DRIVE_HIGH     /* High drive strength */
+#define GPIO_CFG_ANALOG                GPIO_ANALOG         /* Analog mode */
+#define GPIO_CFG_IRQ                   GPIO_IRQ            /* IRQ input enable */
+#define GPIO_CFG_PERIPHERAL            GPIO_PERIPHERAL     /* Peripheral mode (PMR) */
+#define GPIO_CFG_OUTPUT_HIGH           GPIO_OUTPUT_HIGH    /* Output high */
+#define GPIO_CFG_OUTPUT_LOW            (0)                 /* Output low (default) */
+
+/* Macros to extract fields from gpio_pinset_t */
+#define GPIO_PORT_MASK                  (0xF0000000UL)
+#define GPIO_PIN_MASK                   (0x0F000000UL)
+#define GPIO_CFG_MASK                   (0x00FFFFFFUL)
+
+#define GPIO_PORT_SHIFT                 (28)
+#define GPIO_PIN_SHIFT                  (24)
+#define GPIO_CFG_SHIFT                  (0)
+
+#define GPIO_GET_PORT(pinset)           (((pinset) & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT)
+#define GPIO_GET_PIN(pinset)            (((pinset) & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT)
+#define GPIO_GET_CFG(pinset)            ((pinset) & GPIO_CFG_MASK)
+
 
 /****************************************************************************
  * Public Function Prototypes
@@ -53,19 +78,19 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* Must be big enough to hold the 32-bit encoding */
-
+/*
+ * Pin map definitions:
+ * Bits 31-28: Port number (4 bits, supports ports 0-15)
+ * Bits 27-24: Pin number (4 bits, supports pins 0-15)
+ * Bits 23-0:  Configuration (24 bits for flags and PSEL)
+ */
 typedef uint32_t gpio_pinset_t;
 
-
-/* Publication GPIO Pin Configuration Macro */
-
-#define GPIO_PIN_CFG(port, pin, cfg)      \
-  {                                       \
-    .port = (port),                       \
-    .pin = (pin),                         \
-    .cfg = (cfg)                          \
-  }
+/* Publication GPIO Pin Configuration Macro
+ * Encode a 32-bit gpio_pinset_t from port, pin and cfg components.
+ */
+#define GPIO_PIN_CFG(port, pin, cfg) \
+  ((gpio_pinset_t)(((port) & GPIO_PORT_MASK) | ((pin) & GPIO_PIN_MASK) | ((cfg) & GPIO_CFG_MASK)))
 
 /* Common GPIO Pin Configurations */
 
