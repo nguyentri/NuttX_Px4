@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/ra8/hardware/ra8p1/ra_fcache.h
+ * arch/arm/src/ra8/hardware/ra8e1/ra_fcache.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_FCACHE_H
-#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_FCACHE_H
+#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_FCACHE_H
+#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_FCACHE_H
 
 /****************************************************************************
  * Included Files
@@ -37,8 +37,6 @@
 #define R_FCACHE_BASE           0x5001c100
 #endif
 #endif
-
-#define R_FCACHE_CH_BASE(ch)   (R_FCACHE_BASE + ((uint32_t)(ch) * R_FCACHE_CH_STRIDE))
 
 /* FCACHE Register Offsets */
 
@@ -89,4 +87,4 @@
 
 #define FCACHE_MAX_CHANNELS    1
 
-#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_FCACHE_H */
+#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_FCACHE_H */

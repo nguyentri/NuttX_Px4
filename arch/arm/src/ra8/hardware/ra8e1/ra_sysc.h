@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/ra8/hardware/ra8p1/ra_sysc.h
+ * arch/arm/src/ra8/hardware/ra8e1/ra_sysc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_SYSC_H
-#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_SYSC_H
+#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_SYSC_H
+#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_SYSC_H
 
 /****************************************************************************
  * Included Files
@@ -37,10 +37,6 @@
 #define R_SYSC_BASE           0x5001e000
 #endif
 #endif
-
-/* Channel stride for multi-channel peripherals */
-#define R_SYSC_CH_STRIDE    0x00000002
-#define R_SYSC_CH_BASE(ch)   (R_SYSC_BASE + ((uint32_t)(ch) * R_SYSC_CH_STRIDE))
 
 /* SYSC Register Offsets */
 
@@ -84,11 +80,9 @@
 #define R_SYSC_RSTSR1_OFFSET                      0x000000c0  /* Reset Status Register 1 */
 #define R_SYSC_SYRACCR_OFFSET                     0x000000cc  /* System Register Access Control Register */
 /* PVD%sCR1 Registers (1-2) */
-#define R_SYSC_PVDCR1_OFFSET                      0x000000e0  /* Voltage Monitor %s Circuit Control Register 1 */
-#define R_SYSC_PVDCR1_INCREMENT                   0x00000002
+#define R_SYSC_PVDCR1_OFFSET(m)                   (0x000000e0 + ((m) * 0x00000002))  /* Voltage Monitor %s Circuit Control Register 1 */
 /* PVD%sSR Registers (1-2) */
-#define R_SYSC_PVDSR_OFFSET                       0x000000e1  /* Voltage Monitor %s Circuit Status Register */
-#define R_SYSC_PVDSR_INCREMENT                    0x00000002
+#define R_SYSC_PVDSR_OFFSET(m)                    (0x000000e1 + ((m) * 0x00000002))  /* Voltage Monitor %s Circuit Status Register */
 #define R_SYSC_PDRAMSCR0_OFFSET                   0x00000140  /* SRAM Power Domain Standby Control Register 0 */
 #define R_SYSC_PDRAMSCR1_OFFSET                   0x00000142  /* SRAM Power Domain Standby Control Register 1 */
 #define R_SYSC_VBRSABAR_OFFSET                    0x000003b0  /* VBATT Backup Register Security Attribute Boundary Address Register */
@@ -122,11 +116,9 @@
 #define R_SYSC_MOMCR_OFFSET                       0x00000a50  /* Main Clock Oscillator Mode Oscillation Control Register */
 #define R_SYSC_FWEPROR_OFFSET                     0x00000a54  /* Flash P/E Protect Register */
 /* PVD%sCMPCR Registers (1-2) */
-#define R_SYSC_PVDCMPCR_OFFSET                    0x00000a58  /* Voltage Monitor %s Comparator Control Register */
-#define R_SYSC_PVDCMPCR_INCREMENT                 0x00000004
+#define R_SYSC_PVDCMPCR_OFFSET(m)                 (0x00000a58 + ((m) * 0x00000004))  /* Voltage Monitor %s Comparator Control Register */
 /* PVD%sCR0 Registers (1-2) */
-#define R_SYSC_PVDCR0_OFFSET                      0x00000a70  /* Voltage Monitor %s Circuit Control Register 0 */
-#define R_SYSC_PVDCR0_INCREMENT                   0x00000004
+#define R_SYSC_PVDCR0_OFFSET(m)                   (0x00000a70 + ((m) * 0x00000004))  /* Voltage Monitor %s Circuit Control Register 0 */
 #define R_SYSC_VBATTMNSELR_OFFSET                 0x00000a84  /* Battery Backup Voltage Monitor Function Select Register */
 #define R_SYSC_VBTBPCR1_OFFSET                    0x00000a88  /* VBATT Battery Power Supply Control Register 1 */
 #define R_SYSC_LPSCR_OFFSET                       0x00000a90  /* Low Power State Control Register */
@@ -138,8 +130,7 @@
 #define R_SYSC_PLL2LDOCR_OFFSET                   0x00000b08  /* PLL2-LDO Control Register */
 #define R_SYSC_HOCOLDOCR_OFFSET                   0x00000b0c  /* HOCO-LDO Control Register */
 /* PVD%sFCR Registers (1-2) */
-#define R_SYSC_PVDFCR_OFFSET                      0x00000b20  /* Voltage Monitor %s Function Control Register */
-#define R_SYSC_PVDFCR_INCREMENT                   0x00000004
+#define R_SYSC_PVDFCR_OFFSET(m)                   (0x00000b20 + ((m) * 0x00000004))  /* Voltage Monitor %s Function Control Register */
 #define R_SYSC_SOSCCR_OFFSET                      0x00000c00  /* Sub-Clock Oscillator Control Register */
 #define R_SYSC_SOMCR_OFFSET                       0x00000c01  /* Sub-Clock Oscillator Mode Control Register */
 #define R_SYSC_VBTBER_OFFSET                      0x00000c40  /* VBATT Backup Enable Register */
@@ -152,8 +143,7 @@
 #define R_SYSC_VBTICTLR2_OFFSET                   0x00000c4d  /* VBATT Input Control Register 2 */
 #define R_SYSC_VBTIMONR_OFFSET                    0x00000c4e  /* VBATT Input Monitor Register */
 /* VBTBKR[%s] Registers () */
-#define R_SYSC_VBTBKR_OFFSET                      0x00000d00  /* VBATT Backup Register */
-#define R_SYSC_VBTBKR_INCREMENT                   0x00000001
+#define R_SYSC_VBTBKR_OFFSET(m)                   (0x00000d00 + ((m) * 0x00000001))  /* VBATT Backup Register */
 
 /* SYSC Register Addresses */
 
@@ -196,8 +186,8 @@
 #define R_SYSC_MOSCWTCR                           (R_SYSC_BASE + R_SYSC_MOSCWTCR_OFFSET)
 #define R_SYSC_RSTSR1                             (R_SYSC_BASE + R_SYSC_RSTSR1_OFFSET)
 #define R_SYSC_SYRACCR                            (R_SYSC_BASE + R_SYSC_SYRACCR_OFFSET)
-#define R_SYSC_PVDCR1(n)                          (R_SYSC_BASE + R_SYSC_PVDCR1_OFFSET + (n)*0x00000002)
-#define R_SYSC_PVDSR(n)                           (R_SYSC_BASE + R_SYSC_PVDSR_OFFSET + (n)*0x00000002)
+#define R_SYSC_PVDCR1(m)                          (R_SYSC_BASE + R_SYSC_PVDCR1_OFFSET(m))
+#define R_SYSC_PVDSR(m)                           (R_SYSC_BASE + R_SYSC_PVDSR_OFFSET(m))
 #define R_SYSC_PDRAMSCR0                          (R_SYSC_BASE + R_SYSC_PDRAMSCR0_OFFSET)
 #define R_SYSC_PDRAMSCR1                          (R_SYSC_BASE + R_SYSC_PDRAMSCR1_OFFSET)
 #define R_SYSC_VBRSABAR                           (R_SYSC_BASE + R_SYSC_VBRSABAR_OFFSET)
@@ -230,8 +220,8 @@
 #define R_SYSC_RSTSR2                             (R_SYSC_BASE + R_SYSC_RSTSR2_OFFSET)
 #define R_SYSC_MOMCR                              (R_SYSC_BASE + R_SYSC_MOMCR_OFFSET)
 #define R_SYSC_FWEPROR                            (R_SYSC_BASE + R_SYSC_FWEPROR_OFFSET)
-#define R_SYSC_PVDCMPCR(n)                        (R_SYSC_BASE + R_SYSC_PVDCMPCR_OFFSET + (n)*0x00000004)
-#define R_SYSC_PVDCR0(n)                          (R_SYSC_BASE + R_SYSC_PVDCR0_OFFSET + (n)*0x00000004)
+#define R_SYSC_PVDCMPCR(m)                        (R_SYSC_BASE + R_SYSC_PVDCMPCR_OFFSET(m))
+#define R_SYSC_PVDCR0(m)                          (R_SYSC_BASE + R_SYSC_PVDCR0_OFFSET(m))
 #define R_SYSC_VBATTMNSELR                        (R_SYSC_BASE + R_SYSC_VBATTMNSELR_OFFSET)
 #define R_SYSC_VBTBPCR1                           (R_SYSC_BASE + R_SYSC_VBTBPCR1_OFFSET)
 #define R_SYSC_LPSCR                              (R_SYSC_BASE + R_SYSC_LPSCR_OFFSET)
@@ -242,7 +232,7 @@
 #define R_SYSC_PLL1LDOCR                          (R_SYSC_BASE + R_SYSC_PLL1LDOCR_OFFSET)
 #define R_SYSC_PLL2LDOCR                          (R_SYSC_BASE + R_SYSC_PLL2LDOCR_OFFSET)
 #define R_SYSC_HOCOLDOCR                          (R_SYSC_BASE + R_SYSC_HOCOLDOCR_OFFSET)
-#define R_SYSC_PVDFCR(n)                          (R_SYSC_BASE + R_SYSC_PVDFCR_OFFSET + (n)*0x00000004)
+#define R_SYSC_PVDFCR(m)                          (R_SYSC_BASE + R_SYSC_PVDFCR_OFFSET(m))
 #define R_SYSC_SOSCCR                             (R_SYSC_BASE + R_SYSC_SOSCCR_OFFSET)
 #define R_SYSC_SOMCR                              (R_SYSC_BASE + R_SYSC_SOMCR_OFFSET)
 #define R_SYSC_VBTBER                             (R_SYSC_BASE + R_SYSC_VBTBER_OFFSET)
@@ -254,7 +244,7 @@
 #define R_SYSC_VBTICTLR                           (R_SYSC_BASE + R_SYSC_VBTICTLR_OFFSET)
 #define R_SYSC_VBTICTLR2                          (R_SYSC_BASE + R_SYSC_VBTICTLR2_OFFSET)
 #define R_SYSC_VBTIMONR                           (R_SYSC_BASE + R_SYSC_VBTIMONR_OFFSET)
-#define R_SYSC_VBTBKR(n)                          (R_SYSC_BASE + R_SYSC_VBTBKR_OFFSET + (n)*0x00000001)
+#define R_SYSC_VBTBKR(m)                          (R_SYSC_BASE + R_SYSC_VBTBKR_OFFSET(m))
 
 /* Register bit definitions */
 /* SCKDIVCR Register bit definitions */
@@ -764,15 +754,15 @@
 #define R_SYSC_MOSCWTCR_MSTS_SHIFT                (0)  /* Main Clock Oscillator Wait Time Setting */
 #define R_SYSC_MOSCWTCR_MSTS_MASK                 0xf
 #  define R_SYSC_MOSCWTCR_MSTS_0X0                        (0 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 3 cycles (11.4 us) */
-#  define R_SYSC_MOSCWTCR_MSTS_0X1                        (0 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 35 cycles (133.5 us) */
-#  define R_SYSC_MOSCWTCR_MSTS_0X2                        (0 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 67 cycles (255.6 us) */
-#  define R_SYSC_MOSCWTCR_MSTS_0X3                        (0 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 131 cycles (499.7 us) */
-#  define R_SYSC_MOSCWTCR_MSTS_0X4                        (0 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 259 cycles (988.0 us) */
-#  define R_SYSC_MOSCWTCR_MSTS_0X5                        (0 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 547 cycles (2086.6 us) */
-#  define R_SYSC_MOSCWTCR_MSTS_0X6                        (0 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 1059 cycles (4039.8 us) */
-#  define R_SYSC_MOSCWTCR_MSTS_0X7                        (0 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 2147 cycles (8190.2 us) */
-#  define R_SYSC_MOSCWTCR_MSTS_0X8                        (0 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 4291 cycles (16368.9 us) */
-#  define R_SYSC_MOSCWTCR_MSTS_0X9                        (0 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 8163 cycles (31139.4 us) */
+#  define R_SYSC_MOSCWTCR_MSTS_0X1                        (1 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 35 cycles (133.5 us) */
+#  define R_SYSC_MOSCWTCR_MSTS_0X2                        (2 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 67 cycles (255.6 us) */
+#  define R_SYSC_MOSCWTCR_MSTS_0X3                        (3 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 131 cycles (499.7 us) */
+#  define R_SYSC_MOSCWTCR_MSTS_0X4                        (4 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 259 cycles (988.0 us) */
+#  define R_SYSC_MOSCWTCR_MSTS_0X5                        (5 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 547 cycles (2086.6 us) */
+#  define R_SYSC_MOSCWTCR_MSTS_0X6                        (6 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 1059 cycles (4039.8 us) */
+#  define R_SYSC_MOSCWTCR_MSTS_0X7                        (7 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 2147 cycles (8190.2 us) */
+#  define R_SYSC_MOSCWTCR_MSTS_0X8                        (8 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 4291 cycles (16368.9 us) */
+#  define R_SYSC_MOSCWTCR_MSTS_0X9                        (9 << R_SYSC_MOSCWTCR_MSTS_SHIFT)  /* Wait time = 8163 cycles (31139.4 us) */
 
 /* RSTSR1 Register bit definitions */
 #define R_SYSC_RSTSR1_IWDTRF                      (1 << 0)  /* Independent Watchdog Timer Reset Detect Flag */
@@ -1051,8 +1041,8 @@
 /* DPSWCR Register bit definitions */
 #define R_SYSC_DPSWCR_WTSTS_SHIFT                 (0)  /* Deep Software Wait Standby Time Setting Bit */
 #define R_SYSC_DPSWCR_WTSTS_MASK                  0xff
-#  define R_SYSC_DPSWCR_WTSTS_0X0B                        (0 << R_SYSC_DPSWCR_WTSTS_SHIFT)  /* Wait cycle for fast recovery */
-#  define R_SYSC_DPSWCR_WTSTS_0X9A                        (0 << R_SYSC_DPSWCR_WTSTS_SHIFT)  /* Wait cycle for slow recovery */
+#  define R_SYSC_DPSWCR_WTSTS_0X0B                        (11 << R_SYSC_DPSWCR_WTSTS_SHIFT)  /* Wait cycle for fast recovery */
+#  define R_SYSC_DPSWCR_WTSTS_0X9A                        (154 << R_SYSC_DPSWCR_WTSTS_SHIFT)  /* Wait cycle for slow recovery */
 
 /* DPSIER0 Register bit definitions */
 #define R_SYSC_DPSIER0_DIRQ0E                     (1 << 0)  /* IRQ0-DS Pin Enable */
@@ -1266,19 +1256,19 @@
 /* PVDCMPCR Register bit definitions */
 #define R_SYSC_PVDCMPCR_PVDLVL_SHIFT              (0)  /* Detection Voltage m Level Select */
 #define R_SYSC_PVDCMPCR_PVDLVL_MASK               0x1f
-#  define R_SYSC_PVDCMPCR_PVDLVL_0X03                     (0 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 3.86 V (Vdetm_3) */
-#  define R_SYSC_PVDCMPCR_PVDLVL_0X04                     (0 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 3.14 V (Vdetm_4) */
-#  define R_SYSC_PVDCMPCR_PVDLVL_0X05                     (0 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 3.10 V (Vdetm_5) */
-#  define R_SYSC_PVDCMPCR_PVDLVL_0X06                     (0 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 3.08 V (Vdetm_6) */
-#  define R_SYSC_PVDCMPCR_PVDLVL_0X07                     (0 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 2.85 V (Vdetm_7) */
-#  define R_SYSC_PVDCMPCR_PVDLVL_0X08                     (0 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 2.83 V (Vdetm_8) */
-#  define R_SYSC_PVDCMPCR_PVDLVL_0X09                     (0 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 2.80 V (Vdetm_9) */
-#  define R_SYSC_PVDCMPCR_PVDLVL_0X0A                     (0 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 2.62V (Vdetm_10) */
-#  define R_SYSC_PVDCMPCR_PVDLVL_0X0B                     (0 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 2.33V (Vdetm_11) */
-#  define R_SYSC_PVDCMPCR_PVDLVL_0X0C                     (0 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 1.90V (Vdetm_12) */
-#  define R_SYSC_PVDCMPCR_PVDLVL_0X0D                     (0 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 1.86V (Vdetm_13) */
-#  define R_SYSC_PVDCMPCR_PVDLVL_0X0E                     (0 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 1.74V (Vdetm_14) */
-#  define R_SYSC_PVDCMPCR_PVDLVL_0X0F                     (0 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 1.71V (Vdetm_15) */
+#  define R_SYSC_PVDCMPCR_PVDLVL_0X03                     (3 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 3.86 V (Vdetm_3) */
+#  define R_SYSC_PVDCMPCR_PVDLVL_0X04                     (4 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 3.14 V (Vdetm_4) */
+#  define R_SYSC_PVDCMPCR_PVDLVL_0X05                     (5 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 3.10 V (Vdetm_5) */
+#  define R_SYSC_PVDCMPCR_PVDLVL_0X06                     (6 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 3.08 V (Vdetm_6) */
+#  define R_SYSC_PVDCMPCR_PVDLVL_0X07                     (7 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 2.85 V (Vdetm_7) */
+#  define R_SYSC_PVDCMPCR_PVDLVL_0X08                     (8 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 2.83 V (Vdetm_8) */
+#  define R_SYSC_PVDCMPCR_PVDLVL_0X09                     (9 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 2.80 V (Vdetm_9) */
+#  define R_SYSC_PVDCMPCR_PVDLVL_0X0A                     (10 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 2.62V (Vdetm_10) */
+#  define R_SYSC_PVDCMPCR_PVDLVL_0X0B                     (11 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 2.33V (Vdetm_11) */
+#  define R_SYSC_PVDCMPCR_PVDLVL_0X0C                     (12 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 1.90V (Vdetm_12) */
+#  define R_SYSC_PVDCMPCR_PVDLVL_0X0D                     (13 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 1.86V (Vdetm_13) */
+#  define R_SYSC_PVDCMPCR_PVDLVL_0X0E                     (14 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 1.74V (Vdetm_14) */
+#  define R_SYSC_PVDCMPCR_PVDLVL_0X0F                     (15 << R_SYSC_PVDCMPCR_PVDLVL_SHIFT)  /* 1.71V (Vdetm_15) */
 
 #define R_SYSC_PVDCMPCR_PVDE                      (1 << 7)  /* Voltage Detection m Enable */
 
@@ -1312,10 +1302,10 @@
 #define R_SYSC_LPSCR_LPMD_SHIFT                   (0)  /* Low power mode setting bit */
 #define R_SYSC_LPSCR_LPMD_MASK                    0xf
 #  define R_SYSC_LPSCR_LPMD_0X0                           (0 << R_SYSC_LPSCR_LPMD_SHIFT)  /* System Active */
-#  define R_SYSC_LPSCR_LPMD_0X4                           (0 << R_SYSC_LPSCR_LPMD_SHIFT)  /* Software Standby mode */
-#  define R_SYSC_LPSCR_LPMD_0X8                           (0 << R_SYSC_LPSCR_LPMD_SHIFT)  /* Deep Software Standby mode 1 */
-#  define R_SYSC_LPSCR_LPMD_0X9                           (0 << R_SYSC_LPSCR_LPMD_SHIFT)  /* Deep Software Standby mode 2 */
-#  define R_SYSC_LPSCR_LPMD_0XA                           (0 << R_SYSC_LPSCR_LPMD_SHIFT)  /* Deep Software Standby mode 3 */
+#  define R_SYSC_LPSCR_LPMD_0X4                           (4 << R_SYSC_LPSCR_LPMD_SHIFT)  /* Software Standby mode */
+#  define R_SYSC_LPSCR_LPMD_0X8                           (8 << R_SYSC_LPSCR_LPMD_SHIFT)  /* Deep Software Standby mode 1 */
+#  define R_SYSC_LPSCR_LPMD_0X9                           (9 << R_SYSC_LPSCR_LPMD_SHIFT)  /* Deep Software Standby mode 2 */
+#  define R_SYSC_LPSCR_LPMD_0XA                           (10 << R_SYSC_LPSCR_LPMD_SHIFT)  /* Deep Software Standby mode 3 */
 
 /* SSCR1 Register bit definitions */
 #define R_SYSC_SSCR1_SS1FR                        (1 << 0)  /* Software Standby Fast Return */
@@ -1477,4 +1467,4 @@
 
 #define SYSC_MAX_CHANNELS    128
 
-#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_SYSC_H */
+#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_SYSC_H */

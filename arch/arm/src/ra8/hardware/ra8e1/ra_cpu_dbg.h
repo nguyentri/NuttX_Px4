@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/ra8/hardware/ra8p1/ra_cpu_dbg.h
+ * arch/arm/src/ra8/hardware/ra8e1/ra_cpu_dbg.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_CPU_DBG_H
-#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_CPU_DBG_H
+#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_CPU_DBG_H
+#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_CPU_DBG_H
 
 /****************************************************************************
  * Included Files
@@ -37,8 +37,6 @@
 #define R_CPU_DBG_BASE           0x5001b000
 #endif
 #endif
-
-#define R_CPU_DBG_CH_BASE(ch)   (R_CPU_DBG_BASE + ((uint32_t)(ch) * R_CPU_DBG_CH_STRIDE))
 
 /* CPU_DBG Register Offsets */
 
@@ -115,4 +113,4 @@
 
 #define CPU_DBG_MAX_CHANNELS    1
 
-#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_CPU_DBG_H */
+#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_CPU_DBG_H */

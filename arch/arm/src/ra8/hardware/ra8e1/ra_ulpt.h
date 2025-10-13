@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/ra8/hardware/ra8p1/ra_ulpt.h
+ * arch/arm/src/ra8/hardware/ra8e1/ra_ulpt.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_ULPT_H
-#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_ULPT_H
+#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_ULPT_H
+#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_ULPT_H
 
 /****************************************************************************
  * Included Files
@@ -57,16 +57,16 @@
 
 /* ULPT Register Addresses */
 
-#define R_ULPT_ULPTCNT                            (R_ULPT_BASE + R_ULPT_ULPTCNT_OFFSET)
-#define R_ULPT_ULPTCMA                            (R_ULPT_BASE + R_ULPT_ULPTCMA_OFFSET)
-#define R_ULPT_ULPTCMB                            (R_ULPT_BASE + R_ULPT_ULPTCMB_OFFSET)
-#define R_ULPT_ULPTCR                             (R_ULPT_BASE + R_ULPT_ULPTCR_OFFSET)
-#define R_ULPT_ULPTMR1                            (R_ULPT_BASE + R_ULPT_ULPTMR1_OFFSET)
-#define R_ULPT_ULPTMR2                            (R_ULPT_BASE + R_ULPT_ULPTMR2_OFFSET)
-#define R_ULPT_ULPTMR3                            (R_ULPT_BASE + R_ULPT_ULPTMR3_OFFSET)
-#define R_ULPT_ULPTIOC                            (R_ULPT_BASE + R_ULPT_ULPTIOC_OFFSET)
-#define R_ULPT_ULPTISR                            (R_ULPT_BASE + R_ULPT_ULPTISR_OFFSET)
-#define R_ULPT_ULPTCMSR                           (R_ULPT_BASE + R_ULPT_ULPTCMSR_OFFSET)
+#define R_ULPT_ULPTCNT(n)                         (R_ULPT_CH_BASE(n) + R_ULPT_ULPTCNT_OFFSET)
+#define R_ULPT_ULPTCMA(n)                         (R_ULPT_CH_BASE(n) + R_ULPT_ULPTCMA_OFFSET)
+#define R_ULPT_ULPTCMB(n)                         (R_ULPT_CH_BASE(n) + R_ULPT_ULPTCMB_OFFSET)
+#define R_ULPT_ULPTCR(n)                          (R_ULPT_CH_BASE(n) + R_ULPT_ULPTCR_OFFSET)
+#define R_ULPT_ULPTMR1(n)                         (R_ULPT_CH_BASE(n) + R_ULPT_ULPTMR1_OFFSET)
+#define R_ULPT_ULPTMR2(n)                         (R_ULPT_CH_BASE(n) + R_ULPT_ULPTMR2_OFFSET)
+#define R_ULPT_ULPTMR3(n)                         (R_ULPT_CH_BASE(n) + R_ULPT_ULPTMR3_OFFSET)
+#define R_ULPT_ULPTIOC(n)                         (R_ULPT_CH_BASE(n) + R_ULPT_ULPTIOC_OFFSET)
+#define R_ULPT_ULPTISR(n)                         (R_ULPT_CH_BASE(n) + R_ULPT_ULPTISR_OFFSET)
+#define R_ULPT_ULPTCMSR(n)                        (R_ULPT_CH_BASE(n) + R_ULPT_ULPTCMSR_OFFSET)
 
 /* Register bit definitions */
 /* ULPTCNT Register bit definitions */
@@ -167,4 +167,4 @@
 
 #define ULPT_MAX_CHANNELS    2
 
-#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_ULPT_H */
+#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_ULPT_H */

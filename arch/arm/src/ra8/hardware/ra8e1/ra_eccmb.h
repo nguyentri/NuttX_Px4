@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/ra8/hardware/ra8p1/ra_eccmb.h
+ * arch/arm/src/ra8/hardware/ra8e1/ra_eccmb.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_ECCMB_H
-#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_ECCMB_H
+#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_ECCMB_H
+#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_ECCMB_H
 
 /****************************************************************************
  * Included Files
@@ -51,10 +51,10 @@
 
 /* ECCMB Register Addresses */
 
-#define R_ECCMB_EC710CTL                          (R_ECCMB_BASE + R_ECCMB_EC710CTL_OFFSET)
-#define R_ECCMB_EC710TMC                          (R_ECCMB_BASE + R_ECCMB_EC710TMC_OFFSET)
-#define R_ECCMB_EC710TED                          (R_ECCMB_BASE + R_ECCMB_EC710TED_OFFSET)
-#define R_ECCMB_EC710EAD0                         (R_ECCMB_BASE + R_ECCMB_EC710EAD0_OFFSET)
+#define R_ECCMB_EC710CTL(n)                       (R_ECCMB_CH_BASE(n) + R_ECCMB_EC710CTL_OFFSET)
+#define R_ECCMB_EC710TMC(n)                       (R_ECCMB_CH_BASE(n) + R_ECCMB_EC710TMC_OFFSET)
+#define R_ECCMB_EC710TED(n)                       (R_ECCMB_CH_BASE(n) + R_ECCMB_EC710TED_OFFSET)
+#define R_ECCMB_EC710EAD0(n)                      (R_ECCMB_CH_BASE(n) + R_ECCMB_EC710EAD0_OFFSET)
 
 /* Register bit definitions */
 /* EC710CTL Register bit definitions */
@@ -106,4 +106,4 @@
 
 #define ECCMB_MAX_CHANNELS    2
 
-#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_ECCMB_H */
+#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_ECCMB_H */

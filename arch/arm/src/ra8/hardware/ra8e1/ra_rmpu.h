@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/ra8/hardware/ra8p1/ra_rmpu.h
+ * arch/arm/src/ra8/hardware/ra8e1/ra_rmpu.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_RMPU_H
-#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_RMPU_H
+#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_RMPU_H
+#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_RMPU_H
 
 /****************************************************************************
  * Included Files
@@ -38,10 +38,6 @@
 #endif
 #endif
 
-/* Channel stride for multi-channel peripherals */
-#define R_RMPU_CH_STRIDE    0x00000010
-#define R_RMPU_CH_BASE(ch)   (R_RMPU_BASE + ((uint32_t)(ch) * R_RMPU_CH_STRIDE))
-
 /* RMPU Register Offsets */
 
 #define R_RMPU_MMPUOAD_OFFSET                     0x00000000  /* MMPU Operation After Detection Register */
@@ -50,38 +46,29 @@
 #define R_RMPU_MMPUENPTDMAC_OFFSET                0x00000104  /* MMPU Enable Protect Register for DMAC */
 #define R_RMPU_MMPURPTDMAC_SEC_OFFSET             0x0000010c  /* MMPU Regions Protect register for DMAC Secure */
 /* MMPUACDMAC%s Registers (0-7) */
-#define R_RMPU_MMPUACDMAC_OFFSET                  0x00000200  /* MMPU Access Control Register for DMAC (n = 0 to 7) */
-#define R_RMPU_MMPUACDMAC_INCREMENT               0x00000010
+#define R_RMPU_MMPUACDMAC_OFFSET(m)               (0x00000200 + ((m) * 0x00000010))  /* MMPU Access Control Register for DMAC (n = 0 to 7) */
 /* MMPUSDMAC%s Registers (0-7) */
-#define R_RMPU_MMPUSDMAC_OFFSET                   0x00000204  /* MMPU Start Address Register for DMAC (n = 0 to 7) */
-#define R_RMPU_MMPUSDMAC_INCREMENT                0x00000010
+#define R_RMPU_MMPUSDMAC_OFFSET(m)                (0x00000204 + ((m) * 0x00000010))  /* MMPU Start Address Register for DMAC (n = 0 to 7) */
 /* MMPUEDMAC%s Registers (0-7) */
-#define R_RMPU_MMPUEDMAC_OFFSET                   0x00000208  /* MMPU End Address Register for DMAC (n = 0 to 7) */
-#define R_RMPU_MMPUEDMAC_INCREMENT                0x00000010
+#define R_RMPU_MMPUEDMAC_OFFSET(m)                (0x00000208 + ((m) * 0x00000010))  /* MMPU End Address Register for DMAC (n = 0 to 7) */
 #define R_RMPU_MMPUENEDMAC_OFFSET                 0x00000500  /* MMPU Enable Register for EDMAC */
 #define R_RMPU_MMPUENPTEDMAC_OFFSET               0x00000504  /* MMPU Enable Protect Register for EDMAC */
 #define R_RMPU_MMPURPTEDMAC_OFFSET                0x00000508  /* MMPU Regions Protect Register for EDMAC */
 /* MMPUACEDMAC%s Registers (0-3) */
-#define R_RMPU_MMPUACEDMAC_OFFSET                 0x00000600  /* MMPU Access Control Register for EDMAC (n = 0 to 3) */
-#define R_RMPU_MMPUACEDMAC_INCREMENT              0x00000010
+#define R_RMPU_MMPUACEDMAC_OFFSET(m)              (0x00000600 + ((m) * 0x00000010))  /* MMPU Access Control Register for EDMAC (n = 0 to 3) */
 /* MMPUSEDMAC%s Registers (0-3) */
-#define R_RMPU_MMPUSEDMAC_OFFSET                  0x00000604  /* MMPU Start Address Register for EDMAC (n = 0 to 3) */
-#define R_RMPU_MMPUSEDMAC_INCREMENT               0x00000010
+#define R_RMPU_MMPUSEDMAC_OFFSET(m)               (0x00000604 + ((m) * 0x00000010))  /* MMPU Start Address Register for EDMAC (n = 0 to 3) */
 /* MMPUEEDMAC%s Registers (0-3) */
-#define R_RMPU_MMPUEEDMAC_OFFSET                  0x00000608  /* MMPU End Address Register for EDMAC (n = 0 to 3) */
-#define R_RMPU_MMPUEEDMAC_INCREMENT               0x00000010
+#define R_RMPU_MMPUEEDMAC_OFFSET(m)               (0x00000608 + ((m) * 0x00000010))  /* MMPU End Address Register for EDMAC (n = 0 to 3) */
 #define R_RMPU_MMPUENCEU_OFFSET                   0x00000d00  /* MMPU Enable Register for CEU */
 #define R_RMPU_MMPUENPTCEU_OFFSET                 0x00000d04  /* MMPU Enable Protect Register for CEU */
 #define R_RMPU_MMPURPTCEU_OFFSET                  0x00000d08  /* MMPU Regions Protect Register for CEU */
 /* MMPUACCEU%s Registers (0-1) */
-#define R_RMPU_MMPUACCEU_OFFSET                   0x00000e00  /* MMPU Access Control Register for CEU (n = 0, 1) */
-#define R_RMPU_MMPUACCEU_INCREMENT                0x00000010
+#define R_RMPU_MMPUACCEU_OFFSET(m)                (0x00000e00 + ((m) * 0x00000010))  /* MMPU Access Control Register for CEU (n = 0, 1) */
 /* MMPUSCEU%s Registers (0-1) */
-#define R_RMPU_MMPUSCEU_OFFSET                    0x00000e04  /* MMPU Start Address Register for CEU (n = 0 to 1) */
-#define R_RMPU_MMPUSCEU_INCREMENT                 0x00000010
+#define R_RMPU_MMPUSCEU_OFFSET(m)                 (0x00000e04 + ((m) * 0x00000010))  /* MMPU Start Address Register for CEU (n = 0 to 1) */
 /* MMPUECEU%s Registers (0-1) */
-#define R_RMPU_MMPUECEU_OFFSET                    0x00000e08  /* MMPU End Address Register for CEU (n = 0 to 1) */
-#define R_RMPU_MMPUECEU_INCREMENT                 0x00000010
+#define R_RMPU_MMPUECEU_OFFSET(m)                 (0x00000e08 + ((m) * 0x00000010))  /* MMPU End Address Register for CEU (n = 0 to 1) */
 
 /* RMPU Register Addresses */
 
@@ -90,21 +77,21 @@
 #define R_RMPU_MMPUENDMAC                         (R_RMPU_BASE + R_RMPU_MMPUENDMAC_OFFSET)
 #define R_RMPU_MMPUENPTDMAC                       (R_RMPU_BASE + R_RMPU_MMPUENPTDMAC_OFFSET)
 #define R_RMPU_MMPURPTDMAC_SEC                    (R_RMPU_BASE + R_RMPU_MMPURPTDMAC_SEC_OFFSET)
-#define R_RMPU_MMPUACDMAC(n)                      (R_RMPU_BASE + R_RMPU_MMPUACDMAC_OFFSET + (n)*0x00000010)
-#define R_RMPU_MMPUSDMAC(n)                       (R_RMPU_BASE + R_RMPU_MMPUSDMAC_OFFSET + (n)*0x00000010)
-#define R_RMPU_MMPUEDMAC(n)                       (R_RMPU_BASE + R_RMPU_MMPUEDMAC_OFFSET + (n)*0x00000010)
+#define R_RMPU_MMPUACDMAC(m)                      (R_RMPU_BASE + R_RMPU_MMPUACDMAC_OFFSET(m))
+#define R_RMPU_MMPUSDMAC(m)                       (R_RMPU_BASE + R_RMPU_MMPUSDMAC_OFFSET(m))
+#define R_RMPU_MMPUEDMAC(m)                       (R_RMPU_BASE + R_RMPU_MMPUEDMAC_OFFSET(m))
 #define R_RMPU_MMPUENEDMAC                        (R_RMPU_BASE + R_RMPU_MMPUENEDMAC_OFFSET)
 #define R_RMPU_MMPUENPTEDMAC                      (R_RMPU_BASE + R_RMPU_MMPUENPTEDMAC_OFFSET)
 #define R_RMPU_MMPURPTEDMAC                       (R_RMPU_BASE + R_RMPU_MMPURPTEDMAC_OFFSET)
-#define R_RMPU_MMPUACEDMAC(n)                     (R_RMPU_BASE + R_RMPU_MMPUACEDMAC_OFFSET + (n)*0x00000010)
-#define R_RMPU_MMPUSEDMAC(n)                      (R_RMPU_BASE + R_RMPU_MMPUSEDMAC_OFFSET + (n)*0x00000010)
-#define R_RMPU_MMPUEEDMAC(n)                      (R_RMPU_BASE + R_RMPU_MMPUEEDMAC_OFFSET + (n)*0x00000010)
+#define R_RMPU_MMPUACEDMAC(m)                     (R_RMPU_BASE + R_RMPU_MMPUACEDMAC_OFFSET(m))
+#define R_RMPU_MMPUSEDMAC(m)                      (R_RMPU_BASE + R_RMPU_MMPUSEDMAC_OFFSET(m))
+#define R_RMPU_MMPUEEDMAC(m)                      (R_RMPU_BASE + R_RMPU_MMPUEEDMAC_OFFSET(m))
 #define R_RMPU_MMPUENCEU                          (R_RMPU_BASE + R_RMPU_MMPUENCEU_OFFSET)
 #define R_RMPU_MMPUENPTCEU                        (R_RMPU_BASE + R_RMPU_MMPUENPTCEU_OFFSET)
 #define R_RMPU_MMPURPTCEU                         (R_RMPU_BASE + R_RMPU_MMPURPTCEU_OFFSET)
-#define R_RMPU_MMPUACCEU(n)                       (R_RMPU_BASE + R_RMPU_MMPUACCEU_OFFSET + (n)*0x00000010)
-#define R_RMPU_MMPUSCEU(n)                        (R_RMPU_BASE + R_RMPU_MMPUSCEU_OFFSET + (n)*0x00000010)
-#define R_RMPU_MMPUECEU(n)                        (R_RMPU_BASE + R_RMPU_MMPUECEU_OFFSET + (n)*0x00000010)
+#define R_RMPU_MMPUACCEU(m)                       (R_RMPU_BASE + R_RMPU_MMPUACCEU_OFFSET(m))
+#define R_RMPU_MMPUSCEU(m)                        (R_RMPU_BASE + R_RMPU_MMPUSCEU_OFFSET(m))
+#define R_RMPU_MMPUECEU(m)                        (R_RMPU_BASE + R_RMPU_MMPUECEU_OFFSET(m))
 
 /* Register bit definitions */
 /* MMPUOAD Register bit definitions */
@@ -201,4 +188,4 @@
 
 #define RMPU_MAX_CHANNELS    8
 
-#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_RMPU_H */
+#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_RMPU_H */

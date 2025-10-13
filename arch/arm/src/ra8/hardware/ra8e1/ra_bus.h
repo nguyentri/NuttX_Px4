@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/ra8/hardware/ra8p1/ra_bus.h
+ * arch/arm/src/ra8/hardware/ra8e1/ra_bus.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_BUS_H
-#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_BUS_H
+#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_BUS_H
+#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_BUS_H
 
 /****************************************************************************
  * Included Files
@@ -38,16 +38,11 @@
 #endif
 #endif
 
-/* Channel stride for multi-channel peripherals */
-#define R_BUS_CH_STRIDE    0x00000010
-#define R_BUS_CH_BASE(ch)   (R_BUS_BASE + ((uint32_t)(ch) * R_BUS_CH_STRIDE))
-
 /* BUS Register Offsets */
 
 #define R_BUS_CS0CR_OFFSET                        0x00000802  /* CS0 Control Register */
 /* CS%sCR Registers (1-7) */
-#define R_BUS_CSCR_OFFSET                         0x00000812  /* CS%s Control Register */
-#define R_BUS_CSCR_INCREMENT                      0x00000010
+#define R_BUS_CSCR_OFFSET(m)                      (0x00000812 + ((m) * 0x00000010))  /* CS%s Control Register */
 #define R_BUS_BUSOAD_OFFSET                       0x00001000  /* BUS Operation After Detection Register */
 #define R_BUS_BUSOADPT_OFFSET                     0x00001004  /* BUS Operation After Detection Protect Register */
 #define R_BUS_MSAOAD_OFFSET                       0x00001010  /* Master Security Attribution Operation After Detection Register */
@@ -63,23 +58,19 @@
 #define R_BUS_BUSSABT0PSBI_OFFSET                 0x00001278  /* Bus Slave Arbitration Control Register 0 */
 #define R_BUS_BUSDIVBYP_OFFSET                    0x00001300  /* Bus Divider Bypass Register */
 /* BUS%sERRRW Registers (4-5) */
-#define R_BUS_BUSERRRW_OFFSET                     0x00001804  /* BUS Error Read Write (n = 4, 5) */
-#define R_BUS_BUSERRRW_INCREMENT                  0x00000010
+#define R_BUS_BUSERRRW_OFFSET(m)                  (0x00001804 + ((m) * 0x00000010))  /* BUS Error Read Write (n = 4, 5) */
 /* BUS%sERRADD Registers (4-5) */
-#define R_BUS_BUSERRADD_OFFSET                    0x00001830  /* BUS Error Address Register (n = 4, 5) */
-#define R_BUS_BUSERRADD_INCREMENT                 0x00000010
+#define R_BUS_BUSERRADD_OFFSET(m)                 (0x00001830 + ((m) * 0x00000010))  /* BUS Error Address Register (n = 4, 5) */
 /* BMSA%sERRADD Registers (4-5) */
-#define R_BUS_BMSAERRADD_OFFSET                   0x00001900  /* Bus Master Security Attribution Unit Error Address */
-#define R_BUS_BMSAERRADD_INCREMENT                0x00000010
+#define R_BUS_BMSAERRADD_OFFSET(m)                (0x00001900 + ((m) * 0x00000010))  /* Bus Master Security Attribution Unit Error Address */
 /* BMSA%sERRRW Registers (4-5) */
-#define R_BUS_BMSAERRRW_OFFSET                    0x00001904  /* BUS Master Security Attribution Unit Error Read Write (n = 4, 5) */
-#define R_BUS_BMSAERRRW_INCREMENT                 0x00000010
+#define R_BUS_BMSAERRRW_OFFSET(m)                 (0x00001904 + ((m) * 0x00000010))  /* BUS Master Security Attribution Unit Error Read Write (n = 4, 5) */
 /* BUS%sERRSTAT Registers (1-5) */
-#define R_BUS_BUSERRSTAT_OFFSET                   0x00001a00  /* BUS Error Status Register */
-#define R_BUS_BUSERRSTAT_INCREMENT                0x00000010
+#define R_BUS_BUSERRSTAT_OFFSET(m)                (0x00001a00 + ((m) * 0x00000010))  /* BUS Error Status Register */
 /* BUS%sERRCLR Registers (1-5) */
-#define R_BUS_BUSERRCLR_OFFSET                    0x00001a08  /* BUS Error Clear Register */
-#define R_BUS_BUSERRCLR_INCREMENT                 0x00000010
+#define R_BUS_BUSERRCLR_OFFSET(m)                 (0x00001a08 + ((m) * 0x00000010))  /* BUS Error Clear Register */
+/* BUS%sERRSTAT Registers (10) */
+/* BUS%sERRCLR Registers (10) */
 #define R_BUS_MBWERRSTAT_OFFSET                   0x00001b00  /* Master Bufferable Write Error Status Register */
 #define R_BUS_MBWERRCLR_OFFSET                    0x00001b08  /* Master Bufferable Write Error Clear Register */
 #define R_BUS_SBWERRSTAT_OFFSET                   0x00001b20  /* Slave Bufferable Write Error Status Register */
@@ -88,7 +79,7 @@
 /* BUS Register Addresses */
 
 #define R_BUS_CS0CR                               (R_BUS_BASE + R_BUS_CS0CR_OFFSET)
-#define R_BUS_CSCR(n)                             (R_BUS_BASE + R_BUS_CSCR_OFFSET + (n)*0x00000010)
+#define R_BUS_CSCR(m)                             (R_BUS_BASE + R_BUS_CSCR_OFFSET(m))
 #define R_BUS_BUSOAD                              (R_BUS_BASE + R_BUS_BUSOAD_OFFSET)
 #define R_BUS_BUSOADPT                            (R_BUS_BASE + R_BUS_BUSOADPT_OFFSET)
 #define R_BUS_MSAOAD                              (R_BUS_BASE + R_BUS_MSAOAD_OFFSET)
@@ -103,12 +94,12 @@
 #define R_BUS_BUSSABT0PIBI                        (R_BUS_BASE + R_BUS_BUSSABT0PIBI_OFFSET)
 #define R_BUS_BUSSABT0PSBI                        (R_BUS_BASE + R_BUS_BUSSABT0PSBI_OFFSET)
 #define R_BUS_BUSDIVBYP                           (R_BUS_BASE + R_BUS_BUSDIVBYP_OFFSET)
-#define R_BUS_BUSERRRW(n)                         (R_BUS_BASE + R_BUS_BUSERRRW_OFFSET + (n)*0x00000010)
-#define R_BUS_BUSERRADD(n)                        (R_BUS_BASE + R_BUS_BUSERRADD_OFFSET + (n)*0x00000010)
-#define R_BUS_BMSAERRADD(n)                       (R_BUS_BASE + R_BUS_BMSAERRADD_OFFSET + (n)*0x00000010)
-#define R_BUS_BMSAERRRW(n)                        (R_BUS_BASE + R_BUS_BMSAERRRW_OFFSET + (n)*0x00000010)
-#define R_BUS_BUSERRSTAT(n)                       (R_BUS_BASE + R_BUS_BUSERRSTAT_OFFSET + (n)*0x00000010)
-#define R_BUS_BUSERRCLR(n)                        (R_BUS_BASE + R_BUS_BUSERRCLR_OFFSET + (n)*0x00000010)
+#define R_BUS_BUSERRRW(m)                         (R_BUS_BASE + R_BUS_BUSERRRW_OFFSET(m))
+#define R_BUS_BUSERRADD(m)                        (R_BUS_BASE + R_BUS_BUSERRADD_OFFSET(m))
+#define R_BUS_BMSAERRADD(m)                       (R_BUS_BASE + R_BUS_BMSAERRADD_OFFSET(m))
+#define R_BUS_BMSAERRRW(m)                        (R_BUS_BASE + R_BUS_BMSAERRRW_OFFSET(m))
+#define R_BUS_BUSERRSTAT(m)                       (R_BUS_BASE + R_BUS_BUSERRSTAT_OFFSET(m))
+#define R_BUS_BUSERRCLR(m)                        (R_BUS_BASE + R_BUS_BUSERRCLR_OFFSET(m))
 #define R_BUS_MBWERRSTAT                          (R_BUS_BASE + R_BUS_MBWERRSTAT_OFFSET)
 #define R_BUS_MBWERRCLR                           (R_BUS_BASE + R_BUS_MBWERRCLR_OFFSET)
 #define R_BUS_SBWERRSTAT                          (R_BUS_BASE + R_BUS_SBWERRSTAT_OFFSET)
@@ -331,4 +322,4 @@
 
 #define BUS_MAX_CHANNELS    7
 
-#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_BUS_H */
+#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_BUS_H */

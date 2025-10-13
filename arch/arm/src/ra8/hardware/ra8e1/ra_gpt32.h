@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/ra8/hardware/ra8p1/ra_gpt32.h
+ * arch/arm/src/ra8/hardware/ra8e1/ra_gpt32.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_GPT32_H
-#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_GPT32_H
+#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_GPT32_H
+#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_GPT32_H
 
 /****************************************************************************
  * Included Files
@@ -86,45 +86,45 @@
 
 /* GPT32 Register Addresses */
 
-#define R_GPT32_GTWP                              (R_GPT32_BASE + R_GPT32_GTWP_OFFSET)
-#define R_GPT32_GTSTR                             (R_GPT32_BASE + R_GPT32_GTSTR_OFFSET)
-#define R_GPT32_GTSTP                             (R_GPT32_BASE + R_GPT32_GTSTP_OFFSET)
-#define R_GPT32_GTCLR                             (R_GPT32_BASE + R_GPT32_GTCLR_OFFSET)
-#define R_GPT32_GTSSR                             (R_GPT32_BASE + R_GPT32_GTSSR_OFFSET)
-#define R_GPT32_GTPSR                             (R_GPT32_BASE + R_GPT32_GTPSR_OFFSET)
-#define R_GPT32_GTCSR                             (R_GPT32_BASE + R_GPT32_GTCSR_OFFSET)
-#define R_GPT32_GTUPSR                            (R_GPT32_BASE + R_GPT32_GTUPSR_OFFSET)
-#define R_GPT32_GTDNSR                            (R_GPT32_BASE + R_GPT32_GTDNSR_OFFSET)
-#define R_GPT32_GTICASR                           (R_GPT32_BASE + R_GPT32_GTICASR_OFFSET)
-#define R_GPT32_GTICBSR                           (R_GPT32_BASE + R_GPT32_GTICBSR_OFFSET)
-#define R_GPT32_GTCR                              (R_GPT32_BASE + R_GPT32_GTCR_OFFSET)
-#define R_GPT32_GTUDDTYC                          (R_GPT32_BASE + R_GPT32_GTUDDTYC_OFFSET)
-#define R_GPT32_GTIOR                             (R_GPT32_BASE + R_GPT32_GTIOR_OFFSET)
-#define R_GPT32_GTINTAD                           (R_GPT32_BASE + R_GPT32_GTINTAD_OFFSET)
-#define R_GPT32_GTST                              (R_GPT32_BASE + R_GPT32_GTST_OFFSET)
-#define R_GPT32_GTBER                             (R_GPT32_BASE + R_GPT32_GTBER_OFFSET)
-#define R_GPT32_GTCNT                             (R_GPT32_BASE + R_GPT32_GTCNT_OFFSET)
-#define R_GPT32_GTCCRA                            (R_GPT32_BASE + R_GPT32_GTCCRA_OFFSET)
-#define R_GPT32_GTCCRB                            (R_GPT32_BASE + R_GPT32_GTCCRB_OFFSET)
-#define R_GPT32_GTCCRC                            (R_GPT32_BASE + R_GPT32_GTCCRC_OFFSET)
-#define R_GPT32_GTCCRE                            (R_GPT32_BASE + R_GPT32_GTCCRE_OFFSET)
-#define R_GPT32_GTCCRD                            (R_GPT32_BASE + R_GPT32_GTCCRD_OFFSET)
-#define R_GPT32_GTCCRF                            (R_GPT32_BASE + R_GPT32_GTCCRF_OFFSET)
-#define R_GPT32_GTPR                              (R_GPT32_BASE + R_GPT32_GTPR_OFFSET)
-#define R_GPT32_GTPBR                             (R_GPT32_BASE + R_GPT32_GTPBR_OFFSET)
-#define R_GPT32_GTADTRA                           (R_GPT32_BASE + R_GPT32_GTADTRA_OFFSET)
-#define R_GPT32_GTADTBRA                          (R_GPT32_BASE + R_GPT32_GTADTBRA_OFFSET)
-#define R_GPT32_GTADTDBRA                         (R_GPT32_BASE + R_GPT32_GTADTDBRA_OFFSET)
-#define R_GPT32_GTADTRB                           (R_GPT32_BASE + R_GPT32_GTADTRB_OFFSET)
-#define R_GPT32_GTADTBRB                          (R_GPT32_BASE + R_GPT32_GTADTBRB_OFFSET)
-#define R_GPT32_GTADTDBRB                         (R_GPT32_BASE + R_GPT32_GTADTDBRB_OFFSET)
-#define R_GPT32_GTDTCR                            (R_GPT32_BASE + R_GPT32_GTDTCR_OFFSET)
-#define R_GPT32_GTDVU                             (R_GPT32_BASE + R_GPT32_GTDVU_OFFSET)
-#define R_GPT32_GTADSMR                           (R_GPT32_BASE + R_GPT32_GTADSMR_OFFSET)
-#define R_GPT32_GTICLF                            (R_GPT32_BASE + R_GPT32_GTICLF_OFFSET)
-#define R_GPT32_GTPC                              (R_GPT32_BASE + R_GPT32_GTPC_OFFSET)
-#define R_GPT32_GTSECSR                           (R_GPT32_BASE + R_GPT32_GTSECSR_OFFSET)
-#define R_GPT32_GTSECR                            (R_GPT32_BASE + R_GPT32_GTSECR_OFFSET)
+#define R_GPT32_GTWP(n)                           (R_GPT32_CH_BASE(n) + R_GPT32_GTWP_OFFSET)
+#define R_GPT32_GTSTR(n)                          (R_GPT32_CH_BASE(n) + R_GPT32_GTSTR_OFFSET)
+#define R_GPT32_GTSTP(n)                          (R_GPT32_CH_BASE(n) + R_GPT32_GTSTP_OFFSET)
+#define R_GPT32_GTCLR(n)                          (R_GPT32_CH_BASE(n) + R_GPT32_GTCLR_OFFSET)
+#define R_GPT32_GTSSR(n)                          (R_GPT32_CH_BASE(n) + R_GPT32_GTSSR_OFFSET)
+#define R_GPT32_GTPSR(n)                          (R_GPT32_CH_BASE(n) + R_GPT32_GTPSR_OFFSET)
+#define R_GPT32_GTCSR(n)                          (R_GPT32_CH_BASE(n) + R_GPT32_GTCSR_OFFSET)
+#define R_GPT32_GTUPSR(n)                         (R_GPT32_CH_BASE(n) + R_GPT32_GTUPSR_OFFSET)
+#define R_GPT32_GTDNSR(n)                         (R_GPT32_CH_BASE(n) + R_GPT32_GTDNSR_OFFSET)
+#define R_GPT32_GTICASR(n)                        (R_GPT32_CH_BASE(n) + R_GPT32_GTICASR_OFFSET)
+#define R_GPT32_GTICBSR(n)                        (R_GPT32_CH_BASE(n) + R_GPT32_GTICBSR_OFFSET)
+#define R_GPT32_GTCR(n)                           (R_GPT32_CH_BASE(n) + R_GPT32_GTCR_OFFSET)
+#define R_GPT32_GTUDDTYC(n)                       (R_GPT32_CH_BASE(n) + R_GPT32_GTUDDTYC_OFFSET)
+#define R_GPT32_GTIOR(n)                          (R_GPT32_CH_BASE(n) + R_GPT32_GTIOR_OFFSET)
+#define R_GPT32_GTINTAD(n)                        (R_GPT32_CH_BASE(n) + R_GPT32_GTINTAD_OFFSET)
+#define R_GPT32_GTST(n)                           (R_GPT32_CH_BASE(n) + R_GPT32_GTST_OFFSET)
+#define R_GPT32_GTBER(n)                          (R_GPT32_CH_BASE(n) + R_GPT32_GTBER_OFFSET)
+#define R_GPT32_GTCNT(n)                          (R_GPT32_CH_BASE(n) + R_GPT32_GTCNT_OFFSET)
+#define R_GPT32_GTCCRA(n)                         (R_GPT32_CH_BASE(n) + R_GPT32_GTCCRA_OFFSET)
+#define R_GPT32_GTCCRB(n)                         (R_GPT32_CH_BASE(n) + R_GPT32_GTCCRB_OFFSET)
+#define R_GPT32_GTCCRC(n)                         (R_GPT32_CH_BASE(n) + R_GPT32_GTCCRC_OFFSET)
+#define R_GPT32_GTCCRE(n)                         (R_GPT32_CH_BASE(n) + R_GPT32_GTCCRE_OFFSET)
+#define R_GPT32_GTCCRD(n)                         (R_GPT32_CH_BASE(n) + R_GPT32_GTCCRD_OFFSET)
+#define R_GPT32_GTCCRF(n)                         (R_GPT32_CH_BASE(n) + R_GPT32_GTCCRF_OFFSET)
+#define R_GPT32_GTPR(n)                           (R_GPT32_CH_BASE(n) + R_GPT32_GTPR_OFFSET)
+#define R_GPT32_GTPBR(n)                          (R_GPT32_CH_BASE(n) + R_GPT32_GTPBR_OFFSET)
+#define R_GPT32_GTADTRA(n)                        (R_GPT32_CH_BASE(n) + R_GPT32_GTADTRA_OFFSET)
+#define R_GPT32_GTADTBRA(n)                       (R_GPT32_CH_BASE(n) + R_GPT32_GTADTBRA_OFFSET)
+#define R_GPT32_GTADTDBRA(n)                      (R_GPT32_CH_BASE(n) + R_GPT32_GTADTDBRA_OFFSET)
+#define R_GPT32_GTADTRB(n)                        (R_GPT32_CH_BASE(n) + R_GPT32_GTADTRB_OFFSET)
+#define R_GPT32_GTADTBRB(n)                       (R_GPT32_CH_BASE(n) + R_GPT32_GTADTBRB_OFFSET)
+#define R_GPT32_GTADTDBRB(n)                      (R_GPT32_CH_BASE(n) + R_GPT32_GTADTDBRB_OFFSET)
+#define R_GPT32_GTDTCR(n)                         (R_GPT32_CH_BASE(n) + R_GPT32_GTDTCR_OFFSET)
+#define R_GPT32_GTDVU(n)                          (R_GPT32_CH_BASE(n) + R_GPT32_GTDVU_OFFSET)
+#define R_GPT32_GTADSMR(n)                        (R_GPT32_CH_BASE(n) + R_GPT32_GTADSMR_OFFSET)
+#define R_GPT32_GTICLF(n)                         (R_GPT32_CH_BASE(n) + R_GPT32_GTICLF_OFFSET)
+#define R_GPT32_GTPC(n)                           (R_GPT32_CH_BASE(n) + R_GPT32_GTPC_OFFSET)
+#define R_GPT32_GTSECSR(n)                        (R_GPT32_CH_BASE(n) + R_GPT32_GTSECSR_OFFSET)
+#define R_GPT32_GTSECR(n)                         (R_GPT32_CH_BASE(n) + R_GPT32_GTSECR_OFFSET)
 
 /* Register bit definitions */
 /* GTWP Register bit definitions */
@@ -570,21 +570,21 @@
 #define R_GPT32_GTCR_TPCS_SHIFT                   (23)  /* Timer Prescaler Select */
 #define R_GPT32_GTCR_TPCS_MASK                    0x7800000
 #  define R_GPT32_GTCR_TPCS_0X0                           (0 << R_GPT32_GTCR_TPCS_SHIFT)  /* PCLKD/1  */
-#  define R_GPT32_GTCR_TPCS_0X1                           (0 << R_GPT32_GTCR_TPCS_SHIFT)  /* PCLKD/2  */
-#  define R_GPT32_GTCR_TPCS_0X2                           (0 << R_GPT32_GTCR_TPCS_SHIFT)  /* PCLKD/4  */
-#  define R_GPT32_GTCR_TPCS_0X3                           (0 << R_GPT32_GTCR_TPCS_SHIFT)  /* PCLKD/8  */
-#  define R_GPT32_GTCR_TPCS_0X4                           (0 << R_GPT32_GTCR_TPCS_SHIFT)  /* PCLKD/16  */
-#  define R_GPT32_GTCR_TPCS_0X5                           (0 << R_GPT32_GTCR_TPCS_SHIFT)  /* PCLKD/32  */
-#  define R_GPT32_GTCR_TPCS_0X6                           (0 << R_GPT32_GTCR_TPCS_SHIFT)  /* PCLKD/64  */
-#  define R_GPT32_GTCR_TPCS_0X7                           (0 << R_GPT32_GTCR_TPCS_SHIFT)  /* Setting prohibited */
-#  define R_GPT32_GTCR_TPCS_0X8                           (0 << R_GPT32_GTCR_TPCS_SHIFT)  /* PCLKD/256  */
-#  define R_GPT32_GTCR_TPCS_0X9                           (0 << R_GPT32_GTCR_TPCS_SHIFT)  /* Setting prohibited */
-#  define R_GPT32_GTCR_TPCS_0XA                           (0 << R_GPT32_GTCR_TPCS_SHIFT)  /* PCLKD/1024  */
-#  define R_GPT32_GTCR_TPCS_0XB                           (0 << R_GPT32_GTCR_TPCS_SHIFT)  /* Setting prohibited */
-#  define R_GPT32_GTCR_TPCS_0XC                           (0 << R_GPT32_GTCR_TPCS_SHIFT)  /* GTETRGA (Via the POEG) */
-#  define R_GPT32_GTCR_TPCS_0XD                           (0 << R_GPT32_GTCR_TPCS_SHIFT)  /* GTETRGB (Via the POEG) */
-#  define R_GPT32_GTCR_TPCS_0XE                           (0 << R_GPT32_GTCR_TPCS_SHIFT)  /* GTETRGC (Via the POEG) */
-#  define R_GPT32_GTCR_TPCS_0XF                           (0 << R_GPT32_GTCR_TPCS_SHIFT)  /* GTETRGD (Via the POEG) */
+#  define R_GPT32_GTCR_TPCS_0X1                           (1 << R_GPT32_GTCR_TPCS_SHIFT)  /* PCLKD/2  */
+#  define R_GPT32_GTCR_TPCS_0X2                           (2 << R_GPT32_GTCR_TPCS_SHIFT)  /* PCLKD/4  */
+#  define R_GPT32_GTCR_TPCS_0X3                           (3 << R_GPT32_GTCR_TPCS_SHIFT)  /* PCLKD/8  */
+#  define R_GPT32_GTCR_TPCS_0X4                           (4 << R_GPT32_GTCR_TPCS_SHIFT)  /* PCLKD/16  */
+#  define R_GPT32_GTCR_TPCS_0X5                           (5 << R_GPT32_GTCR_TPCS_SHIFT)  /* PCLKD/32  */
+#  define R_GPT32_GTCR_TPCS_0X6                           (6 << R_GPT32_GTCR_TPCS_SHIFT)  /* PCLKD/64  */
+#  define R_GPT32_GTCR_TPCS_0X7                           (7 << R_GPT32_GTCR_TPCS_SHIFT)  /* Setting prohibited */
+#  define R_GPT32_GTCR_TPCS_0X8                           (8 << R_GPT32_GTCR_TPCS_SHIFT)  /* PCLKD/256  */
+#  define R_GPT32_GTCR_TPCS_0X9                           (9 << R_GPT32_GTCR_TPCS_SHIFT)  /* Setting prohibited */
+#  define R_GPT32_GTCR_TPCS_0XA                           (10 << R_GPT32_GTCR_TPCS_SHIFT)  /* PCLKD/1024  */
+#  define R_GPT32_GTCR_TPCS_0XB                           (11 << R_GPT32_GTCR_TPCS_SHIFT)  /* Setting prohibited */
+#  define R_GPT32_GTCR_TPCS_0XC                           (12 << R_GPT32_GTCR_TPCS_SHIFT)  /* GTETRGA (Via the POEG) */
+#  define R_GPT32_GTCR_TPCS_0XD                           (13 << R_GPT32_GTCR_TPCS_SHIFT)  /* GTETRGB (Via the POEG) */
+#  define R_GPT32_GTCR_TPCS_0XE                           (14 << R_GPT32_GTCR_TPCS_SHIFT)  /* GTETRGC (Via the POEG) */
+#  define R_GPT32_GTCR_TPCS_0XF                           (15 << R_GPT32_GTCR_TPCS_SHIFT)  /* GTETRGD (Via the POEG) */
 
 /* GTUDDTYC Register bit definitions */
 #define R_GPT32_GTUDDTYC_UD                       (1 << 0)  /* Count Direction Setting */
@@ -790,25 +790,25 @@
 #define R_GPT32_GTICLF_ICLFSELC_SHIFT             (4)  /* Inter Channel Signal C Select */
 #define R_GPT32_GTICLF_ICLFSELC_MASK              0x3f0
 #  define R_GPT32_GTICLF_ICLFSELC_0X00                    (0 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC0A */
-#  define R_GPT32_GTICLF_ICLFSELC_0X01                    (0 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC0B */
-#  define R_GPT32_GTICLF_ICLFSELC_0X02                    (0 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC1A */
-#  define R_GPT32_GTICLF_ICLFSELC_0X03                    (0 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC1B */
-#  define R_GPT32_GTICLF_ICLFSELC_0X04                    (0 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC2A */
-#  define R_GPT32_GTICLF_ICLFSELC_0X05                    (0 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC2B */
-#  define R_GPT32_GTICLF_ICLFSELC_0X06                    (0 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC3A */
-#  define R_GPT32_GTICLF_ICLFSELC_0X07                    (0 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC3B */
-#  define R_GPT32_GTICLF_ICLFSELC_0X08                    (0 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC4A */
-#  define R_GPT32_GTICLF_ICLFSELC_0X09                    (0 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC4B */
-#  define R_GPT32_GTICLF_ICLFSELC_0X0A                    (0 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC5A */
-#  define R_GPT32_GTICLF_ICLFSELC_0X0B                    (0 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC5B */
-#  define R_GPT32_GTICLF_ICLFSELC_0X0C                    (0 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC6A */
-#  define R_GPT32_GTICLF_ICLFSELC_0X0D                    (0 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC6B */
-#  define R_GPT32_GTICLF_ICLFSELC_0X0E                    (0 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC7A */
-#  define R_GPT32_GTICLF_ICLFSELC_0X0F                    (0 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC7B */
-#  define R_GPT32_GTICLF_ICLFSELC_0X10                    (0 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC8A */
-#  define R_GPT32_GTICLF_ICLFSELC_0X11                    (0 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC8B */
-#  define R_GPT32_GTICLF_ICLFSELC_0X12                    (0 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC9A */
-#  define R_GPT32_GTICLF_ICLFSELC_0X13                    (0 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC9B */
+#  define R_GPT32_GTICLF_ICLFSELC_0X01                    (1 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC0B */
+#  define R_GPT32_GTICLF_ICLFSELC_0X02                    (2 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC1A */
+#  define R_GPT32_GTICLF_ICLFSELC_0X03                    (3 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC1B */
+#  define R_GPT32_GTICLF_ICLFSELC_0X04                    (4 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC2A */
+#  define R_GPT32_GTICLF_ICLFSELC_0X05                    (5 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC2B */
+#  define R_GPT32_GTICLF_ICLFSELC_0X06                    (6 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC3A */
+#  define R_GPT32_GTICLF_ICLFSELC_0X07                    (7 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC3B */
+#  define R_GPT32_GTICLF_ICLFSELC_0X08                    (8 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC4A */
+#  define R_GPT32_GTICLF_ICLFSELC_0X09                    (9 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC4B */
+#  define R_GPT32_GTICLF_ICLFSELC_0X0A                    (10 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC5A */
+#  define R_GPT32_GTICLF_ICLFSELC_0X0B                    (11 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC5B */
+#  define R_GPT32_GTICLF_ICLFSELC_0X0C                    (12 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC6A */
+#  define R_GPT32_GTICLF_ICLFSELC_0X0D                    (13 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC6B */
+#  define R_GPT32_GTICLF_ICLFSELC_0X0E                    (14 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC7A */
+#  define R_GPT32_GTICLF_ICLFSELC_0X0F                    (15 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC7B */
+#  define R_GPT32_GTICLF_ICLFSELC_0X10                    (16 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC8A */
+#  define R_GPT32_GTICLF_ICLFSELC_0X11                    (17 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC8B */
+#  define R_GPT32_GTICLF_ICLFSELC_0X12                    (18 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC9A */
+#  define R_GPT32_GTICLF_ICLFSELC_0X13                    (19 << R_GPT32_GTICLF_ICLFSELC_SHIFT)  /* GTIOC9B */
 
 #define R_GPT32_GTICLF_ICLFB_SHIFT                (16)  /* GTIOCnB Output Logical Operation Function Select */
 #define R_GPT32_GTICLF_ICLFB_MASK                 0x70000
@@ -824,25 +824,25 @@
 #define R_GPT32_GTICLF_ICLFSELD_SHIFT             (20)  /* Inter Channel Signal D Select */
 #define R_GPT32_GTICLF_ICLFSELD_MASK              0x3f00000
 #  define R_GPT32_GTICLF_ICLFSELD_0X00                    (0 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC0A */
-#  define R_GPT32_GTICLF_ICLFSELD_0X01                    (0 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC0B */
-#  define R_GPT32_GTICLF_ICLFSELD_0X02                    (0 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC1A */
-#  define R_GPT32_GTICLF_ICLFSELD_0X03                    (0 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC1B */
-#  define R_GPT32_GTICLF_ICLFSELD_0X04                    (0 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC2A */
-#  define R_GPT32_GTICLF_ICLFSELD_0X05                    (0 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC2B */
-#  define R_GPT32_GTICLF_ICLFSELD_0X06                    (0 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC3A */
-#  define R_GPT32_GTICLF_ICLFSELD_0X07                    (0 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC3B */
-#  define R_GPT32_GTICLF_ICLFSELD_0X08                    (0 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC4A */
-#  define R_GPT32_GTICLF_ICLFSELD_0X09                    (0 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC4B */
-#  define R_GPT32_GTICLF_ICLFSELD_0X0A                    (0 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC5A */
-#  define R_GPT32_GTICLF_ICLFSELD_0X0B                    (0 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC5B */
-#  define R_GPT32_GTICLF_ICLFSELD_0X0C                    (0 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC6A */
-#  define R_GPT32_GTICLF_ICLFSELD_0X0D                    (0 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC6B */
-#  define R_GPT32_GTICLF_ICLFSELD_0X0E                    (0 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC7A */
-#  define R_GPT32_GTICLF_ICLFSELD_0X0F                    (0 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC7B */
-#  define R_GPT32_GTICLF_ICLFSELD_0X10                    (0 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC8A */
-#  define R_GPT32_GTICLF_ICLFSELD_0X11                    (0 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC8B */
-#  define R_GPT32_GTICLF_ICLFSELD_0X12                    (0 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC9A */
-#  define R_GPT32_GTICLF_ICLFSELD_0X13                    (0 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC9B */
+#  define R_GPT32_GTICLF_ICLFSELD_0X01                    (1 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC0B */
+#  define R_GPT32_GTICLF_ICLFSELD_0X02                    (2 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC1A */
+#  define R_GPT32_GTICLF_ICLFSELD_0X03                    (3 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC1B */
+#  define R_GPT32_GTICLF_ICLFSELD_0X04                    (4 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC2A */
+#  define R_GPT32_GTICLF_ICLFSELD_0X05                    (5 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC2B */
+#  define R_GPT32_GTICLF_ICLFSELD_0X06                    (6 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC3A */
+#  define R_GPT32_GTICLF_ICLFSELD_0X07                    (7 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC3B */
+#  define R_GPT32_GTICLF_ICLFSELD_0X08                    (8 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC4A */
+#  define R_GPT32_GTICLF_ICLFSELD_0X09                    (9 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC4B */
+#  define R_GPT32_GTICLF_ICLFSELD_0X0A                    (10 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC5A */
+#  define R_GPT32_GTICLF_ICLFSELD_0X0B                    (11 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC5B */
+#  define R_GPT32_GTICLF_ICLFSELD_0X0C                    (12 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC6A */
+#  define R_GPT32_GTICLF_ICLFSELD_0X0D                    (13 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC6B */
+#  define R_GPT32_GTICLF_ICLFSELD_0X0E                    (14 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC7A */
+#  define R_GPT32_GTICLF_ICLFSELD_0X0F                    (15 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC7B */
+#  define R_GPT32_GTICLF_ICLFSELD_0X10                    (16 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC8A */
+#  define R_GPT32_GTICLF_ICLFSELD_0X11                    (17 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC8B */
+#  define R_GPT32_GTICLF_ICLFSELD_0X12                    (18 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC9A */
+#  define R_GPT32_GTICLF_ICLFSELD_0X13                    (19 << R_GPT32_GTICLF_ICLFSELD_SHIFT)  /* GTIOC9B */
 
 /* GTPC Register bit definitions */
 #define R_GPT32_GTPC_PCEN                         (1 << 0)  /* Period Count Function Enable */
@@ -895,4 +895,4 @@
 
 #define GPT32_MAX_CHANNELS    8
 
-#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_GPT32_H */
+#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_GPT32_H */

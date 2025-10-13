@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/ra8/hardware/ra8p1/ra_icu_common.h
+ * arch/arm/src/ra8/hardware/ra8e1/ra_icu_common.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_ICU_COMMON_H
-#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_ICU_COMMON_H
+#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_ICU_COMMON_H
+#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_ICU_COMMON_H
 
 /****************************************************************************
  * Included Files
@@ -38,20 +38,15 @@
 #endif
 #endif
 
-/* Channel stride for multi-channel peripherals */
-#define R_ICU_COMMON_CH_STRIDE    0x00000001
-#define R_ICU_COMMON_CH_BASE(ch)   (R_ICU_COMMON_BASE + ((uint32_t)(ch) * R_ICU_COMMON_CH_STRIDE))
-
 /* ICU_COMMON Register Offsets */
 
 /* IRQCR%s Registers (0-15) */
-#define R_ICU_COMMON_IRQCR_OFFSET                 0x00000000  /* IRQ Control Register %s */
-#define R_ICU_COMMON_IRQCR_INCREMENT              0x00000001
+#define R_ICU_COMMON_IRQCR_OFFSET(m)              (0x00000000 + ((m) * 0x00000001))  /* IRQ Control Register %s */
 #define R_ICU_COMMON_NMICR_OFFSET                 0x00000010  /* NMI Pin Interrupt Control Register */
 
 /* ICU_COMMON Register Addresses */
 
-#define R_ICU_COMMON_IRQCR(n)                     (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR_OFFSET + (n)*0x00000001)
+#define R_ICU_COMMON_IRQCR(m)                     (R_ICU_COMMON_BASE + R_ICU_COMMON_IRQCR_OFFSET(m))
 #define R_ICU_COMMON_NMICR                        (R_ICU_COMMON_BASE + R_ICU_COMMON_NMICR_OFFSET)
 
 /* Register bit definitions */
@@ -89,4 +84,4 @@
 
 #define ICU_COMMON_MAX_CHANNELS    16
 
-#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_ICU_COMMON_H */
+#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_ICU_COMMON_H */

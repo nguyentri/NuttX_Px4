@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/ra8/hardware/ra8p1/ra_icu.h
+ * arch/arm/src/ra8/hardware/ra8e1/ra_icu.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_ICU_H
-#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_ICU_H
+#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_ICU_H
+#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_ICU_H
 
 /****************************************************************************
  * Included Files
@@ -38,10 +38,6 @@
 #endif
 #endif
 
-/* Channel stride for multi-channel peripherals */
-#define R_ICU_CH_STRIDE    0x00000004
-#define R_ICU_CH_BASE(ch)   (R_ICU_BASE + ((uint32_t)(ch) * R_ICU_CH_STRIDE))
-
 /* ICU Register Offsets */
 
 #define R_ICU_NMIER_OFFSET                        0x00000100  /* Non-Maskable Interrupt Enable Register */
@@ -50,8 +46,7 @@
 #define R_ICU_WUPEN0_OFFSET                       0x000001a0  /* Wake Up Interrupt Enable Register 0 */
 #define R_ICU_WUPEN1_OFFSET                       0x000001a4  /* Wake Up interrupt enable register 1 */
 /* IELSR%s Registers (0-95) */
-#define R_ICU_IELSR_OFFSET                        0x00000300  /* ICU Event Link Setting Register %s */
-#define R_ICU_IELSR_INCREMENT                     0x00000004
+#define R_ICU_IELSR_OFFSET(m)                     (0x00000300 + ((m) * 0x00000004))  /* ICU Event Link Setting Register %s */
 
 /* ICU Register Addresses */
 
@@ -60,7 +55,7 @@
 #define R_ICU_NMISR                               (R_ICU_BASE + R_ICU_NMISR_OFFSET)
 #define R_ICU_WUPEN0                              (R_ICU_BASE + R_ICU_WUPEN0_OFFSET)
 #define R_ICU_WUPEN1                              (R_ICU_BASE + R_ICU_WUPEN1_OFFSET)
-#define R_ICU_IELSR(p)                            (R_ICU_BASE + R_ICU_IELSR_OFFSET + (p)*0x00000004)
+#define R_ICU_IELSR(m)                            (R_ICU_BASE + R_ICU_IELSR_OFFSET(m))
 
 /* Register bit definitions */
 /* NMIER Register bit definitions */
@@ -190,4 +185,4 @@
 
 #define ICU_MAX_CHANNELS    96
 
-#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_ICU_H */
+#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_ICU_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/ra8/hardware/ra8p1/ra_faci.h
+ * arch/arm/src/ra8/hardware/ra8e1/ra_faci.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_FACI_H
-#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_FACI_H
+#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_FACI_H
+#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_FACI_H
 
 /****************************************************************************
  * Included Files
@@ -38,10 +38,6 @@
 #endif
 #endif
 
-/* Channel stride for multi-channel peripherals */
-#define R_FACI_CH_STRIDE    0x00000004
-#define R_FACI_CH_BASE(ch)   (R_FACI_BASE + ((uint32_t)(ch) * R_FACI_CH_STRIDE))
-
 /* FACI Register Offsets */
 
 #define R_FACI_FASTAT_OFFSET                      0x00000010  /* Flash Access Status Register */
@@ -52,8 +48,7 @@
 #define R_FACI_FMEPROT_OFFSET                     0x00000044  /* Flash P/E Mode Entry Protection Register */
 #define R_FACI_FCNTSELR_OFFSET                    0x00000048  /* Flash Counter Select Register */
 /* FCNTDATAR%s Registers (0-1) */
-#define R_FACI_FCNTDATAR_OFFSET                   0x0000004c  /* Flash Counter Data Register %s */
-#define R_FACI_FCNTDATAR_INCREMENT                0x00000004
+#define R_FACI_FCNTDATAR_OFFSET(m)                (0x0000004c + ((m) * 0x00000004))  /* Flash Counter Data Register %s */
 #define R_FACI_FBPROT0_OFFSET                     0x00000078  /* Flash Block Protection Register */
 #define R_FACI_FBPROT1_OFFSET                     0x0000007c  /* Flash Block Protection for Secure Register */
 #define R_FACI_FSTATR_OFFSET                      0x00000080  /* Flash Status Register */
@@ -77,7 +72,7 @@
 #define R_FACI_FEADDR                             (R_FACI_BASE + R_FACI_FEADDR_OFFSET)
 #define R_FACI_FMEPROT                            (R_FACI_BASE + R_FACI_FMEPROT_OFFSET)
 #define R_FACI_FCNTSELR                           (R_FACI_BASE + R_FACI_FCNTSELR_OFFSET)
-#define R_FACI_FCNTDATAR(n)                       (R_FACI_BASE + R_FACI_FCNTDATAR_OFFSET + (n)*0x00000004)
+#define R_FACI_FCNTDATAR(m)                       (R_FACI_BASE + R_FACI_FCNTDATAR_OFFSET(m))
 #define R_FACI_FBPROT0                            (R_FACI_BASE + R_FACI_FBPROT0_OFFSET)
 #define R_FACI_FBPROT1                            (R_FACI_BASE + R_FACI_FBPROT1_OFFSET)
 #define R_FACI_FSTATR                             (R_FACI_BASE + R_FACI_FSTATR_OFFSET)
@@ -231,4 +226,4 @@
 
 #define FACI_MAX_CHANNELS    2
 
-#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_FACI_H */
+#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_FACI_H */

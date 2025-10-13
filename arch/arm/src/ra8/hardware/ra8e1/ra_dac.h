@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/ra8/hardware/ra8p1/ra_dac.h
+ * arch/arm/src/ra8/hardware/ra8e1/ra_dac.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_DAC_H
-#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_DAC_H
+#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_DAC_H
+#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_DAC_H
 
 /****************************************************************************
  * Included Files
@@ -37,8 +37,6 @@
 #define R_DAC_BASE           0x50333000
 #endif
 #endif
-
-#define R_DAC_CH_BASE(ch)   (R_DAC_BASE + ((uint32_t)(ch) * R_DAC_CH_STRIDE))
 
 /* DAC Register Offsets */
 
@@ -99,4 +97,4 @@
 
 #define DAC_MAX_CHANNELS    1
 
-#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_DAC_H */
+#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_DAC_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/ra8/hardware/ra8p1/ra_agt.h
+ * arch/arm/src/ra8/hardware/ra8e1/ra_agt.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_AGT_H
-#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_AGT_H
+#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_AGT_H
+#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_AGT_H
 
 /****************************************************************************
  * Included Files
@@ -57,16 +57,16 @@
 
 /* AGT Register Addresses */
 
-#define R_AGT_AGT                                 (R_AGT_BASE + R_AGT_AGT_OFFSET)
-#define R_AGT_AGTCMA                              (R_AGT_BASE + R_AGT_AGTCMA_OFFSET)
-#define R_AGT_AGTCMB                              (R_AGT_BASE + R_AGT_AGTCMB_OFFSET)
-#define R_AGT_AGTCR                               (R_AGT_BASE + R_AGT_AGTCR_OFFSET)
-#define R_AGT_AGTMR1                              (R_AGT_BASE + R_AGT_AGTMR1_OFFSET)
-#define R_AGT_AGTMR2                              (R_AGT_BASE + R_AGT_AGTMR2_OFFSET)
-#define R_AGT_AGTIOC                              (R_AGT_BASE + R_AGT_AGTIOC_OFFSET)
-#define R_AGT_AGTISR                              (R_AGT_BASE + R_AGT_AGTISR_OFFSET)
-#define R_AGT_AGTCMSR                             (R_AGT_BASE + R_AGT_AGTCMSR_OFFSET)
-#define R_AGT_AGTIOSEL                            (R_AGT_BASE + R_AGT_AGTIOSEL_OFFSET)
+#define R_AGT_AGT(n)                              (R_AGT_CH_BASE(n) + R_AGT_AGT_OFFSET)
+#define R_AGT_AGTCMA(n)                           (R_AGT_CH_BASE(n) + R_AGT_AGTCMA_OFFSET)
+#define R_AGT_AGTCMB(n)                           (R_AGT_CH_BASE(n) + R_AGT_AGTCMB_OFFSET)
+#define R_AGT_AGTCR(n)                            (R_AGT_CH_BASE(n) + R_AGT_AGTCR_OFFSET)
+#define R_AGT_AGTMR1(n)                           (R_AGT_CH_BASE(n) + R_AGT_AGTMR1_OFFSET)
+#define R_AGT_AGTMR2(n)                           (R_AGT_CH_BASE(n) + R_AGT_AGTMR2_OFFSET)
+#define R_AGT_AGTIOC(n)                           (R_AGT_CH_BASE(n) + R_AGT_AGTIOC_OFFSET)
+#define R_AGT_AGTISR(n)                           (R_AGT_CH_BASE(n) + R_AGT_AGTISR_OFFSET)
+#define R_AGT_AGTCMSR(n)                          (R_AGT_CH_BASE(n) + R_AGT_AGTCMSR_OFFSET)
+#define R_AGT_AGTIOSEL(n)                         (R_AGT_CH_BASE(n) + R_AGT_AGTIOSEL_OFFSET)
 
 /* Register bit definitions */
 /* AGTCR Register bit definitions */
@@ -159,4 +159,4 @@
 
 #define AGT_MAX_CHANNELS    2
 
-#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_AGT_H */
+#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_AGT_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/ra8/hardware/ra8p1/ra_elc.h
+ * arch/arm/src/ra8/hardware/ra8e1/ra_elc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_ELC_H
-#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_ELC_H
+#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_ELC_H
+#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_ELC_H
 
 /****************************************************************************
  * Included Files
@@ -38,19 +38,13 @@
 #endif
 #endif
 
-/* Channel stride for multi-channel peripherals */
-#define R_ELC_CH_STRIDE    0x00000004
-#define R_ELC_CH_BASE(ch)   (R_ELC_BASE + ((uint32_t)(ch) * R_ELC_CH_STRIDE))
-
 /* ELC Register Offsets */
 
 #define R_ELC_ELCR_OFFSET                         0x00000000  /* Event Link Controller Register */
 /* ELSEGR%s Registers (0-1) */
-#define R_ELC_ELSEGR_OFFSET                       0x00000004  /* Event Link Software Event Generation Register %s */
-#define R_ELC_ELSEGR_INCREMENT                    0x00000004
+#define R_ELC_ELSEGR_OFFSET(m)                    (0x00000004 + ((m) * 0x00000004))  /* Event Link Software Event Generation Register %s */
 /* ELSR%s Registers (0-17) */
-#define R_ELC_ELSR_OFFSET                         0x00000020  /* Event Link Setting Registern */
-#define R_ELC_ELSR_INCREMENT                      0x00000004
+#define R_ELC_ELSR_OFFSET(m)                      (0x00000020 + ((m) * 0x00000004))  /* Event Link Setting Registern */
 #define R_ELC_ELSR30_OFFSET                       0x00000098  /* Event Link Setting Register30 */
 #define R_ELC_ELCSARA_OFFSET                      0x000000e0  /* Event Link Controller Security Attribution Register A */
 #define R_ELC_ELCSARB_OFFSET                      0x000000e4  /* Event Link Controller Security Attribution Register B */
@@ -60,8 +54,8 @@
 /* ELC Register Addresses */
 
 #define R_ELC_ELCR                                (R_ELC_BASE + R_ELC_ELCR_OFFSET)
-#define R_ELC_ELSEGR(n)                           (R_ELC_BASE + R_ELC_ELSEGR_OFFSET + (n)*0x00000004)
-#define R_ELC_ELSR(n)                             (R_ELC_BASE + R_ELC_ELSR_OFFSET + (n)*0x00000004)
+#define R_ELC_ELSEGR(m)                           (R_ELC_BASE + R_ELC_ELSEGR_OFFSET(m))
+#define R_ELC_ELSR(m)                             (R_ELC_BASE + R_ELC_ELSR_OFFSET(m))
 #define R_ELC_ELSR30                              (R_ELC_BASE + R_ELC_ELSR30_OFFSET)
 #define R_ELC_ELCSARA                             (R_ELC_BASE + R_ELC_ELCSARA_OFFSET)
 #define R_ELC_ELCSARB                             (R_ELC_BASE + R_ELC_ELCSARB_OFFSET)
@@ -194,4 +188,4 @@
 
 #define ELC_MAX_CHANNELS    18
 
-#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_ELC_H */
+#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_ELC_H */

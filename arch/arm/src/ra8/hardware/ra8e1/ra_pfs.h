@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/ra8/hardware/ra8p1/ra_pfs.h
+ * arch/arm/src/ra8/hardware/ra8e1/ra_pfs.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_PFS_H
-#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_PFS_H
+#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_PFS_H
+#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_PFS_H
 
 /****************************************************************************
  * Included Files
@@ -41,10 +41,6 @@
 /* PFS Register Array Strides */
 #define R_PFS_PSEL_PORT_OFFSET          0x40
 #define R_PFS_PSEL_PIN_OFFSET           0x04
-
-/* Channel stride for multi-channel peripherals */
-#define R_PFS_CH_STRIDE    0x00000004
-#define R_PFS_CH_BASE(ch)   (R_PFS_BASE + ((uint32_t)(ch) * R_PFS_CH_STRIDE))
 
 /* PFS Register Offsets */
 
@@ -126,4 +122,4 @@
 
 #define PFS_MAX_CHANNELS    12
 
-#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_PFS_H */
+#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_PFS_H */

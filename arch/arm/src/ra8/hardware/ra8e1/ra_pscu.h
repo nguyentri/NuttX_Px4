@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/ra8/hardware/ra8p1/ra_pscu.h
+ * arch/arm/src/ra8/hardware/ra8e1/ra_pscu.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_PSCU_H
-#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_PSCU_H
+#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_PSCU_H
+#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_PSCU_H
 
 /****************************************************************************
  * Included Files
@@ -733,19 +733,19 @@
 #define R_PSCU_DLMMON_DLMMON_SHIFT                (0)  /* Device Lifecycle Management State Monitor */
 #define R_PSCU_DLMMON_DLMMON_MASK                 0xf
 #  define R_PSCU_DLMMON_DLMMON_0X0                        (0 << R_PSCU_DLMMON_DLMMON_SHIFT)  /* Reserved */
-#  define R_PSCU_DLMMON_DLMMON_0X1                        (0 << R_PSCU_DLMMON_DLMMON_SHIFT)  /* Reserved */
-#  define R_PSCU_DLMMON_DLMMON_0X2                        (0 << R_PSCU_DLMMON_DLMMON_SHIFT)  /* Reserved */
-#  define R_PSCU_DLMMON_DLMMON_0X3                        (0 << R_PSCU_DLMMON_DLMMON_SHIFT)  /* Reserved */
-#  define R_PSCU_DLMMON_DLMMON_0X4                        (0 << R_PSCU_DLMMON_DLMMON_SHIFT)  /* OEM */
-#  define R_PSCU_DLMMON_DLMMON_0X5                        (0 << R_PSCU_DLMMON_DLMMON_SHIFT)  /* Reserved */
-#  define R_PSCU_DLMMON_DLMMON_0X6                        (0 << R_PSCU_DLMMON_DLMMON_SHIFT)  /* LCK_BOOT */
-#  define R_PSCU_DLMMON_DLMMON_0X7                        (0 << R_PSCU_DLMMON_DLMMON_SHIFT)  /* RMA_REQ */
-#  define R_PSCU_DLMMON_DLMMON_0X8                        (0 << R_PSCU_DLMMON_DLMMON_SHIFT)  /* RMA_ACK */
-#  define R_PSCU_DLMMON_DLMMON_0X9                        (0 << R_PSCU_DLMMON_DLMMON_SHIFT)  /* RMA_RET */
+#  define R_PSCU_DLMMON_DLMMON_0X1                        (1 << R_PSCU_DLMMON_DLMMON_SHIFT)  /* Reserved */
+#  define R_PSCU_DLMMON_DLMMON_0X2                        (2 << R_PSCU_DLMMON_DLMMON_SHIFT)  /* Reserved */
+#  define R_PSCU_DLMMON_DLMMON_0X3                        (3 << R_PSCU_DLMMON_DLMMON_SHIFT)  /* Reserved */
+#  define R_PSCU_DLMMON_DLMMON_0X4                        (4 << R_PSCU_DLMMON_DLMMON_SHIFT)  /* OEM */
+#  define R_PSCU_DLMMON_DLMMON_0X5                        (5 << R_PSCU_DLMMON_DLMMON_SHIFT)  /* Reserved */
+#  define R_PSCU_DLMMON_DLMMON_0X6                        (6 << R_PSCU_DLMMON_DLMMON_SHIFT)  /* LCK_BOOT */
+#  define R_PSCU_DLMMON_DLMMON_0X7                        (7 << R_PSCU_DLMMON_DLMMON_SHIFT)  /* RMA_REQ */
+#  define R_PSCU_DLMMON_DLMMON_0X8                        (8 << R_PSCU_DLMMON_DLMMON_SHIFT)  /* RMA_ACK */
+#  define R_PSCU_DLMMON_DLMMON_0X9                        (9 << R_PSCU_DLMMON_DLMMON_SHIFT)  /* RMA_RET */
 
 
 /* Maximum number of channels */
 
 #define PSCU_MAX_CHANNELS    1
 
-#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_PSCU_H */
+#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_PSCU_H */

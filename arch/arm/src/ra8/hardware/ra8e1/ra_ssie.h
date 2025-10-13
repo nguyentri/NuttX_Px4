@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/ra8/hardware/ra8p1/ra_ssie.h
+ * arch/arm/src/ra8/hardware/ra8e1/ra_ssie.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_SSIE_H
-#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_SSIE_H
+#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_SSIE_H
+#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_SSIE_H
 
 /****************************************************************************
  * Included Files
@@ -55,14 +55,14 @@
 
 /* SSIE Register Addresses */
 
-#define R_SSIE_SSICR                              (R_SSIE_BASE + R_SSIE_SSICR_OFFSET)
-#define R_SSIE_SSISR                              (R_SSIE_BASE + R_SSIE_SSISR_OFFSET)
-#define R_SSIE_SSIFCR                             (R_SSIE_BASE + R_SSIE_SSIFCR_OFFSET)
-#define R_SSIE_SSIFSR                             (R_SSIE_BASE + R_SSIE_SSIFSR_OFFSET)
-#define R_SSIE_SSIFTDR                            (R_SSIE_BASE + R_SSIE_SSIFTDR_OFFSET)
-#define R_SSIE_SSIFRDR                            (R_SSIE_BASE + R_SSIE_SSIFRDR_OFFSET)
-#define R_SSIE_SSIOFR                             (R_SSIE_BASE + R_SSIE_SSIOFR_OFFSET)
-#define R_SSIE_SSISCR                             (R_SSIE_BASE + R_SSIE_SSISCR_OFFSET)
+#define R_SSIE_SSICR(n)                           (R_SSIE_CH_BASE(n) + R_SSIE_SSICR_OFFSET)
+#define R_SSIE_SSISR(n)                           (R_SSIE_CH_BASE(n) + R_SSIE_SSISR_OFFSET)
+#define R_SSIE_SSIFCR(n)                          (R_SSIE_CH_BASE(n) + R_SSIE_SSIFCR_OFFSET)
+#define R_SSIE_SSIFSR(n)                          (R_SSIE_CH_BASE(n) + R_SSIE_SSIFSR_OFFSET)
+#define R_SSIE_SSIFTDR(n)                         (R_SSIE_CH_BASE(n) + R_SSIE_SSIFTDR_OFFSET)
+#define R_SSIE_SSIFRDR(n)                         (R_SSIE_CH_BASE(n) + R_SSIE_SSIFRDR_OFFSET)
+#define R_SSIE_SSIOFR(n)                          (R_SSIE_CH_BASE(n) + R_SSIE_SSIOFR_OFFSET)
+#define R_SSIE_SSISCR(n)                          (R_SSIE_CH_BASE(n) + R_SSIE_SSISCR_OFFSET)
 
 /* Register bit definitions */
 /* SSICR Register bit definitions */
@@ -75,18 +75,18 @@
 #define R_SSIE_SSICR_CKDV_SHIFT                   (4)  /* Selects Bit Clock Division Ratio */
 #define R_SSIE_SSICR_CKDV_MASK                    0xf0
 #  define R_SSIE_SSICR_CKDV_0X0                           (0 << R_SSIE_SSICR_CKDV_SHIFT)  /* AUDIO_MCK */
-#  define R_SSIE_SSICR_CKDV_0X1                           (0 << R_SSIE_SSICR_CKDV_SHIFT)  /* AUDIO_MCK/2 */
-#  define R_SSIE_SSICR_CKDV_0X2                           (0 << R_SSIE_SSICR_CKDV_SHIFT)  /* AUDIO_MCK/4 */
-#  define R_SSIE_SSICR_CKDV_0X3                           (0 << R_SSIE_SSICR_CKDV_SHIFT)  /* AUDIO_MCK/8 */
-#  define R_SSIE_SSICR_CKDV_0X4                           (0 << R_SSIE_SSICR_CKDV_SHIFT)  /* AUDIO_MCK/16 */
-#  define R_SSIE_SSICR_CKDV_0X5                           (0 << R_SSIE_SSICR_CKDV_SHIFT)  /* AUDIO_MCK/32 */
-#  define R_SSIE_SSICR_CKDV_0X6                           (0 << R_SSIE_SSICR_CKDV_SHIFT)  /* AUDIO_MCK/64 */
-#  define R_SSIE_SSICR_CKDV_0X7                           (0 << R_SSIE_SSICR_CKDV_SHIFT)  /* AUDIO_MCK/128 */
-#  define R_SSIE_SSICR_CKDV_0X8                           (0 << R_SSIE_SSICR_CKDV_SHIFT)  /* AUDIO_MCK/6 */
-#  define R_SSIE_SSICR_CKDV_0X9                           (0 << R_SSIE_SSICR_CKDV_SHIFT)  /* AUDIO_MCK/12 */
-#  define R_SSIE_SSICR_CKDV_0XA                           (0 << R_SSIE_SSICR_CKDV_SHIFT)  /* AUDIO_MCK/24 */
-#  define R_SSIE_SSICR_CKDV_0XB                           (0 << R_SSIE_SSICR_CKDV_SHIFT)  /* AUDIO_MCK/48 */
-#  define R_SSIE_SSICR_CKDV_0XC                           (0 << R_SSIE_SSICR_CKDV_SHIFT)  /* AUDIO_MCK/96 */
+#  define R_SSIE_SSICR_CKDV_0X1                           (1 << R_SSIE_SSICR_CKDV_SHIFT)  /* AUDIO_MCK/2 */
+#  define R_SSIE_SSICR_CKDV_0X2                           (2 << R_SSIE_SSICR_CKDV_SHIFT)  /* AUDIO_MCK/4 */
+#  define R_SSIE_SSICR_CKDV_0X3                           (3 << R_SSIE_SSICR_CKDV_SHIFT)  /* AUDIO_MCK/8 */
+#  define R_SSIE_SSICR_CKDV_0X4                           (4 << R_SSIE_SSICR_CKDV_SHIFT)  /* AUDIO_MCK/16 */
+#  define R_SSIE_SSICR_CKDV_0X5                           (5 << R_SSIE_SSICR_CKDV_SHIFT)  /* AUDIO_MCK/32 */
+#  define R_SSIE_SSICR_CKDV_0X6                           (6 << R_SSIE_SSICR_CKDV_SHIFT)  /* AUDIO_MCK/64 */
+#  define R_SSIE_SSICR_CKDV_0X7                           (7 << R_SSIE_SSICR_CKDV_SHIFT)  /* AUDIO_MCK/128 */
+#  define R_SSIE_SSICR_CKDV_0X8                           (8 << R_SSIE_SSICR_CKDV_SHIFT)  /* AUDIO_MCK/6 */
+#  define R_SSIE_SSICR_CKDV_0X9                           (9 << R_SSIE_SSICR_CKDV_SHIFT)  /* AUDIO_MCK/12 */
+#  define R_SSIE_SSICR_CKDV_0XA                           (10 << R_SSIE_SSICR_CKDV_SHIFT)  /* AUDIO_MCK/24 */
+#  define R_SSIE_SSICR_CKDV_0XB                           (11 << R_SSIE_SSICR_CKDV_SHIFT)  /* AUDIO_MCK/48 */
+#  define R_SSIE_SSICR_CKDV_0XC                           (12 << R_SSIE_SSICR_CKDV_SHIFT)  /* AUDIO_MCK/96 */
 
 #define R_SSIE_SSICR_DEL                          (1 << 8)  /* Selects Serial Data Delay */
 
@@ -208,4 +208,4 @@
 
 #define SSIE_MAX_CHANNELS    2
 
-#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_SSIE_H */
+#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_SSIE_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/ra8/hardware/ra8p1/ra_edmac.h
+ * arch/arm/src/ra8/hardware/ra8e1/ra_edmac.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_EDMAC_H
-#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_EDMAC_H
+#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_EDMAC_H
+#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_EDMAC_H
 
 /****************************************************************************
  * Included Files
@@ -213,11 +213,11 @@
 /* FDR Register bit definitions */
 #define R_EDMAC_FDR_RFD_SHIFT                     (0)  /* Receive FIFO Depth */
 #define R_EDMAC_FDR_RFD_MASK                      0x1f
-#  define R_EDMAC_FDR_RFD_0X0F                            (0 << R_EDMAC_FDR_RFD_SHIFT)  /* 4096 bytes */
+#  define R_EDMAC_FDR_RFD_0X0F                            (15 << R_EDMAC_FDR_RFD_SHIFT)  /* 4096 bytes */
 
 #define R_EDMAC_FDR_TFD_SHIFT                     (8)  /* Transmit FIFO Depth */
 #define R_EDMAC_FDR_TFD_MASK                      0x1f00
-#  define R_EDMAC_FDR_TFD_0X07                            (0 << R_EDMAC_FDR_TFD_SHIFT)  /* 2048 bytes */
+#  define R_EDMAC_FDR_TFD_0X07                            (7 << R_EDMAC_FDR_TFD_SHIFT)  /* 2048 bytes */
 
 /* RMCR Register bit definitions */
 #define R_EDMAC_RMCR_RNR                          (1 << 0)  /* Receive Request Reset */
@@ -258,4 +258,4 @@
 
 #define EDMAC_MAX_CHANNELS    1
 
-#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_EDMAC_H */
+#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_EDMAC_H */

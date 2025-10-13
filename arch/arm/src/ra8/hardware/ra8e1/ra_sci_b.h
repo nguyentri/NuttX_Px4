@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/ra8/hardware/ra8p1/ra_sci_b.h
+ * arch/arm/src/ra8/hardware/ra8e1/ra_sci_b.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_SCI_B_H
-#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_SCI_B_H
+#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_SCI_B_H
+#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_SCI_B_H
 
 /****************************************************************************
  * Included Files
@@ -77,36 +77,36 @@
 
 /* SCI_B Register Addresses */
 
-#define R_SCI_B_RDR                               (R_SCI_B_BASE + R_SCI_B_RDR_OFFSET)
-#define R_SCI_B_RDR_BY                            (R_SCI_B_BASE + R_SCI_B_RDR_BY_OFFSET)
-#define R_SCI_B_TDR                               (R_SCI_B_BASE + R_SCI_B_TDR_OFFSET)
-#define R_SCI_B_TDRLL                             (R_SCI_B_BASE + R_SCI_B_TDRLL_OFFSET)
-#define R_SCI_B_TDRLH                             (R_SCI_B_BASE + R_SCI_B_TDRLH_OFFSET)
-#define R_SCI_B_CCR0                              (R_SCI_B_BASE + R_SCI_B_CCR0_OFFSET)
-#define R_SCI_B_CCR1                              (R_SCI_B_BASE + R_SCI_B_CCR1_OFFSET)
-#define R_SCI_B_CCR2                              (R_SCI_B_BASE + R_SCI_B_CCR2_OFFSET)
-#define R_SCI_B_CCR3                              (R_SCI_B_BASE + R_SCI_B_CCR3_OFFSET)
-#define R_SCI_B_CCR4                              (R_SCI_B_BASE + R_SCI_B_CCR4_OFFSET)
-#define R_SCI_B_CESR                              (R_SCI_B_BASE + R_SCI_B_CESR_OFFSET)
-#define R_SCI_B_ICR                               (R_SCI_B_BASE + R_SCI_B_ICR_OFFSET)
-#define R_SCI_B_FCR                               (R_SCI_B_BASE + R_SCI_B_FCR_OFFSET)
-#define R_SCI_B_MCR                               (R_SCI_B_BASE + R_SCI_B_MCR_OFFSET)
-#define R_SCI_B_DCR                               (R_SCI_B_BASE + R_SCI_B_DCR_OFFSET)
-#define R_SCI_B_XCR0                              (R_SCI_B_BASE + R_SCI_B_XCR0_OFFSET)
-#define R_SCI_B_XCR1                              (R_SCI_B_BASE + R_SCI_B_XCR1_OFFSET)
-#define R_SCI_B_XCR2                              (R_SCI_B_BASE + R_SCI_B_XCR2_OFFSET)
-#define R_SCI_B_CSR                               (R_SCI_B_BASE + R_SCI_B_CSR_OFFSET)
-#define R_SCI_B_ISR                               (R_SCI_B_BASE + R_SCI_B_ISR_OFFSET)
-#define R_SCI_B_FRSR                              (R_SCI_B_BASE + R_SCI_B_FRSR_OFFSET)
-#define R_SCI_B_FTSR                              (R_SCI_B_BASE + R_SCI_B_FTSR_OFFSET)
-#define R_SCI_B_MSR                               (R_SCI_B_BASE + R_SCI_B_MSR_OFFSET)
-#define R_SCI_B_XSR0                              (R_SCI_B_BASE + R_SCI_B_XSR0_OFFSET)
-#define R_SCI_B_XSR1                              (R_SCI_B_BASE + R_SCI_B_XSR1_OFFSET)
-#define R_SCI_B_CFCLR                             (R_SCI_B_BASE + R_SCI_B_CFCLR_OFFSET)
-#define R_SCI_B_ICFCLR                            (R_SCI_B_BASE + R_SCI_B_ICFCLR_OFFSET)
-#define R_SCI_B_FFCLR                             (R_SCI_B_BASE + R_SCI_B_FFCLR_OFFSET)
-#define R_SCI_B_MFCLR                             (R_SCI_B_BASE + R_SCI_B_MFCLR_OFFSET)
-#define R_SCI_B_XFCLR                             (R_SCI_B_BASE + R_SCI_B_XFCLR_OFFSET)
+#define R_SCI_B_RDR(n)                            (R_SCI_B_CH_BASE(n) + R_SCI_B_RDR_OFFSET)
+#define R_SCI_B_RDR_BY(n)                         (R_SCI_B_CH_BASE(n) + R_SCI_B_RDR_BY_OFFSET)
+#define R_SCI_B_TDR(n)                            (R_SCI_B_CH_BASE(n) + R_SCI_B_TDR_OFFSET)
+#define R_SCI_B_TDRLL(n)                          (R_SCI_B_CH_BASE(n) + R_SCI_B_TDRLL_OFFSET)
+#define R_SCI_B_TDRLH(n)                          (R_SCI_B_CH_BASE(n) + R_SCI_B_TDRLH_OFFSET)
+#define R_SCI_B_CCR0(n)                           (R_SCI_B_CH_BASE(n) + R_SCI_B_CCR0_OFFSET)
+#define R_SCI_B_CCR1(n)                           (R_SCI_B_CH_BASE(n) + R_SCI_B_CCR1_OFFSET)
+#define R_SCI_B_CCR2(n)                           (R_SCI_B_CH_BASE(n) + R_SCI_B_CCR2_OFFSET)
+#define R_SCI_B_CCR3(n)                           (R_SCI_B_CH_BASE(n) + R_SCI_B_CCR3_OFFSET)
+#define R_SCI_B_CCR4(n)                           (R_SCI_B_CH_BASE(n) + R_SCI_B_CCR4_OFFSET)
+#define R_SCI_B_CESR(n)                           (R_SCI_B_CH_BASE(n) + R_SCI_B_CESR_OFFSET)
+#define R_SCI_B_ICR(n)                            (R_SCI_B_CH_BASE(n) + R_SCI_B_ICR_OFFSET)
+#define R_SCI_B_FCR(n)                            (R_SCI_B_CH_BASE(n) + R_SCI_B_FCR_OFFSET)
+#define R_SCI_B_MCR(n)                            (R_SCI_B_CH_BASE(n) + R_SCI_B_MCR_OFFSET)
+#define R_SCI_B_DCR(n)                            (R_SCI_B_CH_BASE(n) + R_SCI_B_DCR_OFFSET)
+#define R_SCI_B_XCR0(n)                           (R_SCI_B_CH_BASE(n) + R_SCI_B_XCR0_OFFSET)
+#define R_SCI_B_XCR1(n)                           (R_SCI_B_CH_BASE(n) + R_SCI_B_XCR1_OFFSET)
+#define R_SCI_B_XCR2(n)                           (R_SCI_B_CH_BASE(n) + R_SCI_B_XCR2_OFFSET)
+#define R_SCI_B_CSR(n)                            (R_SCI_B_CH_BASE(n) + R_SCI_B_CSR_OFFSET)
+#define R_SCI_B_ISR(n)                            (R_SCI_B_CH_BASE(n) + R_SCI_B_ISR_OFFSET)
+#define R_SCI_B_FRSR(n)                           (R_SCI_B_CH_BASE(n) + R_SCI_B_FRSR_OFFSET)
+#define R_SCI_B_FTSR(n)                           (R_SCI_B_CH_BASE(n) + R_SCI_B_FTSR_OFFSET)
+#define R_SCI_B_MSR(n)                            (R_SCI_B_CH_BASE(n) + R_SCI_B_MSR_OFFSET)
+#define R_SCI_B_XSR0(n)                           (R_SCI_B_CH_BASE(n) + R_SCI_B_XSR0_OFFSET)
+#define R_SCI_B_XSR1(n)                           (R_SCI_B_CH_BASE(n) + R_SCI_B_XSR1_OFFSET)
+#define R_SCI_B_CFCLR(n)                          (R_SCI_B_CH_BASE(n) + R_SCI_B_CFCLR_OFFSET)
+#define R_SCI_B_ICFCLR(n)                         (R_SCI_B_CH_BASE(n) + R_SCI_B_ICFCLR_OFFSET)
+#define R_SCI_B_FFCLR(n)                          (R_SCI_B_CH_BASE(n) + R_SCI_B_FFCLR_OFFSET)
+#define R_SCI_B_MFCLR(n)                          (R_SCI_B_CH_BASE(n) + R_SCI_B_MFCLR_OFFSET)
+#define R_SCI_B_XFCLR(n)                          (R_SCI_B_CH_BASE(n) + R_SCI_B_XFCLR_OFFSET)
 
 /* Register bit definitions */
 /* RDR Register bit definitions */
@@ -636,4 +636,4 @@
 
 #define SCI_B_MAX_CHANNELS    6
 
-#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_SCI_B_H */
+#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_SCI_B_H */

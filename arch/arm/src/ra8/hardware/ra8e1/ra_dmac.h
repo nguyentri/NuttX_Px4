@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/ra8/hardware/ra8p1/ra_dmac.h
+ * arch/arm/src/ra8/hardware/ra8e1/ra_dmac.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_DMAC_H
-#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_DMAC_H
+#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_DMAC_H
+#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_DMAC_H
 
 /****************************************************************************
  * Included Files
@@ -63,22 +63,22 @@
 
 /* DMAC Register Addresses */
 
-#define R_DMAC_DMSAR                              (R_DMAC_BASE + R_DMAC_DMSAR_OFFSET)
-#define R_DMAC_DMDAR                              (R_DMAC_BASE + R_DMAC_DMDAR_OFFSET)
-#define R_DMAC_DMCRA                              (R_DMAC_BASE + R_DMAC_DMCRA_OFFSET)
-#define R_DMAC_DMCRB                              (R_DMAC_BASE + R_DMAC_DMCRB_OFFSET)
-#define R_DMAC_DMTMD                              (R_DMAC_BASE + R_DMAC_DMTMD_OFFSET)
-#define R_DMAC_DMINT                              (R_DMAC_BASE + R_DMAC_DMINT_OFFSET)
-#define R_DMAC_DMAMD                              (R_DMAC_BASE + R_DMAC_DMAMD_OFFSET)
-#define R_DMAC_DMOFR                              (R_DMAC_BASE + R_DMAC_DMOFR_OFFSET)
-#define R_DMAC_DMCNT                              (R_DMAC_BASE + R_DMAC_DMCNT_OFFSET)
-#define R_DMAC_DMREQ                              (R_DMAC_BASE + R_DMAC_DMREQ_OFFSET)
-#define R_DMAC_DMSTS                              (R_DMAC_BASE + R_DMAC_DMSTS_OFFSET)
-#define R_DMAC_DMSRR                              (R_DMAC_BASE + R_DMAC_DMSRR_OFFSET)
-#define R_DMAC_DMDRR                              (R_DMAC_BASE + R_DMAC_DMDRR_OFFSET)
-#define R_DMAC_DMSBS                              (R_DMAC_BASE + R_DMAC_DMSBS_OFFSET)
-#define R_DMAC_DMDBS                              (R_DMAC_BASE + R_DMAC_DMDBS_OFFSET)
-#define R_DMAC_DMBWR                              (R_DMAC_BASE + R_DMAC_DMBWR_OFFSET)
+#define R_DMAC_DMSAR(n)                           (R_DMAC_CH_BASE(n) + R_DMAC_DMSAR_OFFSET)
+#define R_DMAC_DMDAR(n)                           (R_DMAC_CH_BASE(n) + R_DMAC_DMDAR_OFFSET)
+#define R_DMAC_DMCRA(n)                           (R_DMAC_CH_BASE(n) + R_DMAC_DMCRA_OFFSET)
+#define R_DMAC_DMCRB(n)                           (R_DMAC_CH_BASE(n) + R_DMAC_DMCRB_OFFSET)
+#define R_DMAC_DMTMD(n)                           (R_DMAC_CH_BASE(n) + R_DMAC_DMTMD_OFFSET)
+#define R_DMAC_DMINT(n)                           (R_DMAC_CH_BASE(n) + R_DMAC_DMINT_OFFSET)
+#define R_DMAC_DMAMD(n)                           (R_DMAC_CH_BASE(n) + R_DMAC_DMAMD_OFFSET)
+#define R_DMAC_DMOFR(n)                           (R_DMAC_CH_BASE(n) + R_DMAC_DMOFR_OFFSET)
+#define R_DMAC_DMCNT(n)                           (R_DMAC_CH_BASE(n) + R_DMAC_DMCNT_OFFSET)
+#define R_DMAC_DMREQ(n)                           (R_DMAC_CH_BASE(n) + R_DMAC_DMREQ_OFFSET)
+#define R_DMAC_DMSTS(n)                           (R_DMAC_CH_BASE(n) + R_DMAC_DMSTS_OFFSET)
+#define R_DMAC_DMSRR(n)                           (R_DMAC_CH_BASE(n) + R_DMAC_DMSRR_OFFSET)
+#define R_DMAC_DMDRR(n)                           (R_DMAC_CH_BASE(n) + R_DMAC_DMDRR_OFFSET)
+#define R_DMAC_DMSBS(n)                           (R_DMAC_CH_BASE(n) + R_DMAC_DMSBS_OFFSET)
+#define R_DMAC_DMDBS(n)                           (R_DMAC_CH_BASE(n) + R_DMAC_DMDBS_OFFSET)
+#define R_DMAC_DMBWR(n)                           (R_DMAC_CH_BASE(n) + R_DMAC_DMBWR_OFFSET)
 
 /* Register bit definitions */
 /* DMSAR Register bit definitions */
@@ -211,4 +211,4 @@
 
 #define DMAC_MAX_CHANNELS    8
 
-#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_DMAC_H */
+#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_DMAC_H */

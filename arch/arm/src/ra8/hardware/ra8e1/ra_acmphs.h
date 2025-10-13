@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/ra8/hardware/ra8p1/ra_acmphs.h
+ * arch/arm/src/ra8/hardware/ra8e1/ra_acmphs.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_ACMPHS_H
-#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_ACMPHS_H
+#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_ACMPHS_H
+#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_ACMPHS_H
 
 /****************************************************************************
  * Included Files
@@ -54,13 +54,13 @@
 
 /* ACMPHS Register Addresses */
 
-#define R_ACMPHS_CMPCTL                           (R_ACMPHS_BASE + R_ACMPHS_CMPCTL_OFFSET)
-#define R_ACMPHS_CMPSEL0                          (R_ACMPHS_BASE + R_ACMPHS_CMPSEL0_OFFSET)
-#define R_ACMPHS_CMPSEL1                          (R_ACMPHS_BASE + R_ACMPHS_CMPSEL1_OFFSET)
-#define R_ACMPHS_CMPMON                           (R_ACMPHS_BASE + R_ACMPHS_CMPMON_OFFSET)
-#define R_ACMPHS_CPIOC                            (R_ACMPHS_BASE + R_ACMPHS_CPIOC_OFFSET)
-#define R_ACMPHS_CPINTCTL                         (R_ACMPHS_BASE + R_ACMPHS_CPINTCTL_OFFSET)
-#define R_ACMPHS_CPMSKCTL                         (R_ACMPHS_BASE + R_ACMPHS_CPMSKCTL_OFFSET)
+#define R_ACMPHS_CMPCTL(n)                        (R_ACMPHS_CH_BASE(n) + R_ACMPHS_CMPCTL_OFFSET)
+#define R_ACMPHS_CMPSEL0(n)                       (R_ACMPHS_CH_BASE(n) + R_ACMPHS_CMPSEL0_OFFSET)
+#define R_ACMPHS_CMPSEL1(n)                       (R_ACMPHS_CH_BASE(n) + R_ACMPHS_CMPSEL1_OFFSET)
+#define R_ACMPHS_CMPMON(n)                        (R_ACMPHS_CH_BASE(n) + R_ACMPHS_CMPMON_OFFSET)
+#define R_ACMPHS_CPIOC(n)                         (R_ACMPHS_CH_BASE(n) + R_ACMPHS_CPIOC_OFFSET)
+#define R_ACMPHS_CPINTCTL(n)                      (R_ACMPHS_CH_BASE(n) + R_ACMPHS_CPINTCTL_OFFSET)
+#define R_ACMPHS_CPMSKCTL(n)                      (R_ACMPHS_CH_BASE(n) + R_ACMPHS_CPMSKCTL_OFFSET)
 
 /* Register bit definitions */
 /* CMPCTL Register bit definitions */
@@ -90,18 +90,18 @@
 #define R_ACMPHS_CMPSEL0_CMPSEL_SHIFT             (0)  /* Comparator Input Selection */
 #define R_ACMPHS_CMPSEL0_CMPSEL_MASK              0xf
 #  define R_ACMPHS_CMPSEL0_CMPSEL_0X00                    (0 << R_ACMPHS_CMPSEL0_CMPSEL_SHIFT)  /* Do not input */
-#  define R_ACMPHS_CMPSEL0_CMPSEL_0X01                    (0 << R_ACMPHS_CMPSEL0_CMPSEL_SHIFT)  /* Select IVCMP0 */
-#  define R_ACMPHS_CMPSEL0_CMPSEL_0X04                    (0 << R_ACMPHS_CMPSEL0_CMPSEL_SHIFT)  /* Select IVCMP2 */
-#  define R_ACMPHS_CMPSEL0_CMPSEL_0X08                    (0 << R_ACMPHS_CMPSEL0_CMPSEL_SHIFT)  /* Select IVCMP3 */
+#  define R_ACMPHS_CMPSEL0_CMPSEL_0X01                    (1 << R_ACMPHS_CMPSEL0_CMPSEL_SHIFT)  /* Select IVCMP0 */
+#  define R_ACMPHS_CMPSEL0_CMPSEL_0X04                    (4 << R_ACMPHS_CMPSEL0_CMPSEL_SHIFT)  /* Select IVCMP2 */
+#  define R_ACMPHS_CMPSEL0_CMPSEL_0X08                    (8 << R_ACMPHS_CMPSEL0_CMPSEL_SHIFT)  /* Select IVCMP3 */
 
 /* CMPSEL1 Register bit definitions */
 #define R_ACMPHS_CMPSEL1_CRVS_SHIFT               (0)  /* Reference Voltage Selection */
 #define R_ACMPHS_CMPSEL1_CRVS_MASK                0x3f
 #  define R_ACMPHS_CMPSEL1_CRVS_0X00                      (0 << R_ACMPHS_CMPSEL1_CRVS_SHIFT)  /* Do not input */
-#  define R_ACMPHS_CMPSEL1_CRVS_0X01                      (0 << R_ACMPHS_CMPSEL1_CRVS_SHIFT)  /* Select IVREF0 */
-#  define R_ACMPHS_CMPSEL1_CRVS_0X02                      (0 << R_ACMPHS_CMPSEL1_CRVS_SHIFT)  /* Select IVREF1 */
-#  define R_ACMPHS_CMPSEL1_CRVS_0X04                      (0 << R_ACMPHS_CMPSEL1_CRVS_SHIFT)  /* Select IVREF2 */
-#  define R_ACMPHS_CMPSEL1_CRVS_0X08                      (0 << R_ACMPHS_CMPSEL1_CRVS_SHIFT)  /* Select IVREF3 */
+#  define R_ACMPHS_CMPSEL1_CRVS_0X01                      (1 << R_ACMPHS_CMPSEL1_CRVS_SHIFT)  /* Select IVREF0 */
+#  define R_ACMPHS_CMPSEL1_CRVS_0X02                      (2 << R_ACMPHS_CMPSEL1_CRVS_SHIFT)  /* Select IVREF1 */
+#  define R_ACMPHS_CMPSEL1_CRVS_0X04                      (4 << R_ACMPHS_CMPSEL1_CRVS_SHIFT)  /* Select IVREF2 */
+#  define R_ACMPHS_CMPSEL1_CRVS_0X08                      (8 << R_ACMPHS_CMPSEL1_CRVS_SHIFT)  /* Select IVREF3 */
 
 /* CMPMON Register bit definitions */
 #define R_ACMPHS_CMPMON_COMPMON                   (1 << 0)  /* Comparator Output Monitor */
@@ -131,4 +131,4 @@
 
 #define ACMPHS_MAX_CHANNELS    2
 
-#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_ACMPHS_H */
+#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_ACMPHS_H */

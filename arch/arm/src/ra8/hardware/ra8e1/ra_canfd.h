@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/ra8/hardware/ra8p1/ra_canfd.h
+ * arch/arm/src/ra8/hardware/ra8e1/ra_canfd.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_CANFD_H
-#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_CANFD_H
+#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_CANFD_H
+#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_CANFD_H
 
 /****************************************************************************
  * Included Files
@@ -39,7 +39,7 @@
 #endif
 
 /* Channel stride for multi-channel peripherals */
-#define R_CANFD_CH_STRIDE    0x00000004
+#define R_CANFD_CH_STRIDE    0x00002000
 #define R_CANFD_CH_BASE(ch)   (R_CANFD_BASE + ((uint32_t)(ch) * R_CANFD_CH_STRIDE))
 
 /* CANFD Register Offsets */
@@ -59,14 +59,11 @@
 #define R_CANFD_CFDRMND_OFFSET                    0x00000034  /* RX Message Buffer New Data Register */
 #define R_CANFD_CFDRMIEC_OFFSET                   0x00000038  /* RX Message Buffer Interrupt Enable Configuration Register */
 /* CFDRFCC%s Registers (0-1) */
-#define R_CANFD_CFDRFCC_OFFSET                    0x0000003c  /* RX FIFO Configuration/Control Registers %s */
-#define R_CANFD_CFDRFCC_INCREMENT                 0x00000004
+#define R_CANFD_CFDRFCC_OFFSET(m)                 (0x0000003c + ((m) * 0x00000004))  /* RX FIFO Configuration/Control Registers %s */
 /* CFDRFSTS%s Registers (0-1) */
-#define R_CANFD_CFDRFSTS_OFFSET                   0x00000044  /* RX FIFO Status Registers %s */
-#define R_CANFD_CFDRFSTS_INCREMENT                0x00000004
+#define R_CANFD_CFDRFSTS_OFFSET(m)                (0x00000044 + ((m) * 0x00000004))  /* RX FIFO Status Registers %s */
 /* CFDRFPCTR%s Registers (0-1) */
-#define R_CANFD_CFDRFPCTR_OFFSET                  0x0000004c  /* RX FIFO Pointer Control Registers %s */
-#define R_CANFD_CFDRFPCTR_INCREMENT               0x00000004
+#define R_CANFD_CFDRFPCTR_OFFSET(m)               (0x0000004c + ((m) * 0x00000004))  /* RX FIFO Pointer Control Registers %s */
 #define R_CANFD_CFDCFCC_OFFSET                    0x00000054  /* Common FIFO Configuration/Control Register */
 #define R_CANFD_CFDCFSTS_OFFSET                   0x00000058  /* Common FIFO Status Register */
 #define R_CANFD_CFDCFPCTR_OFFSET                  0x0000005c  /* Common FIFO Pointer Control Register */
@@ -75,11 +72,9 @@
 #define R_CANFD_CFDFMSTS_OFFSET                   0x00000068  /* FIFO Message Lost Status Register */
 #define R_CANFD_CFDRFISTS_OFFSET                  0x0000006c  /* RX FIFO Interrupt Flag Status Register */
 /* CFDTMC%s Registers (0-3) */
-#define R_CANFD_CFDTMC_OFFSET                     0x00000070  /* TX Message Buffer Control Registers %s */
-#define R_CANFD_CFDTMC_INCREMENT                  0x00000001
+#define R_CANFD_CFDTMC_OFFSET(m)                  (0x00000070 + ((m) * 0x00000001))  /* TX Message Buffer Control Registers %s */
 /* CFDTMSTS%s Registers (0-3) */
-#define R_CANFD_CFDTMSTS_OFFSET                   0x00000074  /* TX Message Buffer Status Registers %s */
-#define R_CANFD_CFDTMSTS_INCREMENT                0x00000001
+#define R_CANFD_CFDTMSTS_OFFSET(m)                (0x00000074 + ((m) * 0x00000001))  /* TX Message Buffer Status Registers %s */
 #define R_CANFD_CFDTMTRSTS_OFFSET                 0x00000078  /* TX Message Buffer Transmission Request Status Register */
 #define R_CANFD_CFDTMTARSTS_OFFSET                0x0000007c  /* TX Message Buffer Transmission Abort Request Status Register */
 #define R_CANFD_CFDTMTCSTS_OFFSET                 0x00000080  /* TX Message Buffer Transmission Completion Status Register */
@@ -107,322 +102,314 @@
 #define R_CANFD_CFDC0FDSTS_OFFSET                 0x0000010c  /* CANFD Status Register */
 #define R_CANFD_CFDC0FDCRC_OFFSET                 0x00000110  /* CANFD CRC Register */
 /* CFDGAFLID%s Registers (1-16) */
-#define R_CANFD_CFDGAFLID_OFFSET                  0x00000120  /* Global Acceptance Filter List ID Registers */
-#define R_CANFD_CFDGAFLID_INCREMENT               0x00000010
+#define R_CANFD_CFDGAFLID_OFFSET(m)               (0x00000120 + ((m) * 0x00000010))  /* Global Acceptance Filter List ID Registers */
 /* CFDGAFLM%s Registers (1-16) */
-#define R_CANFD_CFDGAFLM_OFFSET                   0x00000124  /* Global Acceptance Filter List Mask Registers */
-#define R_CANFD_CFDGAFLM_INCREMENT                0x00000010
+#define R_CANFD_CFDGAFLM_OFFSET(m)                (0x00000124 + ((m) * 0x00000010))  /* Global Acceptance Filter List Mask Registers */
 /* CFDGAFLP0%s Registers (1-16) */
-#define R_CANFD_CFDGAFLP0_OFFSET                  0x00000128  /* Global Acceptance Filter List Pointer 0 Registers */
-#define R_CANFD_CFDGAFLP0_INCREMENT               0x00000010
+#define R_CANFD_CFDGAFLP0_OFFSET(m)               (0x00000128 + ((m) * 0x00000010))  /* Global Acceptance Filter List Pointer 0 Registers */
 /* CFDGAFLP1%s Registers (1-16) */
-#define R_CANFD_CFDGAFLP1_OFFSET                  0x0000012c  /* Global Acceptance Filter List Pointer 1 Registers */
-#define R_CANFD_CFDGAFLP1_INCREMENT               0x00000010
+#define R_CANFD_CFDGAFLP1_OFFSET(m)               (0x0000012c + ((m) * 0x00000010))  /* Global Acceptance Filter List Pointer 1 Registers */
 /* CFDRPGACC%s Registers (0-63) */
-#define R_CANFD_CFDRPGACC_OFFSET                  0x00000280  /* RAM Test Page Access Registers %s */
-#define R_CANFD_CFDRPGACC_INCREMENT               0x00000004
+#define R_CANFD_CFDRPGACC_OFFSET(m)               (0x00000280 + ((m) * 0x00000004))  /* RAM Test Page Access Registers %s */
 /* CFDRFID%s Registers (0-1) */
-#define R_CANFD_CFDRFID_OFFSET                    0x00000520  /* RX FIFO Access ID Register %s */
-#define R_CANFD_CFDRFID_INCREMENT                 0x0000004c
+#define R_CANFD_CFDRFID_OFFSET(m)                 (0x00000520 + ((m) * 0x0000004c))  /* RX FIFO Access ID Register %s */
 /* CFDRFPTR%s Registers (0-1) */
-#define R_CANFD_CFDRFPTR_OFFSET                   0x00000524  /* RX FIFO Access Pointer Register %s */
-#define R_CANFD_CFDRFPTR_INCREMENT                0x0000004c
+#define R_CANFD_CFDRFPTR_OFFSET(m)                (0x00000524 + ((m) * 0x0000004c))  /* RX FIFO Access Pointer Register %s */
 /* CFDRFFDSTS%s Registers (0-1) */
-#define R_CANFD_CFDRFFDSTS_OFFSET                 0x00000528  /* RX FIFO Access CANFD Status Register %s */
-#define R_CANFD_CFDRFFDSTS_INCREMENT              0x0000004c
+#define R_CANFD_CFDRFFDSTS_OFFSET(m)              (0x00000528 + ((m) * 0x0000004c))  /* RX FIFO Access CANFD Status Register %s */
 /* CFDRFDF%s_0 Registers (0-1) */
-#define R_CANFD_CFDRFDF_0_OFFSET                  0x0000052c  /* RX FIFO Access Data Field 0 Register %s */
-#define R_CANFD_CFDRFDF_0_INCREMENT               0x0000004c
+#define R_CANFD_CFDRFDF_0_OFFSET(m)               (0x0000052c + ((m) * 0x0000004c))  /* RX FIFO Access Data Field 0 Register %s */
 /* CFDRFDF%s_1 Registers (0-1) */
-#define R_CANFD_CFDRFDF_1_OFFSET                  0x00000530  /* RX FIFO Access Data Field 1 Register %s */
-#define R_CANFD_CFDRFDF_1_INCREMENT               0x0000004c
+#define R_CANFD_CFDRFDF_1_OFFSET(m)               (0x00000530 + ((m) * 0x0000004c))  /* RX FIFO Access Data Field 1 Register %s */
 /* CFDRFDF%s_2 Registers (0-1) */
-#define R_CANFD_CFDRFDF_2_OFFSET                  0x00000534  /* RX FIFO Access Data Field 2 Register %s */
-#define R_CANFD_CFDRFDF_2_INCREMENT               0x0000004c
+#define R_CANFD_CFDRFDF_2_OFFSET(m)               (0x00000534 + ((m) * 0x0000004c))  /* RX FIFO Access Data Field 2 Register %s */
 /* CFDRFDF%s_3 Registers (0-1) */
-#define R_CANFD_CFDRFDF_3_OFFSET                  0x00000538  /* RX FIFO Access Data Field 3 Register %s */
-#define R_CANFD_CFDRFDF_3_INCREMENT               0x0000004c
+#define R_CANFD_CFDRFDF_3_OFFSET(m)               (0x00000538 + ((m) * 0x0000004c))  /* RX FIFO Access Data Field 3 Register %s */
 /* CFDRFDF%s_4 Registers (0-1) */
-#define R_CANFD_CFDRFDF_4_OFFSET                  0x0000053c  /* RX FIFO Access Data Field 4 Register %s */
-#define R_CANFD_CFDRFDF_4_INCREMENT               0x0000004c
+#define R_CANFD_CFDRFDF_4_OFFSET(m)               (0x0000053c + ((m) * 0x0000004c))  /* RX FIFO Access Data Field 4 Register %s */
 /* CFDRFDF%s_5 Registers (0-1) */
-#define R_CANFD_CFDRFDF_5_OFFSET                  0x00000540  /* RX FIFO Access Data Field 5 Register %s */
-#define R_CANFD_CFDRFDF_5_INCREMENT               0x0000004c
+#define R_CANFD_CFDRFDF_5_OFFSET(m)               (0x00000540 + ((m) * 0x0000004c))  /* RX FIFO Access Data Field 5 Register %s */
 /* CFDRFDF%s_6 Registers (0-1) */
-#define R_CANFD_CFDRFDF_6_OFFSET                  0x00000544  /* RX FIFO Access Data Field 6 Register %s */
-#define R_CANFD_CFDRFDF_6_INCREMENT               0x0000004c
+#define R_CANFD_CFDRFDF_6_OFFSET(m)               (0x00000544 + ((m) * 0x0000004c))  /* RX FIFO Access Data Field 6 Register %s */
 /* CFDRFDF%s_7 Registers (0-1) */
-#define R_CANFD_CFDRFDF_7_OFFSET                  0x00000548  /* RX FIFO Access Data Field 7 Register %s */
-#define R_CANFD_CFDRFDF_7_INCREMENT               0x0000004c
+#define R_CANFD_CFDRFDF_7_OFFSET(m)               (0x00000548 + ((m) * 0x0000004c))  /* RX FIFO Access Data Field 7 Register %s */
 /* CFDRFDF%s_8 Registers (0-1) */
-#define R_CANFD_CFDRFDF_8_OFFSET                  0x0000054c  /* RX FIFO Access Data Field 8 Register %s */
-#define R_CANFD_CFDRFDF_8_INCREMENT               0x0000004c
+#define R_CANFD_CFDRFDF_8_OFFSET(m)               (0x0000054c + ((m) * 0x0000004c))  /* RX FIFO Access Data Field 8 Register %s */
 /* CFDRFDF%s_9 Registers (0-1) */
-#define R_CANFD_CFDRFDF_9_OFFSET                  0x00000550  /* RX FIFO Access Data Field 9 Register %s */
-#define R_CANFD_CFDRFDF_9_INCREMENT               0x0000004c
+#define R_CANFD_CFDRFDF_9_OFFSET(m)               (0x00000550 + ((m) * 0x0000004c))  /* RX FIFO Access Data Field 9 Register %s */
 /* CFDRFDF%s_10 Registers (0-1) */
-#define R_CANFD_CFDRFDF_10_OFFSET                 0x00000554  /* RX FIFO Access Data Field 10 Register %s */
-#define R_CANFD_CFDRFDF_10_INCREMENT              0x0000004c
+#define R_CANFD_CFDRFDF_10_OFFSET(m)              (0x00000554 + ((m) * 0x0000004c))  /* RX FIFO Access Data Field 10 Register %s */
 /* CFDRFDF%s_11 Registers (0-1) */
-#define R_CANFD_CFDRFDF_11_OFFSET                 0x00000558  /* RX FIFO Access Data Field 11 Register %s */
-#define R_CANFD_CFDRFDF_11_INCREMENT              0x0000004c
+#define R_CANFD_CFDRFDF_11_OFFSET(m)              (0x00000558 + ((m) * 0x0000004c))  /* RX FIFO Access Data Field 11 Register %s */
 /* CFDRFDF%s_12 Registers (0-1) */
-#define R_CANFD_CFDRFDF_12_OFFSET                 0x0000055c  /* RX FIFO Access Data Field 12 Register %s */
-#define R_CANFD_CFDRFDF_12_INCREMENT              0x0000004c
+#define R_CANFD_CFDRFDF_12_OFFSET(m)              (0x0000055c + ((m) * 0x0000004c))  /* RX FIFO Access Data Field 12 Register %s */
 /* CFDRFDF%s_13 Registers (0-1) */
-#define R_CANFD_CFDRFDF_13_OFFSET                 0x00000560  /* RX FIFO Access Data Field 13 Register %s */
-#define R_CANFD_CFDRFDF_13_INCREMENT              0x0000004c
+#define R_CANFD_CFDRFDF_13_OFFSET(m)              (0x00000560 + ((m) * 0x0000004c))  /* RX FIFO Access Data Field 13 Register %s */
 /* CFDRFDF%s_14 Registers (0-1) */
-#define R_CANFD_CFDRFDF_14_OFFSET                 0x00000564  /* RX FIFO Access Data Field 14 Register %s */
-#define R_CANFD_CFDRFDF_14_INCREMENT              0x0000004c
+#define R_CANFD_CFDRFDF_14_OFFSET(m)              (0x00000564 + ((m) * 0x0000004c))  /* RX FIFO Access Data Field 14 Register %s */
 /* CFDRFDF%s_15 Registers (0-1) */
-#define R_CANFD_CFDRFDF_15_OFFSET                 0x00000568  /* RX FIFO Access Data Field 15 Register %s */
-#define R_CANFD_CFDRFDF_15_INCREMENT              0x0000004c
+#define R_CANFD_CFDRFDF_15_OFFSET(m)              (0x00000568 + ((m) * 0x0000004c))  /* RX FIFO Access Data Field 15 Register %s */
 #define R_CANFD_CFDCFID_OFFSET                    0x000005b8  /* Common FIFO Access ID Register */
 #define R_CANFD_CFDCFPTR_OFFSET                   0x000005bc  /* Common FIFO Access Pointer Register */
 #define R_CANFD_CFDCFFDCSTS_OFFSET                0x000005c0  /* Common FIFO Access CANFD Control/Status Register */
 /* CFDCFDF%s Registers (0-15) */
-#define R_CANFD_CFDCFDF_OFFSET                    0x000005c4  /* Common FIFO Access Data Field %s Registers */
-#define R_CANFD_CFDCFDF_INCREMENT                 0x00000004
+#define R_CANFD_CFDCFDF_OFFSET(m)                 (0x000005c4 + ((m) * 0x00000004))  /* Common FIFO Access Data Field %s Registers */
 /* CFDTMID%s Registers (0-3) */
-#define R_CANFD_CFDTMID_OFFSET                    0x00000604  /* TX Message Buffer ID Registers */
-#define R_CANFD_CFDTMID_INCREMENT                 0x0000004c
+#define R_CANFD_CFDTMID_OFFSET(m)                 (0x00000604 + ((m) * 0x0000004c))  /* TX Message Buffer ID Registers */
 /* CFDTMPTR%s Registers (0-3) */
-#define R_CANFD_CFDTMPTR_OFFSET                   0x00000608  /* TX Message Buffer Pointer Register  */
-#define R_CANFD_CFDTMPTR_INCREMENT                0x0000004c
+#define R_CANFD_CFDTMPTR_OFFSET(m)                (0x00000608 + ((m) * 0x0000004c))  /* TX Message Buffer Pointer Register  */
 /* CFDTMFDCTR%s Registers (0-3) */
-#define R_CANFD_CFDTMFDCTR_OFFSET                 0x0000060c  /* TX Message Buffer CANFD Control Register  */
-#define R_CANFD_CFDTMFDCTR_INCREMENT              0x0000004c
+#define R_CANFD_CFDTMFDCTR_OFFSET(m)              (0x0000060c + ((m) * 0x0000004c))  /* TX Message Buffer CANFD Control Register  */
 /* CFDTMDF%s_0 Registers (0-3) */
-#define R_CANFD_CFDTMDF_0_OFFSET                  0x00000610  /* TX Message Buffer Data Field Register */
-#define R_CANFD_CFDTMDF_0_INCREMENT               0x0000004c
+#define R_CANFD_CFDTMDF_0_OFFSET(m)               (0x00000610 + ((m) * 0x0000004c))  /* TX Message Buffer Data Field Register */
 /* CFDTMDF%s_1 Registers (0-3) */
-#define R_CANFD_CFDTMDF_1_OFFSET                  0x00000614  /* TX Message Buffer Data Field Register */
-#define R_CANFD_CFDTMDF_1_INCREMENT               0x0000004c
+#define R_CANFD_CFDTMDF_1_OFFSET(m)               (0x00000614 + ((m) * 0x0000004c))  /* TX Message Buffer Data Field Register */
 /* CFDTMDF%s_2 Registers (0-3) */
-#define R_CANFD_CFDTMDF_2_OFFSET                  0x00000618  /* TX Message Buffer Data Field Register */
-#define R_CANFD_CFDTMDF_2_INCREMENT               0x0000004c
+#define R_CANFD_CFDTMDF_2_OFFSET(m)               (0x00000618 + ((m) * 0x0000004c))  /* TX Message Buffer Data Field Register */
 /* CFDTMDF%s_3 Registers (0-3) */
-#define R_CANFD_CFDTMDF_3_OFFSET                  0x0000061c  /* TX Message Buffer Data Field Register */
-#define R_CANFD_CFDTMDF_3_INCREMENT               0x0000004c
+#define R_CANFD_CFDTMDF_3_OFFSET(m)               (0x0000061c + ((m) * 0x0000004c))  /* TX Message Buffer Data Field Register */
 /* CFDTMDF%s_4 Registers (0-3) */
-#define R_CANFD_CFDTMDF_4_OFFSET                  0x00000620  /* TX Message Buffer Data Field Register */
-#define R_CANFD_CFDTMDF_4_INCREMENT               0x0000004c
+#define R_CANFD_CFDTMDF_4_OFFSET(m)               (0x00000620 + ((m) * 0x0000004c))  /* TX Message Buffer Data Field Register */
 /* CFDTMDF%s_5 Registers (0-3) */
-#define R_CANFD_CFDTMDF_5_OFFSET                  0x00000624  /* TX Message Buffer Data Field Register */
-#define R_CANFD_CFDTMDF_5_INCREMENT               0x0000004c
+#define R_CANFD_CFDTMDF_5_OFFSET(m)               (0x00000624 + ((m) * 0x0000004c))  /* TX Message Buffer Data Field Register */
 /* CFDTMDF%s_6 Registers (0-3) */
-#define R_CANFD_CFDTMDF_6_OFFSET                  0x00000628  /* TX Message Buffer Data Field Register  */
-#define R_CANFD_CFDTMDF_6_INCREMENT               0x0000004c
+#define R_CANFD_CFDTMDF_6_OFFSET(m)               (0x00000628 + ((m) * 0x0000004c))  /* TX Message Buffer Data Field Register  */
 /* CFDTMDF%s_7 Registers (0-3) */
-#define R_CANFD_CFDTMDF_7_OFFSET                  0x0000062c  /* TX Message Buffer Data Field Register */
-#define R_CANFD_CFDTMDF_7_INCREMENT               0x0000004c
+#define R_CANFD_CFDTMDF_7_OFFSET(m)               (0x0000062c + ((m) * 0x0000004c))  /* TX Message Buffer Data Field Register */
 /* CFDTMDF%s_8 Registers (0-3) */
-#define R_CANFD_CFDTMDF_8_OFFSET                  0x00000630  /* TX Message Buffer Data Field Register */
-#define R_CANFD_CFDTMDF_8_INCREMENT               0x0000004c
+#define R_CANFD_CFDTMDF_8_OFFSET(m)               (0x00000630 + ((m) * 0x0000004c))  /* TX Message Buffer Data Field Register */
 /* CFDTMDF%s_9 Registers (0-3) */
-#define R_CANFD_CFDTMDF_9_OFFSET                  0x00000634  /* TX Message Buffer Data Field Register */
-#define R_CANFD_CFDTMDF_9_INCREMENT               0x0000004c
+#define R_CANFD_CFDTMDF_9_OFFSET(m)               (0x00000634 + ((m) * 0x0000004c))  /* TX Message Buffer Data Field Register */
 /* CFDTMDF%s_10 Registers (0-3) */
-#define R_CANFD_CFDTMDF_10_OFFSET                 0x00000638  /* TX Message Buffer Data Field Register  */
-#define R_CANFD_CFDTMDF_10_INCREMENT              0x0000004c
+#define R_CANFD_CFDTMDF_10_OFFSET(m)              (0x00000638 + ((m) * 0x0000004c))  /* TX Message Buffer Data Field Register  */
 /* CFDTMDF%s_11 Registers (0-3) */
-#define R_CANFD_CFDTMDF_11_OFFSET                 0x0000063c  /* TX Message Buffer Data Field Register */
-#define R_CANFD_CFDTMDF_11_INCREMENT              0x0000004c
+#define R_CANFD_CFDTMDF_11_OFFSET(m)              (0x0000063c + ((m) * 0x0000004c))  /* TX Message Buffer Data Field Register */
 /* CFDTMDF%s_12 Registers (0-3) */
-#define R_CANFD_CFDTMDF_12_OFFSET                 0x00000640  /* TX Message Buffer Data Field Register */
-#define R_CANFD_CFDTMDF_12_INCREMENT              0x0000004c
+#define R_CANFD_CFDTMDF_12_OFFSET(m)              (0x00000640 + ((m) * 0x0000004c))  /* TX Message Buffer Data Field Register */
 /* CFDTMDF%s_13 Registers (0-3) */
-#define R_CANFD_CFDTMDF_13_OFFSET                 0x00000644  /* TX Message Buffer Data Field Register */
-#define R_CANFD_CFDTMDF_13_INCREMENT              0x0000004c
+#define R_CANFD_CFDTMDF_13_OFFSET(m)              (0x00000644 + ((m) * 0x0000004c))  /* TX Message Buffer Data Field Register */
 /* CFDTMDF%s_14 Registers (0-3) */
-#define R_CANFD_CFDTMDF_14_OFFSET                 0x00000648  /* TX Message Buffer Data Field Register */
-#define R_CANFD_CFDTMDF_14_INCREMENT              0x0000004c
+#define R_CANFD_CFDTMDF_14_OFFSET(m)              (0x00000648 + ((m) * 0x0000004c))  /* TX Message Buffer Data Field Register */
 /* CFDTMDF%s_15 Registers (0-3) */
-#define R_CANFD_CFDTMDF_15_OFFSET                 0x0000064c  /* TX Message Buffer Data Field Register */
-#define R_CANFD_CFDTMDF_15_INCREMENT              0x0000004c
+#define R_CANFD_CFDTMDF_15_OFFSET(m)              (0x0000064c + ((m) * 0x0000004c))  /* TX Message Buffer Data Field Register */
 #define R_CANFD_CFDTHLACC0_OFFSET                 0x00000740  /* TX History List Access Register 0 */
 #define R_CANFD_CFDTHLACC1_OFFSET                 0x00000744  /* TX History List Access Register 1 */
 /* CFDRMID%s Registers (0-7) */
-#define R_CANFD_CFDRMID_OFFSET                    0x00000920  /* RX Message Buffer ID Registers */
-#define R_CANFD_CFDRMID_INCREMENT                 0x0000004c
+#define R_CANFD_CFDRMID_OFFSET(m)                 (0x00000920 + ((m) * 0x0000004c))  /* RX Message Buffer ID Registers */
 /* CFDRMPTR%s Registers (0-7) */
-#define R_CANFD_CFDRMPTR_OFFSET                   0x00000924  /* RX Message Buffer Pointer Registers */
-#define R_CANFD_CFDRMPTR_INCREMENT                0x0000004c
+#define R_CANFD_CFDRMPTR_OFFSET(m)                (0x00000924 + ((m) * 0x0000004c))  /* RX Message Buffer Pointer Registers */
 /* CFDRMFDSTS%s Registers (0-7) */
-#define R_CANFD_CFDRMFDSTS_OFFSET                 0x00000928  /* RX Message Buffer CANFD Status Registers */
-#define R_CANFD_CFDRMFDSTS_INCREMENT              0x0000004c
+#define R_CANFD_CFDRMFDSTS_OFFSET(m)              (0x00000928 + ((m) * 0x0000004c))  /* RX Message Buffer CANFD Status Registers */
 /* CFDRMDF%s_0 Registers (0-7) */
-#define R_CANFD_CFDRMDF_0_OFFSET                  0x0000092c  /* RX Message Buffer Data Field 0 Registers */
-#define R_CANFD_CFDRMDF_0_INCREMENT               0x0000004c
+#define R_CANFD_CFDRMDF_0_OFFSET(m)               (0x0000092c + ((m) * 0x0000004c))  /* RX Message Buffer Data Field 0 Registers */
 /* CFDRMDF%s_1 Registers (0-7) */
-#define R_CANFD_CFDRMDF_1_OFFSET                  0x00000930  /* RX Message Buffer Data Field 1 Registers */
-#define R_CANFD_CFDRMDF_1_INCREMENT               0x0000004c
+#define R_CANFD_CFDRMDF_1_OFFSET(m)               (0x00000930 + ((m) * 0x0000004c))  /* RX Message Buffer Data Field 1 Registers */
 /* CFDRMDF%s_2 Registers (0-7) */
-#define R_CANFD_CFDRMDF_2_OFFSET                  0x00000934  /* RX Message Buffer Data Field 2 Registers */
-#define R_CANFD_CFDRMDF_2_INCREMENT               0x0000004c
+#define R_CANFD_CFDRMDF_2_OFFSET(m)               (0x00000934 + ((m) * 0x0000004c))  /* RX Message Buffer Data Field 2 Registers */
 /* CFDRMDF%s_3 Registers (0-7) */
-#define R_CANFD_CFDRMDF_3_OFFSET                  0x00000938  /* RX Message Buffer Data Field 3 Registers */
-#define R_CANFD_CFDRMDF_3_INCREMENT               0x0000004c
+#define R_CANFD_CFDRMDF_3_OFFSET(m)               (0x00000938 + ((m) * 0x0000004c))  /* RX Message Buffer Data Field 3 Registers */
 /* CFDRMDF%s_4 Registers (0-7) */
-#define R_CANFD_CFDRMDF_4_OFFSET                  0x0000093c  /* RX Message Buffer Data Field 4 Registers */
-#define R_CANFD_CFDRMDF_4_INCREMENT               0x0000004c
+#define R_CANFD_CFDRMDF_4_OFFSET(m)               (0x0000093c + ((m) * 0x0000004c))  /* RX Message Buffer Data Field 4 Registers */
 /* CFDRMDF%s_5 Registers (0-7) */
-#define R_CANFD_CFDRMDF_5_OFFSET                  0x00000940  /* RX Message Buffer Data Field 5 Registers */
-#define R_CANFD_CFDRMDF_5_INCREMENT               0x0000004c
+#define R_CANFD_CFDRMDF_5_OFFSET(m)               (0x00000940 + ((m) * 0x0000004c))  /* RX Message Buffer Data Field 5 Registers */
 /* CFDRMDF%s_6 Registers (0-7) */
-#define R_CANFD_CFDRMDF_6_OFFSET                  0x00000944  /* RX Message Buffer Data Field 6 Registers */
-#define R_CANFD_CFDRMDF_6_INCREMENT               0x0000004c
+#define R_CANFD_CFDRMDF_6_OFFSET(m)               (0x00000944 + ((m) * 0x0000004c))  /* RX Message Buffer Data Field 6 Registers */
 /* CFDRMDF%s_7 Registers (0-7) */
-#define R_CANFD_CFDRMDF_7_OFFSET                  0x00000948  /* RX Message Buffer Data Field 7 Registers */
-#define R_CANFD_CFDRMDF_7_INCREMENT               0x0000004c
+#define R_CANFD_CFDRMDF_7_OFFSET(m)               (0x00000948 + ((m) * 0x0000004c))  /* RX Message Buffer Data Field 7 Registers */
 /* CFDRMDF%s_8 Registers (0-7) */
-#define R_CANFD_CFDRMDF_8_OFFSET                  0x0000094c  /* RX Message Buffer Data Field 8 Registers */
-#define R_CANFD_CFDRMDF_8_INCREMENT               0x0000004c
+#define R_CANFD_CFDRMDF_8_OFFSET(m)               (0x0000094c + ((m) * 0x0000004c))  /* RX Message Buffer Data Field 8 Registers */
 /* CFDRMDF%s_9 Registers (0-7) */
-#define R_CANFD_CFDRMDF_9_OFFSET                  0x00000950  /* RX Message Buffer Data Field 9 Registers */
-#define R_CANFD_CFDRMDF_9_INCREMENT               0x0000004c
+#define R_CANFD_CFDRMDF_9_OFFSET(m)               (0x00000950 + ((m) * 0x0000004c))  /* RX Message Buffer Data Field 9 Registers */
 /* CFDRMDF%s_10 Registers (0-7) */
-#define R_CANFD_CFDRMDF_10_OFFSET                 0x00000954  /* RX Message Buffer Data Field 10 Registers */
-#define R_CANFD_CFDRMDF_10_INCREMENT              0x0000004c
+#define R_CANFD_CFDRMDF_10_OFFSET(m)              (0x00000954 + ((m) * 0x0000004c))  /* RX Message Buffer Data Field 10 Registers */
 /* CFDRMDF%s_11 Registers (0-7) */
-#define R_CANFD_CFDRMDF_11_OFFSET                 0x00000958  /* RX Message Buffer Data Field 11 Registers */
-#define R_CANFD_CFDRMDF_11_INCREMENT              0x0000004c
+#define R_CANFD_CFDRMDF_11_OFFSET(m)              (0x00000958 + ((m) * 0x0000004c))  /* RX Message Buffer Data Field 11 Registers */
 /* CFDRMDF%s_12 Registers (0-7) */
-#define R_CANFD_CFDRMDF_12_OFFSET                 0x0000095c  /* RX Message Buffer Data Field 12 Registers */
-#define R_CANFD_CFDRMDF_12_INCREMENT              0x0000004c
+#define R_CANFD_CFDRMDF_12_OFFSET(m)              (0x0000095c + ((m) * 0x0000004c))  /* RX Message Buffer Data Field 12 Registers */
 /* CFDRMDF%s_13 Registers (0-7) */
-#define R_CANFD_CFDRMDF_13_OFFSET                 0x00000960  /* RX Message Buffer Data Field 13 Registers */
-#define R_CANFD_CFDRMDF_13_INCREMENT              0x0000004c
+#define R_CANFD_CFDRMDF_13_OFFSET(m)              (0x00000960 + ((m) * 0x0000004c))  /* RX Message Buffer Data Field 13 Registers */
 /* CFDRMDF%s_14 Registers (0-7) */
-#define R_CANFD_CFDRMDF_14_OFFSET                 0x00000964  /* RX Message Buffer Data Field 14 Registers */
-#define R_CANFD_CFDRMDF_14_INCREMENT              0x0000004c
+#define R_CANFD_CFDRMDF_14_OFFSET(m)              (0x00000964 + ((m) * 0x0000004c))  /* RX Message Buffer Data Field 14 Registers */
 /* CFDRMDF%s_15 Registers (0-7) */
-#define R_CANFD_CFDRMDF_15_OFFSET                 0x00000968  /* RX Message Buffer Data Field 15 Registers */
-#define R_CANFD_CFDRMDF_15_INCREMENT              0x0000004c
+#define R_CANFD_CFDRMDF_15_OFFSET(m)              (0x00000968 + ((m) * 0x0000004c))  /* RX Message Buffer Data Field 15 Registers */
+/* CFDRMID%s Registers (8-15) */
+/* CFDRMPTR%s Registers (8-15) */
+/* CFDRMFDSTS%s Registers (8-15) */
+/* CFDRMDF%s_0 Registers (8-15) */
+/* CFDRMDF%s_1 Registers (8-15) */
+/* CFDRMDF%s_2 Registers (8-15) */
+/* CFDRMDF%s_3 Registers (8-15) */
+/* CFDRMDF%s_4 Registers (8-15) */
+/* CFDRMDF%s_5 Registers (8-15) */
+/* CFDRMDF%s_6 Registers (8-15) */
+/* CFDRMDF%s_7 Registers (8-15) */
+/* CFDRMDF%s_8 Registers (8-15) */
+/* CFDRMDF%s_9 Registers (8-15) */
+/* CFDRMDF%s_10 Registers (8-15) */
+/* CFDRMDF%s_11 Registers (8-15) */
+/* CFDRMDF%s_12 Registers (8-15) */
+/* CFDRMDF%s_13 Registers (8-15) */
+/* CFDRMDF%s_14 Registers (8-15) */
+/* CFDRMDF%s_15 Registers (8-15) */
+/* CFDRMPTR%s Registers (16-23) */
+/* CFDRMFDSTS%s Registers (16-23) */
+/* CFDRMDF%s_0 Registers (16-23) */
+/* CFDRMDF%s_1 Registers (16-23) */
+/* CFDRMDF%s_2 Registers (16-23) */
+/* CFDRMDF%s_3 Registers (16-23) */
+/* CFDRMDF%s_4 Registers (16-23) */
+/* CFDRMDF%s_5 Registers (16-23) */
+/* CFDRMDF%s_6 Registers (16-23) */
+/* CFDRMDF%s_7 Registers (16-23) */
+/* CFDRMDF%s_8 Registers (16-23) */
+/* CFDRMDF%s_9 Registers (16-23) */
+/* CFDRMDF%s_10 Registers (16-23) */
+/* CFDRMDF%s_11 Registers (16-23) */
+/* CFDRMDF%s_12 Registers (16-23) */
+/* CFDRMDF%s_13 Registers (16-23) */
+/* CFDRMDF%s_14 Registers (16-23) */
+/* CFDRMDF%s_15 Registers (16-23) */
+/* CFDRMPTR%s Registers (24-31) */
+/* CFDRMFDSTS%s Registers (24-31) */
+/* CFDRMDF%s_0 Registers (24-31) */
+/* CFDRMDF%s_1 Registers (24-31) */
+/* CFDRMDF%s_2 Registers (24-31) */
+/* CFDRMDF%s_3 Registers (24-31) */
+/* CFDRMDF%s_4 Registers (24-31) */
+/* CFDRMDF%s_5 Registers (24-31) */
+/* CFDRMDF%s_6 Registers (24-31) */
+/* CFDRMDF%s_7 Registers (24-31) */
+/* CFDRMDF%s_8 Registers (24-31) */
+/* CFDRMDF%s_9 Registers (24-31) */
+/* CFDRMDF%s_10 Registers (24-31) */
+/* CFDRMDF%s_11 Registers (24-31) */
+/* CFDRMDF%s_12 Registers (24-31) */
+/* CFDRMDF%s_13 Registers (24-31) */
+/* CFDRMDF%s_14 Registers (24-31) */
+/* CFDRMDF%s_15 Registers (24-31) */
 
 /* CANFD Register Addresses */
 
-#define R_CANFD_CFDC0NCFG                         (R_CANFD_BASE + R_CANFD_CFDC0NCFG_OFFSET)
-#define R_CANFD_CFDC0CTR                          (R_CANFD_BASE + R_CANFD_CFDC0CTR_OFFSET)
-#define R_CANFD_CFDC0STS                          (R_CANFD_BASE + R_CANFD_CFDC0STS_OFFSET)
-#define R_CANFD_CFDC0ERFL                         (R_CANFD_BASE + R_CANFD_CFDC0ERFL_OFFSET)
-#define R_CANFD_CFDGCFG                           (R_CANFD_BASE + R_CANFD_CFDGCFG_OFFSET)
-#define R_CANFD_CFDGCTR                           (R_CANFD_BASE + R_CANFD_CFDGCTR_OFFSET)
-#define R_CANFD_CFDGSTS                           (R_CANFD_BASE + R_CANFD_CFDGSTS_OFFSET)
-#define R_CANFD_CFDGERFL                          (R_CANFD_BASE + R_CANFD_CFDGERFL_OFFSET)
-#define R_CANFD_CFDGTSC                           (R_CANFD_BASE + R_CANFD_CFDGTSC_OFFSET)
-#define R_CANFD_CFDGAFLECTR                       (R_CANFD_BASE + R_CANFD_CFDGAFLECTR_OFFSET)
-#define R_CANFD_CFDGAFLCFG                        (R_CANFD_BASE + R_CANFD_CFDGAFLCFG_OFFSET)
-#define R_CANFD_CFDRMNB                           (R_CANFD_BASE + R_CANFD_CFDRMNB_OFFSET)
-#define R_CANFD_CFDRMND                           (R_CANFD_BASE + R_CANFD_CFDRMND_OFFSET)
-#define R_CANFD_CFDRMIEC                          (R_CANFD_BASE + R_CANFD_CFDRMIEC_OFFSET)
-#define R_CANFD_CFDRFCC(n)                        (R_CANFD_BASE + R_CANFD_CFDRFCC_OFFSET + (n)*0x00000004)
-#define R_CANFD_CFDRFSTS(n)                       (R_CANFD_BASE + R_CANFD_CFDRFSTS_OFFSET + (n)*0x00000004)
-#define R_CANFD_CFDRFPCTR(n)                      (R_CANFD_BASE + R_CANFD_CFDRFPCTR_OFFSET + (n)*0x00000004)
-#define R_CANFD_CFDCFCC                           (R_CANFD_BASE + R_CANFD_CFDCFCC_OFFSET)
-#define R_CANFD_CFDCFSTS                          (R_CANFD_BASE + R_CANFD_CFDCFSTS_OFFSET)
-#define R_CANFD_CFDCFPCTR                         (R_CANFD_BASE + R_CANFD_CFDCFPCTR_OFFSET)
-#define R_CANFD_CFDFESTS                          (R_CANFD_BASE + R_CANFD_CFDFESTS_OFFSET)
-#define R_CANFD_CFDFFSTS                          (R_CANFD_BASE + R_CANFD_CFDFFSTS_OFFSET)
-#define R_CANFD_CFDFMSTS                          (R_CANFD_BASE + R_CANFD_CFDFMSTS_OFFSET)
-#define R_CANFD_CFDRFISTS                         (R_CANFD_BASE + R_CANFD_CFDRFISTS_OFFSET)
-#define R_CANFD_CFDTMC(n)                         (R_CANFD_BASE + R_CANFD_CFDTMC_OFFSET + (n)*0x00000001)
-#define R_CANFD_CFDTMSTS(n)                       (R_CANFD_BASE + R_CANFD_CFDTMSTS_OFFSET + (n)*0x00000001)
-#define R_CANFD_CFDTMTRSTS                        (R_CANFD_BASE + R_CANFD_CFDTMTRSTS_OFFSET)
-#define R_CANFD_CFDTMTARSTS                       (R_CANFD_BASE + R_CANFD_CFDTMTARSTS_OFFSET)
-#define R_CANFD_CFDTMTCSTS                        (R_CANFD_BASE + R_CANFD_CFDTMTCSTS_OFFSET)
-#define R_CANFD_CFDTMTASTS                        (R_CANFD_BASE + R_CANFD_CFDTMTASTS_OFFSET)
-#define R_CANFD_CFDTMIEC                          (R_CANFD_BASE + R_CANFD_CFDTMIEC_OFFSET)
-#define R_CANFD_CFDTXQCC                          (R_CANFD_BASE + R_CANFD_CFDTXQCC_OFFSET)
-#define R_CANFD_CFDTXQSTS                         (R_CANFD_BASE + R_CANFD_CFDTXQSTS_OFFSET)
-#define R_CANFD_CFDTXQPCTR                        (R_CANFD_BASE + R_CANFD_CFDTXQPCTR_OFFSET)
-#define R_CANFD_CFDTHLCC                          (R_CANFD_BASE + R_CANFD_CFDTHLCC_OFFSET)
-#define R_CANFD_CFDTHLSTS                         (R_CANFD_BASE + R_CANFD_CFDTHLSTS_OFFSET)
-#define R_CANFD_CFDTHLPCTR                        (R_CANFD_BASE + R_CANFD_CFDTHLPCTR_OFFSET)
-#define R_CANFD_CFDGTINTSTS                       (R_CANFD_BASE + R_CANFD_CFDGTINTSTS_OFFSET)
-#define R_CANFD_CFDGTSTCFG                        (R_CANFD_BASE + R_CANFD_CFDGTSTCFG_OFFSET)
-#define R_CANFD_CFDGTSTCTR                        (R_CANFD_BASE + R_CANFD_CFDGTSTCTR_OFFSET)
-#define R_CANFD_CFDGFDCFG                         (R_CANFD_BASE + R_CANFD_CFDGFDCFG_OFFSET)
-#define R_CANFD_CFDGLOCKK                         (R_CANFD_BASE + R_CANFD_CFDGLOCKK_OFFSET)
-#define R_CANFD_CFDGAFLIGNENT                     (R_CANFD_BASE + R_CANFD_CFDGAFLIGNENT_OFFSET)
-#define R_CANFD_CFDGAFLIGNCTR                     (R_CANFD_BASE + R_CANFD_CFDGAFLIGNCTR_OFFSET)
-#define R_CANFD_CFDCDTCT                          (R_CANFD_BASE + R_CANFD_CFDCDTCT_OFFSET)
-#define R_CANFD_CFDCDTSTS                         (R_CANFD_BASE + R_CANFD_CFDCDTSTS_OFFSET)
-#define R_CANFD_CFDGRSTC                          (R_CANFD_BASE + R_CANFD_CFDGRSTC_OFFSET)
-#define R_CANFD_CFDC0DCFG                         (R_CANFD_BASE + R_CANFD_CFDC0DCFG_OFFSET)
-#define R_CANFD_CFDC0FDCFG                        (R_CANFD_BASE + R_CANFD_CFDC0FDCFG_OFFSET)
-#define R_CANFD_CFDC0FDCTR                        (R_CANFD_BASE + R_CANFD_CFDC0FDCTR_OFFSET)
-#define R_CANFD_CFDC0FDSTS                        (R_CANFD_BASE + R_CANFD_CFDC0FDSTS_OFFSET)
-#define R_CANFD_CFDC0FDCRC                        (R_CANFD_BASE + R_CANFD_CFDC0FDCRC_OFFSET)
-#define R_CANFD_CFDGAFLID(n)                      (R_CANFD_BASE + R_CANFD_CFDGAFLID_OFFSET + (n)*0x00000010)
-#define R_CANFD_CFDGAFLM(n)                       (R_CANFD_BASE + R_CANFD_CFDGAFLM_OFFSET + (n)*0x00000010)
-#define R_CANFD_CFDGAFLP0(n)                      (R_CANFD_BASE + R_CANFD_CFDGAFLP0_OFFSET + (n)*0x00000010)
-#define R_CANFD_CFDGAFLP1(n)                      (R_CANFD_BASE + R_CANFD_CFDGAFLP1_OFFSET + (n)*0x00000010)
-#define R_CANFD_CFDRPGACC(n)                      (R_CANFD_BASE + R_CANFD_CFDRPGACC_OFFSET + (n)*0x00000004)
-#define R_CANFD_CFDRFID(n)                        (R_CANFD_BASE + R_CANFD_CFDRFID_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDRFPTR(n)                       (R_CANFD_BASE + R_CANFD_CFDRFPTR_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDRFFDSTS(n)                     (R_CANFD_BASE + R_CANFD_CFDRFFDSTS_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDRFDF_0(n)                      (R_CANFD_BASE + R_CANFD_CFDRFDF_0_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDRFDF_1(n)                      (R_CANFD_BASE + R_CANFD_CFDRFDF_1_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDRFDF_2(n)                      (R_CANFD_BASE + R_CANFD_CFDRFDF_2_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDRFDF_3(n)                      (R_CANFD_BASE + R_CANFD_CFDRFDF_3_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDRFDF_4(n)                      (R_CANFD_BASE + R_CANFD_CFDRFDF_4_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDRFDF_5(n)                      (R_CANFD_BASE + R_CANFD_CFDRFDF_5_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDRFDF_6(n)                      (R_CANFD_BASE + R_CANFD_CFDRFDF_6_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDRFDF_7(n)                      (R_CANFD_BASE + R_CANFD_CFDRFDF_7_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDRFDF_8(n)                      (R_CANFD_BASE + R_CANFD_CFDRFDF_8_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDRFDF_9(n)                      (R_CANFD_BASE + R_CANFD_CFDRFDF_9_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDRFDF_10(n)                     (R_CANFD_BASE + R_CANFD_CFDRFDF_10_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDRFDF_11(n)                     (R_CANFD_BASE + R_CANFD_CFDRFDF_11_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDRFDF_12(n)                     (R_CANFD_BASE + R_CANFD_CFDRFDF_12_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDRFDF_13(n)                     (R_CANFD_BASE + R_CANFD_CFDRFDF_13_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDRFDF_14(n)                     (R_CANFD_BASE + R_CANFD_CFDRFDF_14_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDRFDF_15(n)                     (R_CANFD_BASE + R_CANFD_CFDRFDF_15_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDCFID                           (R_CANFD_BASE + R_CANFD_CFDCFID_OFFSET)
-#define R_CANFD_CFDCFPTR                          (R_CANFD_BASE + R_CANFD_CFDCFPTR_OFFSET)
-#define R_CANFD_CFDCFFDCSTS                       (R_CANFD_BASE + R_CANFD_CFDCFFDCSTS_OFFSET)
-#define R_CANFD_CFDCFDF(n)                        (R_CANFD_BASE + R_CANFD_CFDCFDF_OFFSET + (n)*0x00000004)
-#define R_CANFD_CFDTMID(n)                        (R_CANFD_BASE + R_CANFD_CFDTMID_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDTMPTR(n)                       (R_CANFD_BASE + R_CANFD_CFDTMPTR_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDTMFDCTR(n)                     (R_CANFD_BASE + R_CANFD_CFDTMFDCTR_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDTMDF_0(n)                      (R_CANFD_BASE + R_CANFD_CFDTMDF_0_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDTMDF_1(n)                      (R_CANFD_BASE + R_CANFD_CFDTMDF_1_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDTMDF_2(n)                      (R_CANFD_BASE + R_CANFD_CFDTMDF_2_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDTMDF_3(n)                      (R_CANFD_BASE + R_CANFD_CFDTMDF_3_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDTMDF_4(n)                      (R_CANFD_BASE + R_CANFD_CFDTMDF_4_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDTMDF_5(n)                      (R_CANFD_BASE + R_CANFD_CFDTMDF_5_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDTMDF_6(n)                      (R_CANFD_BASE + R_CANFD_CFDTMDF_6_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDTMDF_7(n)                      (R_CANFD_BASE + R_CANFD_CFDTMDF_7_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDTMDF_8(n)                      (R_CANFD_BASE + R_CANFD_CFDTMDF_8_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDTMDF_9(n)                      (R_CANFD_BASE + R_CANFD_CFDTMDF_9_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDTMDF_10(n)                     (R_CANFD_BASE + R_CANFD_CFDTMDF_10_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDTMDF_11(n)                     (R_CANFD_BASE + R_CANFD_CFDTMDF_11_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDTMDF_12(n)                     (R_CANFD_BASE + R_CANFD_CFDTMDF_12_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDTMDF_13(n)                     (R_CANFD_BASE + R_CANFD_CFDTMDF_13_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDTMDF_14(n)                     (R_CANFD_BASE + R_CANFD_CFDTMDF_14_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDTMDF_15(n)                     (R_CANFD_BASE + R_CANFD_CFDTMDF_15_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDTHLACC0                        (R_CANFD_BASE + R_CANFD_CFDTHLACC0_OFFSET)
-#define R_CANFD_CFDTHLACC1                        (R_CANFD_BASE + R_CANFD_CFDTHLACC1_OFFSET)
-#define R_CANFD_CFDRMID(n)                        (R_CANFD_BASE + R_CANFD_CFDRMID_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDRMPTR(n)                       (R_CANFD_BASE + R_CANFD_CFDRMPTR_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDRMFDSTS(n)                     (R_CANFD_BASE + R_CANFD_CFDRMFDSTS_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDRMDF_0(n)                      (R_CANFD_BASE + R_CANFD_CFDRMDF_0_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDRMDF_1(n)                      (R_CANFD_BASE + R_CANFD_CFDRMDF_1_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDRMDF_2(n)                      (R_CANFD_BASE + R_CANFD_CFDRMDF_2_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDRMDF_3(n)                      (R_CANFD_BASE + R_CANFD_CFDRMDF_3_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDRMDF_4(n)                      (R_CANFD_BASE + R_CANFD_CFDRMDF_4_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDRMDF_5(n)                      (R_CANFD_BASE + R_CANFD_CFDRMDF_5_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDRMDF_6(n)                      (R_CANFD_BASE + R_CANFD_CFDRMDF_6_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDRMDF_7(n)                      (R_CANFD_BASE + R_CANFD_CFDRMDF_7_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDRMDF_8(n)                      (R_CANFD_BASE + R_CANFD_CFDRMDF_8_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDRMDF_9(n)                      (R_CANFD_BASE + R_CANFD_CFDRMDF_9_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDRMDF_10(n)                     (R_CANFD_BASE + R_CANFD_CFDRMDF_10_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDRMDF_11(n)                     (R_CANFD_BASE + R_CANFD_CFDRMDF_11_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDRMDF_12(n)                     (R_CANFD_BASE + R_CANFD_CFDRMDF_12_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDRMDF_13(n)                     (R_CANFD_BASE + R_CANFD_CFDRMDF_13_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDRMDF_14(n)                     (R_CANFD_BASE + R_CANFD_CFDRMDF_14_OFFSET + (n)*0x0000004c)
-#define R_CANFD_CFDRMDF_15(n)                     (R_CANFD_BASE + R_CANFD_CFDRMDF_15_OFFSET + (n)*0x0000004c)
+#define R_CANFD_CFDC0NCFG(n)                      (R_CANFD_CH_BASE(n) + R_CANFD_CFDC0NCFG_OFFSET)
+#define R_CANFD_CFDC0CTR(n)                       (R_CANFD_CH_BASE(n) + R_CANFD_CFDC0CTR_OFFSET)
+#define R_CANFD_CFDC0STS(n)                       (R_CANFD_CH_BASE(n) + R_CANFD_CFDC0STS_OFFSET)
+#define R_CANFD_CFDC0ERFL(n)                      (R_CANFD_CH_BASE(n) + R_CANFD_CFDC0ERFL_OFFSET)
+#define R_CANFD_CFDGCFG(n)                        (R_CANFD_CH_BASE(n) + R_CANFD_CFDGCFG_OFFSET)
+#define R_CANFD_CFDGCTR(n)                        (R_CANFD_CH_BASE(n) + R_CANFD_CFDGCTR_OFFSET)
+#define R_CANFD_CFDGSTS(n)                        (R_CANFD_CH_BASE(n) + R_CANFD_CFDGSTS_OFFSET)
+#define R_CANFD_CFDGERFL(n)                       (R_CANFD_CH_BASE(n) + R_CANFD_CFDGERFL_OFFSET)
+#define R_CANFD_CFDGTSC(n)                        (R_CANFD_CH_BASE(n) + R_CANFD_CFDGTSC_OFFSET)
+#define R_CANFD_CFDGAFLECTR(n)                    (R_CANFD_CH_BASE(n) + R_CANFD_CFDGAFLECTR_OFFSET)
+#define R_CANFD_CFDGAFLCFG(n)                     (R_CANFD_CH_BASE(n) + R_CANFD_CFDGAFLCFG_OFFSET)
+#define R_CANFD_CFDRMNB(n)                        (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMNB_OFFSET)
+#define R_CANFD_CFDRMND(n)                        (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMND_OFFSET)
+#define R_CANFD_CFDRMIEC(n)                       (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMIEC_OFFSET)
+#define R_CANFD_CFDRFCC(n, m)                     (R_CANFD_CH_BASE(n) + R_CANFD_CFDRFCC_OFFSET(m))
+#define R_CANFD_CFDRFSTS(n, m)                    (R_CANFD_CH_BASE(n) + R_CANFD_CFDRFSTS_OFFSET(m))
+#define R_CANFD_CFDRFPCTR(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDRFPCTR_OFFSET(m))
+#define R_CANFD_CFDCFCC(n)                        (R_CANFD_CH_BASE(n) + R_CANFD_CFDCFCC_OFFSET)
+#define R_CANFD_CFDCFSTS(n)                       (R_CANFD_CH_BASE(n) + R_CANFD_CFDCFSTS_OFFSET)
+#define R_CANFD_CFDCFPCTR(n)                      (R_CANFD_CH_BASE(n) + R_CANFD_CFDCFPCTR_OFFSET)
+#define R_CANFD_CFDFESTS(n)                       (R_CANFD_CH_BASE(n) + R_CANFD_CFDFESTS_OFFSET)
+#define R_CANFD_CFDFFSTS(n)                       (R_CANFD_CH_BASE(n) + R_CANFD_CFDFFSTS_OFFSET)
+#define R_CANFD_CFDFMSTS(n)                       (R_CANFD_CH_BASE(n) + R_CANFD_CFDFMSTS_OFFSET)
+#define R_CANFD_CFDRFISTS(n)                      (R_CANFD_CH_BASE(n) + R_CANFD_CFDRFISTS_OFFSET)
+#define R_CANFD_CFDTMC(n, m)                      (R_CANFD_CH_BASE(n) + R_CANFD_CFDTMC_OFFSET(m))
+#define R_CANFD_CFDTMSTS(n, m)                    (R_CANFD_CH_BASE(n) + R_CANFD_CFDTMSTS_OFFSET(m))
+#define R_CANFD_CFDTMTRSTS(n)                     (R_CANFD_CH_BASE(n) + R_CANFD_CFDTMTRSTS_OFFSET)
+#define R_CANFD_CFDTMTARSTS(n)                    (R_CANFD_CH_BASE(n) + R_CANFD_CFDTMTARSTS_OFFSET)
+#define R_CANFD_CFDTMTCSTS(n)                     (R_CANFD_CH_BASE(n) + R_CANFD_CFDTMTCSTS_OFFSET)
+#define R_CANFD_CFDTMTASTS(n)                     (R_CANFD_CH_BASE(n) + R_CANFD_CFDTMTASTS_OFFSET)
+#define R_CANFD_CFDTMIEC(n)                       (R_CANFD_CH_BASE(n) + R_CANFD_CFDTMIEC_OFFSET)
+#define R_CANFD_CFDTXQCC(n)                       (R_CANFD_CH_BASE(n) + R_CANFD_CFDTXQCC_OFFSET)
+#define R_CANFD_CFDTXQSTS(n)                      (R_CANFD_CH_BASE(n) + R_CANFD_CFDTXQSTS_OFFSET)
+#define R_CANFD_CFDTXQPCTR(n)                     (R_CANFD_CH_BASE(n) + R_CANFD_CFDTXQPCTR_OFFSET)
+#define R_CANFD_CFDTHLCC(n)                       (R_CANFD_CH_BASE(n) + R_CANFD_CFDTHLCC_OFFSET)
+#define R_CANFD_CFDTHLSTS(n)                      (R_CANFD_CH_BASE(n) + R_CANFD_CFDTHLSTS_OFFSET)
+#define R_CANFD_CFDTHLPCTR(n)                     (R_CANFD_CH_BASE(n) + R_CANFD_CFDTHLPCTR_OFFSET)
+#define R_CANFD_CFDGTINTSTS(n)                    (R_CANFD_CH_BASE(n) + R_CANFD_CFDGTINTSTS_OFFSET)
+#define R_CANFD_CFDGTSTCFG(n)                     (R_CANFD_CH_BASE(n) + R_CANFD_CFDGTSTCFG_OFFSET)
+#define R_CANFD_CFDGTSTCTR(n)                     (R_CANFD_CH_BASE(n) + R_CANFD_CFDGTSTCTR_OFFSET)
+#define R_CANFD_CFDGFDCFG(n)                      (R_CANFD_CH_BASE(n) + R_CANFD_CFDGFDCFG_OFFSET)
+#define R_CANFD_CFDGLOCKK(n)                      (R_CANFD_CH_BASE(n) + R_CANFD_CFDGLOCKK_OFFSET)
+#define R_CANFD_CFDGAFLIGNENT(n)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDGAFLIGNENT_OFFSET)
+#define R_CANFD_CFDGAFLIGNCTR(n)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDGAFLIGNCTR_OFFSET)
+#define R_CANFD_CFDCDTCT(n)                       (R_CANFD_CH_BASE(n) + R_CANFD_CFDCDTCT_OFFSET)
+#define R_CANFD_CFDCDTSTS(n)                      (R_CANFD_CH_BASE(n) + R_CANFD_CFDCDTSTS_OFFSET)
+#define R_CANFD_CFDGRSTC(n)                       (R_CANFD_CH_BASE(n) + R_CANFD_CFDGRSTC_OFFSET)
+#define R_CANFD_CFDC0DCFG(n)                      (R_CANFD_CH_BASE(n) + R_CANFD_CFDC0DCFG_OFFSET)
+#define R_CANFD_CFDC0FDCFG(n)                     (R_CANFD_CH_BASE(n) + R_CANFD_CFDC0FDCFG_OFFSET)
+#define R_CANFD_CFDC0FDCTR(n)                     (R_CANFD_CH_BASE(n) + R_CANFD_CFDC0FDCTR_OFFSET)
+#define R_CANFD_CFDC0FDSTS(n)                     (R_CANFD_CH_BASE(n) + R_CANFD_CFDC0FDSTS_OFFSET)
+#define R_CANFD_CFDC0FDCRC(n)                     (R_CANFD_CH_BASE(n) + R_CANFD_CFDC0FDCRC_OFFSET)
+#define R_CANFD_CFDGAFLID(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDGAFLID_OFFSET(m))
+#define R_CANFD_CFDGAFLM(n, m)                    (R_CANFD_CH_BASE(n) + R_CANFD_CFDGAFLM_OFFSET(m))
+#define R_CANFD_CFDGAFLP0(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDGAFLP0_OFFSET(m))
+#define R_CANFD_CFDGAFLP1(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDGAFLP1_OFFSET(m))
+#define R_CANFD_CFDRPGACC(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDRPGACC_OFFSET(m))
+#define R_CANFD_CFDRFID(n, m)                     (R_CANFD_CH_BASE(n) + R_CANFD_CFDRFID_OFFSET(m))
+#define R_CANFD_CFDRFPTR(n, m)                    (R_CANFD_CH_BASE(n) + R_CANFD_CFDRFPTR_OFFSET(m))
+#define R_CANFD_CFDRFFDSTS(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDRFFDSTS_OFFSET(m))
+#define R_CANFD_CFDRFDF_0(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDRFDF_0_OFFSET(m))
+#define R_CANFD_CFDRFDF_1(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDRFDF_1_OFFSET(m))
+#define R_CANFD_CFDRFDF_2(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDRFDF_2_OFFSET(m))
+#define R_CANFD_CFDRFDF_3(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDRFDF_3_OFFSET(m))
+#define R_CANFD_CFDRFDF_4(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDRFDF_4_OFFSET(m))
+#define R_CANFD_CFDRFDF_5(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDRFDF_5_OFFSET(m))
+#define R_CANFD_CFDRFDF_6(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDRFDF_6_OFFSET(m))
+#define R_CANFD_CFDRFDF_7(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDRFDF_7_OFFSET(m))
+#define R_CANFD_CFDRFDF_8(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDRFDF_8_OFFSET(m))
+#define R_CANFD_CFDRFDF_9(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDRFDF_9_OFFSET(m))
+#define R_CANFD_CFDRFDF_10(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDRFDF_10_OFFSET(m))
+#define R_CANFD_CFDRFDF_11(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDRFDF_11_OFFSET(m))
+#define R_CANFD_CFDRFDF_12(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDRFDF_12_OFFSET(m))
+#define R_CANFD_CFDRFDF_13(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDRFDF_13_OFFSET(m))
+#define R_CANFD_CFDRFDF_14(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDRFDF_14_OFFSET(m))
+#define R_CANFD_CFDRFDF_15(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDRFDF_15_OFFSET(m))
+#define R_CANFD_CFDCFID(n)                        (R_CANFD_CH_BASE(n) + R_CANFD_CFDCFID_OFFSET)
+#define R_CANFD_CFDCFPTR(n)                       (R_CANFD_CH_BASE(n) + R_CANFD_CFDCFPTR_OFFSET)
+#define R_CANFD_CFDCFFDCSTS(n)                    (R_CANFD_CH_BASE(n) + R_CANFD_CFDCFFDCSTS_OFFSET)
+#define R_CANFD_CFDCFDF(n, m)                     (R_CANFD_CH_BASE(n) + R_CANFD_CFDCFDF_OFFSET(m))
+#define R_CANFD_CFDTMID(n, m)                     (R_CANFD_CH_BASE(n) + R_CANFD_CFDTMID_OFFSET(m))
+#define R_CANFD_CFDTMPTR(n, m)                    (R_CANFD_CH_BASE(n) + R_CANFD_CFDTMPTR_OFFSET(m))
+#define R_CANFD_CFDTMFDCTR(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDTMFDCTR_OFFSET(m))
+#define R_CANFD_CFDTMDF_0(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDTMDF_0_OFFSET(m))
+#define R_CANFD_CFDTMDF_1(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDTMDF_1_OFFSET(m))
+#define R_CANFD_CFDTMDF_2(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDTMDF_2_OFFSET(m))
+#define R_CANFD_CFDTMDF_3(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDTMDF_3_OFFSET(m))
+#define R_CANFD_CFDTMDF_4(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDTMDF_4_OFFSET(m))
+#define R_CANFD_CFDTMDF_5(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDTMDF_5_OFFSET(m))
+#define R_CANFD_CFDTMDF_6(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDTMDF_6_OFFSET(m))
+#define R_CANFD_CFDTMDF_7(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDTMDF_7_OFFSET(m))
+#define R_CANFD_CFDTMDF_8(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDTMDF_8_OFFSET(m))
+#define R_CANFD_CFDTMDF_9(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDTMDF_9_OFFSET(m))
+#define R_CANFD_CFDTMDF_10(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDTMDF_10_OFFSET(m))
+#define R_CANFD_CFDTMDF_11(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDTMDF_11_OFFSET(m))
+#define R_CANFD_CFDTMDF_12(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDTMDF_12_OFFSET(m))
+#define R_CANFD_CFDTMDF_13(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDTMDF_13_OFFSET(m))
+#define R_CANFD_CFDTMDF_14(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDTMDF_14_OFFSET(m))
+#define R_CANFD_CFDTMDF_15(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDTMDF_15_OFFSET(m))
+#define R_CANFD_CFDTHLACC0(n)                     (R_CANFD_CH_BASE(n) + R_CANFD_CFDTHLACC0_OFFSET)
+#define R_CANFD_CFDTHLACC1(n)                     (R_CANFD_CH_BASE(n) + R_CANFD_CFDTHLACC1_OFFSET)
+#define R_CANFD_CFDRMID(n, m)                     (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMID_OFFSET(m))
+#define R_CANFD_CFDRMPTR(n, m)                    (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMPTR_OFFSET(m))
+#define R_CANFD_CFDRMFDSTS(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMFDSTS_OFFSET(m))
+#define R_CANFD_CFDRMDF_0(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDF_0_OFFSET(m))
+#define R_CANFD_CFDRMDF_1(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDF_1_OFFSET(m))
+#define R_CANFD_CFDRMDF_2(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDF_2_OFFSET(m))
+#define R_CANFD_CFDRMDF_3(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDF_3_OFFSET(m))
+#define R_CANFD_CFDRMDF_4(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDF_4_OFFSET(m))
+#define R_CANFD_CFDRMDF_5(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDF_5_OFFSET(m))
+#define R_CANFD_CFDRMDF_6(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDF_6_OFFSET(m))
+#define R_CANFD_CFDRMDF_7(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDF_7_OFFSET(m))
+#define R_CANFD_CFDRMDF_8(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDF_8_OFFSET(m))
+#define R_CANFD_CFDRMDF_9(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDF_9_OFFSET(m))
+#define R_CANFD_CFDRMDF_10(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDF_10_OFFSET(m))
+#define R_CANFD_CFDRMDF_11(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDF_11_OFFSET(m))
+#define R_CANFD_CFDRMDF_12(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDF_12_OFFSET(m))
+#define R_CANFD_CFDRMDF_13(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDF_13_OFFSET(m))
+#define R_CANFD_CFDRMDF_14(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDF_14_OFFSET(m))
+#define R_CANFD_CFDRMDF_15(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDF_15_OFFSET(m))
 
 /* Register bit definitions */
 /* CFDC0NCFG Register bit definitions */
@@ -900,9 +887,9 @@
 #define R_CANFD_CFDTXQCC_TXQDC_SHIFT              (8)  /* TX Queue Depth Configuration */
 #define R_CANFD_CFDTXQCC_TXQDC_MASK               0x300
 #  define R_CANFD_CFDTXQCC_TXQDC_0X00                     (0 << R_CANFD_CFDTXQCC_TXQDC_SHIFT)  /* 0 messages */
-#  define R_CANFD_CFDTXQCC_TXQDC_0X01                     (0 << R_CANFD_CFDTXQCC_TXQDC_SHIFT)  /* Reserved */
-#  define R_CANFD_CFDTXQCC_TXQDC_0X10                     (0 << R_CANFD_CFDTXQCC_TXQDC_SHIFT)  /* 3 messages */
-#  define R_CANFD_CFDTXQCC_TXQDC_0X11                     (0 << R_CANFD_CFDTXQCC_TXQDC_SHIFT)  /* 4 messages */
+#  define R_CANFD_CFDTXQCC_TXQDC_0X01                     (1 << R_CANFD_CFDTXQCC_TXQDC_SHIFT)  /* Reserved */
+#  define R_CANFD_CFDTXQCC_TXQDC_0X10                     (2 << R_CANFD_CFDTXQCC_TXQDC_SHIFT)  /* 3 messages */
+#  define R_CANFD_CFDTXQCC_TXQDC_0X11                     (3 << R_CANFD_CFDTXQCC_TXQDC_SHIFT)  /* 4 messages */
 
 /* CFDTXQSTS Register bit definitions */
 #define R_CANFD_CFDTXQSTS_TXQEMP                  (1 << 0)  /* TX Queue Empty */
@@ -2589,4 +2576,4 @@
 
 #define CANFD_MAX_CHANNELS    64
 
-#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_CANFD_H */
+#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_CANFD_H */

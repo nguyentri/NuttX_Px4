@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/ra8/hardware/ra8p1/ra_adc12.h
+ * arch/arm/src/ra8/hardware/ra8e1/ra_adc12.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_ADC12_H
-#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_ADC12_H
+#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_ADC12_H
+#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_ADC12_H
 
 /****************************************************************************
  * Included Files
@@ -39,7 +39,7 @@
 #endif
 
 /* Channel stride for multi-channel peripherals */
-#define R_ADC12_CH_STRIDE    0x00000002
+#define R_ADC12_CH_STRIDE    0x00000200
 #define R_ADC12_CH_BASE(ch)   (R_ADC12_BASE + ((uint32_t)(ch) * R_ADC12_CH_STRIDE))
 
 /* ADC12 Register Offsets */
@@ -60,8 +60,8 @@
 #define R_ADC12_ADOCDR_OFFSET                     0x0000001c  /* A/D Internal Reference Voltage Data Register */
 #define R_ADC12_ADRD_OFFSET                       0x0000001e  /* A/D Self-Diagnosis Data Register */
 /* ADDR%s Registers (0-8) */
-#define R_ADC12_ADDR_OFFSET                       0x00000020  /* A/D Data Registers %s */
-#define R_ADC12_ADDR_INCREMENT                    0x00000002
+#define R_ADC12_ADDR_OFFSET(m)                    (0x00000020 + ((m) * 0x00000002))  /* A/D Data Registers %s */
+/* ADDR%s Registers (16-19) */
 #define R_ADC12_ADVMDR_OFFSET                     0x00000026  /* A/D VBATT Monitor Data Register */
 #define R_ADC12_ADSHCR_OFFSET                     0x00000066  /* A/D Sample and Hold Circuit Control Register */
 #define R_ADC12_ADDISCR_OFFSET                    0x0000007a  /* A/D Disconnection Detection Control Register */
@@ -76,8 +76,7 @@
 #define R_ADC12_ADCMPANSR0_OFFSET                 0x00000094  /* A/D Compare Function Window A Channel Select Register 0 */
 #define R_ADC12_ADCMPLR0_OFFSET                   0x00000098  /* A/D Compare Function Window A Comparison Condition Setting Register 0 */
 /* ADCMPDR%s Registers (0-1) */
-#define R_ADC12_ADCMPDR_OFFSET                    0x0000009c  /* A/D Compare Function Window A Lower-Side/Upper-Side Level Setting Register */
-#define R_ADC12_ADCMPDR_INCREMENT                 0x00000002
+#define R_ADC12_ADCMPDR_OFFSET(m)                 (0x0000009c + ((m) * 0x00000002))  /* A/D Compare Function Window A Lower-Side/Upper-Side Level Setting Register */
 #define R_ADC12_ADCMPSR0_OFFSET                   0x000000a0  /* A/D Compare Function Window A Channel Status Register 0 */
 #define R_ADC12_ADCMPSER_OFFSET                   0x000000a4  /* A/D Compare Function Window A Extended Input Channel Status Register */
 #define R_ADC12_ADCMPBNSR_OFFSET                  0x000000a6  /* A/D Compare Function Window B Channel Select Register */
@@ -85,64 +84,63 @@
 #define R_ADC12_ADWINULB_OFFSET                   0x000000aa  /* A/D Compare Function Window B Lower-Side/Upper-Side Level Setting Register */
 #define R_ADC12_ADCMPBSR_OFFSET                   0x000000ac  /* A/D Compare Function Window B Status Register */
 /* ADBUF%s Registers (0-15) */
-#define R_ADC12_ADBUF_OFFSET                      0x000000b0  /* A/D Data Buffer Registers %s */
-#define R_ADC12_ADBUF_INCREMENT                   0x00000002
+#define R_ADC12_ADBUF_OFFSET(m)                   (0x000000b0 + ((m) * 0x00000002))  /* A/D Data Buffer Registers %s */
 #define R_ADC12_ADBUFEN_OFFSET                    0x000000d0  /* A/D Data Buffer Enable Register */
 #define R_ADC12_ADBUFPTR_OFFSET                   0x000000d2  /* A/D Data Buffer Pointer Register */
 #define R_ADC12_ADSSTRL_OFFSET                    0x000000dd  /* A/D Sampling State Register */
 #define R_ADC12_ADSSTRT_OFFSET                    0x000000de  /* A/D Sampling State Register */
 #define R_ADC12_ADSSTRO_OFFSET                    0x000000df  /* A/D Sampling State Register */
 /* ADSSTR%s Registers (0-8) */
-#define R_ADC12_ADSSTR_OFFSET                     0x000000e0  /* A/D Sampling State Register */
-#define R_ADC12_ADSSTR_INCREMENT                  0x00000001
+#define R_ADC12_ADSSTR_OFFSET(m)                  (0x000000e0 + ((m) * 0x00000001))  /* A/D Sampling State Register */
 #define R_ADC12_ADSSTRV_OFFSET                    0x000000e3  /* A/D Sampling State Register */
+/* ADSSTR%s Registers (16-19) */
 
 /* ADC12 Register Addresses */
 
-#define R_ADC12_ADCSR                             (R_ADC12_BASE + R_ADC12_ADCSR_OFFSET)
-#define R_ADC12_ADANSA0                           (R_ADC12_BASE + R_ADC12_ADANSA0_OFFSET)
-#define R_ADC12_ADANSA1                           (R_ADC12_BASE + R_ADC12_ADANSA1_OFFSET)
-#define R_ADC12_ADADS0                            (R_ADC12_BASE + R_ADC12_ADADS0_OFFSET)
-#define R_ADC12_ADADS1                            (R_ADC12_BASE + R_ADC12_ADADS1_OFFSET)
-#define R_ADC12_ADADC                             (R_ADC12_BASE + R_ADC12_ADADC_OFFSET)
-#define R_ADC12_ADCER                             (R_ADC12_BASE + R_ADC12_ADCER_OFFSET)
-#define R_ADC12_ADSTRGR                           (R_ADC12_BASE + R_ADC12_ADSTRGR_OFFSET)
-#define R_ADC12_ADEXICR                           (R_ADC12_BASE + R_ADC12_ADEXICR_OFFSET)
-#define R_ADC12_ADANSB0                           (R_ADC12_BASE + R_ADC12_ADANSB0_OFFSET)
-#define R_ADC12_ADANSB1                           (R_ADC12_BASE + R_ADC12_ADANSB1_OFFSET)
-#define R_ADC12_ADDBLDR                           (R_ADC12_BASE + R_ADC12_ADDBLDR_OFFSET)
-#define R_ADC12_ADTSDR                            (R_ADC12_BASE + R_ADC12_ADTSDR_OFFSET)
-#define R_ADC12_ADOCDR                            (R_ADC12_BASE + R_ADC12_ADOCDR_OFFSET)
-#define R_ADC12_ADRD                              (R_ADC12_BASE + R_ADC12_ADRD_OFFSET)
-#define R_ADC12_ADDR(n)                           (R_ADC12_BASE + R_ADC12_ADDR_OFFSET + (n)*0x00000002)
-#define R_ADC12_ADVMDR                            (R_ADC12_BASE + R_ADC12_ADVMDR_OFFSET)
-#define R_ADC12_ADSHCR                            (R_ADC12_BASE + R_ADC12_ADSHCR_OFFSET)
-#define R_ADC12_ADDISCR                           (R_ADC12_BASE + R_ADC12_ADDISCR_OFFSET)
-#define R_ADC12_ADSHMSR                           (R_ADC12_BASE + R_ADC12_ADSHMSR_OFFSET)
-#define R_ADC12_ADGSPCR                           (R_ADC12_BASE + R_ADC12_ADGSPCR_OFFSET)
-#define R_ADC12_ADDBLDRA                          (R_ADC12_BASE + R_ADC12_ADDBLDRA_OFFSET)
-#define R_ADC12_ADDBLDRB                          (R_ADC12_BASE + R_ADC12_ADDBLDRB_OFFSET)
-#define R_ADC12_ADWINMON                          (R_ADC12_BASE + R_ADC12_ADWINMON_OFFSET)
-#define R_ADC12_ADCMPCR                           (R_ADC12_BASE + R_ADC12_ADCMPCR_OFFSET)
-#define R_ADC12_ADCMPANSER                        (R_ADC12_BASE + R_ADC12_ADCMPANSER_OFFSET)
-#define R_ADC12_ADCMPLER                          (R_ADC12_BASE + R_ADC12_ADCMPLER_OFFSET)
-#define R_ADC12_ADCMPANSR0                        (R_ADC12_BASE + R_ADC12_ADCMPANSR0_OFFSET)
-#define R_ADC12_ADCMPLR0                          (R_ADC12_BASE + R_ADC12_ADCMPLR0_OFFSET)
-#define R_ADC12_ADCMPDR(n)                        (R_ADC12_BASE + R_ADC12_ADCMPDR_OFFSET + (n)*0x00000002)
-#define R_ADC12_ADCMPSR0                          (R_ADC12_BASE + R_ADC12_ADCMPSR0_OFFSET)
-#define R_ADC12_ADCMPSER                          (R_ADC12_BASE + R_ADC12_ADCMPSER_OFFSET)
-#define R_ADC12_ADCMPBNSR                         (R_ADC12_BASE + R_ADC12_ADCMPBNSR_OFFSET)
-#define R_ADC12_ADWINLLB                          (R_ADC12_BASE + R_ADC12_ADWINLLB_OFFSET)
-#define R_ADC12_ADWINULB                          (R_ADC12_BASE + R_ADC12_ADWINULB_OFFSET)
-#define R_ADC12_ADCMPBSR                          (R_ADC12_BASE + R_ADC12_ADCMPBSR_OFFSET)
-#define R_ADC12_ADBUF(n)                          (R_ADC12_BASE + R_ADC12_ADBUF_OFFSET + (n)*0x00000002)
-#define R_ADC12_ADBUFEN                           (R_ADC12_BASE + R_ADC12_ADBUFEN_OFFSET)
-#define R_ADC12_ADBUFPTR                          (R_ADC12_BASE + R_ADC12_ADBUFPTR_OFFSET)
-#define R_ADC12_ADSSTRL                           (R_ADC12_BASE + R_ADC12_ADSSTRL_OFFSET)
-#define R_ADC12_ADSSTRT                           (R_ADC12_BASE + R_ADC12_ADSSTRT_OFFSET)
-#define R_ADC12_ADSSTRO                           (R_ADC12_BASE + R_ADC12_ADSSTRO_OFFSET)
-#define R_ADC12_ADSSTR(n)                         (R_ADC12_BASE + R_ADC12_ADSSTR_OFFSET + (n)*0x00000001)
-#define R_ADC12_ADSSTRV                           (R_ADC12_BASE + R_ADC12_ADSSTRV_OFFSET)
+#define R_ADC12_ADCSR(n)                          (R_ADC12_CH_BASE(n) + R_ADC12_ADCSR_OFFSET)
+#define R_ADC12_ADANSA0(n)                        (R_ADC12_CH_BASE(n) + R_ADC12_ADANSA0_OFFSET)
+#define R_ADC12_ADANSA1(n)                        (R_ADC12_CH_BASE(n) + R_ADC12_ADANSA1_OFFSET)
+#define R_ADC12_ADADS0(n)                         (R_ADC12_CH_BASE(n) + R_ADC12_ADADS0_OFFSET)
+#define R_ADC12_ADADS1(n)                         (R_ADC12_CH_BASE(n) + R_ADC12_ADADS1_OFFSET)
+#define R_ADC12_ADADC(n)                          (R_ADC12_CH_BASE(n) + R_ADC12_ADADC_OFFSET)
+#define R_ADC12_ADCER(n)                          (R_ADC12_CH_BASE(n) + R_ADC12_ADCER_OFFSET)
+#define R_ADC12_ADSTRGR(n)                        (R_ADC12_CH_BASE(n) + R_ADC12_ADSTRGR_OFFSET)
+#define R_ADC12_ADEXICR(n)                        (R_ADC12_CH_BASE(n) + R_ADC12_ADEXICR_OFFSET)
+#define R_ADC12_ADANSB0(n)                        (R_ADC12_CH_BASE(n) + R_ADC12_ADANSB0_OFFSET)
+#define R_ADC12_ADANSB1(n)                        (R_ADC12_CH_BASE(n) + R_ADC12_ADANSB1_OFFSET)
+#define R_ADC12_ADDBLDR(n)                        (R_ADC12_CH_BASE(n) + R_ADC12_ADDBLDR_OFFSET)
+#define R_ADC12_ADTSDR(n)                         (R_ADC12_CH_BASE(n) + R_ADC12_ADTSDR_OFFSET)
+#define R_ADC12_ADOCDR(n)                         (R_ADC12_CH_BASE(n) + R_ADC12_ADOCDR_OFFSET)
+#define R_ADC12_ADRD(n)                           (R_ADC12_CH_BASE(n) + R_ADC12_ADRD_OFFSET)
+#define R_ADC12_ADDR(n, m)                        (R_ADC12_CH_BASE(n) + R_ADC12_ADDR_OFFSET(m))
+#define R_ADC12_ADVMDR(n)                         (R_ADC12_CH_BASE(n) + R_ADC12_ADVMDR_OFFSET)
+#define R_ADC12_ADSHCR(n)                         (R_ADC12_CH_BASE(n) + R_ADC12_ADSHCR_OFFSET)
+#define R_ADC12_ADDISCR(n)                        (R_ADC12_CH_BASE(n) + R_ADC12_ADDISCR_OFFSET)
+#define R_ADC12_ADSHMSR(n)                        (R_ADC12_CH_BASE(n) + R_ADC12_ADSHMSR_OFFSET)
+#define R_ADC12_ADGSPCR(n)                        (R_ADC12_CH_BASE(n) + R_ADC12_ADGSPCR_OFFSET)
+#define R_ADC12_ADDBLDRA(n)                       (R_ADC12_CH_BASE(n) + R_ADC12_ADDBLDRA_OFFSET)
+#define R_ADC12_ADDBLDRB(n)                       (R_ADC12_CH_BASE(n) + R_ADC12_ADDBLDRB_OFFSET)
+#define R_ADC12_ADWINMON(n)                       (R_ADC12_CH_BASE(n) + R_ADC12_ADWINMON_OFFSET)
+#define R_ADC12_ADCMPCR(n)                        (R_ADC12_CH_BASE(n) + R_ADC12_ADCMPCR_OFFSET)
+#define R_ADC12_ADCMPANSER(n)                     (R_ADC12_CH_BASE(n) + R_ADC12_ADCMPANSER_OFFSET)
+#define R_ADC12_ADCMPLER(n)                       (R_ADC12_CH_BASE(n) + R_ADC12_ADCMPLER_OFFSET)
+#define R_ADC12_ADCMPANSR0(n)                     (R_ADC12_CH_BASE(n) + R_ADC12_ADCMPANSR0_OFFSET)
+#define R_ADC12_ADCMPLR0(n)                       (R_ADC12_CH_BASE(n) + R_ADC12_ADCMPLR0_OFFSET)
+#define R_ADC12_ADCMPDR(n, m)                     (R_ADC12_CH_BASE(n) + R_ADC12_ADCMPDR_OFFSET(m))
+#define R_ADC12_ADCMPSR0(n)                       (R_ADC12_CH_BASE(n) + R_ADC12_ADCMPSR0_OFFSET)
+#define R_ADC12_ADCMPSER(n)                       (R_ADC12_CH_BASE(n) + R_ADC12_ADCMPSER_OFFSET)
+#define R_ADC12_ADCMPBNSR(n)                      (R_ADC12_CH_BASE(n) + R_ADC12_ADCMPBNSR_OFFSET)
+#define R_ADC12_ADWINLLB(n)                       (R_ADC12_CH_BASE(n) + R_ADC12_ADWINLLB_OFFSET)
+#define R_ADC12_ADWINULB(n)                       (R_ADC12_CH_BASE(n) + R_ADC12_ADWINULB_OFFSET)
+#define R_ADC12_ADCMPBSR(n)                       (R_ADC12_CH_BASE(n) + R_ADC12_ADCMPBSR_OFFSET)
+#define R_ADC12_ADBUF(n, m)                       (R_ADC12_CH_BASE(n) + R_ADC12_ADBUF_OFFSET(m))
+#define R_ADC12_ADBUFEN(n)                        (R_ADC12_CH_BASE(n) + R_ADC12_ADBUFEN_OFFSET)
+#define R_ADC12_ADBUFPTR(n)                       (R_ADC12_CH_BASE(n) + R_ADC12_ADBUFPTR_OFFSET)
+#define R_ADC12_ADSSTRL(n)                        (R_ADC12_CH_BASE(n) + R_ADC12_ADSSTRL_OFFSET)
+#define R_ADC12_ADSSTRT(n)                        (R_ADC12_CH_BASE(n) + R_ADC12_ADSSTRT_OFFSET)
+#define R_ADC12_ADSSTRO(n)                        (R_ADC12_CH_BASE(n) + R_ADC12_ADSSTRO_OFFSET)
+#define R_ADC12_ADSSTR(n, m)                      (R_ADC12_CH_BASE(n) + R_ADC12_ADSSTR_OFFSET(m))
+#define R_ADC12_ADSSTRV(n)                        (R_ADC12_CH_BASE(n) + R_ADC12_ADSSTRV_OFFSET)
 
 /* Register bit definitions */
 /* ADCSR Register bit definitions */
@@ -370,7 +368,7 @@
 #define R_ADC12_ADDISCR_ADNDIS_SHIFT              (0)  /* Disconnection Detection Assist Setting */
 #define R_ADC12_ADDISCR_ADNDIS_MASK               0xf
 #  define R_ADC12_ADDISCR_ADNDIS_0X0                      (0 << R_ADC12_ADDISCR_ADNDIS_SHIFT)  /* The disconnection detection assist function is disabled */
-#  define R_ADC12_ADDISCR_ADNDIS_0X1                      (0 << R_ADC12_ADDISCR_ADNDIS_SHIFT)  /* Setting prohibited */
+#  define R_ADC12_ADDISCR_ADNDIS_0X1                      (1 << R_ADC12_ADDISCR_ADNDIS_SHIFT)  /* Setting prohibited */
 
 #define R_ADC12_ADDISCR_PCHG                      (1 << 4)  /* Precharge/discharge select */
 
@@ -584,4 +582,4 @@
 
 #define ADC12_MAX_CHANNELS    16
 
-#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_ADC12_H */
+#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_ADC12_H */

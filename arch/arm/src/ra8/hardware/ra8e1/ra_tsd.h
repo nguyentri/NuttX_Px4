@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/ra8/hardware/ra8p1/ra_tsd.h
+ * arch/arm/src/ra8/hardware/ra8e1/ra_tsd.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_TSD_H
-#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_TSD_H
+#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_TSD_H
+#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_TSD_H
 
 /****************************************************************************
  * Included Files
@@ -56,4 +56,4 @@
 
 #define TSD_MAX_CHANNELS    1
 
-#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_TSD_H */
+#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_TSD_H */

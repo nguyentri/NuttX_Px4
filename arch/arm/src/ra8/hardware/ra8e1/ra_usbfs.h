@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/ra8/hardware/ra8p1/ra_usbfs.h
+ * arch/arm/src/ra8/hardware/ra8e1/ra_usbfs.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_USBFS_H
-#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_USBFS_H
+#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_USBFS_H
+#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_USBFS_H
 
 /****************************************************************************
  * Included Files
@@ -38,10 +38,6 @@
 #endif
 #endif
 
-/* Channel stride for multi-channel peripherals */
-#define R_USBFS_CH_STRIDE    0x00000004
-#define R_USBFS_CH_BASE(ch)   (R_USBFS_BASE + ((uint32_t)(ch) * R_USBFS_CH_STRIDE))
-
 /* USBFS Register Offsets */
 
 #define R_USBFS_SYSCFG_OFFSET                     0x00000000  /* System Configuration Control Register */
@@ -50,19 +46,15 @@
 #define R_USBFS_CFIFO_OFFSET                      0x00000014  /* CFIFO Port Register */
 #define R_USBFS_CFIFOL_OFFSET                     0x00000014  /* CFIFO Port Register */
 /* D%sFIFO Registers (0-1) */
-#define R_USBFS_DFIFO_OFFSET                      0x00000018  /* D%sFIFO Port Register */
-#define R_USBFS_DFIFO_INCREMENT                   0x00000004
+#define R_USBFS_DFIFO_OFFSET(m)                   (0x00000018 + ((m) * 0x00000004))  /* D%sFIFO Port Register */
 /* D%sFIFOL Registers (0-1) */
-#define R_USBFS_DFIFOL_OFFSET                     0x00000018  /* D%sFIFO Port Register */
-#define R_USBFS_DFIFOL_INCREMENT                  0x00000004
+#define R_USBFS_DFIFOL_OFFSET(m)                  (0x00000018 + ((m) * 0x00000004))  /* D%sFIFO Port Register */
 #define R_USBFS_CFIFOSEL_OFFSET                   0x00000020  /* CFIFO Port Select Register */
 #define R_USBFS_CFIFOCTR_OFFSET                   0x00000022  /* CFIFO Port Control Register */
 /* D%sFIFOSEL Registers (0-1) */
-#define R_USBFS_DFIFOSEL_OFFSET                   0x00000028  /* D%sFIFO Port Select Register */
-#define R_USBFS_DFIFOSEL_INCREMENT                0x00000004
+#define R_USBFS_DFIFOSEL_OFFSET(m)                (0x00000028 + ((m) * 0x00000004))  /* D%sFIFO Port Select Register */
 /* D%sFIFOCTR Registers (0-1) */
-#define R_USBFS_DFIFOCTR_OFFSET                   0x0000002a  /* D%sFIFO Port Control Register */
-#define R_USBFS_DFIFOCTR_INCREMENT                0x00000004
+#define R_USBFS_DFIFOCTR_OFFSET(m)                (0x0000002a + ((m) * 0x00000004))  /* D%sFIFO Port Control Register */
 #define R_USBFS_INTENB0_OFFSET                    0x00000030  /* Interrupt Enable Register 0 */
 #define R_USBFS_INTENB1_OFFSET                    0x00000032  /* Interrupt Enable Register 1 */
 #define R_USBFS_BRDYENB_OFFSET                    0x00000036  /* BRDY Interrupt Enable Register */
@@ -89,17 +81,14 @@
 #define R_USBFS_PIPEMAXP_OFFSET                   0x0000006c  /* Pipe Maximum Packet Size Register */
 #define R_USBFS_PIPEPERI_OFFSET                   0x0000006e  /* Pipe Cycle Control Register */
 /* PIPE%sCTR Registers (1-5) */
-#define R_USBFS_PIPECTR_OFFSET                    0x00000070  /* PIPE%s Control Registers */
-#define R_USBFS_PIPECTR_INCREMENT                 0x00000002
+#define R_USBFS_PIPECTR_OFFSET(m)                 (0x00000070 + ((m) * 0x00000002))  /* PIPE%s Control Registers */
+/* PIPE%sCTR Registers (6-9) */
 /* PIPE%sTRE Registers (1-5) */
-#define R_USBFS_PIPETRE_OFFSET                    0x00000090  /* PIPE%s Transaction Counter Enable Register */
-#define R_USBFS_PIPETRE_INCREMENT                 0x00000004
+#define R_USBFS_PIPETRE_OFFSET(m)                 (0x00000090 + ((m) * 0x00000004))  /* PIPE%s Transaction Counter Enable Register */
 /* PIPE%sTRN Registers (1-5) */
-#define R_USBFS_PIPETRN_OFFSET                    0x00000092  /* PIPE%s Transaction Counter Register */
-#define R_USBFS_PIPETRN_INCREMENT                 0x00000004
+#define R_USBFS_PIPETRN_OFFSET(m)                 (0x00000092 + ((m) * 0x00000004))  /* PIPE%s Transaction Counter Register */
 /* DEVADD%s Registers (0-5) */
-#define R_USBFS_DEVADD_OFFSET                     0x000000d0  /* Device Address %s Configuration Register */
-#define R_USBFS_DEVADD_INCREMENT                  0x00000002
+#define R_USBFS_DEVADD_OFFSET(m)                  (0x000000d0 + ((m) * 0x00000002))  /* Device Address %s Configuration Register */
 #define R_USBFS_DPUSR0R_OFFSET                    0x00000400  /* Deep Software Standby USB Transceiver Control/Pin Monitor Register */
 #define R_USBFS_DPUSR1R_OFFSET                    0x00000404  /* Deep Software Standby USB Suspend/Resume Interrupt Register */
 
@@ -110,12 +99,12 @@
 #define R_USBFS_DVSTCTR0                          (R_USBFS_BASE + R_USBFS_DVSTCTR0_OFFSET)
 #define R_USBFS_CFIFO                             (R_USBFS_BASE + R_USBFS_CFIFO_OFFSET)
 #define R_USBFS_CFIFOL                            (R_USBFS_BASE + R_USBFS_CFIFOL_OFFSET)
-#define R_USBFS_DFIFO(n)                          (R_USBFS_BASE + R_USBFS_DFIFO_OFFSET + (n)*0x00000004)
-#define R_USBFS_DFIFOL(n)                         (R_USBFS_BASE + R_USBFS_DFIFOL_OFFSET + (n)*0x00000004)
+#define R_USBFS_DFIFO(m)                          (R_USBFS_BASE + R_USBFS_DFIFO_OFFSET(m))
+#define R_USBFS_DFIFOL(m)                         (R_USBFS_BASE + R_USBFS_DFIFOL_OFFSET(m))
 #define R_USBFS_CFIFOSEL                          (R_USBFS_BASE + R_USBFS_CFIFOSEL_OFFSET)
 #define R_USBFS_CFIFOCTR                          (R_USBFS_BASE + R_USBFS_CFIFOCTR_OFFSET)
-#define R_USBFS_DFIFOSEL(n)                       (R_USBFS_BASE + R_USBFS_DFIFOSEL_OFFSET + (n)*0x00000004)
-#define R_USBFS_DFIFOCTR(n)                       (R_USBFS_BASE + R_USBFS_DFIFOCTR_OFFSET + (n)*0x00000004)
+#define R_USBFS_DFIFOSEL(m)                       (R_USBFS_BASE + R_USBFS_DFIFOSEL_OFFSET(m))
+#define R_USBFS_DFIFOCTR(m)                       (R_USBFS_BASE + R_USBFS_DFIFOCTR_OFFSET(m))
 #define R_USBFS_INTENB0                           (R_USBFS_BASE + R_USBFS_INTENB0_OFFSET)
 #define R_USBFS_INTENB1                           (R_USBFS_BASE + R_USBFS_INTENB1_OFFSET)
 #define R_USBFS_BRDYENB                           (R_USBFS_BASE + R_USBFS_BRDYENB_OFFSET)
@@ -141,10 +130,10 @@
 #define R_USBFS_PIPECFG                           (R_USBFS_BASE + R_USBFS_PIPECFG_OFFSET)
 #define R_USBFS_PIPEMAXP                          (R_USBFS_BASE + R_USBFS_PIPEMAXP_OFFSET)
 #define R_USBFS_PIPEPERI                          (R_USBFS_BASE + R_USBFS_PIPEPERI_OFFSET)
-#define R_USBFS_PIPECTR(n)                        (R_USBFS_BASE + R_USBFS_PIPECTR_OFFSET + (n)*0x00000002)
-#define R_USBFS_PIPETRE(n)                        (R_USBFS_BASE + R_USBFS_PIPETRE_OFFSET + (n)*0x00000004)
-#define R_USBFS_PIPETRN(n)                        (R_USBFS_BASE + R_USBFS_PIPETRN_OFFSET + (n)*0x00000004)
-#define R_USBFS_DEVADD(n)                         (R_USBFS_BASE + R_USBFS_DEVADD_OFFSET + (n)*0x00000002)
+#define R_USBFS_PIPECTR(m)                        (R_USBFS_BASE + R_USBFS_PIPECTR_OFFSET(m))
+#define R_USBFS_PIPETRE(m)                        (R_USBFS_BASE + R_USBFS_PIPETRE_OFFSET(m))
+#define R_USBFS_PIPETRN(m)                        (R_USBFS_BASE + R_USBFS_PIPETRN_OFFSET(m))
+#define R_USBFS_DEVADD(m)                         (R_USBFS_BASE + R_USBFS_DEVADD_OFFSET(m))
 #define R_USBFS_DPUSR0R                           (R_USBFS_BASE + R_USBFS_DPUSR0R_OFFSET)
 #define R_USBFS_DPUSR1R                           (R_USBFS_BASE + R_USBFS_DPUSR1R_OFFSET)
 
@@ -217,15 +206,15 @@
 #define R_USBFS_CFIFOSEL_CURPIPE_SHIFT            (0)  /* CFIFO Port Access Pipe Specification */
 #define R_USBFS_CFIFOSEL_CURPIPE_MASK             0xf
 #  define R_USBFS_CFIFOSEL_CURPIPE_0X0                    (0 << R_USBFS_CFIFOSEL_CURPIPE_SHIFT)  /* Default Control Pipe */
-#  define R_USBFS_CFIFOSEL_CURPIPE_0X1                    (0 << R_USBFS_CFIFOSEL_CURPIPE_SHIFT)  /* Pipe 1 */
-#  define R_USBFS_CFIFOSEL_CURPIPE_0X2                    (0 << R_USBFS_CFIFOSEL_CURPIPE_SHIFT)  /* Pipe 2 */
-#  define R_USBFS_CFIFOSEL_CURPIPE_0X3                    (0 << R_USBFS_CFIFOSEL_CURPIPE_SHIFT)  /* Pipe 3 */
-#  define R_USBFS_CFIFOSEL_CURPIPE_0X4                    (0 << R_USBFS_CFIFOSEL_CURPIPE_SHIFT)  /* Pipe 4 */
-#  define R_USBFS_CFIFOSEL_CURPIPE_0X5                    (0 << R_USBFS_CFIFOSEL_CURPIPE_SHIFT)  /* Pipe 5 */
-#  define R_USBFS_CFIFOSEL_CURPIPE_0X6                    (0 << R_USBFS_CFIFOSEL_CURPIPE_SHIFT)  /* Pipe 6 */
-#  define R_USBFS_CFIFOSEL_CURPIPE_0X7                    (0 << R_USBFS_CFIFOSEL_CURPIPE_SHIFT)  /* Pipe 7 */
-#  define R_USBFS_CFIFOSEL_CURPIPE_0X8                    (0 << R_USBFS_CFIFOSEL_CURPIPE_SHIFT)  /* Pipe 8 */
-#  define R_USBFS_CFIFOSEL_CURPIPE_0X9                    (0 << R_USBFS_CFIFOSEL_CURPIPE_SHIFT)  /* Pipe 9 */
+#  define R_USBFS_CFIFOSEL_CURPIPE_0X1                    (1 << R_USBFS_CFIFOSEL_CURPIPE_SHIFT)  /* Pipe 1 */
+#  define R_USBFS_CFIFOSEL_CURPIPE_0X2                    (2 << R_USBFS_CFIFOSEL_CURPIPE_SHIFT)  /* Pipe 2 */
+#  define R_USBFS_CFIFOSEL_CURPIPE_0X3                    (3 << R_USBFS_CFIFOSEL_CURPIPE_SHIFT)  /* Pipe 3 */
+#  define R_USBFS_CFIFOSEL_CURPIPE_0X4                    (4 << R_USBFS_CFIFOSEL_CURPIPE_SHIFT)  /* Pipe 4 */
+#  define R_USBFS_CFIFOSEL_CURPIPE_0X5                    (5 << R_USBFS_CFIFOSEL_CURPIPE_SHIFT)  /* Pipe 5 */
+#  define R_USBFS_CFIFOSEL_CURPIPE_0X6                    (6 << R_USBFS_CFIFOSEL_CURPIPE_SHIFT)  /* Pipe 6 */
+#  define R_USBFS_CFIFOSEL_CURPIPE_0X7                    (7 << R_USBFS_CFIFOSEL_CURPIPE_SHIFT)  /* Pipe 7 */
+#  define R_USBFS_CFIFOSEL_CURPIPE_0X8                    (8 << R_USBFS_CFIFOSEL_CURPIPE_SHIFT)  /* Pipe 8 */
+#  define R_USBFS_CFIFOSEL_CURPIPE_0X9                    (9 << R_USBFS_CFIFOSEL_CURPIPE_SHIFT)  /* Pipe 9 */
 
 #define R_USBFS_CFIFOSEL_ISEL                     (1 << 5)  /* CFIFO Port Access Direction When DCP Is Selected */
 
@@ -251,15 +240,15 @@
 #define R_USBFS_DFIFOSEL_CURPIPE_SHIFT            (0)  /* FIFO Port Access Pipe Specification */
 #define R_USBFS_DFIFOSEL_CURPIPE_MASK             0xf
 #  define R_USBFS_DFIFOSEL_CURPIPE_0X0                    (0 << R_USBFS_DFIFOSEL_CURPIPE_SHIFT)  /* Default Control Pipe */
-#  define R_USBFS_DFIFOSEL_CURPIPE_0X1                    (0 << R_USBFS_DFIFOSEL_CURPIPE_SHIFT)  /* Pipe 1 */
-#  define R_USBFS_DFIFOSEL_CURPIPE_0X2                    (0 << R_USBFS_DFIFOSEL_CURPIPE_SHIFT)  /* Pipe 2 */
-#  define R_USBFS_DFIFOSEL_CURPIPE_0X3                    (0 << R_USBFS_DFIFOSEL_CURPIPE_SHIFT)  /* Pipe 3 */
-#  define R_USBFS_DFIFOSEL_CURPIPE_0X4                    (0 << R_USBFS_DFIFOSEL_CURPIPE_SHIFT)  /* Pipe 4 */
-#  define R_USBFS_DFIFOSEL_CURPIPE_0X5                    (0 << R_USBFS_DFIFOSEL_CURPIPE_SHIFT)  /* Pipe 5 */
-#  define R_USBFS_DFIFOSEL_CURPIPE_0X6                    (0 << R_USBFS_DFIFOSEL_CURPIPE_SHIFT)  /* Pipe 6 */
-#  define R_USBFS_DFIFOSEL_CURPIPE_0X7                    (0 << R_USBFS_DFIFOSEL_CURPIPE_SHIFT)  /* Pipe 7 */
-#  define R_USBFS_DFIFOSEL_CURPIPE_0X8                    (0 << R_USBFS_DFIFOSEL_CURPIPE_SHIFT)  /* Pipe 8 */
-#  define R_USBFS_DFIFOSEL_CURPIPE_0X9                    (0 << R_USBFS_DFIFOSEL_CURPIPE_SHIFT)  /* Pipe 9 */
+#  define R_USBFS_DFIFOSEL_CURPIPE_0X1                    (1 << R_USBFS_DFIFOSEL_CURPIPE_SHIFT)  /* Pipe 1 */
+#  define R_USBFS_DFIFOSEL_CURPIPE_0X2                    (2 << R_USBFS_DFIFOSEL_CURPIPE_SHIFT)  /* Pipe 2 */
+#  define R_USBFS_DFIFOSEL_CURPIPE_0X3                    (3 << R_USBFS_DFIFOSEL_CURPIPE_SHIFT)  /* Pipe 3 */
+#  define R_USBFS_DFIFOSEL_CURPIPE_0X4                    (4 << R_USBFS_DFIFOSEL_CURPIPE_SHIFT)  /* Pipe 4 */
+#  define R_USBFS_DFIFOSEL_CURPIPE_0X5                    (5 << R_USBFS_DFIFOSEL_CURPIPE_SHIFT)  /* Pipe 5 */
+#  define R_USBFS_DFIFOSEL_CURPIPE_0X6                    (6 << R_USBFS_DFIFOSEL_CURPIPE_SHIFT)  /* Pipe 6 */
+#  define R_USBFS_DFIFOSEL_CURPIPE_0X7                    (7 << R_USBFS_DFIFOSEL_CURPIPE_SHIFT)  /* Pipe 7 */
+#  define R_USBFS_DFIFOSEL_CURPIPE_0X8                    (8 << R_USBFS_DFIFOSEL_CURPIPE_SHIFT)  /* Pipe 8 */
+#  define R_USBFS_DFIFOSEL_CURPIPE_0X9                    (9 << R_USBFS_DFIFOSEL_CURPIPE_SHIFT)  /* Pipe 9 */
 
 #define R_USBFS_DFIFOSEL_BIGEND                   (1 << 8)  /* FIFO Port Endian Control */
 
@@ -518,11 +507,11 @@
 
 #define R_USBFS_USBADDR_STSRECOV_SHIFT            (8)  /* Status Recovery */
 #define R_USBFS_USBADDR_STSRECOV_MASK             0xf00
-#  define R_USBFS_USBADDR_STSRECOV_0X4                    (0 << R_USBFS_USBADDR_STSRECOV_SHIFT)  /* Recovery in device controller mode: Setting prohibited Recovery in host controller mode: Return to the low-speed state (bits DVSTCTR0.RHST[2:0] = 001b)  */
-#  define R_USBFS_USBADDR_STSRECOV_0X8                    (0 << R_USBFS_USBADDR_STSRECOV_SHIFT)  /* Recovery in device controller mode: Setting prohibited Recovery in host controller mode: Return to the full-speed state (bits DVSTCTR0.RHST[2:0] = 010b)  */
-#  define R_USBFS_USBADDR_STSRECOV_0X9                    (0 << R_USBFS_USBADDR_STSRECOV_SHIFT)  /* Recovery in device controller mode: Return to the full-speed state (bits DVSTCTR0.RHST[2:0] = 010b), bits INTSTS0.DVSQ[2:0] = 001b (default state) Recovery in host controller mode: Setting prohibited  */
-#  define R_USBFS_USBADDR_STSRECOV_0XA                    (0 << R_USBFS_USBADDR_STSRECOV_SHIFT)  /* Recovery in device controller mode: Return to the full-speed state (bits DVSTCTR0.RHST[2:0] = 010b), bits INTSTS0.DVSQ[2:0] = 010b (address state) Recovery in host controller mode: Setting prohibited  */
-#  define R_USBFS_USBADDR_STSRECOV_0XB                    (0 << R_USBFS_USBADDR_STSRECOV_SHIFT)  /* Recovery in device controller mode: Return to the full-speed state (bits DVSTCTR0.RHST[2:0] = 010b), bits INTSTS0.DVSQ[2:0] = 011b (configured state) Recovery in host controller mode: Setting prohibited  */
+#  define R_USBFS_USBADDR_STSRECOV_0X4                    (4 << R_USBFS_USBADDR_STSRECOV_SHIFT)  /* Recovery in device controller mode: Setting prohibited Recovery in host controller mode: Return to the low-speed state (bits DVSTCTR0.RHST[2:0] = 001b)  */
+#  define R_USBFS_USBADDR_STSRECOV_0X8                    (8 << R_USBFS_USBADDR_STSRECOV_SHIFT)  /* Recovery in device controller mode: Setting prohibited Recovery in host controller mode: Return to the full-speed state (bits DVSTCTR0.RHST[2:0] = 010b)  */
+#  define R_USBFS_USBADDR_STSRECOV_0X9                    (9 << R_USBFS_USBADDR_STSRECOV_SHIFT)  /* Recovery in device controller mode: Return to the full-speed state (bits DVSTCTR0.RHST[2:0] = 010b), bits INTSTS0.DVSQ[2:0] = 001b (default state) Recovery in host controller mode: Setting prohibited  */
+#  define R_USBFS_USBADDR_STSRECOV_0XA                    (10 << R_USBFS_USBADDR_STSRECOV_SHIFT)  /* Recovery in device controller mode: Return to the full-speed state (bits DVSTCTR0.RHST[2:0] = 010b), bits INTSTS0.DVSQ[2:0] = 010b (address state) Recovery in host controller mode: Setting prohibited  */
+#  define R_USBFS_USBADDR_STSRECOV_0XB                    (11 << R_USBFS_USBADDR_STSRECOV_SHIFT)  /* Recovery in device controller mode: Return to the full-speed state (bits DVSTCTR0.RHST[2:0] = 010b), bits INTSTS0.DVSQ[2:0] = 011b (configured state) Recovery in host controller mode: Setting prohibited  */
 
 /* USBREQ Register bit definitions */
 #define R_USBFS_USBREQ_BMREQUESTTYPE_SHIFT        (0)  /* Request Type */
@@ -555,11 +544,11 @@
 #define R_USBFS_DCPMAXP_DEVSEL_SHIFT              (12)  /* Device Select */
 #define R_USBFS_DCPMAXP_DEVSEL_MASK               0xf000
 #  define R_USBFS_DCPMAXP_DEVSEL_0X0                      (0 << R_USBFS_DCPMAXP_DEVSEL_SHIFT)  /* Address 0000b */
-#  define R_USBFS_DCPMAXP_DEVSEL_0X1                      (0 << R_USBFS_DCPMAXP_DEVSEL_SHIFT)  /* Address 0001b */
-#  define R_USBFS_DCPMAXP_DEVSEL_0X2                      (0 << R_USBFS_DCPMAXP_DEVSEL_SHIFT)  /* Address 0010b */
-#  define R_USBFS_DCPMAXP_DEVSEL_0X3                      (0 << R_USBFS_DCPMAXP_DEVSEL_SHIFT)  /* Address 0011b */
-#  define R_USBFS_DCPMAXP_DEVSEL_0X4                      (0 << R_USBFS_DCPMAXP_DEVSEL_SHIFT)  /* Address 0100b */
-#  define R_USBFS_DCPMAXP_DEVSEL_0X5                      (0 << R_USBFS_DCPMAXP_DEVSEL_SHIFT)  /* Address 0101b */
+#  define R_USBFS_DCPMAXP_DEVSEL_0X1                      (1 << R_USBFS_DCPMAXP_DEVSEL_SHIFT)  /* Address 0001b */
+#  define R_USBFS_DCPMAXP_DEVSEL_0X2                      (2 << R_USBFS_DCPMAXP_DEVSEL_SHIFT)  /* Address 0010b */
+#  define R_USBFS_DCPMAXP_DEVSEL_0X3                      (3 << R_USBFS_DCPMAXP_DEVSEL_SHIFT)  /* Address 0011b */
+#  define R_USBFS_DCPMAXP_DEVSEL_0X4                      (4 << R_USBFS_DCPMAXP_DEVSEL_SHIFT)  /* Address 0100b */
+#  define R_USBFS_DCPMAXP_DEVSEL_0X5                      (5 << R_USBFS_DCPMAXP_DEVSEL_SHIFT)  /* Address 0101b */
 
 /* DCPCTR Register bit definitions */
 #define R_USBFS_DCPCTR_PID_SHIFT                  (0)  /* Response PID */
@@ -589,15 +578,15 @@
 #define R_USBFS_PIPESEL_PIPESEL_SHIFT             (0)  /* Pipe Window Select */
 #define R_USBFS_PIPESEL_PIPESEL_MASK              0xf
 #  define R_USBFS_PIPESEL_PIPESEL_0X0                     (0 << R_USBFS_PIPESEL_PIPESEL_SHIFT)  /* No pipe selected */
-#  define R_USBFS_PIPESEL_PIPESEL_0X1                     (0 << R_USBFS_PIPESEL_PIPESEL_SHIFT)  /* Pipe 1 */
-#  define R_USBFS_PIPESEL_PIPESEL_0X2                     (0 << R_USBFS_PIPESEL_PIPESEL_SHIFT)  /* Pipe 2 */
-#  define R_USBFS_PIPESEL_PIPESEL_0X3                     (0 << R_USBFS_PIPESEL_PIPESEL_SHIFT)  /* Pipe 3 */
-#  define R_USBFS_PIPESEL_PIPESEL_0X4                     (0 << R_USBFS_PIPESEL_PIPESEL_SHIFT)  /* Pipe 4 */
-#  define R_USBFS_PIPESEL_PIPESEL_0X5                     (0 << R_USBFS_PIPESEL_PIPESEL_SHIFT)  /* Pipe 5 */
-#  define R_USBFS_PIPESEL_PIPESEL_0X6                     (0 << R_USBFS_PIPESEL_PIPESEL_SHIFT)  /* Pipe 6 */
-#  define R_USBFS_PIPESEL_PIPESEL_0X7                     (0 << R_USBFS_PIPESEL_PIPESEL_SHIFT)  /* Pipe 7 */
-#  define R_USBFS_PIPESEL_PIPESEL_0X8                     (0 << R_USBFS_PIPESEL_PIPESEL_SHIFT)  /* Pipe 8 */
-#  define R_USBFS_PIPESEL_PIPESEL_0X9                     (0 << R_USBFS_PIPESEL_PIPESEL_SHIFT)  /* Pipe 9 */
+#  define R_USBFS_PIPESEL_PIPESEL_0X1                     (1 << R_USBFS_PIPESEL_PIPESEL_SHIFT)  /* Pipe 1 */
+#  define R_USBFS_PIPESEL_PIPESEL_0X2                     (2 << R_USBFS_PIPESEL_PIPESEL_SHIFT)  /* Pipe 2 */
+#  define R_USBFS_PIPESEL_PIPESEL_0X3                     (3 << R_USBFS_PIPESEL_PIPESEL_SHIFT)  /* Pipe 3 */
+#  define R_USBFS_PIPESEL_PIPESEL_0X4                     (4 << R_USBFS_PIPESEL_PIPESEL_SHIFT)  /* Pipe 4 */
+#  define R_USBFS_PIPESEL_PIPESEL_0X5                     (5 << R_USBFS_PIPESEL_PIPESEL_SHIFT)  /* Pipe 5 */
+#  define R_USBFS_PIPESEL_PIPESEL_0X6                     (6 << R_USBFS_PIPESEL_PIPESEL_SHIFT)  /* Pipe 6 */
+#  define R_USBFS_PIPESEL_PIPESEL_0X7                     (7 << R_USBFS_PIPESEL_PIPESEL_SHIFT)  /* Pipe 7 */
+#  define R_USBFS_PIPESEL_PIPESEL_0X8                     (8 << R_USBFS_PIPESEL_PIPESEL_SHIFT)  /* Pipe 8 */
+#  define R_USBFS_PIPESEL_PIPESEL_0X9                     (9 << R_USBFS_PIPESEL_PIPESEL_SHIFT)  /* Pipe 9 */
 
 /* PIPECFG Register bit definitions */
 #define R_USBFS_PIPECFG_EPNUM_SHIFT               (0)  /* Endpoint Number */
@@ -625,11 +614,11 @@
 #define R_USBFS_PIPEMAXP_DEVSEL_SHIFT             (12)  /* Device Select */
 #define R_USBFS_PIPEMAXP_DEVSEL_MASK              0xf000
 #  define R_USBFS_PIPEMAXP_DEVSEL_0X0                     (0 << R_USBFS_PIPEMAXP_DEVSEL_SHIFT)  /* Address 0000b */
-#  define R_USBFS_PIPEMAXP_DEVSEL_0X1                     (0 << R_USBFS_PIPEMAXP_DEVSEL_SHIFT)  /* Address 0001b */
-#  define R_USBFS_PIPEMAXP_DEVSEL_0X2                     (0 << R_USBFS_PIPEMAXP_DEVSEL_SHIFT)  /* Address 0010b */
-#  define R_USBFS_PIPEMAXP_DEVSEL_0X3                     (0 << R_USBFS_PIPEMAXP_DEVSEL_SHIFT)  /* Address 0011b */
-#  define R_USBFS_PIPEMAXP_DEVSEL_0X4                     (0 << R_USBFS_PIPEMAXP_DEVSEL_SHIFT)  /* Address 0100b */
-#  define R_USBFS_PIPEMAXP_DEVSEL_0X5                     (0 << R_USBFS_PIPEMAXP_DEVSEL_SHIFT)  /* Address 0101b */
+#  define R_USBFS_PIPEMAXP_DEVSEL_0X1                     (1 << R_USBFS_PIPEMAXP_DEVSEL_SHIFT)  /* Address 0001b */
+#  define R_USBFS_PIPEMAXP_DEVSEL_0X2                     (2 << R_USBFS_PIPEMAXP_DEVSEL_SHIFT)  /* Address 0010b */
+#  define R_USBFS_PIPEMAXP_DEVSEL_0X3                     (3 << R_USBFS_PIPEMAXP_DEVSEL_SHIFT)  /* Address 0011b */
+#  define R_USBFS_PIPEMAXP_DEVSEL_0X4                     (4 << R_USBFS_PIPEMAXP_DEVSEL_SHIFT)  /* Address 0100b */
+#  define R_USBFS_PIPEMAXP_DEVSEL_0X5                     (5 << R_USBFS_PIPEMAXP_DEVSEL_SHIFT)  /* Address 0101b */
 
 /* PIPEPERI Register bit definitions */
 #define R_USBFS_PIPEPERI_IITV_SHIFT               (0)  /* Interval Error Detection Interval */
@@ -743,4 +732,4 @@
 
 #define USBFS_MAX_CHANNELS    6
 
-#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_USBFS_H */
+#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_USBFS_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/ra8/hardware/ra8p1/ra_ceu.h
+ * arch/arm/src/ra8/hardware/ra8e1/ra_ceu.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_CEU_H
-#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_CEU_H
+#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_CEU_H
+#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_CEU_H
 
 /****************************************************************************
  * Included Files
@@ -600,4 +600,4 @@
 
 #define CEU_MAX_CHANNELS    1
 
-#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_CEU_H */
+#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_CEU_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/ra8/hardware/ra8p1/ra_rtc.h
+ * arch/arm/src/ra8/hardware/ra8e1/ra_rtc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_RTC_H
-#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_RTC_H
+#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_RTC_H
+#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_RTC_H
 
 /****************************************************************************
  * Included Files
@@ -38,16 +38,11 @@
 #endif
 #endif
 
-/* Channel stride for multi-channel peripherals */
-#define R_RTC_CH_STRIDE    0x00000002
-#define R_RTC_CH_BASE(ch)   (R_RTC_BASE + ((uint32_t)(ch) * R_RTC_CH_STRIDE))
-
 /* RTC Register Offsets */
 
 #define R_RTC_R64CNT_OFFSET                       0x00000000  /* 64-Hz Counter */
 /* BCNT%s Registers (0-3) */
-#define R_RTC_BCNT_OFFSET                         0x00000002  /* Binary Counter %s */
-#define R_RTC_BCNT_INCREMENT                      0x00000002
+#define R_RTC_BCNT_OFFSET(m)                      (0x00000002 + ((m) * 0x00000002))  /* Binary Counter %s */
 #define R_RTC_RSECCNT_OFFSET                      0x00000002  /* Second Counter (in Calendar Count Mode) */
 #define R_RTC_RMINCNT_OFFSET                      0x00000004  /* Minute Counter (in Calendar Count Mode) */
 #define R_RTC_RHRCNT_OFFSET                       0x00000006  /* Hour Counter (in Calendar Count Mode) */
@@ -56,15 +51,13 @@
 #define R_RTC_RMONCNT_OFFSET                      0x0000000c  /* Month Counter */
 #define R_RTC_RYRCNT_OFFSET                       0x0000000e  /* Year Counter */
 /* BCNT%sAR Registers (0-3) */
-#define R_RTC_BCNTAR_OFFSET                       0x00000010  /* Binary Counter %s Alarm Register */
-#define R_RTC_BCNTAR_INCREMENT                    0x00000002
+#define R_RTC_BCNTAR_OFFSET(m)                    (0x00000010 + ((m) * 0x00000002))  /* Binary Counter %s Alarm Register */
 #define R_RTC_RSECAR_OFFSET                       0x00000010  /* Second Alarm Register (in Calendar Count Mode) */
 #define R_RTC_RMINAR_OFFSET                       0x00000012  /* Minute Alarm Register (in Calendar Count Mode) */
 #define R_RTC_RHRAR_OFFSET                        0x00000014  /* Hour Alarm Register (in Calendar Count Mode) */
 #define R_RTC_RWKAR_OFFSET                        0x00000016  /* Day-of-Week Alarm Register (in Calendar Count Mode) */
 /* BCNT%sAER Registers (0-3) */
-#define R_RTC_BCNTAER_OFFSET                      0x00000018  /* Binary Counter %s Alarm Enable Register */
-#define R_RTC_BCNTAER_INCREMENT                   0x00000002
+#define R_RTC_BCNTAER_OFFSET(m)                   (0x00000018 + ((m) * 0x00000002))  /* Binary Counter %s Alarm Enable Register */
 #define R_RTC_RDAYAR_OFFSET                       0x00000018  /* Date Alarm Register (in Calendar Count Mode) */
 #define R_RTC_RMONAR_OFFSET                       0x0000001a  /* Month Alarm Register (in Calendar Count Mode) */
 #define R_RTC_RYRAR_OFFSET                        0x0000001c  /* Year Alarm Register (in Calendar Count Mode) */
@@ -77,40 +70,30 @@
 #define R_RTC_RFRL_OFFSET                         0x0000002c  /* Frequency Register L */
 #define R_RTC_RADJ_OFFSET                         0x0000002e  /* Time Error Adjustment Register */
 /* RTCCR%s Registers (0-2) */
-#define R_RTC_RTCCR_OFFSET                        0x00000040  /* Time Capture Control Register %s */
-#define R_RTC_RTCCR_INCREMENT                     0x00000002
+#define R_RTC_RTCCR_OFFSET(m)                     (0x00000040 + ((m) * 0x00000002))  /* Time Capture Control Register %s */
 /* BCNT0CP%s Registers (0-2) */
-#define R_RTC_BCNT0CP_OFFSET                      0x00000052  /* BCNT0 Capture Register %s */
-#define R_RTC_BCNT0CP_INCREMENT                   0x00000010
+#define R_RTC_BCNT0CP_OFFSET(m)                   (0x00000052 + ((m) * 0x00000010))  /* BCNT0 Capture Register %s */
 /* RSECCP%s Registers (0-2) */
-#define R_RTC_RSECCP_OFFSET                       0x00000052  /* Second Capture Register %s */
-#define R_RTC_RSECCP_INCREMENT                    0x00000010
+#define R_RTC_RSECCP_OFFSET(m)                    (0x00000052 + ((m) * 0x00000010))  /* Second Capture Register %s */
 /* BCNT1CP%s Registers (0-2) */
-#define R_RTC_BCNT1CP_OFFSET                      0x00000054  /* BCNT1 Capture Register %s */
-#define R_RTC_BCNT1CP_INCREMENT                   0x00000010
+#define R_RTC_BCNT1CP_OFFSET(m)                   (0x00000054 + ((m) * 0x00000010))  /* BCNT1 Capture Register %s */
 /* RMINCP%s Registers (0-2) */
-#define R_RTC_RMINCP_OFFSET                       0x00000054  /* Minute Capture Register %s */
-#define R_RTC_RMINCP_INCREMENT                    0x00000010
+#define R_RTC_RMINCP_OFFSET(m)                    (0x00000054 + ((m) * 0x00000010))  /* Minute Capture Register %s */
 /* BCNT2CP%s Registers (0-2) */
-#define R_RTC_BCNT2CP_OFFSET                      0x00000056  /* BCNT2 Capture Register %s */
-#define R_RTC_BCNT2CP_INCREMENT                   0x00000010
+#define R_RTC_BCNT2CP_OFFSET(m)                   (0x00000056 + ((m) * 0x00000010))  /* BCNT2 Capture Register %s */
 /* RHRCP%s Registers (0-2) */
-#define R_RTC_RHRCP_OFFSET                        0x00000056  /* Hour Capture Register %s */
-#define R_RTC_RHRCP_INCREMENT                     0x00000010
+#define R_RTC_RHRCP_OFFSET(m)                     (0x00000056 + ((m) * 0x00000010))  /* Hour Capture Register %s */
 /* BCNT3CP%s Registers (0-2) */
-#define R_RTC_BCNT3CP_OFFSET                      0x0000005a  /* BCNT3 Capture Register %s */
-#define R_RTC_BCNT3CP_INCREMENT                   0x00000010
+#define R_RTC_BCNT3CP_OFFSET(m)                   (0x0000005a + ((m) * 0x00000010))  /* BCNT3 Capture Register %s */
 /* RDAYCP%s Registers (0-2) */
-#define R_RTC_RDAYCP_OFFSET                       0x0000005a  /* Date Capture Register %s */
-#define R_RTC_RDAYCP_INCREMENT                    0x00000010
+#define R_RTC_RDAYCP_OFFSET(m)                    (0x0000005a + ((m) * 0x00000010))  /* Date Capture Register %s */
 /* RMONCP%s Registers (0-2) */
-#define R_RTC_RMONCP_OFFSET                       0x0000005c  /* Month Capture Register %s */
-#define R_RTC_RMONCP_INCREMENT                    0x00000010
+#define R_RTC_RMONCP_OFFSET(m)                    (0x0000005c + ((m) * 0x00000010))  /* Month Capture Register %s */
 
 /* RTC Register Addresses */
 
 #define R_RTC_R64CNT                              (R_RTC_BASE + R_RTC_R64CNT_OFFSET)
-#define R_RTC_BCNT(n)                             (R_RTC_BASE + R_RTC_BCNT_OFFSET + (n)*0x00000002)
+#define R_RTC_BCNT(m)                             (R_RTC_BASE + R_RTC_BCNT_OFFSET(m))
 #define R_RTC_RSECCNT                             (R_RTC_BASE + R_RTC_RSECCNT_OFFSET)
 #define R_RTC_RMINCNT                             (R_RTC_BASE + R_RTC_RMINCNT_OFFSET)
 #define R_RTC_RHRCNT                              (R_RTC_BASE + R_RTC_RHRCNT_OFFSET)
@@ -118,12 +101,12 @@
 #define R_RTC_RDAYCNT                             (R_RTC_BASE + R_RTC_RDAYCNT_OFFSET)
 #define R_RTC_RMONCNT                             (R_RTC_BASE + R_RTC_RMONCNT_OFFSET)
 #define R_RTC_RYRCNT                              (R_RTC_BASE + R_RTC_RYRCNT_OFFSET)
-#define R_RTC_BCNTAR(n)                           (R_RTC_BASE + R_RTC_BCNTAR_OFFSET + (n)*0x00000002)
+#define R_RTC_BCNTAR(m)                           (R_RTC_BASE + R_RTC_BCNTAR_OFFSET(m))
 #define R_RTC_RSECAR                              (R_RTC_BASE + R_RTC_RSECAR_OFFSET)
 #define R_RTC_RMINAR                              (R_RTC_BASE + R_RTC_RMINAR_OFFSET)
 #define R_RTC_RHRAR                               (R_RTC_BASE + R_RTC_RHRAR_OFFSET)
 #define R_RTC_RWKAR                               (R_RTC_BASE + R_RTC_RWKAR_OFFSET)
-#define R_RTC_BCNTAER(n)                          (R_RTC_BASE + R_RTC_BCNTAER_OFFSET + (n)*0x00000002)
+#define R_RTC_BCNTAER(m)                          (R_RTC_BASE + R_RTC_BCNTAER_OFFSET(m))
 #define R_RTC_RDAYAR                              (R_RTC_BASE + R_RTC_RDAYAR_OFFSET)
 #define R_RTC_RMONAR                              (R_RTC_BASE + R_RTC_RMONAR_OFFSET)
 #define R_RTC_RYRAR                               (R_RTC_BASE + R_RTC_RYRAR_OFFSET)
@@ -135,16 +118,16 @@
 #define R_RTC_RFRH                                (R_RTC_BASE + R_RTC_RFRH_OFFSET)
 #define R_RTC_RFRL                                (R_RTC_BASE + R_RTC_RFRL_OFFSET)
 #define R_RTC_RADJ                                (R_RTC_BASE + R_RTC_RADJ_OFFSET)
-#define R_RTC_RTCCR(n)                            (R_RTC_BASE + R_RTC_RTCCR_OFFSET + (n)*0x00000002)
-#define R_RTC_BCNT0CP(n)                          (R_RTC_BASE + R_RTC_BCNT0CP_OFFSET + (n)*0x00000010)
-#define R_RTC_RSECCP(n)                           (R_RTC_BASE + R_RTC_RSECCP_OFFSET + (n)*0x00000010)
-#define R_RTC_BCNT1CP(n)                          (R_RTC_BASE + R_RTC_BCNT1CP_OFFSET + (n)*0x00000010)
-#define R_RTC_RMINCP(n)                           (R_RTC_BASE + R_RTC_RMINCP_OFFSET + (n)*0x00000010)
-#define R_RTC_BCNT2CP(n)                          (R_RTC_BASE + R_RTC_BCNT2CP_OFFSET + (n)*0x00000010)
-#define R_RTC_RHRCP(n)                            (R_RTC_BASE + R_RTC_RHRCP_OFFSET + (n)*0x00000010)
-#define R_RTC_BCNT3CP(n)                          (R_RTC_BASE + R_RTC_BCNT3CP_OFFSET + (n)*0x00000010)
-#define R_RTC_RDAYCP(n)                           (R_RTC_BASE + R_RTC_RDAYCP_OFFSET + (n)*0x00000010)
-#define R_RTC_RMONCP(n)                           (R_RTC_BASE + R_RTC_RMONCP_OFFSET + (n)*0x00000010)
+#define R_RTC_RTCCR(m)                            (R_RTC_BASE + R_RTC_RTCCR_OFFSET(m))
+#define R_RTC_BCNT0CP(m)                          (R_RTC_BASE + R_RTC_BCNT0CP_OFFSET(m))
+#define R_RTC_RSECCP(m)                           (R_RTC_BASE + R_RTC_RSECCP_OFFSET(m))
+#define R_RTC_BCNT1CP(m)                          (R_RTC_BASE + R_RTC_BCNT1CP_OFFSET(m))
+#define R_RTC_RMINCP(m)                           (R_RTC_BASE + R_RTC_RMINCP_OFFSET(m))
+#define R_RTC_BCNT2CP(m)                          (R_RTC_BASE + R_RTC_BCNT2CP_OFFSET(m))
+#define R_RTC_RHRCP(m)                            (R_RTC_BASE + R_RTC_RHRCP_OFFSET(m))
+#define R_RTC_BCNT3CP(m)                          (R_RTC_BASE + R_RTC_BCNT3CP_OFFSET(m))
+#define R_RTC_RDAYCP(m)                           (R_RTC_BASE + R_RTC_RDAYCP_OFFSET(m))
+#define R_RTC_RMONCP(m)                           (R_RTC_BASE + R_RTC_RMONCP_OFFSET(m))
 
 /* Register bit definitions */
 /* R64CNT Register bit definitions */
@@ -312,16 +295,16 @@
 
 #define R_RTC_RCR1_PES_SHIFT                      (4)  /* Periodic Interrupt Select */
 #define R_RTC_RCR1_PES_MASK                       0xf0
-#  define R_RTC_RCR1_PES_0X6                              (0 << R_RTC_RCR1_PES_SHIFT)  /* Generate periodic interrupt every 1/256 second */
-#  define R_RTC_RCR1_PES_0X7                              (0 << R_RTC_RCR1_PES_SHIFT)  /* Generate periodic interrupt every 1/128 second */
-#  define R_RTC_RCR1_PES_0X8                              (0 << R_RTC_RCR1_PES_SHIFT)  /* Generate periodic interrupt every 1/64 second */
-#  define R_RTC_RCR1_PES_0X9                              (0 << R_RTC_RCR1_PES_SHIFT)  /* Generate periodic interrupt every 1/32 second */
-#  define R_RTC_RCR1_PES_0XA                              (0 << R_RTC_RCR1_PES_SHIFT)  /* Generate periodic interrupt every 1/16 second */
-#  define R_RTC_RCR1_PES_0XB                              (0 << R_RTC_RCR1_PES_SHIFT)  /* Generate periodic interrupt every 1/8 second */
-#  define R_RTC_RCR1_PES_0XC                              (0 << R_RTC_RCR1_PES_SHIFT)  /* Generate periodic interrupt every 1/4 second */
-#  define R_RTC_RCR1_PES_0XD                              (0 << R_RTC_RCR1_PES_SHIFT)  /* Generate periodic interrupt every 1/2 second */
-#  define R_RTC_RCR1_PES_0XE                              (0 << R_RTC_RCR1_PES_SHIFT)  /* Generate periodic interrupt every 1 second */
-#  define R_RTC_RCR1_PES_0XF                              (0 << R_RTC_RCR1_PES_SHIFT)  /* Generate periodic interrupt every 2 seconds */
+#  define R_RTC_RCR1_PES_0X6                              (6 << R_RTC_RCR1_PES_SHIFT)  /* Generate periodic interrupt every 1/256 second */
+#  define R_RTC_RCR1_PES_0X7                              (7 << R_RTC_RCR1_PES_SHIFT)  /* Generate periodic interrupt every 1/128 second */
+#  define R_RTC_RCR1_PES_0X8                              (8 << R_RTC_RCR1_PES_SHIFT)  /* Generate periodic interrupt every 1/64 second */
+#  define R_RTC_RCR1_PES_0X9                              (9 << R_RTC_RCR1_PES_SHIFT)  /* Generate periodic interrupt every 1/32 second */
+#  define R_RTC_RCR1_PES_0XA                              (10 << R_RTC_RCR1_PES_SHIFT)  /* Generate periodic interrupt every 1/16 second */
+#  define R_RTC_RCR1_PES_0XB                              (11 << R_RTC_RCR1_PES_SHIFT)  /* Generate periodic interrupt every 1/8 second */
+#  define R_RTC_RCR1_PES_0XC                              (12 << R_RTC_RCR1_PES_SHIFT)  /* Generate periodic interrupt every 1/4 second */
+#  define R_RTC_RCR1_PES_0XD                              (13 << R_RTC_RCR1_PES_SHIFT)  /* Generate periodic interrupt every 1/2 second */
+#  define R_RTC_RCR1_PES_0XE                              (14 << R_RTC_RCR1_PES_SHIFT)  /* Generate periodic interrupt every 1 second */
+#  define R_RTC_RCR1_PES_0XF                              (15 << R_RTC_RCR1_PES_SHIFT)  /* Generate periodic interrupt every 2 seconds */
 
 /* RCR2 Register bit definitions */
 #define R_RTC_RCR2_START                          (1 << 0)  /* Start */
@@ -436,4 +419,4 @@
 
 #define RTC_MAX_CHANNELS    4
 
-#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_RTC_H */
+#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_RTC_H */

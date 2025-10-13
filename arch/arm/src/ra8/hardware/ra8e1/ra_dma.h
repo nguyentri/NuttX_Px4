@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/ra8/hardware/ra8p1/ra_dma.h
+ * arch/arm/src/ra8/hardware/ra8e1/ra_dma.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_DMA_H
-#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_DMA_H
+#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_DMA_H
+#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_DMA_H
 
 /****************************************************************************
  * Included Files
@@ -38,23 +38,18 @@
 #endif
 #endif
 
-/* Channel stride for multi-channel peripherals */
-#define R_DMA_CH_STRIDE    0x00000004
-#define R_DMA_CH_BASE(ch)   (R_DMA_BASE + ((uint32_t)(ch) * R_DMA_CH_STRIDE))
-
 /* DMA Register Offsets */
 
 #define R_DMA_DMAST_OFFSET                        0x00000000  /* DMA Module Activation Register */
 #define R_DMA_DMECHR_OFFSET                       0x00000040  /* DMAC Error Channel Register */
 /* DELSR%s Registers (0-7) */
-#define R_DMA_DELSR_OFFSET                        0x00000080  /* DMAC Event Link Setting Register %s */
-#define R_DMA_DELSR_INCREMENT                     0x00000004
+#define R_DMA_DELSR_OFFSET(m)                     (0x00000080 + ((m) * 0x00000004))  /* DMAC Event Link Setting Register %s */
 
 /* DMA Register Addresses */
 
 #define R_DMA_DMAST                               (R_DMA_BASE + R_DMA_DMAST_OFFSET)
 #define R_DMA_DMECHR                              (R_DMA_BASE + R_DMA_DMECHR_OFFSET)
-#define R_DMA_DELSR(n)                            (R_DMA_BASE + R_DMA_DELSR_OFFSET + (n)*0x00000004)
+#define R_DMA_DELSR(m)                            (R_DMA_BASE + R_DMA_DELSR_OFFSET(m))
 
 /* Register bit definitions */
 /* DMAST Register bit definitions */
@@ -80,4 +75,4 @@
 
 #define DMA_MAX_CHANNELS    8
 
-#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_DMA_H */
+#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_DMA_H */

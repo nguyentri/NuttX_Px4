@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/ra8/hardware/ra8p1/ra_ospi_b.h
+ * arch/arm/src/ra8/hardware/ra8e1/ra_ospi_b.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_OSPI_B_H
-#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_OSPI_B_H
+#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_OSPI_B_H
+#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_OSPI_B_H
 
 /****************************************************************************
  * Included Files
@@ -38,80 +38,57 @@
 #endif
 #endif
 
-/* Channel stride for multi-channel peripherals */
-#define R_OSPI_B_CH_STRIDE    0x00000004
-#define R_OSPI_B_CH_BASE(ch)   (R_OSPI_B_BASE + ((uint32_t)(ch) * R_OSPI_B_CH_STRIDE))
-
 /* OSPI_B Register Offsets */
 
 #define R_OSPI_B_WRAPCFG_OFFSET                   0x00000000  /* OSPI Wrapper Configuration Register */
 #define R_OSPI_B_COMCFG_OFFSET                    0x00000004  /* OSPI Common Configuration Register */
 /* BMCFGCH%s Registers (0-1) */
-#define R_OSPI_B_BMCFGCH_OFFSET                   0x00000008  /* OSPI Bridge Map Configuration Register chn (n = 0, 1) */
-#define R_OSPI_B_BMCFGCH_INCREMENT                0x00000004
+#define R_OSPI_B_BMCFGCH_OFFSET(m)                (0x00000008 + ((m) * 0x00000004))  /* OSPI Bridge Map Configuration Register chn (n = 0, 1) */
 /* CMCFG0CS%s Registers (0-1) */
-#define R_OSPI_B_CMCFG0CS_OFFSET                  0x00000010  /* OSPI Command Map Configuration Register 0 CSn */
-#define R_OSPI_B_CMCFG0CS_INCREMENT               0x00000010
+#define R_OSPI_B_CMCFG0CS_OFFSET(m)               (0x00000010 + ((m) * 0x00000010))  /* OSPI Command Map Configuration Register 0 CSn */
 /* CMCFG1CS%s Registers (0-1) */
-#define R_OSPI_B_CMCFG1CS_OFFSET                  0x00000014  /* OSPI Command Map Configuration Register 1 CSn */
-#define R_OSPI_B_CMCFG1CS_INCREMENT               0x00000010
+#define R_OSPI_B_CMCFG1CS_OFFSET(m)               (0x00000014 + ((m) * 0x00000010))  /* OSPI Command Map Configuration Register 1 CSn */
 /* CMCFG2CS%s Registers (0-1) */
-#define R_OSPI_B_CMCFG2CS_OFFSET                  0x00000018  /* OSPI Command Map Configuration Register 2 CSn */
-#define R_OSPI_B_CMCFG2CS_INCREMENT               0x00000010
+#define R_OSPI_B_CMCFG2CS_OFFSET(m)               (0x00000018 + ((m) * 0x00000010))  /* OSPI Command Map Configuration Register 2 CSn */
 /* LIOCFGCS%s Registers (0-1) */
-#define R_OSPI_B_LIOCFGCS_OFFSET                  0x00000050  /* OSPI Link I/O Configuration Register CSn */
-#define R_OSPI_B_LIOCFGCS_INCREMENT               0x00000004
+#define R_OSPI_B_LIOCFGCS_OFFSET(m)               (0x00000050 + ((m) * 0x00000004))  /* OSPI Link I/O Configuration Register CSn */
 #define R_OSPI_B_BMCTL0_OFFSET                    0x00000060  /* OSPI Bridge Map Control Register 0 */
 #define R_OSPI_B_BMCTL1_OFFSET                    0x00000064  /* OSPI Bridge Map Control Register 1 */
 /* CMCTLCH%s Registers (0-1) */
-#define R_OSPI_B_CMCTLCH_OFFSET                   0x00000068  /* OSPI Command Map Control register chn (n = 0, 1) */
-#define R_OSPI_B_CMCTLCH_INCREMENT                0x00000004
+#define R_OSPI_B_CMCTLCH_OFFSET(m)                (0x00000068 + ((m) * 0x00000004))  /* OSPI Command Map Control register chn (n = 0, 1) */
 #define R_OSPI_B_CDCTL0_OFFSET                    0x00000070  /* OSPI Command Manual Control Register 0 */
 #define R_OSPI_B_CDCTL1_OFFSET                    0x00000074  /* OSPI Command Manual Control Register 1 */
 #define R_OSPI_B_CDCTL2_OFFSET                    0x00000078  /* OSPI Command Manual Control Register 2 */
 /* CDTBUF%s Registers (0-3) */
-#define R_OSPI_B_CDTBUF_OFFSET                    0x00000080  /* OSPI Command Manual Type Buf %s */
-#define R_OSPI_B_CDTBUF_INCREMENT                 0x00000010
+#define R_OSPI_B_CDTBUF_OFFSET(m)                 (0x00000080 + ((m) * 0x00000010))  /* OSPI Command Manual Type Buf %s */
 /* CDABUF%s Registers (0-3) */
-#define R_OSPI_B_CDABUF_OFFSET                    0x00000084  /* OSPI Command Manual Address Buf %s */
-#define R_OSPI_B_CDABUF_INCREMENT                 0x00000010
+#define R_OSPI_B_CDABUF_OFFSET(m)                 (0x00000084 + ((m) * 0x00000010))  /* OSPI Command Manual Address Buf %s */
 /* CDD0BUF%s Registers (0-3) */
-#define R_OSPI_B_CDD0BUF_OFFSET                   0x00000088  /* OSPI Command Manual Data 0 Buf %s */
-#define R_OSPI_B_CDD0BUF_INCREMENT                0x00000010
+#define R_OSPI_B_CDD0BUF_OFFSET(m)                (0x00000088 + ((m) * 0x00000010))  /* OSPI Command Manual Data 0 Buf %s */
 /* CDD1BUF%s Registers (0-3) */
-#define R_OSPI_B_CDD1BUF_OFFSET                   0x0000008c  /* OSPI Command Manual Data 1 Buf %s */
-#define R_OSPI_B_CDD1BUF_INCREMENT                0x00000010
+#define R_OSPI_B_CDD1BUF_OFFSET(m)                (0x0000008c + ((m) * 0x00000010))  /* OSPI Command Manual Data 1 Buf %s */
 #define R_OSPI_B_LPCTL0_OFFSET                    0x00000100  /* OSPI Link Pattern Control Register 0 */
 #define R_OSPI_B_LPCTL1_OFFSET                    0x00000104  /* OSPI Link Pattern Control Register 1 */
 #define R_OSPI_B_LIOCTL_OFFSET                    0x00000108  /* OSPI Link I/O Control Register */
 /* CCCTL0CS%s Registers (0-1) */
-#define R_OSPI_B_CCCTL0CS_OFFSET                  0x00000130  /* OSPI Command Calibration Control Register 0 CSn */
-#define R_OSPI_B_CCCTL0CS_INCREMENT               0x00000020
+#define R_OSPI_B_CCCTL0CS_OFFSET(m)               (0x00000130 + ((m) * 0x00000020))  /* OSPI Command Calibration Control Register 0 CSn */
 /* CCCTL1CS%s Registers (0-1) */
-#define R_OSPI_B_CCCTL1CS_OFFSET                  0x00000134  /* OSPI Command Calibration Control Register 1 CSn */
-#define R_OSPI_B_CCCTL1CS_INCREMENT               0x00000020
+#define R_OSPI_B_CCCTL1CS_OFFSET(m)               (0x00000134 + ((m) * 0x00000020))  /* OSPI Command Calibration Control Register 1 CSn */
 /* CCCTL2CS%s Registers (0-1) */
-#define R_OSPI_B_CCCTL2CS_OFFSET                  0x00000138  /* OSPI Command Calibration Control Register 2 CSn */
-#define R_OSPI_B_CCCTL2CS_INCREMENT               0x00000020
+#define R_OSPI_B_CCCTL2CS_OFFSET(m)               (0x00000138 + ((m) * 0x00000020))  /* OSPI Command Calibration Control Register 2 CSn */
 /* CCCTL3CS%s Registers (0-1) */
-#define R_OSPI_B_CCCTL3CS_OFFSET                  0x0000013c  /* OSPI Command Calibration Control Register 3 CSn */
-#define R_OSPI_B_CCCTL3CS_INCREMENT               0x00000020
+#define R_OSPI_B_CCCTL3CS_OFFSET(m)               (0x0000013c + ((m) * 0x00000020))  /* OSPI Command Calibration Control Register 3 CSn */
 /* CCCTL4CS%s Registers (0-1) */
-#define R_OSPI_B_CCCTL4CS_OFFSET                  0x00000140  /* OSPI Command Calibration Control Register 4 CSn */
-#define R_OSPI_B_CCCTL4CS_INCREMENT               0x00000020
+#define R_OSPI_B_CCCTL4CS_OFFSET(m)               (0x00000140 + ((m) * 0x00000020))  /* OSPI Command Calibration Control Register 4 CSn */
 /* CCCTL5CS%s Registers (0-1) */
-#define R_OSPI_B_CCCTL5CS_OFFSET                  0x00000144  /* OSPI Command Calibration Control Register 5 CSn */
-#define R_OSPI_B_CCCTL5CS_INCREMENT               0x00000020
+#define R_OSPI_B_CCCTL5CS_OFFSET(m)               (0x00000144 + ((m) * 0x00000020))  /* OSPI Command Calibration Control Register 5 CSn */
 /* CCCTL6CS%s Registers (0-1) */
-#define R_OSPI_B_CCCTL6CS_OFFSET                  0x00000148  /* OSPI Command Calibration Control Register 6 CSn */
-#define R_OSPI_B_CCCTL6CS_INCREMENT               0x00000020
+#define R_OSPI_B_CCCTL6CS_OFFSET(m)               (0x00000148 + ((m) * 0x00000020))  /* OSPI Command Calibration Control Register 6 CSn */
 /* CCCTL7CS%s Registers (0-1) */
-#define R_OSPI_B_CCCTL7CS_OFFSET                  0x0000014c  /* OSPI Command Calibration Control Register 7 CSn */
-#define R_OSPI_B_CCCTL7CS_INCREMENT               0x00000020
+#define R_OSPI_B_CCCTL7CS_OFFSET(m)               (0x0000014c + ((m) * 0x00000020))  /* OSPI Command Calibration Control Register 7 CSn */
 #define R_OSPI_B_COMSTT_OFFSET                    0x00000184  /* OSPI Common Status Register */
 /* CASTTCS%s Registers (0-1) */
-#define R_OSPI_B_CASTTCS_OFFSET                   0x00000188  /* OSPI Calibration Status Register CSn */
-#define R_OSPI_B_CASTTCS_INCREMENT                0x00000004
+#define R_OSPI_B_CASTTCS_OFFSET(m)                (0x00000188 + ((m) * 0x00000004))  /* OSPI Calibration Status Register CSn */
 #define R_OSPI_B_INTS_OFFSET                      0x00000190  /* OSPI Interrupt Status Register */
 #define R_OSPI_B_INTC_OFFSET                      0x00000194  /* OSPI Interrupt Clear Register */
 #define R_OSPI_B_INTE_OFFSET                      0x00000198  /* OSPI Interrupt Enable Register */
@@ -120,34 +97,34 @@
 
 #define R_OSPI_B_WRAPCFG                          (R_OSPI_B_BASE + R_OSPI_B_WRAPCFG_OFFSET)
 #define R_OSPI_B_COMCFG                           (R_OSPI_B_BASE + R_OSPI_B_COMCFG_OFFSET)
-#define R_OSPI_B_BMCFGCH(n)                       (R_OSPI_B_BASE + R_OSPI_B_BMCFGCH_OFFSET + (n)*0x00000004)
-#define R_OSPI_B_CMCFG0CS(n)                      (R_OSPI_B_BASE + R_OSPI_B_CMCFG0CS_OFFSET + (n)*0x00000010)
-#define R_OSPI_B_CMCFG1CS(n)                      (R_OSPI_B_BASE + R_OSPI_B_CMCFG1CS_OFFSET + (n)*0x00000010)
-#define R_OSPI_B_CMCFG2CS(n)                      (R_OSPI_B_BASE + R_OSPI_B_CMCFG2CS_OFFSET + (n)*0x00000010)
-#define R_OSPI_B_LIOCFGCS(n)                      (R_OSPI_B_BASE + R_OSPI_B_LIOCFGCS_OFFSET + (n)*0x00000004)
+#define R_OSPI_B_BMCFGCH(m)                       (R_OSPI_B_BASE + R_OSPI_B_BMCFGCH_OFFSET(m))
+#define R_OSPI_B_CMCFG0CS(m)                      (R_OSPI_B_BASE + R_OSPI_B_CMCFG0CS_OFFSET(m))
+#define R_OSPI_B_CMCFG1CS(m)                      (R_OSPI_B_BASE + R_OSPI_B_CMCFG1CS_OFFSET(m))
+#define R_OSPI_B_CMCFG2CS(m)                      (R_OSPI_B_BASE + R_OSPI_B_CMCFG2CS_OFFSET(m))
+#define R_OSPI_B_LIOCFGCS(m)                      (R_OSPI_B_BASE + R_OSPI_B_LIOCFGCS_OFFSET(m))
 #define R_OSPI_B_BMCTL0                           (R_OSPI_B_BASE + R_OSPI_B_BMCTL0_OFFSET)
 #define R_OSPI_B_BMCTL1                           (R_OSPI_B_BASE + R_OSPI_B_BMCTL1_OFFSET)
-#define R_OSPI_B_CMCTLCH(n)                       (R_OSPI_B_BASE + R_OSPI_B_CMCTLCH_OFFSET + (n)*0x00000004)
+#define R_OSPI_B_CMCTLCH(m)                       (R_OSPI_B_BASE + R_OSPI_B_CMCTLCH_OFFSET(m))
 #define R_OSPI_B_CDCTL0                           (R_OSPI_B_BASE + R_OSPI_B_CDCTL0_OFFSET)
 #define R_OSPI_B_CDCTL1                           (R_OSPI_B_BASE + R_OSPI_B_CDCTL1_OFFSET)
 #define R_OSPI_B_CDCTL2                           (R_OSPI_B_BASE + R_OSPI_B_CDCTL2_OFFSET)
-#define R_OSPI_B_CDTBUF(n)                        (R_OSPI_B_BASE + R_OSPI_B_CDTBUF_OFFSET + (n)*0x00000010)
-#define R_OSPI_B_CDABUF(n)                        (R_OSPI_B_BASE + R_OSPI_B_CDABUF_OFFSET + (n)*0x00000010)
-#define R_OSPI_B_CDD0BUF(n)                       (R_OSPI_B_BASE + R_OSPI_B_CDD0BUF_OFFSET + (n)*0x00000010)
-#define R_OSPI_B_CDD1BUF(n)                       (R_OSPI_B_BASE + R_OSPI_B_CDD1BUF_OFFSET + (n)*0x00000010)
+#define R_OSPI_B_CDTBUF(m)                        (R_OSPI_B_BASE + R_OSPI_B_CDTBUF_OFFSET(m))
+#define R_OSPI_B_CDABUF(m)                        (R_OSPI_B_BASE + R_OSPI_B_CDABUF_OFFSET(m))
+#define R_OSPI_B_CDD0BUF(m)                       (R_OSPI_B_BASE + R_OSPI_B_CDD0BUF_OFFSET(m))
+#define R_OSPI_B_CDD1BUF(m)                       (R_OSPI_B_BASE + R_OSPI_B_CDD1BUF_OFFSET(m))
 #define R_OSPI_B_LPCTL0                           (R_OSPI_B_BASE + R_OSPI_B_LPCTL0_OFFSET)
 #define R_OSPI_B_LPCTL1                           (R_OSPI_B_BASE + R_OSPI_B_LPCTL1_OFFSET)
 #define R_OSPI_B_LIOCTL                           (R_OSPI_B_BASE + R_OSPI_B_LIOCTL_OFFSET)
-#define R_OSPI_B_CCCTL0CS(n)                      (R_OSPI_B_BASE + R_OSPI_B_CCCTL0CS_OFFSET + (n)*0x00000020)
-#define R_OSPI_B_CCCTL1CS(n)                      (R_OSPI_B_BASE + R_OSPI_B_CCCTL1CS_OFFSET + (n)*0x00000020)
-#define R_OSPI_B_CCCTL2CS(n)                      (R_OSPI_B_BASE + R_OSPI_B_CCCTL2CS_OFFSET + (n)*0x00000020)
-#define R_OSPI_B_CCCTL3CS(n)                      (R_OSPI_B_BASE + R_OSPI_B_CCCTL3CS_OFFSET + (n)*0x00000020)
-#define R_OSPI_B_CCCTL4CS(n)                      (R_OSPI_B_BASE + R_OSPI_B_CCCTL4CS_OFFSET + (n)*0x00000020)
-#define R_OSPI_B_CCCTL5CS(n)                      (R_OSPI_B_BASE + R_OSPI_B_CCCTL5CS_OFFSET + (n)*0x00000020)
-#define R_OSPI_B_CCCTL6CS(n)                      (R_OSPI_B_BASE + R_OSPI_B_CCCTL6CS_OFFSET + (n)*0x00000020)
-#define R_OSPI_B_CCCTL7CS(n)                      (R_OSPI_B_BASE + R_OSPI_B_CCCTL7CS_OFFSET + (n)*0x00000020)
+#define R_OSPI_B_CCCTL0CS(m)                      (R_OSPI_B_BASE + R_OSPI_B_CCCTL0CS_OFFSET(m))
+#define R_OSPI_B_CCCTL1CS(m)                      (R_OSPI_B_BASE + R_OSPI_B_CCCTL1CS_OFFSET(m))
+#define R_OSPI_B_CCCTL2CS(m)                      (R_OSPI_B_BASE + R_OSPI_B_CCCTL2CS_OFFSET(m))
+#define R_OSPI_B_CCCTL3CS(m)                      (R_OSPI_B_BASE + R_OSPI_B_CCCTL3CS_OFFSET(m))
+#define R_OSPI_B_CCCTL4CS(m)                      (R_OSPI_B_BASE + R_OSPI_B_CCCTL4CS_OFFSET(m))
+#define R_OSPI_B_CCCTL5CS(m)                      (R_OSPI_B_BASE + R_OSPI_B_CCCTL5CS_OFFSET(m))
+#define R_OSPI_B_CCCTL6CS(m)                      (R_OSPI_B_BASE + R_OSPI_B_CCCTL6CS_OFFSET(m))
+#define R_OSPI_B_CCCTL7CS(m)                      (R_OSPI_B_BASE + R_OSPI_B_CCCTL7CS_OFFSET(m))
 #define R_OSPI_B_COMSTT                           (R_OSPI_B_BASE + R_OSPI_B_COMSTT_OFFSET)
-#define R_OSPI_B_CASTTCS(n)                       (R_OSPI_B_BASE + R_OSPI_B_CASTTCS_OFFSET + (n)*0x00000004)
+#define R_OSPI_B_CASTTCS(m)                       (R_OSPI_B_BASE + R_OSPI_B_CASTTCS_OFFSET(m))
 #define R_OSPI_B_INTS                             (R_OSPI_B_BASE + R_OSPI_B_INTS_OFFSET)
 #define R_OSPI_B_INTC                             (R_OSPI_B_BASE + R_OSPI_B_INTC_OFFSET)
 #define R_OSPI_B_INTE                             (R_OSPI_B_BASE + R_OSPI_B_INTE_OFFSET)
@@ -223,12 +200,12 @@
 #define R_OSPI_B_LIOCFGCS_PRTMD_SHIFT             (0)  /* Protocol mode */
 #define R_OSPI_B_LIOCFGCS_PRTMD_MASK              0x3ff
 #  define R_OSPI_B_LIOCFGCS_PRTMD_0X000                   (0 << R_OSPI_B_LIOCFGCS_PRTMD_SHIFT)  /* 1S-1S-1S */
-#  define R_OSPI_B_LIOCFGCS_PRTMD_0X3B2                   (0 << R_OSPI_B_LIOCFGCS_PRTMD_SHIFT)  /* 4S-4D-4D */
-#  define R_OSPI_B_LIOCFGCS_PRTMD_0X3FF                   (0 << R_OSPI_B_LIOCFGCS_PRTMD_SHIFT)  /* 8D-8D-8D */
-#  define R_OSPI_B_LIOCFGCS_PRTMD_0X048                   (0 << R_OSPI_B_LIOCFGCS_PRTMD_SHIFT)  /* 1S-2S-2S */
-#  define R_OSPI_B_LIOCFGCS_PRTMD_0X049                   (0 << R_OSPI_B_LIOCFGCS_PRTMD_SHIFT)  /* 2S-2S-2S */
-#  define R_OSPI_B_LIOCFGCS_PRTMD_0X090                   (0 << R_OSPI_B_LIOCFGCS_PRTMD_SHIFT)  /* 1S-4S-4S */
-#  define R_OSPI_B_LIOCFGCS_PRTMD_0X092                   (0 << R_OSPI_B_LIOCFGCS_PRTMD_SHIFT)  /* 4S-4S-4S */
+#  define R_OSPI_B_LIOCFGCS_PRTMD_0X3B2                   (946 << R_OSPI_B_LIOCFGCS_PRTMD_SHIFT)  /* 4S-4D-4D */
+#  define R_OSPI_B_LIOCFGCS_PRTMD_0X3FF                   (1023 << R_OSPI_B_LIOCFGCS_PRTMD_SHIFT)  /* 8D-8D-8D */
+#  define R_OSPI_B_LIOCFGCS_PRTMD_0X048                   (72 << R_OSPI_B_LIOCFGCS_PRTMD_SHIFT)  /* 1S-2S-2S */
+#  define R_OSPI_B_LIOCFGCS_PRTMD_0X049                   (73 << R_OSPI_B_LIOCFGCS_PRTMD_SHIFT)  /* 2S-2S-2S */
+#  define R_OSPI_B_LIOCFGCS_PRTMD_0X090                   (144 << R_OSPI_B_LIOCFGCS_PRTMD_SHIFT)  /* 1S-4S-4S */
+#  define R_OSPI_B_LIOCFGCS_PRTMD_0X092                   (146 << R_OSPI_B_LIOCFGCS_PRTMD_SHIFT)  /* 4S-4S-4S */
 
 #define R_OSPI_B_LIOCFGCS_LATEMD                  (1 << 10)  /* Latency mode */
 
@@ -559,4 +536,4 @@
 
 #define OSPI_B_MAX_CHANNELS    4
 
-#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_OSPI_B_H */
+#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_OSPI_B_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/ra8/hardware/ra8p1/ra_iic.h
+ * arch/arm/src/ra8/hardware/ra8e1/ra_iic.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_IIC_H
-#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_IIC_H
+#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_IIC_H
+#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_IIC_H
 
 /****************************************************************************
  * Included Files
@@ -39,7 +39,7 @@
 #endif
 
 /* Channel stride for multi-channel peripherals */
-#define R_IIC_CH_STRIDE    0x00000002
+#define R_IIC_CH_STRIDE    0x00000100
 #define R_IIC_CH_BASE(ch)   (R_IIC_BASE + ((uint32_t)(ch) * R_IIC_CH_STRIDE))
 
 /* IIC Register Offsets */
@@ -55,11 +55,9 @@
 #define R_IIC_ICSR1_OFFSET                        0x00000008  /* I2C Bus Status Register 1 */
 #define R_IIC_ICSR2_OFFSET                        0x00000009  /* I2C Bus Status Register 2 */
 /* SARL%s Registers (0-2) */
-#define R_IIC_SARL_OFFSET                         0x0000000a  /* Slave Address Register Ly */
-#define R_IIC_SARL_INCREMENT                      0x00000002
+#define R_IIC_SARL_OFFSET(m)                      (0x0000000a + ((m) * 0x00000002))  /* Slave Address Register Ly */
 /* SARU%s Registers (0-2) */
-#define R_IIC_SARU_OFFSET                         0x0000000b  /* Slave Address Register Uy */
-#define R_IIC_SARU_INCREMENT                      0x00000002
+#define R_IIC_SARU_OFFSET(m)                      (0x0000000b + ((m) * 0x00000002))  /* Slave Address Register Uy */
 #define R_IIC_ICBRL_OFFSET                        0x00000010  /* I2C Bus Bit Rate Low-Level Register */
 #define R_IIC_ICBRH_OFFSET                        0x00000011  /* I2C Bus Bit Rate High-Level Register */
 #define R_IIC_ICDRT_OFFSET                        0x00000012  /* I2C Bus Transmit Data Register */
@@ -67,22 +65,22 @@
 
 /* IIC Register Addresses */
 
-#define R_IIC_ICCR1                               (R_IIC_BASE + R_IIC_ICCR1_OFFSET)
-#define R_IIC_ICCR2                               (R_IIC_BASE + R_IIC_ICCR2_OFFSET)
-#define R_IIC_ICMR1                               (R_IIC_BASE + R_IIC_ICMR1_OFFSET)
-#define R_IIC_ICMR2                               (R_IIC_BASE + R_IIC_ICMR2_OFFSET)
-#define R_IIC_ICMR3                               (R_IIC_BASE + R_IIC_ICMR3_OFFSET)
-#define R_IIC_ICFER                               (R_IIC_BASE + R_IIC_ICFER_OFFSET)
-#define R_IIC_ICSER                               (R_IIC_BASE + R_IIC_ICSER_OFFSET)
-#define R_IIC_ICIER                               (R_IIC_BASE + R_IIC_ICIER_OFFSET)
-#define R_IIC_ICSR1                               (R_IIC_BASE + R_IIC_ICSR1_OFFSET)
-#define R_IIC_ICSR2                               (R_IIC_BASE + R_IIC_ICSR2_OFFSET)
-#define R_IIC_SARL(n)                             (R_IIC_BASE + R_IIC_SARL_OFFSET + (n)*0x00000002)
-#define R_IIC_SARU(n)                             (R_IIC_BASE + R_IIC_SARU_OFFSET + (n)*0x00000002)
-#define R_IIC_ICBRL                               (R_IIC_BASE + R_IIC_ICBRL_OFFSET)
-#define R_IIC_ICBRH                               (R_IIC_BASE + R_IIC_ICBRH_OFFSET)
-#define R_IIC_ICDRT                               (R_IIC_BASE + R_IIC_ICDRT_OFFSET)
-#define R_IIC_ICDRR                               (R_IIC_BASE + R_IIC_ICDRR_OFFSET)
+#define R_IIC_ICCR1(n)                            (R_IIC_CH_BASE(n) + R_IIC_ICCR1_OFFSET)
+#define R_IIC_ICCR2(n)                            (R_IIC_CH_BASE(n) + R_IIC_ICCR2_OFFSET)
+#define R_IIC_ICMR1(n)                            (R_IIC_CH_BASE(n) + R_IIC_ICMR1_OFFSET)
+#define R_IIC_ICMR2(n)                            (R_IIC_CH_BASE(n) + R_IIC_ICMR2_OFFSET)
+#define R_IIC_ICMR3(n)                            (R_IIC_CH_BASE(n) + R_IIC_ICMR3_OFFSET)
+#define R_IIC_ICFER(n)                            (R_IIC_CH_BASE(n) + R_IIC_ICFER_OFFSET)
+#define R_IIC_ICSER(n)                            (R_IIC_CH_BASE(n) + R_IIC_ICSER_OFFSET)
+#define R_IIC_ICIER(n)                            (R_IIC_CH_BASE(n) + R_IIC_ICIER_OFFSET)
+#define R_IIC_ICSR1(n)                            (R_IIC_CH_BASE(n) + R_IIC_ICSR1_OFFSET)
+#define R_IIC_ICSR2(n)                            (R_IIC_CH_BASE(n) + R_IIC_ICSR2_OFFSET)
+#define R_IIC_SARL(n, m)                          (R_IIC_CH_BASE(n) + R_IIC_SARL_OFFSET(m))
+#define R_IIC_SARU(n, m)                          (R_IIC_CH_BASE(n) + R_IIC_SARU_OFFSET(m))
+#define R_IIC_ICBRL(n)                            (R_IIC_CH_BASE(n) + R_IIC_ICBRL_OFFSET)
+#define R_IIC_ICBRH(n)                            (R_IIC_CH_BASE(n) + R_IIC_ICBRH_OFFSET)
+#define R_IIC_ICDRT(n)                            (R_IIC_CH_BASE(n) + R_IIC_ICDRT_OFFSET)
+#define R_IIC_ICDRR(n)                            (R_IIC_CH_BASE(n) + R_IIC_ICDRR_OFFSET)
 
 /* Register bit definitions */
 /* ICCR1 Register bit definitions */
@@ -284,4 +282,4 @@
 
 #define IIC_MAX_CHANNELS    3
 
-#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_IIC_H */
+#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_IIC_H */

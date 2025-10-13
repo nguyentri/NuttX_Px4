@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/ra8/hardware/ra8p1/ra_spi_b.h
+ * arch/arm/src/ra8/hardware/ra8e1/ra_spi_b.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_SPI_B_H
-#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_SPI_B_H
+#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_SPI_B_H
+#define __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_SPI_B_H
 
 /****************************************************************************
  * Included Files
@@ -39,7 +39,7 @@
 #endif
 
 /* Channel stride for multi-channel peripherals */
-#define R_SPI_B_CH_STRIDE    0x00000004
+#define R_SPI_B_CH_STRIDE    0x00000100
 #define R_SPI_B_CH_BASE(ch)   (R_SPI_B_BASE + ((uint32_t)(ch) * R_SPI_B_CH_STRIDE))
 
 /* SPI_B Register Offsets */
@@ -51,7 +51,6 @@
 #define R_SPI_B_SPCR3_OFFSET                      0x00000010  /* SPI Control Register 3 */
 /* SPCMD%s Registers (0-7) */
 #define R_SPI_B_SPCMD_OFFSET(m)                   (0x00000014 + ((m) * 0x00000004))  /* SPI Command Register */
-#define R_SPI_B_SPCMD_INCREMENT                   0x00000004
 #define R_SPI_B_SPDCR_OFFSET                      0x00000040  /* SPI Data Control Register */
 #define R_SPI_B_SPDCR2_OFFSET                     0x00000044  /* SPI Data Control Register 2 */
 #define R_SPI_B_SPSR_OFFSET                       0x00000050  /* SPI Status Register */
@@ -63,20 +62,20 @@
 
 /* SPI_B Register Addresses */
 
-#define R_SPI_B_SPDR                              (R_SPI_B_CH_BASE(n) + R_SPI_B_SPDR_OFFSET)
-#define R_SPI_B_SPDECR                            (R_SPI_B_CH_BASE(n) + R_SPI_B_SPDECR_OFFSET)
-#define R_SPI_B_SPCR                              (R_SPI_B_CH_BASE(n) + R_SPI_B_SPCR_OFFSET)
-#define R_SPI_B_SPCR2                             (R_SPI_B_CH_BASE(n) + R_SPI_B_SPCR2_OFFSET)
-#define R_SPI_B_SPCR3                             (R_SPI_B_CH_BASE(n) + R_SPI_B_SPCR3_OFFSET)
-#define R_SPI_B_SPCMD(n)                          (R_SPI_B_CH_BASE(n) + R_SPI_B_SPCMD_OFFSET + (n)*0x00000004)
-#define R_SPI_B_SPDCR                             (R_SPI_B_CH_BASE(n) + R_SPI_B_SPDCR_OFFSET)
-#define R_SPI_B_SPDCR2                            (R_SPI_B_CH_BASE(n) + R_SPI_B_SPDCR2_OFFSET)
-#define R_SPI_B_SPSR                              (R_SPI_B_CH_BASE(n) + R_SPI_B_SPSR_OFFSET)
-#define R_SPI_B_SPTFSR                            (R_SPI_B_CH_BASE(n) + R_SPI_B_SPTFSR_OFFSET)
-#define R_SPI_B_SPRFSR                            (R_SPI_B_CH_BASE(n) + R_SPI_B_SPRFSR_OFFSET)
-#define R_SPI_B_SPPSR                             (R_SPI_B_CH_BASE(n) + R_SPI_B_SPPSR_OFFSET)
-#define R_SPI_B_SPSRC                             (R_SPI_B_CH_BASE(n) + R_SPI_B_SPSRC_OFFSET)
-#define R_SPI_B_SPFCR                             (R_SPI_B_CH_BASE(n) + R_SPI_B_SPFCR_OFFSET)
+#define R_SPI_B_SPDR(n)                           (R_SPI_B_CH_BASE(n) + R_SPI_B_SPDR_OFFSET)
+#define R_SPI_B_SPDECR(n)                         (R_SPI_B_CH_BASE(n) + R_SPI_B_SPDECR_OFFSET)
+#define R_SPI_B_SPCR(n)                           (R_SPI_B_CH_BASE(n) + R_SPI_B_SPCR_OFFSET)
+#define R_SPI_B_SPCR2(n)                          (R_SPI_B_CH_BASE(n) + R_SPI_B_SPCR2_OFFSET)
+#define R_SPI_B_SPCR3(n)                          (R_SPI_B_CH_BASE(n) + R_SPI_B_SPCR3_OFFSET)
+#define R_SPI_B_SPCMD(n, m)                       (R_SPI_B_CH_BASE(n) + R_SPI_B_SPCMD_OFFSET(m))
+#define R_SPI_B_SPDCR(n)                          (R_SPI_B_CH_BASE(n) + R_SPI_B_SPDCR_OFFSET)
+#define R_SPI_B_SPDCR2(n)                         (R_SPI_B_CH_BASE(n) + R_SPI_B_SPDCR2_OFFSET)
+#define R_SPI_B_SPSR(n)                           (R_SPI_B_CH_BASE(n) + R_SPI_B_SPSR_OFFSET)
+#define R_SPI_B_SPTFSR(n)                         (R_SPI_B_CH_BASE(n) + R_SPI_B_SPTFSR_OFFSET)
+#define R_SPI_B_SPRFSR(n)                         (R_SPI_B_CH_BASE(n) + R_SPI_B_SPRFSR_OFFSET)
+#define R_SPI_B_SPPSR(n)                          (R_SPI_B_CH_BASE(n) + R_SPI_B_SPPSR_OFFSET)
+#define R_SPI_B_SPSRC(n)                          (R_SPI_B_CH_BASE(n) + R_SPI_B_SPSRC_OFFSET)
+#define R_SPI_B_SPFCR(n)                          (R_SPI_B_CH_BASE(n) + R_SPI_B_SPFCR_OFFSET)
 
 /* Register bit definitions */
 /* SPDR Register bit definitions */
@@ -88,7 +87,7 @@
 #define R_SPI_B_SPDECR_SCKDL_MASK                 0x7
 #  define R_SPI_B_SPDECR_SCKDL_000                        (0 << R_SPI_B_SPDECR_SCKDL_SHIFT)  /* 1RSPCK */
 #  define R_SPI_B_SPDECR_SCKDL_001                        (1 << R_SPI_B_SPDECR_SCKDL_SHIFT)  /* 2RSPCK */
-#  define R_SPI_B_SPDECR_SCKDL_010                        (10 << R_SPI_B_SPDECR_SCKDL_SHIFT)  /* 3RSPCK */
+#  define R_SPI_B_SPDECR_SCKDL_010                        (2 << R_SPI_B_SPDECR_SCKDL_SHIFT)  /* 3RSPCK */
 #  define R_SPI_B_SPDECR_SCKDL_011                        (3 << R_SPI_B_SPDECR_SCKDL_SHIFT)  /* 4RSPCK */
 #  define R_SPI_B_SPDECR_SCKDL_100                        (4 << R_SPI_B_SPDECR_SCKDL_SHIFT)  /* 5RSPCK */
 #  define R_SPI_B_SPDECR_SCKDL_101                        (5 << R_SPI_B_SPDECR_SCKDL_SHIFT)  /* 6RSPCK */
@@ -99,7 +98,7 @@
 #define R_SPI_B_SPDECR_SLNDL_MASK                 0x700
 #  define R_SPI_B_SPDECR_SLNDL_000                        (0 << R_SPI_B_SPDECR_SLNDL_SHIFT)  /* 1RSPCK */
 #  define R_SPI_B_SPDECR_SLNDL_001                        (1 << R_SPI_B_SPDECR_SLNDL_SHIFT)  /* 2RSPCK */
-#  define R_SPI_B_SPDECR_SLNDL_010                        (10 << R_SPI_B_SPDECR_SLNDL_SHIFT)  /* 3RSPCK */
+#  define R_SPI_B_SPDECR_SLNDL_010                        (2 << R_SPI_B_SPDECR_SLNDL_SHIFT)  /* 3RSPCK */
 #  define R_SPI_B_SPDECR_SLNDL_011                        (3 << R_SPI_B_SPDECR_SLNDL_SHIFT)  /* 4RSPCK */
 #  define R_SPI_B_SPDECR_SLNDL_100                        (4 << R_SPI_B_SPDECR_SLNDL_SHIFT)  /* 5RSPCK */
 #  define R_SPI_B_SPDECR_SLNDL_101                        (5 << R_SPI_B_SPDECR_SLNDL_SHIFT)  /* 6RSPCK */
@@ -110,7 +109,7 @@
 #define R_SPI_B_SPDECR_SPNDL_MASK                 0x70000
 #  define R_SPI_B_SPDECR_SPNDL_000                        (0 << R_SPI_B_SPDECR_SPNDL_SHIFT)  /* 1RSPCK + 5TCLK */
 #  define R_SPI_B_SPDECR_SPNDL_001                        (1 << R_SPI_B_SPDECR_SPNDL_SHIFT)  /* 2RSPCK + 5TCLK */
-#  define R_SPI_B_SPDECR_SPNDL_010                        (10 << R_SPI_B_SPDECR_SPNDL_SHIFT)  /* 3RSPCK + 5TCLK */
+#  define R_SPI_B_SPDECR_SPNDL_010                        (2 << R_SPI_B_SPDECR_SPNDL_SHIFT)  /* 3RSPCK + 5TCLK */
 #  define R_SPI_B_SPDECR_SPNDL_011                        (3 << R_SPI_B_SPDECR_SPNDL_SHIFT)  /* 4RSPCK + 5TCLK */
 #  define R_SPI_B_SPDECR_SPNDL_100                        (4 << R_SPI_B_SPDECR_SPNDL_SHIFT)  /* 5RSPCK + 5TCLK */
 #  define R_SPI_B_SPDECR_SPNDL_101                        (5 << R_SPI_B_SPDECR_SPNDL_SHIFT)  /* 6RSPCK + 5TCLK */
@@ -197,7 +196,7 @@
 #define R_SPI_B_SPCR3_SPSLN_MASK                  0x7000000
 #  define R_SPI_B_SPCR3_SPSLN_000                         (0 << R_SPI_B_SPCR3_SPSLN_SHIFT)  /* Sequence Length is 1 (Referenced SPCMDn, n = 0→0→…) */
 #  define R_SPI_B_SPCR3_SPSLN_001                         (1 << R_SPI_B_SPCR3_SPSLN_SHIFT)  /* Sequence Length is 2 (Referenced SPCMDn, n = 0→1→0→…) */
-#  define R_SPI_B_SPCR3_SPSLN_010                         (10 << R_SPI_B_SPCR3_SPSLN_SHIFT)  /* Sequence Length is 3 (Referenced SPCMDn, n = 0→1→2→0→…) */
+#  define R_SPI_B_SPCR3_SPSLN_010                         (2 << R_SPI_B_SPCR3_SPSLN_SHIFT)  /* Sequence Length is 3 (Referenced SPCMDn, n = 0→1→2→0→…) */
 #  define R_SPI_B_SPCR3_SPSLN_011                         (3 << R_SPI_B_SPCR3_SPSLN_SHIFT)  /* Sequence Length is 4 (Referenced SPCMDn, n = 0→1→2→3→0→…) */
 #  define R_SPI_B_SPCR3_SPSLN_100                         (4 << R_SPI_B_SPCR3_SPSLN_SHIFT)  /* Sequence Length is 5 (Referenced SPCMDn, n = 0→1→2→3→4→0→…) */
 #  define R_SPI_B_SPCR3_SPSLN_101                         (5 << R_SPI_B_SPCR3_SPSLN_SHIFT)  /* Sequence Length is 6 (Referenced SPCMDn, n = 0→1→2→3→4→5→0→…) */
@@ -213,7 +212,7 @@
 #define R_SPI_B_SPCMD_BRDV_MASK                   0xc
 #  define R_SPI_B_SPCMD_BRDV_00                           (0 << R_SPI_B_SPCMD_BRDV_SHIFT)  /* Base bit rate */
 #  define R_SPI_B_SPCMD_BRDV_01                           (1 << R_SPI_B_SPCMD_BRDV_SHIFT)  /* Base bit rate divided by 2 */
-#  define R_SPI_B_SPCMD_BRDV_10                           (10 << R_SPI_B_SPCMD_BRDV_SHIFT)  /* Base bit rate divided by 4 */
+#  define R_SPI_B_SPCMD_BRDV_10                           (2 << R_SPI_B_SPCMD_BRDV_SHIFT)  /* Base bit rate divided by 4 */
 #  define R_SPI_B_SPCMD_BRDV_11                           (3 << R_SPI_B_SPCMD_BRDV_SHIFT)  /* Base bit rate divided by 8 */
 
 #define R_SPI_B_SPCMD_SSLKP                       (1 << 7)  /* SSL Signal Level Hold */
@@ -233,7 +232,7 @@
 #define R_SPI_B_SPCMD_SSLA_MASK                   0x7000000
 #  define R_SPI_B_SPCMD_SSLA_000                          (0 << R_SPI_B_SPCMD_SSLA_SHIFT)  /* SSL0 */
 #  define R_SPI_B_SPCMD_SSLA_001                          (1 << R_SPI_B_SPCMD_SSLA_SHIFT)  /* SSL1 */
-#  define R_SPI_B_SPCMD_SSLA_010                          (10 << R_SPI_B_SPCMD_SSLA_SHIFT)  /* SSL2 */
+#  define R_SPI_B_SPCMD_SSLA_010                          (2 << R_SPI_B_SPCMD_SSLA_SHIFT)  /* SSL2 */
 #  define R_SPI_B_SPCMD_SSLA_011                          (3 << R_SPI_B_SPCMD_SSLA_SHIFT)  /* SSL3 */
 
 /* SPDCR Register bit definitions */
@@ -247,7 +246,7 @@
 #define R_SPI_B_SPDCR_SPFC_MASK                   0x300
 #  define R_SPI_B_SPDCR_SPFC_00                           (0 << R_SPI_B_SPDCR_SPFC_SHIFT)  /* 1 frame */
 #  define R_SPI_B_SPDCR_SPFC_01                           (1 << R_SPI_B_SPDCR_SPFC_SHIFT)  /* 2 frames */
-#  define R_SPI_B_SPDCR_SPFC_10                           (10 << R_SPI_B_SPDCR_SPFC_SHIFT)  /* 3 frames */
+#  define R_SPI_B_SPDCR_SPFC_10                           (2 << R_SPI_B_SPDCR_SPFC_SHIFT)  /* 3 frames */
 #  define R_SPI_B_SPDCR_SPFC_11                           (3 << R_SPI_B_SPDCR_SPFC_SHIFT)  /* 4 frames */
 
 /* SPDCR2 Register bit definitions */
@@ -255,14 +254,14 @@
 #define R_SPI_B_SPDCR2_RTRG_MASK                  0x3
 #  define R_SPI_B_SPDCR2_RTRG_00                          (0 << R_SPI_B_SPDCR2_RTRG_SHIFT)  /* threshold 0 */
 #  define R_SPI_B_SPDCR2_RTRG_01                          (1 << R_SPI_B_SPDCR2_RTRG_SHIFT)  /* threshold 1 */
-#  define R_SPI_B_SPDCR2_RTRG_10                          (10 << R_SPI_B_SPDCR2_RTRG_SHIFT)  /* threshold 2 */
+#  define R_SPI_B_SPDCR2_RTRG_10                          (2 << R_SPI_B_SPDCR2_RTRG_SHIFT)  /* threshold 2 */
 #  define R_SPI_B_SPDCR2_RTRG_11                          (3 << R_SPI_B_SPDCR2_RTRG_SHIFT)  /* threshold 3 */
 
 #define R_SPI_B_SPDCR2_TTRG_SHIFT                 (8)  /* Transmission FIFO threshold setting */
 #define R_SPI_B_SPDCR2_TTRG_MASK                  0x300
 #  define R_SPI_B_SPDCR2_TTRG_00                          (0 << R_SPI_B_SPDCR2_TTRG_SHIFT)  /* threshold 0 */
 #  define R_SPI_B_SPDCR2_TTRG_01                          (1 << R_SPI_B_SPDCR2_TTRG_SHIFT)  /* threshold 1 */
-#  define R_SPI_B_SPDCR2_TTRG_10                          (10 << R_SPI_B_SPDCR2_TTRG_SHIFT)  /* threshold 2 */
+#  define R_SPI_B_SPDCR2_TTRG_10                          (2 << R_SPI_B_SPDCR2_TTRG_SHIFT)  /* threshold 2 */
 #  define R_SPI_B_SPDCR2_TTRG_11                          (3 << R_SPI_B_SPDCR2_TTRG_SHIFT)  /* threshold 3 */
 
 /* SPSR Register bit definitions */
@@ -270,7 +269,7 @@
 #define R_SPI_B_SPSR_SPCP_MASK                    0x700
 #  define R_SPI_B_SPSR_SPCP_000                           (0 << R_SPI_B_SPSR_SPCP_SHIFT)  /* SPCMD0 */
 #  define R_SPI_B_SPSR_SPCP_001                           (1 << R_SPI_B_SPSR_SPCP_SHIFT)  /* SPCMD1 */
-#  define R_SPI_B_SPSR_SPCP_010                           (10 << R_SPI_B_SPSR_SPCP_SHIFT)  /* SPCMD2 */
+#  define R_SPI_B_SPSR_SPCP_010                           (2 << R_SPI_B_SPSR_SPCP_SHIFT)  /* SPCMD2 */
 #  define R_SPI_B_SPSR_SPCP_011                           (3 << R_SPI_B_SPSR_SPCP_SHIFT)  /* SPCMD3 */
 #  define R_SPI_B_SPSR_SPCP_100                           (4 << R_SPI_B_SPSR_SPCP_SHIFT)  /* SPCMD4 */
 #  define R_SPI_B_SPSR_SPCP_101                           (5 << R_SPI_B_SPSR_SPCP_SHIFT)  /* SPCMD5 */
@@ -281,7 +280,7 @@
 #define R_SPI_B_SPSR_SPECM_MASK                   0x7000
 #  define R_SPI_B_SPSR_SPECM_000                          (0 << R_SPI_B_SPSR_SPECM_SHIFT)  /* SPCMD0 */
 #  define R_SPI_B_SPSR_SPECM_001                          (1 << R_SPI_B_SPSR_SPECM_SHIFT)  /* SPCMD1 */
-#  define R_SPI_B_SPSR_SPECM_010                          (10 << R_SPI_B_SPSR_SPECM_SHIFT)  /* SPCMD2 */
+#  define R_SPI_B_SPSR_SPECM_010                          (2 << R_SPI_B_SPSR_SPECM_SHIFT)  /* SPCMD2 */
 #  define R_SPI_B_SPSR_SPECM_011                          (3 << R_SPI_B_SPSR_SPECM_SHIFT)  /* SPCMD3 */
 #  define R_SPI_B_SPSR_SPECM_100                          (4 << R_SPI_B_SPSR_SPECM_SHIFT)  /* SPCMD4 */
 #  define R_SPI_B_SPSR_SPECM_101                          (5 << R_SPI_B_SPSR_SPECM_SHIFT)  /* SPCMD5 */
@@ -342,4 +341,4 @@
 
 #define SPI_B_MAX_CHANNELS    8
 
-#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_SPI_B_H */
+#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_SPI_B_H */
