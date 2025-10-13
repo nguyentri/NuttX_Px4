@@ -190,6 +190,26 @@ int ra8p1_rust_sample_init(void);
 #endif
 
 /****************************************************************************
+ * Name: ra8p1_i2c_initialize
+ *
+ * Description:
+ *   Initialize I2C bus for EVK-RA8P1 board
+ *
+ * Input Parameters:
+ *   bus - I2C bus number (0 or 1)
+ *
+ * Returned Value:
+ *   Pointer to I2C device structure on success; NULL on failure
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_RA_I2C0) || defined(CONFIG_RA_I2C1)
+struct i2c_master_s;
+struct i2c_master_s *ra8p1_i2c_initialize(int bus);
+int ra8p1_i2c_uninitialize(int bus);
+#endif
+
+/****************************************************************************
  * Name: gy912_register_sensors
  *
  * Description:

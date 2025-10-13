@@ -40,4 +40,9 @@ else
 CSRCS += ra8p1_user_leds.c
 endif
 
+# I2C support
+ifneq ($(CONFIG_RA_I2C),y)
+CSRCS += ra8p1_i2c.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

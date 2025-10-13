@@ -43,7 +43,7 @@
 
 #include "arm_internal.h"
 #include "chip.h"
-#include "hardware/ra_adc.h"
+#include "hardware/ra_memorymap.h"
 #include "ra_gpio.h"
 #include "ra_mstp.h"
 #include "ra_icu.h"
@@ -173,11 +173,11 @@ static const struct adc_ops_s g_adcops =
 static const struct ra8_adc_chan_s g_adc0_channels[] =
 {
   {
-    .channel = RA8_ADC_CHANNEL_AN000,    /* Battery voltage (P004) */
+    .channel = RA_ADC_CHANNEL_AN000,    /* Battery voltage (P004) */
     .pinmux  = GPIO_P004_ANALOG,
   },
   {
-    .channel = RA8_ADC_CHANNEL_AN001,    /* Reserved AN001 (P003) - Battery current AN104 mapped differently */
+    .channel = RA_ADC_CHANNEL_AN001,    /* Reserved AN001 (P003) - Battery current AN104 mapped differently */
     .pinmux  = GPIO_P003_ANALOG,
   },
   /* Add more channels as needed */
@@ -189,7 +189,7 @@ static const struct ra8_adc_chan_s g_adc0_channels[] =
 static const struct ra8_adc_chan_s g_adc1_channels[] =
 {
   {
-    .channel = RA8_ADC_CHANNEL_AN104,    /* Battery current (P003) mapped to ADC1 */
+    .channel = RA_ADC_CHANNEL_AN104,    /* Battery current (P003) mapped to ADC1 */
     .pinmux  = GPIO_P005_ANALOG,
   },
   /* Add more ADC1 channels as needed */
@@ -200,15 +200,15 @@ static const struct ra8_adc_chan_s g_adc1_channels[] =
 
 static struct ra8_adc_priv_s g_adc0_priv =
 {
-  .base       = RA8_ADC0_BASE,
-  .mstp       = RA_MSTP_ADC0,
+  .base       = RA_ADC0_BASE,
+  .mstp       = R_MSTP_ADC0,
   .intf       = 0,
   .irq        = -1, /* Assigned dynamically */
   .elc        = RA_ELC_ADC0_SCAN_END,
-  .resolution = RA8_ADC_RESOLUTION_12BIT,
-  .mode       = RA8_ADC_MODE_SINGLE_SCAN,
-  .trigger    = RA8_ADC_TRIGGER_SOFTWARE,
-  .alignment  = RA8_ADC_ALIGNMENT_RIGHT,
+  .resolution = RA_ADC_RESOLUTION_12BIT,
+  .mode       = RA_ADC_MODE_SINGLE_SCAN,
+  .trigger    = RA_ADC_TRIGGER_SOFTWARE,
+  .alignment  = RA_ADC_ALIGNMENT_RIGHT,
 #ifdef CONFIG_RA_ADC_DTC
   .dtc_enable = true,
 #endif
@@ -227,14 +227,14 @@ static struct adc_dev_s g_adc0_dev =
 
 static struct ra8_adc_priv_s g_adc1_priv =
 {
-  .base       = RA8_ADC1_BASE,
+  .base       = RA_ADC1_BASE,
   .intf       = 1,
   .irq        = -1, /* Assigned dynamically */
   .elc        = RA_ELC_ADC1_SCAN_END,
-  .resolution = RA8_ADC_RESOLUTION_12BIT,
-  .mode       = RA8_ADC_MODE_SINGLE_SCAN,
-  .trigger    = RA8_ADC_TRIGGER_SOFTWARE,
-  .alignment  = RA8_ADC_ALIGNMENT_RIGHT,
+  .resolution = RA_ADC_RESOLUTION_12BIT,
+  .mode       = RA_ADC_MODE_SINGLE_SCAN,
+  .trigger    = RA_ADC_TRIGGER_SOFTWARE,
+  .alignment  = RA_ADC_ALIGNMENT_RIGHT,
 #ifdef CONFIG_RA_ADC_DTC
   .dtc_enable = true,
 #endif
@@ -354,10 +354,10 @@ static int ra8_adc_configure(FAR struct ra8_adc_priv_s *priv)
   regval = 0;
   regval |= (priv->mode << ADC_ADCSR_ADCS_SHIFT) & ADC_ADCSR_ADCS_MASK;
 
-  if (priv->trigger != RA8_ADC_TRIGGER_SOFTWARE)
+  if (priv->trigger != RA_ADC_TRIGGER_SOFTWARE)
     {
       regval |= ADC_ADCSR_TRGE;
-      if (priv->trigger == RA8_ADC_TRIGGER_ASYNC_EXT)
+      if (priv->trigger == RA_ADC_TRIGGER_ASYNC_EXT)
         {
           regval |= ADC_ADCSR_EXTRG;
         }
@@ -368,7 +368,7 @@ static int ra8_adc_configure(FAR struct ra8_adc_priv_s *priv)
   /* Configure ADC control extended register (ADCER) */
 
   regval = 0;
-  if (priv->alignment == RA8_ADC_ALIGNMENT_LEFT)
+  if (priv->alignment == RA_ADC_ALIGNMENT_LEFT)
     {
       regval |= ADC_ADCER_ADRFMT;
     }

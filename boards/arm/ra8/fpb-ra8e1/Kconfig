@@ -218,11 +218,34 @@ config RA8E1_SPI_MASTERSLAVE_EXAMPLE
 config RA8E1_SPI_GY912_EXAMPLE
 	bool "SPI GY-912 Example Application"
 	default n
-	depends on RA_SPI && SENSORS_GY912
+	depends on RA_SPI
+	select SENSORS_GY912 if !SENSORS_GY912
 	---help---
 		Enable SPI GY-912 sensor demo application for FPB-RA8E1.
 		Demonstrates 10DOF sensor module communication via SPI.
 		Self-contained demo with no external app dependencies.
+
+if RA8E1_SPI_GY912_EXAMPLE
+
+config RA8E1_SPI_GY912_EXAMPLE_PROGNAME
+	string "SPI GY-912 example program name"
+	default "gy912_test"
+	---help---
+		Program name for the SPI GY-912 example application
+
+config RA8E1_SPI_GY912_EXAMPLE_PRIORITY
+	int "SPI GY-912 example task priority"
+	default 100
+	---help---
+		Task priority for the SPI GY-912 example application
+
+config RA8E1_SPI_GY912_EXAMPLE_STACKSIZE
+	int "SPI GY-912 example stack size"
+	default 4096
+	---help---
+		Stack size for the SPI GY-912 example application
+
+endif # RA8E1_SPI_GY912_EXAMPLE
 
 config RA8E1_I2C_GY912_EXAMPLE
 	bool "I2C GY-912 Example Application"

@@ -40,7 +40,8 @@
 #include <arch/irq.h>
 
 #include "arm_internal.h"
-#include "hardware/ra_icu.h"
+#include "chip.h"
+#include "hardware/ra_memorymap.h"
 #include "ra_icu.h"
 
 /****************************************************************************
@@ -324,17 +325,17 @@ int ra_icu_filter_config(int icu_irq, uint8_t mode, bool filter_enable,
   regval = 0;
 
   /* Set interrupt detection mode */
-  regval |= (mode & R_ICU_IRQCR_IRQMD_MASK) << R_ICU_IRQCR_IRQMD;
+  regval |= (mode & R_ICU_COMMON_IRQCR_IRQMD_MASK) << R_ICU_COMMON_IRQCR_IRQMD_SHIFT;
 
   /* Set filter configuration if enabled */
   if (filter_enable)
     {
-      regval |= R_ICU_IRQCR_FLTEN;
-      regval |= (filter_clock & R_ICU_IRQCR_FCLKSEL_MASK) << R_ICU_IRQCR_FCLKSEL_SHIFT;
+      regval |= R_ICU_COMMON_IRQCR_FLTEN;
+      regval |= (filter_clock & R_ICU_COMMON_IRQCR_FCLKSEL_MASK) << R_ICU_COMMON_IRQCR_FCLKSEL_SHIFT;
     }
 
   /* Write to the IRQCR register */
-  putreg8(regval, R_ICU_IRQCR(icu_irq));
+  putreg8(regval, R_ICU_COMMON_IRQCR(icu_irq));
 
   return OK;
 }
@@ -349,7 +350,7 @@ int ra_icu_filter_config(int icu_irq, uint8_t mode, bool filter_enable,
 
 void ra_icu_enable_wakeup(uint32_t mask)
 {
-  modifyreg32(R_ICU_WUPEN, 0, mask);
+  modifyreg32(R_ICU_WUPEN0, 0, mask);
 }
 
 /****************************************************************************
@@ -362,7 +363,7 @@ void ra_icu_enable_wakeup(uint32_t mask)
 
 void ra_icu_disable_wakeup(uint32_t mask)
 {
-  modifyreg32(R_ICU_WUPEN, mask, 0);
+  modifyreg32(R_ICU_WUPEN0, mask, 0);
 }
 
 /****************************************************************************

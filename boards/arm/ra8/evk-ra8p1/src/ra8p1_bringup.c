@@ -139,6 +139,31 @@ int ra8p1_bringup(void)
   board_button_initialize();
 #endif
 
+#if defined(CONFIG_RA_I2C0) || defined(CONFIG_RA_I2C1)
+  /* Initialize I2C buses */
+#ifdef CONFIG_RA_I2C0
+  if (ra8p1_i2c_initialize(0) != NULL)
+    {
+      syslog(LOG_INFO, "I2C0 initialized successfully\n");
+    }
+  else
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize I2C0\n");
+    }
+#endif
+
+#ifdef CONFIG_RA_I2C1
+  if (ra8p1_i2c_initialize(1) != NULL)
+    {
+      syslog(LOG_INFO, "I2C1 initialized successfully\n");
+    }
+  else
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize I2C1\n");
+    }
+#endif
+#endif
+
   ra8p1_app_examples();
 
   return ret;

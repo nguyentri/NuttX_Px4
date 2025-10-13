@@ -34,6 +34,7 @@
 
 #include "arm_internal.h"
 #include "chip.h"
+#include "hardware/ra_memorymap.h"
 
 /****************************************************************************
  * Pre-processor Definitions

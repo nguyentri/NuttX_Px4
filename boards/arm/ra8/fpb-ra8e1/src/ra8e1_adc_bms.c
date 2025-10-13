@@ -46,7 +46,6 @@
 #include "arm_internal.h"
 #include "chip.h"
 #include "ra_gpio.h"
-#include "board.h"
 #include "fpb-ra8e1.h"
 
 /* Forward declaration for ADC driver initialization */

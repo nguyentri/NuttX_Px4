@@ -46,11 +46,9 @@
 
 #include "arm_internal.h"
 #include "chip.h"
-
-#include "hardware/ra_sci.h"
-#include "hardware/ra_mstp.h"
+#include "hardware/ra_memorymap.h"
 #include "hardware/ra_system.h"
-#include "hardware/ra_mstp.h"
+#include "ra_mstp.h"
 #include "ra_lowputc.h"
 #include "ra_icu.h"
 #include "ra_gpio.h"
@@ -395,7 +393,7 @@ static uart_dev_t  g_uart1port =
 #ifdef CONFIG_RA_SCI2_UART
 static struct up_dev_s  g_uart2priv =
 {
-  .scibase      = R_SCI2_B_BASE,
+  .scibase      = R_SCI_B_CH_BASE(2),
   .mstp         = R_MSTP_MSTPCRB_SCI2,
   .rxi_irq      = -1,               /* Will be assigned by ICU */
   .txi_irq      = -1,               /* Will be assigned by ICU */
@@ -892,6 +890,16 @@ static void up_sci_config(struct up_dev_s *priv)
   regval = R_SCI_B_CCR1_SPB2DT |     /* Serial port break data */
            R_SCI_B_CCR1_SPB2IO |     /* Serial port break I/O */
            0;                        /* No CTS flow control for basic UART */
+
+  if (priv->parity == 1)  /* Odd parity */
+    {
+      regval |= R_SCI_B_CCR1_PE | R_SCI_B_CCR1_PM;
+    }
+  else if (priv->parity == 2)  /* Even parity */
+    {
+      regval |= R_SCI_B_CCR1_PE;
+    }
+
   up_serialout(priv, R_SCI_B_CCR1_OFFSET, regval);
 
   /* Calculate baud rate settings dynamically */
@@ -951,15 +959,6 @@ static void up_sci_config(struct up_dev_s *priv)
       regval |= (2 << R_SCI_B_CCR3_CHR_SHIFT); /* CHR=2 for 8-bit (from XML) */
     }
 
-  if (priv->parity == 1)  /* Odd parity */
-    {
-      regval |= R_SCI_B_CCR3_PE | R_SCI_B_CCR3_PM;
-    }
-  else if (priv->parity == 2)  /* Even parity */
-    {
-      regval |= R_SCI_B_CCR3_PE;
-    }
-
   if (priv->stopbits2)
     {
       regval |= R_SCI_B_CCR3_STP;
@@ -1001,9 +1000,9 @@ static int up_setup(struct uart_dev_s *dev)
     }
 
   /* Enable module stop control for all SCI channels */
-  putreg16((R_SYSTEM_PRCR_PRKEY_VALUE | R_SYSTEM_PRCR_PRC1), R_SYSTEM_PRCR);
+  putreg16((R_SYSC_PRCR_PRKEY | R_SYSC_PRCR_PRC1), R_SYSC_PRCR_S);
   modifyreg32(R_MSTP_MSTPCRB, priv->mstp, 0);
-  putreg16(R_SYSTEM_PRCR_PRKEY_VALUE, R_SYSTEM_PRCR);
+  putreg16(R_SYSC_PRCR_PRKEY, R_SYSC_PRCR_S);
 
   /* Read back to ensure write completed and add delay for module power-up */
   (void)getreg32(R_MSTP_MSTPCRB);
@@ -1040,9 +1039,9 @@ static void up_shutdown(struct uart_dev_s *dev)
   up_serialout(priv, R_SCI_B_CCR0_OFFSET, 0);
 
   /* Stop SCI  */
-  putreg16((R_SYSTEM_PRCR_PRKEY_VALUE | R_SYSTEM_PRCR_PRC1), R_SYSTEM_PRCR);
+  putreg16((R_SYSC_PRCR_PRKEY | R_SYSC_PRCR_PRC1), R_SYSC_PRCR_S);
   modifyreg32(R_MSTP_MSTPCRB, priv->mstp, 1);
-  putreg16(R_SYSTEM_PRCR_PRKEY_VALUE, R_SYSTEM_PRCR);
+  putreg16(R_SYSC_PRCR_PRKEY, R_SYSC_PRCR_S);
 }
 
 /****************************************************************************
@@ -1308,7 +1307,7 @@ static void up_send(struct uart_dev_s *dev, int ch)
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
 
   /* Send the character to TDR_BY register (byte access) */
-  up_serialout(priv, R_SCI_B_TDR_BY_OFFSET, (uint8_t)ch);
+  up_serialout(priv, R_SCI_B_TDR_OFFSET, (uint8_t)ch);
 
   /* Clear TDRE flag by writing to CFCLR register */
   up_serialout(priv, R_SCI_B_CFCLR_OFFSET, R_SCI_B_CFCLR_TDREC);

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_RA_GPT_H
-#define __ARCH_ARM_SRC_RA8_RA_GPT_H
+#ifndef __ARCH_ARM_SRC_RA_RA8_GPT_H
+#define __ARCH_ARM_SRC_RA_RA8_GPT_H
 
 /****************************************************************************
  * Included Files
@@ -28,7 +28,8 @@
 #include <nuttx/config.h>
 #include <nuttx/timers/pwm.h>
 #include <nuttx/timers/timer.h>
-#include "hardware/ra_gpt.h"
+#include "chip.h"
+#include "hardware/ra_memorymap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -62,6 +63,28 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+
+/* GPT Channel Configuration Structure */
+
+struct ra_gpt_config_s
+{
+  uint32_t base;                   /* GPT peripheral base address */
+  uint32_t pclkd_frequency;        /* PCLKD frequency in Hz */
+  uint8_t  channel;                /* GPT channel (0-13) */
+  uint8_t  irq;                    /* Interrupt request number */
+};
+
+/* GPT Device Structure */
+
+struct ra_gpt_dev_s
+{
+  const struct ra_gpt_config_s *config;  /* GPT configuration */
+  uint32_t frequency;                      /* PWM frequency */
+  uint32_t period;                         /* PWM period in timer counts */
+  bool started;                            /* PWM started flag */
+};
+
 
 /* GPT timer configuration */
 struct ra_gpt_timer_config_s
@@ -298,4 +321,4 @@ int ra_gpt_set_compare(int channel, int compare, uint32_t value);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_RA8_RA_GPT_H */
+#endif /* __ARCH_ARM_SRC_RA_RA8_GPT_H */

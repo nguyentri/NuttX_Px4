@@ -41,6 +41,45 @@
 #include "ra_gpio.h"
 #include "ra_icu.h"
 
+
+/* Register Bitfield Definitions ********************************************/
+
+/* PFS - Pmn Pin Function Control Register */
+
+#define R_PFS_PSEL_SHIFT_HW           (24)   /* Hardware PSEL position in PFS register at 28:24 */
+
+/* GPIO Configuration Bit Fields for cfg field in gpio_pinset_t struct */
+/* These align with the R_PFS_* bit positions for direct use */
+/* Note: R_PFS_* macros are already bit masks, not bit positions */
+
+#define GPIO_CFG_OUTPUT                R_PFS_PDR          /* Output direction (bit 2) */
+#define GPIO_CFG_PULLUP                R_PFS_PCR          /* Enable pull-up (bit 4) */
+#define GPIO_CFG_OPENDRAIN             R_PFS_NCODR        /* Open-drain output (bit 6) */
+#define GPIO_CFG_DRIVE_MID             R_PFS_DSCR_01      /* Mid drive strength */
+#define GPIO_CFG_DRIVE_HIGH            R_PFS_DSCR_11      /* High drive */
+#define GPIO_CFG_ANALOG                R_PFS_ASEL         /* Analog mode (bit 15) */
+#define GPIO_CFG_IRQ                   R_PFS_ISEL         /* IRQ input enable (bit 14) */
+#define GPIO_CFG_PERIPHERAL            R_PFS_PMR          /* Peripheral mode (bit 16) */
+
+/* Macros to extract fields from gpio_pinset_t
+ * New encoding to avoid conflict with pin map definitions:
+ * Bits 31-28: Port number (4 bits, supports ports 0-15)
+ * Bits 27-24: Pin number (4 bits, supports pins 0-15)
+ * Bits 23-0:  Configuration (24 bits for flags and PSEL)
+ */
+#define GPIO_PORT_MASK                  (0xF0000000UL)
+#define GPIO_PIN_MASK                   (0x0F000000UL)
+#define GPIO_CFG_MASK                   (0x00FFFFFFUL)
+
+#define GPIO_PORT_SHIFT                 (28)
+#define GPIO_PIN_SHIFT                  (24)
+#define GPIO_CFG_SHIFT                  (0)
+
+#define GPIO_GET_PORT(pinset)           (((pinset) & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT)
+#define GPIO_GET_PIN(pinset)            (((pinset) & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT)
+#define GPIO_GET_CFG(pinset)            ((pinset) & GPIO_CFG_MASK)
+
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -84,10 +123,10 @@ static void ra_pin_access_enable(void)
   if (g_pfs_protect_counter == 0)
     {
       /* Clear BOWI bit - writing to PFSWE bit enabled */
-      putreg8(0, R_PWPR);
+      putreg8(0, R_PFS_PWPR);
 
       /* Set PFSWE bit - writing to PFS register enabled */
-      putreg8((1 << R_PWPR_PFSWE), R_PWPR);
+      putreg8((1 << R_PWPR_PFSWE), R_PFS_PWPR);
     }
 
   /* Increment the protect counter */
@@ -121,10 +160,10 @@ static void ra_pin_access_disable(void)
   if (g_pfs_protect_counter == 0)
     {
       /* Clear PFSWE bit - writing to PFS register disabled */
-      putreg8(0, R_PWPR);
+      putreg8(0, R_PFS_PWPR);
 
       /* Set BOWI bit - writing to PFSWE bit disabled */
-      putreg8((1 << R_PWPR_B0WI), R_PWPR);
+      putreg8((1 << R_PWPR_B0WI), R_PFS_PWPR);
     }
 
   leave_critical_section(flags);
@@ -178,10 +217,10 @@ static void ra_gpio_pfs_write(uint8_t port, uint8_t pin, uint32_t value)
              (pin * R_PFS_PSEL_PIN_OFFSET);
 
   /* For peripheral functions, clear PMR first */
-  if ((value & (1 << R_PFS_PMR)) != 0)
+  if ((value & R_PFS_PMR) != 0)
     {
       /* Clear PMR bit first, keeping other settings */
-      putreg32(value & ~(1 << R_PFS_PMR), pfs_addr);
+      putreg32(value & ~R_PFS_PMR, pfs_addr);
     }
 
   /* Write the complete configuration */
@@ -205,28 +244,21 @@ static void ra_gpio_pfs_write(uint8_t port, uint8_t pin, uint32_t value)
 static uint32_t ra_gpio_get_pfs_config(gpio_pinset_t cfgset)
 {
   uint32_t pfs_value = 0;
-  uint16_t cfg = GPIO_GET_CFG(cfgset);
+  uint32_t cfg = GPIO_GET_CFG(cfgset);
 
-  /* Extract PSEL field from bits 8-12 (5 bits) */
-  uint8_t psel = (cfg >> R_PFS_PSEL_SHIFT_8) & R_PFS_PSEL_MASK;
+  /* Extract PSEL field from config bits 20-16 (5 bits) */
+  uint32_t psel = (cfg >> R_PFS_PSEL_SHIFT_CFG) & 0x1F;
   if (psel != 0)
     {
-      /* Peripheral mode: set PSEL and PMR */
-      pfs_value |= (psel << R_PFS_PSEL_SHIFT_16);
-      pfs_value |= (1 << R_PFS_PMR);
+      /* Shift to hardware PSEL position at 28:24 */
+      pfs_value |= (psel << R_PFS_PSEL_SHIFT_HW);
+      /* Set PMR bit for peripheral function */
+      pfs_value |= R_PFS_PMR;
     }
 
-  /* Convert bit positions to masks for GPIO config bits (0-7) */
-  if (cfg & (1 << R_PFS_PODR)) pfs_value |= (1 << R_PFS_PODR);
-  if (cfg & (1 << R_PFS_PDR)) pfs_value |= (1 << R_PFS_PDR);
-  if (cfg & (1 << R_PFS_PCR)) pfs_value |= (1 << R_PFS_PCR);
-  if (cfg & (1 << R_PFS_NCODR)) pfs_value |= (1 << R_PFS_NCODR);
-  if (cfg & (1 << R_PFS_DSCR)) pfs_value |= (1 << R_PFS_DSCR);
-  if (cfg & (1 << R_PFS_DSCR1)) pfs_value |= (1 << R_PFS_DSCR1);
-  if (cfg & (1 << R_PFS_EOFR0)) pfs_value |= (1 << R_PFS_EOFR0);
-  if (cfg & (1 << R_PFS_EOFR1)) pfs_value |= (1 << R_PFS_EOFR1);
-  if (cfg & (1 << R_PFS_ISEL)) pfs_value |= (1 << R_PFS_ISEL);
-  if (cfg & (1 << R_PFS_ASEL)) pfs_value |= (1 << R_PFS_ASEL);
+  /* Map configuration bits 0-15 directly to PFS register bits 0-15 */
+  /* These bits align exactly with the hardware register layout */
+  pfs_value |= (cfg & 0x0000FFFF);
 
   return pfs_value;
 }
@@ -254,7 +286,7 @@ static int ra_gpio_find_irq_for_pin(gpio_pinset_t pinset)
   uint16_t cfg = GPIO_GET_CFG(pinset);
 
   /* Check if this pin is configured for IRQ functionality */
-  if (!(cfg & (1 << R_PFS_ISEL)))
+  if (!(cfg & R_PFS_ISEL))
     {
       /* Pin is not configured for external interrupts */
       return -1;
@@ -623,21 +655,22 @@ void ra_gpio_set_drive_strength(gpio_pinset_t pinset, uint8_t strength)
 
   pfs_value = getreg32(pfs_addr);
 
-  /* Clear existing drive strength bits */
-  pfs_value &= ~((1 << R_PFS_DSCR) | (1 << R_PFS_DSCR1));
+  /* Clear existing drive strength bits (bits 11:10) */
+  pfs_value &= ~R_PFS_DSCR_MASK;
 
   /* Set new drive strength */
   switch (strength)
     {
       case 1: /* Mid */
-        pfs_value |= (1 << R_PFS_DSCR);
+        pfs_value |= R_PFS_DSCR_01;
         break;
 
       case 2: /* High */
-        pfs_value |= (1 << R_PFS_DSCR) | (1 << R_PFS_DSCR1);
+        pfs_value |= R_PFS_DSCR_11;
         break;
 
       default: /* Low */
+        pfs_value |= R_PFS_DSCR_00;
         break;
     }
 
@@ -710,7 +743,8 @@ int ra_gpiosetevent(uint32_t pinset, bool rising, bool falling,
 
               ra_pin_access_enable();
               pfs_value = getreg32(pfs_addr);
-              pfs_value &= ~((1 << R_PFS_ISEL) | (1 << R_PFS_EOFR0) | (1 << R_PFS_EOFR1));
+              /* Clear IRQ and edge detection bits */
+              pfs_value &= ~(R_PFS_ISEL | R_PFS_EOFR_MASK);
               putreg32(pfs_value, pfs_addr);
               ra_pin_access_disable();
 
@@ -737,19 +771,27 @@ int ra_gpiosetevent(uint32_t pinset, bool rising, bool falling,
   pfs_value = getreg32(pfs_addr);
 
   /* Clear existing interrupt configuration bits */
-  pfs_value &= ~((1 << R_PFS_ISEL) | (1 << R_PFS_EOFR0) | (1 << R_PFS_EOFR1));
+  pfs_value &= ~(R_PFS_ISEL | R_PFS_EOFR_MASK);
 
   /* Enable IRQ input */
-  pfs_value |= (1 << R_PFS_ISEL);
+  pfs_value |= R_PFS_ISEL;
 
-  /* Configure edge detection */
-  if (rising)
+  /* Configure edge detection using EOFR field */
+  if (rising && falling)
     {
-      pfs_value |= (1 << R_PFS_EOFR0);  /* Event on Rising */
+      pfs_value |= R_PFS_EOFR_11;  /* Detect both edges */
     }
-  if (falling)
+  else if (rising)
     {
-      pfs_value |= (1 << R_PFS_EOFR1);  /* Event on Falling */
+      pfs_value |= R_PFS_EOFR_01;  /* Detect rising edge */
+    }
+  else if (falling)
+    {
+      pfs_value |= R_PFS_EOFR_10;  /* Detect falling edge */
+    }
+  else
+    {
+      pfs_value |= R_PFS_EOFR_00;  /* Don't care */
     }
 
   /* Set pin as input */

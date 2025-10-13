@@ -30,6 +30,9 @@ if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS ra8p1_buttons.c)
 endif()
 
+if(CONFIG_RA_I2C)
+  list(APPEND SRCS ra8p1_i2c.c)
+endif()
 
 target_sources(board PRIVATE ${SRCS})
 

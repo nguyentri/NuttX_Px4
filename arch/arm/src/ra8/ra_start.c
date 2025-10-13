@@ -36,13 +36,12 @@
 #include "arch/board/board.h"
 #include "arm_internal.h"
 #include "nvic.h"
+#include "chip.h"
 #include "ra_clock.h"
 #include "ra_lowputc.h"
 #include "ra_start.h"
-#include "hardware/ra_flash.h"
 #include "hardware/ra_system.h"
-#include "hardware/ra_option_setting.h"
-#include "hardware/ra_gpio.h"
+#include "hardware/ra_memorymap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -760,10 +759,10 @@ void ra_register_protect_enable(ra_reg_protect_t regs_to_protect)
   /* If counter reaches zero, enable protection */
   if (g_register_protect_counters[regs_to_protect] == 0)
     {
-      uint16_t prcr_value = getreg16(R_SYSTEM_PRCR);
-      prcr_value = (prcr_value | R_SYSTEM_PRCR_PRKEY) &
+      uint16_t prcr_value = getreg16(R_SYSC_PRCR_S);
+      prcr_value = (prcr_value | R_SYSC_PRCR_PRKEY) &
                    (~prcr_masks[regs_to_protect]);
-      putreg16(prcr_value, R_SYSTEM_PRCR);
+      putreg16(prcr_value, R_SYSC_PRCR_S);
     }
 
   leave_critical_section(flags);
@@ -790,10 +789,10 @@ void ra_register_protect_disable(ra_reg_protect_t regs_to_unprotect)
   /* If this is first entry then disable protection */
   if (g_register_protect_counters[regs_to_unprotect] == 0)
     {
-      uint16_t prcr_value = getreg16(R_SYSTEM_PRCR);
-      prcr_value = (prcr_value | R_SYSTEM_PRCR_PRKEY) |
+      uint16_t prcr_value = getreg16(R_SYSC_PRCR_S);
+      prcr_value = (prcr_value | R_SYSC_PRCR_PRKEY) |
                    prcr_masks[regs_to_unprotect];
-      putreg16(prcr_value, R_SYSTEM_PRCR);
+      putreg16(prcr_value, R_SYSC_PRCR_S);
     }
 
   /* Increment the protect counter */
@@ -821,9 +820,9 @@ void ra_gpio_security_init(void)
   ra_register_protect_disable(RA_REG_PROTECT_SAR);
 
   /* Set all PMSAR registers to 0 (secure mode for all pins) */
-  for (i = 0; i < R_PMSAR_NUM; i++)
+  for (i = 0; i < PFS_MAX_CHANNELS; i++)
     {
-      putreg16(0U, R_PMSAR(i));
+      putreg16(0U, R_PFS_PMSAR(i));
     }
 
   /* Set all PSCU registers to 0 (secure mode) */

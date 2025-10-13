@@ -215,14 +215,6 @@
 #  endif
 #endif
 
-
-/* SYSTEM Control Register Bits */
-#define R_SYSTEM_PRCR_PRKEY               (0xA500)      /* Protection Key */
-#define R_SYSTEM_PRCR_PRC0                (1 << 0)      /* Protect bit 0 */
-#define R_SYSTEM_PRCR_PRC1                (1 << 1)      /* Protect bit 1 */
-#define R_SYSTEM_PRCR_PRC3                (1 << 3)      /* Protect bit 3 */
-#define R_SYSTEM_PRCR_PRC4                (1 << 4)      /* Protect bit 4 */
-
 /* Register Protection Types */
 typedef enum
 {

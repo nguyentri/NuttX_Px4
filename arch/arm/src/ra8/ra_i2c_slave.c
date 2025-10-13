@@ -42,7 +42,8 @@
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
-#include "hardware/ra_i2c.h"
+#include "chip.h"
+#include "hardware/ra_memorymap.h"
 #include "ra_i2c.h"
 
 #ifdef CONFIG_RA_I2C_SLAVE

@@ -26,6 +26,7 @@
 
 #ifdef CONFIG_RA8E1_SPI_GY912_EXAMPLE
 
+#include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <debug.h>
@@ -37,7 +38,6 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/sensors/sensor.h>
 #include <nuttx/sensors/ioctl.h>
-#include <nuttx/uorb.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/semaphore.h>
@@ -47,7 +47,8 @@
 #include "arm_internal.h"
 #include "chip.h"
 #include "ra_gpio.h"
-#include "board.h"
+#include "ra_spi.h"
+#include "fpb-ra8e1.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -142,13 +143,13 @@
 #define ICM20948_PWR_MGMT_2_DISABLE_GYRO  (0x07 << 0)
 
 /* SPI Device IDs */
-#define GY912_SPI_BMP388_DEVID   0
-#define GY912_SPI_ICM20948_DEVID 1
+#define GY912_SPI_ICM20948_DEVID 0  /* ICM20948 IMU - CS0 (P408) */
+#define GY912_SPI_BMP388_DEVID   1  /* BMP388 Barometer - CS1 (P407) */
 
 /* Sensor update intervals */
 #define GY912_DEFAULT_INTERVAL_US 100000  /* 100ms */
 #define GY912_MIN_INTERVAL_US     1000    /* 1ms */
-#define GY912_MAX_INTERVAL_US     1000000 /* 1s */
+#define GY912_MAX_INTERVAL_US     100000 /* 1s */
 
 /****************************************************************************
  * Private Types
@@ -212,7 +213,7 @@ static int gy912_sensor_fetch(FAR struct sensor_lowerhalf_s *lower,
                              FAR char *buffer, size_t buflen);
 static int gy912_sensor_selftest(FAR struct sensor_lowerhalf_s *lower,
                                 FAR struct file *filep,
-                                FAR uint32_t *result);
+                                unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -230,6 +231,142 @@ static const struct sensor_ops_s g_gy912_sensor_ops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: ra_spi_select
+ *
+ * Description:
+ *   Board-specific SPI device select function.
+ *   Controls chip select pins for SPI devices.
+ *
+ * Input Parameters:
+ *   dev      - SPI device structure
+ *   devid    - Device ID (identifies which CS pin to control)
+ *   selected - true: assert CS (select device), false: deassert CS
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void ra_spi_select(struct spi_dev_s *dev, uint32_t devid, bool selected)
+{
+#ifdef CONFIG_RA_SPI1
+  bool readback;
+
+  /* Handle SPI1 devices (GY-912 sensors) */
+  switch (devid)
+    {
+      case GY912_SPI_ICM20948_DEVID:
+        /* ICM20948 IMU - CS on P408 (active low) */
+        ra_gpiowrite(GPIO_SPI1_CS0, !selected);
+        readback = ra_gpioread(GPIO_SPI1_CS0);
+        spiinfo("SPI1 ICM20948 CS %s (P408 write=%d, readback=%d)\n",
+                selected ? "ASSERT" : "DEASSERT", !selected, readback);
+        if (readback != !selected)
+          {
+            spierr("SPI1_CS0 readback mismatch! Expected=%d, Got=%d\n",
+                   !selected, readback);
+          }
+        break;
+
+      case GY912_SPI_BMP388_DEVID:
+        /* BMP388 Barometer - CS on P407 (active low) */
+        ra_gpiowrite(GPIO_SPI1_CS1, !selected);
+        readback = ra_gpioread(GPIO_SPI1_CS1);
+        spiinfo("SPI1 BMP388 CS %s (P407 write=%d, readback=%d)\n",
+                selected ? "ASSERT" : "DEASSERT", !selected, readback);
+        if (readback != !selected)
+          {
+            spierr("SPI1_CS1 readback mismatch! Expected=%d, Got=%d\n",
+                   !selected, readback);
+          }
+        break;
+
+      default:
+        spiwarn("SPI1: Unknown device ID 0x%08lx\n", (unsigned long)devid);
+        break;
+    }
+#endif /* CONFIG_RA_SPI1 */
+
+#ifdef CONFIG_RA_SPI0
+  /* Add SPI0 device handling here if needed */
+  /* For now, SPI0 devices are not defined */
+#endif /* CONFIG_RA_SPI0 */
+}
+
+/****************************************************************************
+ * Name: ra_spi_status
+ *
+ * Description:
+ *   Return status information associated with the SPI device.
+ *
+ * Input Parameters:
+ *   dev   - SPI device structure
+ *   devid - Device ID
+ *
+ * Returned Value:
+ *   Bit-encoded SPI status (see include/nuttx/spi/spi.h)
+ *
+ ****************************************************************************/
+
+uint8_t ra_spi_status(struct spi_dev_s *dev, uint32_t devid)
+{
+  uint8_t status = 0;
+
+  /* GY-912 sensors are always present on the board */
+#ifdef CONFIG_RA_SPI1
+  switch (devid)
+    {
+      case GY912_SPI_ICM20948_DEVID:
+      case GY912_SPI_BMP388_DEVID:
+        status |= SPI_STATUS_PRESENT;
+        break;
+
+      default:
+        break;
+    }
+#endif
+
+  return status;
+}
+
+/****************************************************************************
+ * Name: ra_spi_cmddata
+ *
+ * Description:
+ *   Some SPI devices require an additional control to determine whether
+ *   to send data or command. This function provides selection of
+ *   command or data.
+ *
+ * Input Parameters:
+ *   dev - SPI device structure
+ *   devid - Device ID
+ *   cmd - true: command, false: data
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_CMDDATA
+int ra_spi_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
+{
+  /* GY-912 sensors don't use separate command/data lines */
+  return OK;
+}
+#endif
+
 
 /****************************************************************************
  * Name: gy912_spi_read_reg
@@ -253,10 +390,12 @@ static int gy912_spi_read_reg(FAR struct gy912_sensor_dev_s *priv,
 
   /* Select the device */
   SPI_SELECT(priv->spi, priv->devid, true);
+  /* Small delay to allow CS to settle before starting transfer */
+  usleep(10);
 
   /* Set up the transfer */
   SPI_SETFREQUENCY(priv->spi, priv->frequency);
-  SPI_SETMODE(priv->spi, SPIDEV_MODE3);
+  SPI_SETMODE(priv->spi, SPIDEV_MODE2);
   SPI_SETBITS(priv->spi, 8);
 
   /* Prepare the command (read bit set for most sensors) */
@@ -299,10 +438,12 @@ static int gy912_spi_write_reg(FAR struct gy912_sensor_dev_s *priv,
 
   /* Select the device */
   SPI_SELECT(priv->spi, priv->devid, true);
+  /* Small delay to allow CS to settle before starting transfer */
+  usleep(10);
 
   /* Set up the transfer */
   SPI_SETFREQUENCY(priv->spi, priv->frequency);
-  SPI_SETMODE(priv->spi, SPIDEV_MODE3);
+  SPI_SETMODE(priv->spi, SPIDEV_MODE2);
   SPI_SETBITS(priv->spi, 8);
 
   /* Prepare the command (write bit clear) */
@@ -354,10 +495,12 @@ static int gy912_spi_read_block(FAR struct gy912_sensor_dev_s *priv,
 
   /* Select the device */
   SPI_SELECT(priv->spi, priv->devid, true);
+  /* Small delay to allow CS to settle before starting transfer */
+  usleep(10);
 
   /* Set up the transfer */
   SPI_SETFREQUENCY(priv->spi, priv->frequency);
-  SPI_SETMODE(priv->spi, SPIDEV_MODE3);
+  SPI_SETMODE(priv->spi, SPIDEV_MODE2);
   SPI_SETBITS(priv->spi, 8);
 
   /* Prepare the command */
@@ -406,30 +549,30 @@ static int gy912_bmp388_initialize(FAR struct gy912_sensor_dev_s *priv)
   uint8_t chip_id;
   int ret;
 
-  sinfo("Initializing BMP388 sensor\n");
+  spiinfo("Initializing BMP388 sensor\n");
 
   /* Read chip ID to verify communication */
   ret = gy912_spi_read_reg(priv, BMP388_CHIP_ID_REG, &chip_id);
   if (ret < 0)
     {
-      serr("Failed to read BMP388 chip ID: %d\n", ret);
+      spierr("Failed to read BMP388 chip ID: %d\n", ret);
       return ret;
     }
 
   if (chip_id != BMP388_CHIP_ID_VALUE)
     {
-      serr("Invalid BMP388 chip ID: 0x%02x (expected 0x%02x)\n",
+      spierr("Invalid BMP388 chip ID: 0x%02x (expected 0x%02x)\n",
            chip_id, BMP388_CHIP_ID_VALUE);
       return -ENODEV;
     }
 
-  sinfo("BMP388 chip ID verified: 0x%02x\n", chip_id);
+  spiinfo("BMP388 chip ID verified: 0x%02x\n", chip_id);
 
   /* Perform soft reset */
   ret = gy912_spi_write_reg(priv, BMP388_CMD_REG, BMP388_CMD_SOFT_RESET);
   if (ret < 0)
     {
-      serr("Failed to reset BMP388: %d\n", ret);
+      spierr("Failed to reset BMP388: %d\n", ret);
       return ret;
     }
 
@@ -442,7 +585,7 @@ static int gy912_bmp388_initialize(FAR struct gy912_sensor_dev_s *priv)
                            BMP388_PWR_CTRL_MODE_NORMAL);
   if (ret < 0)
     {
-      serr("Failed to configure BMP388 power control: %d\n", ret);
+      spierr("Failed to configure BMP388 power control: %d\n", ret);
       return ret;
     }
 
@@ -450,7 +593,7 @@ static int gy912_bmp388_initialize(FAR struct gy912_sensor_dev_s *priv)
   ret = gy912_spi_write_reg(priv, BMP388_OSR_REG, 0x00);
   if (ret < 0)
     {
-      serr("Failed to configure BMP388 oversampling: %d\n", ret);
+      spierr("Failed to configure BMP388 oversampling: %d\n", ret);
       return ret;
     }
 
@@ -458,11 +601,11 @@ static int gy912_bmp388_initialize(FAR struct gy912_sensor_dev_s *priv)
   ret = gy912_spi_write_reg(priv, BMP388_ODR_REG, 0x00);
   if (ret < 0)
     {
-      serr("Failed to configure BMP388 ODR: %d\n", ret);
+      spierr("Failed to configure BMP388 ODR: %d\n", ret);
       return ret;
     }
 
-  sinfo("BMP388 initialization completed successfully\n");
+  spiinfo("BMP388 initialization completed successfully\n");
   return OK;
 }
 
@@ -486,7 +629,7 @@ static int gy912_bmp388_read_data(FAR struct gy912_sensor_dev_s *priv)
   ret = gy912_spi_read_block(priv, BMP388_DATA_0_REG, data, 6);
   if (ret < 0)
     {
-      serr("Failed to read BMP388 data: %d\n", ret);
+      spierr("Failed to read BMP388 data: %d\n", ret);
       return ret;
     }
 
@@ -498,7 +641,7 @@ static int gy912_bmp388_read_data(FAR struct gy912_sensor_dev_s *priv)
   clock_gettime(CLOCK_REALTIME, &ts);
 
   /* Convert and store data (simplified conversion for demo) */
-  priv->data.baro_data.timestamp = (uint64_t)ts.tv_sec * 1000000 + ts.tv_nsec / 1000;
+  priv->data.baro_data.timestamp = (uint64_t)ts.tv_sec * 100000 + ts.tv_nsec / 1000;
   priv->data.baro_data.pressure = (float)raw_pressure / 100.0f;  /* Convert to hPa */
   priv->data.baro_data.temperature = (float)raw_temperature / 100.0f;  /* Convert to °C */
 
@@ -559,31 +702,31 @@ static int gy912_icm20948_initialize(FAR struct gy912_sensor_dev_s *priv)
   uint8_t who_am_i;
   int ret;
 
-  sinfo("Initializing ICM20948 sensor\n");
+  spiinfo("Initializing ICM20948 sensor\n");
 
   /* Read WHO_AM_I register to verify communication */
   ret = gy912_spi_read_reg(priv, ICM20948_WHO_AM_I, &who_am_i);
   if (ret < 0)
     {
-      serr("Failed to read ICM20948 WHO_AM_I: %d\n", ret);
+      spierr("Failed to read ICM20948 WHO_AM_I: %d\n", ret);
       return ret;
     }
 
   if (who_am_i != ICM20948_WHO_AM_I_VALUE)
     {
-      serr("Invalid ICM20948 WHO_AM_I: 0x%02x (expected 0x%02x)\n",
+      spierr("Invalid ICM20948 WHO_AM_I: 0x%02x (expected 0x%02x)\n",
            who_am_i, ICM20948_WHO_AM_I_VALUE);
       return -ENODEV;
     }
 
-  sinfo("ICM20948 WHO_AM_I verified: 0x%02x\n", who_am_i);
+  spiinfo("ICM20948 WHO_AM_I verified: 0x%02x\n", who_am_i);
 
   /* Perform device reset */
   ret = gy912_spi_write_reg(priv, ICM20948_PWR_MGMT_1,
                            ICM20948_PWR_MGMT_1_DEVICE_RESET);
   if (ret < 0)
     {
-      serr("Failed to reset ICM20948: %d\n", ret);
+      spierr("Failed to reset ICM20948: %d\n", ret);
       return ret;
     }
 
@@ -595,7 +738,7 @@ static int gy912_icm20948_initialize(FAR struct gy912_sensor_dev_s *priv)
                            ICM20948_PWR_MGMT_1_CLKSEL_AUTO);
   if (ret < 0)
     {
-      serr("Failed to configure ICM20948 power management 1: %d\n", ret);
+      spierr("Failed to configure ICM20948 power management 1: %d\n", ret);
       return ret;
     }
 
@@ -603,11 +746,11 @@ static int gy912_icm20948_initialize(FAR struct gy912_sensor_dev_s *priv)
   ret = gy912_spi_write_reg(priv, ICM20948_PWR_MGMT_2, 0x00);
   if (ret < 0)
     {
-      serr("Failed to configure ICM20948 power management 2: %d\n", ret);
+      spierr("Failed to configure ICM20948 power management 2: %d\n", ret);
       return ret;
     }
 
-  sinfo("ICM20948 initialization completed successfully\n");
+  spiinfo("ICM20948 initialization completed successfully\n");
   return OK;
 }
 
@@ -630,7 +773,7 @@ static int gy912_icm20948_read_accel(FAR struct gy912_sensor_dev_s *priv)
   ret = gy912_spi_read_block(priv, ICM20948_ACCEL_XOUT_H, data, 6);
   if (ret < 0)
     {
-      serr("Failed to read ICM20948 accelerometer data: %d\n", ret);
+      spierr("Failed to read ICM20948 accelerometer data: %d\n", ret);
       return ret;
     }
 
@@ -643,7 +786,7 @@ static int gy912_icm20948_read_accel(FAR struct gy912_sensor_dev_s *priv)
   clock_gettime(CLOCK_REALTIME, &ts);
 
   /* Convert and store data (simplified conversion for demo) */
-  priv->data.accel_data.timestamp = (uint64_t)ts.tv_sec * 1000000 + ts.tv_nsec / 1000;
+  priv->data.accel_data.timestamp = (uint64_t)ts.tv_sec * 100000 + ts.tv_nsec / 1000;
   priv->data.accel_data.x = (float)raw_x * 9.81f / 16384.0f;  /* Convert to m/s² */
   priv->data.accel_data.y = (float)raw_y * 9.81f / 16384.0f;
   priv->data.accel_data.z = (float)raw_z * 9.81f / 16384.0f;
@@ -671,7 +814,7 @@ static int gy912_icm20948_read_gyro(FAR struct gy912_sensor_dev_s *priv)
   ret = gy912_spi_read_block(priv, ICM20948_GYRO_XOUT_H, data, 6);
   if (ret < 0)
     {
-      serr("Failed to read ICM20948 gyroscope data: %d\n", ret);
+      spierr("Failed to read ICM20948 gyroscope data: %d\n", ret);
       return ret;
     }
 
@@ -684,7 +827,7 @@ static int gy912_icm20948_read_gyro(FAR struct gy912_sensor_dev_s *priv)
   clock_gettime(CLOCK_REALTIME, &ts);
 
   /* Convert and store data (simplified conversion for demo) */
-  priv->data.gyro_data.timestamp = (uint64_t)ts.tv_sec * 1000000 + ts.tv_nsec / 1000;
+  priv->data.gyro_data.timestamp = (uint64_t)ts.tv_sec * 100000 + ts.tv_nsec / 1000;
   priv->data.gyro_data.x = (float)raw_x * 3.14159f / (180.0f * 131.0f);  /* Convert to rad/s */
   priv->data.gyro_data.y = (float)raw_y * 3.14159f / (180.0f * 131.0f);
   priv->data.gyro_data.z = (float)raw_z * 3.14159f / (180.0f * 131.0f);
@@ -709,12 +852,11 @@ static int gy912_icm20948_read_mag(FAR struct gy912_sensor_dev_s *priv)
   clock_gettime(CLOCK_REALTIME, &ts);
 
   /* Placeholder magnetometer data (ICM20948 magnetometer requires I2C master setup) */
-  priv->data.mag_data.timestamp = (uint64_t)ts.tv_sec * 1000000 + ts.tv_nsec / 1000;
+  priv->data.mag_data.timestamp = (uint64_t)ts.tv_sec * 100000 + ts.tv_nsec / 1000;
   priv->data.mag_data.x = 0.0f;
   priv->data.mag_data.y = 0.0f;
   priv->data.mag_data.z = 0.0f;
   priv->data.mag_data.temperature = 25.0f;
-  priv->data.mag_data.status = 0;
 
   return OK;
 }
@@ -803,13 +945,13 @@ static int gy912_sensor_activate(FAR struct sensor_lowerhalf_s *lower,
       if (ret == OK)
         {
           priv->enabled = true;
-          sinfo("Sensor type %d activated\n", lower->type);
+          spiinfo("Sensor type %d activated\n", lower->type);
         }
     }
   else if (!enable && priv->enabled)
     {
       priv->enabled = false;
-      sinfo("Sensor type %d deactivated\n", lower->type);
+      spiinfo("Sensor type %d deactivated\n", lower->type);
       ret = OK;
     }
   else
@@ -854,7 +996,8 @@ static int gy912_sensor_set_interval(FAR struct sensor_lowerhalf_s *lower,
     }
 
   priv->interval_us = *period_us;
-  sinfo("Sensor type %d interval set to %u us\n", lower->type, *period_us);
+  spiinfo("Sensor type %d interval set to %lu us\n", lower->type,
+        (unsigned long)*period_us);
 
   nxsem_post(&priv->exclsem);
   return OK;
@@ -941,9 +1084,10 @@ static int gy912_sensor_fetch(FAR struct sensor_lowerhalf_s *lower,
 
 static int gy912_sensor_selftest(FAR struct sensor_lowerhalf_s *lower,
                                 FAR struct file *filep,
-                                FAR uint32_t *result)
+                                unsigned long arg)
 {
   FAR struct gy912_sensor_dev_s *priv = (FAR struct gy912_sensor_dev_s *)lower;
+  uint32_t result = 0;
   int ret;
 
   /* Take the semaphore */
@@ -957,18 +1101,18 @@ static int gy912_sensor_selftest(FAR struct sensor_lowerhalf_s *lower,
   switch (lower->type)
     {
       case SENSOR_TYPE_BAROMETER:
-        ret = gy912_bmp388_selftest(priv, result);
+        ret = gy912_bmp388_selftest(priv, &result);
         break;
 
       case SENSOR_TYPE_ACCELEROMETER:
       case SENSOR_TYPE_GYROSCOPE:
       case SENSOR_TYPE_MAGNETIC_FIELD:
-        ret = gy912_icm20948_selftest(priv, result);
+        ret = gy912_icm20948_selftest(priv, &result);
         break;
 
       default:
         ret = -EINVAL;
-        *result = 0xFFFFFFFF;
+        result = 0xFFFFFFFF;
         break;
     }
 
@@ -1002,7 +1146,7 @@ int gy912_register_sensors(FAR struct spi_dev_s *spi)
   bmp388_dev = kmm_zalloc(sizeof(struct gy912_sensor_dev_s));
   if (bmp388_dev == NULL)
     {
-      serr("Failed to allocate BMP388 device structure\n");
+      spierr("Failed to allocate BMP388 device structure\n");
       return -ENOMEM;
     }
 
@@ -1011,7 +1155,7 @@ int gy912_register_sensors(FAR struct spi_dev_s *spi)
   bmp388_dev->lower.nbuffer = 1;
   bmp388_dev->spi = spi;
   bmp388_dev->devid = GY912_SPI_BMP388_DEVID;
-  bmp388_dev->frequency = 1000000;  /* 1 MHz */
+  bmp388_dev->frequency = 100000;  /* 1 MHz */
   bmp388_dev->interval_us = GY912_DEFAULT_INTERVAL_US;
   bmp388_dev->enabled = false;
   nxsem_init(&bmp388_dev->exclsem, 0, 1);
@@ -1019,18 +1163,18 @@ int gy912_register_sensors(FAR struct spi_dev_s *spi)
   ret = sensor_register(&bmp388_dev->lower, 0);
   if (ret < 0)
     {
-      serr("Failed to register BMP388 sensor: %d\n", ret);
+      spierr("Failed to register BMP388 sensor: %d\n", ret);
       kmm_free(bmp388_dev);
       return ret;
     }
 
-  sinfo("BMP388 barometer registered successfully\n");
+  spiinfo("BMP388 barometer registered successfully\n");
 
   /* Register ICM20948 accelerometer */
   accel_dev = kmm_zalloc(sizeof(struct gy912_sensor_dev_s));
   if (accel_dev == NULL)
     {
-      serr("Failed to allocate ICM20948 accelerometer device structure\n");
+      spierr("Failed to allocate ICM20948 accelerometer device structure\n");
       return -ENOMEM;
     }
 
@@ -1039,7 +1183,7 @@ int gy912_register_sensors(FAR struct spi_dev_s *spi)
   accel_dev->lower.nbuffer = 1;
   accel_dev->spi = spi;
   accel_dev->devid = GY912_SPI_ICM20948_DEVID;
-  accel_dev->frequency = 1000000;  /* 1 MHz */
+  accel_dev->frequency = 100000;  /* 1 MHz */
   accel_dev->interval_us = GY912_DEFAULT_INTERVAL_US;
   accel_dev->enabled = false;
   nxsem_init(&accel_dev->exclsem, 0, 1);
@@ -1047,18 +1191,18 @@ int gy912_register_sensors(FAR struct spi_dev_s *spi)
   ret = sensor_register(&accel_dev->lower, 0);
   if (ret < 0)
     {
-      serr("Failed to register ICM20948 accelerometer: %d\n", ret);
+      spierr("Failed to register ICM20948 accelerometer: %d\n", ret);
       kmm_free(accel_dev);
       return ret;
     }
 
-  sinfo("ICM20948 accelerometer registered successfully\n");
+  spiinfo("ICM20948 accelerometer registered successfully\n");
 
   /* Register ICM20948 gyroscope */
   gyro_dev = kmm_zalloc(sizeof(struct gy912_sensor_dev_s));
   if (gyro_dev == NULL)
     {
-      serr("Failed to allocate ICM20948 gyroscope device structure\n");
+      spierr("Failed to allocate ICM20948 gyroscope device structure\n");
       return -ENOMEM;
     }
 
@@ -1067,7 +1211,7 @@ int gy912_register_sensors(FAR struct spi_dev_s *spi)
   gyro_dev->lower.nbuffer = 1;
   gyro_dev->spi = spi;
   gyro_dev->devid = GY912_SPI_ICM20948_DEVID;
-  gyro_dev->frequency = 1000000;  /* 1 MHz */
+  gyro_dev->frequency = 100000;  /* 1 MHz */
   gyro_dev->interval_us = GY912_DEFAULT_INTERVAL_US;
   gyro_dev->enabled = false;
   nxsem_init(&gyro_dev->exclsem, 0, 1);
@@ -1075,18 +1219,18 @@ int gy912_register_sensors(FAR struct spi_dev_s *spi)
   ret = sensor_register(&gyro_dev->lower, 0);
   if (ret < 0)
     {
-      serr("Failed to register ICM20948 gyroscope: %d\n", ret);
+      spierr("Failed to register ICM20948 gyroscope: %d\n", ret);
       kmm_free(gyro_dev);
       return ret;
     }
 
-  sinfo("ICM20948 gyroscope registered successfully\n");
+  spiinfo("ICM20948 gyroscope registered successfully\n");
 
   /* Register ICM20948 magnetometer */
   mag_dev = kmm_zalloc(sizeof(struct gy912_sensor_dev_s));
   if (mag_dev == NULL)
     {
-      serr("Failed to allocate ICM20948 magnetometer device structure\n");
+      spierr("Failed to allocate ICM20948 magnetometer device structure\n");
       return -ENOMEM;
     }
 
@@ -1095,7 +1239,7 @@ int gy912_register_sensors(FAR struct spi_dev_s *spi)
   mag_dev->lower.nbuffer = 1;
   mag_dev->spi = spi;
   mag_dev->devid = GY912_SPI_ICM20948_DEVID;
-  mag_dev->frequency = 1000000;  /* 1 MHz */
+  mag_dev->frequency = 100000;  /* 1 MHz */
   mag_dev->interval_us = GY912_DEFAULT_INTERVAL_US;
   mag_dev->enabled = false;
   nxsem_init(&mag_dev->exclsem, 0, 1);
@@ -1103,12 +1247,222 @@ int gy912_register_sensors(FAR struct spi_dev_s *spi)
   ret = sensor_register(&mag_dev->lower, 0);
   if (ret < 0)
     {
-      serr("Failed to register ICM20948 magnetometer: %d\n", ret);
+      spierr("Failed to register ICM20948 magnetometer: %d\n", ret);
       kmm_free(mag_dev);
       return ret;
     }
 
-  sinfo("ICM20948 magnetometer registered successfully\n");
+  spiinfo("ICM20948 magnetometer registered successfully\n");
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: ra8e1_spi_gy912_init
+ *
+ * Description:
+ *   Initialize SPI bus and GY-912 sensors
+ *
+ ****************************************************************************/
+
+int ra8e1_spi_gy912_init(void)
+{
+  FAR struct spi_dev_s *spi;
+  int ret;
+
+  spiinfo("Initializing SPI GY-912 example\n");
+
+  /* Configure GPIO pins for SPI1 */
+  ret = ra_configgpio(GPIO_SPI1_SCK);
+  if (ret < 0)
+    {
+      spierr("Failed to configure SPI1_SCK: %d\n", ret);
+      return ret;
+    }
+
+  ret = ra_configgpio(GPIO_SPI1_MOSI);
+  if (ret < 0)
+    {
+      spierr("Failed to configure SPI1_MOSI: %d\n", ret);
+      return ret;
+    }
+
+  ret = ra_configgpio(GPIO_SPI1_MISO);
+  if (ret < 0)
+    {
+      spierr("Failed to configure SPI1_MISO: %d\n", ret);
+      return ret;
+    }
+
+  /* Configure Chip Select pins as GPIO outputs (active low) */
+  ret = ra_configgpio(GPIO_SPI1_CS0);  /* ICM20948 CS - P408 */
+  if (ret < 0)
+    {
+      spierr("Failed to configure SPI1_CS0: %d\n", ret);
+      return ret;
+    }
+
+  ret = ra_configgpio(GPIO_SPI1_CS1);  /* BMP388 CS - P407 */
+  if (ret < 0)
+    {
+      spierr("Failed to configure SPI1_CS1: %d\n", ret);
+      return ret;
+    }
+
+  /* Configure Data Ready pin as input with pull-up */
+  ret = ra_configgpio(GPIO_IMU_DRDY);  /* P409 - ICM20948 Data Ready */
+  if (ret < 0)
+    {
+      spierr("Failed to configure IMU_DRDY: %d\n", ret);
+      return ret;
+    }
+
+  /* Set CS pins high (deselected) initially */
+  ra_gpiowrite(GPIO_SPI1_CS0, true);
+  ra_gpiowrite(GPIO_SPI1_CS1, true);
+
+  /* Initialize SPI1 bus */
+  spi = ra_spibus_initialize(1);
+  if (spi == NULL)
+    {
+      spierr("Failed to initialize SPI1 bus\n");
+      return -ENODEV;
+    }
+
+  spiinfo("SPI1 bus initialized successfully\n");
+
+  /* Register GY-912 sensors with sensor framework */
+  ret = gy912_register_sensors(spi);
+  if (ret < 0)
+    {
+      spierr("Failed to register GY-912 sensors: %d\n", ret);
+      return ret;
+    }
+
+  spiinfo("SPI GY-912 initialization complete\n");
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: ra8e1_spi_gy912_test
+ *
+ * Description:
+ *   Test SPI communication with GY-912 sensors
+ *
+ ****************************************************************************/
+
+int ra8e1_spi_gy912_test(void)
+{
+  FAR struct spi_dev_s *spi;
+  uint8_t chip_id;
+
+  spiinfo("Starting SPI GY-912 test\n");
+
+  /* Get SPI1 bus */
+  spi = ra_spibus_initialize(1);
+  if (spi == NULL)
+    {
+      spierr("Failed to get SPI1 bus\n");
+      return -ENODEV;
+    }
+
+  /* Test BMP388 */
+  spiinfo("Testing BMP388 barometer...\n");
+
+  SPI_LOCK(spi, true);
+  SPI_SELECT(spi, GY912_SPI_BMP388_DEVID, true);
+  SPI_SETMODE(spi, SPIDEV_MODE3);  /* BMP388 uses Mode 3 (CPOL=1, CPHA=1) */
+  SPI_SETBITS(spi, 8);
+  SPI_SETFREQUENCY(spi, 100000);  /* Start slow at 100 kHz */
+
+  /* Read BMP388 CHIP_ID register */
+  uint8_t tx_buf[2] = { BMP388_CHIP_ID_REG | 0x80, 0x00 };
+  uint8_t rx_buf[2];
+
+  SPI_EXCHANGE(spi, tx_buf, rx_buf, 2);
+  chip_id = rx_buf[1];
+
+  SPI_SELECT(spi, GY912_SPI_BMP388_DEVID, false);
+  SPI_LOCK(spi, false);
+
+  if (chip_id == BMP388_CHIP_ID_VALUE)
+    {
+      spiinfo("BMP388 detected! Chip ID: 0x%02X\n", chip_id);
+    }
+  else
+    {
+      spierr("BMP388 not found. Read Chip ID: 0x%02X (expected 0x%02X)\n",
+           chip_id, BMP388_CHIP_ID_VALUE);
+    }
+
+  /* Test ICM20948 */
+  spiinfo("Testing ICM20948 IMU...\n");
+
+  SPI_LOCK(spi, true);
+  SPI_SELECT(spi, GY912_SPI_ICM20948_DEVID, true);
+  SPI_SETMODE(spi, SPIDEV_MODE3);  /* ICM20948 uses Mode 3 (CPOL=1, CPHA=1) */
+  SPI_SETBITS(spi, 8);
+  SPI_SETFREQUENCY(spi, 100000);  /* Start slow at 100 kHz */
+
+  /* Read ICM20948 WHO_AM_I register */
+  tx_buf[0] = ICM20948_WHO_AM_I | 0x80;
+  tx_buf[1] = 0x00;
+
+  SPI_EXCHANGE(spi, tx_buf, rx_buf, 2);
+  chip_id = rx_buf[1];
+
+  SPI_SELECT(spi, GY912_SPI_ICM20948_DEVID, false);
+  SPI_LOCK(spi, false);
+
+  if (chip_id == ICM20948_WHO_AM_I_VALUE)
+    {
+      spiinfo("ICM20948 detected! WHO_AM_I: 0x%02X\n", chip_id);
+    }
+  else
+    {
+      spierr("ICM20948 not found. Read WHO_AM_I: 0x%02X (expected 0x%02X)\n",
+           chip_id, ICM20948_WHO_AM_I_VALUE);
+    }
+
+  spiinfo("SPI GY-912 test complete\n");
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: ra8e1_spi_gy912_main
+ *
+ * Description:
+ *   Main entry point for SPI GY-912 example application
+ *
+ ****************************************************************************/
+
+int ra8e1_spi_gy912_main(int argc, FAR char *argv[])
+{
+  int ret;
+
+  spiinfo("=== SPI GY-912 Sensor Test ===\n");
+  spiinfo("SPI1 Configuration:\n");
+  spiinfo("  SCK:  P412 (GPIO_SPI1_SCK)\n");
+  spiinfo("  MOSI: P411 (GPIO_SPI1_MOSI)\n");
+  spiinfo("  MISO: P410 (GPIO_SPI1_MISO)\n");
+  spiinfo("  CS0:  P408 (ICM20948 CS)\n");
+  spiinfo("  CS1:  P407 (BMP388 CS)\n");
+  spiinfo("  DRDY: P409 (ICM20948 Data Ready)\n");
+  spiinfo("=============================\n\n");
+
+  /* Run communication test */
+  ret = ra8e1_spi_gy912_test();
+  if (ret < 0)
+    {
+      spierr("SPI GY-912 test failed: %d\n", ret);
+      return ret;
+    }
+
+  spiinfo("\nSPI GY-912 example completed successfully\n");
+  spiinfo("Sensors are now registered with the sensor framework\n");
+  spiinfo("Use 'sensor_test' commands to read sensor data\n");
 
   return OK;
 }

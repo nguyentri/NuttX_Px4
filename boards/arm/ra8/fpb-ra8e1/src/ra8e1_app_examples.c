@@ -181,6 +181,20 @@ int ra8e1_gpt_pwm_example(void)
 }
 #endif
 
+#ifdef CONFIG_RA8E1_SPI_GY912_EXAMPLE
+int ra8e1_spi_gy912_example(void)
+{
+  int ret = ra8e1_spi_gy912_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "SPI GY-912 init failed: %d\n", ret);
+      return ret;
+    }
+
+  return ra8e1_spi_gy912_main(0, NULL);
+}
+#endif
+
 
 /* Run all enabled application examples. Returns 0 on success or the
  * last non-zero error code from any example.
@@ -290,10 +304,10 @@ int ra8e1_app_examples(void)
 #endif
 
 #ifdef CONFIG_RA8E1_SPI_GY912_EXAMPLE
-  ret = ra8e1_spi_gy912_init();
+  ret = ra8e1_spi_gy912_example();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "SPI GY-912 init failed: %d\n", ret);
+      syslog(LOG_ERR, "SPI GY-912 example failed: %d\n", ret);
       last_err = ret;
     }
 #endif

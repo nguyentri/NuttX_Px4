@@ -33,9 +33,9 @@
 #include <nuttx/timers/rtc.h>
 
 #include "arm_internal.h"
-
+#include "chip.h"
+#include "hardware/ra_memorymap.h"
 #include "ra_mstp.h"
-#include "hardware/ra_rtc.h"
 
 #ifdef CONFIG_RTC
 
@@ -47,7 +47,7 @@
  * Private Data
  ****************************************************************************/
 
-/* External reference to the RTC enabled state variable 
+/* External reference to the RTC enabled state variable
  * (defined in arch_rtc.c when CONFIG_RTC_ARCH is enabled)
  */
 

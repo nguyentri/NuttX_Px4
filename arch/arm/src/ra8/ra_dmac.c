@@ -41,8 +41,9 @@
 
 #include "arm_internal.h"
 #include "chip.h"
-#include "ra_dmac.h"
+#include "hardware/ra_memorymap.h"
 #include "ra_icu.h"
+#include "ra_dmac.h"
 
 /****************************************************************************
  * Pre-processor Definitions

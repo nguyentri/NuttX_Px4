@@ -38,10 +38,7 @@
 #include "nvic.h"
 #include "chip.h"
 #include "arm_internal.h"
-#include "ra_clock.h"
-#include "ra_icu.h"
-#include "ra_mstp.h"
-#include "hardware/ra_gpt.h"
+#include "hardware/ra_memorymap.h"
 
 /****************************************************************************
  * Pre-processor Definitions

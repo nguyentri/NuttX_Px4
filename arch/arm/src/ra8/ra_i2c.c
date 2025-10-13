@@ -45,11 +45,8 @@
 
 #include "arm_internal.h"
 #include "chip.h"
-#include "ra_gpio.h"
-#include "ra_icu.h"
-#include "hardware/ra_i2c.h"
-#include "hardware/ra_dmac.h"
 #include "hardware/ra_memorymap.h"
+#include "ra_gpio.h"
 #include "ra_icu.h"
 #include "ra_mstp.h"
 #include "ra_i2c.h"
@@ -181,7 +178,7 @@ static const struct i2c_ops_s ra_i2c_ops =
 static const struct ra_i2c_config_s ra_i2c0_config =
 {
   .base         = R_IIC0_BASE,
-  .mstp         = RA_MSTP_IIC0,
+  .mstp         = R_MSTP_IIC0,
   .clk_freq     = RA_PCLKB_FREQUENCY,
   .bus          = 0,
   .rxi_elc      = RA_ELC_IIC0_RXI,  /* EVENT_IIC0_RXI */
@@ -211,7 +208,7 @@ static struct ra_i2c_priv_s ra_i2c0_priv =
 static const struct ra_i2c_config_s ra_i2c1_config =
 {
   .base         = R_IIC1_BASE,
-  .mstp         = RA_MSTP_IIC1,
+  .mstp         = R_MSTP_IIC1,
   .clk_freq     = RA_PCLKB_FREQUENCY,
   .bus          = 1,
   .rxi_elc      = RA_ELC_IIC1_RXI,  /* EVENT_IIC1_RXI */

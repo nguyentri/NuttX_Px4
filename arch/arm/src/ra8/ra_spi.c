@@ -45,16 +45,11 @@
 
 #include "arm_internal.h"
 #include "chip.h"
+#include "hardware/ra_memorymap.h"
 #include "ra_gpio.h"
 #include "ra_icu.h"
 #include "ra_clock.h"
-#include "hardware/ra_spi.h"
-#include "hardware/ra_dtc.h"
 #include "ra_dtc.h"
-#include "hardware/ra_dmac.h"
-#include "hardware/ra_memorymap.h"
-#include "hardware/ra_icu.h"
-#include "hardware/ra_mstp.h"
 #include "ra_mstp.h"
 #include "ra_spi.h"
 
@@ -63,6 +58,15 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#define R_SPI_B_SPCMD_SPB_4       (0x03UL << R_SPI_B_SPCMD_SPB_SHIFT)
+#define R_SPI_B_SPCMD_SPB_8       (0x07UL << R_SPI_B_SPCMD_SPB_SHIFT)
+#define R_SPI_B_SPCMD_SPB_16      (0x0FUL << R_SPI_B_SPCMD_SPB_SHIFT)
+#define R_SPI_B_SPCMD_SPB_20      (0x13UL << R_SPI_B_SPCMD_SPB_SHIFT)
+#define R_SPI_B_SPCMD_SPB_24      (0x17UL << R_SPI_B_SPCMD_SPB_SHIFT)
+#define R_SPI_B_SPCMD_SPB_32      (0x1FUL << R_SPI_B_SPCMD_SPB_SHIFT)
+
+#define R_SPI_B_SPSRC_ALL_CLEAR   (0xFD800000) /* All flags that can be cleared */
 
 /* SPI timeout */
 #define SPI_TIMEOUT_MS          1000
@@ -248,7 +252,7 @@ static const struct spi_ops_s ra_spi_ops =
 #ifdef CONFIG_RA_SPI0
 static const struct ra_spi_config_s ra_spi0_config =
 {
-  .base        = R_SPI0_B_BASE,
+  .base        = R_SPI_B_CH_BASE(0),
   .bus         = 0,
 
   .rxi_elc     = RA_ELC_SPI0_RXI,
@@ -286,7 +290,7 @@ static struct ra_spi_priv_s ra_spi0_priv =
 #ifdef CONFIG_RA_SPI1
 static const struct ra_spi_config_s ra_spi1_config =
 {
-  .base        = R_SPI1_B_BASE,
+  .base        = R_SPI_B_CH_BASE(1),
   .bus         = 1,
 
   .rxi_elc     = RA_ELC_SPI1_RXI,
@@ -391,49 +395,49 @@ static void ra_spi_cs_configure(struct ra_spi_priv_s *priv, uint32_t devid)
     }
 
   /* Configure SPCMD register */
-  spcmd = ra_spi_getreg32(priv, RA_SPI_SPCMD0_OFFSET);
+  spcmd = ra_spi_getreg32(priv, R_SPI_B_SPCMD_OFFSET(0));
 
   /* Clear SSL selection bits */
-  spcmd &= ~RA_SPI_SPCMD_SSLA_MASK;
+  spcmd &= ~R_SPI_B_SPCMD_SSLA_MASK;
 
   /* Set SSL selection */
-  spcmd |= (ssl_select << RA_SPI_SPCMD_SSLA_SHIFT) & RA_SPI_SPCMD_SSLA_MASK;
+  spcmd |= (ssl_select << R_SPI_B_SPCMD_SSLA_SHIFT) & R_SPI_B_SPCMD_SSLA_MASK;
 
   /* Enable timing delays if configured */
   if (setup_delay > 0)
     {
-      spcmd |= RA_SPI_SPCMD_SCKDEN;
+      spcmd |= R_SPI_B_SPCMD_SCKDEN;
     }
   else
     {
-      spcmd &= ~RA_SPI_SPCMD_SCKDEN;
+      spcmd &= ~R_SPI_B_SPCMD_SCKDEN;
     }
 
   if (negation_delay > 0)
     {
-      spcmd |= RA_SPI_SPCMD_SLNDEN;
+      spcmd |= R_SPI_B_SPCMD_SLNDEN;
     }
   else
     {
-      spcmd &= ~RA_SPI_SPCMD_SLNDEN;
+      spcmd &= ~R_SPI_B_SPCMD_SLNDEN;
     }
 
   if (hold_delay > 0)
     {
-      spcmd |= RA_SPI_SPCMD_SPNDEN;
+      spcmd |= R_SPI_B_SPCMD_SPNDEN;
     }
   else
     {
-      spcmd &= ~RA_SPI_SPCMD_SPNDEN;
+      spcmd &= ~R_SPI_B_SPCMD_SPNDEN;
     }
 
-  ra_spi_putreg32(priv, RA_SPI_SPCMD0_OFFSET, spcmd);
+  ra_spi_putreg32(priv, R_SPI_B_SPCMD_OFFSET(0), spcmd);
 
   /* Configure timing delay register (SPDECR) - all delays in one 32-bit write */
-  uint32_t spdecr = ((setup_delay & 0x07) << RA_SPI_SPDECR_SCKDL_SHIFT) |      /* Clock delay */
-                    ((negation_delay & 0x07) << RA_SPI_SPDECR_SLNDL_SHIFT) |   /* SSL negation delay */
-                    ((hold_delay & 0x07) << RA_SPI_SPDECR_SPNDL_SHIFT);        /* Next access delay */
-  ra_spi_putreg32(priv, RA_SPI_SPDECR_OFFSET, spdecr);
+  uint32_t spdecr = ((setup_delay & 0x07) << R_SPI_B_SPDECR_SCKDL_SHIFT) |      /* Clock delay */
+                    ((negation_delay & 0x07) << R_SPI_B_SPDECR_SLNDL_SHIFT) |   /* SSL negation delay */
+                    ((hold_delay & 0x07) << R_SPI_B_SPDECR_SPNDL_SHIFT);        /* Next access delay */
+  ra_spi_putreg32(priv, R_SPI_B_SPDECR_OFFSET, spdecr);
 
   spiinfo("SPI%d CS configured: SSL=%d, delays=%d/%d/%d\n",
           priv->config->bus, ssl_select, setup_delay, hold_delay, negation_delay);
@@ -545,14 +549,14 @@ static void ra_spi_apply_cs_config(struct spi_dev_s *dev, uint32_t devid)
 static void ra_spi_writeword(struct ra_spi_priv_s *priv, uint32_t word)
 {
   /* Wait until the transmit buffer is empty */
-  //while ((ra_spi_getreg32(priv, RA_SPI_SPSR_OFFSET) & RA_SPI_SPSR_SPTEF) == 0);
+  //while ((ra_spi_getreg32(priv, R_SPI_B_SPSR_OFFSET) & R_SPI_B_SPSR_SPTEF) == 0);
 
   /* Write the data using 32-bit register access regardless of data width */
   /* The hardware will use only the relevant bits based on the configured nbits */
-  ra_spi_putreg32(priv, RA_SPI_SPDR_OFFSET, word);
+  ra_spi_putreg32(priv, R_SPI_B_SPDR_OFFSET, word);
 
   /* SPI Status Clear Register */
-  ra_spi_putreg32(priv, RA_SPI_SPSRC_OFFSET, RA_SPI_SPSRC_SPTEFC);
+  ra_spi_putreg32(priv, R_SPI_B_SPSRC_OFFSET, R_SPI_B_SPSRC_SPTEFC);
 }
 
 /****************************************************************************
@@ -566,14 +570,14 @@ static void ra_spi_writeword(struct ra_spi_priv_s *priv, uint32_t word)
 static uint32_t ra_spi_readword(struct ra_spi_priv_s *priv)
 {
   /* Wait until receive buffer is full */
-  //while ((ra_spi_getreg32(priv, RA_SPI_SPSR_OFFSET) & RA_SPI_SPSR_SPRF) == 0);
+  //while ((ra_spi_getreg32(priv, R_SPI_B_SPSR_OFFSET) & R_SPI_B_SPSR_SPRF) == 0);
 
   /* Read the data using 32-bit register access regardless of data width */
   /* The hardware will provide only the relevant bits based on the configured nbits */
-  uint32_t val = ra_spi_getreg32(priv, RA_SPI_SPDR_OFFSET);
+  uint32_t val = ra_spi_getreg32(priv, R_SPI_B_SPDR_OFFSET);
 
   /* Clear Receive Full flag */
-  ra_spi_putreg32(priv, RA_SPI_SPSRC_OFFSET, RA_SPI_SPSRC_SPRFC);
+  ra_spi_putreg32(priv, R_SPI_B_SPSRC_OFFSET, R_SPI_B_SPSRC_SPRFC);
 
   return val;
 }
@@ -687,7 +691,7 @@ static int ra_spi_dtc_configure_transfer(struct ra_spi_priv_s *priv,
       priv->dtc_tx_info.mra = RA_DTC_MRA_MD_NORMAL | transfer_size | RA_DTC_MRA_SM_INCREMENT;
       priv->dtc_tx_info.mrb = RA_DTC_MRB_DM_FIXED | RA_DTC_MRB_DISEL; /* IRQ at end */
       priv->dtc_tx_info.sar = (uint32_t)txbuffer;
-      priv->dtc_tx_info.dar = priv->config->base + RA_SPI_SPDR_OFFSET;
+      priv->dtc_tx_info.dar = priv->config->base + R_SPI_B_SPDR_OFFSET;
       priv->dtc_tx_info.cra = (uint16_t)nwords;
       priv->dtc_tx_info.crb = 0;
 
@@ -702,7 +706,7 @@ static int ra_spi_dtc_configure_transfer(struct ra_spi_priv_s *priv,
       /* Configure RX DTC: source fixed, dest increment, normal mode */
       priv->dtc_rx_info.mra = RA_DTC_MRA_MD_NORMAL | transfer_size | RA_DTC_MRA_SM_FIXED;
       priv->dtc_rx_info.mrb = RA_DTC_MRB_DM_INCREMENT | RA_DTC_MRB_DISEL; /* IRQ at end */
-      priv->dtc_rx_info.sar = priv->config->base + RA_SPI_SPDR_OFFSET;
+      priv->dtc_rx_info.sar = priv->config->base + R_SPI_B_SPDR_OFFSET;
       priv->dtc_rx_info.dar = (uint32_t)rxbuffer;
       priv->dtc_rx_info.cra = (uint16_t)nwords;
       priv->dtc_rx_info.crb = 0;
@@ -807,28 +811,25 @@ static void ra_spi_start_transfer(struct ra_spi_priv_s *priv)
 {
   uint32_t spcr;
 
-  spiinfo("DTC start for SPI%d - TX IRQ=%d, RX IRQ=%d, TEI IRQ=%d, ERI IRQ=%d\n",
-          priv->config->bus, priv->txi_irq, priv->rxi_irq, priv->tei_irq, priv->eri_irq);
-
   /* Clear any existing interrupt flags before enabling interrupts */
-  ra_spi_putreg32(priv, RA_SPI_SPSRC_OFFSET, RA_SPI_SPSRC_ALL_CLEAR);
+  ra_spi_putreg32(priv, R_SPI_B_SPSRC_OFFSET, R_SPI_B_SPSRC_ALL_CLEAR);
 
   /* Clear FIFOs to ensure a clean start */
-  ra_spi_putreg32(priv, RA_SPI_SPFCR_OFFSET, RA_SPI_SPFCR_SPFRST);
+  ra_spi_putreg32(priv, R_SPI_B_SPFCR_OFFSET, R_SPI_B_SPFCR_SPFRST);
 
   /* Get SPCR and enable appropriate interrupts for DTC-driven transfer */
-  spcr = ra_spi_getreg32(priv, RA_SPI_SPCR_OFFSET);
+  spcr = ra_spi_getreg32(priv, R_SPI_B_SPCR_OFFSET);
 
   /* Enable Transmit Empty interrupt if transmitting (DTC TX or TX buffer present) */
   if (priv->txbuffer)
     {
-      spcr |= RA_SPI_SPCR_SPTIE;
+      spcr |= R_SPI_B_SPCR_SPTIE;
     }
 
   /* Enable Receive Buffer Full interrupt if receiving */
   if (priv->rxbuffer)
     {
-      spcr |= RA_SPI_SPCR_SPRIE;
+      spcr |= R_SPI_B_SPCR_SPRIE;
     }
 
   /* Now set SPE to start the transfer. For non-DTC full-duplex transfers we
@@ -841,7 +842,7 @@ static void ra_spi_start_transfer(struct ra_spi_priv_s *priv)
       up_disable_irq(priv->txi_irq);
 
       /* Enable SPI transfer */
-      ra_spi_putreg32(priv, RA_SPI_SPCR_OFFSET, spcr | RA_SPI_SPCR_SPE);
+      ra_spi_putreg32(priv, R_SPI_B_SPCR_OFFSET, spcr | R_SPI_B_SPCR_SPE);
 
       /* Prefill up to two transmit words to start the pipeline */
       ra_spi_transmit(priv);
@@ -857,7 +858,7 @@ static void ra_spi_start_transfer(struct ra_spi_priv_s *priv)
   else
     {
       /* Default: enable SPE and let ISR handle transmit */
-      ra_spi_putreg32(priv, RA_SPI_SPCR_OFFSET, spcr | RA_SPI_SPCR_SPE);
+      ra_spi_putreg32(priv, R_SPI_B_SPCR_OFFSET, spcr | R_SPI_B_SPCR_SPE);
     }
 
   spiinfo("SPI transfer started: SPCR=0x%08lx\n", spcr);
@@ -1028,8 +1029,8 @@ static int ra_spi_tei_interrupt(int irq, void *context, void *arg)
   up_disable_irq(priv->tei_irq);
 
   /* Disable the SPI Transfer */
-  spcr = ra_spi_getreg32(priv, RA_SPI_SPCR_OFFSET);
-  ra_spi_putreg32(priv, RA_SPI_SPCR_OFFSET, spcr & ~RA_SPI_SPCR_SPE);
+  spcr = ra_spi_getreg32(priv, R_SPI_B_SPCR_OFFSET);
+  ra_spi_putreg32(priv, R_SPI_B_SPCR_OFFSET, spcr & ~R_SPI_B_SPCR_SPE);
 
   /* Clear pending and re-enable TXI IRQ */
   ra_icu_clear_irq(priv->txi_irq);
@@ -1060,28 +1061,28 @@ static int ra_spi_eri_interrupt(int irq, void *context, void *arg)
   /* Disable TXI IRQ before clearing SPE */
   up_disable_irq(priv->txi_irq);
 
-  spcr = ra_spi_getreg32(priv, RA_SPI_SPCR_OFFSET);
-  ra_spi_putreg32(priv, RA_SPI_SPCR_OFFSET, spcr & ~RA_SPI_SPCR_SPE);
+  spcr = ra_spi_getreg32(priv, R_SPI_B_SPCR_OFFSET);
+  ra_spi_putreg32(priv, R_SPI_B_SPCR_OFFSET, spcr & ~R_SPI_B_SPCR_SPE);
 
   /* Clear pending and re-enable TXI IRQ */
   ra_icu_clear_irq(priv->txi_irq);
   up_enable_irq(priv->txi_irq);
 
   spierr("SPI%d error interrupt: SPSR=%08lx\n", priv->config->bus, spsr);
-  spsr = ra_spi_getreg32(priv, RA_SPI_SPSR_OFFSET);
-  if (spsr & RA_SPI_SPSR_OVRF)
+  spsr = ra_spi_getreg32(priv, R_SPI_B_SPSR_OFFSET);
+  if (spsr & R_SPI_B_SPSR_OVRF)
     {
       spierr("SPI%d overrun error\n", priv->config->bus);
     }
-  if (spsr & RA_SPI_SPSR_MODF)
+  if (spsr & R_SPI_B_SPSR_MODF)
     {
       spierr("SPI%d mode fault error\n", priv->config->bus);
     }
-  if (spsr & RA_SPI_SPSR_PERF)
+  if (spsr & R_SPI_B_SPSR_PERF)
     {
       spierr("SPI%d parity error\n", priv->config->bus);
     }
-  if (spsr & RA_SPI_SPSR_UDRF)
+  if (spsr & R_SPI_B_SPSR_UDRF)
     {
       spierr("SPI%d underrun error\n", priv->config->bus);
     }
@@ -1207,16 +1208,16 @@ static uint32_t ra_spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
     priv->config->bus, spbr, brdv, (unsigned long)priv->actual);
 
   /* Set the bit rate field in SPCR3 register */
-  uint32_t spcr3 = ra_spi_getreg32(priv, RA_SPI_SPCR3_OFFSET);
-  spcr3 &= ~RA_SPI_SPCR3_SPBR_MASK;
-  spcr3 |= ((spbr & 0xFF) << RA_SPI_SPCR3_SPBR_SHIFT);
-  ra_spi_putreg32(priv, RA_SPI_SPCR3_OFFSET, spcr3);
+  uint32_t spcr3 = ra_spi_getreg32(priv, R_SPI_B_SPCR3_OFFSET);
+  spcr3 &= ~R_SPI_B_SPCR3_SPBR_MASK;
+  spcr3 |= ((spbr & 0xFF) << R_SPI_B_SPCR3_SPBR_SHIFT);
+  ra_spi_putreg32(priv, R_SPI_B_SPCR3_OFFSET, spcr3);
 
   /* Update SPCMD0 with new BRDV */
-  uint32_t spcmd0 = ra_spi_getreg32(priv, RA_SPI_SPCMD0_OFFSET);
-  spcmd0 &= ~RA_SPI_SPCMD_BRDV_MASK;
-  spcmd0 |= (brdv << RA_SPI_SPCMD_BRDV_SHIFT);
-  ra_spi_putreg32(priv, RA_SPI_SPCMD0_OFFSET, spcmd0);
+  uint32_t spcmd0 = ra_spi_getreg32(priv, R_SPI_B_SPCMD_OFFSET(0));
+  spcmd0 &= ~R_SPI_B_SPCMD_BRDV_MASK;
+  spcmd0 |= (brdv << R_SPI_B_SPCMD_BRDV_SHIFT);
+  ra_spi_putreg32(priv, R_SPI_B_SPCMD_OFFSET(0), spcmd0);
 
   return priv->actual;
 }
@@ -1249,8 +1250,8 @@ static void ra_spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
       return;
     }
 
-  spcmd0 = ra_spi_getreg32(priv, RA_SPI_SPCMD0_OFFSET);
-  spcmd0 &= ~(RA_SPI_SPCMD_CPOL | RA_SPI_SPCMD_CPHA);
+  spcmd0 = ra_spi_getreg32(priv, R_SPI_B_SPCMD_OFFSET(0));
+  spcmd0 &= ~(R_SPI_B_SPCMD_CPOL | R_SPI_B_SPCMD_CPHA);
 
   switch (mode)
     {
@@ -1258,15 +1259,15 @@ static void ra_spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
         break;
 
       case SPIDEV_MODE1: /* CPOL=0; CPHA=1 */
-        spcmd0 |= RA_SPI_SPCMD_CPHA;
+        spcmd0 |= R_SPI_B_SPCMD_CPHA;
         break;
 
       case SPIDEV_MODE2: /* CPOL=1; CPHA=0 */
-        spcmd0 |= RA_SPI_SPCMD_CPOL;
+        spcmd0 |= R_SPI_B_SPCMD_CPOL;
         break;
 
       case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
-        spcmd0 |= (RA_SPI_SPCMD_CPOL | RA_SPI_SPCMD_CPHA);
+        spcmd0 |= (R_SPI_B_SPCMD_CPOL | R_SPI_B_SPCMD_CPHA);
         break;
 
       default:
@@ -1275,7 +1276,7 @@ static void ra_spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
         return;
     }
 
-  ra_spi_putreg32(priv, RA_SPI_SPCMD0_OFFSET, spcmd0);
+  ra_spi_putreg32(priv, R_SPI_B_SPCMD_OFFSET(0), spcmd0);
   priv->mode = mode;
 }
 
@@ -1312,32 +1313,32 @@ static void ra_spi_setbits(struct spi_dev_s *dev, int nbits)
   switch (nbits)
     {
       case 4:
-        spb_bits = RA_SPI_SPCMD_SPB_4;
+        spb_bits = R_SPI_B_SPCMD_SPB_4;
         break;
       case 8:
-        spb_bits = RA_SPI_SPCMD_SPB_8;
+        spb_bits = R_SPI_B_SPCMD_SPB_8;
         break;
       case 16:
-        spb_bits = RA_SPI_SPCMD_SPB_16;
+        spb_bits = R_SPI_B_SPCMD_SPB_16;
         break;
       case 20:
-        spb_bits = RA_SPI_SPCMD_SPB_20;
+        spb_bits = R_SPI_B_SPCMD_SPB_20;
         break;
       case 24:
-        spb_bits = RA_SPI_SPCMD_SPB_24;
+        spb_bits = R_SPI_B_SPCMD_SPB_24;
         break;
       case 32:
-        spb_bits = RA_SPI_SPCMD_SPB_32;
+        spb_bits = R_SPI_B_SPCMD_SPB_32;
         break;
       default:
         spierr("SPI%d bad nbits %d\n", priv->config->bus, nbits);
         return;
     }
 
-  spcmd0 = ra_spi_getreg32(priv, RA_SPI_SPCMD0_OFFSET);
-  spcmd0 &= ~RA_SPI_SPCMD_SPB_MASK;
+  spcmd0 = ra_spi_getreg32(priv, R_SPI_B_SPCMD_OFFSET(0));
+  spcmd0 &= ~R_SPI_B_SPCMD_SPB_MASK;
   spcmd0 |= spb_bits;
-  ra_spi_putreg32(priv, RA_SPI_SPCMD0_OFFSET, spcmd0);
+  ra_spi_putreg32(priv, R_SPI_B_SPCMD_OFFSET(0), spcmd0);
 
   priv->nbits = nbits;
 }
@@ -1589,14 +1590,14 @@ static void ra_spi_bus_initialize(struct ra_spi_priv_s *priv)
 
   /* Enable SPI module via MSTP */
 #if defined(CONFIG_RA_SPI0)
-  if (priv->config->base == RA_SPI0_BASE)
+  if (priv->config->bus == 0)
     {
       ra_mstp_start(RA_MSTP_SPI0);
     }
   else
 #endif
 #if defined(CONFIG_RA_SPI1)
-  if (priv->config->base == RA_SPI1_BASE)
+  if (priv->config->bus == 1)
     {
       ra_mstp_start(RA_MSTP_SPI1);
     }
@@ -1608,21 +1609,21 @@ static void ra_spi_bus_initialize(struct ra_spi_priv_s *priv)
     }
 
   /* Disable SPI (clear SPCR) before configuration */
-  ra_spi_putreg32(priv, RA_SPI_SPCR_OFFSET, 0);
+  ra_spi_putreg32(priv, R_SPI_B_SPCR_OFFSET, 0);
 
   /* Clear status flags */
-  ra_spi_putreg32(priv, RA_SPI_SPSRC_OFFSET, RA_SPI_SPSRC_ALL_CLEAR);
+  ra_spi_putreg32(priv, R_SPI_B_SPSRC_OFFSET, R_SPI_B_SPSRC_ALL_CLEAR);
 
   /* Configure basic SPCR bits from configuration
    * - enable error interrupt and communication end interrupt
    * - set master mode and auto-stop when master
    */
-  spcr |= RA_SPI_SPCR_SPEIE | RA_SPI_SPCR_CENDIE;
+  spcr |= R_SPI_B_SPCR_SPEIE | R_SPI_B_SPCR_CENDIE;
 
   if (priv->config->master_mode)
     {
-      spcr |= RA_SPI_SPCR_MSTR;
-      spcr |= RA_SPI_SPCR_SCKASE; /* SCK Auto Stop for master */
+      spcr |= R_SPI_B_SPCR_MSTR;
+      spcr |= R_SPI_B_SPCR_SCKASE; /* SCK Auto Stop for master */
 
       /* Configure SPDECR delays using defaults or CS config if available */
       uint32_t setup = CS_SETUP_DELAY;
@@ -1637,59 +1638,59 @@ static void ra_spi_bus_initialize(struct ra_spi_priv_s *priv)
           hold  = priv->config->cs_config[0].hold_delay;
         }
 
-      spdecr = ((setup & 0x07) << RA_SPI_SPDECR_SCKDL_SHIFT) |
-               ((neg & 0x07) << RA_SPI_SPDECR_SLNDL_SHIFT) |
-               ((hold & 0x07) << RA_SPI_SPDECR_SPNDL_SHIFT);
-      ra_spi_putreg32(priv, RA_SPI_SPDECR_OFFSET, spdecr);
+      spdecr = ((setup & 0x07) << R_SPI_B_SPDECR_SCKDL_SHIFT) |
+               ((neg & 0x07) << R_SPI_B_SPDECR_SLNDL_SHIFT) |
+               ((hold & 0x07) << R_SPI_B_SPDECR_SPNDL_SHIFT);
+      ra_spi_putreg32(priv, R_SPI_B_SPDECR_OFFSET, spdecr);
 
       /* SPCMD0 default: 8-bit, BRDV=1 (no div), use SSL0 and enable delays */
-      spcmd0 = RA_SPI_SPCMD_SPB_8 | RA_SPI_SPCMD_BRDV_1 | RA_SPI_SPCMD_SSLA_0 |
-               RA_SPI_SPCMD_SCKDEN | RA_SPI_SPCMD_SLNDEN | RA_SPI_SPCMD_SPNDEN;
-      ra_spi_putreg32(priv, RA_SPI_SPCMD0_OFFSET, spcmd0);
+      spcmd0 = R_SPI_B_SPCMD_SPB_8 | R_SPI_B_SPCMD_BRDV_01 | R_SPI_B_SPCMD_SSLA_000 |
+               R_SPI_B_SPCMD_SCKDEN | R_SPI_B_SPCMD_SLNDEN | R_SPI_B_SPCMD_SPNDEN;
+      ra_spi_putreg32(priv, R_SPI_B_SPCMD_OFFSET(0), spcmd0);
     }
   else
     {
       /* Slave mode: enable mode-fault detection */
-      spcr |= RA_SPI_SPCR_MODFEN;
+      spcr |= R_SPI_B_SPCR_MODFEN;
     }
 
   /* SPCR2 default = 0 (pin control and MOSI idle/byte swap disabled) */
-  ra_spi_putreg32(priv, RA_SPI_SPCR2_OFFSET, spcr2);
+  ra_spi_putreg32(priv, R_SPI_B_SPCR2_OFFSET, spcr2);
 
   /* SPTIE must be enabled for DTC even if transmitting from RXI */
   if (priv->use_dtc || priv->txbuffer)
     {
-      spcr |= RA_SPI_SPCR_SPTIE;
+      spcr |= R_SPI_B_SPCR_SPTIE;
     }
 
   /* SPRIE only for full-duplex (when both TX and RX are active) */
   if (priv->use_dtc || (priv->txbuffer && priv->rxbuffer))
     {
-      spcr |= RA_SPI_SPCR_SPRIE;
+      spcr |= R_SPI_B_SPCR_SPRIE;
     }
 
   /* SPI Mode Select: 3-wire if CS is clock-synchronous */
   if (priv->config->cs_config == NULL ||
       (priv->config->num_cs > 0 && priv->config->cs_config[0].cs_type == RA_SPI_CS_CLK_SYS))
     {
-      spcr |= RA_SPI_SPCR_SPMS;
+      spcr |= R_SPI_B_SPCR_SPMS;
     }
 
   /* Bit-rate switch enabled (BPEN) */
-  spcr |= RA_SPI_SPCR_BPEN;
+  spcr |= R_SPI_B_SPCR_BPEN;
 
   /* Write SPCR without SPE first */
-  ra_spi_putreg32(priv, RA_SPI_SPCR_OFFSET, spcr & ~RA_SPI_SPCR_SPE);
-  ra_spi_putreg32(priv, RA_SPI_SPCR_OFFSET, spcr);
+  ra_spi_putreg32(priv, R_SPI_B_SPCR_OFFSET, spcr & ~R_SPI_B_SPCR_SPE);
+  ra_spi_putreg32(priv, R_SPI_B_SPCR_OFFSET, spcr);
 
   /* Configure SPCR3
    * - SSL polarity defaults (active low)
    * - bit rate field will be set by ra_spi_setfrequency
    */
-  ra_spi_putreg32(priv, RA_SPI_SPCR3_OFFSET, spcr3);
+  ra_spi_putreg32(priv, R_SPI_B_SPCR3_OFFSET, spcr3);
 
   /* Configure SPDCR default */
-  ra_spi_putreg32(priv, RA_SPI_SPDCR_OFFSET, spdcr);
+  ra_spi_putreg32(priv, R_SPI_B_SPDCR_OFFSET, spdcr);
 
   /* Set default bit rate to 1MHz */
   ra_spi_setfrequency(&priv->spidev, 1000000);
@@ -1780,8 +1781,6 @@ struct spi_dev_s *ra_spibus_initialize(int bus)
           return NULL;
         }
       priv->eri_irq = ret; /* Store the assigned IRQ number */
-      spiinfo("SPI%d interrupts attached: RXI=%d TXI=%d TEI=%d ERI=%d (all disabled until transfer)\n",
-              priv->config->bus, priv->rxi_irq, priv->txi_irq, priv->tei_irq, priv->eri_irq);
     }
 
   /* Increment reference count */
@@ -1861,50 +1860,50 @@ int ra_spi_set_loopback(FAR struct spi_dev_s *dev, bool loopback2,
     }
 
   /* Read current SPCR/SPCR2 via driver helpers */
-  spcr  = ra_spi_getreg32(priv, RA_SPI_SPCR_OFFSET);
-  spcr2 = ra_spi_getreg32(priv, RA_SPI_SPCR2_OFFSET);
+  spcr  = ra_spi_getreg32(priv, R_SPI_B_SPCR_OFFSET);
+  spcr2 = ra_spi_getreg32(priv, R_SPI_B_SPCR2_OFFSET);
 
   /* Disable SPI while changing control bits */
-  if (spcr & RA_SPI_SPCR_SPE)
+  if (spcr & R_SPI_B_SPCR_SPE)
     {
-      ra_spi_putreg32(priv, RA_SPI_SPCR_OFFSET, spcr & ~RA_SPI_SPCR_SPE);
-      (void)ra_spi_getreg32(priv, RA_SPI_SPCR_OFFSET);
+      ra_spi_putreg32(priv, R_SPI_B_SPCR_OFFSET, spcr & ~R_SPI_B_SPCR_SPE);
+      (void)ra_spi_getreg32(priv, R_SPI_B_SPCR_OFFSET);
     }
 
   /* Update SPCR2 pin control bits: SPLP2, MOIFV, MOIFE */
   if (loopback2)
     {
-      spcr2 |= RA_SPI_SPCR2_SPLP2;
+      spcr2 |= R_SPI_B_SPCR2_SPLP2;
     }
   else
     {
-      spcr2 &= ~RA_SPI_SPCR2_SPLP2;
+      spcr2 &= ~R_SPI_B_SPCR2_SPLP2;
     }
 
   if (moifv)
     {
-      spcr2 |= RA_SPI_SPCR2_MOIFV;
+      spcr2 |= R_SPI_B_SPCR2_MOIFV;
       if (moife)
         {
-          spcr2 |= RA_SPI_SPCR2_MOIFE;
+          spcr2 |= R_SPI_B_SPCR2_MOIFE;
         }
     }
   else
     {
-      spcr2 &= ~RA_SPI_SPCR2_MOIFV;
-      spcr2 &= ~RA_SPI_SPCR2_MOIFE;
+      spcr2 &= ~R_SPI_B_SPCR2_MOIFV;
+      spcr2 &= ~R_SPI_B_SPCR2_MOIFE;
     }
 
   /* Write back SPCR2 */
-  ra_spi_putreg32(priv, RA_SPI_SPCR2_OFFSET, spcr2);
-  spcr2 = ra_spi_getreg32(priv, RA_SPI_SPCR2_OFFSET);
+  ra_spi_putreg32(priv, R_SPI_B_SPCR2_OFFSET, spcr2);
+  spcr2 = ra_spi_getreg32(priv, R_SPI_B_SPCR2_OFFSET);
   (void)spcr2;
 
   /* Restore SPE if it was previously enabled */
-  if (spcr & RA_SPI_SPCR_SPE)
+  if (spcr & R_SPI_B_SPCR_SPE)
     {
-      ra_spi_putreg32(priv, RA_SPI_SPCR_OFFSET, spcr | RA_SPI_SPCR_SPE);
-      (void)ra_spi_getreg32(priv, RA_SPI_SPCR_OFFSET);
+      ra_spi_putreg32(priv, R_SPI_B_SPCR_OFFSET, spcr | R_SPI_B_SPCR_SPE);
+      (void)ra_spi_getreg32(priv, R_SPI_B_SPCR_OFFSET);
     }
 
   return OK;

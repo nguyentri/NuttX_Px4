@@ -29,15 +29,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#if defined(CONFIG_RA8E1_GROUP)
-#  include "hardware/ra8e1/ra8e1_clock.h"
-#elif defined(CONFIG_RA8P1_GROUP)
-#  include "hardware/ra8p1/ra8p1_clock.h"
-#else
-#  error "Unsupported RA clock configuration"
-#endif
-
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/

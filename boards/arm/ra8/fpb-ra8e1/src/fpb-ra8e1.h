@@ -200,6 +200,9 @@ int ra8e1_rust_sample_init(void);
 #ifdef CONFIG_RA8E1_SPI_GY912_EXAMPLE
 struct spi_dev_s;
 int gy912_register_sensors(FAR struct spi_dev_s *spi);
+int ra8e1_spi_gy912_init(void);
+int ra8e1_spi_gy912_test(void);
+int ra8e1_spi_gy912_main(int argc, FAR char *argv[]);
 #endif
 
 #endif /* __ASSEMBLY__ */

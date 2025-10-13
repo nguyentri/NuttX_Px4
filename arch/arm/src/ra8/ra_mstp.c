@@ -32,7 +32,6 @@
 
 #include "arm_internal.h"
 #include "chip.h"
-#include "hardware/ra_mstp.h"
 #include "hardware/ra_memorymap.h"
 #include "ra_mstp.h"
 

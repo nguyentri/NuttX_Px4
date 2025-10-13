@@ -32,8 +32,7 @@
 #include <nuttx/irq.h>
 
 #include "chip.h"
-#include "hardware/ra_gpio.h"
-#include "hardware/ra_pinmap.h"
+#include "hardware/ra_memorymap.h"
 
 /****************************************************************************
  * Pre-processor Definitions

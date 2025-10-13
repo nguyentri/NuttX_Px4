@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_RA_FLASH_H
-#define __ARCH_ARM_SRC_RA8_RA_FLASH_H
+#ifndef __ARCH_ARM_SRC_RA_RA8_FLASH_H
+#define __ARCH_ARM_SRC_RA_RA8_FLASH_H
 
 /****************************************************************************
  * Included Files
@@ -31,7 +31,7 @@
 #include <stdbool.h>
 
 #include "chip.h"
-#include "hardware/ra_flash.h"
+#include "hardware/ra_memorymap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -88,4 +88,4 @@ struct mtd_dev_s *ra_flash_initialize(bool data_flash);
 }
 #endif
 
-#endif /* __ARCH_ARM_SRC_RA8_RA_FLASH_H */
+#endif /* __ARCH_ARM_SRC_RA_RA8_FLASH_H */

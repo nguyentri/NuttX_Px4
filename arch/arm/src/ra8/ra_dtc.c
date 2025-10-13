@@ -41,7 +41,7 @@
 
 #include "arm_internal.h"
 #include "chip.h"
-#include "hardware/ra_dtc.h"
+#include "hardware/ra_memorymap.h"
 #include "ra_dtc.h"
 #include "ra_icu.h"
 
@@ -260,10 +260,10 @@ static int ra_dtc_interrupt_handler(int irq, void *context, void *arg)
   if (ctrl && ctrl->config.callback)
     {
       /* Check if DTC is still active for this specific transfer */
-      uint32_t dtc_status = getreg32(RA_DTC_DTCSTS);
+      uint32_t dtc_status = getreg32(R_DTC_DTCSTS);
 
       /* If DTC is no longer active, the transfer completed */
-      if (!(dtc_status & RA_DTC_DTCSTS_ACT))
+      if (!(dtc_status & R_DTC_DTCSTS_ACT))
         {
           /* Transfer completed, call user callback */
           ctrl->config.callback(ctrl, RA_DTC_EVENT_END, ctrl->config.user_data);
@@ -316,11 +316,11 @@ static int ra_dtc_wait_for_completion(int irq_slot)
 {
   unsigned int waited = 0;
   uint32_t val;
-  uint32_t vecn_mask = RA_DTC_DTCSTS_VECN_MASK;
-  uint32_t act_mask  = RA_DTC_DTCSTS_ACT;
+  uint32_t vecn_mask = R_DTC_DTCSTS_VECN_MASK;
+  uint32_t act_mask  = R_DTC_DTCSTS_ACT;
 
   /* Read initial value */
-  val = getreg16(RA_DTC_DTCSTS);
+  val = getreg16(R_DTC_DTCSTS);
 
   /* Wait while ACT is set and vector number matches the slot */
   while ((val & act_mask) && ((val & vecn_mask) == (uint32_t)irq_slot))
@@ -335,7 +335,7 @@ static int ra_dtc_wait_for_completion(int irq_slot)
           return -ETIMEDOUT;
         }
 
-      val = getreg16(RA_DTC_DTCSTS);
+      val = getreg16(R_DTC_DTCSTS);
     }
 
   return OK;
@@ -370,10 +370,10 @@ int ra_dtc_initialize(void)
   memset(g_dtc_vector_table, 0, sizeof(g_dtc_vector_table));
 
   /* Set vector table base address */
-  putreg32((uint32_t)g_dtc_vector_table, RA_DTC_DTCVBR_SEC);
+  putreg32((uint32_t)g_dtc_vector_table, R_DTC_DTCVBR_SEC);
 
   /* Start the DTC module by setting DTCST.DTCST = 1 */
-  putreg8(1, RA_DTC_DTCST);
+  putreg8(1, R_DTC_DTCST);
 
   g_dtc_initialized = true;
 
@@ -495,9 +495,9 @@ int ra_dtc_open(ra_dtc_handle_t *handle, const ra_dtc_config_t *config)
         }
 
       /* Update vector table safely: disable read-skip before update and re-enable */
-      putreg8(DTC_DTCCR_RRS_DISABLE, RA_DTC_DTCCR_SEC);
+      putreg8(DTC_DTCCR_RRS_DISABLE, R_DTC_DTCCR_SEC);
       g_dtc_vector_table[vec_index] = &ctrl->info;
-      putreg8(DTC_DTCCR_RRS_ENABLE, RA_DTC_DTCCR_SEC);
+      putreg8(DTC_DTCCR_RRS_ENABLE, R_DTC_DTCCR_SEC);
 
       /* If completion callback is needed, attach DTC completion interrupt */
       if (config->callback)
@@ -586,9 +586,9 @@ int ra_dtc_close(ra_dtc_handle_t handle)
       if (vec_index >= 0 && vec_index < RA_DTC_VECTOR_TABLE_ENTRIES)
         {
           /* Protect with read-skip disable/enable in case DTC is active */
-          putreg8(DTC_DTCCR_RRS_DISABLE, RA_DTC_DTCCR_SEC);
+          putreg8(DTC_DTCCR_RRS_DISABLE, R_DTC_DTCCR_SEC);
           g_dtc_vector_table[vec_index] = NULL;
-          putreg8(DTC_DTCCR_RRS_ENABLE, RA_DTC_DTCCR_SEC);
+          putreg8(DTC_DTCCR_RRS_ENABLE, R_DTC_DTCCR_SEC);
         }
 
       /* If we allocated the slot for this context, detach it now */
@@ -746,7 +746,7 @@ int ra_dtc_reset(ra_dtc_handle_t handle, uint32_t src_addr,
   }
 
   /* Disable read skip for register updates */
-  putreg8(DTC_DTCCR_RRS_DISABLE, RA_DTC_DTCCR_SEC);
+  putreg8(DTC_DTCCR_RRS_DISABLE, R_DTC_DTCCR_SEC);
 
   /* Update transfer information */
   ctrl->info.sar = src_addr;
@@ -771,7 +771,7 @@ int ra_dtc_reset(ra_dtc_handle_t handle, uint32_t src_addr,
   ctrl->config.transfer_count = transfer_count;
 
   /* Re-enable read skip */
-  putreg8(DTC_DTCCR_RRS_ENABLE, RA_DTC_DTCCR_SEC);
+  putreg8(DTC_DTCCR_RRS_ENABLE, R_DTC_DTCCR_SEC);
 
   return OK;
 }
@@ -838,7 +838,7 @@ int ra_dtc_set_vector(int icu_slot, ra_dtc_info_t *transfer_info)
     }
 
   /* Disable read-skip (RRS) before updating vector table */
-  putreg8(DTC_DTCCR_RRS_DISABLE, RA_DTC_DTCCR_SEC);
+  putreg8(DTC_DTCCR_RRS_DISABLE, R_DTC_DTCCR_SEC);
 
   g_dtc_vector_table[icu_slot] = transfer_info;
 
@@ -870,13 +870,13 @@ int ra_dtc_set_vector(int icu_slot, ra_dtc_info_t *transfer_info)
         serr("ra_dtc_set_vector: failed to verify vector write for slot %d\n", icu_slot);
 
         /* Re-enable read-skip before returning error */
-        putreg8(DTC_DTCCR_RRS_ENABLE, RA_DTC_DTCCR_SEC);
+        putreg8(DTC_DTCCR_RRS_ENABLE, R_DTC_DTCCR_SEC);
         return -EIO;
       }
   }
 
   /* Re-enable read-skip */
-  putreg8(DTC_DTCCR_RRS_ENABLE, RA_DTC_DTCCR_SEC);
+  putreg8(DTC_DTCCR_RRS_ENABLE, R_DTC_DTCCR_SEC);
 
   return OK;
 }

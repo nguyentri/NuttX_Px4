@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_RA_DMAC_H
-#define __ARCH_ARM_SRC_RA8_RA_DMAC_H
+#ifndef __ARCH_ARM_SRC_RA_RA8_DMAC_H
+#define __ARCH_ARM_SRC_RA_RA8_DMAC_H
 
 /****************************************************************************
  * Included Files
@@ -29,7 +29,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "hardware/ra_dmac.h"
+#include "chip.h"
+#include "hardware/ra_memorymap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -104,4 +105,4 @@ uint32_t ra_dmac_get_remaining_count(ra_dmac_handle_t handle);
 }
 #endif
 
-#endif /* __ARCH_ARM_SRC_RA8_RA_DMAC_H */
+#endif /* __ARCH_ARM_SRC_RA_RA8_DMAC_H */

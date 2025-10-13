@@ -39,10 +39,11 @@
 #include "barriers.h"
 #include "arm_internal.h"
 
-#include "ra_clock.h"
-#include "hardware/ra_flash.h"
-#include "hardware/ra_system.h"
+#include "chip.h"
 #include "hardware/ra_memorymap.h"
+#include "hardware/ra_system.h"
+#include "ra_clock.h"
+
 
 /****************************************************************************
  * Pre-processor Definitions (Private Definitions)
@@ -182,8 +183,8 @@ static void ra_update_clock_config(void);
 
 void ra_sys_core_clock_update (void)
 {
-  uint32_t clock_index = getreg8(R_SYSTEM_SCKSCR);
-  uint8_t cpuck = (getreg8(R_SYSTEM_SCKDIVCR2) & R_SYSTEM_SCKDIVCR2_CPUCK_Msk) >> R_SYSTEM_SCKDIVCR2_CPUCK_Pos;
+  uint32_t clock_index = getreg8(R_SYSC_SCKSCR);
+  uint8_t cpuck = (getreg8(R_SYSC_SCKDIVCR2) & R_SYSC_SCKDIVCR2_CPUCK_MASK) >> R_SYSC_SCKDIVCR2_CPUCK_SHIFT;
   uint8_t cpuclk_div = cpuck;
 
  /* Handle special divider cases first */
@@ -283,31 +284,31 @@ static void ra_peripheral_clock_init(void)
 
   /* Set the SCI clock if SCI is enabled */
 #ifdef CONFIG_RA_SCI
-  ra_peripheral_clock_set((volatile uint8_t *)R_SYSTEM_SCICKCR,
-                          (volatile uint8_t *)R_SYSTEM_SCICKDIVCR,
+  ra_peripheral_clock_set((volatile uint8_t *)R_SYSC_SCICKCR,
+                          (volatile uint8_t *)R_SYSC_SCICKDIVCR,
                           CONFIG_RA_SCICLK_DIV,
                           CONFIG_RA_SCICLK_SOURCE);
 #endif
 
   /* Set the SPI clock if SPI is enabled */
 #ifdef CONFIG_RA_SPI
-  ra_peripheral_clock_set((volatile uint8_t *)R_SYSTEM_SPICKCR,
-                          (volatile uint8_t *)R_SYSTEM_SPICKDIVCR,
+  ra_peripheral_clock_set((volatile uint8_t *)R_SYSC_SPICKCR,
+                          (volatile uint8_t *)R_SYSC_SPICKDIVCR,
                           CONFIG_RA_SPICLK_DIV,
                           CONFIG_RA_SPICLK_SOURCE);
 #endif
 
   /* Set the CANFD clock if CAN is enabled */
 #ifdef CONFIG_RA_CAN
-  ra_peripheral_clock_set((volatile uint8_t *)R_SYSTEM_CANFDCKCR,
-                          (volatile uint8_t *)R_SYSTEM_CANFDCKDIVCR,
+  ra_peripheral_clock_set((volatile uint8_t *)R_SYSC_CANFDCKCR,
+                          (volatile uint8_t *)R_SYSC_CANFDCKDIVCR,
                           CONFIG_RA_CANFDCLK_DIV,
                           CONFIG_RA_CANFDCLK_SOURCE);
 #endif
 
   /* Set the USB clock if USB is enabled */
 #ifdef CONFIG_RA_USB
-  ra_peripheral_clock_set((volatile uint8_t *)R_SYSTEM_USBCKCR,
+  ra_peripheral_clock_set((volatile uint8_t *)R_SYSC_USBCKCR,
                           NULL,  /* No divider register for USB on some MCUs */
                           0,     /* No divider */
                           CONFIG_RA_USBCLK_SOURCE);
@@ -315,25 +316,25 @@ static void ra_peripheral_clock_init(void)
 
   /* Set the OCTASPI clock if OSPI is enabled */
 #ifdef CONFIG_RA_OSPI
-  ra_peripheral_clock_set((volatile uint8_t *)R_SYSTEM_OCTACKCR,
-                          (volatile uint8_t *)R_SYSTEM_OCTACKDIVCR,
+  ra_peripheral_clock_set((volatile uint8_t *)R_SYSC_OCTACKCR,
+                          (volatile uint8_t *)R_SYSC_OCTACKDIVCR,
                           CONFIG_RA_OCTACLK_DIV,
                           CONFIG_RA_OCTACLK_SOURCE);
 #endif
 
   /* Set the GPT clock if GPT is enabled */
 #ifdef CONFIG_RA_GPT
-  ra_peripheral_clock_set((volatile uint8_t *)R_SYSTEM_GPTCKCR,
-                          (volatile uint8_t *)R_SYSTEM_GPTCKDIVCR,
+  ra_peripheral_clock_set((volatile uint8_t *)R_SYSC_GPTCKCR,
+                          (volatile uint8_t *)R_SYSC_GPTCKDIVCR,
                           CONFIG_RA_GPTCLK_DIV,
                           CONFIG_RA_GPTCLK_SOURCE);
 #endif
 
   /* Set the I2C clock if I2C is enabled */
 #ifdef CONFIG_RA_I2C
-#ifdef R_SYSTEM_IICCKCR
-  ra_peripheral_clock_set((volatile uint8_t *)R_SYSTEM_IICCKCR,
-                          (volatile uint8_t *)R_SYSTEM_IICCKDIVCR,
+#ifdef R_SYSC_IICCKCR
+  ra_peripheral_clock_set((volatile uint8_t *)R_SYSC_IICCKCR,
+                          (volatile uint8_t *)R_SYSC_IICCKDIVCR,
                           CONFIG_RA_IICCLK_DIV,
                           CONFIG_RA_IICCLK_SOURCE);
 #endif
@@ -341,8 +342,8 @@ static void ra_peripheral_clock_init(void)
 
   /* Set the ADC clock if ADC is enabled */
 #ifdef CONFIG_RA_ADC
-  ra_peripheral_clock_set((volatile uint8_t *)R_SYSTEM_ADCCKCR,
-                          (volatile uint8_t *)R_SYSTEM_ADCCKDIVCR,
+  ra_peripheral_clock_set((volatile uint8_t *)R_SYSC_ADCCKCR,
+                          (volatile uint8_t *)R_SYSC_ADCCKDIVCR,
                           CONFIG_RA_ADCCLK_DIV,
                           CONFIG_RA_ADCCLK_SOURCE);
 #endif
@@ -362,35 +363,35 @@ static void ra_prv_clock_set_hard_reset(void)
   putreg8(RA_PRV_ROM_TWO_WAIT_CYCLES, R_FCACHE_FLWT);
 
   /* Set system clock dividers with temporary safe values first */
-  putreg32(RA_PRV_STARTUP_SCKDIVCR, R_SYSTEM_SCKDIVCR);
+  putreg32(RA_PRV_STARTUP_SCKDIVCR, R_SYSC_SCKDIVCR);
 
   /* Set CPU clock divider based on configuration */
 #if CONFIG_RA_CPUCLK_DIV == RA_CLOCKS_SYS_CLOCK_DIV_1
   /* Determine what the other dividers are using and stay aligned with that. */
   putreg8((CONFIG_RA_ICK_DIV & 0x8) ? RA_CLOCKS_SYS_CLOCK_DIV_3 : RA_CLOCKS_SYS_CLOCK_DIV_2,
-          R_SYSTEM_SCKDIVCR2);
+          R_SYSC_SCKDIVCR2);
 #else
   /* If not /1, can just add 1 to it. */
-  putreg8(RA_PRV_STARTUP_SCKDIVCR2 + 1, R_SYSTEM_SCKDIVCR2);
+  putreg8(RA_PRV_STARTUP_SCKDIVCR2 + 1, R_SYSC_SCKDIVCR2);
 #endif
 
   /* Set the system source clock */
-  putreg8(RA_CFG_CLOCK_SOURCE, R_SYSTEM_SCKSCR);
+  putreg8(RA_CFG_CLOCK_SOURCE, R_SYSC_SCKSCR);
 
   /* Wait for settling delay. */
   ra_sys_core_clock_update();
   up_udelay(RA_CFG_CLOCK_SETTLING_DELAY_US);
 
   /* Continue and set clock to actual target speed. */
-  putreg8(RA_PRV_STARTUP_SCKDIVCR2, R_SYSTEM_SCKDIVCR2);
-  putreg32(RA_PRV_STARTUP_SCKDIVCR, R_SYSTEM_SCKDIVCR);
+  putreg8(RA_PRV_STARTUP_SCKDIVCR2, R_SYSC_SCKDIVCR2);
+  putreg32(RA_PRV_STARTUP_SCKDIVCR, R_SYSC_SCKDIVCR);
 
   /* Wait for settling delay. */
   ra_sys_core_clock_update();
   up_udelay(RA_CFG_CLOCK_SETTLING_DELAY_US);
 
   /* Set the system source clock again */
-  putreg8(RA_CFG_CLOCK_SOURCE, R_SYSTEM_SCKSCR);
+  putreg8(RA_CFG_CLOCK_SOURCE, R_SYSC_SCKSCR);
 
   /* Update the CMSIS core clock variable so that it reflects the new ICLK frequency. */
   ra_sys_core_clock_update();
@@ -419,25 +420,25 @@ static void ra_prv_clock_set_hard_reset(void)
 static void ra_clock_init(void)
 {
   /* Step 1: Unlock system registers */
-  putreg16(RA_PRV_PRCR_UNLOCK, R_SYSTEM_PRCR);
+  putreg16(RA_PRV_PRCR_UNLOCK, R_SYSC_PRCR_S);
 
   /* Step 2: Initialize clock frequency variables */
   ra_clock_freq_var_init();
 
   /* Step 3: Start HOCO if used */
 #if defined(CONFIG_RA_CLOCK_HOCO) || defined(CONFIG_RA_CLOCK_PLL) || defined(CONFIG_RA_CLOCK_PLL1P)
-  putreg8(0U, R_SYSTEM_HOCOCR);  /* Enable HOCO */
+  putreg8(0U, R_SYSC_HOCOCR);  /* Enable HOCO */
   /* Wait for HOCO to stabilize */
-  RA_HARDWARE_REGISTER_WAIT((getreg8(R_SYSTEM_OSCSF) & R_SYSTEM_OSCSF_HOCOSF), R_SYSTEM_OSCSF_HOCOSF);
+  RA_HARDWARE_REGISTER_WAIT((getreg8(R_SYSC_OSCSF) & R_SYSC_OSCSF_HOCOSF), R_SYSC_OSCSF_HOCOSF);
 #endif
 
   /* Step 4: Configure and start PLL if used */
 #if defined(CONFIG_RA8E1_GROUP)
-  putreg16((uint16_t)RA_PRV_PLLCCR, R_SYSTEM_PLLCCR);
-  putreg16((uint16_t)RA_PRV_PLLCCR2, R_SYSTEM_PLLCCR2);
-  putreg8(0U, R_SYSTEM_PLLCR);  /* Enable PLL */
+  putreg16((uint16_t)RA_PRV_PLLCCR, R_SYSC_PLLCCR);
+  putreg16((uint16_t)RA_PRV_PLLCCR2, R_SYSC_PLLCCR2);
+  putreg8(0U, R_SYSC_PLLCR);  /* Enable PLL */
   /* Wait for PLL to stabilize */
-  RA_HARDWARE_REGISTER_WAIT((getreg8(R_SYSTEM_OSCSF) & R_SYSTEM_OSCSF_PLLSF), R_SYSTEM_OSCSF_PLLSF);
+  RA_HARDWARE_REGISTER_WAIT((getreg8(R_SYSC_OSCSF) & R_SYSC_OSCSF_PLLSF), R_SYSC_OSCSF_PLLSF);
 #endif
 
   /* Step 5: Set clocks from hard reset state */
@@ -447,7 +448,7 @@ static void ra_clock_init(void)
   ra_peripheral_clock_init();
 
   /* Step 7: Lock system registers */
-  putreg16(RA_PRV_PRCR_LOCK, R_SYSTEM_PRCR);
+  putreg16(RA_PRV_PRCR_LOCK, R_SYSC_PRCR_S);
 }
 
 /****************************************************************************
@@ -500,12 +501,12 @@ static void ra_update_clock_config(void)
   uint32_t source_freq;
 
   /* Read current clock source */
-  sckscr = getreg8(R_SYSTEM_SCKSCR);
-  clock_source = sckscr & R_SYSTEM_SCKSCR_CKSEL_MASK;
+  sckscr = getreg8(R_SYSC_SCKSCR);
+  clock_source = sckscr & R_SYSC_SCKSCR_CKSEL_MASK;
 
   /* Read clock dividers */
-  sckdivcr = getreg32(R_SYSTEM_SCKDIVCR);
-  sckdivcr2 = getreg16(R_SYSTEM_SCKDIVCR2);
+  sckdivcr = getreg32(R_SYSC_SCKDIVCR);
+  sckdivcr2 = getreg16(R_SYSC_SCKDIVCR2);
 
   /* Update configuration structure */
   g_ra_clock_config.clock_source = clock_source;

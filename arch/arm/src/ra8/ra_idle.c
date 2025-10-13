@@ -38,6 +38,7 @@
 #include <syslog.h>
 
 #include "chip.h"
+#include "hardware/ra_memorymap.h"
 #include "arm_internal.h"
 
 /****************************************************************************

@@ -33,9 +33,9 @@
 #include "arm_internal.h"
 #include "ra_lowputc.h"
 #include "ra_gpio.h"
-#include "hardware/ra_sci.h"
-#include "hardware/ra_mstp.h"
-#include "hardware/ra_system.h"
+#include "chip.h"
+#include "ra_mstp.h"
+#include "hardware/ra_memorymap.h"
 
 /* The board.h file may redefine pin configurations defined in ra_pinmap.h */
 
@@ -113,42 +113,42 @@
 /* Select USART parameters for the selected console */
 
 #  if defined(CONFIG_SCI0_SERIAL_CONSOLE)
-#    define RA_CONSOLE_BASE     R_SCI0_B_BASE
+#    define RA_CONSOLE_BASE     R_SCI_B_CH_BASE(0)
 #    define RA_CONSOLE_MTSP     R_MSTP_MSTPCRB_SCI0
 #    define RA_CONSOLE_BAUD     CONFIG_SCI0_BAUD
 #    define RA_CONSOLE_BITS     CONFIG_SCI0_BITS
 #    define RA_CONSOLE_PARITY   CONFIG_SCI0_PARITY
 #    define RA_CONSOLE_2STOP    CONFIG_SCI0_2STOP
 #  elif defined(CONFIG_SCI1_SERIAL_CONSOLE)
-#    define RA_CONSOLE_BASE     R_SCI1_B_BASE
+#    define RA_CONSOLE_BASE     R_SCI_B_CH_BASE(1)
 #    define RA_CONSOLE_MTSP     R_MSTP_MSTPCRB_SCI1
 #    define RA_CONSOLE_BAUD     CONFIG_SCI1_BAUD
 #    define RA_CONSOLE_BITS     CONFIG_SCI1_BITS
 #    define RA_CONSOLE_PARITY   CONFIG_SCI1_PARITY
 #    define RA_CONSOLE_2STOP    CONFIG_SCI1_2STOP
 #  elif defined(CONFIG_SCI2_SERIAL_CONSOLE)
-#    define RA_CONSOLE_BASE     R_SCI2_B_BASE
+#    define RA_CONSOLE_BASE     R_SCI_B_CH_BASE(2)
 #    define RA_CONSOLE_MTSP     R_MSTP_MSTPCRB_SCI2
 #    define RA_CONSOLE_BAUD     CONFIG_SCI2_BAUD
 #    define RA_CONSOLE_BITS     CONFIG_SCI2_BITS
 #    define RA_CONSOLE_PARITY   CONFIG_SCI2_PARITY
 #    define RA_CONSOLE_2STOP    CONFIG_SCI2_2STOP
 #  elif defined(CONFIG_SCI3_SERIAL_CONSOLE)
-#    define RA_CONSOLE_BASE     R_SCI3_B_BASE
+#    define RA_CONSOLE_BASE     R_SCI_B_CH_BASE(3)
 #    define RA_CONSOLE_MTSP     R_MSTP_MSTPCRB_SCI3
 #    define RA_CONSOLE_BAUD     CONFIG_SCI3_BAUD
 #    define RA_CONSOLE_BITS     CONFIG_SCI3_BITS
 #    define RA_CONSOLE_PARITY   CONFIG_SCI3_PARITY
 #    define RA_CONSOLE_2STOP    CONFIG_SCI3_2STOP
 #  elif defined(CONFIG_SCI4_SERIAL_CONSOLE)
-#    define RA_CONSOLE_BASE     R_SCI4_B_BASE
+#    define RA_CONSOLE_BASE     R_SCI_B_CH_BASE(4)
 #    define RA_CONSOLE_MTSP     R_MSTP_MSTPCRB_SCI4
 #    define RA_CONSOLE_BAUD     CONFIG_SCI4_BAUD
 #    define RA_CONSOLE_BITS     CONFIG_SCI4_BITS
 #    define RA_CONSOLE_PARITY   CONFIG_SCI4_PARITY
 #    define RA_CONSOLE_2STOP    CONFIG_SCI4_2STOP
 #  elif defined(CONFIG_SCI9_SERIAL_CONSOLE)
-#    define RA_CONSOLE_BASE     R_SCI9_B_BASE
+#    define RA_CONSOLE_BASE     R_SCI_B_CH_BASE(9)
 #    define RA_CONSOLE_MTSP     R_MSTP_MSTPCRB_SCI9
 #    define RA_CONSOLE_BAUD     CONFIG_SCI9_BAUD
 #    define RA_CONSOLE_BITS     CONFIG_SCI9_BITS
@@ -220,7 +220,7 @@ void arm_lowputc(char ch)
   if ((getreg32(RA_CONSOLE_BASE + R_SCI_B_CSR_OFFSET) & R_SCI_B_CSR_TDRE) != 0)
     {
       /* Send the character to TDR_BY register (byte access) */
-      putreg8((uint32_t)ch, RA_CONSOLE_BASE + R_SCI_B_TDR_BY_OFFSET);
+      putreg8((uint32_t)ch, RA_CONSOLE_BASE + R_SCI_B_TDR_OFFSET);
 
       /* Clear TDRE flag by writing to CFCLR register */
       putreg32(R_SCI_B_CFCLR_TDREC, RA_CONSOLE_BASE + R_SCI_B_CFCLR_OFFSET);

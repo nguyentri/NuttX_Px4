@@ -33,7 +33,6 @@
  */
 
 #include <arch/ra8/chip.h>
-#include "hardware/ra_memorymap.h"
 
 /* Include the chip interrupt definition file */
 

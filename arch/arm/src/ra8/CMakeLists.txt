@@ -24,6 +24,7 @@ target_include_directories(arch PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/hardware
   ${CMAKE_CURRENT_SOURCE_DIR}/hardware/ra8e1
+  ${CMAKE_CURRENT_SOURCE_DIR}/hardware/ra8p1
 )
 
 # Required RA8 core files
