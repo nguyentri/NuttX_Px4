@@ -1072,11 +1072,11 @@
 #define R_MFWD_FWRFVC_RFRV_MASK                   0xf0000
 
 /* FWCFC Register bit definitions */
-#define R_MFWD_FWCFC_CFEFFV2 TO CFEFFV0_SHIFT     (0)  /* Cascade Filter E-Frame Filter Valid n (n = 0 to 2) */
-#define R_MFWD_FWCFC_CFEFFV2 TO CFEFFV0_MASK      0x7
+#define R_MFWD_FWCFC_CFEFFV2_TO_CFEFFV0_SHIFT     (0)  /* Cascade Filter E-Frame Filter Valid n (n = 0 to 2) */
+#define R_MFWD_FWCFC_CFEFFV2_TO_CFEFFV0_MASK      0x7
 
-#define R_MFWD_FWCFC_CFPFFV1 TO CFPFFV0_SHIFT     (16)  /* Cascade Filter E-Frame Filter Valid n (n = 0 to 1) */
-#define R_MFWD_FWCFC_CFPFFV1 TO CFPFFV0_MASK      0x30000
+#define R_MFWD_FWCFC_CFPFFV1_TO_CFPFFV0_SHIFT     (16)  /* Cascade Filter E-Frame Filter Valid n (n = 0 to 1) */
+#define R_MFWD_FWCFC_CFPFFV1_TO_CFPFFV0_MASK      0x30000
 
 /* FWCFMC Register bit definitions */
 #define R_MFWD_FWCFMC_CFFN_SHIFT                  (0)  /* Cascade Filter Filter Number */
@@ -1239,11 +1239,11 @@
 #define R_MFWD_FWL2SC_L2ICDS                      (1 << 7)  /* Layer 2 Include C-TAG DEI in Stream */
 
 /* FWSFHEC Register bit definitions */
-#define R_MFWD_FWSFHEC_IP4HE15 TO IP4HE0_SHIFT    (0)  /* IPv4 Stream Filter Hash Equation n (n = 0 to 15) */
-#define R_MFWD_FWSFHEC_IP4HE15 TO IP4HE0_MASK     0xffff
+#define R_MFWD_FWSFHEC_IP4HE15_TO_IP4HE0_SHIFT    (0)  /* IPv4 Stream Filter Hash Equation n (n = 0 to 15) */
+#define R_MFWD_FWSFHEC_IP4HE15_TO_IP4HE0_MASK     0xffff
 
-#define R_MFWD_FWSFHEC_IP6HE15 TO IP6HE0_SHIFT    (16)  /* IPv6 Stream Filter Hash Equation n (n = 0 to 15) */
-#define R_MFWD_FWSFHEC_IP6HE15 TO IP6HE0_MASK     0xffff0000
+#define R_MFWD_FWSFHEC_IP6HE15_TO_IP6HE0_SHIFT    (16)  /* IPv6 Stream Filter Hash Equation n (n = 0 to 15) */
+#define R_MFWD_FWSFHEC_IP6HE15_TO_IP6HE0_MASK     0xffff0000
 
 /* FWSHCR0 Register bit definitions */
 #define R_MFWD_FWSHCR0_SHCMDP0_SHIFT              (0)  /* Software Hash Calculation MAC Destination Part 0 */
@@ -1336,8 +1336,8 @@
 #define R_MFWD_FWLTHHEC_LTHHMUE_MASK              0x1ff0000
 
 /* FWLTHHC Register bit definitions */
-#define R_MFWD_FWLTHHC_LTHHE7 TO LTHHE0_SHIFT     (0)  /* L3 Hash Equation n (n = 0 to 7) */
-#define R_MFWD_FWLTHHC_LTHHE7 TO LTHHE0_MASK      0xff
+#define R_MFWD_FWLTHHC_LTHHE7_TO_LTHHE0_SHIFT     (0)  /* L3 Hash Equation n (n = 0 to 7) */
+#define R_MFWD_FWLTHHC_LTHHE7_TO_LTHHE0_MASK      0xff
 
 /* FWLTHTL0 Register bit definitions */
 #define R_MFWD_FWLTHTL0_LTHSLP0_SHIFT             (0)  /* L3 Stream Learn Part 0 */
@@ -1585,8 +1585,8 @@
 #define R_MFWD_FWMACHEC_MACHMUE_MASK              0xfff0000
 
 /* FWMACHC Register bit definitions */
-#define R_MFWD_FWMACHC_MACHE10 TO MACHE0_SHIFT    (0)  /* MAC Hash Equation n (n = 0 to 10) */
-#define R_MFWD_FWMACHC_MACHE10 TO MACHE0_MASK     0x7ff
+#define R_MFWD_FWMACHC_MACHE10_TO_MACHE0_SHIFT    (0)  /* MAC Hash Equation n (n = 0 to 10) */
+#define R_MFWD_FWMACHC_MACHE10_TO_MACHE0_MASK     0x7ff
 
 /* FWMACTL0 Register bit definitions */
 #define R_MFWD_FWMACTL0_MACSLL                    (1 << 8)  /* MAC Security Level Learn */
@@ -2046,8 +2046,8 @@
 
 #define R_MFWD_FWPMTRFC_MTRCF                     (1 << 4)  /* Meter Coupling Flag */
 
-#define R_MFWD_FWPMTRFC_MTRCM15 TO MTRCM0_SHIFT   (16)  /* Meter Color Mode n (n = 0 to 15) */
-#define R_MFWD_FWPMTRFC_MTRCM15 TO MTRCM0_MASK    0xffff0000
+#define R_MFWD_FWPMTRFC_MTRCM15_TO_MTRCM0_SHIFT   (16)  /* Meter Color Mode n (n = 0 to 15) */
+#define R_MFWD_FWPMTRFC_MTRCM15_TO_MTRCM0_MASK    0xffff0000
 
 /* FWPMTRCBSC Register bit definitions */
 #define R_MFWD_FWPMTRCBSC_CBS_SHIFT               (0)  /* CBS */
@@ -2441,174 +2441,174 @@
 #define R_MFWD_FWEID1_L23UEED                     (1 << 8)  /* Layer 2/Layer 3 Update Error Disable */
 
 /* FWEIS2 Register bit definitions */
-#define R_MFWD_FWEIS2_PMFS15 TO PMFS0_SHIFT       (0)  /* PSFP MSDU n Filtering Status Flag (n = 0 to 15) */
-#define R_MFWD_FWEIS2_PMFS15 TO PMFS0_MASK        0xffff
+#define R_MFWD_FWEIS2_PMFS15_TO_PMFS0_SHIFT       (0)  /* PSFP MSDU n Filtering Status Flag (n = 0 to 15) */
+#define R_MFWD_FWEIS2_PMFS15_TO_PMFS0_MASK        0xffff
 
 /* FWEIE2 Register bit definitions */
-#define R_MFWD_FWEIE2_PMFE15 TO PMFE0_SHIFT       (0)  /* PSFP MSDU n Filtering Enable (n = 0 to 15) */
-#define R_MFWD_FWEIE2_PMFE15 TO PMFE0_MASK        0xffff
-#  define R_MFWD_FWEIE2_PMFE15 TO PMFE0_0                 (0 << R_MFWD_FWEIE2_PMFE15 TO PMFE0_SHIFT)  /* Interrupt disabled. */
-#  define R_MFWD_FWEIE2_PMFE15 TO PMFE0_1                 (1 << R_MFWD_FWEIE2_PMFE15 TO PMFE0_SHIFT)  /* Interrupt Enabled. */
+#define R_MFWD_FWEIE2_PMFE15_TO_PMFE0_SHIFT       (0)  /* PSFP MSDU n Filtering Enable (n = 0 to 15) */
+#define R_MFWD_FWEIE2_PMFE15_TO_PMFE0_MASK        0xffff
+#  define R_MFWD_FWEIE2_PMFE15_TO_PMFE0_0                 (0 << R_MFWD_FWEIE2_PMFE15_TO_PMFE0_SHIFT)  /* Interrupt disabled. */
+#  define R_MFWD_FWEIE2_PMFE15_TO_PMFE0_1                 (1 << R_MFWD_FWEIE2_PMFE15_TO_PMFE0_SHIFT)  /* Interrupt Enabled. */
 
 /* FWEID2 Register bit definitions */
-#define R_MFWD_FWEID2_PMFD15 TO PMFD0_SHIFT       (0)  /* PSFP MSDU n Filtering Disable (n = 0 to 15) */
-#define R_MFWD_FWEID2_PMFD15 TO PMFD0_MASK        0xffff
+#define R_MFWD_FWEID2_PMFD15_TO_PMFD0_SHIFT       (0)  /* PSFP MSDU n Filtering Disable (n = 0 to 15) */
+#define R_MFWD_FWEID2_PMFD15_TO_PMFD0_MASK        0xffff
 
 /* FWEIS5 Register bit definitions */
-#define R_MFWD_FWEIS5_PMRFS31 TO PMRFS0_SHIFT     (0)  /* PSFP Meter n Filtering Status Flag (n = 0 to 31) */
-#define R_MFWD_FWEIS5_PMRFS31 TO PMRFS0_MASK      0xffffffff
+#define R_MFWD_FWEIS5_PMRFS31_TO_PMRFS0_SHIFT     (0)  /* PSFP Meter n Filtering Status Flag (n = 0 to 31) */
+#define R_MFWD_FWEIS5_PMRFS31_TO_PMRFS0_MASK      0xffffffff
 
 /* FWEIE5 Register bit definitions */
-#define R_MFWD_FWEIE5_PMRFE31 TO PMRFE0_SHIFT     (0)  /* PSFP Meter n Filtering Enable (n = 0 to 31) */
-#define R_MFWD_FWEIE5_PMRFE31 TO PMRFE0_MASK      0xffffffff
+#define R_MFWD_FWEIE5_PMRFE31_TO_PMRFE0_SHIFT     (0)  /* PSFP Meter n Filtering Enable (n = 0 to 31) */
+#define R_MFWD_FWEIE5_PMRFE31_TO_PMRFE0_MASK      0xffffffff
 
 /* FWEID5 Register bit definitions */
-#define R_MFWD_FWEID5_PMRFD31 TO PMRFD0_SHIFT     (0)  /* PSFP Meter n Filtering Disable (n = 0 to 31) */
-#define R_MFWD_FWEID5_PMRFD31 TO PMRFD0_MASK      0xffffffff
+#define R_MFWD_FWEID5_PMRFD31_TO_PMRFD0_SHIFT     (0)  /* PSFP Meter n Filtering Disable (n = 0 to 31) */
+#define R_MFWD_FWEID5_PMRFD31_TO_PMRFD0_MASK      0xffffffff
 
 /* FWEIS60 Register bit definitions */
-#define R_MFWD_FWEIS60_FFS31 TO FFS0_SHIFT        (0)  /* FRER n Filtering Status Flag (n = 96 to 127) */
-#define R_MFWD_FWEIS60_FFS31 TO FFS0_MASK         0xffffffff
+#define R_MFWD_FWEIS60_FFS31_TO_FFS0_SHIFT        (0)  /* FRER n Filtering Status Flag (n = 96 to 127) */
+#define R_MFWD_FWEIS60_FFS31_TO_FFS0_MASK         0xffffffff
 
 /* FWEIE60 Register bit definitions */
-#define R_MFWD_FWEIE60_FFE31 TO FFE0_SHIFT        (0)  /* FRER n Filtering Enable (n = 96 to 127) */
-#define R_MFWD_FWEIE60_FFE31 TO FFE0_MASK         0xffffffff
+#define R_MFWD_FWEIE60_FFE31_TO_FFE0_SHIFT        (0)  /* FRER n Filtering Enable (n = 96 to 127) */
+#define R_MFWD_FWEIE60_FFE31_TO_FFE0_MASK         0xffffffff
 
 /* FWEID60 Register bit definitions */
-#define R_MFWD_FWEID60_FFD31 TO FFD0_SHIFT        (0)  /* FRER n Filtering Disable (n = 96 to 127) */
-#define R_MFWD_FWEID60_FFD31 TO FFD0_MASK         0xffffffff
+#define R_MFWD_FWEID60_FFD31_TO_FFD0_SHIFT        (0)  /* FRER n Filtering Disable (n = 96 to 127) */
+#define R_MFWD_FWEID60_FFD31_TO_FFD0_MASK         0xffffffff
 
 /* FWEIS61 Register bit definitions */
-#define R_MFWD_FWEIS61_FFS31 TO FFS0_SHIFT        (0)  /* FRER n Filtering Status Flag (n = 64 to 95) */
-#define R_MFWD_FWEIS61_FFS31 TO FFS0_MASK         0xffffffff
+#define R_MFWD_FWEIS61_FFS31_TO_FFS0_SHIFT        (0)  /* FRER n Filtering Status Flag (n = 64 to 95) */
+#define R_MFWD_FWEIS61_FFS31_TO_FFS0_MASK         0xffffffff
 
 /* FWEIE61 Register bit definitions */
-#define R_MFWD_FWEIE61_FFE31 TO FFE0_SHIFT        (0)  /* FRER n Filtering Enable (n = 64 to 95) */
-#define R_MFWD_FWEIE61_FFE31 TO FFE0_MASK         0xffffffff
+#define R_MFWD_FWEIE61_FFE31_TO_FFE0_SHIFT        (0)  /* FRER n Filtering Enable (n = 64 to 95) */
+#define R_MFWD_FWEIE61_FFE31_TO_FFE0_MASK         0xffffffff
 
 /* FWEID61 Register bit definitions */
-#define R_MFWD_FWEID61_FFD31 TO FFD0_SHIFT        (0)  /* FRER n Filtering Disable (n = 64 to 95) */
-#define R_MFWD_FWEID61_FFD31 TO FFD0_MASK         0xffffffff
+#define R_MFWD_FWEID61_FFD31_TO_FFD0_SHIFT        (0)  /* FRER n Filtering Disable (n = 64 to 95) */
+#define R_MFWD_FWEID61_FFD31_TO_FFD0_MASK         0xffffffff
 
 /* FWEIS62 Register bit definitions */
-#define R_MFWD_FWEIS62_FFS31 TO FFS0_SHIFT        (0)  /* FRER n Filtering Status Flag (n = 32 to 63) */
-#define R_MFWD_FWEIS62_FFS31 TO FFS0_MASK         0xffffffff
+#define R_MFWD_FWEIS62_FFS31_TO_FFS0_SHIFT        (0)  /* FRER n Filtering Status Flag (n = 32 to 63) */
+#define R_MFWD_FWEIS62_FFS31_TO_FFS0_MASK         0xffffffff
 
 /* FWEIE62 Register bit definitions */
-#define R_MFWD_FWEIE62_FFE31 TO FFE0_SHIFT        (0)  /* FRER n Filtering Enable (n = 32 to 63) */
-#define R_MFWD_FWEIE62_FFE31 TO FFE0_MASK         0xffffffff
+#define R_MFWD_FWEIE62_FFE31_TO_FFE0_SHIFT        (0)  /* FRER n Filtering Enable (n = 32 to 63) */
+#define R_MFWD_FWEIE62_FFE31_TO_FFE0_MASK         0xffffffff
 
 /* FWEID62 Register bit definitions */
-#define R_MFWD_FWEID62_FFD31 TO FFD0_SHIFT        (0)  /* FRER n Filtering Disable (n = 32 to 63) */
-#define R_MFWD_FWEID62_FFD31 TO FFD0_MASK         0xffffffff
+#define R_MFWD_FWEID62_FFD31_TO_FFD0_SHIFT        (0)  /* FRER n Filtering Disable (n = 32 to 63) */
+#define R_MFWD_FWEID62_FFD31_TO_FFD0_MASK         0xffffffff
 
 /* FWEIS63 Register bit definitions */
-#define R_MFWD_FWEIS63_FFS31 TO FFS0_SHIFT        (0)  /* FRER n Filtering Status Flag (n = 0 to 31) */
-#define R_MFWD_FWEIS63_FFS31 TO FFS0_MASK         0xffffffff
+#define R_MFWD_FWEIS63_FFS31_TO_FFS0_SHIFT        (0)  /* FRER n Filtering Status Flag (n = 0 to 31) */
+#define R_MFWD_FWEIS63_FFS31_TO_FFS0_MASK         0xffffffff
 
 /* FWEIE63 Register bit definitions */
-#define R_MFWD_FWEIE63_FFE31 TO FFE0_SHIFT        (0)  /* FRER n Filtering Enable (n = 0 to 31) */
-#define R_MFWD_FWEIE63_FFE31 TO FFE0_MASK         0xffffffff
+#define R_MFWD_FWEIE63_FFE31_TO_FFE0_SHIFT        (0)  /* FRER n Filtering Enable (n = 0 to 31) */
+#define R_MFWD_FWEIE63_FFE31_TO_FFE0_MASK         0xffffffff
 
 /* FWEID63 Register bit definitions */
-#define R_MFWD_FWEID63_FFD31 TO FFD0_SHIFT        (0)  /* FRER n Filtering Disable (n = 0 to 31) */
-#define R_MFWD_FWEID63_FFD31 TO FFD0_MASK         0xffffffff
+#define R_MFWD_FWEID63_FFD31_TO_FFD0_SHIFT        (0)  /* FRER n Filtering Disable (n = 0 to 31) */
+#define R_MFWD_FWEID63_FFD31_TO_FFD0_MASK         0xffffffff
 
 /* FWEIS70 Register bit definitions */
-#define R_MFWD_FWEIS70_FOORS31 TO FOORS0_SHIFT    (0)  /* FRER n Out Of Range Status Flag (n = 96 to 127) */
-#define R_MFWD_FWEIS70_FOORS31 TO FOORS0_MASK     0xffffffff
+#define R_MFWD_FWEIS70_FOORS31_TO_FOORS0_SHIFT    (0)  /* FRER n Out Of Range Status Flag (n = 96 to 127) */
+#define R_MFWD_FWEIS70_FOORS31_TO_FOORS0_MASK     0xffffffff
 
 /* FWEIE70 Register bit definitions */
-#define R_MFWD_FWEIE70_FOORE31 TO FOORE0_SHIFT    (0)  /* FRER n Out Of Range Enable (n = 96 to 127) */
-#define R_MFWD_FWEIE70_FOORE31 TO FOORE0_MASK     0xffffffff
+#define R_MFWD_FWEIE70_FOORE31_TO_FOORE0_SHIFT    (0)  /* FRER n Out Of Range Enable (n = 96 to 127) */
+#define R_MFWD_FWEIE70_FOORE31_TO_FOORE0_MASK     0xffffffff
 
 /* FWEID70 Register bit definitions */
-#define R_MFWD_FWEID70_FOORD31 TO FOORD0_SHIFT    (0)  /* FRER n Out Of Range Disable (n = 96 to 127) */
-#define R_MFWD_FWEID70_FOORD31 TO FOORD0_MASK     0xffffffff
+#define R_MFWD_FWEID70_FOORD31_TO_FOORD0_SHIFT    (0)  /* FRER n Out Of Range Disable (n = 96 to 127) */
+#define R_MFWD_FWEID70_FOORD31_TO_FOORD0_MASK     0xffffffff
 
 /* FWEIS71 Register bit definitions */
-#define R_MFWD_FWEIS71_FOORS31 TO FOORS0_SHIFT    (0)  /* FRER n Out Of Range Status Flag (n = 64 to 95) */
-#define R_MFWD_FWEIS71_FOORS31 TO FOORS0_MASK     0xffffffff
+#define R_MFWD_FWEIS71_FOORS31_TO_FOORS0_SHIFT    (0)  /* FRER n Out Of Range Status Flag (n = 64 to 95) */
+#define R_MFWD_FWEIS71_FOORS31_TO_FOORS0_MASK     0xffffffff
 
 /* FWEIE71 Register bit definitions */
-#define R_MFWD_FWEIE71_FOORE31 TO FOORE0_SHIFT    (0)  /* FRER n Out Of Range Enable (n = 64 to 95) */
-#define R_MFWD_FWEIE71_FOORE31 TO FOORE0_MASK     0xffffffff
+#define R_MFWD_FWEIE71_FOORE31_TO_FOORE0_SHIFT    (0)  /* FRER n Out Of Range Enable (n = 64 to 95) */
+#define R_MFWD_FWEIE71_FOORE31_TO_FOORE0_MASK     0xffffffff
 
 /* FWEID71 Register bit definitions */
-#define R_MFWD_FWEID71_FOORD31 TO FOORD0_SHIFT    (0)  /* FRER n Out Of Range Disable (n = 64 to 95) */
-#define R_MFWD_FWEID71_FOORD31 TO FOORD0_MASK     0xffffffff
+#define R_MFWD_FWEID71_FOORD31_TO_FOORD0_SHIFT    (0)  /* FRER n Out Of Range Disable (n = 64 to 95) */
+#define R_MFWD_FWEID71_FOORD31_TO_FOORD0_MASK     0xffffffff
 
 /* FWEIS72 Register bit definitions */
-#define R_MFWD_FWEIS72_FOORS31 TO FOORS0_SHIFT    (0)  /* FRER n Out Of Range Status Flag (n = 32 to 63) */
-#define R_MFWD_FWEIS72_FOORS31 TO FOORS0_MASK     0xffffffff
+#define R_MFWD_FWEIS72_FOORS31_TO_FOORS0_SHIFT    (0)  /* FRER n Out Of Range Status Flag (n = 32 to 63) */
+#define R_MFWD_FWEIS72_FOORS31_TO_FOORS0_MASK     0xffffffff
 
 /* FWEIE72 Register bit definitions */
-#define R_MFWD_FWEIE72_FOORE31 TO FOORE0_SHIFT    (0)  /* FRER n Out Of Range Enable (n = 32 to 63) */
-#define R_MFWD_FWEIE72_FOORE31 TO FOORE0_MASK     0xffffffff
+#define R_MFWD_FWEIE72_FOORE31_TO_FOORE0_SHIFT    (0)  /* FRER n Out Of Range Enable (n = 32 to 63) */
+#define R_MFWD_FWEIE72_FOORE31_TO_FOORE0_MASK     0xffffffff
 
 /* FWEID72 Register bit definitions */
-#define R_MFWD_FWEID72_FOORD31 TO FOORD0_SHIFT    (0)  /* FRER n Out Of Range Disable (n = 32 to 63) */
-#define R_MFWD_FWEID72_FOORD31 TO FOORD0_MASK     0xffffffff
+#define R_MFWD_FWEID72_FOORD31_TO_FOORD0_SHIFT    (0)  /* FRER n Out Of Range Disable (n = 32 to 63) */
+#define R_MFWD_FWEID72_FOORD31_TO_FOORD0_MASK     0xffffffff
 
 /* FWEIS73 Register bit definitions */
-#define R_MFWD_FWEIS73_FOORS31 TO FOORS0_SHIFT    (0)  /* FRER n Out Of Range Status Flag (n = 0 to 31) */
-#define R_MFWD_FWEIS73_FOORS31 TO FOORS0_MASK     0xffffffff
+#define R_MFWD_FWEIS73_FOORS31_TO_FOORS0_SHIFT    (0)  /* FRER n Out Of Range Status Flag (n = 0 to 31) */
+#define R_MFWD_FWEIS73_FOORS31_TO_FOORS0_MASK     0xffffffff
 
 /* FWEIE73 Register bit definitions */
-#define R_MFWD_FWEIE73_FOORE31 TO FOORE0_SHIFT    (0)  /* FRER n Out Of Range Enable (n = 0 to 31) */
-#define R_MFWD_FWEIE73_FOORE31 TO FOORE0_MASK     0xffffffff
+#define R_MFWD_FWEIE73_FOORE31_TO_FOORE0_SHIFT    (0)  /* FRER n Out Of Range Enable (n = 0 to 31) */
+#define R_MFWD_FWEIE73_FOORE31_TO_FOORE0_MASK     0xffffffff
 
 /* FWEID73 Register bit definitions */
-#define R_MFWD_FWEID73_FOORD31 TO FOORD0_SHIFT    (0)  /* FRER n Out Of Range Disable (n = 0 to 31) */
-#define R_MFWD_FWEID73_FOORD31 TO FOORD0_MASK     0xffffffff
+#define R_MFWD_FWEID73_FOORD31_TO_FOORD0_SHIFT    (0)  /* FRER n Out Of Range Disable (n = 0 to 31) */
+#define R_MFWD_FWEID73_FOORD31_TO_FOORD0_MASK     0xffffffff
 
 /* FWEIS80 Register bit definitions */
-#define R_MFWD_FWEIS80_TOS31 TO TOS0_SHIFT        (0)  /* Timeout Status Flag n (n = 96 to 127) */
-#define R_MFWD_FWEIS80_TOS31 TO TOS0_MASK         0xffffffff
+#define R_MFWD_FWEIS80_TOS31_TO_TOS0_SHIFT        (0)  /* Timeout Status Flag n (n = 96 to 127) */
+#define R_MFWD_FWEIS80_TOS31_TO_TOS0_MASK         0xffffffff
 
 /* FWEIE80 Register bit definitions */
-#define R_MFWD_FWEIE80_TOE31 TO TOE0_SHIFT        (0)  /* Timeout Enable n (n = 96 to 127) */
-#define R_MFWD_FWEIE80_TOE31 TO TOE0_MASK         0xffffffff
+#define R_MFWD_FWEIE80_TOE31_TO_TOE0_SHIFT        (0)  /* Timeout Enable n (n = 96 to 127) */
+#define R_MFWD_FWEIE80_TOE31_TO_TOE0_MASK         0xffffffff
 
 /* FWEID80 Register bit definitions */
-#define R_MFWD_FWEID80_TOD31 TO TOD0_SHIFT        (0)  /* Timeout Disable n (n = 96 to 127) */
-#define R_MFWD_FWEID80_TOD31 TO TOD0_MASK         0xffffffff
+#define R_MFWD_FWEID80_TOD31_TO_TOD0_SHIFT        (0)  /* Timeout Disable n (n = 96 to 127) */
+#define R_MFWD_FWEID80_TOD31_TO_TOD0_MASK         0xffffffff
 
 /* FWEIS81 Register bit definitions */
-#define R_MFWD_FWEIS81_TOS31 TO TOS0_SHIFT        (0)  /* Timeout Status Flag n (n = 64 to 95) */
-#define R_MFWD_FWEIS81_TOS31 TO TOS0_MASK         0xffffffff
+#define R_MFWD_FWEIS81_TOS31_TO_TOS0_SHIFT        (0)  /* Timeout Status Flag n (n = 64 to 95) */
+#define R_MFWD_FWEIS81_TOS31_TO_TOS0_MASK         0xffffffff
 
 /* FWEIE81 Register bit definitions */
-#define R_MFWD_FWEIE81_TOE31 TO TOE0_SHIFT        (0)  /* Timeout Enable n (n = 64 to 95) */
-#define R_MFWD_FWEIE81_TOE31 TO TOE0_MASK         0xffffffff
+#define R_MFWD_FWEIE81_TOE31_TO_TOE0_SHIFT        (0)  /* Timeout Enable n (n = 64 to 95) */
+#define R_MFWD_FWEIE81_TOE31_TO_TOE0_MASK         0xffffffff
 
 /* FWEID81 Register bit definitions */
-#define R_MFWD_FWEID81_TOD31 TO TOD0_SHIFT        (0)  /* Timeout Disable n (n = 64 to 95) */
-#define R_MFWD_FWEID81_TOD31 TO TOD0_MASK         0xffffffff
+#define R_MFWD_FWEID81_TOD31_TO_TOD0_SHIFT        (0)  /* Timeout Disable n (n = 64 to 95) */
+#define R_MFWD_FWEID81_TOD31_TO_TOD0_MASK         0xffffffff
 
 /* FWEIS82 Register bit definitions */
-#define R_MFWD_FWEIS82_TOS31 TO TOS0_SHIFT        (0)  /* Timeout Status Flag n (n = 32 to 63) */
-#define R_MFWD_FWEIS82_TOS31 TO TOS0_MASK         0xffffffff
+#define R_MFWD_FWEIS82_TOS31_TO_TOS0_SHIFT        (0)  /* Timeout Status Flag n (n = 32 to 63) */
+#define R_MFWD_FWEIS82_TOS31_TO_TOS0_MASK         0xffffffff
 
 /* FWEIE82 Register bit definitions */
-#define R_MFWD_FWEIE82_TOE31 TO TOE0_SHIFT        (0)  /* Timeout Enable n (n = 32 to 63) */
-#define R_MFWD_FWEIE82_TOE31 TO TOE0_MASK         0xffffffff
+#define R_MFWD_FWEIE82_TOE31_TO_TOE0_SHIFT        (0)  /* Timeout Enable n (n = 32 to 63) */
+#define R_MFWD_FWEIE82_TOE31_TO_TOE0_MASK         0xffffffff
 
 /* FWEID82 Register bit definitions */
-#define R_MFWD_FWEID82_TOD31 TO TOD0_SHIFT        (0)  /* Timeout Disable n (n = 32 to 63) */
-#define R_MFWD_FWEID82_TOD31 TO TOD0_MASK         0xffffffff
+#define R_MFWD_FWEID82_TOD31_TO_TOD0_SHIFT        (0)  /* Timeout Disable n (n = 32 to 63) */
+#define R_MFWD_FWEID82_TOD31_TO_TOD0_MASK         0xffffffff
 
 /* FWEIS83 Register bit definitions */
-#define R_MFWD_FWEIS83_TOS31 TO TOS0_SHIFT        (0)  /* Timeout Status Flag n (n = 0 to 31) */
-#define R_MFWD_FWEIS83_TOS31 TO TOS0_MASK         0xffffffff
+#define R_MFWD_FWEIS83_TOS31_TO_TOS0_SHIFT        (0)  /* Timeout Status Flag n (n = 0 to 31) */
+#define R_MFWD_FWEIS83_TOS31_TO_TOS0_MASK         0xffffffff
 
 /* FWEIE83 Register bit definitions */
-#define R_MFWD_FWEIE83_TOE31 TO TOE0_SHIFT        (0)  /* Timeout Enable n (n = 0 to 31) */
-#define R_MFWD_FWEIE83_TOE31 TO TOE0_MASK         0xffffffff
+#define R_MFWD_FWEIE83_TOE31_TO_TOE0_SHIFT        (0)  /* Timeout Enable n (n = 0 to 31) */
+#define R_MFWD_FWEIE83_TOE31_TO_TOE0_MASK         0xffffffff
 
 /* FWEID83 Register bit definitions */
-#define R_MFWD_FWEID83_TOD31 TO TOD0_SHIFT        (0)  /* Timeout Disable n (n = 0 to 31) */
-#define R_MFWD_FWEID83_TOD31 TO TOD0_MASK         0xffffffff
+#define R_MFWD_FWEID83_TOD31_TO_TOD0_SHIFT        (0)  /* Timeout Disable n (n = 0 to 31) */
+#define R_MFWD_FWEID83_TOD31_TO_TOD0_MASK         0xffffffff
 
 /* FWMIS0 Register bit definitions */
 #define R_MFWD_FWMIS0_LTHTFS                      (1 << 0)  /* L3 Table Full Status Flag */

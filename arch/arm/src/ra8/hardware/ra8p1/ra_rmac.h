@@ -291,13 +291,13 @@
 #define R_RMAC_MTPFC_PFRLV_MASK                   0xf8000000
 
 /* MTPFC2 Register bit definitions */
-#define R_RMAC_MTPFC2_PFCTTZ1 TO PFCTTZ0_SHIFT    (0)  /* PFC Frame n Transmission with TIME = 0 (n = 0, 1) */
-#define R_RMAC_MTPFC2_PFCTTZ1 TO PFCTTZ0_MASK     0x3
-#  define R_RMAC_MTPFC2_PFCTTZ1 TO PFCTTZ0_0              (0 << R_RMAC_MTPFC2_PFCTTZ1 TO PFCTTZ0_SHIFT)  /* The transmission of PFC frames with TIME value zero is disabled. */
-#  define R_RMAC_MTPFC2_PFCTTZ1 TO PFCTTZ0_1              (1 << R_RMAC_MTPFC2_PFCTTZ1 TO PFCTTZ0_SHIFT)  /* The transmission of PFC frames with TIME value zero is enabled. */
+#define R_RMAC_MTPFC2_PFCTTZ1_TO_PFCTTZ0_SHIFT    (0)  /* PFC Frame n Transmission with TIME = 0 (n = 0, 1) */
+#define R_RMAC_MTPFC2_PFCTTZ1_TO_PFCTTZ0_MASK     0x3
+#  define R_RMAC_MTPFC2_PFCTTZ1_TO_PFCTTZ0_0              (0 << R_RMAC_MTPFC2_PFCTTZ1_TO_PFCTTZ0_SHIFT)  /* The transmission of PFC frames with TIME value zero is disabled. */
+#  define R_RMAC_MTPFC2_PFCTTZ1_TO_PFCTTZ0_1              (1 << R_RMAC_MTPFC2_PFCTTZ1_TO_PFCTTZ0_SHIFT)  /* The transmission of PFC frames with TIME value zero is enabled. */
 
-#define R_RMAC_MTPFC2_MPFCFR1 TO MPFCFR0_SHIFT    (8)  /* Manual PFC Frame n Request (n = 0, 1) */
-#define R_RMAC_MTPFC2_MPFCFR1 TO MPFCFR0_MASK     0x300
+#define R_RMAC_MTPFC2_MPFCFR1_TO_MPFCFR0_SHIFT    (8)  /* Manual PFC Frame n Request (n = 0, 1) */
+#define R_RMAC_MTPFC2_MPFCFR1_TO_MPFCFR0_MASK     0x300
 
 #define R_RMAC_MTPFC2_PFTTZ                       (1 << 16)  /* Pause Frame Transmission with TIME = 0 */
 
@@ -491,8 +491,8 @@
 #define R_RMAC_MPFC_PFBV_SHIFT                    (8)  /* PTP Filtering Byte Value */
 #define R_RMAC_MPFC_PFBV_MASK                     0xff00
 
-#define R_RMAC_MPFC_TEF1 TO TEF0_SHIFT            (16)  /* Timer Enable for Filtering n (n = 0 to 1) */
-#define R_RMAC_MPFC_TEF1 TO TEF0_MASK             0x30000
+#define R_RMAC_MPFC_TEF1_TO_TEF0_SHIFT            (16)  /* Timer Enable for Filtering n (n = 0 to 1) */
+#define R_RMAC_MPFC_TEF1_TO_TEF0_MASK             0x30000
 
 /* MLVC Register bit definitions */
 #define R_RMAC_MLVC_LVT_SHIFT                     (0)  /* Link Verification Timer */
@@ -529,8 +529,8 @@
 
 #define R_RMAC_MEIS_RPOES                         (1 << 10)  /* P-Frame Overflow Error Status Flag */
 
-#define R_RMAC_MEIS_CTLES1 TO CTLES0_SHIFT        (12)  /* Captured Timestamp Lost Error Status Flag n (n = 0 to 1) */
-#define R_RMAC_MEIS_CTLES1 TO CTLES0_MASK         0x3000
+#define R_RMAC_MEIS_CTLES1_TO_CTLES0_SHIFT        (12)  /* Captured Timestamp Lost Error Status Flag n (n = 0 to 1) */
+#define R_RMAC_MEIS_CTLES1_TO_CTLES0_MASK         0x3000
 
 #define R_RMAC_MEIS_PDES                          (1 << 20)  /* PHY Data Error Status Flag */
 
@@ -581,8 +581,8 @@
 
 #define R_RMAC_MEIE_RPOEE                         (1 << 10)  /* P-Frame Overflow Error Enable */
 
-#define R_RMAC_MEIE_CTLEE1 TO CTLEE0_SHIFT        (12)  /* Captured Timestamp Lost Error Enable n (n = 0 to 1) */
-#define R_RMAC_MEIE_CTLEE1 TO CTLEE0_MASK         0x3000
+#define R_RMAC_MEIE_CTLEE1_TO_CTLEE0_SHIFT        (12)  /* Captured Timestamp Lost Error Enable n (n = 0 to 1) */
+#define R_RMAC_MEIE_CTLEE1_TO_CTLEE0_MASK         0x3000
 
 #define R_RMAC_MEIE_PDEE                          (1 << 20)  /* PHY Data Error Enable */
 
@@ -635,8 +635,8 @@
 
 #define R_RMAC_MEID_RPOED                         (1 << 10)  /* P-Frame Overflow Error Disable */
 
-#define R_RMAC_MEID_CTLED1 TO CTLED0_SHIFT        (12)  /* Captured Timestamp Lost Error Disable n (n = 0 to 1) */
-#define R_RMAC_MEID_CTLED1 TO CTLED0_MASK         0x3000
+#define R_RMAC_MEID_CTLED1_TO_CTLED0_SHIFT        (12)  /* Captured Timestamp Lost Error Disable n (n = 0 to 1) */
+#define R_RMAC_MEID_CTLED1_TO_CTLED0_MASK         0x3000
 
 #define R_RMAC_MEID_PDED                          (1 << 20)  /* PHY Data Error Disable */
 

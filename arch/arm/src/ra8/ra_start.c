@@ -381,10 +381,12 @@ static void ra_cortex_m85_init(void)
   putreg32((uint32_t)_vectors, NVIC_VECTAB);
 #endif
 #endif
+#if defined(R_FCACHE_FCACHEIV) && defined(R_FCACHE_FCACHEE)
   /* Enable flash cache and wait for it to be ready */
   putreg16(1U, R_FCACHE_FCACHEIV);
   RA_HARDWARE_WAIT(getreg16(R_FCACHE_FCACHEIV), 0U);
   putreg16(1U, R_FCACHE_FCACHEE);
+#endif
 }
 
 /* Main entry point */

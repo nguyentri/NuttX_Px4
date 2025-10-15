@@ -748,8 +748,8 @@
 #define R_GWCA_GWRXDNECN_RXDNEN_MASK              0xffff
 
 /* GWTSDIS Register bit definitions */
-#define R_GWCA_GWTSDIS_TSDIS1 TO TSDIS0_SHIFT     (0)  /* Timestamp Data i Interrupt Status Flag */
-#define R_GWCA_GWTSDIS_TSDIS1 TO TSDIS0_MASK      0x3
+#define R_GWCA_GWTSDIS_TSDIS1_TO_TSDIS0_SHIFT     (0)  /* Timestamp Data i Interrupt Status Flag */
+#define R_GWCA_GWTSDIS_TSDIS1_TO_TSDIS0_MASK      0x3
 
 #define R_GWCA_GWTSDIS_TSDIS0                     (1 << 0)  /* TSDIS0 */
 
@@ -761,8 +761,8 @@
 #define R_GWCA_GWTSDIE_TSDIE1                     (1 << 1)  /* Timestamp Data i Interrupt Enable */
 
 /* GWTSDID Register bit definitions */
-#define R_GWCA_GWTSDID_TSDID1 TO TSDID0_SHIFT     (0)  /* Timestamp Data i Interrupt Disable */
-#define R_GWCA_GWTSDID_TSDID1 TO TSDID0_MASK      0x3
+#define R_GWCA_GWTSDID_TSDID1_TO_TSDID0_SHIFT     (0)  /* Timestamp Data i Interrupt Disable */
+#define R_GWCA_GWTSDID_TSDID1_TO_TSDID0_MASK      0x3
 
 #define R_GWCA_GWTSDID_TSDID0                     (1 << 0)  /* TSDID0 */
 
@@ -783,14 +783,14 @@
 
 #define R_GWCA_GWEIS0_TSHES                       (1 << 15)  /* Timestamp Hardware Error Status Flag */
 
-#define R_GWCA_GWEIS0_FSES7 TO FSES0_SHIFT        (16)  /* Frame Size Error Status Flag i */
-#define R_GWCA_GWEIS0_FSES7 TO FSES0_MASK         0xff0000
+#define R_GWCA_GWEIS0_FSES7_TO_FSES0_SHIFT        (16)  /* Frame Size Error Status Flag i */
+#define R_GWCA_GWEIS0_FSES7_TO_FSES0_MASK         0xff0000
 
-#define R_GWCA_GWEIS0_TDFES1 TO TDFES0_SHIFT      (24)  /* Timestamp Descriptor i Full Error Status Flag */
-#define R_GWCA_GWEIS0_TDFES1 TO TDFES0_MASK       0x3000000
+#define R_GWCA_GWEIS0_TDFES1_TO_TDFES0_SHIFT      (24)  /* Timestamp Descriptor i Full Error Status Flag */
+#define R_GWCA_GWEIS0_TDFES1_TO_TDFES0_MASK       0x3000000
 
-#define R_GWCA_GWEIS0_TSDNES1 TO TSDNES0_SHIFT    (28)  /* Timestamp Descriptor i Number Error Status Flag */
-#define R_GWCA_GWEIS0_TSDNES1 TO TSDNES0_MASK     0x30000000
+#define R_GWCA_GWEIS0_TSDNES1_TO_TSDNES0_SHIFT    (28)  /* Timestamp Descriptor i Number Error Status Flag */
+#define R_GWCA_GWEIS0_TSDNES1_TO_TSDNES0_MASK     0x30000000
 
 #define R_GWCA_GWEIS0_DECCES                      (1 << 1)  /* DECCES */
 
@@ -902,14 +902,14 @@
 
 #define R_GWCA_GWEID0_TSHED                       (1 << 15)  /* Timestamp Hardware Full Error Disable */
 
-#define R_GWCA_GWEID0_FSED7 TO FSED0_SHIFT        (16)  /* Frame Size Error Disable i */
-#define R_GWCA_GWEID0_FSED7 TO FSED0_MASK         0xff0000
+#define R_GWCA_GWEID0_FSED7_TO_FSED0_SHIFT        (16)  /* Frame Size Error Disable i */
+#define R_GWCA_GWEID0_FSED7_TO_FSED0_MASK         0xff0000
 
-#define R_GWCA_GWEID0_TDFED1 TO TDFED0_SHIFT      (24)  /* Timestamp Descriptor i Full Error Disable */
-#define R_GWCA_GWEID0_TDFED1 TO TDFED0_MASK       0x3000000
+#define R_GWCA_GWEID0_TDFED1_TO_TDFED0_SHIFT      (24)  /* Timestamp Descriptor i Full Error Disable */
+#define R_GWCA_GWEID0_TDFED1_TO_TDFED0_MASK       0x3000000
 
-#define R_GWCA_GWEID0_TSDNED1 TO TSDNED0_SHIFT    (28)  /* Timestamp Descriptor i Number Error Disable */
-#define R_GWCA_GWEID0_TSDNED1 TO TSDNED0_MASK     0x30000000
+#define R_GWCA_GWEID0_TSDNED1_TO_TSDNED0_SHIFT    (28)  /* Timestamp Descriptor i Number Error Disable */
+#define R_GWCA_GWEID0_TSDNED1_TO_TSDNED0_MASK     0x30000000
 
 #define R_GWCA_GWEID0_TECCED                      (1 << 1)  /* TECCED */
 
@@ -954,11 +954,11 @@
 #define R_GWCA_GWEID0_TSDNED1                     (1 << 29)  /* TSDNED1 */
 
 /* GWEIS1 Register bit definitions */
-#define R_GWCA_GWEIS1_DQOES7 TO DQOES0_SHIFT      (0)  /* Descriptor Queue i Overflow Error Status Flag */
-#define R_GWCA_GWEIS1_DQOES7 TO DQOES0_MASK       0xff
+#define R_GWCA_GWEIS1_DQOES7_TO_DQOES0_SHIFT      (0)  /* Descriptor Queue i Overflow Error Status Flag */
+#define R_GWCA_GWEIS1_DQOES7_TO_DQOES0_MASK       0xff
 
-#define R_GWCA_GWEIS1_DQSES7 TO DQSES0_SHIFT      (16)  /* Descriptor Queue i Security Error Status Flag (The variable i corresponds to the bit position number.) */
-#define R_GWCA_GWEIS1_DQSES7 TO DQSES0_MASK       0xff0000
+#define R_GWCA_GWEIS1_DQSES7_TO_DQSES0_SHIFT      (16)  /* Descriptor Queue i Security Error Status Flag (The variable i corresponds to the bit position number.) */
+#define R_GWCA_GWEIS1_DQSES7_TO_DQSES0_MASK       0xff0000
 
 #define R_GWCA_GWEIS1_DQOES0                      (1 << 0)  /* DQOES0 */
 
@@ -1026,11 +1026,11 @@
 #define R_GWCA_GWEIE1_DQSEE7                      (1 << 23)  /* Descriptor Queue i Security Error Enable */
 
 /* GWEID1 Register bit definitions */
-#define R_GWCA_GWEID1_DQOED7 TO DQOED0_SHIFT      (0)  /* Descriptor Queue i Overflow Error Disable */
-#define R_GWCA_GWEID1_DQOED7 TO DQOED0_MASK       0xff
+#define R_GWCA_GWEID1_DQOED7_TO_DQOED0_SHIFT      (0)  /* Descriptor Queue i Overflow Error Disable */
+#define R_GWCA_GWEID1_DQOED7_TO_DQOED0_MASK       0xff
 
-#define R_GWCA_GWEID1_DQSED7 TO DQSED0_SHIFT      (16)  /* Descriptor Queue i Security Error Disable (The variable i corresponds to the bit position number.) */
-#define R_GWCA_GWEID1_DQSED7 TO DQSED0_MASK       0xff0000
+#define R_GWCA_GWEID1_DQSED7_TO_DQSED0_SHIFT      (16)  /* Descriptor Queue i Security Error Disable (The variable i corresponds to the bit position number.) */
+#define R_GWCA_GWEID1_DQSED7_TO_DQSED0_MASK       0xff0000
 
 #define R_GWCA_GWEID1_DQOED0                      (1 << 0)  /* DQOED0 */
 
@@ -1065,8 +1065,8 @@
 #define R_GWCA_GWEID1_DQSED7                      (1 << 23)  /* DQSED7 */
 
 /* GWEIS3 Register bit definitions */
-#define R_GWCA_GWEIS3_IAOES3 TO IAOES0_SHIFT      (0)  /* Incremental Area i Overflow Error Status Flag */
-#define R_GWCA_GWEIS3_IAOES3 TO IAOES0_MASK       0xf
+#define R_GWCA_GWEIS3_IAOES3_TO_IAOES0_SHIFT      (0)  /* Incremental Area i Overflow Error Status Flag */
+#define R_GWCA_GWEIS3_IAOES3_TO_IAOES0_MASK       0xf
 
 #define R_GWCA_GWEIS3_IAOES0                      (1 << 0)  /* IAOES0 */
 
@@ -1090,8 +1090,8 @@
 #define R_GWCA_GWEIE3_IAOEE4                      (1 << 4)  /* IAOEE4 */
 
 /* GWEID3 Register bit definitions */
-#define R_GWCA_GWEID3_IAOED3 TO IAOED0_SHIFT      (0)  /* Incremental Area i Overflow Error Disable */
-#define R_GWCA_GWEID3_IAOED3 TO IAOED0_MASK       0xf
+#define R_GWCA_GWEID3_IAOED3_TO_IAOED0_SHIFT      (0)  /* Incremental Area i Overflow Error Disable */
+#define R_GWCA_GWEID3_IAOED3_TO_IAOED0_MASK       0xf
 
 #define R_GWCA_GWEID3_IAOED0                      (1 << 0)  /* IAOED0 */
 

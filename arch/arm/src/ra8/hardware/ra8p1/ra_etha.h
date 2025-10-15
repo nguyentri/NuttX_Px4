@@ -425,10 +425,10 @@
 #define R_ETHA_EACAEC_CE7                         (1 << 7)  /* CBS Enable n (n = 0 to 7) */
 
 /* EACC Register bit definitions */
-#define R_ETHA_EACC_CC7 TO CC0_SHIFT              (0)  /* Configuration Change n (n = 0 to 7) */
-#define R_ETHA_EACC_CC7 TO CC0_MASK               0xff
-#  define R_ETHA_EACC_CC7 TO CC0_0                        (0 << R_ETHA_EACC_CC7 TO CC0_SHIFT)  /* No effect */
-#  define R_ETHA_EACC_CC7 TO CC0_1                        (1 << R_ETHA_EACC_CC7 TO CC0_SHIFT)  /* The Admin settings of CBS i are copied to its Oper settings (EACAEC.CEi, EACAIVCq.CIV, and EACAULCq.CUL are respectively copied to EACOEM.CEi, EACOIVMq.CIV, and EACOULMq.CUL) */
+#define R_ETHA_EACC_CC7_TO_CC0_SHIFT              (0)  /* Configuration Change n (n = 0 to 7) */
+#define R_ETHA_EACC_CC7_TO_CC0_MASK               0xff
+#  define R_ETHA_EACC_CC7_TO_CC0_0                        (0 << R_ETHA_EACC_CC7_TO_CC0_SHIFT)  /* No effect */
+#  define R_ETHA_EACC_CC7_TO_CC0_1                        (1 << R_ETHA_EACC_CC7_TO_CC0_SHIFT)  /* The Admin settings of CBS i are copied to its Oper settings (EACAEC.CEi, EACAIVCq.CIV, and EACAULCq.CUL are respectively copied to EACOEM.CEi, EACOIVMq.CIV, and EACOULMq.CUL) */
 
 #define R_ETHA_EACC_CC0                           (1 << 0)  /* CC0 */
 
@@ -649,8 +649,8 @@
 
 #define R_ETHA_EAEIS0_TFES                        (1 << 6)  /* TAG Filtering Error Status Flag */
 
-#define R_ETHA_EAEIS0_FSES7 TO FSES0_SHIFT        (8)  /* Frame Size Error Status Flag n (n = 0 to 7) */
-#define R_ETHA_EAEIS0_FSES7 TO FSES0_MASK         0xff00
+#define R_ETHA_EAEIS0_FSES7_TO_FSES0_SHIFT        (8)  /* Frame Size Error Status Flag n (n = 0 to 7) */
+#define R_ETHA_EAEIS0_FSES7_TO_FSES0_MASK         0xff00
 
 #define R_ETHA_EAEIS0_DECCES                      (1 << 0)  /* DECCES */
 
@@ -701,10 +701,10 @@
 
 #define R_ETHA_EAEIE0_TFEE                        (1 << 6)  /* TAG Filtering Error Enable */
 
-#define R_ETHA_EAEIE0_FSEE7 TO FSEE0_SHIFT        (8)  /* Frame Size Error Enable n (n = 0 to 7) */
-#define R_ETHA_EAEIE0_FSEE7 TO FSEE0_MASK         0xff00
-#  define R_ETHA_EAEIE0_FSEE7 TO FSEE0_0                  (0 << R_ETHA_EAEIE0_FSEE7 TO FSEE0_SHIFT)  /* Interrupt disabled for descriptor queue i */
-#  define R_ETHA_EAEIE0_FSEE7 TO FSEE0_1                  (1 << R_ETHA_EAEIE0_FSEE7 TO FSEE0_SHIFT)  /* Interrupt enabled for descriptor queue i */
+#define R_ETHA_EAEIE0_FSEE7_TO_FSEE0_SHIFT        (8)  /* Frame Size Error Enable n (n = 0 to 7) */
+#define R_ETHA_EAEIE0_FSEE7_TO_FSEE0_MASK         0xff00
+#  define R_ETHA_EAEIE0_FSEE7_TO_FSEE0_0                  (0 << R_ETHA_EAEIE0_FSEE7_TO_FSEE0_SHIFT)  /* Interrupt disabled for descriptor queue i */
+#  define R_ETHA_EAEIE0_FSEE7_TO_FSEE0_1                  (1 << R_ETHA_EAEIE0_FSEE7_TO_FSEE0_SHIFT)  /* Interrupt enabled for descriptor queue i */
 
 #define R_ETHA_EAEIE0_DECCEE                      (1 << 0)  /* DECCEE */
 
@@ -755,8 +755,8 @@
 
 #define R_ETHA_EAEID0_TFED                        (1 << 6)  /* TAG Filtering Error Disable */
 
-#define R_ETHA_EAEID0_FSED7 TO FSED0_SHIFT        (8)  /* Frame Size Error Disable n (n = 0 to 7) */
-#define R_ETHA_EAEID0_FSED7 TO FSED0_MASK         0xff00
+#define R_ETHA_EAEID0_FSED7_TO_FSED0_SHIFT        (8)  /* Frame Size Error Disable n (n = 0 to 7) */
+#define R_ETHA_EAEID0_FSED7_TO_FSED0_MASK         0xff00
 
 #define R_ETHA_EAEID0_DECCED                      (1 << 0)  /* DECCED */
 
@@ -803,11 +803,11 @@
 #define R_ETHA_EAEID0_TASCTGEED                   (1 << 24)  /* TASCTGEED */
 
 /* EAEIS1 Register bit definitions */
-#define R_ETHA_EAEIS1_CULES7 TO CULES0_SHIFT      (0)  /* CBS n Upper Limit Error Status Flag (n = 0 to 7) */
-#define R_ETHA_EAEIS1_CULES7 TO CULES0_MASK       0xff
+#define R_ETHA_EAEIS1_CULES7_TO_CULES0_SHIFT      (0)  /* CBS n Upper Limit Error Status Flag (n = 0 to 7) */
+#define R_ETHA_EAEIS1_CULES7_TO_CULES0_MASK       0xff
 
-#define R_ETHA_EAEIS1_TASGES7 TO TASGES0_SHIFT    (16)  /* TAS Gate n Error Status Flag (n = 0 to 7) */
-#define R_ETHA_EAEIS1_TASGES7 TO TASGES0_MASK     0xff0000
+#define R_ETHA_EAEIS1_TASGES7_TO_TASGES0_SHIFT    (16)  /* TAS Gate n Error Status Flag (n = 0 to 7) */
+#define R_ETHA_EAEIS1_TASGES7_TO_TASGES0_MASK     0xff0000
 
 #define R_ETHA_EAEIS1_TASCTGES                    (1 << 24)  /* TAS Cut-Through Gate Error Status Flag */
 
@@ -844,15 +844,15 @@
 #define R_ETHA_EAEIS1_TASGES7                     (1 << 23)  /* TASGES7 */
 
 /* EAEIE1 Register bit definitions */
-#define R_ETHA_EAEIE1_CULEE7 TO CULEE0_SHIFT      (0)  /* CBS n Upper Limit Error Enable (n = 0 to 7) */
-#define R_ETHA_EAEIE1_CULEE7 TO CULEE0_MASK       0xff
-#  define R_ETHA_EAEIE1_CULEE7 TO CULEE0_0                (0 << R_ETHA_EAEIE1_CULEE7 TO CULEE0_SHIFT)  /* Interrupt disabled for descriptor queue i */
-#  define R_ETHA_EAEIE1_CULEE7 TO CULEE0_1                (1 << R_ETHA_EAEIE1_CULEE7 TO CULEE0_SHIFT)  /* Interrupt enabled for descriptor queue i */
+#define R_ETHA_EAEIE1_CULEE7_TO_CULEE0_SHIFT      (0)  /* CBS n Upper Limit Error Enable (n = 0 to 7) */
+#define R_ETHA_EAEIE1_CULEE7_TO_CULEE0_MASK       0xff
+#  define R_ETHA_EAEIE1_CULEE7_TO_CULEE0_0                (0 << R_ETHA_EAEIE1_CULEE7_TO_CULEE0_SHIFT)  /* Interrupt disabled for descriptor queue i */
+#  define R_ETHA_EAEIE1_CULEE7_TO_CULEE0_1                (1 << R_ETHA_EAEIE1_CULEE7_TO_CULEE0_SHIFT)  /* Interrupt enabled for descriptor queue i */
 
-#define R_ETHA_EAEIE1_TASGEE7 TO TASGEE0_SHIFT    (16)  /* TAS Gate n Error Enable (n = 0 to 7) */
-#define R_ETHA_EAEIE1_TASGEE7 TO TASGEE0_MASK     0xff0000
-#  define R_ETHA_EAEIE1_TASGEE7 TO TASGEE0_0              (0 << R_ETHA_EAEIE1_TASGEE7 TO TASGEE0_SHIFT)  /* Interrupt disabled for descriptor queue i */
-#  define R_ETHA_EAEIE1_TASGEE7 TO TASGEE0_1              (1 << R_ETHA_EAEIE1_TASGEE7 TO TASGEE0_SHIFT)  /* Interrupt enabled for descriptor queue i */
+#define R_ETHA_EAEIE1_TASGEE7_TO_TASGEE0_SHIFT    (16)  /* TAS Gate n Error Enable (n = 0 to 7) */
+#define R_ETHA_EAEIE1_TASGEE7_TO_TASGEE0_MASK     0xff0000
+#  define R_ETHA_EAEIE1_TASGEE7_TO_TASGEE0_0              (0 << R_ETHA_EAEIE1_TASGEE7_TO_TASGEE0_SHIFT)  /* Interrupt disabled for descriptor queue i */
+#  define R_ETHA_EAEIE1_TASGEE7_TO_TASGEE0_1              (1 << R_ETHA_EAEIE1_TASGEE7_TO_TASGEE0_SHIFT)  /* Interrupt enabled for descriptor queue i */
 
 #define R_ETHA_EAEIE1_TASCTGEE                    (1 << 24)  /* TAS Cut-through Gate Error Enable */
 
@@ -889,11 +889,11 @@
 #define R_ETHA_EAEIE1_TASGEE7                     (1 << 23)  /* TASGEE7 */
 
 /* EAEID1 Register bit definitions */
-#define R_ETHA_EAEID1_CULED7 TO CULED0_SHIFT      (0)  /* CBS n Upper Limit Error Disable (n = 0 to 7) */
-#define R_ETHA_EAEID1_CULED7 TO CULED0_MASK       0xff
+#define R_ETHA_EAEID1_CULED7_TO_CULED0_SHIFT      (0)  /* CBS n Upper Limit Error Disable (n = 0 to 7) */
+#define R_ETHA_EAEID1_CULED7_TO_CULED0_MASK       0xff
 
-#define R_ETHA_EAEID1_TASGED7 TO TASGED0_SHIFT    (16)  /* TAS Gate n Error Disable (n = 0 to 7) */
-#define R_ETHA_EAEID1_TASGED7 TO TASGED0_MASK     0xff0000
+#define R_ETHA_EAEID1_TASGED7_TO_TASGED0_SHIFT    (16)  /* TAS Gate n Error Disable (n = 0 to 7) */
+#define R_ETHA_EAEID1_TASGED7_TO_TASGED0_MASK     0xff0000
 
 #define R_ETHA_EAEID1_TASCTGED                    (1 << 24)  /* TAS Cut-through Gate Error Disable */
 
@@ -930,13 +930,13 @@
 #define R_ETHA_EAEID1_TASGED7                     (1 << 23)  /* TASGED7 */
 
 /* EAEIS2 Register bit definitions */
-#define R_ETHA_EAEIS2_DQOES7 TO DQOES0_SHIFT      (0)  /* Descriptor Queue n Overflow Error Status Flag (n = 0 to 7) */
-#define R_ETHA_EAEIS2_DQOES7 TO DQOES0_MASK       0xff
+#define R_ETHA_EAEIS2_DQOES7_TO_DQOES0_SHIFT      (0)  /* Descriptor Queue n Overflow Error Status Flag (n = 0 to 7) */
+#define R_ETHA_EAEIS2_DQOES7_TO_DQOES0_MASK       0xff
 
 #define R_ETHA_EAEIS2_CTDQOES                     (1 << 8)  /* Cut-Through Descriptor Queue Overflow Error Status Flag */
 
-#define R_ETHA_EAEIS2_DQSES7 TO DQSES0_SHIFT      (16)  /* Descriptor Queue n Security Error Status Flag (n = 0 to 7) */
-#define R_ETHA_EAEIS2_DQSES7 TO DQSES0_MASK       0xff0000
+#define R_ETHA_EAEIS2_DQSES7_TO_DQSES0_SHIFT      (16)  /* Descriptor Queue n Security Error Status Flag (n = 0 to 7) */
+#define R_ETHA_EAEIS2_DQSES7_TO_DQSES0_MASK       0xff0000
 
 #define R_ETHA_EAEIS2_DQOES0                      (1 << 0)  /* DQOES0 */
 
@@ -971,17 +971,17 @@
 #define R_ETHA_EAEIS2_DQSES7                      (1 << 23)  /* DQSES7 */
 
 /* EAEIE2 Register bit definitions */
-#define R_ETHA_EAEIE2_DQOEE7 TO DQOEE0_SHIFT      (0)  /* Descriptor Queue n Overflow Error Enable (n = 0 to 7) */
-#define R_ETHA_EAEIE2_DQOEE7 TO DQOEE0_MASK       0xff
-#  define R_ETHA_EAEIE2_DQOEE7 TO DQOEE0_0                (0 << R_ETHA_EAEIE2_DQOEE7 TO DQOEE0_SHIFT)  /* Interrupt disabled for descriptor queue i */
-#  define R_ETHA_EAEIE2_DQOEE7 TO DQOEE0_1                (1 << R_ETHA_EAEIE2_DQOEE7 TO DQOEE0_SHIFT)  /* Interrupt enabled for descriptor queue i */
+#define R_ETHA_EAEIE2_DQOEE7_TO_DQOEE0_SHIFT      (0)  /* Descriptor Queue n Overflow Error Enable (n = 0 to 7) */
+#define R_ETHA_EAEIE2_DQOEE7_TO_DQOEE0_MASK       0xff
+#  define R_ETHA_EAEIE2_DQOEE7_TO_DQOEE0_0                (0 << R_ETHA_EAEIE2_DQOEE7_TO_DQOEE0_SHIFT)  /* Interrupt disabled for descriptor queue i */
+#  define R_ETHA_EAEIE2_DQOEE7_TO_DQOEE0_1                (1 << R_ETHA_EAEIE2_DQOEE7_TO_DQOEE0_SHIFT)  /* Interrupt enabled for descriptor queue i */
 
 #define R_ETHA_EAEIE2_CTDQOEE                     (1 << 8)  /* Cut-Through Descriptor Queue Overflow Error Enable */
 
-#define R_ETHA_EAEIE2_DQSEE7 TO DQSEE0_SHIFT      (16)  /* Descriptor Queue n Security Error Enable (n = 0 to 7) */
-#define R_ETHA_EAEIE2_DQSEE7 TO DQSEE0_MASK       0xff0000
-#  define R_ETHA_EAEIE2_DQSEE7 TO DQSEE0_0                (0 << R_ETHA_EAEIE2_DQSEE7 TO DQSEE0_SHIFT)  /* Interrupt disabled for descriptor queue i */
-#  define R_ETHA_EAEIE2_DQSEE7 TO DQSEE0_1                (1 << R_ETHA_EAEIE2_DQSEE7 TO DQSEE0_SHIFT)  /* Interrupt enabled for descriptor queue i */
+#define R_ETHA_EAEIE2_DQSEE7_TO_DQSEE0_SHIFT      (16)  /* Descriptor Queue n Security Error Enable (n = 0 to 7) */
+#define R_ETHA_EAEIE2_DQSEE7_TO_DQSEE0_MASK       0xff0000
+#  define R_ETHA_EAEIE2_DQSEE7_TO_DQSEE0_0                (0 << R_ETHA_EAEIE2_DQSEE7_TO_DQSEE0_SHIFT)  /* Interrupt disabled for descriptor queue i */
+#  define R_ETHA_EAEIE2_DQSEE7_TO_DQSEE0_1                (1 << R_ETHA_EAEIE2_DQSEE7_TO_DQSEE0_SHIFT)  /* Interrupt enabled for descriptor queue i */
 
 #define R_ETHA_EAEIE2_DQOEE0                      (1 << 0)  /* DQOEE0 */
 
@@ -1016,13 +1016,13 @@
 #define R_ETHA_EAEIE2_DQSEE7                      (1 << 23)  /* DQSEE7 */
 
 /* EAEID2 Register bit definitions */
-#define R_ETHA_EAEID2_DQOED7 TO DQOED0_SHIFT      (0)  /* Descriptor Queue n Overflow Error Disable (n = 0 to 7) */
-#define R_ETHA_EAEID2_DQOED7 TO DQOED0_MASK       0xff
+#define R_ETHA_EAEID2_DQOED7_TO_DQOED0_SHIFT      (0)  /* Descriptor Queue n Overflow Error Disable (n = 0 to 7) */
+#define R_ETHA_EAEID2_DQOED7_TO_DQOED0_MASK       0xff
 
 #define R_ETHA_EAEID2_CTDQOED                     (1 << 8)  /* Cut-Through Descriptor Queue Overflow Error Disable */
 
-#define R_ETHA_EAEID2_DQSED7 TO DQSED0_SHIFT      (16)  /* Descriptor Queue n Security Error Disable (n = 0 to 7) */
-#define R_ETHA_EAEID2_DQSED7 TO DQSED0_MASK       0xff0000
+#define R_ETHA_EAEID2_DQSED7_TO_DQSED0_SHIFT      (16)  /* Descriptor Queue n Security Error Disable (n = 0 to 7) */
+#define R_ETHA_EAEID2_DQSED7_TO_DQSED0_MASK       0xff0000
 
 #define R_ETHA_EAEID2_DQOED0                      (1 << 0)  /* DQOED0 */
 

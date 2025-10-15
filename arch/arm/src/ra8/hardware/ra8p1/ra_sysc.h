@@ -117,6 +117,7 @@
 /* PSSTCR%s Registers (0-5) */
 #define R_SYSC_PSSTCR_OFFSET(m)                   (0x00000210 + ((m) * 0x00000002))  /* Power Switch Control Start Time Control Register %s */
 /* PSSTCR%s Registers (0-5) */
+#define R_SYSC_PSSTCRX_OFFSET(m)                  (0x00000210 + ((m) * 0x00000002))  /* Power Switch Control Start Time Control Register %s */
 #define R_SYSC_VBRSABAR_OFFSET                    0x000003b0  /* VBATT Backup Register Security Attribute Boundary Address Register */
 #define R_SYSC_VBRPABARS_OFFSET                   0x000003b4  /* VBATT Backup Register Privilege Attribute Boundary Address Register for Secure Region */
 #define R_SYSC_CGFSAR_OFFSET                      0x000003c0  /* Clock Generation Function Security Attribute Register */
@@ -153,9 +154,11 @@
 /* PVD%sCMPCR Registers (1-2) */
 #define R_SYSC_PVDCMPCR_OFFSET(m)                 (0x00000a58 + ((m) * 0x00000004))  /* Voltage Monitor %s Comparator Control Register */
 /* PVD%sCMPCR Registers (4-5) */
+#define R_SYSC_PVDXCMPCR_OFFSET(m)                (0x00000a64 + ((m) * 0x00000004))  /* Voltage Monitor %s Comparator Control Register */
 /* PVD%sCR0 Registers (1-2) */
 #define R_SYSC_PVDCR0_OFFSET(m)                   (0x00000a70 + ((m) * 0x00000004))  /* Voltage Monitor %s Circuit Control Register 0 */
 /* PVD%sCR0 Registers (4-5) */
+#define R_SYSC_PVDXCR0_OFFSET(m)                  (0x00000a7c + ((m) * 0x00000004))  /* Voltage Monitor %s Circuit Control Register 0 */
 #define R_SYSC_VBATTMNSELR_OFFSET                 0x00000a84  /* Battery Backup Voltage Monitor Function Select Register */
 #define R_SYSC_VBTBPCR1_OFFSET                    0x00000a88  /* VBATT Battery Power Supply Control Register 1 */
 #define R_SYSC_LPSCR_OFFSET                       0x00000a90  /* Low Power State Control Register */
@@ -174,6 +177,7 @@
 /* PVD%sFCR Registers (1-2) */
 #define R_SYSC_PVDFCR_OFFSET(m)                   (0x00000b20 + ((m) * 0x00000004))  /* Voltage Monitor %s Function Control Register */
 /* PVD%sFCR Registers (4-5) */
+#define R_SYSC_PVDXFCR_OFFSET(m)                  (0x00000b2c + ((m) * 0x00000004))  /* Voltage Monitor %s Function Control Register */
 #define R_SYSC_PVDLR_OFFSET                       0x00000b34  /* Voltage Monitor Lock Register */
 #define R_SYSC_DPSIER4_OFFSET                     0x00000b40  /* Deep Software Standby Interrupt Enable Register 4 */
 #define R_SYSC_DPSIER5_OFFSET                     0x00000b44  /* Deep Software Standby Interrupt Enable Register 5 */
@@ -272,7 +276,7 @@
 #define R_SYSC_PDCTRESWM                          (R_SYSC_BASE + R_SYSC_PDCTRESWM_OFFSET)
 #define R_SYSC_PDRAMSCR0                          (R_SYSC_BASE + R_SYSC_PDRAMSCR0_OFFSET)
 #define R_SYSC_PDRAMSCR1                          (R_SYSC_BASE + R_SYSC_PDRAMSCR1_OFFSET)
-#define R_SYSC_PSSTCR(m)                          (R_SYSC_BASE + R_SYSC_PSSTCR_OFFSET(m))
+#define R_SYSC_PSSTCRX(m)                         (R_SYSC_BASE + R_SYSC_PSSTCRX_OFFSET(m))
 #define R_SYSC_VBRSABAR                           (R_SYSC_BASE + R_SYSC_VBRSABAR_OFFSET)
 #define R_SYSC_VBRPABARS                          (R_SYSC_BASE + R_SYSC_VBRPABARS_OFFSET)
 #define R_SYSC_CGFSAR                             (R_SYSC_BASE + R_SYSC_CGFSAR_OFFSET)
@@ -306,8 +310,8 @@
 #define R_SYSC_RSTSR3                             (R_SYSC_BASE + R_SYSC_RSTSR3_OFFSET)
 #define R_SYSC_MOMCR                              (R_SYSC_BASE + R_SYSC_MOMCR_OFFSET)
 #define R_SYSC_FWEPROR                            (R_SYSC_BASE + R_SYSC_FWEPROR_OFFSET)
-#define R_SYSC_PVDCMPCR(m)                        (R_SYSC_BASE + R_SYSC_PVDCMPCR_OFFSET(m))
-#define R_SYSC_PVDCR0(m)                          (R_SYSC_BASE + R_SYSC_PVDCR0_OFFSET(m))
+#define R_SYSC_PVDXCMPCR(m)                       (R_SYSC_BASE + R_SYSC_PVDXCMPCR_OFFSET(m))
+#define R_SYSC_PVDXCR0(m)                         (R_SYSC_BASE + R_SYSC_PVDXCR0_OFFSET(m))
 #define R_SYSC_VBATTMNSELR                        (R_SYSC_BASE + R_SYSC_VBATTMNSELR_OFFSET)
 #define R_SYSC_VBTBPCR1                           (R_SYSC_BASE + R_SYSC_VBTBPCR1_OFFSET)
 #define R_SYSC_LPSCR                              (R_SYSC_BASE + R_SYSC_LPSCR_OFFSET)
@@ -323,7 +327,7 @@
 #define R_SYSC_PLL1LDOCR                          (R_SYSC_BASE + R_SYSC_PLL1LDOCR_OFFSET)
 #define R_SYSC_PLL2LDOCR                          (R_SYSC_BASE + R_SYSC_PLL2LDOCR_OFFSET)
 #define R_SYSC_HOCOLDOCR                          (R_SYSC_BASE + R_SYSC_HOCOLDOCR_OFFSET)
-#define R_SYSC_PVDFCR(m)                          (R_SYSC_BASE + R_SYSC_PVDFCR_OFFSET(m))
+#define R_SYSC_PVDXFCR(m)                         (R_SYSC_BASE + R_SYSC_PVDXFCR_OFFSET(m))
 #define R_SYSC_PVDLR                              (R_SYSC_BASE + R_SYSC_PVDLR_OFFSET)
 #define R_SYSC_DPSIER4                            (R_SYSC_BASE + R_SYSC_DPSIER4_OFFSET)
 #define R_SYSC_DPSIER5                            (R_SYSC_BASE + R_SYSC_DPSIER5_OFFSET)

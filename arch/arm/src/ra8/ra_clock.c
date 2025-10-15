@@ -356,8 +356,10 @@ static void ra_peripheral_clock_init(void)
 
 static void ra_prv_clock_set_hard_reset(void)
 {
+#if defined (R_FCACHE_FLWT)
   /* Set flash wait states for high frequency operation */
   putreg8(RA_PRV_ROM_TWO_WAIT_CYCLES, R_FCACHE_FLWT);
+#endif
 
   /* Set system clock dividers with temporary safe values first */
   putreg32(RA_PRV_STARTUP_SCKDIVCR, R_SYSC_SCKDIVCR);

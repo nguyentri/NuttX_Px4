@@ -22,17 +22,10 @@
 #define __ARCH_ARM_SRC_RA_HARDWARE_RA8E1_PINMAP_H
 
 /****************************************************************************
- * Included Files
- ****************************************************************************/
-
-
-/****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Port Number definitions
- * Port number occupies bits 31-28 (4 bits)
- */
+/* Port Number definitions */
 #define PORT0                                   (0 << 28)
 #define PORT1                                   (1 << 28)
 #define PORT2                                   (2 << 28)
@@ -43,11 +36,15 @@
 #define PORT7                                   (7 << 28)
 #define PORT8                                   (8 << 28)
 #define PORT9                                   (9 << 28)
+#define PORT10                                  (10 << 28)
+#define PORT11                                  (11 << 28)
+#define PORT12                                  (12 << 28)
+#define PORT13                                  (13 << 28)
+#define PORT14                                  (14 << 28)
+#define PORT15                                  (15 << 28)
 #define PORT_MAX                                (10)
 
-/* Pin Number definitions
- * Pin number occupies bits 27-24 (4 bits)
- */
+/* Pin Number definitions */
 #define PIN0                                   (0 << 24)
 #define PIN1                                   (1 << 24)
 #define PIN2                                   (2 << 24)
@@ -85,23 +82,7 @@
 #define IRQ15                                  (15)
 #define MAX_GPIO_IRQS                          (16)
 
-/* PSEL configuration Bit Fields for cfg field in gpio_pinset_t struct
- * PSEL occupies bits 20-16 (5 bits) in the configuration field
- * This will be shifted to hardware position 28:24 when writing to PFS register
- *
- * The following bits are also used in the gpio_pinset_t config field:
- * Bits 0-15 directly map to PFS register bits 0-15:
- *   0 PODR  Port Output Data
- *   2 PDR   Port Direction
- *   4 PCR   Pull-up Control
- *   6 NCODR N-Channel Open-Drain Control
- *   11:10 DSCR[1:0] Port Drive Capability
- *   13:12 EOFR[1:0] Event on Falling/Event on Rising
- *   14 ISEL IRQ Input Enable
- *   15 ASEL Analog Input Enable
- * Bit 16 PMR will be set automatically based on PSEL value
- */
-
+/* PSEL configuration Bit Fields for cfg field in gpio_pinset_t struct */
 #define R_PFS_PSEL_SHIFT_CFG                    (16)   /* PSEL position in gpio_pinset_t.cfg (bits 20-16) */
 #define PFS_PSEL_HIZ                            (0x00 << R_PFS_PSEL_SHIFT_CFG)
 #define PFS_PSEL_AGT                            (0x01 << R_PFS_PSEL_SHIFT_CFG)
@@ -130,18 +111,18 @@
 #define PFS_PSEL_ULPT                           (0x1C << R_PFS_PSEL_SHIFT_CFG)
 
 /* GPIO Configuration for gpio_pinset_t.cfg field */
-#define GPIO_OUTPUT                  		(R_PFS_PDR)           /* Output direction */
-#define GPIO_INPUT                   		(0)                   /* Input direction (default) */
-#define GPIO_PULLUP                  		(R_PFS_PCR)           /* Enable pull-up */
-#define GPIO_OPENDRAIN               		(R_PFS_NCODR)         /* Open drain output */
-#define GPIO_LOW_DRIVE               		(R_PFS_DSCR_00)       /* Low drive strength (default) */
-#define GPIO_MIDDLE_DRIVE            		(R_PFS_DSCR_01)       /* Middle drive strength */
-#define GPIO_HIGH_DRIVE              		(R_PFS_DSCR_11)       /* High drive strength */
-#define GPIO_ANALOG                  		(R_PFS_ASEL)          /* Analog mode */
-#define GPIO_IRQ                     		(R_PFS_ISEL)          /* IRQ input enable */
-#define GPIO_PERIPHERAL              		(R_PFS_PMR)           /* Peripheral mode (PMR) */
-#define GPIO_OUTPUT_HIGH             		(R_PFS_PODR)          /* Output high */
-#define GPIO_OUTPUT_LOW              		(0)                   /* Output low (default) */
+#define GPIO_OUTPUT                   		(R_PFS_PDR)           /* Output direction */
+#define GPIO_INPUT                    		(0)                   /* Input direction (default) */
+#define GPIO_PULLUP                   		(R_PFS_PCR)           /* Enable pull-up */
+#define GPIO_OPENDRAIN                		(R_PFS_NCODR)         /* Open drain output */
+#define GPIO_LOW_DRIVE                		(R_PFS_DSCR_00)       /* Low drive strength (default) */
+#define GPIO_MIDDLE_DRIVE             		(R_PFS_DSCR_01)       /* Middle drive strength */
+#define GPIO_HIGH_DRIVE               		(R_PFS_DSCR_11)       /* High drive strength */
+#define GPIO_ANALOG                   		(R_PFS_ASEL)          /* Analog mode */
+#define GPIO_IRQ                      		(R_PFS_ISEL)          /* IRQ input enable */
+#define GPIO_PERIPHERAL               		(R_PFS_PMR)           /* Peripheral mode (PMR) */
+#define GPIO_OUTPUT_HIGH              		(R_PFS_PODR)          /* Output high */
+#define GPIO_OUTPUT_LOW               		(0)                   /* Output low (default) */
 
 /* Alternative Function Pin Definitions */
 #define GPIO_ADTRG0_1                         (gpio_pinset_t)(PORT1 | PIN2 | PFS_PSEL_CAC_ADC14)
@@ -1237,6 +1218,7 @@
 #define GPIO_P905_INPUT                     (gpio_pinset_t)(PORT9 | PIN5 | GPIO_INPUT)
 #define GPIO_P905_INPUT_PULLUP              (gpio_pinset_t)(PORT9 | PIN5 | GPIO_INPUT | R_PFS_PCR)
 
+
 /* Note: Peripheral mode is detected automatically when PSEL != 0 */
 
-#endif /* _ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_RA_PINMAP_H */
+#endif /* __ARCH_ARM_SRC_RA_HARDWARE_RA8E1_PINMAP_H */

@@ -152,10 +152,10 @@
 #define R_COMA_RCEC_ACE_MASK                      0x7f
 
 /* RCDC Register bit definitions */
-#define R_COMA_RCDC_ACD2 TO ACD0_SHIFT            (0)  /* Agent i Clock Disable (i = 0 to 2) */
-#define R_COMA_RCDC_ACD2 TO ACD0_MASK             0x7
-#  define R_COMA_RCDC_ACD2 TO ACD0_0                      (0 << R_COMA_RCDC_ACD2 TO ACD0_SHIFT)  /* No effect */
-#  define R_COMA_RCDC_ACD2 TO ACD0_1                      (1 << R_COMA_RCDC_ACD2 TO ACD0_SHIFT)  /* Clears bit i in RCEC.ACEi register */
+#define R_COMA_RCDC_ACD2_TO_ACD0_SHIFT            (0)  /* Agent i Clock Disable (i = 0 to 2) */
+#define R_COMA_RCDC_ACD2_TO_ACD0_MASK             0x7
+#  define R_COMA_RCDC_ACD2_TO_ACD0_0                      (0 << R_COMA_RCDC_ACD2_TO_ACD0_SHIFT)  /* No effect */
+#  define R_COMA_RCDC_ACD2_TO_ACD0_1                      (1 << R_COMA_RCDC_ACD2_TO_ACD0_SHIFT)  /* Clears bit i in RCEC.ACEi register */
 
 #define R_COMA_RCDC_RCD                           (1 << 16)  /* Clock Disable */
 
@@ -297,11 +297,11 @@
 #define R_COMA_CAEID0_BPECCED                     (1 << 2)  /* Buffer Pool ECC Error Interrupt Disable */
 
 /* CAEIS1 Register bit definitions */
-#define R_COMA_CAEIS1_PWMCLOS2 TO PWMCLOS0_SHIFT  (0)  /* Port n Watermark Critical Level Overtook Status Flag (n = 0 to 2) */
-#define R_COMA_CAEIS1_PWMCLOS2 TO PWMCLOS0_MASK   0x7
+#define R_COMA_CAEIS1_PWMCLOS2_TO_PWMCLOS0_SHIFT  (0)  /* Port n Watermark Critical Level Overtook Status Flag (n = 0 to 2) */
+#define R_COMA_CAEIS1_PWMCLOS2_TO_PWMCLOS0_MASK   0x7
 
-#define R_COMA_CAEIS1_PWMFLOS2 TO PWMFLOS0_SHIFT  (16)  /* Port n Watermark Flush Level Overtook Status Flag (n = 0 to 2) */
-#define R_COMA_CAEIS1_PWMFLOS2 TO PWMFLOS0_MASK   0x70000
+#define R_COMA_CAEIS1_PWMFLOS2_TO_PWMFLOS0_SHIFT  (16)  /* Port n Watermark Flush Level Overtook Status Flag (n = 0 to 2) */
+#define R_COMA_CAEIS1_PWMFLOS2_TO_PWMFLOS0_MASK   0x70000
 
 #define R_COMA_CAEIS1_PWMCLOS_SHIFT               (0)  /* Port Watermark Critical Level Overtook Status */
 #define R_COMA_CAEIS1_PWMCLOS_MASK                0x7f
@@ -310,11 +310,11 @@
 #define R_COMA_CAEIS1_PWMFLOS_MASK                0x7f0000
 
 /* CAEIE1 Register bit definitions */
-#define R_COMA_CAEIE1_PWMCLOE2 TO PWMCLOE0_SHIFT  (0)  /* Port n Watermark Critical Level Overtook Enable (n = 0 to 2) */
-#define R_COMA_CAEIE1_PWMCLOE2 TO PWMCLOE0_MASK   0x7
+#define R_COMA_CAEIE1_PWMCLOE2_TO_PWMCLOE0_SHIFT  (0)  /* Port n Watermark Critical Level Overtook Enable (n = 0 to 2) */
+#define R_COMA_CAEIE1_PWMCLOE2_TO_PWMCLOE0_MASK   0x7
 
-#define R_COMA_CAEIE1_PWMFLOE2 TO PWMFLOE0_SHIFT  (16)  /* Port n Watermark Flush Level Overtook Enable (n = 0 to 2) */
-#define R_COMA_CAEIE1_PWMFLOE2 TO PWMFLOE0_MASK   0x70000
+#define R_COMA_CAEIE1_PWMFLOE2_TO_PWMFLOE0_SHIFT  (16)  /* Port n Watermark Flush Level Overtook Enable (n = 0 to 2) */
+#define R_COMA_CAEIE1_PWMFLOE2_TO_PWMFLOE0_MASK   0x70000
 
 #define R_COMA_CAEIE1_PWMCLOE_SHIFT               (0)  /* Port Watermark Critical Level Overtook Enable */
 #define R_COMA_CAEIE1_PWMCLOE_MASK                0x7f
@@ -323,11 +323,11 @@
 #define R_COMA_CAEIE1_PWMFLOE_MASK                0x7f0000
 
 /* CAEID1 Register bit definitions */
-#define R_COMA_CAEID1_PWMCLOD2 TO PWMCLOD0_SHIFT  (0)  /* Port n Watermark Critical Level Overtook Disable (n = 0 to 2) */
-#define R_COMA_CAEID1_PWMCLOD2 TO PWMCLOD0_MASK   0x7
+#define R_COMA_CAEID1_PWMCLOD2_TO_PWMCLOD0_SHIFT  (0)  /* Port n Watermark Critical Level Overtook Disable (n = 0 to 2) */
+#define R_COMA_CAEID1_PWMCLOD2_TO_PWMCLOD0_MASK   0x7
 
-#define R_COMA_CAEID1_PWMFLOD2 TO PWMFLOD0_SHIFT  (16)  /* Port n Watermark Flush Level Overtook Disable (n = 0 to 2) */
-#define R_COMA_CAEID1_PWMFLOD2 TO PWMFLOD0_MASK   0x70000
+#define R_COMA_CAEID1_PWMFLOD2_TO_PWMFLOD0_SHIFT  (16)  /* Port n Watermark Flush Level Overtook Disable (n = 0 to 2) */
+#define R_COMA_CAEID1_PWMFLOD2_TO_PWMFLOD0_MASK   0x70000
 
 #define R_COMA_CAEID1_PWMCLOD_SHIFT               (0)  /* Port Watermark Critical Level Overtook Disable */
 #define R_COMA_CAEID1_PWMCLOD_MASK                0x7f
@@ -336,22 +336,22 @@
 #define R_COMA_CAEID1_PWMFLOD_MASK                0x7f0000
 
 /* CAMIS0 Register bit definitions */
-#define R_COMA_CAMIS0_PFS1 TO PFS0_SHIFT          (0)  /* Pause Frame Status Flag n (n= 0 to 1) */
-#define R_COMA_CAMIS0_PFS1 TO PFS0_MASK           0x3
+#define R_COMA_CAMIS0_PFS1_TO_PFS0_SHIFT          (0)  /* Pause Frame Status Flag n (n= 0 to 1) */
+#define R_COMA_CAMIS0_PFS1_TO_PFS0_MASK           0x3
 
 #define R_COMA_CAMIS0_PFS_SHIFT                   (0)  /* Pause Frame Status */
 #define R_COMA_CAMIS0_PFS_MASK                    0x3
 
 /* CAMIE0 Register bit definitions */
-#define R_COMA_CAMIE0_PFE1 TO PFE0_SHIFT          (0)  /* Pause Frame Enable n (n = 0 to 1) */
-#define R_COMA_CAMIE0_PFE1 TO PFE0_MASK           0x3
+#define R_COMA_CAMIE0_PFE1_TO_PFE0_SHIFT          (0)  /* Pause Frame Enable n (n = 0 to 1) */
+#define R_COMA_CAMIE0_PFE1_TO_PFE0_MASK           0x3
 
 #define R_COMA_CAMIE0_PFE_SHIFT                   (0)  /* Pause Frame Enable */
 #define R_COMA_CAMIE0_PFE_MASK                    0x3
 
 /* CAMID0 Register bit definitions */
-#define R_COMA_CAMID0_PFD1 TO PFD0_SHIFT          (0)  /* Pause Frame Disable n (n = 0 to 1) */
-#define R_COMA_CAMID0_PFD1 TO PFD0_MASK           0x3
+#define R_COMA_CAMID0_PFD1_TO_PFD0_SHIFT          (0)  /* Pause Frame Disable n (n = 0 to 1) */
+#define R_COMA_CAMID0_PFD1_TO_PFD0_MASK           0x3
 
 #define R_COMA_CAMID0_PFD_SHIFT                   (0)  /* Pause Frame Disable */
 #define R_COMA_CAMID0_PFD_MASK                    0x3

@@ -67,7 +67,7 @@
 #define R_MIPI_DSI_RXRINFOOWSR_OFFSET             0x00000238  /* Receive Result Info Overwrite Status Register */
 #define R_MIPI_DSI_RXRINFOOWSCR_OFFSET            0x0000023c  /* Receive Result Info Overwrite Status Clear Register */
 /* RXRSS%sR Registers (0-3) */
-#define R_MIPI_DSI_RXRSSR_OFFSET(m)               (0x00000240 + ((m) * 0x00000004))  /* Receive Result Save Slot-x Register (x = 0 to 3) */
+#define R_MIPI_DSI_RXRSSXR_OFFSET(m)              (0x00000240 + ((m) * 0x00000004))  /* Receive Result Save Slot-x Register (x = 0 to 3) */
 #define R_MIPI_DSI_RXPPD0R_OFFSET                 0x000002c0  /* Receive Packet Payload Data 0 Register */
 #define R_MIPI_DSI_RXPPD1R_OFFSET                 0x000002c4  /* Receive Packet Payload Data 1 Register */
 #define R_MIPI_DSI_RXPPD2R_OFFSET                 0x000002c8  /* Receive Packet Payload Data 2 Register */
@@ -146,7 +146,7 @@
 #define R_MIPI_DSI_RXRSSCR                        (R_MIPI_DSI_BASE + R_MIPI_DSI_RXRSSCR_OFFSET)
 #define R_MIPI_DSI_RXRINFOOWSR                    (R_MIPI_DSI_BASE + R_MIPI_DSI_RXRINFOOWSR_OFFSET)
 #define R_MIPI_DSI_RXRINFOOWSCR                   (R_MIPI_DSI_BASE + R_MIPI_DSI_RXRINFOOWSCR_OFFSET)
-#define R_MIPI_DSI_RXRSSR(m)                      (R_MIPI_DSI_BASE + R_MIPI_DSI_RXRSSR_OFFSET(m))
+#define R_MIPI_DSI_RXRSSXR(m)                     (R_MIPI_DSI_BASE + R_MIPI_DSI_RXRSSXR_OFFSET(m))
 #define R_MIPI_DSI_RXPPD0R                        (R_MIPI_DSI_BASE + R_MIPI_DSI_RXPPD0R_OFFSET)
 #define R_MIPI_DSI_RXPPD1R                        (R_MIPI_DSI_BASE + R_MIPI_DSI_RXPPD1R_OFFSET)
 #define R_MIPI_DSI_RXPPD2R                        (R_MIPI_DSI_BASE + R_MIPI_DSI_RXPPD2R_OFFSET)

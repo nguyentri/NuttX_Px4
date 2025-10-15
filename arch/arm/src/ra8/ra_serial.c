@@ -1236,7 +1236,7 @@ static int up_receive(struct uart_dev_s *dev, unsigned int *status)
   priv->sr  = 0;
 
   /* Read the received byte from RDR_BY register */
-  ch = (int)(up_serialin(priv, R_SCI_B_RDR_BY_OFFSET) & 0xff);
+  ch = (int)(up_serialin(priv, R_SCI_B_RDR_OFFSET) & 0xff);
 
   /* Clear RDRF flag by writing to CFCLR register (SCI_B requirement) */
   up_serialout(priv, R_SCI_B_CFCLR_OFFSET, R_SCI_B_CFCLR_RDRFC);

@@ -83,6 +83,7 @@
 /* PIPE%sCTR Registers (1-5) */
 #define R_USBFS_PIPECTR_OFFSET(m)                 (0x00000070 + ((m) * 0x00000002))  /* PIPE%s Control Registers */
 /* PIPE%sCTR Registers (6-9) */
+#define R_USBFS_PIPEXCTR_OFFSET(m)                (0x0000007a + ((m) * 0x00000002))  /* PIPE%s Control Registers */
 /* PIPE%sTRE Registers (1-5) */
 #define R_USBFS_PIPETRE_OFFSET(m)                 (0x00000090 + ((m) * 0x00000004))  /* PIPE%s Transaction Counter Enable Register */
 /* PIPE%sTRN Registers (1-5) */
@@ -130,7 +131,7 @@
 #define R_USBFS_PIPECFG                           (R_USBFS_BASE + R_USBFS_PIPECFG_OFFSET)
 #define R_USBFS_PIPEMAXP                          (R_USBFS_BASE + R_USBFS_PIPEMAXP_OFFSET)
 #define R_USBFS_PIPEPERI                          (R_USBFS_BASE + R_USBFS_PIPEPERI_OFFSET)
-#define R_USBFS_PIPECTR(m)                        (R_USBFS_BASE + R_USBFS_PIPECTR_OFFSET(m))
+#define R_USBFS_PIPEXCTR(m)                       (R_USBFS_BASE + R_USBFS_PIPEXCTR_OFFSET(m))
 #define R_USBFS_PIPETRE(m)                        (R_USBFS_BASE + R_USBFS_PIPETRE_OFFSET(m))
 #define R_USBFS_PIPETRN(m)                        (R_USBFS_BASE + R_USBFS_PIPETRN_OFFSET(m))
 #define R_USBFS_DEVADD(m)                         (R_USBFS_BASE + R_USBFS_DEVADD_OFFSET(m))

@@ -62,6 +62,7 @@
 /* ADDR%s Registers (0-8) */
 #define R_ADC12_ADDR_OFFSET(m)                    (0x00000020 + ((m) * 0x00000002))  /* A/D Data Registers %s */
 /* ADDR%s Registers (16-19) */
+#define R_ADC12_ADDRX_OFFSET(m)                   (0x00000020 + ((m) * 0x00000002))  /* A/D Data Registers %s */
 #define R_ADC12_ADVMDR_OFFSET                     0x00000026  /* A/D VBATT Monitor Data Register */
 #define R_ADC12_ADSHCR_OFFSET                     0x00000066  /* A/D Sample and Hold Circuit Control Register */
 #define R_ADC12_ADDISCR_OFFSET                    0x0000007a  /* A/D Disconnection Detection Control Register */
@@ -94,6 +95,7 @@
 #define R_ADC12_ADSSTR_OFFSET(m)                  (0x000000e0 + ((m) * 0x00000001))  /* A/D Sampling State Register */
 #define R_ADC12_ADSSTRV_OFFSET                    0x000000e3  /* A/D Sampling State Register */
 /* ADSSTR%s Registers (16-19) */
+#define R_ADC12_ADSSTRX_OFFSET(m)                 (0x000000ec + ((m) * 0x00000001))  /* A/D Sampling State Register */
 
 /* ADC12 Register Addresses */
 
@@ -112,7 +114,7 @@
 #define R_ADC12_ADTSDR(n)                         (R_ADC12_CH_BASE(n) + R_ADC12_ADTSDR_OFFSET)
 #define R_ADC12_ADOCDR(n)                         (R_ADC12_CH_BASE(n) + R_ADC12_ADOCDR_OFFSET)
 #define R_ADC12_ADRD(n)                           (R_ADC12_CH_BASE(n) + R_ADC12_ADRD_OFFSET)
-#define R_ADC12_ADDR(n, m)                        (R_ADC12_CH_BASE(n) + R_ADC12_ADDR_OFFSET(m))
+#define R_ADC12_ADDRX(n, m)                       (R_ADC12_CH_BASE(n) + R_ADC12_ADDRX_OFFSET(m))
 #define R_ADC12_ADVMDR(n)                         (R_ADC12_CH_BASE(n) + R_ADC12_ADVMDR_OFFSET)
 #define R_ADC12_ADSHCR(n)                         (R_ADC12_CH_BASE(n) + R_ADC12_ADSHCR_OFFSET)
 #define R_ADC12_ADDISCR(n)                        (R_ADC12_CH_BASE(n) + R_ADC12_ADDISCR_OFFSET)
@@ -139,7 +141,7 @@
 #define R_ADC12_ADSSTRL(n)                        (R_ADC12_CH_BASE(n) + R_ADC12_ADSSTRL_OFFSET)
 #define R_ADC12_ADSSTRT(n)                        (R_ADC12_CH_BASE(n) + R_ADC12_ADSSTRT_OFFSET)
 #define R_ADC12_ADSSTRO(n)                        (R_ADC12_CH_BASE(n) + R_ADC12_ADSSTRO_OFFSET)
-#define R_ADC12_ADSSTR(n, m)                      (R_ADC12_CH_BASE(n) + R_ADC12_ADSSTR_OFFSET(m))
+#define R_ADC12_ADSSTRX(n, m)                     (R_ADC12_CH_BASE(n) + R_ADC12_ADSSTRX_OFFSET(m))
 #define R_ADC12_ADSSTRV(n)                        (R_ADC12_CH_BASE(n) + R_ADC12_ADSSTRV_OFFSET)
 
 /* Register bit definitions */

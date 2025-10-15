@@ -39,7 +39,6 @@
 
 #include "arm_internal.h"
 #include "chip.h"
-#include "hardware/ra_memorymap.h"
 #include "ra_start.h"
 #include "ra_gpio.h"
 #include "ra_icu.h"

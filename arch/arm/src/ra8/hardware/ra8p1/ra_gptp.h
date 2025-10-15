@@ -171,10 +171,10 @@
 #define R_GPTP_PTPTMEC_TE_MASK                    0x3
 
 /* PTPTMDC Register bit definitions */
-#define R_GPTP_PTPTMDC_TD1 TO TD0_SHIFT           (0)  /* Timer n Disable (n = 0, 1) */
-#define R_GPTP_PTPTMDC_TD1 TO TD0_MASK            0x3
-#  define R_GPTP_PTPTMDC_TD1 TO TD0_0                     (0 << R_GPTP_PTPTMDC_TD1 TO TD0_SHIFT)  /* No effect */
-#  define R_GPTP_PTPTMDC_TD1 TO TD0_1                     (1 << R_GPTP_PTPTMDC_TD1 TO TD0_SHIFT)  /* Bit q of this register clears PTPTMEC.TEq */
+#define R_GPTP_PTPTMDC_TD1_TO_TD0_SHIFT           (0)  /* Timer n Disable (n = 0, 1) */
+#define R_GPTP_PTPTMDC_TD1_TO_TD0_MASK            0x3
+#  define R_GPTP_PTPTMDC_TD1_TO_TD0_0                     (0 << R_GPTP_PTPTMDC_TD1_TO_TD0_SHIFT)  /* No effect */
+#  define R_GPTP_PTPTMDC_TD1_TO_TD0_1                     (1 << R_GPTP_PTPTMDC_TD1_TO_TD0_SHIFT)  /* Bit q of this register clears PTPTMEC.TEq */
 
 #define R_GPTP_PTPTMDC_TD_SHIFT                   (0)  /* Timer Disable */
 #define R_GPTP_PTPTMDC_TD_MASK                    0x3
@@ -296,11 +296,11 @@
 #define R_GPTP_PTPCCC_CCV_MASK                    0xffffffff
 
 /* PTPIS0 Register bit definitions */
-#define R_GPTP_PTPIS0_MCCS1 TO MCCS0_SHIFT        (0)  /* Media Clock n Capture Status Flag (n = 0, 1) */
-#define R_GPTP_PTPIS0_MCCS1 TO MCCS0_MASK         0x3
+#define R_GPTP_PTPIS0_MCCS1_TO_MCCS0_SHIFT        (0)  /* Media Clock n Capture Status Flag (n = 0, 1) */
+#define R_GPTP_PTPIS0_MCCS1_TO_MCCS0_MASK         0x3
 
-#define R_GPTP_PTPIS0_MCCOES1 TO MCCOES0_SHIFT    (16)  /* Media Clock n Capture Overflow Error Status Flag (n = 0, 1) */
-#define R_GPTP_PTPIS0_MCCOES1 TO MCCOES0_MASK     0x30000
+#define R_GPTP_PTPIS0_MCCOES1_TO_MCCOES0_SHIFT    (16)  /* Media Clock n Capture Overflow Error Status Flag (n = 0, 1) */
+#define R_GPTP_PTPIS0_MCCOES1_TO_MCCOES0_MASK     0x30000
 
 #define R_GPTP_PTPIS0_MCCS_SHIFT                  (0)  /* Media Clock Capture Status */
 #define R_GPTP_PTPIS0_MCCS_MASK                   0x3
@@ -309,15 +309,15 @@
 #define R_GPTP_PTPIS0_MCCOES_MASK                 0x30000
 
 /* PTPIE0 Register bit definitions */
-#define R_GPTP_PTPIE0_MCCE1 TO MCCE0_SHIFT        (0)  /* Media Clock m Capture Enable (m = 0, 1) */
-#define R_GPTP_PTPIE0_MCCE1 TO MCCE0_MASK         0x3
-#  define R_GPTP_PTPIE0_MCCE1 TO MCCE0_0                  (0 << R_GPTP_PTPIE0_MCCE1 TO MCCE0_SHIFT)  /* Interrupt m disabled */
-#  define R_GPTP_PTPIE0_MCCE1 TO MCCE0_1                  (1 << R_GPTP_PTPIE0_MCCE1 TO MCCE0_SHIFT)  /* Interrupt m enabled */
+#define R_GPTP_PTPIE0_MCCE1_TO_MCCE0_SHIFT        (0)  /* Media Clock m Capture Enable (m = 0, 1) */
+#define R_GPTP_PTPIE0_MCCE1_TO_MCCE0_MASK         0x3
+#  define R_GPTP_PTPIE0_MCCE1_TO_MCCE0_0                  (0 << R_GPTP_PTPIE0_MCCE1_TO_MCCE0_SHIFT)  /* Interrupt m disabled */
+#  define R_GPTP_PTPIE0_MCCE1_TO_MCCE0_1                  (1 << R_GPTP_PTPIE0_MCCE1_TO_MCCE0_SHIFT)  /* Interrupt m enabled */
 
-#define R_GPTP_PTPIE0_MCCOEE1 TO MCCOEE0_SHIFT    (16)  /* Media Clock m Capture Overflow Error Enable (m = 0, 1) */
-#define R_GPTP_PTPIE0_MCCOEE1 TO MCCOEE0_MASK     0x30000
-#  define R_GPTP_PTPIE0_MCCOEE1 TO MCCOEE0_0              (0 << R_GPTP_PTPIE0_MCCOEE1 TO MCCOEE0_SHIFT)  /* Interrupt m disabled */
-#  define R_GPTP_PTPIE0_MCCOEE1 TO MCCOEE0_1              (1 << R_GPTP_PTPIE0_MCCOEE1 TO MCCOEE0_SHIFT)  /* Interrupt m enabled */
+#define R_GPTP_PTPIE0_MCCOEE1_TO_MCCOEE0_SHIFT    (16)  /* Media Clock m Capture Overflow Error Enable (m = 0, 1) */
+#define R_GPTP_PTPIE0_MCCOEE1_TO_MCCOEE0_MASK     0x30000
+#  define R_GPTP_PTPIE0_MCCOEE1_TO_MCCOEE0_0              (0 << R_GPTP_PTPIE0_MCCOEE1_TO_MCCOEE0_SHIFT)  /* Interrupt m disabled */
+#  define R_GPTP_PTPIE0_MCCOEE1_TO_MCCOEE0_1              (1 << R_GPTP_PTPIE0_MCCOEE1_TO_MCCOEE0_SHIFT)  /* Interrupt m enabled */
 
 #define R_GPTP_PTPIE0_MCCE_SHIFT                  (0)  /* Media Clock Capture Enable */
 #define R_GPTP_PTPIE0_MCCE_MASK                   0x3
@@ -326,11 +326,11 @@
 #define R_GPTP_PTPIE0_MCCOEE_MASK                 0x30000
 
 /* PTPID0 Register bit definitions */
-#define R_GPTP_PTPID0_MCCD1 TO MCCD0_SHIFT        (0)  /* Media Clock m Capture Disable (m = 0, 1) */
-#define R_GPTP_PTPID0_MCCD1 TO MCCD0_MASK         0x3
+#define R_GPTP_PTPID0_MCCD1_TO_MCCD0_SHIFT        (0)  /* Media Clock m Capture Disable (m = 0, 1) */
+#define R_GPTP_PTPID0_MCCD1_TO_MCCD0_MASK         0x3
 
-#define R_GPTP_PTPID0_MCCOED1 TO MCCOED0_SHIFT    (16)  /* Media Clock m Capture Overflow Error Disable (m = 0, 1) */
-#define R_GPTP_PTPID0_MCCOED1 TO MCCOED0_MASK     0x30000
+#define R_GPTP_PTPID0_MCCOED1_TO_MCCOED0_SHIFT    (16)  /* Media Clock m Capture Overflow Error Disable (m = 0, 1) */
+#define R_GPTP_PTPID0_MCCOED1_TO_MCCOED0_MASK     0x30000
 
 #define R_GPTP_PTPID0_MCCD_SHIFT                  (0)  /* Media Clock Capture Disable */
 #define R_GPTP_PTPID0_MCCD_MASK                   0x3
@@ -339,24 +339,24 @@
 #define R_GPTP_PTPID0_MCCOED_MASK                 0x30000
 
 /* PTPIS1 Register bit definitions */
-#define R_GPTP_PTPIS1_MCRMS1 TO MCRMS0_SHIFT      (0)  /* Media Clock m Recovery Match Status Flag (m = 0, 1) */
-#define R_GPTP_PTPIS1_MCRMS1 TO MCRMS0_MASK       0x3
+#define R_GPTP_PTPIS1_MCRMS1_TO_MCRMS0_SHIFT      (0)  /* Media Clock m Recovery Match Status Flag (m = 0, 1) */
+#define R_GPTP_PTPIS1_MCRMS1_TO_MCRMS0_MASK       0x3
 
 #define R_GPTP_PTPIS1_MCRMS_SHIFT                 (0)  /* Media Clock Recovery Match Status */
 #define R_GPTP_PTPIS1_MCRMS_MASK                  0x3
 
 /* PTPIE1 Register bit definitions */
-#define R_GPTP_PTPIE1_MCRME1 TO MCRME0_SHIFT      (0)  /* Media Clock m Recovery Match Enable (m = 0, 1) */
-#define R_GPTP_PTPIE1_MCRME1 TO MCRME0_MASK       0x3
-#  define R_GPTP_PTPIE1_MCRME1 TO MCRME0_0                (0 << R_GPTP_PTPIE1_MCRME1 TO MCRME0_SHIFT)  /* Interrupt m disabled */
-#  define R_GPTP_PTPIE1_MCRME1 TO MCRME0_1                (1 << R_GPTP_PTPIE1_MCRME1 TO MCRME0_SHIFT)  /* Interrupt m enabled */
+#define R_GPTP_PTPIE1_MCRME1_TO_MCRME0_SHIFT      (0)  /* Media Clock m Recovery Match Enable (m = 0, 1) */
+#define R_GPTP_PTPIE1_MCRME1_TO_MCRME0_MASK       0x3
+#  define R_GPTP_PTPIE1_MCRME1_TO_MCRME0_0                (0 << R_GPTP_PTPIE1_MCRME1_TO_MCRME0_SHIFT)  /* Interrupt m disabled */
+#  define R_GPTP_PTPIE1_MCRME1_TO_MCRME0_1                (1 << R_GPTP_PTPIE1_MCRME1_TO_MCRME0_SHIFT)  /* Interrupt m enabled */
 
 #define R_GPTP_PTPIE1_MCRME_SHIFT                 (0)  /* Media Clock Recovery Match Enable */
 #define R_GPTP_PTPIE1_MCRME_MASK                  0x3
 
 /* PTPID1 Register bit definitions */
-#define R_GPTP_PTPID1_MCRMD1 TO MCRMD0_SHIFT      (0)  /* Media Clock m Recovery Match Disable (m = 0, 1) */
-#define R_GPTP_PTPID1_MCRMD1 TO MCRMD0_MASK       0x3
+#define R_GPTP_PTPID1_MCRMD1_TO_MCRMD0_SHIFT      (0)  /* Media Clock m Recovery Match Disable (m = 0, 1) */
+#define R_GPTP_PTPID1_MCRMD1_TO_MCRMD0_MASK       0x3
 
 #define R_GPTP_PTPID1_MCRMD_SHIFT                 (0)  /* Media Clock Recovery Match Disable */
 #define R_GPTP_PTPID1_MCRMD_MASK                  0x3

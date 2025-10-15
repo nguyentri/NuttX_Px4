@@ -25,8 +25,8 @@
  * Included Files
  ****************************************************************************/
 
-#include "hardware/ra_pinmap.h"
 #include "hardware/ra_memorymap.h"
+#include "hardware/ra_pinmap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -83,6 +83,19 @@ extern "C"
  * Bits 31-28: Port number (4 bits, supports ports 0-15)
  * Bits 27-24: Pin number (4 bits, supports pins 0-15)
  * Bits 23-0:  Configuration (24 bits for flags and PSEL)
+ *  PSEL occupies bits 20-16 (5 bits) in the configuration field
+ *  This will be shifted to hardware position 28:24 when writing to PFS register
+ *  The following bits are also used in the gpio_pinset_t config field:
+ *  Bits 0-15 directly map to PFS register bits 0-15:
+ *   0 PODR  Port Output Data
+ *   2 PDR   Port Direction
+ *   4 PCR   Pull-up Control
+ *   6 NCODR N-Channel Open-Drain Control
+ *   11:10 DSCR[1:0] Port Drive Capability
+ *   13:12 EOFR[1:0] Event on Falling/Event on Rising
+ *   14 ISEL IRQ Input Enable
+ *   15 ASEL Analog Input Enable
+ *  Bit 16 PMR will be set automatically based on PSEL value
  */
 typedef uint32_t gpio_pinset_t;
 

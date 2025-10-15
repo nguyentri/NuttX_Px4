@@ -233,28 +233,51 @@
 /* CFDRMDF%s_15 Registers (0-7) */
 #define R_CANFD_CFDRMDF_15_OFFSET(m)              (0x00000968 + ((m) * 0x0000004c))  /* RX Message Buffer Data Field 15 Registers */
 /* CFDRMID%s Registers (8-15) */
+#define R_CANFD_CFDRMIDX_OFFSET(m)                (0x00000d20 + ((m) * 0x0000004c))  /* RX Message Buffer ID Registers */
 /* CFDRMPTR%s Registers (8-15) */
+#define R_CANFD_CFDRMPTRX_OFFSET(m)               (0x00000d24 + ((m) * 0x0000004c))  /* RX Message Buffer Pointer Registers */
 /* CFDRMFDSTS%s Registers (8-15) */
+#define R_CANFD_CFDRMFDSTSX_OFFSET(m)             (0x00000d28 + ((m) * 0x0000004c))  /* RX Message Buffer CANFD Status Registers */
 /* CFDRMDF%s_0 Registers (8-15) */
+#define R_CANFD_CFDRMDFX_0_OFFSET(m)              (0x00000d2c + ((m) * 0x0000004c))  /* RX Message Buffer Data Field 0 Registers */
 /* CFDRMDF%s_1 Registers (8-15) */
+#define R_CANFD_CFDRMDFX_1_OFFSET(m)              (0x00000d30 + ((m) * 0x0000004c))  /* RX Message Buffer Data Field 1 Registers */
 /* CFDRMDF%s_2 Registers (8-15) */
+#define R_CANFD_CFDRMDFX_2_OFFSET(m)              (0x00000d34 + ((m) * 0x0000004c))  /* RX Message Buffer Data Field 2 Registers */
 /* CFDRMDF%s_3 Registers (8-15) */
+#define R_CANFD_CFDRMDFX_3_OFFSET(m)              (0x00000d38 + ((m) * 0x0000004c))  /* RX Message Buffer Data Field 3 Registers */
 /* CFDRMDF%s_4 Registers (8-15) */
+#define R_CANFD_CFDRMDFX_4_OFFSET(m)              (0x00000d3c + ((m) * 0x0000004c))  /* RX Message Buffer Data Field 4 Registers */
 /* CFDRMDF%s_5 Registers (8-15) */
+#define R_CANFD_CFDRMDFX_5_OFFSET(m)              (0x00000d40 + ((m) * 0x0000004c))  /* RX Message Buffer Data Field 5 Registers */
 /* CFDRMDF%s_6 Registers (8-15) */
+#define R_CANFD_CFDRMDFX_6_OFFSET(m)              (0x00000d44 + ((m) * 0x0000004c))  /* RX Message Buffer Data Field 6 Registers */
 /* CFDRMDF%s_7 Registers (8-15) */
+#define R_CANFD_CFDRMDFX_7_OFFSET(m)              (0x00000d48 + ((m) * 0x0000004c))  /* RX Message Buffer Data Field 7 Registers */
 /* CFDRMDF%s_8 Registers (8-15) */
+#define R_CANFD_CFDRMDFX_8_OFFSET(m)              (0x00000d4c + ((m) * 0x0000004c))  /* RX Message Buffer Data Field 8 Registers */
 /* CFDRMDF%s_9 Registers (8-15) */
+#define R_CANFD_CFDRMDFX_9_OFFSET(m)              (0x00000d50 + ((m) * 0x0000004c))  /* RX Message Buffer Data Field 9 Registers */
 /* CFDRMDF%s_10 Registers (8-15) */
+#define R_CANFD_CFDRMDFX_10_OFFSET(m)             (0x00000d54 + ((m) * 0x0000004c))  /* RX Message Buffer Data Field 10 Registers */
 /* CFDRMDF%s_11 Registers (8-15) */
+#define R_CANFD_CFDRMDFX_11_OFFSET(m)             (0x00000d58 + ((m) * 0x0000004c))  /* RX Message Buffer Data Field 11 Registers */
 /* CFDRMDF%s_12 Registers (8-15) */
+#define R_CANFD_CFDRMDFX_12_OFFSET(m)             (0x00000d5c + ((m) * 0x0000004c))  /* RX Message Buffer Data Field 12 Registers */
 /* CFDRMDF%s_13 Registers (8-15) */
+#define R_CANFD_CFDRMDFX_13_OFFSET(m)             (0x00000d60 + ((m) * 0x0000004c))  /* RX Message Buffer Data Field 13 Registers */
 /* CFDRMDF%s_14 Registers (8-15) */
+#define R_CANFD_CFDRMDFX_14_OFFSET(m)             (0x00000d64 + ((m) * 0x0000004c))  /* RX Message Buffer Data Field 14 Registers */
 /* CFDRMDF%s_15 Registers (8-15) */
+#define R_CANFD_CFDRMDFX_15_OFFSET(m)             (0x00000d68 + ((m) * 0x0000004c))  /* RX Message Buffer Data Field 15 Registers */
 /* CFDRMPTR%s Registers (16-23) */
+#define R_CANFD_CFDRMPTRX_2_OFFSET(m)             (0x00001124 + ((m) * 0x0000004c))  /* RX Message Buffer Pointer Registers */
 /* CFDRMFDSTS%s Registers (16-23) */
+#define R_CANFD_CFDRMFDSTSX_2_OFFSET(m)           (0x00001128 + ((m) * 0x0000004c))  /* RX Message Buffer CANFD Status Registers */
 /* CFDRMPTR%s Registers (24-31) */
+#define R_CANFD_CFDRMPTRX_3_OFFSET(m)             (0x00001524 + ((m) * 0x0000004c))  /* RX Message Buffer Pointer Registers */
 /* CFDRMFDSTS%s Registers (24-31) */
+#define R_CANFD_CFDRMFDSTSX_3_OFFSET(m)           (0x00001528 + ((m) * 0x0000004c))  /* RX Message Buffer CANFD Status Registers */
 
 /* CANFD Register Addresses */
 
@@ -359,25 +382,25 @@
 #define R_CANFD_CFDTMDF_15(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDTMDF_15_OFFSET(m))
 #define R_CANFD_CFDTHLACC0(n)                     (R_CANFD_CH_BASE(n) + R_CANFD_CFDTHLACC0_OFFSET)
 #define R_CANFD_CFDTHLACC1(n)                     (R_CANFD_CH_BASE(n) + R_CANFD_CFDTHLACC1_OFFSET)
-#define R_CANFD_CFDRMID(n, m)                     (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMID_OFFSET(m))
-#define R_CANFD_CFDRMPTR(n, m)                    (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMPTR_OFFSET(m))
-#define R_CANFD_CFDRMFDSTS(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMFDSTS_OFFSET(m))
-#define R_CANFD_CFDRMDF_0(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDF_0_OFFSET(m))
-#define R_CANFD_CFDRMDF_1(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDF_1_OFFSET(m))
-#define R_CANFD_CFDRMDF_2(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDF_2_OFFSET(m))
-#define R_CANFD_CFDRMDF_3(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDF_3_OFFSET(m))
-#define R_CANFD_CFDRMDF_4(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDF_4_OFFSET(m))
-#define R_CANFD_CFDRMDF_5(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDF_5_OFFSET(m))
-#define R_CANFD_CFDRMDF_6(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDF_6_OFFSET(m))
-#define R_CANFD_CFDRMDF_7(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDF_7_OFFSET(m))
-#define R_CANFD_CFDRMDF_8(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDF_8_OFFSET(m))
-#define R_CANFD_CFDRMDF_9(n, m)                   (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDF_9_OFFSET(m))
-#define R_CANFD_CFDRMDF_10(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDF_10_OFFSET(m))
-#define R_CANFD_CFDRMDF_11(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDF_11_OFFSET(m))
-#define R_CANFD_CFDRMDF_12(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDF_12_OFFSET(m))
-#define R_CANFD_CFDRMDF_13(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDF_13_OFFSET(m))
-#define R_CANFD_CFDRMDF_14(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDF_14_OFFSET(m))
-#define R_CANFD_CFDRMDF_15(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDF_15_OFFSET(m))
+#define R_CANFD_CFDRMIDX(n, m)                    (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMIDX_OFFSET(m))
+#define R_CANFD_CFDRMPTRX_3(n, m)                 (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMPTRX_3_OFFSET(m))
+#define R_CANFD_CFDRMFDSTSX_3(n, m)               (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMFDSTSX_3_OFFSET(m))
+#define R_CANFD_CFDRMDFX_0(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDFX_0_OFFSET(m))
+#define R_CANFD_CFDRMDFX_1(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDFX_1_OFFSET(m))
+#define R_CANFD_CFDRMDFX_2(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDFX_2_OFFSET(m))
+#define R_CANFD_CFDRMDFX_3(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDFX_3_OFFSET(m))
+#define R_CANFD_CFDRMDFX_4(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDFX_4_OFFSET(m))
+#define R_CANFD_CFDRMDFX_5(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDFX_5_OFFSET(m))
+#define R_CANFD_CFDRMDFX_6(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDFX_6_OFFSET(m))
+#define R_CANFD_CFDRMDFX_7(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDFX_7_OFFSET(m))
+#define R_CANFD_CFDRMDFX_8(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDFX_8_OFFSET(m))
+#define R_CANFD_CFDRMDFX_9(n, m)                  (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDFX_9_OFFSET(m))
+#define R_CANFD_CFDRMDFX_10(n, m)                 (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDFX_10_OFFSET(m))
+#define R_CANFD_CFDRMDFX_11(n, m)                 (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDFX_11_OFFSET(m))
+#define R_CANFD_CFDRMDFX_12(n, m)                 (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDFX_12_OFFSET(m))
+#define R_CANFD_CFDRMDFX_13(n, m)                 (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDFX_13_OFFSET(m))
+#define R_CANFD_CFDRMDFX_14(n, m)                 (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDFX_14_OFFSET(m))
+#define R_CANFD_CFDRMDFX_15(n, m)                 (R_CANFD_CH_BASE(n) + R_CANFD_CFDRMDFX_15_OFFSET(m))
 
 /* Register bit definitions */
 /* CFDC0NCFG Register bit definitions */
@@ -1105,213 +1128,213 @@
 #define R_CANFD_CFDRFFDSTS_CFDRFPTR_SHIFT         (16)  /* RX FIFO Buffer Pointer Field */
 #define R_CANFD_CFDRFFDSTS_CFDRFPTR_MASK          0xffff0000
 
-/* CFDRFDF_ Register bit definitions */
-#define R_CANFD_CFDRFDF__RFDB_LL_SHIFT            (0)  /* RX FIFO Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRFDF__RFDB_LL_MASK             0xff
+/* CFDRFDF Register bit definitions */
+#define R_CANFD_CFDRFDF_RFDB_LL_SHIFT             (0)  /* RX FIFO Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRFDF_RFDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRFDF__RFDB_LH_SHIFT            (8)  /* RX FIFO Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRFDF__RFDB_LH_MASK             0xff00
+#define R_CANFD_CFDRFDF_RFDB_LH_SHIFT             (8)  /* RX FIFO Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRFDF_RFDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRFDF__RFDB_HL_SHIFT            (16)  /* RX FIFO Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRFDF__RFDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRFDF_RFDB_HL_SHIFT             (16)  /* RX FIFO Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRFDF_RFDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRFDF__RFDB_HH_SHIFT            (24)  /* RX FIFO Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRFDF__RFDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRFDF_RFDB_HH_SHIFT             (24)  /* RX FIFO Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRFDF_RFDB_HH_MASK              0xff000000
 
-/* CFDRFDF_ Register bit definitions */
-#define R_CANFD_CFDRFDF__RFDB_LL_SHIFT            (0)  /* RX FIFO Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRFDF__RFDB_LL_MASK             0xff
+/* CFDRFDF Register bit definitions */
+#define R_CANFD_CFDRFDF_RFDB_LL_SHIFT             (0)  /* RX FIFO Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRFDF_RFDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRFDF__RFDB_LH_SHIFT            (8)  /* RX FIFO Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRFDF__RFDB_LH_MASK             0xff00
+#define R_CANFD_CFDRFDF_RFDB_LH_SHIFT             (8)  /* RX FIFO Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRFDF_RFDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRFDF__RFDB_HL_SHIFT            (16)  /* RX FIFO Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRFDF__RFDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRFDF_RFDB_HL_SHIFT             (16)  /* RX FIFO Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRFDF_RFDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRFDF__RFDB_HH_SHIFT            (24)  /* RX FIFO Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRFDF__RFDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRFDF_RFDB_HH_SHIFT             (24)  /* RX FIFO Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRFDF_RFDB_HH_MASK              0xff000000
 
-/* CFDRFDF_ Register bit definitions */
-#define R_CANFD_CFDRFDF__RFDB_LL_SHIFT            (0)  /* RX FIFO Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRFDF__RFDB_LL_MASK             0xff
+/* CFDRFDF Register bit definitions */
+#define R_CANFD_CFDRFDF_RFDB_LL_SHIFT             (0)  /* RX FIFO Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRFDF_RFDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRFDF__RFDB_LH_SHIFT            (8)  /* RX FIFO Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRFDF__RFDB_LH_MASK             0xff00
+#define R_CANFD_CFDRFDF_RFDB_LH_SHIFT             (8)  /* RX FIFO Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRFDF_RFDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRFDF__RFDB_HL_SHIFT            (16)  /* RX FIFO Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRFDF__RFDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRFDF_RFDB_HL_SHIFT             (16)  /* RX FIFO Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRFDF_RFDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRFDF__RFDB_HH_SHIFT            (24)  /* RX FIFO Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRFDF__RFDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRFDF_RFDB_HH_SHIFT             (24)  /* RX FIFO Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRFDF_RFDB_HH_MASK              0xff000000
 
-/* CFDRFDF_ Register bit definitions */
-#define R_CANFD_CFDRFDF__RFDB_LL_SHIFT            (0)  /* RX FIFO Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRFDF__RFDB_LL_MASK             0xff
+/* CFDRFDF Register bit definitions */
+#define R_CANFD_CFDRFDF_RFDB_LL_SHIFT             (0)  /* RX FIFO Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRFDF_RFDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRFDF__RFDB_LH_SHIFT            (8)  /* RX FIFO Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRFDF__RFDB_LH_MASK             0xff00
+#define R_CANFD_CFDRFDF_RFDB_LH_SHIFT             (8)  /* RX FIFO Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRFDF_RFDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRFDF__RFDB_HL_SHIFT            (16)  /* RX FIFO Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRFDF__RFDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRFDF_RFDB_HL_SHIFT             (16)  /* RX FIFO Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRFDF_RFDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRFDF__RFDB_HH_SHIFT            (24)  /* RX FIFO Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRFDF__RFDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRFDF_RFDB_HH_SHIFT             (24)  /* RX FIFO Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRFDF_RFDB_HH_MASK              0xff000000
 
-/* CFDRFDF_ Register bit definitions */
-#define R_CANFD_CFDRFDF__RFDB_LL_SHIFT            (0)  /* RX FIFO Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRFDF__RFDB_LL_MASK             0xff
+/* CFDRFDF Register bit definitions */
+#define R_CANFD_CFDRFDF_RFDB_LL_SHIFT             (0)  /* RX FIFO Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRFDF_RFDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRFDF__RFDB_LH_SHIFT            (8)  /* RX FIFO Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRFDF__RFDB_LH_MASK             0xff00
+#define R_CANFD_CFDRFDF_RFDB_LH_SHIFT             (8)  /* RX FIFO Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRFDF_RFDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRFDF__RFDB_HL_SHIFT            (16)  /* RX FIFO Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRFDF__RFDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRFDF_RFDB_HL_SHIFT             (16)  /* RX FIFO Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRFDF_RFDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRFDF__RFDB_HH_SHIFT            (24)  /* RX FIFO Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRFDF__RFDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRFDF_RFDB_HH_SHIFT             (24)  /* RX FIFO Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRFDF_RFDB_HH_MASK              0xff000000
 
-/* CFDRFDF_ Register bit definitions */
-#define R_CANFD_CFDRFDF__RFDB_LL_SHIFT            (0)  /* RX FIFO Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRFDF__RFDB_LL_MASK             0xff
+/* CFDRFDF Register bit definitions */
+#define R_CANFD_CFDRFDF_RFDB_LL_SHIFT             (0)  /* RX FIFO Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRFDF_RFDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRFDF__RFDB_LH_SHIFT            (8)  /* RX FIFO Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRFDF__RFDB_LH_MASK             0xff00
+#define R_CANFD_CFDRFDF_RFDB_LH_SHIFT             (8)  /* RX FIFO Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRFDF_RFDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRFDF__RFDB_HL_SHIFT            (16)  /* RX FIFO Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRFDF__RFDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRFDF_RFDB_HL_SHIFT             (16)  /* RX FIFO Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRFDF_RFDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRFDF__RFDB_HH_SHIFT            (24)  /* RX FIFO Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRFDF__RFDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRFDF_RFDB_HH_SHIFT             (24)  /* RX FIFO Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRFDF_RFDB_HH_MASK              0xff000000
 
-/* CFDRFDF_ Register bit definitions */
-#define R_CANFD_CFDRFDF__RFDB_LL_SHIFT            (0)  /* RX FIFO Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRFDF__RFDB_LL_MASK             0xff
+/* CFDRFDF Register bit definitions */
+#define R_CANFD_CFDRFDF_RFDB_LL_SHIFT             (0)  /* RX FIFO Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRFDF_RFDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRFDF__RFDB_LH_SHIFT            (8)  /* RX FIFO Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRFDF__RFDB_LH_MASK             0xff00
+#define R_CANFD_CFDRFDF_RFDB_LH_SHIFT             (8)  /* RX FIFO Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRFDF_RFDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRFDF__RFDB_HL_SHIFT            (16)  /* RX FIFO Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRFDF__RFDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRFDF_RFDB_HL_SHIFT             (16)  /* RX FIFO Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRFDF_RFDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRFDF__RFDB_HH_SHIFT            (24)  /* RX FIFO Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRFDF__RFDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRFDF_RFDB_HH_SHIFT             (24)  /* RX FIFO Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRFDF_RFDB_HH_MASK              0xff000000
 
-/* CFDRFDF_ Register bit definitions */
-#define R_CANFD_CFDRFDF__RFDB_LL_SHIFT            (0)  /* RX FIFO Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRFDF__RFDB_LL_MASK             0xff
+/* CFDRFDF Register bit definitions */
+#define R_CANFD_CFDRFDF_RFDB_LL_SHIFT             (0)  /* RX FIFO Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRFDF_RFDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRFDF__RFDB_LH_SHIFT            (8)  /* RX FIFO Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRFDF__RFDB_LH_MASK             0xff00
+#define R_CANFD_CFDRFDF_RFDB_LH_SHIFT             (8)  /* RX FIFO Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRFDF_RFDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRFDF__RFDB_HL_SHIFT            (16)  /* RX FIFO Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRFDF__RFDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRFDF_RFDB_HL_SHIFT             (16)  /* RX FIFO Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRFDF_RFDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRFDF__RFDB_HH_SHIFT            (24)  /* RX FIFO Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRFDF__RFDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRFDF_RFDB_HH_SHIFT             (24)  /* RX FIFO Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRFDF_RFDB_HH_MASK              0xff000000
 
-/* CFDRFDF_ Register bit definitions */
-#define R_CANFD_CFDRFDF__RFDB_LL_SHIFT            (0)  /* RX FIFO Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRFDF__RFDB_LL_MASK             0xff
+/* CFDRFDF Register bit definitions */
+#define R_CANFD_CFDRFDF_RFDB_LL_SHIFT             (0)  /* RX FIFO Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRFDF_RFDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRFDF__RFDB_LH_SHIFT            (8)  /* RX FIFO Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRFDF__RFDB_LH_MASK             0xff00
+#define R_CANFD_CFDRFDF_RFDB_LH_SHIFT             (8)  /* RX FIFO Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRFDF_RFDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRFDF__RFDB_HL_SHIFT            (16)  /* RX FIFO Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRFDF__RFDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRFDF_RFDB_HL_SHIFT             (16)  /* RX FIFO Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRFDF_RFDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRFDF__RFDB_HH_SHIFT            (24)  /* RX FIFO Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRFDF__RFDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRFDF_RFDB_HH_SHIFT             (24)  /* RX FIFO Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRFDF_RFDB_HH_MASK              0xff000000
 
-/* CFDRFDF_ Register bit definitions */
-#define R_CANFD_CFDRFDF__RFDB_LL_SHIFT            (0)  /* RX FIFO Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRFDF__RFDB_LL_MASK             0xff
+/* CFDRFDF Register bit definitions */
+#define R_CANFD_CFDRFDF_RFDB_LL_SHIFT             (0)  /* RX FIFO Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRFDF_RFDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRFDF__RFDB_LH_SHIFT            (8)  /* RX FIFO Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRFDF__RFDB_LH_MASK             0xff00
+#define R_CANFD_CFDRFDF_RFDB_LH_SHIFT             (8)  /* RX FIFO Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRFDF_RFDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRFDF__RFDB_HL_SHIFT            (16)  /* RX FIFO Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRFDF__RFDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRFDF_RFDB_HL_SHIFT             (16)  /* RX FIFO Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRFDF_RFDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRFDF__RFDB_HH_SHIFT            (24)  /* RX FIFO Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRFDF__RFDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRFDF_RFDB_HH_SHIFT             (24)  /* RX FIFO Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRFDF_RFDB_HH_MASK              0xff000000
 
-/* CFDRFDF_ Register bit definitions */
-#define R_CANFD_CFDRFDF__RFDB_LL_SHIFT            (0)  /* RX FIFO Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRFDF__RFDB_LL_MASK             0xff
+/* CFDRFDF Register bit definitions */
+#define R_CANFD_CFDRFDF_RFDB_LL_SHIFT             (0)  /* RX FIFO Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRFDF_RFDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRFDF__RFDB_LH_SHIFT            (8)  /* RX FIFO Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRFDF__RFDB_LH_MASK             0xff00
+#define R_CANFD_CFDRFDF_RFDB_LH_SHIFT             (8)  /* RX FIFO Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRFDF_RFDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRFDF__RFDB_HL_SHIFT            (16)  /* RX FIFO Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRFDF__RFDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRFDF_RFDB_HL_SHIFT             (16)  /* RX FIFO Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRFDF_RFDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRFDF__RFDB_HH_SHIFT            (24)  /* RX FIFO Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRFDF__RFDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRFDF_RFDB_HH_SHIFT             (24)  /* RX FIFO Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRFDF_RFDB_HH_MASK              0xff000000
 
-/* CFDRFDF_ Register bit definitions */
-#define R_CANFD_CFDRFDF__RFDB_LL_SHIFT            (0)  /* RX FIFO Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRFDF__RFDB_LL_MASK             0xff
+/* CFDRFDF Register bit definitions */
+#define R_CANFD_CFDRFDF_RFDB_LL_SHIFT             (0)  /* RX FIFO Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRFDF_RFDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRFDF__RFDB_LH_SHIFT            (8)  /* RX FIFO Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRFDF__RFDB_LH_MASK             0xff00
+#define R_CANFD_CFDRFDF_RFDB_LH_SHIFT             (8)  /* RX FIFO Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRFDF_RFDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRFDF__RFDB_HL_SHIFT            (16)  /* RX FIFO Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRFDF__RFDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRFDF_RFDB_HL_SHIFT             (16)  /* RX FIFO Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRFDF_RFDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRFDF__RFDB_HH_SHIFT            (24)  /* RX FIFO Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRFDF__RFDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRFDF_RFDB_HH_SHIFT             (24)  /* RX FIFO Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRFDF_RFDB_HH_MASK              0xff000000
 
-/* CFDRFDF_ Register bit definitions */
-#define R_CANFD_CFDRFDF__RFDB_LL_SHIFT            (0)  /* RX FIFO Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRFDF__RFDB_LL_MASK             0xff
+/* CFDRFDF Register bit definitions */
+#define R_CANFD_CFDRFDF_RFDB_LL_SHIFT             (0)  /* RX FIFO Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRFDF_RFDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRFDF__RFDB_LH_SHIFT            (8)  /* RX FIFO Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRFDF__RFDB_LH_MASK             0xff00
+#define R_CANFD_CFDRFDF_RFDB_LH_SHIFT             (8)  /* RX FIFO Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRFDF_RFDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRFDF__RFDB_HL_SHIFT            (16)  /* RX FIFO Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRFDF__RFDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRFDF_RFDB_HL_SHIFT             (16)  /* RX FIFO Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRFDF_RFDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRFDF__RFDB_HH_SHIFT            (24)  /* RX FIFO Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRFDF__RFDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRFDF_RFDB_HH_SHIFT             (24)  /* RX FIFO Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRFDF_RFDB_HH_MASK              0xff000000
 
-/* CFDRFDF_ Register bit definitions */
-#define R_CANFD_CFDRFDF__RFDB_LL_SHIFT            (0)  /* RX FIFO Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRFDF__RFDB_LL_MASK             0xff
+/* CFDRFDF Register bit definitions */
+#define R_CANFD_CFDRFDF_RFDB_LL_SHIFT             (0)  /* RX FIFO Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRFDF_RFDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRFDF__RFDB_LH_SHIFT            (8)  /* RX FIFO Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRFDF__RFDB_LH_MASK             0xff00
+#define R_CANFD_CFDRFDF_RFDB_LH_SHIFT             (8)  /* RX FIFO Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRFDF_RFDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRFDF__RFDB_HL_SHIFT            (16)  /* RX FIFO Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRFDF__RFDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRFDF_RFDB_HL_SHIFT             (16)  /* RX FIFO Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRFDF_RFDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRFDF__RFDB_HH_SHIFT            (24)  /* RX FIFO Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRFDF__RFDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRFDF_RFDB_HH_SHIFT             (24)  /* RX FIFO Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRFDF_RFDB_HH_MASK              0xff000000
 
-/* CFDRFDF_ Register bit definitions */
-#define R_CANFD_CFDRFDF__RFDB_LL_SHIFT            (0)  /* RX FIFO Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRFDF__RFDB_LL_MASK             0xff
+/* CFDRFDF Register bit definitions */
+#define R_CANFD_CFDRFDF_RFDB_LL_SHIFT             (0)  /* RX FIFO Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRFDF_RFDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRFDF__RFDB_LH_SHIFT            (8)  /* RX FIFO Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRFDF__RFDB_LH_MASK             0xff00
+#define R_CANFD_CFDRFDF_RFDB_LH_SHIFT             (8)  /* RX FIFO Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRFDF_RFDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRFDF__RFDB_HL_SHIFT            (16)  /* RX FIFO Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRFDF__RFDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRFDF_RFDB_HL_SHIFT             (16)  /* RX FIFO Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRFDF_RFDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRFDF__RFDB_HH_SHIFT            (24)  /* RX FIFO Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRFDF__RFDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRFDF_RFDB_HH_SHIFT             (24)  /* RX FIFO Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRFDF_RFDB_HH_MASK              0xff000000
 
-/* CFDRFDF_ Register bit definitions */
-#define R_CANFD_CFDRFDF__RFDB_LL_SHIFT            (0)  /* RX FIFO Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRFDF__RFDB_LL_MASK             0xff
+/* CFDRFDF Register bit definitions */
+#define R_CANFD_CFDRFDF_RFDB_LL_SHIFT             (0)  /* RX FIFO Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRFDF_RFDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRFDF__RFDB_LH_SHIFT            (8)  /* RX FIFO Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRFDF__RFDB_LH_MASK             0xff00
+#define R_CANFD_CFDRFDF_RFDB_LH_SHIFT             (8)  /* RX FIFO Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRFDF_RFDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRFDF__RFDB_HL_SHIFT            (16)  /* RX FIFO Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRFDF__RFDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRFDF_RFDB_HL_SHIFT             (16)  /* RX FIFO Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRFDF_RFDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRFDF__RFDB_HH_SHIFT            (24)  /* RX FIFO Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRFDF__RFDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRFDF_RFDB_HH_SHIFT             (24)  /* RX FIFO Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRFDF_RFDB_HH_MASK              0xff000000
 
 /* CFDCFID Register bit definitions */
 #define R_CANFD_CFDCFID_CFID_SHIFT                (0)  /* Common FIFO Buffer ID Field */
@@ -1383,213 +1406,213 @@
 #define R_CANFD_CFDTMFDCTR_TMPTR_SHIFT            (16)  /* TX Message Buffer Pointer Field */
 #define R_CANFD_CFDTMFDCTR_TMPTR_MASK             0xffff0000
 
-/* CFDTMDF_ Register bit definitions */
-#define R_CANFD_CFDTMDF__TMDB_LL_SHIFT            (0)  /* TX Message Buffer Data Byte ((p × 4) */
-#define R_CANFD_CFDTMDF__TMDB_LL_MASK             0xff
+/* CFDTMDF Register bit definitions */
+#define R_CANFD_CFDTMDF_TMDB_LL_SHIFT             (0)  /* TX Message Buffer Data Byte ((p × 4) */
+#define R_CANFD_CFDTMDF_TMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDTMDF__TMDB_LH_SHIFT            (8)  /* TX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDTMDF__TMDB_LH_MASK             0xff00
+#define R_CANFD_CFDTMDF_TMDB_LH_SHIFT             (8)  /* TX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDTMDF_TMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDTMDF__TMDB_HL_SHIFT            (16)  /* TX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDTMDF__TMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDTMDF_TMDB_HL_SHIFT             (16)  /* TX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDTMDF_TMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDTMDF__TMDB_HH_SHIFT            (24)  /* TX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDTMDF__TMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDTMDF_TMDB_HH_SHIFT             (24)  /* TX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDTMDF_TMDB_HH_MASK              0xff000000
 
-/* CFDTMDF_ Register bit definitions */
-#define R_CANFD_CFDTMDF__TMDB_LL_SHIFT            (0)  /* TX Message Buffer Data Byte ((p × 4) */
-#define R_CANFD_CFDTMDF__TMDB_LL_MASK             0xff
+/* CFDTMDF Register bit definitions */
+#define R_CANFD_CFDTMDF_TMDB_LL_SHIFT             (0)  /* TX Message Buffer Data Byte ((p × 4) */
+#define R_CANFD_CFDTMDF_TMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDTMDF__TMDB_LH_SHIFT            (8)  /* TX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDTMDF__TMDB_LH_MASK             0xff00
+#define R_CANFD_CFDTMDF_TMDB_LH_SHIFT             (8)  /* TX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDTMDF_TMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDTMDF__TMDB_HL_SHIFT            (16)  /* TX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDTMDF__TMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDTMDF_TMDB_HL_SHIFT             (16)  /* TX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDTMDF_TMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDTMDF__TMDB_HH_SHIFT            (24)  /* TX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDTMDF__TMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDTMDF_TMDB_HH_SHIFT             (24)  /* TX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDTMDF_TMDB_HH_MASK              0xff000000
 
-/* CFDTMDF_ Register bit definitions */
-#define R_CANFD_CFDTMDF__TMDB_LL_SHIFT            (0)  /* TX Message Buffer Data Byte ((p × 4) */
-#define R_CANFD_CFDTMDF__TMDB_LL_MASK             0xff
+/* CFDTMDF Register bit definitions */
+#define R_CANFD_CFDTMDF_TMDB_LL_SHIFT             (0)  /* TX Message Buffer Data Byte ((p × 4) */
+#define R_CANFD_CFDTMDF_TMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDTMDF__TMDB_LH_SHIFT            (8)  /* TX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDTMDF__TMDB_LH_MASK             0xff00
+#define R_CANFD_CFDTMDF_TMDB_LH_SHIFT             (8)  /* TX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDTMDF_TMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDTMDF__TMDB_HL_SHIFT            (16)  /* TX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDTMDF__TMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDTMDF_TMDB_HL_SHIFT             (16)  /* TX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDTMDF_TMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDTMDF__TMDB_HH_SHIFT            (24)  /* TX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDTMDF__TMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDTMDF_TMDB_HH_SHIFT             (24)  /* TX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDTMDF_TMDB_HH_MASK              0xff000000
 
-/* CFDTMDF_ Register bit definitions */
-#define R_CANFD_CFDTMDF__TMDB_LL_SHIFT            (0)  /* TX Message Buffer Data Byte ((p × 4) */
-#define R_CANFD_CFDTMDF__TMDB_LL_MASK             0xff
+/* CFDTMDF Register bit definitions */
+#define R_CANFD_CFDTMDF_TMDB_LL_SHIFT             (0)  /* TX Message Buffer Data Byte ((p × 4) */
+#define R_CANFD_CFDTMDF_TMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDTMDF__TMDB_LH_SHIFT            (8)  /* TX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDTMDF__TMDB_LH_MASK             0xff00
+#define R_CANFD_CFDTMDF_TMDB_LH_SHIFT             (8)  /* TX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDTMDF_TMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDTMDF__TMDB_HL_SHIFT            (16)  /* TX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDTMDF__TMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDTMDF_TMDB_HL_SHIFT             (16)  /* TX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDTMDF_TMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDTMDF__TMDB_HH_SHIFT            (24)  /* TX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDTMDF__TMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDTMDF_TMDB_HH_SHIFT             (24)  /* TX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDTMDF_TMDB_HH_MASK              0xff000000
 
-/* CFDTMDF_ Register bit definitions */
-#define R_CANFD_CFDTMDF__TMDB_LL_SHIFT            (0)  /* TX Message Buffer Data Byte ((p × 4) */
-#define R_CANFD_CFDTMDF__TMDB_LL_MASK             0xff
+/* CFDTMDF Register bit definitions */
+#define R_CANFD_CFDTMDF_TMDB_LL_SHIFT             (0)  /* TX Message Buffer Data Byte ((p × 4) */
+#define R_CANFD_CFDTMDF_TMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDTMDF__TMDB_LH_SHIFT            (8)  /* TX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDTMDF__TMDB_LH_MASK             0xff00
+#define R_CANFD_CFDTMDF_TMDB_LH_SHIFT             (8)  /* TX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDTMDF_TMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDTMDF__TMDB_HL_SHIFT            (16)  /* TX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDTMDF__TMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDTMDF_TMDB_HL_SHIFT             (16)  /* TX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDTMDF_TMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDTMDF__TMDB_HH_SHIFT            (24)  /* TX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDTMDF__TMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDTMDF_TMDB_HH_SHIFT             (24)  /* TX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDTMDF_TMDB_HH_MASK              0xff000000
 
-/* CFDTMDF_ Register bit definitions */
-#define R_CANFD_CFDTMDF__TMDB_LL_SHIFT            (0)  /* TX Message Buffer Data Byte ((p × 4) */
-#define R_CANFD_CFDTMDF__TMDB_LL_MASK             0xff
+/* CFDTMDF Register bit definitions */
+#define R_CANFD_CFDTMDF_TMDB_LL_SHIFT             (0)  /* TX Message Buffer Data Byte ((p × 4) */
+#define R_CANFD_CFDTMDF_TMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDTMDF__TMDB_LH_SHIFT            (8)  /* TX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDTMDF__TMDB_LH_MASK             0xff00
+#define R_CANFD_CFDTMDF_TMDB_LH_SHIFT             (8)  /* TX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDTMDF_TMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDTMDF__TMDB_HL_SHIFT            (16)  /* TX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDTMDF__TMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDTMDF_TMDB_HL_SHIFT             (16)  /* TX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDTMDF_TMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDTMDF__TMDB_HH_SHIFT            (24)  /* TX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDTMDF__TMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDTMDF_TMDB_HH_SHIFT             (24)  /* TX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDTMDF_TMDB_HH_MASK              0xff000000
 
-/* CFDTMDF_ Register bit definitions */
-#define R_CANFD_CFDTMDF__TMDB_LL_SHIFT            (0)  /* TX Message Buffer Data Byte ((p × 4) */
-#define R_CANFD_CFDTMDF__TMDB_LL_MASK             0xff
+/* CFDTMDF Register bit definitions */
+#define R_CANFD_CFDTMDF_TMDB_LL_SHIFT             (0)  /* TX Message Buffer Data Byte ((p × 4) */
+#define R_CANFD_CFDTMDF_TMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDTMDF__TMDB_LH_SHIFT            (8)  /* TX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDTMDF__TMDB_LH_MASK             0xff00
+#define R_CANFD_CFDTMDF_TMDB_LH_SHIFT             (8)  /* TX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDTMDF_TMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDTMDF__TMDB_HL_SHIFT            (16)  /* TX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDTMDF__TMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDTMDF_TMDB_HL_SHIFT             (16)  /* TX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDTMDF_TMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDTMDF__TMDB_HH_SHIFT            (24)  /* TX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDTMDF__TMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDTMDF_TMDB_HH_SHIFT             (24)  /* TX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDTMDF_TMDB_HH_MASK              0xff000000
 
-/* CFDTMDF_ Register bit definitions */
-#define R_CANFD_CFDTMDF__TMDB_LL_SHIFT            (0)  /* TX Message Buffer Data Byte ((p × 4) */
-#define R_CANFD_CFDTMDF__TMDB_LL_MASK             0xff
+/* CFDTMDF Register bit definitions */
+#define R_CANFD_CFDTMDF_TMDB_LL_SHIFT             (0)  /* TX Message Buffer Data Byte ((p × 4) */
+#define R_CANFD_CFDTMDF_TMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDTMDF__TMDB_LH_SHIFT            (8)  /* TX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDTMDF__TMDB_LH_MASK             0xff00
+#define R_CANFD_CFDTMDF_TMDB_LH_SHIFT             (8)  /* TX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDTMDF_TMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDTMDF__TMDB_HL_SHIFT            (16)  /* TX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDTMDF__TMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDTMDF_TMDB_HL_SHIFT             (16)  /* TX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDTMDF_TMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDTMDF__TMDB_HH_SHIFT            (24)  /* TX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDTMDF__TMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDTMDF_TMDB_HH_SHIFT             (24)  /* TX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDTMDF_TMDB_HH_MASK              0xff000000
 
-/* CFDTMDF_ Register bit definitions */
-#define R_CANFD_CFDTMDF__TMDB_LL_SHIFT            (0)  /* TX Message Buffer Data Byte ((p × 4) */
-#define R_CANFD_CFDTMDF__TMDB_LL_MASK             0xff
+/* CFDTMDF Register bit definitions */
+#define R_CANFD_CFDTMDF_TMDB_LL_SHIFT             (0)  /* TX Message Buffer Data Byte ((p × 4) */
+#define R_CANFD_CFDTMDF_TMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDTMDF__TMDB_LH_SHIFT            (8)  /* TX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDTMDF__TMDB_LH_MASK             0xff00
+#define R_CANFD_CFDTMDF_TMDB_LH_SHIFT             (8)  /* TX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDTMDF_TMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDTMDF__TMDB_HL_SHIFT            (16)  /* TX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDTMDF__TMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDTMDF_TMDB_HL_SHIFT             (16)  /* TX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDTMDF_TMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDTMDF__TMDB_HH_SHIFT            (24)  /* TX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDTMDF__TMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDTMDF_TMDB_HH_SHIFT             (24)  /* TX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDTMDF_TMDB_HH_MASK              0xff000000
 
-/* CFDTMDF_ Register bit definitions */
-#define R_CANFD_CFDTMDF__TMDB_LL_SHIFT            (0)  /* TX Message Buffer Data Byte ((p × 4) */
-#define R_CANFD_CFDTMDF__TMDB_LL_MASK             0xff
+/* CFDTMDF Register bit definitions */
+#define R_CANFD_CFDTMDF_TMDB_LL_SHIFT             (0)  /* TX Message Buffer Data Byte ((p × 4) */
+#define R_CANFD_CFDTMDF_TMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDTMDF__TMDB_LH_SHIFT            (8)  /* TX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDTMDF__TMDB_LH_MASK             0xff00
+#define R_CANFD_CFDTMDF_TMDB_LH_SHIFT             (8)  /* TX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDTMDF_TMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDTMDF__TMDB_HL_SHIFT            (16)  /* TX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDTMDF__TMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDTMDF_TMDB_HL_SHIFT             (16)  /* TX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDTMDF_TMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDTMDF__TMDB_HH_SHIFT            (24)  /* TX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDTMDF__TMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDTMDF_TMDB_HH_SHIFT             (24)  /* TX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDTMDF_TMDB_HH_MASK              0xff000000
 
-/* CFDTMDF_ Register bit definitions */
-#define R_CANFD_CFDTMDF__TMDB_LL_SHIFT            (0)  /* TX Message Buffer Data Byte ((p × 4) */
-#define R_CANFD_CFDTMDF__TMDB_LL_MASK             0xff
+/* CFDTMDF Register bit definitions */
+#define R_CANFD_CFDTMDF_TMDB_LL_SHIFT             (0)  /* TX Message Buffer Data Byte ((p × 4) */
+#define R_CANFD_CFDTMDF_TMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDTMDF__TMDB_LH_SHIFT            (8)  /* TX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDTMDF__TMDB_LH_MASK             0xff00
+#define R_CANFD_CFDTMDF_TMDB_LH_SHIFT             (8)  /* TX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDTMDF_TMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDTMDF__TMDB_HL_SHIFT            (16)  /* TX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDTMDF__TMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDTMDF_TMDB_HL_SHIFT             (16)  /* TX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDTMDF_TMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDTMDF__TMDB_HH_SHIFT            (24)  /* TX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDTMDF__TMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDTMDF_TMDB_HH_SHIFT             (24)  /* TX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDTMDF_TMDB_HH_MASK              0xff000000
 
-/* CFDTMDF_ Register bit definitions */
-#define R_CANFD_CFDTMDF__TMDB_LL_SHIFT            (0)  /* TX Message Buffer Data Byte ((p × 4) */
-#define R_CANFD_CFDTMDF__TMDB_LL_MASK             0xff
+/* CFDTMDF Register bit definitions */
+#define R_CANFD_CFDTMDF_TMDB_LL_SHIFT             (0)  /* TX Message Buffer Data Byte ((p × 4) */
+#define R_CANFD_CFDTMDF_TMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDTMDF__TMDB_LH_SHIFT            (8)  /* TX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDTMDF__TMDB_LH_MASK             0xff00
+#define R_CANFD_CFDTMDF_TMDB_LH_SHIFT             (8)  /* TX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDTMDF_TMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDTMDF__TMDB_HL_SHIFT            (16)  /* TX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDTMDF__TMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDTMDF_TMDB_HL_SHIFT             (16)  /* TX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDTMDF_TMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDTMDF__TMDB_HH_SHIFT            (24)  /* TX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDTMDF__TMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDTMDF_TMDB_HH_SHIFT             (24)  /* TX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDTMDF_TMDB_HH_MASK              0xff000000
 
-/* CFDTMDF_ Register bit definitions */
-#define R_CANFD_CFDTMDF__TMDB_LL_SHIFT            (0)  /* TX Message Buffer Data Byte ((p × 4) */
-#define R_CANFD_CFDTMDF__TMDB_LL_MASK             0xff
+/* CFDTMDF Register bit definitions */
+#define R_CANFD_CFDTMDF_TMDB_LL_SHIFT             (0)  /* TX Message Buffer Data Byte ((p × 4) */
+#define R_CANFD_CFDTMDF_TMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDTMDF__TMDB_LH_SHIFT            (8)  /* TX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDTMDF__TMDB_LH_MASK             0xff00
+#define R_CANFD_CFDTMDF_TMDB_LH_SHIFT             (8)  /* TX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDTMDF_TMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDTMDF__TMDB_HL_SHIFT            (16)  /* TX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDTMDF__TMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDTMDF_TMDB_HL_SHIFT             (16)  /* TX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDTMDF_TMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDTMDF__TMDB_HH_SHIFT            (24)  /* TX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDTMDF__TMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDTMDF_TMDB_HH_SHIFT             (24)  /* TX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDTMDF_TMDB_HH_MASK              0xff000000
 
-/* CFDTMDF_ Register bit definitions */
-#define R_CANFD_CFDTMDF__TMDB_LL_SHIFT            (0)  /* TX Message Buffer Data Byte ((p × 4) */
-#define R_CANFD_CFDTMDF__TMDB_LL_MASK             0xff
+/* CFDTMDF Register bit definitions */
+#define R_CANFD_CFDTMDF_TMDB_LL_SHIFT             (0)  /* TX Message Buffer Data Byte ((p × 4) */
+#define R_CANFD_CFDTMDF_TMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDTMDF__TMDB_LH_SHIFT            (8)  /* TX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDTMDF__TMDB_LH_MASK             0xff00
+#define R_CANFD_CFDTMDF_TMDB_LH_SHIFT             (8)  /* TX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDTMDF_TMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDTMDF__TMDB_HL_SHIFT            (16)  /* TX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDTMDF__TMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDTMDF_TMDB_HL_SHIFT             (16)  /* TX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDTMDF_TMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDTMDF__TMDB_HH_SHIFT            (24)  /* TX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDTMDF__TMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDTMDF_TMDB_HH_SHIFT             (24)  /* TX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDTMDF_TMDB_HH_MASK              0xff000000
 
-/* CFDTMDF_ Register bit definitions */
-#define R_CANFD_CFDTMDF__TMDB_LL_SHIFT            (0)  /* TX Message Buffer Data Byte ((p × 4) */
-#define R_CANFD_CFDTMDF__TMDB_LL_MASK             0xff
+/* CFDTMDF Register bit definitions */
+#define R_CANFD_CFDTMDF_TMDB_LL_SHIFT             (0)  /* TX Message Buffer Data Byte ((p × 4) */
+#define R_CANFD_CFDTMDF_TMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDTMDF__TMDB_LH_SHIFT            (8)  /* TX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDTMDF__TMDB_LH_MASK             0xff00
+#define R_CANFD_CFDTMDF_TMDB_LH_SHIFT             (8)  /* TX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDTMDF_TMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDTMDF__TMDB_HL_SHIFT            (16)  /* TX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDTMDF__TMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDTMDF_TMDB_HL_SHIFT             (16)  /* TX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDTMDF_TMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDTMDF__TMDB_HH_SHIFT            (24)  /* TX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDTMDF__TMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDTMDF_TMDB_HH_SHIFT             (24)  /* TX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDTMDF_TMDB_HH_MASK              0xff000000
 
-/* CFDTMDF_ Register bit definitions */
-#define R_CANFD_CFDTMDF__TMDB_LL_SHIFT            (0)  /* TX Message Buffer Data Byte ((p × 4) */
-#define R_CANFD_CFDTMDF__TMDB_LL_MASK             0xff
+/* CFDTMDF Register bit definitions */
+#define R_CANFD_CFDTMDF_TMDB_LL_SHIFT             (0)  /* TX Message Buffer Data Byte ((p × 4) */
+#define R_CANFD_CFDTMDF_TMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDTMDF__TMDB_LH_SHIFT            (8)  /* TX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDTMDF__TMDB_LH_MASK             0xff00
+#define R_CANFD_CFDTMDF_TMDB_LH_SHIFT             (8)  /* TX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDTMDF_TMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDTMDF__TMDB_HL_SHIFT            (16)  /* TX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDTMDF__TMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDTMDF_TMDB_HL_SHIFT             (16)  /* TX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDTMDF_TMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDTMDF__TMDB_HH_SHIFT            (24)  /* TX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDTMDF__TMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDTMDF_TMDB_HH_SHIFT             (24)  /* TX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDTMDF_TMDB_HH_MASK              0xff000000
 
 /* CFDTHLACC0 Register bit definitions */
 #define R_CANFD_CFDTHLACC0_BT_SHIFT               (0)  /* Buffer Type */
@@ -1639,213 +1662,213 @@
 #define R_CANFD_CFDRMFDSTS_RMPTR_SHIFT            (16)  /* RX Message Buffer Pointer Field */
 #define R_CANFD_CFDRMFDSTS_RMPTR_MASK             0xffff0000
 
-/* CFDRMDF_ Register bit definitions */
-#define R_CANFD_CFDRMDF__RMDB_LL_SHIFT            (0)  /* RX Message Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRMDF__RMDB_LL_MASK             0xff
+/* CFDRMDF Register bit definitions */
+#define R_CANFD_CFDRMDF_RMDB_LL_SHIFT             (0)  /* RX Message Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRMDF_RMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRMDF__RMDB_LH_SHIFT            (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRMDF__RMDB_LH_MASK             0xff00
+#define R_CANFD_CFDRMDF_RMDB_LH_SHIFT             (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRMDF_RMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRMDF__RMDB_HL_SHIFT            (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRMDF__RMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRMDF_RMDB_HL_SHIFT             (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRMDF_RMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRMDF__RMDB_HH_SHIFT            (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRMDF__RMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRMDF_RMDB_HH_SHIFT             (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRMDF_RMDB_HH_MASK              0xff000000
 
-/* CFDRMDF_ Register bit definitions */
-#define R_CANFD_CFDRMDF__RMDB_LL_SHIFT            (0)  /* RX Message Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRMDF__RMDB_LL_MASK             0xff
+/* CFDRMDF Register bit definitions */
+#define R_CANFD_CFDRMDF_RMDB_LL_SHIFT             (0)  /* RX Message Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRMDF_RMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRMDF__RMDB_LH_SHIFT            (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRMDF__RMDB_LH_MASK             0xff00
+#define R_CANFD_CFDRMDF_RMDB_LH_SHIFT             (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRMDF_RMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRMDF__RMDB_HL_SHIFT            (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRMDF__RMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRMDF_RMDB_HL_SHIFT             (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRMDF_RMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRMDF__RMDB_HH_SHIFT            (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRMDF__RMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRMDF_RMDB_HH_SHIFT             (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRMDF_RMDB_HH_MASK              0xff000000
 
-/* CFDRMDF_ Register bit definitions */
-#define R_CANFD_CFDRMDF__RMDB_LL_SHIFT            (0)  /* RX Message Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRMDF__RMDB_LL_MASK             0xff
+/* CFDRMDF Register bit definitions */
+#define R_CANFD_CFDRMDF_RMDB_LL_SHIFT             (0)  /* RX Message Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRMDF_RMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRMDF__RMDB_LH_SHIFT            (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRMDF__RMDB_LH_MASK             0xff00
+#define R_CANFD_CFDRMDF_RMDB_LH_SHIFT             (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRMDF_RMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRMDF__RMDB_HL_SHIFT            (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRMDF__RMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRMDF_RMDB_HL_SHIFT             (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRMDF_RMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRMDF__RMDB_HH_SHIFT            (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRMDF__RMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRMDF_RMDB_HH_SHIFT             (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRMDF_RMDB_HH_MASK              0xff000000
 
-/* CFDRMDF_ Register bit definitions */
-#define R_CANFD_CFDRMDF__RMDB_LL_SHIFT            (0)  /* RX Message Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRMDF__RMDB_LL_MASK             0xff
+/* CFDRMDF Register bit definitions */
+#define R_CANFD_CFDRMDF_RMDB_LL_SHIFT             (0)  /* RX Message Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRMDF_RMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRMDF__RMDB_LH_SHIFT            (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRMDF__RMDB_LH_MASK             0xff00
+#define R_CANFD_CFDRMDF_RMDB_LH_SHIFT             (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRMDF_RMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRMDF__RMDB_HL_SHIFT            (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRMDF__RMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRMDF_RMDB_HL_SHIFT             (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRMDF_RMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRMDF__RMDB_HH_SHIFT            (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRMDF__RMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRMDF_RMDB_HH_SHIFT             (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRMDF_RMDB_HH_MASK              0xff000000
 
-/* CFDRMDF_ Register bit definitions */
-#define R_CANFD_CFDRMDF__RMDB_LL_SHIFT            (0)  /* RX Message Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRMDF__RMDB_LL_MASK             0xff
+/* CFDRMDF Register bit definitions */
+#define R_CANFD_CFDRMDF_RMDB_LL_SHIFT             (0)  /* RX Message Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRMDF_RMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRMDF__RMDB_LH_SHIFT            (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRMDF__RMDB_LH_MASK             0xff00
+#define R_CANFD_CFDRMDF_RMDB_LH_SHIFT             (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRMDF_RMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRMDF__RMDB_HL_SHIFT            (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRMDF__RMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRMDF_RMDB_HL_SHIFT             (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRMDF_RMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRMDF__RMDB_HH_SHIFT            (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRMDF__RMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRMDF_RMDB_HH_SHIFT             (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRMDF_RMDB_HH_MASK              0xff000000
 
-/* CFDRMDF_ Register bit definitions */
-#define R_CANFD_CFDRMDF__RMDB_LL_SHIFT            (0)  /* RX Message Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRMDF__RMDB_LL_MASK             0xff
+/* CFDRMDF Register bit definitions */
+#define R_CANFD_CFDRMDF_RMDB_LL_SHIFT             (0)  /* RX Message Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRMDF_RMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRMDF__RMDB_LH_SHIFT            (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRMDF__RMDB_LH_MASK             0xff00
+#define R_CANFD_CFDRMDF_RMDB_LH_SHIFT             (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRMDF_RMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRMDF__RMDB_HL_SHIFT            (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRMDF__RMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRMDF_RMDB_HL_SHIFT             (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRMDF_RMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRMDF__RMDB_HH_SHIFT            (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRMDF__RMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRMDF_RMDB_HH_SHIFT             (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRMDF_RMDB_HH_MASK              0xff000000
 
-/* CFDRMDF_ Register bit definitions */
-#define R_CANFD_CFDRMDF__RMDB_LL_SHIFT            (0)  /* RX Message Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRMDF__RMDB_LL_MASK             0xff
+/* CFDRMDF Register bit definitions */
+#define R_CANFD_CFDRMDF_RMDB_LL_SHIFT             (0)  /* RX Message Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRMDF_RMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRMDF__RMDB_LH_SHIFT            (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRMDF__RMDB_LH_MASK             0xff00
+#define R_CANFD_CFDRMDF_RMDB_LH_SHIFT             (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRMDF_RMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRMDF__RMDB_HL_SHIFT            (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRMDF__RMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRMDF_RMDB_HL_SHIFT             (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRMDF_RMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRMDF__RMDB_HH_SHIFT            (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRMDF__RMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRMDF_RMDB_HH_SHIFT             (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRMDF_RMDB_HH_MASK              0xff000000
 
-/* CFDRMDF_ Register bit definitions */
-#define R_CANFD_CFDRMDF__RMDB_LL_SHIFT            (0)  /* RX Message Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRMDF__RMDB_LL_MASK             0xff
+/* CFDRMDF Register bit definitions */
+#define R_CANFD_CFDRMDF_RMDB_LL_SHIFT             (0)  /* RX Message Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRMDF_RMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRMDF__RMDB_LH_SHIFT            (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRMDF__RMDB_LH_MASK             0xff00
+#define R_CANFD_CFDRMDF_RMDB_LH_SHIFT             (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRMDF_RMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRMDF__RMDB_HL_SHIFT            (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRMDF__RMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRMDF_RMDB_HL_SHIFT             (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRMDF_RMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRMDF__RMDB_HH_SHIFT            (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRMDF__RMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRMDF_RMDB_HH_SHIFT             (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRMDF_RMDB_HH_MASK              0xff000000
 
-/* CFDRMDF_ Register bit definitions */
-#define R_CANFD_CFDRMDF__RMDB_LL_SHIFT            (0)  /* RX Message Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRMDF__RMDB_LL_MASK             0xff
+/* CFDRMDF Register bit definitions */
+#define R_CANFD_CFDRMDF_RMDB_LL_SHIFT             (0)  /* RX Message Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRMDF_RMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRMDF__RMDB_LH_SHIFT            (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRMDF__RMDB_LH_MASK             0xff00
+#define R_CANFD_CFDRMDF_RMDB_LH_SHIFT             (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRMDF_RMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRMDF__RMDB_HL_SHIFT            (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRMDF__RMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRMDF_RMDB_HL_SHIFT             (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRMDF_RMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRMDF__RMDB_HH_SHIFT            (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRMDF__RMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRMDF_RMDB_HH_SHIFT             (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRMDF_RMDB_HH_MASK              0xff000000
 
-/* CFDRMDF_ Register bit definitions */
-#define R_CANFD_CFDRMDF__RMDB_LL_SHIFT            (0)  /* RX Message Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRMDF__RMDB_LL_MASK             0xff
+/* CFDRMDF Register bit definitions */
+#define R_CANFD_CFDRMDF_RMDB_LL_SHIFT             (0)  /* RX Message Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRMDF_RMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRMDF__RMDB_LH_SHIFT            (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRMDF__RMDB_LH_MASK             0xff00
+#define R_CANFD_CFDRMDF_RMDB_LH_SHIFT             (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRMDF_RMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRMDF__RMDB_HL_SHIFT            (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRMDF__RMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRMDF_RMDB_HL_SHIFT             (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRMDF_RMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRMDF__RMDB_HH_SHIFT            (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRMDF__RMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRMDF_RMDB_HH_SHIFT             (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRMDF_RMDB_HH_MASK              0xff000000
 
-/* CFDRMDF_ Register bit definitions */
-#define R_CANFD_CFDRMDF__RMDB_LL_SHIFT            (0)  /* RX Message Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRMDF__RMDB_LL_MASK             0xff
+/* CFDRMDF Register bit definitions */
+#define R_CANFD_CFDRMDF_RMDB_LL_SHIFT             (0)  /* RX Message Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRMDF_RMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRMDF__RMDB_LH_SHIFT            (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRMDF__RMDB_LH_MASK             0xff00
+#define R_CANFD_CFDRMDF_RMDB_LH_SHIFT             (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRMDF_RMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRMDF__RMDB_HL_SHIFT            (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRMDF__RMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRMDF_RMDB_HL_SHIFT             (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRMDF_RMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRMDF__RMDB_HH_SHIFT            (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRMDF__RMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRMDF_RMDB_HH_SHIFT             (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRMDF_RMDB_HH_MASK              0xff000000
 
-/* CFDRMDF_ Register bit definitions */
-#define R_CANFD_CFDRMDF__RMDB_LL_SHIFT            (0)  /* RX Message Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRMDF__RMDB_LL_MASK             0xff
+/* CFDRMDF Register bit definitions */
+#define R_CANFD_CFDRMDF_RMDB_LL_SHIFT             (0)  /* RX Message Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRMDF_RMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRMDF__RMDB_LH_SHIFT            (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRMDF__RMDB_LH_MASK             0xff00
+#define R_CANFD_CFDRMDF_RMDB_LH_SHIFT             (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRMDF_RMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRMDF__RMDB_HL_SHIFT            (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRMDF__RMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRMDF_RMDB_HL_SHIFT             (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRMDF_RMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRMDF__RMDB_HH_SHIFT            (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRMDF__RMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRMDF_RMDB_HH_SHIFT             (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRMDF_RMDB_HH_MASK              0xff000000
 
-/* CFDRMDF_ Register bit definitions */
-#define R_CANFD_CFDRMDF__RMDB_LL_SHIFT            (0)  /* RX Message Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRMDF__RMDB_LL_MASK             0xff
+/* CFDRMDF Register bit definitions */
+#define R_CANFD_CFDRMDF_RMDB_LL_SHIFT             (0)  /* RX Message Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRMDF_RMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRMDF__RMDB_LH_SHIFT            (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRMDF__RMDB_LH_MASK             0xff00
+#define R_CANFD_CFDRMDF_RMDB_LH_SHIFT             (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRMDF_RMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRMDF__RMDB_HL_SHIFT            (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRMDF__RMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRMDF_RMDB_HL_SHIFT             (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRMDF_RMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRMDF__RMDB_HH_SHIFT            (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRMDF__RMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRMDF_RMDB_HH_SHIFT             (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRMDF_RMDB_HH_MASK              0xff000000
 
-/* CFDRMDF_ Register bit definitions */
-#define R_CANFD_CFDRMDF__RMDB_LL_SHIFT            (0)  /* RX Message Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRMDF__RMDB_LL_MASK             0xff
+/* CFDRMDF Register bit definitions */
+#define R_CANFD_CFDRMDF_RMDB_LL_SHIFT             (0)  /* RX Message Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRMDF_RMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRMDF__RMDB_LH_SHIFT            (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRMDF__RMDB_LH_MASK             0xff00
+#define R_CANFD_CFDRMDF_RMDB_LH_SHIFT             (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRMDF_RMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRMDF__RMDB_HL_SHIFT            (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRMDF__RMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRMDF_RMDB_HL_SHIFT             (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRMDF_RMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRMDF__RMDB_HH_SHIFT            (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRMDF__RMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRMDF_RMDB_HH_SHIFT             (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRMDF_RMDB_HH_MASK              0xff000000
 
-/* CFDRMDF_ Register bit definitions */
-#define R_CANFD_CFDRMDF__RMDB_LL_SHIFT            (0)  /* RX Message Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRMDF__RMDB_LL_MASK             0xff
+/* CFDRMDF Register bit definitions */
+#define R_CANFD_CFDRMDF_RMDB_LL_SHIFT             (0)  /* RX Message Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRMDF_RMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRMDF__RMDB_LH_SHIFT            (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRMDF__RMDB_LH_MASK             0xff00
+#define R_CANFD_CFDRMDF_RMDB_LH_SHIFT             (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRMDF_RMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRMDF__RMDB_HL_SHIFT            (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRMDF__RMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRMDF_RMDB_HL_SHIFT             (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRMDF_RMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRMDF__RMDB_HH_SHIFT            (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRMDF__RMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRMDF_RMDB_HH_SHIFT             (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRMDF_RMDB_HH_MASK              0xff000000
 
-/* CFDRMDF_ Register bit definitions */
-#define R_CANFD_CFDRMDF__RMDB_LL_SHIFT            (0)  /* RX Message Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRMDF__RMDB_LL_MASK             0xff
+/* CFDRMDF Register bit definitions */
+#define R_CANFD_CFDRMDF_RMDB_LL_SHIFT             (0)  /* RX Message Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRMDF_RMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRMDF__RMDB_LH_SHIFT            (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRMDF__RMDB_LH_MASK             0xff00
+#define R_CANFD_CFDRMDF_RMDB_LH_SHIFT             (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRMDF_RMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRMDF__RMDB_HL_SHIFT            (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRMDF__RMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRMDF_RMDB_HL_SHIFT             (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRMDF_RMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRMDF__RMDB_HH_SHIFT            (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRMDF__RMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRMDF_RMDB_HH_SHIFT             (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRMDF_RMDB_HH_MASK              0xff000000
 
 /* CFDRMID Register bit definitions */
 #define R_CANFD_CFDRMID_RMID_SHIFT                (0)  /* RX Message Buffer ID Field */
@@ -1875,213 +1898,213 @@
 #define R_CANFD_CFDRMFDSTS_RMPTR_SHIFT            (16)  /* RX Message Buffer Pointer Field */
 #define R_CANFD_CFDRMFDSTS_RMPTR_MASK             0xffff0000
 
-/* CFDRMDF_ Register bit definitions */
-#define R_CANFD_CFDRMDF__RMDB_LL_SHIFT            (0)  /* RX Message Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRMDF__RMDB_LL_MASK             0xff
+/* CFDRMDF Register bit definitions */
+#define R_CANFD_CFDRMDF_RMDB_LL_SHIFT             (0)  /* RX Message Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRMDF_RMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRMDF__RMDB_LH_SHIFT            (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRMDF__RMDB_LH_MASK             0xff00
+#define R_CANFD_CFDRMDF_RMDB_LH_SHIFT             (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRMDF_RMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRMDF__RMDB_HL_SHIFT            (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRMDF__RMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRMDF_RMDB_HL_SHIFT             (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRMDF_RMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRMDF__RMDB_HH_SHIFT            (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRMDF__RMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRMDF_RMDB_HH_SHIFT             (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRMDF_RMDB_HH_MASK              0xff000000
 
-/* CFDRMDF_ Register bit definitions */
-#define R_CANFD_CFDRMDF__RMDB_LL_SHIFT            (0)  /* RX Message Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRMDF__RMDB_LL_MASK             0xff
+/* CFDRMDF Register bit definitions */
+#define R_CANFD_CFDRMDF_RMDB_LL_SHIFT             (0)  /* RX Message Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRMDF_RMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRMDF__RMDB_LH_SHIFT            (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRMDF__RMDB_LH_MASK             0xff00
+#define R_CANFD_CFDRMDF_RMDB_LH_SHIFT             (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRMDF_RMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRMDF__RMDB_HL_SHIFT            (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRMDF__RMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRMDF_RMDB_HL_SHIFT             (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRMDF_RMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRMDF__RMDB_HH_SHIFT            (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRMDF__RMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRMDF_RMDB_HH_SHIFT             (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRMDF_RMDB_HH_MASK              0xff000000
 
-/* CFDRMDF_ Register bit definitions */
-#define R_CANFD_CFDRMDF__RMDB_LL_SHIFT            (0)  /* RX Message Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRMDF__RMDB_LL_MASK             0xff
+/* CFDRMDF Register bit definitions */
+#define R_CANFD_CFDRMDF_RMDB_LL_SHIFT             (0)  /* RX Message Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRMDF_RMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRMDF__RMDB_LH_SHIFT            (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRMDF__RMDB_LH_MASK             0xff00
+#define R_CANFD_CFDRMDF_RMDB_LH_SHIFT             (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRMDF_RMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRMDF__RMDB_HL_SHIFT            (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRMDF__RMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRMDF_RMDB_HL_SHIFT             (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRMDF_RMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRMDF__RMDB_HH_SHIFT            (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRMDF__RMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRMDF_RMDB_HH_SHIFT             (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRMDF_RMDB_HH_MASK              0xff000000
 
-/* CFDRMDF_ Register bit definitions */
-#define R_CANFD_CFDRMDF__RMDB_LL_SHIFT            (0)  /* RX Message Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRMDF__RMDB_LL_MASK             0xff
+/* CFDRMDF Register bit definitions */
+#define R_CANFD_CFDRMDF_RMDB_LL_SHIFT             (0)  /* RX Message Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRMDF_RMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRMDF__RMDB_LH_SHIFT            (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRMDF__RMDB_LH_MASK             0xff00
+#define R_CANFD_CFDRMDF_RMDB_LH_SHIFT             (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRMDF_RMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRMDF__RMDB_HL_SHIFT            (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRMDF__RMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRMDF_RMDB_HL_SHIFT             (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRMDF_RMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRMDF__RMDB_HH_SHIFT            (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRMDF__RMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRMDF_RMDB_HH_SHIFT             (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRMDF_RMDB_HH_MASK              0xff000000
 
-/* CFDRMDF_ Register bit definitions */
-#define R_CANFD_CFDRMDF__RMDB_LL_SHIFT            (0)  /* RX Message Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRMDF__RMDB_LL_MASK             0xff
+/* CFDRMDF Register bit definitions */
+#define R_CANFD_CFDRMDF_RMDB_LL_SHIFT             (0)  /* RX Message Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRMDF_RMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRMDF__RMDB_LH_SHIFT            (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRMDF__RMDB_LH_MASK             0xff00
+#define R_CANFD_CFDRMDF_RMDB_LH_SHIFT             (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRMDF_RMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRMDF__RMDB_HL_SHIFT            (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRMDF__RMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRMDF_RMDB_HL_SHIFT             (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRMDF_RMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRMDF__RMDB_HH_SHIFT            (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRMDF__RMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRMDF_RMDB_HH_SHIFT             (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRMDF_RMDB_HH_MASK              0xff000000
 
-/* CFDRMDF_ Register bit definitions */
-#define R_CANFD_CFDRMDF__RMDB_LL_SHIFT            (0)  /* RX Message Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRMDF__RMDB_LL_MASK             0xff
+/* CFDRMDF Register bit definitions */
+#define R_CANFD_CFDRMDF_RMDB_LL_SHIFT             (0)  /* RX Message Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRMDF_RMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRMDF__RMDB_LH_SHIFT            (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRMDF__RMDB_LH_MASK             0xff00
+#define R_CANFD_CFDRMDF_RMDB_LH_SHIFT             (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRMDF_RMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRMDF__RMDB_HL_SHIFT            (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRMDF__RMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRMDF_RMDB_HL_SHIFT             (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRMDF_RMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRMDF__RMDB_HH_SHIFT            (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRMDF__RMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRMDF_RMDB_HH_SHIFT             (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRMDF_RMDB_HH_MASK              0xff000000
 
-/* CFDRMDF_ Register bit definitions */
-#define R_CANFD_CFDRMDF__RMDB_LL_SHIFT            (0)  /* RX Message Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRMDF__RMDB_LL_MASK             0xff
+/* CFDRMDF Register bit definitions */
+#define R_CANFD_CFDRMDF_RMDB_LL_SHIFT             (0)  /* RX Message Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRMDF_RMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRMDF__RMDB_LH_SHIFT            (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRMDF__RMDB_LH_MASK             0xff00
+#define R_CANFD_CFDRMDF_RMDB_LH_SHIFT             (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRMDF_RMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRMDF__RMDB_HL_SHIFT            (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRMDF__RMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRMDF_RMDB_HL_SHIFT             (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRMDF_RMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRMDF__RMDB_HH_SHIFT            (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRMDF__RMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRMDF_RMDB_HH_SHIFT             (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRMDF_RMDB_HH_MASK              0xff000000
 
-/* CFDRMDF_ Register bit definitions */
-#define R_CANFD_CFDRMDF__RMDB_LL_SHIFT            (0)  /* RX Message Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRMDF__RMDB_LL_MASK             0xff
+/* CFDRMDF Register bit definitions */
+#define R_CANFD_CFDRMDF_RMDB_LL_SHIFT             (0)  /* RX Message Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRMDF_RMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRMDF__RMDB_LH_SHIFT            (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRMDF__RMDB_LH_MASK             0xff00
+#define R_CANFD_CFDRMDF_RMDB_LH_SHIFT             (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRMDF_RMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRMDF__RMDB_HL_SHIFT            (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRMDF__RMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRMDF_RMDB_HL_SHIFT             (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRMDF_RMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRMDF__RMDB_HH_SHIFT            (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRMDF__RMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRMDF_RMDB_HH_SHIFT             (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRMDF_RMDB_HH_MASK              0xff000000
 
-/* CFDRMDF_ Register bit definitions */
-#define R_CANFD_CFDRMDF__RMDB_LL_SHIFT            (0)  /* RX Message Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRMDF__RMDB_LL_MASK             0xff
+/* CFDRMDF Register bit definitions */
+#define R_CANFD_CFDRMDF_RMDB_LL_SHIFT             (0)  /* RX Message Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRMDF_RMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRMDF__RMDB_LH_SHIFT            (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRMDF__RMDB_LH_MASK             0xff00
+#define R_CANFD_CFDRMDF_RMDB_LH_SHIFT             (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRMDF_RMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRMDF__RMDB_HL_SHIFT            (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRMDF__RMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRMDF_RMDB_HL_SHIFT             (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRMDF_RMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRMDF__RMDB_HH_SHIFT            (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRMDF__RMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRMDF_RMDB_HH_SHIFT             (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRMDF_RMDB_HH_MASK              0xff000000
 
-/* CFDRMDF_ Register bit definitions */
-#define R_CANFD_CFDRMDF__RMDB_LL_SHIFT            (0)  /* RX Message Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRMDF__RMDB_LL_MASK             0xff
+/* CFDRMDF Register bit definitions */
+#define R_CANFD_CFDRMDF_RMDB_LL_SHIFT             (0)  /* RX Message Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRMDF_RMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRMDF__RMDB_LH_SHIFT            (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRMDF__RMDB_LH_MASK             0xff00
+#define R_CANFD_CFDRMDF_RMDB_LH_SHIFT             (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRMDF_RMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRMDF__RMDB_HL_SHIFT            (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRMDF__RMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRMDF_RMDB_HL_SHIFT             (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRMDF_RMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRMDF__RMDB_HH_SHIFT            (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRMDF__RMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRMDF_RMDB_HH_SHIFT             (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRMDF_RMDB_HH_MASK              0xff000000
 
-/* CFDRMDF_ Register bit definitions */
-#define R_CANFD_CFDRMDF__RMDB_LL_SHIFT            (0)  /* RX Message Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRMDF__RMDB_LL_MASK             0xff
+/* CFDRMDF Register bit definitions */
+#define R_CANFD_CFDRMDF_RMDB_LL_SHIFT             (0)  /* RX Message Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRMDF_RMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRMDF__RMDB_LH_SHIFT            (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRMDF__RMDB_LH_MASK             0xff00
+#define R_CANFD_CFDRMDF_RMDB_LH_SHIFT             (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRMDF_RMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRMDF__RMDB_HL_SHIFT            (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRMDF__RMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRMDF_RMDB_HL_SHIFT             (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRMDF_RMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRMDF__RMDB_HH_SHIFT            (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRMDF__RMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRMDF_RMDB_HH_SHIFT             (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRMDF_RMDB_HH_MASK              0xff000000
 
-/* CFDRMDF_ Register bit definitions */
-#define R_CANFD_CFDRMDF__RMDB_LL_SHIFT            (0)  /* RX Message Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRMDF__RMDB_LL_MASK             0xff
+/* CFDRMDF Register bit definitions */
+#define R_CANFD_CFDRMDF_RMDB_LL_SHIFT             (0)  /* RX Message Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRMDF_RMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRMDF__RMDB_LH_SHIFT            (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRMDF__RMDB_LH_MASK             0xff00
+#define R_CANFD_CFDRMDF_RMDB_LH_SHIFT             (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRMDF_RMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRMDF__RMDB_HL_SHIFT            (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRMDF__RMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRMDF_RMDB_HL_SHIFT             (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRMDF_RMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRMDF__RMDB_HH_SHIFT            (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRMDF__RMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRMDF_RMDB_HH_SHIFT             (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRMDF_RMDB_HH_MASK              0xff000000
 
-/* CFDRMDF_ Register bit definitions */
-#define R_CANFD_CFDRMDF__RMDB_LL_SHIFT            (0)  /* RX Message Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRMDF__RMDB_LL_MASK             0xff
+/* CFDRMDF Register bit definitions */
+#define R_CANFD_CFDRMDF_RMDB_LL_SHIFT             (0)  /* RX Message Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRMDF_RMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRMDF__RMDB_LH_SHIFT            (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRMDF__RMDB_LH_MASK             0xff00
+#define R_CANFD_CFDRMDF_RMDB_LH_SHIFT             (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRMDF_RMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRMDF__RMDB_HL_SHIFT            (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRMDF__RMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRMDF_RMDB_HL_SHIFT             (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRMDF_RMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRMDF__RMDB_HH_SHIFT            (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRMDF__RMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRMDF_RMDB_HH_SHIFT             (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRMDF_RMDB_HH_MASK              0xff000000
 
-/* CFDRMDF_ Register bit definitions */
-#define R_CANFD_CFDRMDF__RMDB_LL_SHIFT            (0)  /* RX Message Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRMDF__RMDB_LL_MASK             0xff
+/* CFDRMDF Register bit definitions */
+#define R_CANFD_CFDRMDF_RMDB_LL_SHIFT             (0)  /* RX Message Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRMDF_RMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRMDF__RMDB_LH_SHIFT            (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRMDF__RMDB_LH_MASK             0xff00
+#define R_CANFD_CFDRMDF_RMDB_LH_SHIFT             (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRMDF_RMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRMDF__RMDB_HL_SHIFT            (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRMDF__RMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRMDF_RMDB_HL_SHIFT             (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRMDF_RMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRMDF__RMDB_HH_SHIFT            (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRMDF__RMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRMDF_RMDB_HH_SHIFT             (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRMDF_RMDB_HH_MASK              0xff000000
 
-/* CFDRMDF_ Register bit definitions */
-#define R_CANFD_CFDRMDF__RMDB_LL_SHIFT            (0)  /* RX Message Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRMDF__RMDB_LL_MASK             0xff
+/* CFDRMDF Register bit definitions */
+#define R_CANFD_CFDRMDF_RMDB_LL_SHIFT             (0)  /* RX Message Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRMDF_RMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRMDF__RMDB_LH_SHIFT            (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRMDF__RMDB_LH_MASK             0xff00
+#define R_CANFD_CFDRMDF_RMDB_LH_SHIFT             (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRMDF_RMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRMDF__RMDB_HL_SHIFT            (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRMDF__RMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRMDF_RMDB_HL_SHIFT             (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRMDF_RMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRMDF__RMDB_HH_SHIFT            (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRMDF__RMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRMDF_RMDB_HH_SHIFT             (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRMDF_RMDB_HH_MASK              0xff000000
 
-/* CFDRMDF_ Register bit definitions */
-#define R_CANFD_CFDRMDF__RMDB_LL_SHIFT            (0)  /* RX Message Buffer Data Byte (p × 4) */
-#define R_CANFD_CFDRMDF__RMDB_LL_MASK             0xff
+/* CFDRMDF Register bit definitions */
+#define R_CANFD_CFDRMDF_RMDB_LL_SHIFT             (0)  /* RX Message Buffer Data Byte (p × 4) */
+#define R_CANFD_CFDRMDF_RMDB_LL_MASK              0xff
 
-#define R_CANFD_CFDRMDF__RMDB_LH_SHIFT            (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
-#define R_CANFD_CFDRMDF__RMDB_LH_MASK             0xff00
+#define R_CANFD_CFDRMDF_RMDB_LH_SHIFT             (8)  /* RX Message Buffer Data Byte ((p × 4) + 1) */
+#define R_CANFD_CFDRMDF_RMDB_LH_MASK              0xff00
 
-#define R_CANFD_CFDRMDF__RMDB_HL_SHIFT            (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
-#define R_CANFD_CFDRMDF__RMDB_HL_MASK             0xff0000
+#define R_CANFD_CFDRMDF_RMDB_HL_SHIFT             (16)  /* RX Message Buffer Data Byte ((p × 4) + 2) */
+#define R_CANFD_CFDRMDF_RMDB_HL_MASK              0xff0000
 
-#define R_CANFD_CFDRMDF__RMDB_HH_SHIFT            (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
-#define R_CANFD_CFDRMDF__RMDB_HH_MASK             0xff000000
+#define R_CANFD_CFDRMDF_RMDB_HH_SHIFT             (24)  /* RX Message Buffer Data Byte ((p × 4) + 3) */
+#define R_CANFD_CFDRMDF_RMDB_HH_MASK              0xff000000
 
 /* CFDRMPTR Register bit definitions */
 #define R_CANFD_CFDRMPTR_RMTS_SHIFT               (0)  /* RX Message Buffer Timestamp Field */
