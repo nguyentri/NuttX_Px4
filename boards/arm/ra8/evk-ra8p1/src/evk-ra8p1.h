@@ -104,8 +104,8 @@ void board_autoled_off(int led);
  * Nuttx driver interfaces
  ****************************************************************************/
 
-#ifdef CONFIG_RTC_DRIVER
-int board_rtc_initialize(void);
+#ifdef CONFIG_RA_ADC_B
+int board_adc_initialize(void);
 #endif
 
 /****************************************************************************
@@ -203,7 +203,7 @@ int ra8p1_rust_sample_init(void);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_RA_I2C0) || defined(CONFIG_RA_I2C1)
+#if defined(CONFIG_RA_I2C)
 struct i2c_master_s;
 struct i2c_master_s *ra8p1_i2c_initialize(int bus);
 int ra8p1_i2c_uninitialize(int bus);

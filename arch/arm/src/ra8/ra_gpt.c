@@ -167,8 +167,8 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
 {
 #ifdef CONFIG_RA_GPT0
   {
-    .base       = R_GPT320_BASE,
-    .mstp       = R_MSTP_GPT0,
+    .base       = R_GPT32_CH_BASE(0),
+    .mstp       = RA_MSTP_GPT0,
     .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 0,
@@ -179,8 +179,8 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
 #endif
 #ifdef CONFIG_RA_GPT1 // not configured
   {
-    .base       = R_GPT321_BASE,
-    .mstp       = R_MSTP_GPT1,
+    .base       = R_GPT32_CH_BASE(1),
+    .mstp       = RA_MSTP_GPT1,
     .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 1,
@@ -191,8 +191,8 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
 #endif
 #ifdef CONFIG_RA_GPT2
   {
-    .base       = R_GPT322_BASE,
-    .mstp       = R_MSTP_GPT2,
+    .base       = R_GPT32_CH_BASE(2),
+    .mstp       = RA_MSTP_GPT2,
     .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 2,
@@ -203,8 +203,8 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
 #endif
 #ifdef CONFIG_RA_GPT3
   {
-    .base       = R_GPT323_BASE,
-    .mstp       = R_MSTP_GPT3,
+    .base       = R_GPT32_CH_BASE(3),
+    .mstp       = RA_MSTP_GPT3,
     .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 3,
@@ -215,8 +215,8 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
 #endif
 #ifdef CONFIG_RA_GPT4
   {
-    .base       = R_GPT324_BASE,
-    .mstp       = R_MSTP_GPT4,
+    .base       = R_GPT32_CH_BASE(4),
+    .mstp       = RA_MSTP_GPT4,
     .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 4,
@@ -227,8 +227,8 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
 #endif
 #ifdef CONFIG_RA_GPT5
   {
-    .base       = R_GPT325_BASE,
-    .mstp       = R_MSTP_GPT5,
+    .base       = R_GPT32_CH_BASE(5),
+    .mstp       = RA_MSTP_GPT5,
     .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 5,
@@ -313,16 +313,16 @@ static void gpt_dumpregs(struct ra_gpt_s *priv, const char *msg)
 #ifdef CONFIG_DEBUG_PWM_INFO
   pwminfo("%s:\n", msg);
   pwminfo("  GTCR:    %08x  GTPR:    %08x  GTCNT:   %08x\n",
-          gpt_getreg(priv, RA_GPT_GTCR_OFFSET),
-          gpt_getreg(priv, RA_GPT_GTPR_OFFSET),
-          gpt_getreg(priv, RA_GPT_GTCNT_OFFSET));
+          gpt_getreg(priv, R_GPT32_GTCR_OFFSET),
+          gpt_getreg(priv, R_GPT32_GTPR_OFFSET),
+          gpt_getreg(priv, R_GPT32_GTCNT_OFFSET));
   pwminfo("  GTCCRA:  %08x  GTCCRB:  %08x  GTIOR:   %08x\n",
-          gpt_getreg(priv, RA_GPT_GTCCRA_OFFSET),
-          gpt_getreg(priv, RA_GPT_GTCCRB_OFFSET),
-          gpt_getreg(priv, RA_GPT_GTIOR_OFFSET));
+          gpt_getreg(priv, R_GPT32_GTCCRA_OFFSET),
+          gpt_getreg(priv, R_GPT32_GTCCRB_OFFSET),
+          gpt_getreg(priv, R_GPT32_GTIOR_OFFSET));
   pwminfo("  GTINTAD: %08x  GTST:    %08x\n",
-          gpt_getreg(priv, RA_GPT_GTINTAD_OFFSET),
-          gpt_getreg(priv, RA_GPT_GTST_OFFSET));
+          gpt_getreg(priv, R_GPT32_GTINTAD_OFFSET),
+          gpt_getreg(priv, R_GPT32_GTST_OFFSET));
 #endif
 }
 
@@ -452,35 +452,35 @@ static int gpt_configure(struct ra_gpt_s *priv)
   irqstate_t flags = enter_critical_section();
 
   /* Disable write protection */
-  gpt_putreg(priv, RA_GPT_GTWP_OFFSET, GPT_GTWP_PRKEY);
+  gpt_putreg(priv, R_GPT32_GTWP_OFFSET, GPT_GTWP_PRKEY);
 
   /* Stop the timer if it's running */
-  regval = gpt_getreg(priv, RA_GPT_GTCR_OFFSET);
+  regval = gpt_getreg(priv, R_GPT32_GTCR_OFFSET);
   regval &= ~GPT_GTCR_CST;
-  gpt_putreg(priv, RA_GPT_GTCR_OFFSET, regval);
+  gpt_putreg(priv, R_GPT32_GTCR_OFFSET, regval);
 
   /* Configure timer for saw-wave PWM mode (up-counting) */
   regval = GPT_GTCR_MD_SAW_WAVE_UP | GPT_GTCR_TPCS_PCLKD_1;
-  gpt_putreg(priv, RA_GPT_GTCR_OFFSET, regval);
+  gpt_putreg(priv, R_GPT32_GTCR_OFFSET, regval);
 
   /* Configure I/O pins for PWM output - Start with low output */
   regval = GPT_GTIOR_GTIOA_INITIAL_LOW | GPT_GTIOR_GTIOB_INITIAL_LOW;
-  gpt_putreg(priv, RA_GPT_GTIOR_OFFSET, regval);
+  gpt_putreg(priv, R_GPT32_GTIOR_OFFSET, regval);
 
   /* Initialize counter and period */
-  gpt_putreg(priv, RA_GPT_GTCNT_OFFSET, 0);
-  gpt_putreg(priv, RA_GPT_GTPR_OFFSET, 0xffff);
+  gpt_putreg(priv, R_GPT32_GTCNT_OFFSET, 0);
+  gpt_putreg(priv, R_GPT32_GTPR_OFFSET, 0xffff);
 
   /* Initialize compare registers */
-  gpt_putreg(priv, RA_GPT_GTCCRA_OFFSET, 0);
-  gpt_putreg(priv, RA_GPT_GTCCRB_OFFSET, 0);
+  gpt_putreg(priv, R_GPT32_GTCCRA_OFFSET, 0);
+  gpt_putreg(priv, R_GPT32_GTCCRB_OFFSET, 0);
 
   /* Clear all interrupt flags */
-  regval = gpt_getreg(priv, RA_GPT_GTST_OFFSET);
-  gpt_putreg(priv, RA_GPT_GTST_OFFSET, regval);
+  regval = gpt_getreg(priv, R_GPT32_GTST_OFFSET);
+  gpt_putreg(priv, R_GPT32_GTST_OFFSET, regval);
 
   /* Re-enable write protection */
-  gpt_putreg(priv, RA_GPT_GTWP_OFFSET,
+  gpt_putreg(priv, R_GPT32_GTWP_OFFSET,
              GPT_GTWP_PRKEY | GPT_GTWP_WP | GPT_GTWP_CMNWP);
 
   leave_critical_section(flags);
@@ -495,8 +495,8 @@ static int gpt_configure(struct ra_gpt_s *priv)
                   priv->frequency,
                   priv->prescaler,
                   priv->config->pclkd_freq,
-                  gpt_getreg(priv, RA_GPT_GTPR_OFFSET),
-                  gpt_getreg(priv, RA_GPT_GTCCRA_OFFSET));
+                  gpt_getreg(priv, R_GPT32_GTPR_OFFSET),
+                  gpt_getreg(priv, R_GPT32_GTCCRA_OFFSET));
 
   return 0;
 }
@@ -553,21 +553,21 @@ static int gpt_shutdown(struct pwm_lowerhalf_s *dev)
   irqstate_t flags = enter_critical_section();
 
   /* Disable write protection */
-  gpt_putreg(priv, RA_GPT_GTWP_OFFSET, GPT_GTWP_PRKEY);
+  gpt_putreg(priv, R_GPT32_GTWP_OFFSET, GPT_GTWP_PRKEY);
 
   /* Stop the timer */
-  regval = gpt_getreg(priv, RA_GPT_GTCR_OFFSET);
+  regval = gpt_getreg(priv, R_GPT32_GTCR_OFFSET);
   regval &= ~GPT_GTCR_CST;
-  gpt_putreg(priv, RA_GPT_GTCR_OFFSET, regval);
+  gpt_putreg(priv, R_GPT32_GTCR_OFFSET, regval);
 
   /* Reset the timer to its default state */
-  gpt_putreg(priv, RA_GPT_GTCNT_OFFSET, 0);
-  gpt_putreg(priv, RA_GPT_GTCCRA_OFFSET, 0);
-  gpt_putreg(priv, RA_GPT_GTCCRB_OFFSET, 0);
-  gpt_putreg(priv, RA_GPT_GTIOR_OFFSET, 0);
+  gpt_putreg(priv, R_GPT32_GTCNT_OFFSET, 0);
+  gpt_putreg(priv, R_GPT32_GTCCRA_OFFSET, 0);
+  gpt_putreg(priv, R_GPT32_GTCCRB_OFFSET, 0);
+  gpt_putreg(priv, R_GPT32_GTIOR_OFFSET, 0);
 
   /* Re-enable write protection */
-  gpt_putreg(priv, RA_GPT_GTWP_OFFSET,
+  gpt_putreg(priv, R_GPT32_GTWP_OFFSET,
              GPT_GTWP_PRKEY | GPT_GTWP_WP | GPT_GTWP_CMNWP);
 
   leave_critical_section(flags);
@@ -707,38 +707,38 @@ static int gpt_start(struct pwm_lowerhalf_s *dev,
   irqstate_t flags = enter_critical_section();
 
   /* Disable write protection */
-  gpt_putreg(priv, RA_GPT_GTWP_OFFSET, GPT_GTWP_PRKEY);
+  gpt_putreg(priv, R_GPT32_GTWP_OFFSET, GPT_GTWP_PRKEY);
 
   /* Stop the timer */
-  regval = gpt_getreg(priv, RA_GPT_GTCR_OFFSET);
+  regval = gpt_getreg(priv, R_GPT32_GTCR_OFFSET);
   regval &= ~GPT_GTCR_CST;
-  gpt_putreg(priv, RA_GPT_GTCR_OFFSET, regval);
+  gpt_putreg(priv, R_GPT32_GTCR_OFFSET, regval);
 
   /* Configure the prescaler */
   regval = GPT_GTCR_MD_SAW_WAVE_UP | (prescaler << GPT_GTCR_TPCS_SHIFT);
-  gpt_putreg(priv, RA_GPT_GTCR_OFFSET, regval);
+  gpt_putreg(priv, R_GPT32_GTCR_OFFSET, regval);
 
   /* Set the period */
-  gpt_putreg(priv, RA_GPT_GTPR_OFFSET, period - 1);
+  gpt_putreg(priv, R_GPT32_GTPR_OFFSET, period - 1);
 
   /* Set the duty cycles */
-  gpt_putreg(priv, RA_GPT_GTCCRA_OFFSET, duty_a);
-  gpt_putreg(priv, RA_GPT_GTCCRB_OFFSET, duty_b);
+  gpt_putreg(priv, R_GPT32_GTCCRA_OFFSET, duty_a);
+  gpt_putreg(priv, R_GPT32_GTCCRB_OFFSET, duty_b);
 
   /* Reset the counter */
-  gpt_putreg(priv, RA_GPT_GTCNT_OFFSET, 0);
+  gpt_putreg(priv, R_GPT32_GTCNT_OFFSET, 0);
 
   /* Configure I/O pins for PWM output */
   regval = GPT_GTIOR_GTIOA_INITIAL_LOW | GPT_GTIOR_GTIOB_INITIAL_LOW;
-  gpt_putreg(priv, RA_GPT_GTIOR_OFFSET, regval);
+  gpt_putreg(priv, R_GPT32_GTIOR_OFFSET, regval);
 
   /* Start the timer */
-  regval = gpt_getreg(priv, RA_GPT_GTCR_OFFSET);
+  regval = gpt_getreg(priv, R_GPT32_GTCR_OFFSET);
   regval |= GPT_GTCR_CST;
-  gpt_putreg(priv, RA_GPT_GTCR_OFFSET, regval);
+  gpt_putreg(priv, R_GPT32_GTCR_OFFSET, regval);
 
   /* Re-enable write protection */
-  gpt_putreg(priv, RA_GPT_GTWP_OFFSET,
+  gpt_putreg(priv, R_GPT32_GTWP_OFFSET,
              GPT_GTWP_PRKEY | GPT_GTWP_WP | GPT_GTWP_CMNWP);
 
   leave_critical_section(flags);
@@ -790,18 +790,18 @@ static int gpt_stop(struct pwm_lowerhalf_s *dev)
   irqstate_t flags = enter_critical_section();
 
   /* Disable write protection */
-  gpt_putreg(priv, RA_GPT_GTWP_OFFSET, GPT_GTWP_PRKEY);
+  gpt_putreg(priv, R_GPT32_GTWP_OFFSET, GPT_GTWP_PRKEY);
 
   /* Stop the timer */
-  regval = gpt_getreg(priv, RA_GPT_GTCR_OFFSET);
+  regval = gpt_getreg(priv, R_GPT32_GTCR_OFFSET);
   regval &= ~GPT_GTCR_CST;
-  gpt_putreg(priv, RA_GPT_GTCR_OFFSET, regval);
+  gpt_putreg(priv, R_GPT32_GTCR_OFFSET, regval);
 
   /* Disable PWM outputs */
-  gpt_putreg(priv, RA_GPT_GTIOR_OFFSET, 0);
+  gpt_putreg(priv, R_GPT32_GTIOR_OFFSET, 0);
 
   /* Re-enable write protection */
-  gpt_putreg(priv, RA_GPT_GTWP_OFFSET,
+  gpt_putreg(priv, R_GPT32_GTWP_OFFSET,
              GPT_GTWP_PRKEY | GPT_GTWP_WP | GPT_GTWP_CMNWP);
 
   leave_critical_section(flags);
@@ -959,8 +959,8 @@ struct pwm_lowerhalf_s *ra_gpt_initialize(int channel)
                   lower->frequency,
                   lower->prescaler,
                   lower->config->pclkd_freq,
-                  gpt_getreg(lower, RA_GPT_GTPR_OFFSET),
-                  gpt_getreg(lower, RA_GPT_GTCCRA_OFFSET));
+                  gpt_getreg(lower, R_GPT32_GTPR_OFFSET),
+                  gpt_getreg(lower, R_GPT32_GTCCRA_OFFSET));
 
   return (struct pwm_lowerhalf_s *)lower;
 }

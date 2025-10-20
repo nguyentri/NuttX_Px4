@@ -51,7 +51,7 @@ CONFIG_NSH_UARTDEV="/dev/ttyS0"
 CONFIG_NSH_CONDEV="/dev/ttyS0"
 
 # Clocking Configuration
-CONFIG_RA_CLOCK_PLL=y
+CONFIG_RA_CLOCK_PLL1P=y
 
 # Serial Configuration (SCI2 for NSH console)
 CONFIG_SERIAL=y

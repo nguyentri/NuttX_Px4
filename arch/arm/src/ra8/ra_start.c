@@ -83,17 +83,18 @@ extern uint32_t _vectors[]; /* See arm_vectors.S */
 #define RA_CCR_CACHE_ENABLE        (0x000E0201) /* Enable instruction cache, branch prediction and LOB extension */
 
 /* PRCR register unlock keys */
-#define R_SYSC_PRCR_S_KEY                (0xA500U)
 #define RA_PRCR_PRC1_UNLOCK        ((R_SYSC_PRCR_S_KEY) | 0x2U)
 #define RA_PRCR_LOCK               ((R_SYSC_PRCR_S_KEY) | 0x0U)
 
-/* We use RA_ prefixed macros from ra_start.h to avoid duplicate definitions */
-/* Any usage of macros in this file should be converted to RA_ equivalents */
-#if defined (CONFIG_RA_OPTION_SETTING_ENABLE) && CONFIG_RA_OPTION_SETTING_ENABLE
+
+#if defined (CONFIG_RA_OPTION_SETTING_ENABLE)
 /* boot loaded applications cannot set ofs registers (only do so in the boot loader) */
 #if !defined(CONFIG_RA_BOOTLOADED_APPLICATION) || !CONFIG_RA_BOOTLOADED_APPLICATION
 
-/** configuration register output to sections */
+/* Option byte settings */
+#if defined(CONFIG_RA8E1_GROUP)
+
+/* Option byte Configuration registers to sections */
 #if defined CONFIG_RA_OFS0_SETTING && !CONFIG_RA_TZ_NONSECURE_BUILD
 RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_ofs0") g_ra_cfg_option_setting_ofs0[] = {CONFIG_RA_OPTION_SETTING_OFS0};
 #endif
@@ -136,6 +137,92 @@ RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_bankse
 #if defined CONFIG_RA_BOOT_PROTECT_SETTING && !CONFIG_RA_TZ_NONSECURE_BUILD
 RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_bps_sel") g_ra_cfg_option_setting_bps_sel[] = {CONFIG_RA_OPTION_SETTING_BPS_SEL};
 #endif
+
+#else /* CONFIG_RA8E1_GROUP */
+
+#define RA_CFG_CPU_CORE           (0) /* RA8P1 is Cortex-M85 based */
+
+/* Option byte Configuration registers to sections */
+#if defined RA_CFG_OPTION_SETTING_OFS0 && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_ofs0") g_bsp_cfg_option_setting_ofs0[] = {RA_CFG_OPTION_SETTING_OFS0};
+#endif
+#if defined RA_CFG_OPTION_SETTING_OFS2 && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_ofs2") g_bsp_cfg_option_setting_ofs2[] = {RA_CFG_OPTION_SETTING_OFS2};
+#endif
+#if defined RA_CFG_OPTION_SETTING_SAS && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_sas") g_bsp_cfg_option_setting_sas[] = {RA_CFG_OPTION_SETTING_SAS};
+#endif
+#if defined RA_CFG_OPTION_SETTING_OFS1 && (RA_CFG_CPU_CORE == 0)
+RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_ofs1") g_bsp_cfg_option_setting_ofs1[] = {RA_CFG_OPTION_SETTING_OFS1};
+#endif
+#if defined RA_CFG_OPTION_SETTING_OFS1_SEC && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_ofs1_sec") g_bsp_cfg_option_setting_ofs1_sec[] = {RA_CFG_OPTION_SETTING_OFS1_SEC};
+#endif
+#if defined RA_CFG_OPTION_SETTING_OFS1_SEL && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_ofs1_sel") g_bsp_cfg_option_setting_ofs1_sel[] = {RA_CFG_OPTION_SETTING_OFS1_SEL};
+#endif
+#if defined RA_CFG_OPTION_SETTING_OFS3 && (RA_CFG_CPU_CORE == 0)
+RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_ofs3") g_bsp_cfg_option_setting_ofs3[] = {RA_CFG_OPTION_SETTING_OFS3};
+#endif
+#if defined RA_CFG_OPTION_SETTING_OFS3_SEC && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_ofs3_sec") g_bsp_cfg_option_setting_ofs3_sec[] = {RA_CFG_OPTION_SETTING_OFS3_SEC};
+#endif
+#if defined RA_CFG_OPTION_SETTING_OFS3_SEL && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_ofs3_sel") g_bsp_cfg_option_setting_ofs3_sel[] = {RA_CFG_OPTION_SETTING_OFS3_SEL};
+#endif
+#if defined RA_CFG_OPTION_SETTING_BPS && (RA_CFG_CPU_CORE == 0)
+RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_bps") g_bsp_cfg_option_setting_bps[] = {RA_CFG_OPTION_SETTING_BPS};
+#endif
+#if defined RA_CFG_OPTION_SETTING_BPS_SEC && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_bps_sec") g_bsp_cfg_option_setting_bps_sec[] = {RA_CFG_OPTION_SETTING_BPS_SEC};
+#endif
+#if defined RA_CFG_OPTION_SETTING_OTP_FSBLCTRL0 && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_otp_fsblctrl0") g_bsp_cfg_option_setting_otp_fsblctrl0[] = {RA_CFG_OPTION_SETTING_OTP_FSBLCTRL0};
+#endif
+#if defined RA_CFG_OPTION_SETTING_OTP_FSBLCTRL1 && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_otp_fsblctrl1") g_bsp_cfg_option_setting_otp_fsblctrl1[] = {RA_CFG_OPTION_SETTING_OTP_FSBLCTRL1};
+#endif
+#if defined RA_CFG_OPTION_SETTING_OTP_FSBLCTRL2 && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_otp_fsblctrl2") g_bsp_cfg_option_setting_otp_fsblctrl2[] = {RA_CFG_OPTION_SETTING_OTP_FSBLCTRL2};
+#endif
+#if defined RA_CFG_OPTION_SETTING_OTP_SAMR && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_otp_samr") g_bsp_cfg_option_setting_otp_samr[] = {RA_CFG_OPTION_SETTING_OTP_SAMR};
+#endif
+#if defined RA_CFG_OPTION_SETTING_OTP_SACC00 && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_otp_sacc00") g_bsp_cfg_option_setting_otp_sacc00[] = {RA_CFG_OPTION_SETTING_OTP_SACC00};
+#endif
+#if defined RA_CFG_OPTION_SETTING_OTP_SACC10 && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_otp_sacc10") g_bsp_cfg_option_setting_otp_sacc10[] = {RA_CFG_OPTION_SETTING_OTP_SACC10};
+#endif
+#if defined RA_CFG_OPTION_SETTING_OTP_SACC01 && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_otp_sacc01") g_bsp_cfg_option_setting_otp_sacc01[] = {RA_CFG_OPTION_SETTING_OTP_SACC01};
+#endif
+#if defined RA_CFG_OPTION_SETTING_OTP_SACC11 && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_otp_sacc11") g_bsp_cfg_option_setting_otp_sacc11[] = {RA_CFG_OPTION_SETTING_OTP_SACC11};
+#endif
+#if defined RA_CFG_OPTION_SETTING_OTP_SACC02 && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_otp_sacc02") g_bsp_cfg_option_setting_otp_sacc02[] = {RA_CFG_OPTION_SETTING_OTP_SACC02};
+#endif
+#if defined RA_CFG_OPTION_SETTING_OTP_SACC12 && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_otp_sacc12") g_bsp_cfg_option_setting_otp_sacc12[] = {RA_CFG_OPTION_SETTING_OTP_SACC12};
+#endif
+#if defined RA_CFG_OPTION_SETTING_OTP_SACC03 && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_otp_sacc03") g_bsp_cfg_option_setting_otp_sacc03[] = {RA_CFG_OPTION_SETTING_OTP_SACC03};
+#endif
+#if defined RA_CFG_OPTION_SETTING_OTP_SACC13 && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_otp_sacc13") g_bsp_cfg_option_setting_otp_sacc13[] = {RA_CFG_OPTION_SETTING_OTP_SACC13};
+#endif
+#if defined RA_CFG_OPTION_SETTING_OTP_PBPS_SEC && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_otp_pbps_sec") g_bsp_cfg_option_setting_otp_pbps_sec[] = {RA_CFG_OPTION_SETTING_OTP_PBPS_SEC};
+#endif
+#if defined RA_CFG_OPTION_SETTING_OTP_PBPS && (RA_CFG_CPU_CORE == 0)
+RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_otp_pbps") g_bsp_cfg_option_setting_otp_pbps[] = {RA_CFG_OPTION_SETTING_OTP_PBPS};
+#endif
+#if defined RA_CFG_OPTION_SETTING_OTP_ZHUK && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_otp_zhuk") g_bsp_cfg_option_setting_otp_zhuk[] = {RA_CFG_OPTION_SETTING_OTP_ZHUK};
+#endif
+
+#endif /* CONFIG_RA8E1_GROUP */
 
 #endif /* CONFIG_RA_BOOTLOADED_APPLICATION */
 
@@ -437,8 +524,8 @@ int main(void){
 
   /* Start NuttX */
   /* Then start NuttX main initialization */
-  showprogress('\r');
-  showprogress('\n');
+  //showprogress('\r');
+  //showprogress('\n');
 
   nx_start();
 
@@ -567,7 +654,7 @@ void ra_tcm_init(void)
  ****************************************************************************/
 void ra_ram_init (const uint32_t external)
 {
-#if (0) // Disable standard NuttX RAM initialization
+#if 1 // Disable standard NuttX RAM initialization
     const register uint32_t *src;
     register uint32_t *dest;
 
@@ -597,7 +684,7 @@ void ra_ram_init (const uint32_t external)
     {
       *dest++ = *src++;  // CRITICAL: Copy initialized .data from flash!
     }
-#endif
+#else
 
     /* Use custom memory sections */
     for (uint32_t i = 0; i < g_init_info.zero_count; i++)
@@ -617,120 +704,7 @@ void ra_ram_init (const uint32_t external)
                    ((uintptr_t) g_init_info.p_copy_list[i].p_limit - (uintptr_t) g_init_info.p_copy_list[i].p_base));
         }
     }
-}
-
-
-/****************************************************************************
- * Name: ra_delay_us
- *
- * Description:
- *   Delay for a specified number of microseconds.
- *
- ****************************************************************************/
-
-void ra_delay_us(uint32_t delay_us)
-{
-    uint32_t iclk_hz;
-    uint32_t loops_required = 0;
-    uint32_t total_us       = delay_us; /** Convert the requested time to microseconds. */
-
-    iclk_hz = g_sys_core_clock;                 /** Get the system clock frequency in Hz. */
-
-
-    if (iclk_hz >= 8000000)
-    {
-        /* For larger system clock values the below calculation in the else causes inaccurate delays due to rounding errors:
-         *
-         * ns_per_cycle = RA_PRV_NS_PER_SECOND / iclk_hz
-         *
-         * For system clock values greater than the MOCO speed the following delay calculation is used instead.
-         * The value is always rounded up to ensure the delay is at least the supplied value.
-         */
-        uint32_t cycles_per_us = (iclk_hz + (RA_PRV_US_PER_SECOND * RA_PRV_LOOP_CYCLES) - 1) /
-                                 (RA_PRV_US_PER_SECOND * RA_PRV_LOOP_CYCLES);
-
-        uint64_t loops_required_u64 = ((uint64_t) total_us) * cycles_per_us;
-
-        if (loops_required_u64 > UINT32_MAX)
-        {
-            loops_required = UINT32_MAX;
-        }
-        else
-        {
-            loops_required = (uint32_t) loops_required_u64;
-        }
-    }
-    else
-    {
-        uint32_t cycles_requested;
-        uint32_t ns_per_cycle;
-        uint64_t ns_64bits;
-
-        /* Running on the Sub-clock (32768 Hz) there are 30517 ns/cycle. This means one cycle takes 31 us. One execution
-         * loop of the delay_loop takes 6 cycles which at 32768 Hz is 180 us. That does not include the overhead below prior to even getting
-         * to the delay loop. Given this, at this frequency anything less then a delay request of 122 us will not even generate a single
-         * pass through the delay loop.  For this reason small delays (<=~200 us) at this slow clock rate will not be possible and such a request
-         * will generate a minimum delay of ~200 us.*/
-        ns_per_cycle = RA_PRV_NS_PER_SECOND / iclk_hz;                 /** Get the # of nanoseconds/cycle. */
-
-        /* We want to get the time in total nanoseconds but need to be conscious of overflowing 32 bits. We also do not want to do 64 bit */
-        /* division as that pulls in a division library. */
-        ns_64bits = (uint64_t) total_us * (uint64_t) RA_PRV_NS_PER_US; // Convert to ns.
-
-        /* Have we overflowed 32 bits? */
-        if (ns_64bits <= UINT32_MAX)
-        {
-            /* No, we will not overflow. */
-            cycles_requested = ((uint32_t) ns_64bits / ns_per_cycle);
-            loops_required   = cycles_requested / RA_PRV_LOOP_CYCLES;
-        }
-        else
-        {
-            /* We did overflow. Try dividing down first. */
-            total_us  = (total_us / (ns_per_cycle * RA_PRV_LOOP_CYCLES));
-            ns_64bits = (uint64_t) total_us * (uint64_t) RA_PRV_NS_PER_US; // Convert to ns.
-
-            /* Have we overflowed 32 bits? */
-            if (ns_64bits <= UINT32_MAX)
-            {
-                /* No, we will not overflow. */
-                loops_required = (uint32_t) ns_64bits;
-            }
-            else
-            {
-                /* We still overflowed, use the max count for cycles */
-                loops_required = UINT32_MAX;
-            }
-        }
-    }
-
-    /** Only delay if the supplied parameters constitute a delay. */
-    if (loops_required > (uint32_t) 0)
-    {
-            __asm volatile (
-        #if defined(RENESAS_CORTEX_M85) && (defined(__ARMCC_VERSION) || defined(__GNUC__))
-
-                /* Align the branch target to a 64-bit boundary, a CM85 specific optimization. */
-                /* IAR does not support alignment control within inline assembly. */
-                ".balign 8\n"
-        #endif
-                "sw_delay_loop:         \n"
-        #if defined(__ICCARM__) || defined(__ARMCC_VERSION) || (defined(__llvm__) && !defined(__CLANG_TIDY__))
-                "   subs r0, #1         \n"    ///< 1 cycle
-        #elif defined(__GNUC__)
-                "   sub r0, r0, #1      \n"    ///< 1 cycle
-        #endif
-
-                "   cmp r0, #0          \n"    ///< 1 cycle
-
-        /* CM0 and CM23 have a different instruction set */
-        #if defined(__CORE_CM0PLUS_H_GENERIC) || defined(__CORE_CM23_H_GENERIC)
-                "   bne sw_delay_loop   \n"    ///< 2 cycles
-        #else
-                "   bne.n sw_delay_loop \n"    ///< 2 cycles
-        #endif
-                "   bx lr               \n");  ///< 2 cycles
-    }
+#endif
 }
 
 

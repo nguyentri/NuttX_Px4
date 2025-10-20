@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/ra8/hardware/ra_hardware.h
+ * arch/arm/src/ra8/ra_adc.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -17,55 +17,59 @@
  * under the License.
  *
  ****************************************************************************/
-#ifndef __ARCH_ARM_SRC_RA_HARDWARE_RA8_SYSTEM_H
-#define __ARCH_ARM_SRC_RA_HARDWARE_RA8_SYSTEM_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+#include <debug.h>
+#include <nuttx/analog/adc.h>
+
+#ifdef CONFIG_RA_ADC_B
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define R_SYSC_PRCR_S_KEY                         (0xA500U)
+/* Minimal stub file - board-level ADC setup in ra8p1_adc_b.c handles
+ * the actual ADC-B initialization and device registration.
+ */
 
-/* Hardware register wait macro */
-#define RA_HARDWARE_WAIT(reg, expected) \
-  do { \
-    while ((reg) != (expected)) \
-      { \
-        /* Wait for register to reach expected value */ \
-      } \
-  } while (0)
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
+/****************************************************************************
+ * Name: ra8_adc_b_initialize
+ *
+ * Description:
+ *   Initialize the ADC-B subsystem for RA8P1. This is a compatibility
+ *   stub that delegates to board-level implementation.
+ *
+ * Input Parameters:
+ *   chanlist  - Bit mask of channels to enable
+ *   nchannels - Number of configured channels
+ *
+ * Returned Value:
+ *   Valid ADC device structure reference on success; NULL on failure
+ *
+ ****************************************************************************/
 
-/* Software delay loop */
-inline void ra_hardware_loop (__attribute__((unused)) uint32_t loop_cnt)
+FAR struct adc_dev_s *ra8_adc_b_initialize(uint32_t chanlist,
+                                           int nchannels)
 {
-    __asm volatile (
+  ainfo("ADC-B: ra8_adc_b_initialize called (chanlist=0x%08lx, nchannels=%d)\n",
+        chanlist, nchannels);
 
-        /* Align the branch target to a 64-bit boundary, a CM85 specific optimization. */
-        /* IAR does not support alignment control within inline assembly. */
-        ".balign 8\n"
-        "sw_delay_loop:         \n"
-        "   sub r0, r0, #1      \n"    ///< 1 cycle
+  /* Note: The actual ADC-B device initialization and registration is
+   * performed by board_adc_initialize() in ra8p1_adc_b.c, which is called
+   * during board startup from ra8p1_bringup.c. This function exists to
+   * provide a standard architecture-level interface point.
+   */
 
-        "   cmp r0, #0          \n"
-    );    ///< 1 cycle
+  return NULL;
 }
 
+#endif /* CONFIG_RA_ADC_B */
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions Prototypes
- ****************************************************************************/
-
-#endif /* __ARCH_ARM_SRC_RA_HARDWARE_RA8_SYSTEM_H */

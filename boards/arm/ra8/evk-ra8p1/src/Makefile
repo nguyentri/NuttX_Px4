@@ -45,4 +45,9 @@ ifneq ($(CONFIG_RA_I2C),y)
 CSRCS += ra8p1_i2c.c
 endif
 
+# ADC B support
+ifneq ($(CONFIG_RA_ADC_B),y)
+CSRCS += ra8p1_adc_b.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

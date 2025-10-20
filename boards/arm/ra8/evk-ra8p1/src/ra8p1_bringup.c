@@ -164,6 +164,19 @@ int ra8p1_bringup(void)
 #endif
 #endif
 
+#ifdef CONFIG_RA_ADC
+  /* Initialize ADC-B module */
+  ret = board_adc_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize ADC: %d\n", ret);
+    }
+  else
+    {
+      syslog(LOG_INFO, "ADC-B initialized successfully\n");
+    }
+#endif
+
   ra8p1_app_examples();
 
   return ret;

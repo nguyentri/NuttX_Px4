@@ -219,7 +219,7 @@ config RA8E1_SPI_GY912_EXAMPLE
 	bool "SPI GY-912 Example Application"
 	default n
 	depends on RA_SPI
-	select SENSORS_GY912 if !SENSORS_GY912
+	depends on SENSORS_GY912
 	---help---
 		Enable SPI GY-912 sensor demo application for FPB-RA8E1.
 		Demonstrates 10DOF sensor module communication via SPI.

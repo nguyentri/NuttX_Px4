@@ -45,6 +45,10 @@ if(CONFIG_RA_ADC)
   list(APPEND SRCS ra_adc.c)
 endif()
 
+if(CONFIG_RA_ADC)
+  list(APPEND SRCS ra_adc_b.c)
+endif()
+
 # I2C driver
 if(CONFIG_RA_I2C)
   list(APPEND SRCS ra_i2c.c)

@@ -47,6 +47,10 @@ ifeq ($(CONFIG_RA_ADC),y)
 CHIP_CSRCS += ra_adc.c
 endif
 
+ifeq ($(CONFIG_RA_ADC_B),y)
+CHIP_CSRCS += ra_adc_b.c
+endif
+
 # I2C driver
 ifeq ($(CONFIG_RA_I2C),y)
 CHIP_CSRCS += ra_i2c.c

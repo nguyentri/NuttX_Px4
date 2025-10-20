@@ -220,8 +220,10 @@ config ARCH_CHIP_R7KA8P1KFLCAC
    select RA_HAVE_ULPT1
    # RTC
    select RA_HAVE_RTC
-   # Analog - ADC, DAC, and 4 High-Speed Comparators
-   select RA_HAVE_ADC12
+   # Analog - ADC-B (Advanced ADC with FIFO), DAC, and 4 High-Speed Comparators
+   select RA_HAVE_ADC_B
+   select RA_HAVE_ADC0
+   select RA_HAVE_ADC1
    select RA_HAVE_DAC12
    select RA_HAVE_ACMPHS
    select RA_HAVE_ACMPHS0
@@ -473,9 +475,10 @@ config RA_PLL_DIV
    default 2 if RA8P1_GROUP
    range 0 15
    help
-     PLL input divider value (0 = /1, 1 = /2, 2 = /3, etc.).
-     For RA8E1: HOCO 20MHz / 2 = 10MHz PLL input.
-     For RA8P1: XTAL 24MHz / 3 = 8MHz PLL input.
+     PLL input divider selection (encoded value, not actual divider).
+     Encoding: 0=/1, 1=/2, 2=/3, 3=/4, 4=/5, 5=/6, 7=/8, 8=/9, 9=/1.5, 15=/16
+     For RA8E1: default 1 means /2 (HOCO 20MHz / 2 = 10MHz PLL input)
+     For RA8P1: default 2 means /3 (XTAL 24MHz / 3 = 8MHz PLL input)
 
 config RA_PLL_MUL
    int "PLL Multiplier"
@@ -492,9 +495,10 @@ config RA_PLL1P_DIV
    default 1
    range 0 15
    help
-     PLL1P output divider (0 = /1, 1 = /2, etc.).
-     For RA8E1: 720MHz / 2 = 360MHz system clock.
-     For RA8P1: 2000MHz / 2 = 1000MHz system clock.
+     PLL1P output divider selection (encoded value).
+     Encoding: 0=/1, 1=/2, 2=/3, 3=/4, 4=/5, 5=/6, 7=/8, 8=/9, 9=/1.5, 15=/16
+     For RA8E1: default 1 means /2 (720MHz / 2 = 360MHz system clock)
+     For RA8P1: default 1 means /2 (2000MHz / 2 = 1000MHz system clock)
 
 config RA_PLL1Q_DIV
    int "PLL1Q Output Divider"
@@ -502,9 +506,10 @@ config RA_PLL1Q_DIV
    default 5 if RA8P1_GROUP
    range 0 15
    help
-     PLL1Q output divider for peripheral clocks.
-     For RA8E1: 720MHz / 2 = 360MHz.
-     For RA8P1: 2000MHz / 6 = 333MHz.
+     PLL1Q output divider for peripheral clocks (encoded value).
+     Encoding: 0=/1, 1=/2, 2=/3, 3=/4, 4=/5, 5=/6, 7=/8, 8=/9, 9=/1.5, 15=/16
+     For RA8E1: default 1 means /2 (720MHz / 2 = 360MHz)
+     For RA8P1: default 5 means /6 (2000MHz / 6 = 333MHz)
 
 config RA_PLL1R_DIV
    int "PLL1R Output Divider"
@@ -512,9 +517,10 @@ config RA_PLL1R_DIV
    default 4 if RA8P1_GROUP
    range 0 15
    help
-     PLL1R output divider for peripheral clocks.
-     For RA8E1: 720MHz / 2 = 360MHz.
-     For RA8P1: 2000MHz / 5 = 400MHz.
+     PLL1R output divider for peripheral clocks (encoded value).
+     Encoding: 0=/1, 1=/2, 2=/3, 3=/4, 4=/5, 5=/6, 7=/8, 8=/9, 9=/1.5, 15=/16
+     For RA8E1: default 1 means /2 (720MHz / 2 = 360MHz)
+     For RA8P1: default 4 means /5 (2000MHz / 5 = 400MHz)
 
 menu "PLL2 Configuration (RA8P1 only)"
    depends on RA8P1_GROUP
@@ -547,8 +553,9 @@ config RA_PLL2_DIV
    default 2
    range 0 15
    help
-     PLL2 input divider value (0 = /1, 1 = /2, 2 = /3, etc.).
-     For RA8P1: XTAL 24MHz / 3 = 8MHz PLL2 input.
+     PLL2 input divider selection (encoded value).
+     Encoding: 0=/1, 1=/2, 2=/3, 3=/4, 4=/5, 5=/6, 7=/8, 8=/9, 9=/1.5, 15=/16
+     For RA8P1: default 2 means /3 (XTAL 24MHz / 3 = 8MHz PLL2 input)
 
 config RA_PLL2_MUL
    int "PLL2 Multiplier"
@@ -563,24 +570,27 @@ config RA_PLL2P_DIV
    default 3
    range 0 15
    help
-     PLL2P output divider for peripheral clocks.
-     For RA8P1: 2400MHz / 4 = 600MHz.
+     PLL2P output divider for peripheral clocks (encoded value).
+     Encoding: 0=/1, 1=/2, 2=/3, 3=/4, 4=/5, 5=/6, 7=/8, 8=/9, 9=/1.5, 15=/16
+     For RA8P1: default 3 means /4 (2400MHz / 4 = 600MHz)
 
 config RA_PLL2Q_DIV
    int "PLL2Q Output Divider"
    default 2
    range 0 15
    help
-     PLL2Q output divider for peripheral clocks.
-     For RA8P1: 2400MHz / 3 = 800MHz.
+     PLL2Q output divider for peripheral clocks (encoded value).
+     Encoding: 0=/1, 1=/2, 2=/3, 3=/4, 4=/5, 5=/6, 7=/8, 8=/9, 9=/1.5, 15=/16
+     For RA8P1: default 2 means /3 (2400MHz / 3 = 800MHz)
 
 config RA_PLL2R_DIV
    int "PLL2R Output Divider"
    default 4
    range 0 15
    help
-     PLL2R output divider for peripheral clocks.
-     For RA8P1: 2400MHz / 5 = 480MHz.
+     PLL2R output divider for peripheral clocks (encoded value).
+     Encoding: 0=/1, 1=/2, 2=/3, 3=/4, 4=/5, 5=/6, 7=/8, 8=/9, 9=/1.5, 15=/16
+     For RA8P1: default 4 means /5 (2400MHz / 5 = 480MHz)
 
 endif # RA_PLL2_ENABLE
 
@@ -597,7 +607,9 @@ config RA_CPUCLK_DIV
    default 0
    range 0 11
    help
-     CPU clock divider (0=/1, 1=/2, 2=/4, 3=/8, 4=/16, 5=/32, 6=/64, 7=/128, 8=/3, 9=/6, 10=/12, 11=/24).
+     CPU clock divider (encoded value).
+     Encoding: 0=/1, 1=/2, 2=/4, 3=/8, 4=/16, 5=/32, 6=/64, 7=/128, 8=/3, 9=/6, 10=/12, 11=/24
+     Default 0 (/1) uses full system clock speed.
 
 config RA_ICK_DIV
    int "ICLK Divider"
@@ -605,9 +617,10 @@ config RA_ICK_DIV
    default 2 if RA8P1_GROUP
    range 0 11
    help
-     Internal clock (ICLK) divider for system bus.
-     RA8E1: 8 (/3) gives 120MHz from 360MHz system clock.
-     RA8P1: 2 (/4) gives 250MHz from 1000MHz system clock.
+     Internal clock (ICLK) divider for system bus (encoded value).
+     Encoding: 0=/1, 1=/2, 2=/4, 3=/8, 4=/16, 5=/32, 6=/64, 8=/3, 9=/6, 10=/12, 11=/24
+     RA8E1: default 8 (/3) gives 120MHz from 360MHz system clock
+     RA8P1: default 2 (/4) gives 250MHz from 1000MHz system clock
 
 config RA_PCKA_DIV
    int "PCLKA Divider"
@@ -615,9 +628,10 @@ config RA_PCKA_DIV
    default 3 if RA8P1_GROUP
    range 0 11
    help
-     Peripheral Clock A divider.
-     RA8E1: 8 (/3) gives 120MHz.
-     RA8P1: 3 (/8) gives 125MHz.
+     Peripheral Clock A divider (encoded value).
+     Encoding: 0=/1, 1=/2, 2=/4, 3=/8, 4=/16, 5=/32, 6=/64, 8=/3, 9=/6, 10=/12, 11=/24
+     RA8E1: default 8 (/3) gives 120MHz
+     RA8P1: default 3 (/8) gives 125MHz
 
 config RA_PCKB_DIV
    int "PCLKB Divider"
@@ -625,9 +639,10 @@ config RA_PCKB_DIV
    default 4 if RA8P1_GROUP
    range 0 11
    help
-     Peripheral Clock B divider.
-     RA8E1: 9 (/6) gives 60MHz.
-     RA8P1: 4 (/16) gives 62.5MHz.
+     Peripheral Clock B divider (encoded value).
+     Encoding: 0=/1, 1=/2, 2=/4, 3=/8, 4=/16, 5=/32, 6=/64, 8=/3, 9=/6, 10=/12, 11=/24
+     RA8E1: default 9 (/6) gives 60MHz
+     RA8P1: default 4 (/16) gives 62.5MHz
 
 config RA_PCKC_DIV
    int "PCLKC Divider"
@@ -635,9 +650,10 @@ config RA_PCKC_DIV
    default 3 if RA8P1_GROUP
    range 0 11
    help
-     Peripheral Clock C divider.
-     RA8E1: 9 (/6) gives 60MHz.
-     RA8P1: 3 (/8) gives 125MHz.
+     Peripheral Clock C divider (encoded value).
+     Encoding: 0=/1, 1=/2, 2=/4, 3=/8, 4=/16, 5=/32, 6=/64, 8=/3, 9=/6, 10=/12, 11=/24
+     RA8E1: default 9 (/6) gives 60MHz
+     RA8P1: default 3 (/8) gives 125MHz
 
 config RA_PCKD_DIV
    int "PCLKD Divider"
@@ -645,9 +661,10 @@ config RA_PCKD_DIV
    default 2 if RA8P1_GROUP
    range 0 11
    help
-     Peripheral Clock D divider.
-     RA8E1: 8 (/3) gives 120MHz.
-     RA8P1: 2 (/4) gives 250MHz.
+     Peripheral Clock D divider (encoded value).
+     Encoding: 0=/1, 1=/2, 2=/4, 3=/8, 4=/16, 5=/32, 6=/64, 8=/3, 9=/6, 10=/12, 11=/24
+     RA8E1: default 8 (/3) gives 120MHz
+     RA8P1: default 2 (/4) gives 250MHz
 
 config RA_PCKE_DIV
    int "PCLKE Divider"
@@ -655,9 +672,10 @@ config RA_PCKE_DIV
    default 2 if RA8P1_GROUP
    range 0 11
    help
-     Peripheral Clock E divider.
-     RA8E1: 8 (/3) gives 120MHz.
-     RA8P1: 2 (/4) gives 250MHz.
+     Peripheral Clock E divider (encoded value).
+     Encoding: 0=/1, 1=/2, 2=/4, 3=/8, 4=/16, 5=/32, 6=/64, 8=/3, 9=/6, 10=/12, 11=/24
+     RA8E1: default 8 (/3) gives 120MHz
+     RA8P1: default 2 (/4) gives 250MHz
 
 config RA_BCLK_DIV
    int "BCLK Divider"
@@ -665,9 +683,10 @@ config RA_BCLK_DIV
    default 3 if RA8P1_GROUP
    range 0 11
    help
-     Bus Clock divider.
-     RA8E1: 10 (/12) gives 30MHz.
-     RA8P1: 3 (/8) gives 125MHz.
+     Bus Clock divider (encoded value).
+     Encoding: 0=/1, 1=/2, 2=/4, 3=/8, 4=/16, 5=/32, 6=/64, 8=/3, 9=/6, 10=/12, 11=/24
+     RA8E1: default 10 (/12) gives 30MHz
+     RA8P1: default 3 (/8) gives 125MHz
 
 config RA_FCLK_DIV
    int "FCLK Divider"
@@ -675,9 +694,10 @@ config RA_FCLK_DIV
    default 3 if RA8P1_GROUP
    range 0 11
    help
-     Flash Clock divider.
-     RA8E1: 9 (/6) gives 60MHz.
-     RA8P1: 3 (/8) gives 125MHz.
+     Flash Clock divider (encoded value).
+     Encoding: 0=/1, 1=/2, 2=/4, 3=/8, 4=/16, 5=/32, 6=/64, 8=/3, 9=/6, 10=/12, 11=/24
+     RA8E1: default 9 (/6) gives 60MHz
+     RA8P1: default 3 (/8) gives 125MHz
 
 endmenu
 
@@ -1555,6 +1575,10 @@ config RA_HAVE_ADC1
    bool
    default n
 
+config RA_HAVE_ADC_B
+   bool
+   default n
+
 config RA_ADC
    bool "ADC support"
    default n
@@ -1574,6 +1598,15 @@ config RA_ADC1
    depends on RA_HAVE_ADC1
    select RA_ADC
 
+config RA_ADC_B
+   bool "ADC-B (Advanced ADC with FIFO)"
+   default n
+   depends on RA_HAVE_ADC_B
+   select RA_ADC
+   help
+     Enable ADC-B (Advanced Analog-to-Digital Converter with FIFO support).
+     Provides multi-group scan capability, averaging, and FIFO buffering.
+
 config RA_ADC_DTC
    bool "Use DTC for ADC transfers"
    default n
@@ -1588,6 +1621,27 @@ config RA_ADC_BATTERY_MONITOR
    help
      Enable ADC battery voltage monitoring functionality.
      Provides battery level measurements through ADC channels.
+
+config RA_ADC_BATTERY_VOLTAGE
+   bool "Battery voltage monitoring"
+   default n
+   depends on RA_ADC_BATTERY_MONITOR
+   help
+     Monitor battery voltage through ADC channel AN000.
+
+config RA_ADC_BATTERY_CURRENT
+   bool "Battery current monitoring"
+   default n
+   depends on RA_ADC_BATTERY_MONITOR
+   help
+     Monitor battery current through ADC channel AN104 (ACS712 sensor).
+
+config RA_ADC_ARDUINO
+   bool "Arduino expansion ADC support"
+   default n
+   depends on RA_ADC
+   help
+     Enable ADC support for Arduino expansion connector analog input.
 
 endmenu
 
