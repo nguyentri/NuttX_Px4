@@ -57,7 +57,7 @@ static struct i2c_master_s *g_i2c1_dev = NULL;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ra8p1_i2c_initialize
+ * Name: board_i2c_initialize
  *
  * Description:
  *   Initialize I2C bus for EVK-RA8P1 board
@@ -71,7 +71,7 @@ static struct i2c_master_s *g_i2c1_dev = NULL;
  *
  ****************************************************************************/
 
-struct i2c_master_s *ra8p1_i2c_initialize(int bus)
+struct i2c_master_s *board_i2c_initialize(int bus)
 {
   struct i2c_master_s *dev = NULL;
 
@@ -149,7 +149,7 @@ struct i2c_master_s *ra8p1_i2c_initialize(int bus)
 }
 
 /****************************************************************************
- * Name: ra8p1_i2c_uninitialize
+ * Name: board_i2c_uninitialize
  *
  * Description:
  *   Uninitialize I2C bus
@@ -162,7 +162,7 @@ struct i2c_master_s *ra8p1_i2c_initialize(int bus)
  *
  ****************************************************************************/
 
-int ra8p1_i2c_uninitialize(int bus)
+int board_i2c_uninitialize(int bus)
 {
   struct i2c_master_s *dev = NULL;
   int ret = OK;

@@ -50,4 +50,9 @@ ifneq ($(CONFIG_RA_ADC_B),y)
 CSRCS += ra8p1_adc_b.c
 endif
 
+# GPT PWM support
+ifeq ($(CONFIG_PWM),y)
+CSRCS += ra8p1_gpt_pwm.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

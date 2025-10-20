@@ -74,7 +74,7 @@ int ra8p1_bringup(void);
 int ra8p1_app_examples(void);
 
 /****************************************************************************
- * Name: ra8p1_boardinitialize
+ * Name: board_ra8p1_initialize
  *
  * Description:
  *   All RA8P1 architectures must provide the following entry point.  This
@@ -84,7 +84,7 @@ int ra8p1_app_examples(void);
  *
  ****************************************************************************/
 
-void ra8p1_boardinitialize(void);
+void board_ra8p1_initialize(void);
 
 /****************************************************************************
  * Name: board_autoled_initialize
@@ -113,7 +113,7 @@ int board_adc_initialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_RA8P1_GPIO
-int ra8p1_gpio_initialize(void);
+int board_gpio_initialize(void);
 #endif
 
 /****************************************************************************
@@ -190,7 +190,7 @@ int ra8p1_rust_sample_init(void);
 #endif
 
 /****************************************************************************
- * Name: ra8p1_i2c_initialize
+ * Name: board_i2c_initialize
  *
  * Description:
  *   Initialize I2C bus for EVK-RA8P1 board
@@ -205,8 +205,8 @@ int ra8p1_rust_sample_init(void);
 
 #if defined(CONFIG_RA_I2C)
 struct i2c_master_s;
-struct i2c_master_s *ra8p1_i2c_initialize(int bus);
-int ra8p1_i2c_uninitialize(int bus);
+struct i2c_master_s *board_i2c_initialize(int bus);
+int board_i2c_uninitialize(int bus);
 #endif
 
 /****************************************************************************

@@ -142,7 +142,7 @@ int ra8p1_bringup(void)
 #if defined(CONFIG_RA_I2C0) || defined(CONFIG_RA_I2C1)
   /* Initialize I2C buses */
 #ifdef CONFIG_RA_I2C0
-  if (ra8p1_i2c_initialize(0) != NULL)
+  if (board_i2c_initialize(0) != NULL)
     {
       syslog(LOG_INFO, "I2C0 initialized successfully\n");
     }
@@ -153,7 +153,7 @@ int ra8p1_bringup(void)
 #endif
 
 #ifdef CONFIG_RA_I2C1
-  if (ra8p1_i2c_initialize(1) != NULL)
+  if (board_i2c_initialize(1) != NULL)
     {
       syslog(LOG_INFO, "I2C1 initialized successfully\n");
     }
@@ -174,6 +174,19 @@ int ra8p1_bringup(void)
   else
     {
       syslog(LOG_INFO, "ADC-B initialized successfully\n");
+    }
+#endif
+
+#ifdef CONFIG_PWM
+  /* Initialize GPT PWM devices */
+  ret = board_gpt_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize GPT PWM: %d\n", ret);
+    }
+  else
+    {
+      syslog(LOG_INFO, "GPT PWM devices initialized successfully\n");
     }
 #endif
 

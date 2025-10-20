@@ -180,6 +180,21 @@ extern "C"
 #define EXTERN extern
 #endif
 
+/**
+ * Name: board_gpt_initialize
+ *
+ * Description:
+ *   Initialize GPT (General Purpose Timer) PWM devices.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on any failure.
+ */
+#ifdef CONFIG_PWM
+int board_gpt_initialize(void);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -42,6 +42,9 @@
 
 #include "chip.h"
 #include "hardware/ra_memorymap.h"
+#include "hardware/ra8p1/ra_gpt32.h"
+#include "hardware/ra8p1/ra_gpt_regs.h"
+#include "hardware/ra8p1/ra_gpt_pins.h"
 #include "arm_internal.h"
 #include "nvic.h"
 #include "ra_gpt.h"
