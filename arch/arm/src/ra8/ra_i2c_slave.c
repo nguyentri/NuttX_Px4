@@ -261,16 +261,16 @@ static int ra_i2c_slave_setaddress(struct i2c_slave_s *dev, int addr)
   priv->slave_addr = addr;
 
   /* Set slave address in SARL0/SARU0 registers */
-  ra_i2c_slave_putreg(priv, RA_I2C_SARL0_OFFSET, (addr << 1) & 0xFE);
+  ra_i2c_slave_putreg(priv, R_IIC_SARL_OFFSET(0), (addr << 1) & 0xFE);
 
-  regval = ra_i2c_slave_getreg(priv, RA_I2C_SARU0_OFFSET);
-  regval &= ~(I2C_SARU_SVA_MASK | I2C_SARU_FS);
-  regval |= ((addr >> 7) & 0x03) << I2C_SARU_SVA_SHIFT;  /* Upper 2 bits */
+  regval = ra_i2c_slave_getreg(priv, R_IIC_SARU_OFFSET(0));
+  regval &= ~(R_IIC_SARU_SVA_MASK | R_IIC_SARU_FS);
+  regval |= ((addr >> 7) & 0x03) << R_IIC_SARU_SVA_SHIFT;  /* Upper 2 bits */
   /* FS bit = 0 for 7-bit address format */
-  ra_i2c_slave_putreg(priv, RA_I2C_SARU0_OFFSET, regval);
+  ra_i2c_slave_putreg(priv, R_IIC_SARU_OFFSET(0), regval);
 
   /* Enable slave address 0 detection */
-  ra_i2c_slave_modifyreg(priv, RA_I2C_ICSER_OFFSET, 0, I2C_ICSER_SAR0E);
+  ra_i2c_slave_modifyreg(priv, R_IIC_ICSER_OFFSET, 0, R_IIC_ICSER_SAR0E);
 
   i2cinfo("I2C%d slave address set to 0x%02X\n", priv->config->bus, addr);
 
@@ -399,41 +399,41 @@ static int ra_i2c_slave_init(struct ra_i2c_slave_priv_s *priv)
   /* ra_configgpio(config->sda_pin); */
 
   /* Reset I2C peripheral */
-  ra_i2c_slave_modifyreg(priv, RA_I2C_ICCR1_OFFSET, 0, I2C_ICCR1_IICRST);
+  ra_i2c_slave_modifyreg(priv, R_IIC_ICCR1_OFFSET, 0, R_IIC_ICCR1_IICRST);
   up_udelay(10);
-  ra_i2c_slave_modifyreg(priv, RA_I2C_ICCR1_OFFSET, I2C_ICCR1_IICRST, 0);
+  ra_i2c_slave_modifyreg(priv, R_IIC_ICCR1_OFFSET, R_IIC_ICCR1_IICRST, 0);
 
   /* Configure I2C mode registers for slave mode */
   /* ICMR1: Set internal reference clock select and bit counter */
-  ra_i2c_slave_putreg(priv, RA_I2C_ICMR1_OFFSET, 0);
+  ra_i2c_slave_putreg(priv, R_IIC_ICMR1_OFFSET, 0);
 
   /* ICMR2: Configure delays and timeout */
-  ra_i2c_slave_putreg(priv, RA_I2C_ICMR2_OFFSET, 0);
+  ra_i2c_slave_putreg(priv, R_IIC_ICMR2_OFFSET, 0);
 
   /* ICMR3: Configure SMBus/I2C selection and noise filter */
-  ra_i2c_slave_putreg(priv, RA_I2C_ICMR3_OFFSET, I2C_ICMR3_NF_MASK); /* Enable noise filter */
+  ra_i2c_slave_putreg(priv, R_IIC_ICMR3_OFFSET, R_IIC_ICMR3_NF_MASK); /* Enable noise filter */
 
   /* ICFER: Configure function enables */
-  ra_i2c_slave_putreg(priv, RA_I2C_ICFER_OFFSET,
-                      I2C_ICFER_TMOE |    /* Enable timeout */
-                      I2C_ICFER_SALE |    /* Enable slave arbitration-lost detection */
-                      I2C_ICFER_NFE |     /* Enable digital noise filter */
-                      I2C_ICFER_SCLE);    /* Enable SCL synchronous circuit */
+  ra_i2c_slave_putreg(priv, R_IIC_ICFER_OFFSET,
+                      R_IIC_ICFER_TMOE |    /* Enable timeout */
+                      R_IIC_ICFER_SALE |    /* Enable slave arbitration-lost detection */
+                      R_IIC_ICFER_NFE |     /* Enable digital noise filter */
+                      R_IIC_ICFER_SCLE);    /* Enable SCL synchronous circuit */
 
   /* ICSER: Configure slave address detection - will be set by setaddress */
-  ra_i2c_slave_putreg(priv, RA_I2C_ICSER_OFFSET, 0);
+  ra_i2c_slave_putreg(priv, R_IIC_ICSER_OFFSET, 0);
 
 #ifndef CONFIG_I2C_POLLED
   /* Configure and enable interrupts for slave mode */
-  ra_i2c_slave_putreg(priv, RA_I2C_ICIER_OFFSET,
-                      I2C_ICIER_TIE |     /* Transmit data empty interrupt */
-                      I2C_ICIER_TEIE |    /* Transmit end interrupt */
-                      I2C_ICIER_RIE |     /* Receive data full interrupt */
-                      I2C_ICIER_NAKIE |   /* NACK detection interrupt */
-                      I2C_ICIER_SPIE |    /* Stop condition detection interrupt */
-                      I2C_ICIER_STIE |    /* Start condition detection interrupt */
-                      I2C_ICIER_ALIE |    /* Arbitration-lost detection interrupt */
-                      I2C_ICIER_TMOIE);   /* Timeout detection interrupt */
+  ra_i2c_slave_putreg(priv, R_IIC_ICIER_OFFSET,
+                      R_IIC_ICIER_TIE |     /* Transmit data empty interrupt */
+                      R_IIC_ICIER_TEIE |    /* Transmit end interrupt */
+                      R_IIC_ICIER_RIE |     /* Receive data full interrupt */
+                      R_IIC_ICIER_NAKIE |   /* NACK detection interrupt */
+                      R_IIC_ICIER_SPIE |    /* Stop condition detection interrupt */
+                      R_IIC_ICIER_STIE |    /* Start condition detection interrupt */
+                      R_IIC_ICIER_ALIE |    /* Arbitration-lost detection interrupt */
+                      R_IIC_ICIER_TMOIE);   /* Timeout detection interrupt */
 
   /* Attach interrupt handlers */
   irq_attach(config->rxi_irq, ra_i2c_slave_isr_rxi, priv);
@@ -449,10 +449,10 @@ static int ra_i2c_slave_init(struct ra_i2c_slave_priv_s *priv)
 #endif
 
   /* Enable I2C peripheral in slave mode */
-  ra_i2c_slave_modifyreg(priv, RA_I2C_ICCR1_OFFSET, 0, I2C_ICCR1_ICE);
+  ra_i2c_slave_modifyreg(priv, R_IIC_ICCR1_OFFSET, 0, R_IIC_ICCR1_ICE);
 
   /* Clear master mode bit to ensure slave mode */
-  ra_i2c_slave_modifyreg(priv, RA_I2C_ICCR2_OFFSET, I2C_ICCR2_MST, 0);
+  ra_i2c_slave_modifyreg(priv, R_IIC_ICCR2_OFFSET, R_IIC_ICCR2_MST, 0);
 
   return OK;
 }
@@ -471,7 +471,7 @@ static int ra_i2c_slave_deinit(struct ra_i2c_slave_priv_s *priv)
   uint32_t regval;
 
   /* Disable I2C peripheral */
-  ra_i2c_slave_modifyreg(priv, RA_I2C_ICCR1_OFFSET, I2C_ICCR1_ICE, 0);
+  ra_i2c_slave_modifyreg(priv, R_IIC_ICCR1_OFFSET, R_IIC_ICCR1_ICE, 0);
 
 #ifndef CONFIG_I2C_POLLED
   /* Disable interrupts */
@@ -513,7 +513,7 @@ static int ra_i2c_slave_isr_rxi(int irq, void *context, void *arg)
   /* Handle received data */
   if (priv->buffer && priv->nbytes < priv->buflen)
     {
-      priv->buffer[priv->nbytes++] = ra_i2c_slave_getreg(priv, RA_I2C_ICDRR_OFFSET);
+  priv->buffer[priv->nbytes++] = ra_i2c_slave_getreg(priv, R_IIC_ICDRR_OFFSET);
     }
 
   /* Call callback if registered */
@@ -545,7 +545,7 @@ static int ra_i2c_slave_isr_txi(int irq, void *context, void *arg)
   /* Send data if available */
   if (priv->buffer && priv->nbytes < priv->buflen)
     {
-      ra_i2c_slave_putreg(priv, RA_I2C_ICDRT_OFFSET, priv->buffer[priv->nbytes++]);
+  ra_i2c_slave_putreg(priv, R_IIC_ICDRT_OFFSET, priv->buffer[priv->nbytes++]);
     }
 
   /* Call callback if registered */
@@ -602,12 +602,12 @@ static int ra_i2c_slave_isr_eri(int irq, void *context, void *arg)
   DEBUGASSERT(priv != NULL);
 
   /* Read status to determine error type */
-  sr2 = ra_i2c_slave_getreg(priv, RA_I2C_ICSR2_OFFSET);
+  sr2 = ra_i2c_slave_getreg(priv, R_IIC_ICSR2_OFFSET);
   priv->status = sr2;
 
   /* Clear error flags */
-  ra_i2c_slave_modifyreg(priv, RA_I2C_ICSR2_OFFSET,
-                        I2C_ICSR2_AL | I2C_ICSR2_TMOF | I2C_ICSR2_NACKF, 0);
+  ra_i2c_slave_modifyreg(priv, R_IIC_ICSR2_OFFSET,
+                        R_IIC_ICSR2_AL | R_IIC_ICSR2_TMOF | R_IIC_ICSR2_NACKF, 0);
 
   /* Call callback if registered */
   if (priv->callback)
@@ -636,7 +636,7 @@ static int ra_i2c_slave_isr_start(int irq, void *context, void *arg)
   DEBUGASSERT(priv != NULL);
 
   /* Clear start flag */
-  ra_i2c_slave_modifyreg(priv, RA_I2C_ICSR2_OFFSET, I2C_ICSR2_START, 0);
+  ra_i2c_slave_modifyreg(priv, R_IIC_ICSR2_OFFSET, R_IIC_ICSR2_START, 0);
 
   /* Reset transfer state */
   priv->nbytes = 0;
@@ -668,7 +668,7 @@ static int ra_i2c_slave_isr_stop(int irq, void *context, void *arg)
   DEBUGASSERT(priv != NULL);
 
   /* Clear stop flag */
-  ra_i2c_slave_modifyreg(priv, RA_I2C_ICSR2_OFFSET, I2C_ICSR2_STOP, 0);
+  ra_i2c_slave_modifyreg(priv, R_IIC_ICSR2_OFFSET, R_IIC_ICSR2_STOP, 0);
 
   /* Call callback if registered */
   if (priv->callback)
@@ -698,11 +698,11 @@ static int ra_i2c_slave_isr_address(int irq, void *context, void *arg)
   DEBUGASSERT(priv != NULL);
 
   /* Read status to determine which address matched */
-  sr1 = ra_i2c_slave_getreg(priv, RA_I2C_ICSR1_OFFSET);
+  sr1 = ra_i2c_slave_getreg(priv, R_IIC_ICSR1_OFFSET);
 
   /* Clear address match flags */
-  ra_i2c_slave_modifyreg(priv, RA_I2C_ICSR1_OFFSET,
-                        I2C_ICSR1_AAS0 | I2C_ICSR1_AAS1 | I2C_ICSR1_AAS2, 0);
+  ra_i2c_slave_modifyreg(priv, R_IIC_ICSR1_OFFSET,
+                        R_IIC_ICSR1_AAS0 | R_IIC_ICSR1_AAS1 | R_IIC_ICSR1_AAS2, 0);
 
   /* Call callback if registered */
   if (priv->callback)

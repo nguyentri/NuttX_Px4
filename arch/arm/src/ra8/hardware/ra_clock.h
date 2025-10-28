@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA_HARDWARE_RA_CLOCK_H
-#define __ARCH_ARM_SRC_RA_HARDWARE_RA_CLOCK_H
+#ifndef __ARCH_ARM_SRC_RA_HARDWARE_RA8_CLOCK_H
+#define __ARCH_ARM_SRC_RA_HARDWARE_RA8_CLOCK_H
 
 /****************************************************************************
  * Included Files
@@ -40,4 +40,4 @@
 #  error "Unsupported RA8 Device"
 #endif
 
-#endif /* __ARCH_ARM_SRC_RA_HARDWARE_RA_CLOCK_H */
+#endif /* __ARCH_ARM_SRC_RA_HARDWARE_RA8_CLOCK_H */

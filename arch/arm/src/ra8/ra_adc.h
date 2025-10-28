@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/ra8/ra_adc_b.h
+ * arch/arm/src/ra8/hardware/ra_adc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA_RA8_ADC_B_H
-#define __ARCH_ARM_SRC_RA_RA8_ADC_B_H
+#ifndef __ARCH_ARM_SRC_RA8_HARDWARE_RA_ADC_H
+#define __ARCH_ARM_SRC_RA8_HARDWARE_RA_ADC_H
 
 /****************************************************************************
  * Included Files
@@ -29,30 +29,8 @@
 #include <stdint.h>
 
 /****************************************************************************
- * Public Types
+ * Pre-processor Definitions
  ****************************************************************************/
-
-/* ADC channel configuration */
-
-struct ra8_adc_b_chan_cfg_s
-{
-  uint8_t  vchannel;        /* Virtual channel number (0-95) */
-  uint8_t  pchannel;        /* Physical channel number (0-47) */
-  uint8_t  scan_group_id;   /* Scan group ID (0-8) */
-  uint8_t  sampling_table;  /* Sampling state table ID (0-7) */
-  uint32_t resolution;      /* ADC resolution */
-  bool     differential;    /* Differential mode */
-};
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
 
 /****************************************************************************
  * Public Types
@@ -60,66 +38,52 @@ extern "C"
 
 #ifndef __ASSEMBLY__
 
-/* ADC_B Resolution enumeration */
+/* ADC Resolution enumeration */
 
-enum ra8_adc_b_resolution_e
+enum ra8_adc_resolution_e
 {
-  RA_ADC_B_RESOLUTION_16BIT = 0,  /* 16-bit resolution */
-  RA_ADC_B_RESOLUTION_14BIT = 1,  /* 14-bit resolution */
-  RA_ADC_B_RESOLUTION_12BIT = 2,  /* 12-bit resolution */
-  RA_ADC_B_RESOLUTION_10BIT = 3,  /* 10-bit resolution */
+  RA_ADC_RESOLUTION_12BIT = 0,  /* 12-bit resolution */
+  RA_ADC_RESOLUTION_10BIT = 1,  /* 10-bit resolution */
+  RA_ADC_RESOLUTION_8BIT  = 2,  /* 8-bit resolution */
+  RA_ADC_RESOLUTION_14BIT = 3,  /* 14-bit resolution */
+  RA_ADC_RESOLUTION_16BIT = 4,  /* 16-bit resolution */
 };
 
-/* ADC_B Scan Mode enumeration */
+/* ADC Scan Mode enumeration */
 
-enum ra8_adc_b_mode_e
+enum ra8_adc_mode_e
 {
-  RA_ADC_B_MODE_SINGLE_SCAN = 0,     /* Single scan mode */
-  RA_ADC_B_MODE_CONTINUOUS_SCAN = 1, /* Continuous scan mode */
-  RA_ADC_B_MODE_BACKGROUND_SCAN = 2, /* Background scan mode (Hybrid only) */
+  RA_ADC_MODE_SINGLE_SCAN = 0,  /* Single scan mode */
+  RA_ADC_MODE_GROUP_SCAN  = 1,  /* Group scan mode */
+  RA_ADC_MODE_CONTINUOUS  = 2,  /* Continuous scan mode */
 };
 
-/* ADC_B Conversion Method enumeration */
+/* ADC Trigger Source enumeration */
 
-enum ra8_adc_b_method_e
+enum ra8_adc_trigger_e
 {
-  RA_ADC_B_METHOD_SAR = 0,        /* SAR conversion method */
-  RA_ADC_B_METHOD_OVERSAMPLE = 1, /* Oversampling conversion method */
-  RA_ADC_B_METHOD_HYBRID = 2,     /* Hybrid conversion method */
+  RA_ADC_TRIGGER_SOFTWARE = 0,    /* Software trigger */
+  RA_ADC_TRIGGER_SYNC_ELC = 2,    /* Synchronous trigger via ELC */
+  RA_ADC_TRIGGER_ASYNC_EXT = 3,   /* External asynchronous trigger */
 };
 
-/* ADC_B Trigger Source enumeration */
+/* ADC Data Alignment enumeration */
 
-enum ra8_adc_b_trigger_e
+enum ra8_adc_alignment_e
 {
-  RA_ADC_B_TRIGGER_SOFTWARE = 0,  /* Software trigger */
-  RA_ADC_B_TRIGGER_SYNC_ELC = 1,  /* Synchronous trigger via ELC */
-  RA_ADC_B_TRIGGER_ASYNC_EXT = 2, /* External asynchronous trigger */
-  RA_ADC_B_TRIGGER_GPT = 3,       /* GPT trigger */
+  RA_ADC_ALIGNMENT_RIGHT = 0,  /* Right-aligned data */
+  RA_ADC_ALIGNMENT_LEFT  = 1,  /* Left-aligned data */
 };
+
+
+/* ADC channel definitions for RA8P1 */
+#define RA_ADC_CHANNEL_AN000        0    /* AN000 - Battery voltage */
+#define RA_ADC_CHANNEL_AN001        1    /* AN001 */
+#define RA_ADC_CHANNEL_AN002        2    /* AN002 */
+#define RA_ADC_CHANNEL_AN003        3    /* AN003 */
+#define RA_ADC_CHANNEL_AN004        4    /* AN004 */
+#define RA_ADC_CHANNEL_AN005        5    /* AN005 */
+#define RA_ADC_CHANNEL_AN104        104  /* AN104 - Battery current (ACS712) */
 
 #endif /* __ASSEMBLY__ */
-
-/****************************************************************************
- * Name: ra8_adc_b_initialize
- *
- * Description:
- *   Initialize the ADC_B subsystem for RA8P1
- *
- * Input Parameters:
- *   chanlist - Bit mask of channels to enable
- *   nchannels - Number of channels enabled
- *
- * Returned Value:
- *   Valid ADC device structure reference on success; NULL on failure
- *
- ****************************************************************************/
-
-FAR struct adc_dev_s *ra8_adc_b_initialize(uint32_t chanlist,
-                                           int nchannels);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* __ARCH_ARM_SRC_RA_RA8_ADC_B_H */
+#endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA_ADC_H */

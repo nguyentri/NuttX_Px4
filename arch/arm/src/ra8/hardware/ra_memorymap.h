@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA_HARDWARE_RA_MEMORYMAP_H
-#define __ARCH_ARM_SRC_RA_HARDWARE_RA_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_RA_HARDWARE_RA8_MEMORYMAP_H
+#define __ARCH_ARM_SRC_RA_HARDWARE_RA8_MEMORYMAP_H
 
 /****************************************************************************
  * Included Files
@@ -158,4 +158,4 @@
 #endif
 
 
-#endif /* __ARCH_ARM_SRC_RA_HARDWARE_RA_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_RA_HARDWARE_RA8_MEMORYMAP_H */

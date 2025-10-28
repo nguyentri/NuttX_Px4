@@ -47,6 +47,7 @@
 #include "ra_gpio.h"
 #include "ra_mstp.h"
 #include "ra_icu.h"
+#include "ra_adc.h"
 
 #ifdef CONFIG_RA_ADC
 
@@ -200,8 +201,8 @@ static const struct ra8_adc_chan_s g_adc1_channels[] =
 
 static struct ra8_adc_priv_s g_adc0_priv =
 {
-  .base       = RA_ADC0_BASE,
-  .mstp       = R_MSTP_ADC0,
+  .base       = R_ADC12_BASE,
+  .mstp       = RA_MSTP_ADC0,
   .intf       = 0,
   .irq        = -1, /* Assigned dynamically */
   .elc        = RA_ELC_ADC0_SCAN_END,
@@ -330,8 +331,8 @@ static void ra8_adc_enable_channels(FAR struct ra8_adc_priv_s *priv)
 
   /* Set channel selection registers */
 
-  ra8_adc_putreg(priv, RA_ADC_ADANSE0_OFFSET, adanse0);
-  ra8_adc_putreg(priv, RA_ADC_ADANSE1_OFFSET, adanse1);
+  ra8_adc_putreg(priv, R_ADC12_ADANSA0_OFFSET, adanse0);
+  ra8_adc_putreg(priv, R_ADC12_ADANSA1_OFFSET, adanse1);
 
   ainfo("ADC%d: Channel configuration - ADANSE0: 0x%08lx, ADANSE1: 0x%08lx\n",
         priv->intf, adanse0, adanse1);
@@ -352,32 +353,32 @@ static int ra8_adc_configure(FAR struct ra8_adc_priv_s *priv)
   /* Configure ADC control/status register (ADCSR) */
 
   regval = 0;
-  regval |= (priv->mode << ADC_ADCSR_ADCS_SHIFT) & ADC_ADCSR_ADCS_MASK;
+  regval |= (priv->mode << R_ADC12_ADCSR_ADCS_SHIFT) & R_ADC12_ADCSR_ADCS_MASK;
 
   if (priv->trigger != RA_ADC_TRIGGER_SOFTWARE)
     {
-      regval |= ADC_ADCSR_TRGE;
+      regval |= R_ADC12_ADCSR_TRGE;
       if (priv->trigger == RA_ADC_TRIGGER_ASYNC_EXT)
         {
-          regval |= ADC_ADCSR_EXTRG;
+          regval |= R_ADC12_ADCSR_EXTRG;
         }
     }
 
-  ra8_adc_putreg(priv, RA_ADC_ADCSR_OFFSET, regval);
+  ra8_adc_putreg(priv, R_ADC12_ADCSR_OFFSET, regval);
 
   /* Configure ADC control extended register (ADCER) */
 
   regval = 0;
   if (priv->alignment == RA_ADC_ALIGNMENT_LEFT)
     {
-      regval |= ADC_ADCER_ADRFMT;
+      regval |= R_ADC12_ADCER_ADRFMT;
     }
 
   /* Enable automatic clearing of data registers */
 
-  regval |= ADC_ADCER_ACE;
+  regval |= R_ADC12_ADCER_ACE;
 
-  ra8_adc_putreg(priv, RA_ADC_ADCER_OFFSET, regval);
+  ra8_adc_putreg(priv, R_ADC12_ADCER_OFFSET, regval);
 
   /* Configure channels */
 
@@ -492,8 +493,8 @@ static int ra8_adc_interrupt(int irq, FAR void *context, FAR void *arg)
 
   /* Check if this is a scan end interrupt */
 
-  regval = ra8_adc_getreg(priv, RA_ADC_ADCSR_OFFSET);
-  if (!(regval & ADC_ADCSR_ADST))
+  regval = ra8_adc_getreg(priv, R_ADC12_ADCSR_OFFSET);
+  if (!(regval & R_ADC12_ADCSR_ADST))
     {
       /* Scan has completed */
 
@@ -507,7 +508,7 @@ static int ra8_adc_interrupt(int irq, FAR void *context, FAR void *arg)
           for (i = 0; i < priv->nchannels; i++)
             {
               int channel = priv->channel_buffer[i];
-              data = ra8_adc_getreg(priv, RA_ADC_ADDR_OFFSET(channel)) & 0xFFFF;
+              data = ra8_adc_getreg(priv, R_ADC12_ADDR_OFFSET(channel)) & 0xFFFF;
               priv->dma_buffer[i] = data;
             }
 
@@ -525,7 +526,7 @@ static int ra8_adc_interrupt(int irq, FAR void *context, FAR void *arg)
             {
               if (priv->chanlist & (1 << i))
                 {
-                  data = ra8_adc_getreg(priv, RA_ADC_ADDR_OFFSET(i)) & 0xFFFF;
+                  data = ra8_adc_getreg(priv, R_ADC12_ADDR_OFFSET(i)) & 0xFFFF;
 
                   /* Call receive callback for each channel */
 
@@ -578,10 +579,10 @@ static void ra8_adc_reset(FAR struct adc_dev_s *dev)
 
   /* Reset ADC control registers */
 
-  ra8_adc_putreg(priv, RA_ADC_ADCSR_OFFSET, 0);
-  ra8_adc_putreg(priv, RA_ADC_ADANSE0_OFFSET, 0);
-  ra8_adc_putreg(priv, RA_ADC_ADANSE1_OFFSET, 0);
-  ra8_adc_putreg(priv, RA_ADC_ADCER_OFFSET, 0);
+  ra8_adc_putreg(priv, R_ADC12_ADCSR_OFFSET, 0);
+  ra8_adc_putreg(priv, R_ADC12_ADANSA0_OFFSET, 0);
+  ra8_adc_putreg(priv, R_ADC12_ADANSA1_OFFSET, 0);
+  ra8_adc_putreg(priv, R_ADC12_ADCER_OFFSET, 0);
 
   leave_critical_section(flags);
 }
@@ -663,7 +664,7 @@ static void ra8_adc_shutdown(FAR struct adc_dev_s *dev)
 
   /* Stop any ongoing conversion */
 
-  ra8_adc_putreg(priv, RA_ADC_ADCSR_OFFSET, 0);
+  ra8_adc_putreg(priv, R_ADC12_ADCSR_OFFSET, 0);
 
 #ifdef CONFIG_RA_ADC_DTC
   /* Cleanup DTC resources */
@@ -694,13 +695,13 @@ static void ra8_adc_rxint(FAR struct adc_dev_s *dev, bool enable)
     {
       /* Enable ADC scan end interrupt */
 
-      ra8_adc_modifyreg(priv, RA_ADC_ADCSR_OFFSET, 0, ADC_ADCSR_ADIE);
+      ra8_adc_modifyreg(priv, R_ADC12_ADCSR_OFFSET, 0, R_ADC12_ADCSR_GBADIE);
     }
   else
     {
       /* Disable ADC scan end interrupt */
 
-      ra8_adc_modifyreg(priv, RA_ADC_ADCSR_OFFSET, ADC_ADCSR_ADIE, 0);
+      ra8_adc_modifyreg(priv, R_ADC12_ADCSR_OFFSET, R_ADC12_ADCSR_GBADIE, 0);
     }
 }
 
@@ -726,7 +727,7 @@ static int ra8_adc_ioctl(FAR struct adc_dev_s *dev, int cmd,
         {
           /* Trigger a conversion */
 
-          ra8_adc_modifyreg(priv, RA_ADC_ADCSR_OFFSET, 0, ADC_ADCSR_ADST);
+          ra8_adc_modifyreg(priv, R_ADC12_ADCSR_OFFSET, 0, R_ADC12_ADCSR_ADST);
         }
         break;
 

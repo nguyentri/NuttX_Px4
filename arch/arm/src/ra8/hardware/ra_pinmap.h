@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA_HARDWARE_RA_PINMAP_H
-#define __ARCH_ARM_SRC_RA_HARDWARE_RA_PINMAP_H
+#ifndef __ARCH_ARM_SRC_RA_HARDWARE_RA8_PINMAP_H
+#define __ARCH_ARM_SRC_RA_HARDWARE_RA8_PINMAP_H
 
 /****************************************************************************
  * Included Files
@@ -41,4 +41,4 @@
 #endif
 
 
-#endif /* __ARCH_ARM_SRC_RA_HARDWARE_RA_PINMAP_H */
+#endif /* __ARCH_ARM_SRC_RA_HARDWARE_RA8_PINMAP_H */

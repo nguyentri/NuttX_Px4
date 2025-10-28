@@ -42,11 +42,14 @@
 
 #include "chip.h"
 #include "hardware/ra_memorymap.h"
-#include "hardware/ra8p1/ra_gpt32.h"
-#include "hardware/ra8p1/ra_gpt_regs.h"
-#include "hardware/ra8p1/ra_gpt_pins.h"
 #include "arm_internal.h"
 #include "nvic.h"
+#if defined(CONFIG_RA8E1_GROUP)
+#include "hardware/ra8e1/ra_gpt32.h"
+#include "hardware/ra8e1/ra_gpt16.h"
+#elif defined(CONFIG_RA8P1_GROUP)
+#include "hardware/ra8p1/ra_gpt32.h"
+#endif
 #include "ra_gpt.h"
 #include "ra_mstp.h"
 #include "ra_clock.h"
