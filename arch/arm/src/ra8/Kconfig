@@ -457,7 +457,8 @@ menu "PLL Configuration"
 
 choice
    prompt "PLL Source Clock"
-   default RA_PLL_SOURCE_HOCO
+   default RA_PLL_SOURCE_HOCO if RA8E1_GROUP
+   default RA_PLL_SOURCE_MAIN_OSC if RA8P1_GROUP
    help
      Select the PLL input source clock.
 
@@ -727,6 +728,24 @@ config RA_SCICLK_SOURCE_PLL1P
    bool "PLL1P (High Performance)"
    depends on RA_CLOCK_PLL || RA_CLOCK_PLL1P
 
+config RA_SCICLK_SOURCE_PLL1Q
+   bool "PLL1Q (PLL1 Q output)"
+   depends on RA_CLOCK_PLL || RA_CLOCK_PLL1P
+
+config RA_SCICLK_SOURCE_PLL2P
+   bool "PLL2P (PLL2 P output)"
+   depends on RA_PLL2_ENABLE
+
+config RA_SCICLK_SOURCE_PLL2Q
+   bool "PLL2Q (PLL2 Q output)"
+   depends on RA_PLL2_ENABLE
+
+config RA_SCICLK_SOURCE_PLL2R
+   bool "PLL2R (PLL2 R output)"
+   depends on RA_PLL2_ENABLE
+
+
+
 config RA_SCICLK_SOURCE_DISABLED
    bool "Disabled"
 
@@ -765,6 +784,22 @@ config RA_SPICLK_SOURCE_PLL1P
    bool "PLL1P (High Performance)"
    depends on RA_CLOCK_PLL || RA_CLOCK_PLL1P
 
+config RA_SPICLK_SOURCE_PLL1Q
+   bool "PLL1Q (PLL1 Q output)"
+   depends on RA_CLOCK_PLL || RA_CLOCK_PLL1P
+
+config RA_SPICLK_SOURCE_PLL2P
+   bool "PLL2P (PLL2 P output)"
+   depends on RA_PLL2_ENABLE
+
+config RA_SPICLK_SOURCE_PLL2Q
+   bool "PLL2Q (PLL2 Q output)"
+   depends on RA_PLL2_ENABLE
+
+config RA_SPICLK_SOURCE_PLL2R
+   bool "PLL2R (PLL2 R output)"
+   depends on RA_PLL2_ENABLE
+
 config RA_SPICLK_SOURCE_DISABLED
    bool "Disabled"
 
@@ -793,6 +828,22 @@ config RA_CANFDCLK_SOURCE_MAIN_OSC
 config RA_CANFDCLK_SOURCE_PLL1P
    bool "PLL1P (High Performance)"
    depends on RA_CLOCK_PLL || RA_CLOCK_PLL1P
+
+config RA_CANFDCLK_SOURCE_PLL1Q
+   bool "PLL1Q (PLL1 Q output)"
+   depends on RA_CLOCK_PLL || RA_CLOCK_PLL1P
+
+config RA_CANFDCLK_SOURCE_PLL2P
+   bool "PLL2P (PLL2 P output)"
+   depends on RA_PLL2_ENABLE
+
+config RA_CANFDCLK_SOURCE_PLL2Q
+   bool "PLL2Q (PLL2 Q output)"
+   depends on RA_PLL2_ENABLE
+
+config RA_CANFDCLK_SOURCE_PLL2R
+   bool "PLL2R (PLL2 R output)"
+   depends on RA_PLL2_ENABLE
 
 config RA_CANFDCLK_SOURCE_DISABLED
    bool "Disabled"
@@ -823,6 +874,22 @@ config RA_USBCLK_SOURCE_PLL1P
    bool "PLL1P (High Performance)"
    depends on RA_CLOCK_PLL || RA_CLOCK_PLL1P
 
+config RA_USBCLK_SOURCE_PLL1Q
+   bool "PLL1Q (PLL1 Q output)"
+   depends on RA_CLOCK_PLL || RA_CLOCK_PLL1P
+
+config RA_USBCLK_SOURCE_PLL2P
+   bool "PLL2P (PLL2 P output)"
+   depends on RA_PLL2_ENABLE
+
+config RA_USBCLK_SOURCE_PLL2Q
+   bool "PLL2Q (PLL2 Q output)"
+   depends on RA_PLL2_ENABLE
+
+config RA_USBCLK_SOURCE_PLL2R
+   bool "PLL2R (PLL2 R output)"
+   depends on RA_PLL2_ENABLE
+
 config RA_USBCLK_SOURCE_DISABLED
    bool "Disabled"
 
@@ -851,6 +918,22 @@ config RA_OCTACLK_SOURCE_MAIN_OSC
 config RA_OCTACLK_SOURCE_PLL1P
    bool "PLL1P (High Performance)"
    depends on RA_CLOCK_PLL || RA_CLOCK_PLL1P
+
+config RA_OCTACLK_SOURCE_PLL1Q
+   bool "PLL1Q (PLL1 Q output)"
+   depends on RA_CLOCK_PLL || RA_CLOCK_PLL1P
+
+config RA_OCTACLK_SOURCE_PLL2P
+   bool "PLL2P (PLL2 P output)"
+   depends on RA_PLL2_ENABLE
+
+config RA_OCTACLK_SOURCE_PLL2Q
+   bool "PLL2Q (PLL2 Q output)"
+   depends on RA_PLL2_ENABLE
+
+config RA_OCTACLK_SOURCE_PLL2R
+   bool "PLL2R (PLL2 R output)"
+   depends on RA_PLL2_ENABLE
 
 config RA_OCTACLK_SOURCE_DISABLED
    bool "Disabled"
@@ -910,6 +993,22 @@ config RA_GPTCLK_SOURCE_PLL1P
    bool "PLL1P (High Performance)"
    depends on RA_CLOCK_PLL || RA_CLOCK_PLL1P
 
+config RA_GPTCLK_SOURCE_PLL1Q
+   bool "PLL1Q (PLL1 Q output)"
+   depends on RA_CLOCK_PLL || RA_CLOCK_PLL1P
+
+config RA_GPTCLK_SOURCE_PLL2P
+   bool "PLL2P (PLL2 P output)"
+   depends on RA_PLL2_ENABLE
+
+config RA_GPTCLK_SOURCE_PLL2Q
+   bool "PLL2Q (PLL2 Q output)"
+   depends on RA_PLL2_ENABLE
+
+config RA_GPTCLK_SOURCE_PLL2R
+   bool "PLL2R (PLL2 R output)"
+   depends on RA_PLL2_ENABLE
+
 config RA_GPTCLK_SOURCE_DISABLED
    bool "Disabled"
 
@@ -968,6 +1067,22 @@ config RA_ADCCLK_SOURCE_PLL1P
    bool "PLL1P (High Performance)"
    depends on RA_CLOCK_PLL || RA_CLOCK_PLL1P
 
+config RA_ADCCLK_SOURCE_PLL1Q
+   bool "PLL1Q (PLL1 Q output)"
+   depends on RA_CLOCK_PLL || RA_CLOCK_PLL1P
+
+config RA_ADCCLK_SOURCE_PLL2P
+   bool "PLL2P (PLL2 P output)"
+   depends on RA_PLL2_ENABLE
+
+config RA_ADCCLK_SOURCE_PLL2Q
+   bool "PLL2Q (PLL2 Q output)"
+   depends on RA_PLL2_ENABLE
+
+config RA_ADCCLK_SOURCE_PLL2R
+   bool "PLL2R (PLL2 R output)"
+   depends on RA_PLL2_ENABLE
+
 config RA_ADCCLK_SOURCE_DISABLED
    bool "Disabled"
 
@@ -981,11 +1096,25 @@ config RA_SCICLK_SOURCE
    default 2 if RA_SCICLK_SOURCE_LOCO
    default 3 if RA_SCICLK_SOURCE_MAIN_OSC
    default 5 if RA_SCICLK_SOURCE_PLL1P
+   default 7 if RA_SCICLK_SOURCE_PLL1Q
+   default 6 if RA_SCICLK_SOURCE_PLL2P
+   default 9 if RA_SCICLK_SOURCE_PLL2Q
+   default 10 if RA_SCICLK_SOURCE_PLL2R
    default 15 if RA_SCICLK_SOURCE_DISABLED
    default 5
    help
-     SCI clock source selection (automatically set from choice)
-     Values: 0=HOCO, 1=MOCO, 2=LOCO, 3=Main OSC, 5=PLL1P, 15=Disabled
+   SCI clock source selection (automatically set from choice)
+   Values:
+      0  = HOCO
+      1  = MOCO
+      2  = LOCO
+      3  = Main OSC
+      5  = PLL1P
+      7  = PLL1Q
+      6  = PLL2P
+      9  = PLL2Q
+      10 = PLL2R
+      15 = Disabled
 
 config RA_SPICLK_SOURCE
    int
@@ -994,11 +1123,25 @@ config RA_SPICLK_SOURCE
    default 2 if RA_SPICLK_SOURCE_LOCO
    default 3 if RA_SPICLK_SOURCE_MAIN_OSC
    default 5 if RA_SPICLK_SOURCE_PLL1P
+   default 7 if RA_SPICLK_SOURCE_PLL1Q
+   default 6 if RA_SPICLK_SOURCE_PLL2P
+   default 9 if RA_SPICLK_SOURCE_PLL2Q
+   default 10 if RA_SPICLK_SOURCE_PLL2R
    default 15 if RA_SPICLK_SOURCE_DISABLED
    default 15
    help
-     SPI clock source selection (automatically set from choice)
-     Values: 0=HOCO, 1=MOCO, 2=LOCO, 3=Main OSC, 5=PLL1P, 15=Disabled
+   SPI clock source selection (automatically set from choice)
+   Values:
+      0  = HOCO
+      1  = MOCO
+      2  = LOCO
+      3  = Main OSC
+      5  = PLL1P
+      7  = PLL1Q
+      6  = PLL2P
+      9  = PLL2Q
+      10 = PLL2R
+      15 = Disabled
 
 config RA_CANFDCLK_SOURCE
    int
@@ -1007,11 +1150,25 @@ config RA_CANFDCLK_SOURCE
    default 2 if RA_CANFDCLK_SOURCE_LOCO
    default 3 if RA_CANFDCLK_SOURCE_MAIN_OSC
    default 5 if RA_CANFDCLK_SOURCE_PLL1P
+   default 7 if RA_CANFDCLK_SOURCE_PLL1Q
+   default 6 if RA_CANFDCLK_SOURCE_PLL2P
+   default 9 if RA_CANFDCLK_SOURCE_PLL2Q
+   default 10 if RA_CANFDCLK_SOURCE_PLL2R
    default 15 if RA_CANFDCLK_SOURCE_DISABLED
    default 15
    help
-     CAN-FD clock source selection (automatically set from choice)
-     Values: 0=HOCO, 1=MOCO, 2=LOCO, 3=Main OSC, 5=PLL1P, 15=Disabled
+   CAN-FD clock source selection (automatically set from choice)
+   Values:
+      0  = HOCO
+      1  = MOCO
+      2  = LOCO
+      3  = Main OSC
+      5  = PLL1P
+      7  = PLL1Q
+      6  = PLL2P
+      9  = PLL2Q
+      10 = PLL2R
+      15 = Disabled
 
 config RA_USBCLK_SOURCE
    int
@@ -1020,11 +1177,25 @@ config RA_USBCLK_SOURCE
    default 2 if RA_USBCLK_SOURCE_LOCO
    default 3 if RA_USBCLK_SOURCE_MAIN_OSC
    default 5 if RA_USBCLK_SOURCE_PLL1P
+   default 7 if RA_USBCLK_SOURCE_PLL1Q
+   default 6 if RA_USBCLK_SOURCE_PLL2P
+   default 9 if RA_USBCLK_SOURCE_PLL2Q
+   default 10 if RA_USBCLK_SOURCE_PLL2R
    default 15 if RA_USBCLK_SOURCE_DISABLED
    default 15
    help
-     USB clock source selection (automatically set from choice)
-     Values: 0=HOCO, 1=MOCO, 2=LOCO, 3=Main OSC, 5=PLL1P, 15=Disabled
+   USB clock source selection (automatically set from choice)
+   Values:
+      0  = HOCO
+      1  = MOCO
+      2  = LOCO
+      3  = Main OSC
+      5  = PLL1P
+      7  = PLL1Q
+      6  = PLL2P
+      9  = PLL2Q
+      10 = PLL2R
+      15 = Disabled
 
 config RA_OCTACLK_SOURCE
    int
@@ -1033,11 +1204,25 @@ config RA_OCTACLK_SOURCE
    default 2 if RA_OCTACLK_SOURCE_LOCO
    default 3 if RA_OCTACLK_SOURCE_MAIN_OSC
    default 5 if RA_OCTACLK_SOURCE_PLL1P
+   default 7 if RA_OCTACLK_SOURCE_PLL1Q
+   default 6 if RA_OCTACLK_SOURCE_PLL2P
+   default 9 if RA_OCTACLK_SOURCE_PLL2Q
+   default 10 if RA_OCTACLK_SOURCE_PLL2R
    default 15 if RA_OCTACLK_SOURCE_DISABLED
    default 15
    help
-     Octal SPI clock source selection (automatically set from choice)
-     Values: 0=HOCO, 1=MOCO, 2=LOCO, 3=Main OSC, 5=PLL1P, 15=Disabled
+   Octal SPI clock source selection (automatically set from choice)
+   Values:
+      0  = HOCO
+      1  = MOCO
+      2  = LOCO
+      3  = Main OSC
+      5  = PLL1P
+      7  = PLL1Q
+      6  = PLL2P
+      9  = PLL2Q
+      10 = PLL2R
+      15 = Disabled
 
 config RA_SCISPICLK_SOURCE
    int
@@ -1049,8 +1234,14 @@ config RA_SCISPICLK_SOURCE
    default 15 if RA_SCISPICLK_SOURCE_DISABLED
    default 15
    help
-     SCI SPI clock source selection (automatically set from choice)
-     Values: 0=HOCO, 1=MOCO, 2=LOCO, 3=Main OSC, 5=PLL1P, 15=Disabled
+   SCI SPI clock source selection (automatically set from choice)
+   Values:
+      0  = HOCO
+      1  = MOCO
+      2  = LOCO
+      3  = Main OSC
+      5  = PLL1P
+      15 = Disabled
 
 config RA_GPTCLK_SOURCE
    int
@@ -1059,11 +1250,25 @@ config RA_GPTCLK_SOURCE
    default 2 if RA_GPTCLK_SOURCE_LOCO
    default 3 if RA_GPTCLK_SOURCE_MAIN_OSC
    default 5 if RA_GPTCLK_SOURCE_PLL1P
+   default 7 if RA_GPTCLK_SOURCE_PLL1Q
+   default 6 if RA_GPTCLK_SOURCE_PLL2P
+   default 9 if RA_GPTCLK_SOURCE_PLL2Q
+   default 10 if RA_GPTCLK_SOURCE_PLL2R
    default 15 if RA_GPTCLK_SOURCE_DISABLED
    default 15
    help
-     GPT clock source selection (automatically set from choice)
-     Values: 0=HOCO, 1=MOCO, 2=LOCO, 3=Main OSC, 5=PLL1P, 15=Disabled
+   GPT clock source selection (automatically set from choice)
+   Values:
+      0  = HOCO
+      1  = MOCO
+      2  = LOCO
+      3  = Main OSC
+      5  = PLL1P
+      7  = PLL1Q
+      6  = PLL2P
+      9  = PLL2Q
+      10 = PLL2R
+      15 = Disabled
 
 config RA_IICCLK_SOURCE
    int
@@ -1075,8 +1280,14 @@ config RA_IICCLK_SOURCE
    default 15 if RA_IICCLK_SOURCE_DISABLED
    default 15
    help
-     I2C clock source selection (automatically set from choice)
-     Values: 0=HOCO, 1=MOCO, 2=LOCO, 3=Main OSC, 5=PLL1P, 15=Disabled
+   I2C clock source selection (automatically set from choice)
+   Values:
+      0  = HOCO
+      1  = MOCO
+      2  = LOCO
+      3  = Main OSC
+      5  = PLL1P
+      15 = Disabled
 
 config RA_ADCCLK_SOURCE
    int
@@ -1085,11 +1296,25 @@ config RA_ADCCLK_SOURCE
    default 2 if RA_ADCCLK_SOURCE_LOCO
    default 3 if RA_ADCCLK_SOURCE_MAIN_OSC
    default 5 if RA_ADCCLK_SOURCE_PLL1P
+   default 7 if RA_ADCCLK_SOURCE_PLL1Q
+   default 6 if RA_ADCCLK_SOURCE_PLL2P
+   default 9 if RA_ADCCLK_SOURCE_PLL2Q
+   default 10 if RA_ADCCLK_SOURCE_PLL2R
    default 15 if RA_ADCCLK_SOURCE_DISABLED
    default 15
    help
-     ADC clock source selection (automatically set from choice)
-     Values: 0=HOCO, 1=MOCO, 2=LOCO, 3=Main OSC, 5=PLL1P, 15=Disabled
+   ADC clock source selection (automatically set from choice)
+   Values:
+      0  = HOCO
+      1  = MOCO
+      2  = LOCO
+      3  = Main OSC
+      5  = PLL1P
+      7  = PLL1Q
+      6  = PLL2P
+      9  = PLL2Q
+      10 = PLL2R
+      15 = Disabled
 
 endmenu
 

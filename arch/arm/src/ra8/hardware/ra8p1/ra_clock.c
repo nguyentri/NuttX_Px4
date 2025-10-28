@@ -101,7 +101,7 @@
 #define RA_PRV_STARTUP_SCKDIVCR_PCLKB_BITS       ((CONFIG_RA_PCKB_DIV & 0xFU) << 8U)
 #define RA_PRV_STARTUP_SCKDIVCR_PCLKC_BITS       ((CONFIG_RA_PCKC_DIV & 0xFU) << 4U)
 #define RA_PRV_STARTUP_SCKDIVCR_PCLKD_BITS       (CONFIG_RA_PCKD_DIV & 0xFU)
-#define RA_PRV_STARTUP_SCKDIVCR                  (RA_PRV_STARTUP_SCKDIVCR_FCLK_BITS | \
+//#define RA_PRV_STARTUP_SCKDIVCR                  (RA_PRV_STARTUP_SCKDIVCR_FCLK_BITS | \
                                                   RA_PRV_STARTUP_SCKDIVCR_ICLK_BITS | \
                                                   RA_PRV_STARTUP_SCKDIVCR_PCLKE_BITS | \
                                                   RA_PRV_STARTUP_SCKDIVCR_BCLK_BITS | \
@@ -109,7 +109,9 @@
                                                   RA_PRV_STARTUP_SCKDIVCR_PCLKB_BITS | \
                                                   RA_PRV_STARTUP_SCKDIVCR_PCLKC_BITS | \
                                                   RA_PRV_STARTUP_SCKDIVCR_PCLKD_BITS)
-#define RA_PRV_STARTUP_SCKDIVCR2                 (CONFIG_RA_CPUCLK_DIV)
+//#define RA_PRV_STARTUP_SCKDIVCR2                 (CONFIG_RA_CPUCLK_DIV)
+#define RA_PRV_STARTUP_SCKDIVCR                  (0x32233432)
+#define RA_PRV_STARTUP_SCKDIVCR2                  0x2120
 
 #define RA_PRV_PLL2_MUL_CFG_MACRO_PLLMUL_MASK     (0x3FFU)
 #define RA_PRV_PLL2_MUL_CFG_MACRO_PLLMULNF_MASK    (0x003U)
@@ -119,14 +121,21 @@
                                                         RA_PRV_PLL2CCR_PLLMULNF_BIT) |                                \
                                                       (RA_PRV_PL2SRCSEL << RA_PRV_PLL2CCR_PLSRCSEL_BIT)) |          \
                                                       CONFIG_RA_PLL2_DIV)
+#if CONFIG_RA_PLL2_SOURCE == RA_CLOCKS_SOURCE_CLOCK_HOCO
+#  define RA_PRV_PL2SRCSEL                         (0)
+#elif CONFIG_RA_PLL2_SOURCE == RA_CLOCKS_SOURCE_CLOCK_MAIN_OSC
+#  define RA_PRV_PL2SRCSEL                         (1)
+#else
+#  define RA_PRV_PL2SRCSEL                         (0)
+#endif
 #define RA_PRV_PLL2CCR2_PLL_DIV_MASK               (0x0F) // PLL DIV in PLL2CCR2 is 4 bits wide
 #define RA_PRV_PLL2CCR2_PLL_DIV_Q_BIT              (4)    // PLL DIV Q in PLL2CCR2 starts at bit 4
 #define RA_PRV_PLL2CCR2_PLL_DIV_R_BIT              (8)    // PLL DIV R in PLL2CCR2 starts at bit 8
-#define RA_PRV_PLL2CCR2                            (((CONFIG_RA_PL2ODIVR & RA_PRV_PLL2CCR2_PLL_DIV_MASK) << \
+#define RA_PRV_PLL2CCR2                            (((CONFIG_RA_PLL2R_DIV & RA_PRV_PLL2CCR2_PLL_DIV_MASK) << \
                                                       RA_PRV_PLL2CCR2_PLL_DIV_R_BIT) |                     \
-                                                      ((CONFIG_RA_PL2ODIVQ & RA_PRV_PLL2CCR2_PLL_DIV_MASK) << \
+                                                      ((CONFIG_RA_PLL2Q_DIV & RA_PRV_PLL2CCR2_PLL_DIV_MASK) << \
                                                       RA_PRV_PLL2CCR2_PLL_DIV_Q_BIT) |                     \
-                                                      (CONFIG_RA_PL2ODIVP & RA_PRV_PLL2CCR2_PLL_DIV_MASK))
+                                                      (CONFIG_RA_PLL2P_DIV & RA_PRV_PLL2CCR2_PLL_DIV_MASK))
 
 /* PLL Control Register (PLLCCR) calculations
  * For RA8E1 (PLLCCR_TYPE 3), the PLL multiplier format is:
@@ -144,11 +153,18 @@
 #define RA_PRV_PLLCCR2_PLL_DIV_MASK              (0x0F) // PLL DIV in PLLCCR2/PLL2CCR2 is 4 bits wide
 #define RA_PRV_PLLCCR2_PLL_DIV_Q_BIT             (4)    // PLL DIV Q in PLLCCR2/PLL2CCR2 starts at bit 4
 #define RA_PRV_PLLCCR2_PLL_DIV_R_BIT             (8)    // PLL DIV R in PLLCCR2/PLL2CCR2 starts at bit 8
-#define RA_PRV_PLLCCR2                           (((CONFIG_RA_PLODIVR & RA_PRV_PLLCCR2_PLL_DIV_MASK) << \
+#define RA_PRV_PLLCCR2                           (((CONFIG_RA_PLL1R_DIV & RA_PRV_PLLCCR2_PLL_DIV_MASK) << \
                                                     RA_PRV_PLLCCR2_PLL_DIV_R_BIT) |                    \
-                                                    ((CONFIG_RA_PLODIVQ & RA_PRV_PLLCCR2_PLL_DIV_MASK) << \
+                                                    ((CONFIG_RA_PLL1Q_DIV & RA_PRV_PLLCCR2_PLL_DIV_MASK) << \
                                                     RA_PRV_PLLCCR2_PLL_DIV_Q_BIT) |                    \
-                                                    (CONFIG_RA_PLODIVP & RA_PRV_PLLCCR2_PLL_DIV_MASK))
+                                                    (CONFIG_RA_PLL1P_DIV & RA_PRV_PLLCCR2_PLL_DIV_MASK))
+
+                                                    /* Key codes for MRAM registers. */
+#define BSP_PRV_MRCFREQ_KEY                      (0x1E000000)
+#define BSP_PRV_MREFREQ_KEY                      (0xE1000000)
+#define BSP_PRV_HZ_PER_MHZ                        (1000000)
+#define BSP_PRV_MRCPFB_LIMIT                      (0x65)
+#define BSP_PRV_MRFREQ_MIN_HZ                    (32768)
 
 /****************************************************************************
  * Public Data
@@ -254,8 +270,12 @@ static void ra_peripheral_clock_set(volatile uint8_t *p_clk_ctrl_reg,
       /* Wait for ready bit */
     }
 
-  /* Select the peripheral clock divisor and source */
-  *p_clk_div_reg = peripheral_clk_div;
+  /* Select the peripheral clock divisor and source. Only write divider if provided */
+  if (p_clk_div_reg != NULL)
+    {
+      *p_clk_div_reg = peripheral_clk_div;
+    }
+
   *p_clk_ctrl_reg = peripheral_clk_source | RA_PRV_PERIPHERAL_CLK_REQ_BIT_MASK |
                     RA_PRV_PERIPHERAL_CLK_RDY_BIT_MASK;
 
@@ -307,10 +327,18 @@ static void ra_peripheral_clock_init(void)
 
   /* Set the USB clock if USB is enabled */
 #if defined(CONFIG_RA_USB) && defined(R_SYSC_USBCKCR)
+  /* If the MCU provides a USB divider register, use it; otherwise pass NULL */
+#ifdef R_SYSC_USBCKDIVCR
+  ra_peripheral_clock_set((volatile uint8_t *)R_SYSC_USBCKCR,
+                          (volatile uint8_t *)R_SYSC_USBCKDIVCR,
+                          CONFIG_RA_USBCLK_DIV,
+                          CONFIG_RA_USBCLK_SOURCE);
+#else
   ra_peripheral_clock_set((volatile uint8_t *)R_SYSC_USBCKCR,
                           NULL,  /* No divider register for USB on some MCUs */
                           0,     /* No divider */
                           CONFIG_RA_USBCLK_SOURCE);
+#endif
 #endif
 
   /* Set the OCTASPI clock if OSPI is enabled */
@@ -346,6 +374,67 @@ static void ra_peripheral_clock_init(void)
 #endif
 }
 
+/*******************************************************************************************************************//**
+ * Name: ra_prv_lock_clear_pfb
+ * Description:
+ *   Clear MRAM PFB
+ * Parameters:  none
+ * Return:      none
+ **********************************************************************************************************************/
+static void ra_prv_lock_clear_pfb (void)
+{
+    /* Clear MRAM PFB */
+    putreg8(0x00, R_MRAM_BASE + R_MRAM_MRCPFB_OFFSET);
+    (void)getreg8(R_MRAM_BASE + R_MRAM_MRCPFB_OFFSET);
+    (void)getreg8(R_MRAM_BASE + R_MRAM_MRCPFB_OFFSET);
+    (void)getreg8(R_MRAM_BASE + R_MRAM_MRCPFB_OFFSET);
+}
+
+/*******************************************************************************************************************//**
+ * Sets the wait states for MRAM.
+ **********************************************************************************************************************/
+static void ra_prv_set_wait_state_frequency (uint32_t mriclk_frequency_hz, uint32_t mrpclk_frequency_hz)
+{
+    uint32_t freq_mhz;
+
+    /* Set Code MRAM wait states */
+    if (mriclk_frequency_hz <= BSP_PRV_MRFREQ_MIN_HZ)
+    {
+        /* When under the minimum set MRCFREQ to 0 */
+        freq_mhz = 0;
+    }
+    else
+    {
+        /* Round up the result when converting to MHz */
+        freq_mhz = (mriclk_frequency_hz + BSP_PRV_HZ_PER_MHZ - 1) / BSP_PRV_HZ_PER_MHZ;
+    }
+
+    /* Write MRCFREQ */
+    while (freq_mhz != getreg32(R_MRAM_BASE + R_MRAM_MRCFREQ_OFFSET))
+    {
+        putreg32(BSP_PRV_MRCFREQ_KEY | freq_mhz, R_MRAM_BASE + R_MRAM_MRCFREQ_OFFSET);
+    }
+
+    /* Set Extra MRAM wait states */
+    if (mrpclk_frequency_hz <= BSP_PRV_MRFREQ_MIN_HZ)
+    {
+        /* When under the minimum set MREFREQ to 0 */
+        freq_mhz = 0;
+    }
+    else
+    {
+        /* Round up the result when converting to MHz */
+        freq_mhz = (mrpclk_frequency_hz + BSP_PRV_HZ_PER_MHZ - 1) / BSP_PRV_HZ_PER_MHZ;
+    }
+
+    /* Write MREFREQ */
+    while (freq_mhz != getreg32(R_MRAM_BASE + R_MRAM_MREFREQ_OFFSET))
+    {
+        putreg32(BSP_PRV_MREFREQ_KEY | freq_mhz, R_MRAM_BASE + R_MRAM_MREFREQ_OFFSET);
+    }
+}
+
+
 /****************************************************************************
  * Name: ra_prv_clock_set_hard_reset
  *
@@ -356,23 +445,20 @@ static void ra_peripheral_clock_init(void)
 
 static void ra_prv_clock_set_hard_reset(void)
 {
+  /* Set flash wait states for safe operation at startup frequency */
 #if defined (R_FCACHE_FLWT)
   /* Set flash wait states for high frequency operation */
   putreg8(RA_PRV_ROM_TWO_WAIT_CYCLES, R_FCACHE_FLWT);
 #endif
 
+  /* Clear MRAM PFB */
+  ra_prv_lock_clear_pfb();
+  ra_prv_set_wait_state_frequency(
+    RA_PRV_MRICLK_DIV_VALUE, RA_STARTUP_FCLK_HZ);
+
   /* Set system clock dividers with temporary safe values first */
   putreg32(RA_PRV_STARTUP_SCKDIVCR, R_SYSC_SCKDIVCR);
-
-  /* Set CPU clock divider based on configuration */
-#if CONFIG_RA_CPUCLK_DIV == RA_CLOCKS_SYS_CLOCK_DIV_1
-  /* Determine what the other dividers are using and stay aligned with that. */
-  putreg8((CONFIG_RA_ICK_DIV & 0x8) ? RA_CLOCKS_SYS_CLOCK_DIV_3 : RA_CLOCKS_SYS_CLOCK_DIV_2,
-          R_SYSC_SCKDIVCR2);
-#else
-  /* If not /1, can just add 1 to it. */
-  putreg8(RA_PRV_STARTUP_SCKDIVCR2 + 1, R_SYSC_SCKDIVCR2);
-#endif
+  putreg16(RA_PRV_STARTUP_SCKDIVCR2, R_SYSC_SCKDIVCR2);
 
   /* Set the system source clock */
   putreg8(RA_CFG_CLOCK_SOURCE, R_SYSC_SCKSCR);
@@ -382,7 +468,7 @@ static void ra_prv_clock_set_hard_reset(void)
   up_udelay(RA_CFG_CLOCK_SETTLING_DELAY_US);
 
   /* Continue and set clock to actual target speed. */
-  putreg8(RA_PRV_STARTUP_SCKDIVCR2, R_SYSC_SCKDIVCR2);
+  putreg16(RA_PRV_STARTUP_SCKDIVCR2, R_SYSC_SCKDIVCR2);
   putreg32(RA_PRV_STARTUP_SCKDIVCR, R_SYSC_SCKDIVCR);
 
   /* Wait for settling delay. */
@@ -418,27 +504,77 @@ static void ra_prv_clock_set_hard_reset(void)
 
 static void ra_clock_init(void)
 {
-  /* Step 1: Unlock system registers */
+  /* Unlock system registers */
   putreg16(RA_PRV_PRCR_UNLOCK, R_SYSC_PRCR_S);
 
-  /* Step 2: Initialize clock frequency variables */
+  /* Initialize clock frequency variables */
   ra_clock_freq_var_init();
 
-  /* Step 3: Start HOCO if used */
-#if defined(CONFIG_RA_CLOCK_HOCO) || defined(CONFIG_RA_CLOCK_PLL) || defined(CONFIG_RA_CLOCK_PLL1P)
+
+  /* If PLL source is main oscillator, enable and wait for MOSC stabilization */
+#if defined(CONFIG_RA_PLL_SOURCE_MAIN_OSC)
+  /* Configure main oscillator drive strength based on configured main OSC frequency */
+#if CONFIG_RA_MAIN_OSC_FREQUENCY <= 8000000
+  putreg8(R_SYSC_MOMCR_MODRV0_000 | R_SYSC_MOMCR_MOSEL, R_SYSC_MOMCR);
+#elif CONFIG_RA_MAIN_OSC_FREQUENCY <= 24000000
+  putreg8(R_SYSC_MOMCR_MODRV0_011 | R_SYSC_MOMCR_MOSEL, R_SYSC_MOMCR);
+#else
+  putreg8(R_SYSC_MOMCR_MODRV0_101 | R_SYSC_MOMCR_MOSEL, R_SYSC_MOMCR);
+#endif
+
+  /* Enable main oscillator (clear stop) */
+  putreg8(0U, R_SYSC_MOSCCR);
+
+  /* Set MOSC wait time (use a conservative short wait setting)
+   * If longer stabilization is required, change the MSTS value accordingly.
+   */
+  putreg8(R_SYSC_MOSCWTCR_MSTS_0X1, R_SYSC_MOSCWTCR);
+
+  /* Wait for main oscillator stabilization flag */
+  RA_HARDWARE_WAIT((getreg8(R_SYSC_OSCSF) & R_SYSC_OSCSF_MOSCSF), R_SYSC_OSCSF_MOSCSF);
+#endif /* CONFIG_RA_PLL_SOURCE_MAIN_OSC */
+
+  /* Start HOCO if used */
+#if defined(CONFIG_RA_CLOCK_HOCO)
   putreg8(0U, R_SYSC_HOCOCR);  /* Enable HOCO */
   /* Wait for HOCO to stabilize */
   RA_HARDWARE_WAIT((getreg8(R_SYSC_OSCSF) & R_SYSC_OSCSF_HOCOSF), R_SYSC_OSCSF_HOCOSF);
 #endif
 
-  /* Step 4: Configure and start PLL if used */
-#if defined(CONFIG_RA8E1_GROUP)
+#if defined(CONFIG_RA_PLL_SOURCE_MAIN_OSC)
+  /* Enable main oscillator (clear stop) */
+  putreg8(0U, R_SYSC_MOSCCR);
+  /* Wait for main oscillator stabilization flag */
+  RA_HARDWARE_WAIT((getreg8(R_SYSC_OSCSF) & R_SYSC_OSCSF_MOSCSF), R_SYSC_OSCSF_MOSCSF);
+#endif /* CONFIG_RA_PLL_SOURCE_MAIN_OSC */
+
+  /* Voltage scaling: request higher VSCM before enabling PLLs and wait for transition */
+#ifdef R_SYSC_VSCR
+  putreg8(R_SYSC_VSCR_VSCM_001, R_SYSC_VSCR);
+  /* Wait for transition complete */
+  while ((getreg8(R_SYSC_VSCR) & R_SYSC_VSCR_VSCMTSF) != 0U)
+    {
+      /* spin */
+    }
+#endif
+
+  /* Start PLL2 first (if PLL2 registers are present/configured) */
+#ifdef R_SYSC_PLL2CCR
+  putreg16((uint16_t)RA_PRV_PLL2CCR, R_SYSC_PLL2CCR);
+  putreg16((uint16_t)RA_PRV_PLL2CCR2, R_SYSC_PLL2CCR2);
+  putreg8(0U, R_SYSC_PLL2CR);  /* Enable PLL2 */
+  /* Wait for PLL2 to stabilize if status bit exists */
+#  if defined(R_SYSC_OSCSF) && defined(R_SYSC_OSCSF_PLL2SF)
+  RA_HARDWARE_WAIT((getreg8(R_SYSC_OSCSF) & R_SYSC_OSCSF_PLL2SF), R_SYSC_OSCSF_PLL2SF);
+#  endif
+#endif
+
+  /* Configure and start PLL1 */
   putreg16((uint16_t)RA_PRV_PLLCCR, R_SYSC_PLLCCR);
   putreg16((uint16_t)RA_PRV_PLLCCR2, R_SYSC_PLLCCR2);
-  putreg8(0U, R_SYSC_PLLCR);  /* Enable PLL */
-  /* Wait for PLL to stabilize */
+  putreg8(0U, R_SYSC_PLLCR);  /* Enable PLL1 */
+  /* Wait for PLL1 to stabilize */
   RA_HARDWARE_WAIT((getreg8(R_SYSC_OSCSF) & R_SYSC_OSCSF_PLLSF), R_SYSC_OSCSF_PLLSF);
-#endif
 
   /* Step 5: Set clocks from hard reset state */
   ra_prv_clock_set_hard_reset();

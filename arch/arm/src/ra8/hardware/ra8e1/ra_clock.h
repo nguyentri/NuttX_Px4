@@ -430,16 +430,16 @@
 #  define CONFIG_RA_PLL2_MUL          96        /* PLL2 multiplier */
 #endif
 
-#ifndef CONFIG_RA_PLODIVR
-#  define CONFIG_RA_PLODIVR (RA_CLOCKS_PLL_DIV_2) /* PLL1R Div /2 */
+#ifndef CONFIG_RA_PLL1R_DIV
+#  define CONFIG_RA_PLL1R_DIV (RA_CLOCKS_PLL_DIV_2) /* PLL1R Div /2 */
 #endif
 
-#ifndef CONFIG_RA_PLODIVP
-#  define CONFIG_RA_PLODIVP (RA_CLOCKS_PLL_DIV_2) /* PLL1P Div /2 */
+#ifndef CONFIG_RA_PLL1P_DIV
+#  define CONFIG_RA_PLL1P_DIV (RA_CLOCKS_PLL_DIV_2) /* PLL1P Div /2 */
 #endif
 
-#ifndef CONFIG_RA_PLODIVQ
-#  define CONFIG_RA_PLODIVQ (RA_CLOCKS_PLL_DIV_2) /* PLL1Q Div /2 */
+#ifndef CONFIG_RA_PLL1Q_DIV
+#  define CONFIG_RA_PLL1Q_DIV (RA_CLOCKS_PLL_DIV_2) /* PLL1Q Div /2 */
 #endif
 
 /* PLL Frequency Calculations */

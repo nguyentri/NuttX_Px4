@@ -122,11 +122,11 @@
 #define RA_PRV_PLL2CCR2_PLL_DIV_MASK               (0x0F) // PLL DIV in PLL2CCR2 is 4 bits wide
 #define RA_PRV_PLL2CCR2_PLL_DIV_Q_BIT              (4)    // PLL DIV Q in PLL2CCR2 starts at bit 4
 #define RA_PRV_PLL2CCR2_PLL_DIV_R_BIT              (8)    // PLL DIV R in PLL2CCR2 starts at bit 8
-#define RA_PRV_PLL2CCR2                            (((CONFIG_RA_PL2ODIVR & RA_PRV_PLL2CCR2_PLL_DIV_MASK) << \
+#define RA_PRV_PLL2CCR2                            (((CONFIG_RA_PLL2R_DIV & RA_PRV_PLL2CCR2_PLL_DIV_MASK) << \
                                                       RA_PRV_PLL2CCR2_PLL_DIV_R_BIT) |                     \
-                                                      ((CONFIG_RA_PL2ODIVQ & RA_PRV_PLL2CCR2_PLL_DIV_MASK) << \
+                                                      ((CONFIG_RA_PLL2Q_DIV & RA_PRV_PLL2CCR2_PLL_DIV_MASK) << \
                                                       RA_PRV_PLL2CCR2_PLL_DIV_Q_BIT) |                     \
-                                                      (CONFIG_RA_PL2ODIVP & RA_PRV_PLL2CCR2_PLL_DIV_MASK))
+                                                      (CONFIG_RA_PLL2P_DIV & RA_PRV_PLL2CCR2_PLL_DIV_MASK))
 
 /* PLL Control Register (PLLCCR) calculations
  * For RA8E1 (PLLCCR_TYPE 3), the PLL multiplier format is:
@@ -144,11 +144,11 @@
 #define RA_PRV_PLLCCR2_PLL_DIV_MASK              (0x0F) // PLL DIV in PLLCCR2/PLL2CCR2 is 4 bits wide
 #define RA_PRV_PLLCCR2_PLL_DIV_Q_BIT             (4)    // PLL DIV Q in PLLCCR2/PLL2CCR2 starts at bit 4
 #define RA_PRV_PLLCCR2_PLL_DIV_R_BIT             (8)    // PLL DIV R in PLLCCR2/PLL2CCR2 starts at bit 8
-#define RA_PRV_PLLCCR2                           (((CONFIG_RA_PLODIVR & RA_PRV_PLLCCR2_PLL_DIV_MASK) << \
+#define RA_PRV_PLLCCR2                           (((CONFIG_RA_PLL1R_DIV & RA_PRV_PLLCCR2_PLL_DIV_MASK) << \
                                                     RA_PRV_PLLCCR2_PLL_DIV_R_BIT) |                    \
-                                                    ((CONFIG_RA_PLODIVQ & RA_PRV_PLLCCR2_PLL_DIV_MASK) << \
+                                                    ((CONFIG_RA_PLL1Q_DIV & RA_PRV_PLLCCR2_PLL_DIV_MASK) << \
                                                     RA_PRV_PLLCCR2_PLL_DIV_Q_BIT) |                    \
-                                                    (CONFIG_RA_PLODIVP & RA_PRV_PLLCCR2_PLL_DIV_MASK))
+                                                    (CONFIG_RA_PLL1P_DIV & RA_PRV_PLLCCR2_PLL_DIV_MASK))
 
 /****************************************************************************
  * Public Data
@@ -425,7 +425,7 @@ static void ra_clock_init(void)
   ra_clock_freq_var_init();
 
   /* Step 3: Start HOCO if used */
-#if defined(CONFIG_RA_CLOCK_HOCO) || defined(CONFIG_RA_CLOCK_PLL) || defined(CONFIG_RA_CLOCK_PLL1P)
+#if defined(CONFIG_RA_CLOCK_HOCO)
   putreg8(0U, R_SYSC_HOCOCR);  /* Enable HOCO */
   /* Wait for HOCO to stabilize */
   RA_HARDWARE_WAIT((getreg8(R_SYSC_OSCSF) & R_SYSC_OSCSF_HOCOSF), R_SYSC_OSCSF_HOCOSF);
