@@ -76,6 +76,15 @@
 /* DPHYREFCR Register bit definitions */
 #define R_MIPI_PHY_DPHYREFCR_RFREQ_SHIFT          (0)  /* Reference Clock Frequency Setting */
 #define R_MIPI_PHY_DPHYREFCR_RFREQ_MASK           0xff
+#  define R_MIPI_PHY_DPHYREFCR_RFREQ_00100111             (39 << R_MIPI_PHY_DPHYREFCR_RFREQ_SHIFT)  /* 40MHz */
+#  define R_MIPI_PHY_DPHYREFCR_RFREQ_00101000             (40 << R_MIPI_PHY_DPHYREFCR_RFREQ_SHIFT)  /* 41MHz */
+#  define R_MIPI_PHY_DPHYREFCR_RFREQ_00101001             (41 << R_MIPI_PHY_DPHYREFCR_RFREQ_SHIFT)  /* 42MHz */
+#  define R_MIPI_PHY_DPHYREFCR_RFREQ_01110101             (117 << R_MIPI_PHY_DPHYREFCR_RFREQ_SHIFT)  /* 118MHz */
+#  define R_MIPI_PHY_DPHYREFCR_RFREQ_01110110             (118 << R_MIPI_PHY_DPHYREFCR_RFREQ_SHIFT)  /* 119MHz */
+#  define R_MIPI_PHY_DPHYREFCR_RFREQ_01110111             (119 << R_MIPI_PHY_DPHYREFCR_RFREQ_SHIFT)  /* 120MHz */
+
+#define R_MIPI_PHY_DPHYREFCR_RESERVED_SHIFT       (8)  /* These bits are read as 000000000000000000000000. The write value should be 000000000000000000000000. */
+#define R_MIPI_PHY_DPHYREFCR_RESERVED_MASK        0xffffff00
 
 /* DPHYPLFCR Register bit definitions */
 #define R_MIPI_PHY_DPHYPLFCR_IDIV_SHIFT           (0)  /* D-PHY PLL Input Frequency Division Ratio Select */
@@ -85,44 +94,78 @@
 #  define R_MIPI_PHY_DPHYPLFCR_IDIV_10                    (2 << R_MIPI_PHY_DPHYPLFCR_IDIV_SHIFT)  /* 1/3 */
 #  define R_MIPI_PHY_DPHYPLFCR_IDIV_11                    (3 << R_MIPI_PHY_DPHYPLFCR_IDIV_SHIFT)  /* 1/4 */
 
+#define R_MIPI_PHY_DPHYPLFCR_RESERVED_SHIFT       (25)  /* These bits are read as 00000000. The write value should be 00000000. */
+#define R_MIPI_PHY_DPHYPLFCR_RESERVED_MASK        0xfe000000
+
 #define R_MIPI_PHY_DPHYPLFCR_NFMUL_SHIFT          (8)  /* D-PHY PLL Frequency Multiplication Factor Select (Fractional Part) */
 #define R_MIPI_PHY_DPHYPLFCR_NFMUL_MASK           0x300
-#  define R_MIPI_PHY_DPHYPLFCR_NFMUL_00                   (0 << R_MIPI_PHY_DPHYPLFCR_NFMUL_SHIFT)  /* 0.00 */
-#  define R_MIPI_PHY_DPHYPLFCR_NFMUL_01                   (1 << R_MIPI_PHY_DPHYPLFCR_NFMUL_SHIFT)  /* 0.33 */
-#  define R_MIPI_PHY_DPHYPLFCR_NFMUL_10                   (2 << R_MIPI_PHY_DPHYPLFCR_NFMUL_SHIFT)  /* 0.66 */
+#  define R_MIPI_PHY_DPHYPLFCR_NFMUL_00                   (0 << R_MIPI_PHY_DPHYPLFCR_NFMUL_SHIFT)  /* 0.00  */
+#  define R_MIPI_PHY_DPHYPLFCR_NFMUL_01                   (1 << R_MIPI_PHY_DPHYPLFCR_NFMUL_SHIFT)  /* 0.33  */
+#  define R_MIPI_PHY_DPHYPLFCR_NFMUL_10                   (2 << R_MIPI_PHY_DPHYPLFCR_NFMUL_SHIFT)  /* 0.66  */
 #  define R_MIPI_PHY_DPHYPLFCR_NFMUL_11                   (3 << R_MIPI_PHY_DPHYPLFCR_NFMUL_SHIFT)  /* 0.50 */
 
-#define R_MIPI_PHY_DPHYPLFCR_PMUL_SHIFT           (12)  /*  */
+#define R_MIPI_PHY_DPHYPLFCR_PMUL_SHIFT           (12)  /* D-PHY PLL Output Frequency Division Ratio Select */
 #define R_MIPI_PHY_DPHYPLFCR_PMUL_MASK            0x3000
-#  define R_MIPI_PHY_DPHYPLFCR_PMUL_00                    (0 << R_MIPI_PHY_DPHYPLFCR_PMUL_SHIFT)  /* 1 */
-#  define R_MIPI_PHY_DPHYPLFCR_PMUL_01                    (1 << R_MIPI_PHY_DPHYPLFCR_PMUL_SHIFT)  /* 1/2 */
-#  define R_MIPI_PHY_DPHYPLFCR_PMUL_10                    (2 << R_MIPI_PHY_DPHYPLFCR_PMUL_SHIFT)  /* 1/4 */
+#  define R_MIPI_PHY_DPHYPLFCR_PMUL_00                    (0 << R_MIPI_PHY_DPHYPLFCR_PMUL_SHIFT)  /* 1  */
+#  define R_MIPI_PHY_DPHYPLFCR_PMUL_01                    (1 << R_MIPI_PHY_DPHYPLFCR_PMUL_SHIFT)  /* 1/2  */
+#  define R_MIPI_PHY_DPHYPLFCR_PMUL_10                    (2 << R_MIPI_PHY_DPHYPLFCR_PMUL_SHIFT)  /* 1/4  */
 #  define R_MIPI_PHY_DPHYPLFCR_PMUL_11                    (3 << R_MIPI_PHY_DPHYPLFCR_PMUL_SHIFT)  /* 1/8 */
 
 #define R_MIPI_PHY_DPHYPLFCR_NMUL_SHIFT           (16)  /* D-PHY PLL Frequency Multiplication Factor Select (Integer Part) */
 #define R_MIPI_PHY_DPHYPLFCR_NMUL_MASK            0x1ff0000
+#  define R_MIPI_PHY_DPHYPLFCR_NMUL_00010011              (19 << R_MIPI_PHY_DPHYPLFCR_NMUL_SHIFT)  /* 20 */
+#  define R_MIPI_PHY_DPHYPLFCR_NMUL_00010100              (20 << R_MIPI_PHY_DPHYPLFCR_NMUL_SHIFT)  /* 21 */
+#  define R_MIPI_PHY_DPHYPLFCR_NMUL_00010101              (21 << R_MIPI_PHY_DPHYPLFCR_NMUL_SHIFT)  /* 22 */
+#  define R_MIPI_PHY_DPHYPLFCR_NMUL_01100010              (98 << R_MIPI_PHY_DPHYPLFCR_NMUL_SHIFT)  /* 99 */
+#  define R_MIPI_PHY_DPHYPLFCR_NMUL_01100011              (99 << R_MIPI_PHY_DPHYPLFCR_NMUL_SHIFT)  /* 100 */
+#  define R_MIPI_PHY_DPHYPLFCR_NMUL_01100100              (100 << R_MIPI_PHY_DPHYPLFCR_NMUL_SHIFT)  /* 101 */
 
 /* DPHYPLOCR Register bit definitions */
 #define R_MIPI_PHY_DPHYPLOCR_PLLSTP               (1 << 0)  /* D-PHY PLL Operation Control */
 
+#define R_MIPI_PHY_DPHYPLOCR_RESERVED_SHIFT       (1)  /* These bits are read as 0000000000000000000000000000000. The write value should be 0000000000000000000000000000000. */
+#define R_MIPI_PHY_DPHYPLOCR_RESERVED_MASK        0xfffffffe
+
 /* DPHYESCCR Register bit definitions */
 #define R_MIPI_PHY_DPHYESCCR_ESCDIV_SHIFT         (0)  /* Escape Mode Transfer Clock Division Ratio */
 #define R_MIPI_PHY_DPHYESCCR_ESCDIV_MASK          0x1f
+#  define R_MIPI_PHY_DPHYESCCR_ESCDIV_00000               (0 << R_MIPI_PHY_DPHYESCCR_ESCDIV_SHIFT)  /* x1/1 */
+#  define R_MIPI_PHY_DPHYESCCR_ESCDIV_00001               (1 << R_MIPI_PHY_DPHYESCCR_ESCDIV_SHIFT)  /* x1/2 */
+#  define R_MIPI_PHY_DPHYESCCR_ESCDIV_00010               (2 << R_MIPI_PHY_DPHYESCCR_ESCDIV_SHIFT)  /* x1/3 */
+#  define R_MIPI_PHY_DPHYESCCR_ESCDIV_00011               (3 << R_MIPI_PHY_DPHYESCCR_ESCDIV_SHIFT)  /* x1/4 */
+#  define R_MIPI_PHY_DPHYESCCR_ESCDIV_11101               (29 << R_MIPI_PHY_DPHYESCCR_ESCDIV_SHIFT)  /* x1/30 */
+#  define R_MIPI_PHY_DPHYESCCR_ESCDIV_11110               (30 << R_MIPI_PHY_DPHYESCCR_ESCDIV_SHIFT)  /* x1/31 */
+#  define R_MIPI_PHY_DPHYESCCR_ESCDIV_11111               (31 << R_MIPI_PHY_DPHYESCCR_ESCDIV_SHIFT)  /* x1/32 */
+
+#define R_MIPI_PHY_DPHYESCCR_RESERVED_SHIFT       (5)  /* These bits are read as 000000000000000000000000000. The write value should be 000000000000000000000000000. */
+#define R_MIPI_PHY_DPHYESCCR_RESERVED_MASK        0xffffffe0
 
 /* DPHYPWRCR Register bit definitions */
 #define R_MIPI_PHY_DPHYPWRCR_PWRSEN               (1 << 0)  /* D-PHY Power Supplying Control */
 
+#define R_MIPI_PHY_DPHYPWRCR_RESERVED_SHIFT       (1)  /* These bits are read as 0000000000000000000000000000000. The write value should be 0000000000000000000000000000000. */
+#define R_MIPI_PHY_DPHYPWRCR_RESERVED_MASK        0xfffffffe
+
 /* DPHYSFR Register bit definitions */
 #define R_MIPI_PHY_DPHYSFR_PWRSF                  (1 << 0)  /* D-PHY LDO Power-on Status Flag */
+
+#define R_MIPI_PHY_DPHYSFR_RESERVED_SHIFT         (9)  /* These bits are read as 00000000000000000000000. */
+#define R_MIPI_PHY_DPHYSFR_RESERVED_MASK          0xfffffe00
 
 #define R_MIPI_PHY_DPHYSFR_PLLSF                  (1 << 8)  /* D-PHY PLL Oscillation Stabilization Flag */
 
 /* DPHYOCR Register bit definitions */
 #define R_MIPI_PHY_DPHYOCR_DPHYEN                 (1 << 0)  /* D-PHY Operation Control */
 
+#define R_MIPI_PHY_DPHYOCR_RESERVED_SHIFT         (1)  /* These bits are read as 0000000000000000000000000000000. The write value should be 0000000000000000000000000000000. */
+#define R_MIPI_PHY_DPHYOCR_RESERVED_MASK          0xfffffffe
+
 /* DPHYTIM1 Register bit definitions */
 #define R_MIPI_PHY_DPHYTIM1_TINIT_SHIFT           (0)  /* D-PHY T_INIT Parameter Setting */
 #define R_MIPI_PHY_DPHYTIM1_TINIT_MASK            0x7ffff
+
+#define R_MIPI_PHY_DPHYTIM1_RESERVED_SHIFT        (19)  /* These bits are read as 0000000000000. The write value should be 0000000000000. */
+#define R_MIPI_PHY_DPHYTIM1_RESERVED_MASK         0xfff80000
 
 /* DPHYTIM2 Register bit definitions */
 #define R_MIPI_PHY_DPHYTIM2_TCLKPREP_SHIFT        (0)  /* D-PHY T_CLK_PREPARE Parameter Setting */
@@ -164,9 +207,15 @@
 #define R_MIPI_PHY_DPHYTIM5_THSEXIT_SHIFT         (16)  /* D-PHY T_THS_EXIT Parameter Setting */
 #define R_MIPI_PHY_DPHYTIM5_THSEXIT_MASK          0xff0000
 
+#define R_MIPI_PHY_DPHYTIM5_RESERVED_SHIFT        (24)  /* These bits are read as 00000000. The write value should be 00000000. */
+#define R_MIPI_PHY_DPHYTIM5_RESERVED_MASK         0xff000000
+
 /* DPHYTIM6 Register bit definitions */
 #define R_MIPI_PHY_DPHYTIM6_TLPX_SHIFT            (0)  /* D-PHY T_TLPX Parameter Setting */
 #define R_MIPI_PHY_DPHYTIM6_TLPX_MASK             0xff
+
+#define R_MIPI_PHY_DPHYTIM6_RESERVED_SHIFT        (8)  /* These bits are read as 000000000000000000000000. The write value should be 000000000000000000000000. */
+#define R_MIPI_PHY_DPHYTIM6_RESERVED_MASK         0xffffff00
 
 /* DPHYMDC Register bit definitions */
 #define R_MIPI_PHY_DPHYMDC_MASTEREN               (1 << 0)  /* D-PHY Master/Slave Select */

@@ -44,21 +44,21 @@
 
 /* SPI_B Register Offsets */
 
-#define R_SPI_B_SPDR_OFFSET                       0x00000000  /* SPI Data Register */
-#define R_SPI_B_SPDECR_OFFSET                     0x00000004  /* SPI Delay Control Register */
-#define R_SPI_B_SPCR_OFFSET                       0x00000008  /* SPI Control Register */
-#define R_SPI_B_SPCR2_OFFSET                      0x0000000c  /* SPI Control Register 2 */
-#define R_SPI_B_SPCR3_OFFSET                      0x00000010  /* SPI Control Register 3 */
+#define R_SPI_B_SPDR_OFFSET                       0x00000000  /* RSPI Data Register */
+#define R_SPI_B_SPDECR_OFFSET                     0x00000004  /* RSPI Delay Control Register */
+#define R_SPI_B_SPCR_OFFSET                       0x00000008  /* RSPI Control Register */
+#define R_SPI_B_SPCR2_OFFSET                      0x0000000c  /* RSPI Control Register 2 */
+#define R_SPI_B_SPCR3_OFFSET                      0x00000010  /* RSPI Control Register 3 */
 /* SPCMD%s Registers (0-7) */
-#define R_SPI_B_SPCMD_OFFSET(m)                   (0x00000014 + ((m) * 0x00000004))  /* SPI Command Register */
-#define R_SPI_B_SPDCR_OFFSET                      0x00000040  /* SPI Data Control Register */
-#define R_SPI_B_SPDCR2_OFFSET                     0x00000044  /* SPI Data Control Register 2 */
+#define R_SPI_B_SPCMD_OFFSET(m)                   (0x00000014 + ((m) * 0x00000004))  /* RSPI Command Register */
+#define R_SPI_B_SPDCR_OFFSET                      0x00000040  /* RSPI Data Control Register */
+#define R_SPI_B_SPDCR2_OFFSET                     0x00000044  /* RSPI Data Control Register 2 */
 #define R_SPI_B_SPSR_OFFSET                       0x00000050  /* SPI Status Register */
-#define R_SPI_B_SPTFSR_OFFSET                     0x00000058  /* SPI Transfer FIFO Status Register */
-#define R_SPI_B_SPRFSR_OFFSET                     0x0000005c  /* SPI Receive FIFO Status Register */
-#define R_SPI_B_SPPSR_OFFSET                      0x00000060  /* SPI Polling Register */
-#define R_SPI_B_SPSRC_OFFSET                      0x00000068  /* SPI Status Clear Register */
-#define R_SPI_B_SPFCR_OFFSET                      0x0000006c  /* SPI FIFO Clear Register */
+#define R_SPI_B_SPTFSR_OFFSET                     0x00000058  /* RSPI Transfer FIFO Status Register */
+#define R_SPI_B_SPRFSR_OFFSET                     0x0000005c  /* RSPI Receive FIFO Status Register */
+#define R_SPI_B_SPPSR_OFFSET                      0x00000060  /* RSPI Poling Register */
+#define R_SPI_B_SPSRC_OFFSET                      0x00000068  /* RSPI Status Clear Register */
+#define R_SPI_B_SPFCR_OFFSET                      0x0000006c  /* RSPI FIFO Clear Register */
 
 /* SPI_B Register Addresses */
 
@@ -78,10 +78,6 @@
 #define R_SPI_B_SPFCR(n)                          (R_SPI_B_CH_BASE(n) + R_SPI_B_SPFCR_OFFSET)
 
 /* Register bit definitions */
-/* SPDR Register bit definitions */
-#define R_SPI_B_SPDR_SPD_SHIFT                    (0)  /* These bits are the interface with the buffers that hold data for transmission and reception by the SPI. */
-#define R_SPI_B_SPDR_SPD_MASK                     0xffffffff
-
 /* SPDECR Register bit definitions */
 #define R_SPI_B_SPDECR_SCKDL_SHIFT                (0)  /* RSPCK Delay */
 #define R_SPI_B_SPDECR_SCKDL_MASK                 0x7
@@ -105,7 +101,7 @@
 #  define R_SPI_B_SPDECR_SLNDL_110                        (6 << R_SPI_B_SPDECR_SLNDL_SHIFT)  /* 7RSPCK */
 #  define R_SPI_B_SPDECR_SLNDL_111                        (7 << R_SPI_B_SPDECR_SLNDL_SHIFT)  /* 8RSPCK */
 
-#define R_SPI_B_SPDECR_SPNDL_SHIFT                (16)  /* SPI Next-Access Delay */
+#define R_SPI_B_SPDECR_SPNDL_SHIFT                (16)  /* RSPI Next-Access Delay */
 #define R_SPI_B_SPDECR_SPNDL_MASK                 0x70000
 #  define R_SPI_B_SPDECR_SPNDL_000                        (0 << R_SPI_B_SPDECR_SPNDL_SHIFT)  /* 1RSPCK + 5TCLK */
 #  define R_SPI_B_SPDECR_SPNDL_001                        (1 << R_SPI_B_SPDECR_SPNDL_SHIFT)  /* 2RSPCK + 5TCLK */
@@ -118,9 +114,19 @@
 
 #define R_SPI_B_SPDECR_ARST_SHIFT                 (24)  /* Receive Sampling Timing Adjustment bits */
 #define R_SPI_B_SPDECR_ARST_MASK                  0x7000000
+#  define R_SPI_B_SPDECR_ARST_000                         (0 << R_SPI_B_SPDECR_ARST_SHIFT)  /* 0 TCLK delay */
+#  define R_SPI_B_SPDECR_ARST_001                         (1 << R_SPI_B_SPDECR_ARST_SHIFT)  /* 1 TCLK delay */
+#  define R_SPI_B_SPDECR_ARST_010                         (2 << R_SPI_B_SPDECR_ARST_SHIFT)  /* 2 TCLK delay */
+#  define R_SPI_B_SPDECR_ARST_011                         (3 << R_SPI_B_SPDECR_ARST_SHIFT)  /* 3 TCLK delay */
+#  define R_SPI_B_SPDECR_ARST_100                         (4 << R_SPI_B_SPDECR_ARST_SHIFT)  /* 4 TCLK delay */
+#  define R_SPI_B_SPDECR_ARST_101                         (5 << R_SPI_B_SPDECR_ARST_SHIFT)  /* 5 TCLK delay */
+#  define R_SPI_B_SPDECR_ARST_110                         (6 << R_SPI_B_SPDECR_ARST_SHIFT)  /* 6 TCLK delay */
+#  define R_SPI_B_SPDECR_ARST_111                         (7 << R_SPI_B_SPDECR_ARST_SHIFT)  /* 7 TCLK delay */
 
 /* SPCR Register bit definitions */
-#define R_SPI_B_SPCR_SPE                          (1 << 0)  /* SPI Function Enable */
+#define R_SPI_B_SPCR_SPE                          (1 << 0)  /* RSPI Function Enable */
+
+#define R_SPI_B_SPCR_SPSCKSEL                     (1 << 7)  /* RSPI Master Receive Clock Select */
 
 #define R_SPI_B_SPCR_SPPE                         (1 << 8)  /* Parity Enable */
 
@@ -134,32 +140,30 @@
 
 #define R_SPI_B_SPCR_MODFEN                       (1 << 14)  /* Mode Fault Error Detection Enable */
 
-#define R_SPI_B_SPCR_SPEIE                        (1 << 16)  /* SPI Error Interrupt Enable */
+#define R_SPI_B_SPCR_SPEIE                        (1 << 16)  /* RSPI Error Interrupt Enable */
 
-#define R_SPI_B_SPCR_SPRIE                        (1 << 17)  /* SPI Receive Buffer Full Interrupt Enable */
+#define R_SPI_B_SPCR_SPRIE                        (1 << 17)  /* RSPI Receive Buffer Full Interrupt Enable */
 
-#define R_SPI_B_SPCR_SPIIE                        (1 << 18)  /* SPI Idle Interrupt Enable */
+#define R_SPI_B_SPCR_SPIIE                        (1 << 18)  /* RSPI Idle Interrupt Enable */
 
-#define R_SPI_B_SPCR_SPDRES                       (1 << 19)  /* SPI receive data ready error select */
+#define R_SPI_B_SPCR_SPDRES                       (1 << 19)  /* RSPI receive data ready error select */
 
-#define R_SPI_B_SPCR_SPTIE                        (1 << 20)  /* SPI Transmit Buffer Empty Interrupt Enable */
+#define R_SPI_B_SPCR_SPTIE                        (1 << 20)  /* RSPI Transmit Buffer Empty Interrupt Enable */
 
-#define R_SPI_B_SPCR_CENDIE                       (1 << 21)  /* SPI Communication End Interrupt Enable */
+#define R_SPI_B_SPCR_CENDIE                       (1 << 21)  /* RSPI Communication End Interrupt Enable */
 
-#define R_SPI_B_SPCR_SPMS                         (1 << 24)  /* SPI Mode Select */
+#define R_SPI_B_SPCR_SPMS                         (1 << 24)  /* RSPI Mode Select */
 
-#define R_SPI_B_SPCR_SPFRF                        (1 << 25)  /* SPI Frame Format Select */
+#define R_SPI_B_SPCR_SPFRF                        (1 << 25)  /* RSPI Frame Format Select */
 
 #define R_SPI_B_SPCR_TXMD_SHIFT                   (28)  /* Communication Mode Select */
 #define R_SPI_B_SPCR_TXMD_MASK                    0x30000000
 #  define R_SPI_B_SPCR_TXMD_00                            (0 << R_SPI_B_SPCR_TXMD_SHIFT)  /* Transmit-Receive */
 #  define R_SPI_B_SPCR_TXMD_01                            (1 << R_SPI_B_SPCR_TXMD_SHIFT)  /* Transmit only */
 
-#define R_SPI_B_SPCR_MSTR                         (1 << 30)  /* SPI Master/Slave Mode Select */
+#define R_SPI_B_SPCR_MSTR                         (1 << 30)  /* RSPI Master/Slave Mode Select */
 
 #define R_SPI_B_SPCR_BPEN                         (1 << 31)  /* Synchronization Circuit Bypass Enable */
-
-#define R_SPI_B_SPCR_SPSCKSEL                     (1 << 7)  /* RSPI Master Receive Clock Select */
 
 /* SPCR2 Register bit definitions */
 #define R_SPI_B_SPCR2_RMFM_SHIFT                  (0)  /* Frame processing count setting in Master Receive only */
@@ -169,12 +173,12 @@
 
 #define R_SPI_B_SPCR2_RMSTTG                      (1 << 7)  /* Start Trigger in Master Receive only */
 
-#define R_SPI_B_SPCR2_SPDRC_SHIFT                 (8)  /* SPI received data ready detect adjustment */
+#define R_SPI_B_SPCR2_SPDRC_SHIFT                 (8)  /* RSPI received data ready detect adjustment */
 #define R_SPI_B_SPCR2_SPDRC_MASK                  0xff00
 
-#define R_SPI_B_SPCR2_SPLP                        (1 << 16)  /* SPI Loopback */
+#define R_SPI_B_SPCR2_SPLP                        (1 << 16)  /* RSPI Loopback */
 
-#define R_SPI_B_SPCR2_SPLP2                       (1 << 17)  /* SPI Loopback 2 */
+#define R_SPI_B_SPCR2_SPLP2                       (1 << 17)  /* RSPI Loopback 2 */
 
 #define R_SPI_B_SPCR2_MOIFV                       (1 << 20)  /* MOSI Idle Fixed Value */
 
@@ -192,16 +196,16 @@
 #define R_SPI_B_SPCR3_SPBR_SHIFT                  (8)  /* SPI Bit Rate */
 #define R_SPI_B_SPCR3_SPBR_MASK                   0xff00
 
-#define R_SPI_B_SPCR3_SPSLN_SHIFT                 (24)  /* SPI Sequence Length */
+#define R_SPI_B_SPCR3_SPSLN_SHIFT                 (24)  /* RSPI Sequence Length */
 #define R_SPI_B_SPCR3_SPSLN_MASK                  0x7000000
-#  define R_SPI_B_SPCR3_SPSLN_000                         (0 << R_SPI_B_SPCR3_SPSLN_SHIFT)  /* Sequence Length is 1 (Referenced SPCMDn, n = 0→0→…) */
-#  define R_SPI_B_SPCR3_SPSLN_001                         (1 << R_SPI_B_SPCR3_SPSLN_SHIFT)  /* Sequence Length is 2 (Referenced SPCMDn, n = 0→1→0→…) */
-#  define R_SPI_B_SPCR3_SPSLN_010                         (2 << R_SPI_B_SPCR3_SPSLN_SHIFT)  /* Sequence Length is 3 (Referenced SPCMDn, n = 0→1→2→0→…) */
-#  define R_SPI_B_SPCR3_SPSLN_011                         (3 << R_SPI_B_SPCR3_SPSLN_SHIFT)  /* Sequence Length is 4 (Referenced SPCMDn, n = 0→1→2→3→0→…) */
-#  define R_SPI_B_SPCR3_SPSLN_100                         (4 << R_SPI_B_SPCR3_SPSLN_SHIFT)  /* Sequence Length is 5 (Referenced SPCMDn, n = 0→1→2→3→4→0→…) */
-#  define R_SPI_B_SPCR3_SPSLN_101                         (5 << R_SPI_B_SPCR3_SPSLN_SHIFT)  /* Sequence Length is 6 (Referenced SPCMDn, n = 0→1→2→3→4→5→0→…) */
-#  define R_SPI_B_SPCR3_SPSLN_110                         (6 << R_SPI_B_SPCR3_SPSLN_SHIFT)  /* Sequence Length is 7 (Referenced SPCMDn, n = 0→1→2→3→4→5→6→0→…) */
-#  define R_SPI_B_SPCR3_SPSLN_111                         (7 << R_SPI_B_SPCR3_SPSLN_SHIFT)  /* Sequence Length is 8 (Referenced SPCMDn, n = 0→1→2→3→4→5→6→7→0→…) */
+#  define R_SPI_B_SPCR3_SPSLN_000                         (0 << R_SPI_B_SPCR3_SPSLN_SHIFT)  /* Sequence Length is 1 (Referenced SPCMDn, n = 0->0->...) */
+#  define R_SPI_B_SPCR3_SPSLN_001                         (1 << R_SPI_B_SPCR3_SPSLN_SHIFT)  /* Sequence Length is 2 (Referenced SPCMDn, n = 0->1->0->...) */
+#  define R_SPI_B_SPCR3_SPSLN_010                         (2 << R_SPI_B_SPCR3_SPSLN_SHIFT)  /* Sequence Length is 3 (Referenced SPCMDn, n = 0->1->2->0->...) */
+#  define R_SPI_B_SPCR3_SPSLN_011                         (3 << R_SPI_B_SPCR3_SPSLN_SHIFT)  /* Sequence Length is 4 (Referenced SPCMDn, n = 0->1->2->3->0->...) */
+#  define R_SPI_B_SPCR3_SPSLN_100                         (4 << R_SPI_B_SPCR3_SPSLN_SHIFT)  /* Sequence Length is 5 (Referenced SPCMDn, n = 0->1->2->3->4->0->...) */
+#  define R_SPI_B_SPCR3_SPSLN_101                         (5 << R_SPI_B_SPCR3_SPSLN_SHIFT)  /* Sequence Length is 6 (Referenced SPCMDn, n = 0->1->2->3->4->5->0->...) */
+#  define R_SPI_B_SPCR3_SPSLN_110                         (6 << R_SPI_B_SPCR3_SPSLN_SHIFT)  /* Sequence Length is 7 (Referenced SPCMDn, n = 0->1->2->3->4->5->6->0->...) */
+#  define R_SPI_B_SPCR3_SPSLN_111                         (7 << R_SPI_B_SPCR3_SPSLN_SHIFT)  /* Sequence Length is 8 (Referenced SPCMDn, n = 0->1->2->3->4->5->6->7->0->...) */
 
 /* SPCMD Register bit definitions */
 #define R_SPI_B_SPCMD_CPHA                        (1 << 0)  /* RSPCK Phase */
@@ -210,22 +214,22 @@
 
 #define R_SPI_B_SPCMD_BRDV_SHIFT                  (2)  /* Bit Rate Division */
 #define R_SPI_B_SPCMD_BRDV_MASK                   0xc
-#  define R_SPI_B_SPCMD_BRDV_00                           (0 << R_SPI_B_SPCMD_BRDV_SHIFT)  /* Base bit rate */
-#  define R_SPI_B_SPCMD_BRDV_01                           (1 << R_SPI_B_SPCMD_BRDV_SHIFT)  /* Base bit rate divided by 2 */
-#  define R_SPI_B_SPCMD_BRDV_10                           (2 << R_SPI_B_SPCMD_BRDV_SHIFT)  /* Base bit rate divided by 4 */
-#  define R_SPI_B_SPCMD_BRDV_11                           (3 << R_SPI_B_SPCMD_BRDV_SHIFT)  /* Base bit rate divided by 8 */
+#  define R_SPI_B_SPCMD_BRDV_00                           (0 << R_SPI_B_SPCMD_BRDV_SHIFT)  /* The base bit rate is selected. */
+#  define R_SPI_B_SPCMD_BRDV_01                           (1 << R_SPI_B_SPCMD_BRDV_SHIFT)  /* Two-divided base bit rate is selected. */
+#  define R_SPI_B_SPCMD_BRDV_10                           (2 << R_SPI_B_SPCMD_BRDV_SHIFT)  /* Four-divided base bit rate is selected. */
+#  define R_SPI_B_SPCMD_BRDV_11                           (3 << R_SPI_B_SPCMD_BRDV_SHIFT)  /* Eight-divided base bit rate is selected. */
 
 #define R_SPI_B_SPCMD_SSLKP                       (1 << 7)  /* SSL Signal Level Hold */
 
-#define R_SPI_B_SPCMD_LSBF                        (1 << 12)  /* SPI LSB First */
+#define R_SPI_B_SPCMD_LSBF                        (1 << 12)  /* RSPI LSB First */
 
-#define R_SPI_B_SPCMD_SPNDEN                      (1 << 13)  /* SPI Next-Access Delay Enable */
+#define R_SPI_B_SPCMD_SPNDEN                      (1 << 13)  /* RSPI Next-Access Delay Enable */
 
 #define R_SPI_B_SPCMD_SLNDEN                      (1 << 14)  /* SSL Negation Delay Setting Enable */
 
 #define R_SPI_B_SPCMD_SCKDEN                      (1 << 15)  /* RSPCK Delay Setting Enable */
 
-#define R_SPI_B_SPCMD_SPB_SHIFT                   (16)  /* SPI Data Length */
+#define R_SPI_B_SPCMD_SPB_SHIFT                   (16)  /* RSPI Data Length */
 #define R_SPI_B_SPCMD_SPB_MASK                    0x1f0000
 
 #define R_SPI_B_SPCMD_SSLA_SHIFT                  (24)  /* SSL Signal Assertion */
@@ -238,16 +242,16 @@
 /* SPDCR Register bit definitions */
 #define R_SPI_B_SPDCR_BYSW                        (1 << 0)  /* Byte Swap Operating Mode Select */
 
-#define R_SPI_B_SPDCR_SPRDTD                      (1 << 3)  /* SPI Receive Data or Transmit Data Select */
+#define R_SPI_B_SPDCR_SPRDTD                      (1 << 3)  /* RSPI Receive Data or Transmit Data Select */
 
 #define R_SPI_B_SPDCR_SINV                        (1 << 4)  /* Serial data invert bit */
 
 #define R_SPI_B_SPDCR_SPFC_SHIFT                  (8)  /* Frame Count */
 #define R_SPI_B_SPDCR_SPFC_MASK                   0x300
 #  define R_SPI_B_SPDCR_SPFC_00                           (0 << R_SPI_B_SPDCR_SPFC_SHIFT)  /* 1 frame */
-#  define R_SPI_B_SPDCR_SPFC_01                           (1 << R_SPI_B_SPDCR_SPFC_SHIFT)  /* 2 frames */
-#  define R_SPI_B_SPDCR_SPFC_10                           (2 << R_SPI_B_SPDCR_SPFC_SHIFT)  /* 3 frames */
-#  define R_SPI_B_SPDCR_SPFC_11                           (3 << R_SPI_B_SPDCR_SPFC_SHIFT)  /* 4 frames */
+#  define R_SPI_B_SPDCR_SPFC_01                           (1 << R_SPI_B_SPDCR_SPFC_SHIFT)  /* 2 frame */
+#  define R_SPI_B_SPDCR_SPFC_10                           (2 << R_SPI_B_SPDCR_SPFC_SHIFT)  /* 3 frame */
+#  define R_SPI_B_SPDCR_SPFC_11                           (3 << R_SPI_B_SPDCR_SPFC_SHIFT)  /* 4 frame */
 
 /* SPDCR2 Register bit definitions */
 #define R_SPI_B_SPDCR2_RTRG_SHIFT                 (0)  /* Receive FIFO threshold setting */
@@ -265,7 +269,7 @@
 #  define R_SPI_B_SPDCR2_TTRG_11                          (3 << R_SPI_B_SPDCR2_TTRG_SHIFT)  /* threshold 3 */
 
 /* SPSR Register bit definitions */
-#define R_SPI_B_SPSR_SPCP_SHIFT                   (8)  /* SPI Command Pointer */
+#define R_SPI_B_SPSR_SPCP_SHIFT                   (8)  /* RSPI Command Pointer */
 #define R_SPI_B_SPSR_SPCP_MASK                    0x700
 #  define R_SPI_B_SPSR_SPCP_000                           (0 << R_SPI_B_SPSR_SPCP_SHIFT)  /* SPCMD0 */
 #  define R_SPI_B_SPSR_SPCP_001                           (1 << R_SPI_B_SPSR_SPCP_SHIFT)  /* SPCMD1 */
@@ -276,7 +280,7 @@
 #  define R_SPI_B_SPSR_SPCP_110                           (6 << R_SPI_B_SPSR_SPCP_SHIFT)  /* SPCMD6 */
 #  define R_SPI_B_SPSR_SPCP_111                           (7 << R_SPI_B_SPSR_SPCP_SHIFT)  /* SPCMD7 */
 
-#define R_SPI_B_SPSR_SPECM_SHIFT                  (12)  /* SPI Error Command */
+#define R_SPI_B_SPSR_SPECM_SHIFT                  (12)  /* RSPI Error Command */
 #define R_SPI_B_SPSR_SPECM_MASK                   0x7000
 #  define R_SPI_B_SPSR_SPECM_000                          (0 << R_SPI_B_SPSR_SPECM_SHIFT)  /* SPCMD0 */
 #  define R_SPI_B_SPSR_SPECM_001                          (1 << R_SPI_B_SPSR_SPECM_SHIFT)  /* SPCMD1 */
@@ -287,11 +291,11 @@
 #  define R_SPI_B_SPSR_SPECM_110                          (6 << R_SPI_B_SPSR_SPECM_SHIFT)  /* SPCMD6 */
 #  define R_SPI_B_SPSR_SPECM_111                          (7 << R_SPI_B_SPSR_SPECM_SHIFT)  /* SPCMD7 */
 
-#define R_SPI_B_SPSR_SPDRF                        (1 << 23)  /* SPI Receive Data Ready Flag */
+#define R_SPI_B_SPSR_SPDRF                        (1 << 23)  /* RSPI Receive Data Ready Flag */
 
 #define R_SPI_B_SPSR_OVRF                         (1 << 24)  /* Overrun Error Flag */
 
-#define R_SPI_B_SPSR_IDLNF                        (1 << 25)  /* SPI Idle Flag */
+#define R_SPI_B_SPSR_IDLNF                        (1 << 25)  /* RSPI Idle Flag */
 
 #define R_SPI_B_SPSR_MODF                         (1 << 26)  /* Mode Fault Error Flag */
 
@@ -299,11 +303,11 @@
 
 #define R_SPI_B_SPSR_UDRF                         (1 << 28)  /* Underrun Error Flag */
 
-#define R_SPI_B_SPSR_SPTEF                        (1 << 29)  /* SPI Transmit Buffer Empty Flag */
+#define R_SPI_B_SPSR_SPTEF                        (1 << 29)  /* RSPI Transmit Buffer Empty Flag */
 
 #define R_SPI_B_SPSR_CENDF                        (1 << 30)  /* Communication End Flag */
 
-#define R_SPI_B_SPSR_SPRF                         (1 << 31)  /* SPI Receive Buffer Full Flag */
+#define R_SPI_B_SPSR_SPRF                         (1 << 31)  /* RSPI Receive Buffer Full Flag */
 
 /* SPTFSR Register bit definitions */
 #define R_SPI_B_SPTFSR_TFDN_SHIFT                 (0)  /* Transmit FIFO data empty stage number */
@@ -314,10 +318,10 @@
 #define R_SPI_B_SPRFSR_RFDN_MASK                  0x7
 
 /* SPPSR Register bit definitions */
-#define R_SPI_B_SPPSR_SPEPS                       (1 << 0)  /* SPI Polling Status */
+#define R_SPI_B_SPPSR_SPEPS                       (1 << 0)  /* RSPI Poling Status */
 
 /* SPSRC Register bit definitions */
-#define R_SPI_B_SPSRC_SPDRFC                      (1 << 23)  /* SPI Receive Data Ready Flag Clear */
+#define R_SPI_B_SPSRC_SPDRFC                      (1 << 23)  /* RSPI Receive Data Ready Flag Clear */
 
 #define R_SPI_B_SPSRC_OVRFC                       (1 << 24)  /* Overrun Error Flag Clear */
 
@@ -327,14 +331,14 @@
 
 #define R_SPI_B_SPSRC_UDRFC                       (1 << 28)  /* Underrun Error Flag Clear */
 
-#define R_SPI_B_SPSRC_SPTEFC                      (1 << 29)  /* SPI Transmit Buffer Empty Flag Clear */
+#define R_SPI_B_SPSRC_SPTEFC                      (1 << 29)  /* RSPI Transmit Buffer Empty Flag Clear */
 
 #define R_SPI_B_SPSRC_CENDFC                      (1 << 30)  /* Communication End Flag Clear */
 
-#define R_SPI_B_SPSRC_SPRFC                       (1 << 31)  /* SPI Receive Buffer Full Flag Clear */
+#define R_SPI_B_SPSRC_SPRFC                       (1 << 31)  /* RSPI Receive Buffer Full Flag Clear */
 
 /* SPFCR Register bit definitions */
-#define R_SPI_B_SPFCR_SPFRST                      (1 << 0)  /* SPI FIFO clear */
+#define R_SPI_B_SPFCR_SPFRST                      (1 << 0)  /* RSPI FIFO clear */
 
 
 /* Maximum number of channels */

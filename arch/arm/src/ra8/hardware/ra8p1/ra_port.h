@@ -45,14 +45,17 @@
 /* PORT Register Offsets */
 
 #define R_PORT_PCNTR1_OFFSET                      0x00000000  /* Port Control Register 1 */
-#define R_PORT_PDR_OFFSET                         0x00000000  /* Port Control Register 1 */
-#define R_PORT_PODR_OFFSET                        0x00000002  /* Port Control Register 1 */
+#define R_PORT_PDR_OFFSET                         0x00000000  /* Data direction register */
+#define R_PORT_PODR_OFFSET                        0x00000002  /* Output data register */
 #define R_PORT_PCNTR2_OFFSET                      0x00000004  /* Port Control Register 2 */
-#define R_PORT_PIDR_OFFSET                        0x00000004  /* Port Control Register 2 */
-#define R_PORT_EIDR_OFFSET                        0x00000006  /* Port Control Register 2 */
+#define R_PORT_PIDR_OFFSET                        0x00000004  /* Input data register */
+#define R_PORT_EIDR_OFFSET                        0x00000006  /* Event input data register */
 #define R_PORT_PCNTR3_OFFSET                      0x00000008  /* Port Control Register 3 */
-#define R_PORT_POSR_OFFSET                        0x00000008  /* Port Control Register 3 */
-#define R_PORT_PORR_OFFSET                        0x0000000a  /* Port Control Register 3 */
+#define R_PORT_POSR_OFFSET                        0x00000008  /* Output reset register */
+#define R_PORT_PORR_OFFSET                        0x0000000a  /* Output set register */
+#define R_PORT_PCNTR4_OFFSET                      0x0000000c  /* Port Control Register 4 */
+#define R_PORT_EOSR_OFFSET                        0x0000000c  /* Event output reset register */
+#define R_PORT_EORR_OFFSET                        0x0000000e  /* Event output set register */
 
 /* PORT Register Addresses */
 
@@ -65,111 +68,24 @@
 #define R_PORT_PCNTR3(port)                       (R_PORT_CH_BASE(port) + R_PORT_PCNTR3_OFFSET)
 #define R_PORT_POSR(port)                         (R_PORT_CH_BASE(port) + R_PORT_POSR_OFFSET)
 #define R_PORT_PORR(port)                         (R_PORT_CH_BASE(port) + R_PORT_PORR_OFFSET)
+#define R_PORT_PCNTR4(port)                       (R_PORT_CH_BASE(port) + R_PORT_PCNTR4_OFFSET)
+#define R_PORT_EOSR(port)                         (R_PORT_CH_BASE(port) + R_PORT_EOSR_OFFSET)
+#define R_PORT_EORR(port)                         (R_PORT_CH_BASE(port) + R_PORT_EORR_OFFSET)
 
 /* Register bit definitions */
 /* PCNTR1 Register bit definitions */
-#define R_PORT_PCNTR1_PDR00                       (1 << 0)  /* Pmn Direction */
-
-#define R_PORT_PCNTR1_PDR01                       (1 << 1)  /* Pmn Direction */
-
-#define R_PORT_PCNTR1_PDR02                       (1 << 2)  /* Pmn Direction */
-
-#define R_PORT_PCNTR1_PDR03                       (1 << 3)  /* Pmn Direction */
-
-#define R_PORT_PCNTR1_PDR04                       (1 << 4)  /* Pmn Direction */
-
-#define R_PORT_PCNTR1_PDR05                       (1 << 5)  /* Pmn Direction */
-
-#define R_PORT_PCNTR1_PDR06                       (1 << 6)  /* Pmn Direction */
-
-#define R_PORT_PCNTR1_PDR07                       (1 << 7)  /* Pmn Direction */
-
-#define R_PORT_PCNTR1_PDR08                       (1 << 8)  /* Pmn Direction */
-
-#define R_PORT_PCNTR1_PDR09                       (1 << 9)  /* Pmn Direction */
-
-#define R_PORT_PCNTR1_PDR10                       (1 << 10)  /* Pmn Direction */
-
-#define R_PORT_PCNTR1_PDR11                       (1 << 11)  /* Pmn Direction */
-
-#define R_PORT_PCNTR1_PDR12                       (1 << 12)  /* Pmn Direction */
-
-#define R_PORT_PCNTR1_PDR13                       (1 << 13)  /* Pmn Direction */
-
-#define R_PORT_PCNTR1_PDR14                       (1 << 14)  /* Pmn Direction */
-
-#define R_PORT_PCNTR1_PDR15                       (1 << 15)  /* Pmn Direction */
-
-#define R_PORT_PCNTR1_PODR00                      (1 << 16)  /* Pmn Output Data */
-
-#define R_PORT_PCNTR1_PODR01                      (1 << 17)  /* Pmn Output Data */
-
-#define R_PORT_PCNTR1_PODR02                      (1 << 18)  /* Pmn Output Data */
-
-#define R_PORT_PCNTR1_PODR03                      (1 << 19)  /* Pmn Output Data */
-
-#define R_PORT_PCNTR1_PODR04                      (1 << 20)  /* Pmn Output Data */
-
-#define R_PORT_PCNTR1_PODR05                      (1 << 21)  /* Pmn Output Data */
-
-#define R_PORT_PCNTR1_PODR06                      (1 << 22)  /* Pmn Output Data */
-
-#define R_PORT_PCNTR1_PODR07                      (1 << 23)  /* Pmn Output Data */
-
-#define R_PORT_PCNTR1_PODR08                      (1 << 24)  /* Pmn Output Data */
-
-#define R_PORT_PCNTR1_PODR09                      (1 << 25)  /* Pmn Output Data */
-
-#define R_PORT_PCNTR1_PODR10                      (1 << 26)  /* Pmn Output Data */
-
-#define R_PORT_PCNTR1_PODR11                      (1 << 27)  /* Pmn Output Data */
-
-#define R_PORT_PCNTR1_PODR12                      (1 << 28)  /* Pmn Output Data */
-
-#define R_PORT_PCNTR1_PODR13                      (1 << 29)  /* Pmn Output Data */
-
-#define R_PORT_PCNTR1_PODR14                      (1 << 30)  /* Pmn Output Data */
-
-#define R_PORT_PCNTR1_PODR15                      (1 << 31)  /* Pmn Output Data */
-
 #define R_PORT_PCNTR1_PDR_SHIFT                   (0)  /* Pmn Direction */
 #define R_PORT_PCNTR1_PDR_MASK                    0xffff
+#  define R_PORT_PCNTR1_PDR_0                             (0 << R_PORT_PCNTR1_PDR_SHIFT)  /* Input (functions as an input pin) */
+#  define R_PORT_PCNTR1_PDR_1                             (1 << R_PORT_PCNTR1_PDR_SHIFT)  /* Output (functions as an output pin). */
 
 #define R_PORT_PCNTR1_PODR_SHIFT                  (16)  /* Pmn Output Data */
 #define R_PORT_PCNTR1_PODR_MASK                   0xffff0000
+#  define R_PORT_PCNTR1_PODR_0                            (0 << R_PORT_PCNTR1_PODR_SHIFT)  /* Low output */
+#  define R_PORT_PCNTR1_PODR_1                            (1 << R_PORT_PCNTR1_PODR_SHIFT)  /* High output. */
 
 /* PDR Register bit definitions */
-#define R_PORT_PDR_PODR00                         (1 << 0)  /* Pmn Output Data */
-
-#define R_PORT_PDR_PODR01                         (1 << 1)  /* Pmn Output Data */
-
-#define R_PORT_PDR_PODR02                         (1 << 2)  /* Pmn Output Data */
-
-#define R_PORT_PDR_PODR03                         (1 << 3)  /* Pmn Output Data */
-
-#define R_PORT_PDR_PODR04                         (1 << 4)  /* Pmn Output Data */
-
-#define R_PORT_PDR_PODR05                         (1 << 5)  /* Pmn Output Data */
-
-#define R_PORT_PDR_PODR06                         (1 << 6)  /* Pmn Output Data */
-
-#define R_PORT_PDR_PODR07                         (1 << 7)  /* Pmn Output Data */
-
-#define R_PORT_PDR_PODR08                         (1 << 8)  /* Pmn Output Data */
-
-#define R_PORT_PDR_PODR09                         (1 << 9)  /* Pmn Output Data */
-
-#define R_PORT_PDR_PODR10                         (1 << 10)  /* Pmn Output Data */
-
-#define R_PORT_PDR_PODR11                         (1 << 11)  /* Pmn Output Data */
-
-#define R_PORT_PDR_PODR12                         (1 << 12)  /* Pmn Output Data */
-
-#define R_PORT_PDR_PODR13                         (1 << 13)  /* Pmn Output Data */
-
-#define R_PORT_PDR_PODR14                         (1 << 14)  /* Pmn Output Data */
-
-#define R_PORT_PDR_PODR15                         (1 << 15)  /* Pmn Output Data */
+#define R_PORT_PDR_PDR_S                          (1 << 0)  /* Pmn Direction */
 
 #define R_PORT_PDR_PDR0                           (1 << 0)  /* Pmn Direction */
 
@@ -204,37 +120,7 @@
 #define R_PORT_PDR_PDR15                          (1 << 15)  /* Pmn Direction */
 
 /* PODR Register bit definitions */
-#define R_PORT_PODR_PDR00                         (1 << 0)  /* Pmn Direction */
-
-#define R_PORT_PODR_PDR01                         (1 << 1)  /* Pmn Direction */
-
-#define R_PORT_PODR_PDR02                         (1 << 2)  /* Pmn Direction */
-
-#define R_PORT_PODR_PDR03                         (1 << 3)  /* Pmn Direction */
-
-#define R_PORT_PODR_PDR04                         (1 << 4)  /* Pmn Direction */
-
-#define R_PORT_PODR_PDR05                         (1 << 5)  /* Pmn Direction */
-
-#define R_PORT_PODR_PDR06                         (1 << 6)  /* Pmn Direction */
-
-#define R_PORT_PODR_PDR07                         (1 << 7)  /* Pmn Direction */
-
-#define R_PORT_PODR_PDR08                         (1 << 8)  /* Pmn Direction */
-
-#define R_PORT_PODR_PDR09                         (1 << 9)  /* Pmn Direction */
-
-#define R_PORT_PODR_PDR10                         (1 << 10)  /* Pmn Direction */
-
-#define R_PORT_PODR_PDR11                         (1 << 11)  /* Pmn Direction */
-
-#define R_PORT_PODR_PDR12                         (1 << 12)  /* Pmn Direction */
-
-#define R_PORT_PODR_PDR13                         (1 << 13)  /* Pmn Direction */
-
-#define R_PORT_PODR_PDR14                         (1 << 14)  /* Pmn Direction */
-
-#define R_PORT_PODR_PDR15                         (1 << 15)  /* Pmn Direction */
+#define R_PORT_PODR_PODR_S                        (1 << 0)  /* Pmn Output Data */
 
 #define R_PORT_PODR_PODR0                         (1 << 0)  /* Pmn Output Data */
 
@@ -269,108 +155,18 @@
 #define R_PORT_PODR_PODR15                        (1 << 15)  /* Pmn Output Data */
 
 /* PCNTR2 Register bit definitions */
-#define R_PORT_PCNTR2_PIDR00                      (1 << 0)  /* Pmn State */
-
-#define R_PORT_PCNTR2_PIDR01                      (1 << 1)  /* Pmn State */
-
-#define R_PORT_PCNTR2_PIDR02                      (1 << 2)  /* Pmn State */
-
-#define R_PORT_PCNTR2_PIDR03                      (1 << 3)  /* Pmn State */
-
-#define R_PORT_PCNTR2_PIDR04                      (1 << 4)  /* Pmn State */
-
-#define R_PORT_PCNTR2_PIDR05                      (1 << 5)  /* Pmn State */
-
-#define R_PORT_PCNTR2_PIDR06                      (1 << 6)  /* Pmn State */
-
-#define R_PORT_PCNTR2_PIDR07                      (1 << 7)  /* Pmn State */
-
-#define R_PORT_PCNTR2_PIDR08                      (1 << 8)  /* Pmn State */
-
-#define R_PORT_PCNTR2_PIDR09                      (1 << 9)  /* Pmn State */
-
-#define R_PORT_PCNTR2_PIDR10                      (1 << 10)  /* Pmn State */
-
-#define R_PORT_PCNTR2_PIDR11                      (1 << 11)  /* Pmn State */
-
-#define R_PORT_PCNTR2_PIDR12                      (1 << 12)  /* Pmn State */
-
-#define R_PORT_PCNTR2_PIDR13                      (1 << 13)  /* Pmn State */
-
-#define R_PORT_PCNTR2_PIDR14                      (1 << 14)  /* Pmn State */
-
-#define R_PORT_PCNTR2_PIDR15                      (1 << 15)  /* Pmn State */
-
-#define R_PORT_PCNTR2_EIDR00                      (1 << 16)  /* Port Event Input Data */
-
-#define R_PORT_PCNTR2_EIDR01                      (1 << 17)  /* Port Event Input Data */
-
-#define R_PORT_PCNTR2_EIDR02                      (1 << 18)  /* Port Event Input Data */
-
-#define R_PORT_PCNTR2_EIDR03                      (1 << 19)  /* Port Event Input Data */
-
-#define R_PORT_PCNTR2_EIDR04                      (1 << 20)  /* Port Event Input Data */
-
-#define R_PORT_PCNTR2_EIDR05                      (1 << 21)  /* Port Event Input Data */
-
-#define R_PORT_PCNTR2_EIDR06                      (1 << 22)  /* Port Event Input Data */
-
-#define R_PORT_PCNTR2_EIDR07                      (1 << 23)  /* Port Event Input Data */
-
-#define R_PORT_PCNTR2_EIDR08                      (1 << 24)  /* Port Event Input Data */
-
-#define R_PORT_PCNTR2_EIDR09                      (1 << 25)  /* Port Event Input Data */
-
-#define R_PORT_PCNTR2_EIDR10                      (1 << 26)  /* Port Event Input Data */
-
-#define R_PORT_PCNTR2_EIDR11                      (1 << 27)  /* Port Event Input Data */
-
-#define R_PORT_PCNTR2_EIDR12                      (1 << 28)  /* Port Event Input Data */
-
-#define R_PORT_PCNTR2_EIDR13                      (1 << 29)  /* Port Event Input Data */
-
-#define R_PORT_PCNTR2_EIDR14                      (1 << 30)  /* Port Event Input Data */
-
-#define R_PORT_PCNTR2_EIDR15                      (1 << 31)  /* Port Event Input Data */
-
 #define R_PORT_PCNTR2_PIDR_SHIFT                  (0)  /* Pmn Input Data */
 #define R_PORT_PCNTR2_PIDR_MASK                   0xffff
+#  define R_PORT_PCNTR2_PIDR_0                            (0 << R_PORT_PCNTR2_PIDR_SHIFT)  /* Low input */
+#  define R_PORT_PCNTR2_PIDR_1                            (1 << R_PORT_PCNTR2_PIDR_SHIFT)  /* High input. */
 
 #define R_PORT_PCNTR2_EIDR_SHIFT                  (16)  /* Pmn Event Input Data */
 #define R_PORT_PCNTR2_EIDR_MASK                   0xffff0000
+#  define R_PORT_PCNTR2_EIDR_0                            (0 << R_PORT_PCNTR2_EIDR_SHIFT)  /* Low input */
+#  define R_PORT_PCNTR2_EIDR_1                            (1 << R_PORT_PCNTR2_EIDR_SHIFT)  /* High input. */
 
 /* PIDR Register bit definitions */
-#define R_PORT_PIDR_EIDR00                        (1 << 0)  /* Port Event Input Data */
-
-#define R_PORT_PIDR_EIDR01                        (1 << 1)  /* Port Event Input Data */
-
-#define R_PORT_PIDR_EIDR02                        (1 << 2)  /* Port Event Input Data */
-
-#define R_PORT_PIDR_EIDR03                        (1 << 3)  /* Port Event Input Data */
-
-#define R_PORT_PIDR_EIDR04                        (1 << 4)  /* Port Event Input Data */
-
-#define R_PORT_PIDR_EIDR05                        (1 << 5)  /* Port Event Input Data */
-
-#define R_PORT_PIDR_EIDR06                        (1 << 6)  /* Port Event Input Data */
-
-#define R_PORT_PIDR_EIDR07                        (1 << 7)  /* Port Event Input Data */
-
-#define R_PORT_PIDR_EIDR08                        (1 << 8)  /* Port Event Input Data */
-
-#define R_PORT_PIDR_EIDR09                        (1 << 9)  /* Port Event Input Data */
-
-#define R_PORT_PIDR_EIDR10                        (1 << 10)  /* Port Event Input Data */
-
-#define R_PORT_PIDR_EIDR11                        (1 << 11)  /* Port Event Input Data */
-
-#define R_PORT_PIDR_EIDR12                        (1 << 12)  /* Port Event Input Data */
-
-#define R_PORT_PIDR_EIDR13                        (1 << 13)  /* Port Event Input Data */
-
-#define R_PORT_PIDR_EIDR14                        (1 << 14)  /* Port Event Input Data */
-
-#define R_PORT_PIDR_EIDR15                        (1 << 15)  /* Port Event Input Data */
+#define R_PORT_PIDR_PIDR_S                        (1 << 0)  /* Pmn Input Data */
 
 #define R_PORT_PIDR_PIDR0                         (1 << 0)  /* Pmn Input Data */
 
@@ -405,37 +201,7 @@
 #define R_PORT_PIDR_PIDR15                        (1 << 15)  /* Pmn Input Data */
 
 /* EIDR Register bit definitions */
-#define R_PORT_EIDR_PIDR00                        (1 << 0)  /* Pmn State */
-
-#define R_PORT_EIDR_PIDR01                        (1 << 1)  /* Pmn State */
-
-#define R_PORT_EIDR_PIDR02                        (1 << 2)  /* Pmn State */
-
-#define R_PORT_EIDR_PIDR03                        (1 << 3)  /* Pmn State */
-
-#define R_PORT_EIDR_PIDR04                        (1 << 4)  /* Pmn State */
-
-#define R_PORT_EIDR_PIDR05                        (1 << 5)  /* Pmn State */
-
-#define R_PORT_EIDR_PIDR06                        (1 << 6)  /* Pmn State */
-
-#define R_PORT_EIDR_PIDR07                        (1 << 7)  /* Pmn State */
-
-#define R_PORT_EIDR_PIDR08                        (1 << 8)  /* Pmn State */
-
-#define R_PORT_EIDR_PIDR09                        (1 << 9)  /* Pmn State */
-
-#define R_PORT_EIDR_PIDR10                        (1 << 10)  /* Pmn State */
-
-#define R_PORT_EIDR_PIDR11                        (1 << 11)  /* Pmn State */
-
-#define R_PORT_EIDR_PIDR12                        (1 << 12)  /* Pmn State */
-
-#define R_PORT_EIDR_PIDR13                        (1 << 13)  /* Pmn State */
-
-#define R_PORT_EIDR_PIDR14                        (1 << 14)  /* Pmn State */
-
-#define R_PORT_EIDR_PIDR15                        (1 << 15)  /* Pmn State */
+#define R_PORT_EIDR_EIDR_S                        (1 << 0)  /* Pmn Event Input Data */
 
 #define R_PORT_EIDR_EIDR0                         (1 << 0)  /* Pmn Event Input Data */
 
@@ -470,108 +236,18 @@
 #define R_PORT_EIDR_EIDR15                        (1 << 15)  /* Pmn Event Input Data */
 
 /* PCNTR3 Register bit definitions */
-#define R_PORT_PCNTR3_POSR00                      (1 << 0)  /* Pmn Output Set */
-
-#define R_PORT_PCNTR3_POSR01                      (1 << 1)  /* Pmn Output Set */
-
-#define R_PORT_PCNTR3_POSR02                      (1 << 2)  /* Pmn Output Set */
-
-#define R_PORT_PCNTR3_POSR03                      (1 << 3)  /* Pmn Output Set */
-
-#define R_PORT_PCNTR3_POSR04                      (1 << 4)  /* Pmn Output Set */
-
-#define R_PORT_PCNTR3_POSR05                      (1 << 5)  /* Pmn Output Set */
-
-#define R_PORT_PCNTR3_POSR06                      (1 << 6)  /* Pmn Output Set */
-
-#define R_PORT_PCNTR3_POSR07                      (1 << 7)  /* Pmn Output Set */
-
-#define R_PORT_PCNTR3_POSR08                      (1 << 8)  /* Pmn Output Set */
-
-#define R_PORT_PCNTR3_POSR09                      (1 << 9)  /* Pmn Output Set */
-
-#define R_PORT_PCNTR3_POSR10                      (1 << 10)  /* Pmn Output Set */
-
-#define R_PORT_PCNTR3_POSR11                      (1 << 11)  /* Pmn Output Set */
-
-#define R_PORT_PCNTR3_POSR12                      (1 << 12)  /* Pmn Output Set */
-
-#define R_PORT_PCNTR3_POSR13                      (1 << 13)  /* Pmn Output Set */
-
-#define R_PORT_PCNTR3_POSR14                      (1 << 14)  /* Pmn Output Set */
-
-#define R_PORT_PCNTR3_POSR15                      (1 << 15)  /* Pmn Output Set */
-
-#define R_PORT_PCNTR3_PORR00                      (1 << 16)  /* Pmn Output Reset */
-
-#define R_PORT_PCNTR3_PORR01                      (1 << 17)  /* Pmn Output Reset */
-
-#define R_PORT_PCNTR3_PORR02                      (1 << 18)  /* Pmn Output Reset */
-
-#define R_PORT_PCNTR3_PORR03                      (1 << 19)  /* Pmn Output Reset */
-
-#define R_PORT_PCNTR3_PORR04                      (1 << 20)  /* Pmn Output Reset */
-
-#define R_PORT_PCNTR3_PORR05                      (1 << 21)  /* Pmn Output Reset */
-
-#define R_PORT_PCNTR3_PORR06                      (1 << 22)  /* Pmn Output Reset */
-
-#define R_PORT_PCNTR3_PORR07                      (1 << 23)  /* Pmn Output Reset */
-
-#define R_PORT_PCNTR3_PORR08                      (1 << 24)  /* Pmn Output Reset */
-
-#define R_PORT_PCNTR3_PORR09                      (1 << 25)  /* Pmn Output Reset */
-
-#define R_PORT_PCNTR3_PORR10                      (1 << 26)  /* Pmn Output Reset */
-
-#define R_PORT_PCNTR3_PORR11                      (1 << 27)  /* Pmn Output Reset */
-
-#define R_PORT_PCNTR3_PORR12                      (1 << 28)  /* Pmn Output Reset */
-
-#define R_PORT_PCNTR3_PORR13                      (1 << 29)  /* Pmn Output Reset */
-
-#define R_PORT_PCNTR3_PORR14                      (1 << 30)  /* Pmn Output Reset */
-
-#define R_PORT_PCNTR3_PORR15                      (1 << 31)  /* Pmn Output Reset */
-
 #define R_PORT_PCNTR3_POSR_SHIFT                  (0)  /* Pmn Output Set */
 #define R_PORT_PCNTR3_POSR_MASK                   0xffff
+#  define R_PORT_PCNTR3_POSR_0                            (0 << R_PORT_PCNTR3_POSR_SHIFT)  /* No affect to output */
+#  define R_PORT_PCNTR3_POSR_1                            (1 << R_PORT_PCNTR3_POSR_SHIFT)  /* High output. */
 
 #define R_PORT_PCNTR3_PORR_SHIFT                  (16)  /* Pmn Output Reset */
 #define R_PORT_PCNTR3_PORR_MASK                   0xffff0000
+#  define R_PORT_PCNTR3_PORR_0                            (0 << R_PORT_PCNTR3_PORR_SHIFT)  /* No affect to output */
+#  define R_PORT_PCNTR3_PORR_1                            (1 << R_PORT_PCNTR3_PORR_SHIFT)  /* Low output. */
 
 /* POSR Register bit definitions */
-#define R_PORT_POSR_PORR00                        (1 << 0)  /* Pmn Output Reset */
-
-#define R_PORT_POSR_PORR01                        (1 << 1)  /* Pmn Output Reset */
-
-#define R_PORT_POSR_PORR02                        (1 << 2)  /* Pmn Output Reset */
-
-#define R_PORT_POSR_PORR03                        (1 << 3)  /* Pmn Output Reset */
-
-#define R_PORT_POSR_PORR04                        (1 << 4)  /* Pmn Output Reset */
-
-#define R_PORT_POSR_PORR05                        (1 << 5)  /* Pmn Output Reset */
-
-#define R_PORT_POSR_PORR06                        (1 << 6)  /* Pmn Output Reset */
-
-#define R_PORT_POSR_PORR07                        (1 << 7)  /* Pmn Output Reset */
-
-#define R_PORT_POSR_PORR08                        (1 << 8)  /* Pmn Output Reset */
-
-#define R_PORT_POSR_PORR09                        (1 << 9)  /* Pmn Output Reset */
-
-#define R_PORT_POSR_PORR10                        (1 << 10)  /* Pmn Output Reset */
-
-#define R_PORT_POSR_PORR11                        (1 << 11)  /* Pmn Output Reset */
-
-#define R_PORT_POSR_PORR12                        (1 << 12)  /* Pmn Output Reset */
-
-#define R_PORT_POSR_PORR13                        (1 << 13)  /* Pmn Output Reset */
-
-#define R_PORT_POSR_PORR14                        (1 << 14)  /* Pmn Output Reset */
-
-#define R_PORT_POSR_PORR15                        (1 << 15)  /* Pmn Output Reset */
+#define R_PORT_POSR_POSR_S                        (1 << 0)  /* Pmn Output Set */
 
 #define R_PORT_POSR_POSR0                         (1 << 0)  /* Pmn Output Set */
 
@@ -606,37 +282,7 @@
 #define R_PORT_POSR_POSR15                        (1 << 15)  /* Pmn Output Set */
 
 /* PORR Register bit definitions */
-#define R_PORT_PORR_POSR00                        (1 << 0)  /* Pmn Output Set */
-
-#define R_PORT_PORR_POSR01                        (1 << 1)  /* Pmn Output Set */
-
-#define R_PORT_PORR_POSR02                        (1 << 2)  /* Pmn Output Set */
-
-#define R_PORT_PORR_POSR03                        (1 << 3)  /* Pmn Output Set */
-
-#define R_PORT_PORR_POSR04                        (1 << 4)  /* Pmn Output Set */
-
-#define R_PORT_PORR_POSR05                        (1 << 5)  /* Pmn Output Set */
-
-#define R_PORT_PORR_POSR06                        (1 << 6)  /* Pmn Output Set */
-
-#define R_PORT_PORR_POSR07                        (1 << 7)  /* Pmn Output Set */
-
-#define R_PORT_PORR_POSR08                        (1 << 8)  /* Pmn Output Set */
-
-#define R_PORT_PORR_POSR09                        (1 << 9)  /* Pmn Output Set */
-
-#define R_PORT_PORR_POSR10                        (1 << 10)  /* Pmn Output Set */
-
-#define R_PORT_PORR_POSR11                        (1 << 11)  /* Pmn Output Set */
-
-#define R_PORT_PORR_POSR12                        (1 << 12)  /* Pmn Output Set */
-
-#define R_PORT_PORR_POSR13                        (1 << 13)  /* Pmn Output Set */
-
-#define R_PORT_PORR_POSR14                        (1 << 14)  /* Pmn Output Set */
-
-#define R_PORT_PORR_POSR15                        (1 << 15)  /* Pmn Output Set */
+#define R_PORT_PORR_PORR_S                        (1 << 0)  /* Pmn Output Reset */
 
 #define R_PORT_PORR_PORR0                         (1 << 0)  /* Pmn Output Reset */
 
@@ -670,9 +316,90 @@
 
 #define R_PORT_PORR_PORR15                        (1 << 15)  /* Pmn Output Reset */
 
+/* PCNTR4 Register bit definitions */
+#define R_PORT_PCNTR4_EOSR_SHIFT                  (0)  /* Pmn Event Output Set */
+#define R_PORT_PCNTR4_EOSR_MASK                   0xffff
+#  define R_PORT_PCNTR4_EOSR_0                            (0 << R_PORT_PCNTR4_EOSR_SHIFT)  /* No affect to output */
+#  define R_PORT_PCNTR4_EOSR_1                            (1 << R_PORT_PCNTR4_EOSR_SHIFT)  /* High output. */
+
+#define R_PORT_PCNTR4_EORR_SHIFT                  (16)  /* Pmn Event Output Reset */
+#define R_PORT_PCNTR4_EORR_MASK                   0xffff0000
+#  define R_PORT_PCNTR4_EORR_0                            (0 << R_PORT_PCNTR4_EORR_SHIFT)  /* No affect to output */
+#  define R_PORT_PCNTR4_EORR_1                            (1 << R_PORT_PCNTR4_EORR_SHIFT)  /* Low output */
+
+/* EOSR Register bit definitions */
+#define R_PORT_EOSR_EOSR_S                        (1 << 0)  /* Pmn Event Output Set */
+
+#define R_PORT_EOSR_EOSR0                         (1 << 0)  /* Pmn Event Output Set */
+
+#define R_PORT_EOSR_EOSR1                         (1 << 1)  /* Pmn Event Output Set */
+
+#define R_PORT_EOSR_EOSR2                         (1 << 2)  /* Pmn Event Output Set */
+
+#define R_PORT_EOSR_EOSR3                         (1 << 3)  /* Pmn Event Output Set */
+
+#define R_PORT_EOSR_EOSR4                         (1 << 4)  /* Pmn Event Output Set */
+
+#define R_PORT_EOSR_EOSR5                         (1 << 5)  /* Pmn Event Output Set */
+
+#define R_PORT_EOSR_EOSR6                         (1 << 6)  /* Pmn Event Output Set */
+
+#define R_PORT_EOSR_EOSR7                         (1 << 7)  /* Pmn Event Output Set */
+
+#define R_PORT_EOSR_EOSR8                         (1 << 8)  /* Pmn Event Output Set */
+
+#define R_PORT_EOSR_EOSR9                         (1 << 9)  /* Pmn Event Output Set */
+
+#define R_PORT_EOSR_EOSR10                        (1 << 10)  /* Pmn Event Output Set */
+
+#define R_PORT_EOSR_EOSR11                        (1 << 11)  /* Pmn Event Output Set */
+
+#define R_PORT_EOSR_EOSR12                        (1 << 12)  /* Pmn Event Output Set */
+
+#define R_PORT_EOSR_EOSR13                        (1 << 13)  /* Pmn Event Output Set */
+
+#define R_PORT_EOSR_EOSR14                        (1 << 14)  /* Pmn Event Output Set */
+
+#define R_PORT_EOSR_EOSR15                        (1 << 15)  /* Pmn Event Output Set */
+
+/* EORR Register bit definitions */
+#define R_PORT_EORR_EORR_S                        (1 << 0)  /* Pmn Event Output Reset */
+
+#define R_PORT_EORR_EORR0                         (1 << 0)  /* Pmn Event Output Reset */
+
+#define R_PORT_EORR_EORR1                         (1 << 1)  /* Pmn Event Output Reset */
+
+#define R_PORT_EORR_EORR2                         (1 << 2)  /* Pmn Event Output Reset */
+
+#define R_PORT_EORR_EORR3                         (1 << 3)  /* Pmn Event Output Reset */
+
+#define R_PORT_EORR_EORR4                         (1 << 4)  /* Pmn Event Output Reset */
+
+#define R_PORT_EORR_EORR5                         (1 << 5)  /* Pmn Event Output Reset */
+
+#define R_PORT_EORR_EORR6                         (1 << 6)  /* Pmn Event Output Reset */
+
+#define R_PORT_EORR_EORR7                         (1 << 7)  /* Pmn Event Output Reset */
+
+#define R_PORT_EORR_EORR8                         (1 << 8)  /* Pmn Event Output Reset */
+
+#define R_PORT_EORR_EORR9                         (1 << 9)  /* Pmn Event Output Reset */
+
+#define R_PORT_EORR_EORR10                        (1 << 10)  /* Pmn Event Output Reset */
+
+#define R_PORT_EORR_EORR11                        (1 << 11)  /* Pmn Event Output Reset */
+
+#define R_PORT_EORR_EORR12                        (1 << 12)  /* Pmn Event Output Reset */
+
+#define R_PORT_EORR_EORR13                        (1 << 13)  /* Pmn Event Output Reset */
+
+#define R_PORT_EORR_EORR14                        (1 << 14)  /* Pmn Event Output Reset */
+
+#define R_PORT_EORR_EORR15                        (1 << 15)  /* Pmn Event Output Reset */
+
 
 /* Maximum number of channels */
 
-#define PORT_MAX_CHANNELS    14
+#define PORT_MAX_CHANNELS    15
 
 #endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_PORT_H */

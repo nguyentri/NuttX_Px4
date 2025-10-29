@@ -67,7 +67,19 @@
 #define R_MIPI_DSI_RXRINFOOWSR_OFFSET             0x00000238  /* Receive Result Info Overwrite Status Register */
 #define R_MIPI_DSI_RXRINFOOWSCR_OFFSET            0x0000023c  /* Receive Result Info Overwrite Status Clear Register */
 /* RXRSS%sR Registers (0-3) */
-#define R_MIPI_DSI_RXRSSXR_OFFSET(m)              (0x00000240 + ((m) * 0x00000004))  /* Receive Result Save Slot-x Register (x = 0 to 3) */
+#define R_MIPI_DSI_RXRSSXR_OFFSET(m)              (0x00000240 + ((m) * 0x00000004))  /* Receive Result Save Slot-%s Register */
+/* RXRSS%sR_L Registers (0-3) */
+#define R_MIPI_DSI_RXRSSR_L_OFFSET(m)             (0x00000240 + ((m) * 0x00000004))  /* Receive Result Save Slot-%s Register */
+/* RXRSS%sR_LL Registers (0-3) */
+#define R_MIPI_DSI_RXRSSR_LL_OFFSET(m)            (0x00000240 + ((m) * 0x00000004))  /* Receive Result Save Slot-%s Register */
+/* RXRSS%sR_LH Registers (0-3) */
+#define R_MIPI_DSI_RXRSSR_LH_OFFSET(m)            (0x00000241 + ((m) * 0x00000004))  /* Receive Result Save Slot-%s Register */
+/* RXRSS%sR_H Registers (0-3) */
+#define R_MIPI_DSI_RXRSSR_H_OFFSET(m)             (0x00000242 + ((m) * 0x00000004))  /* Receive Result Save Slot-%s Register */
+/* RXRSS%sR_HL Registers (0-3) */
+#define R_MIPI_DSI_RXRSSR_HL_OFFSET(m)            (0x00000242 + ((m) * 0x00000004))  /* Receive Result Save Slot-%s Register */
+/* RXRSS%sR_HH Registers (0-3) */
+#define R_MIPI_DSI_RXRSSR_HH_OFFSET(m)            (0x00000243 + ((m) * 0x00000004))  /* Receive Result Save Slot-%s Register */
 #define R_MIPI_DSI_RXPPD0R_OFFSET                 0x000002c0  /* Receive Packet Payload Data 0 Register */
 #define R_MIPI_DSI_RXPPD1R_OFFSET                 0x000002c4  /* Receive Packet Payload Data 1 Register */
 #define R_MIPI_DSI_RXPPD2R_OFFSET                 0x000002c8  /* Receive Packet Payload Data 2 Register */
@@ -102,21 +114,89 @@
 #define R_MIPI_DSI_SQCH1SCR_OFFSET                0x00000614  /* Sequence Channel 1 Status Clear Register */
 #define R_MIPI_DSI_SQCH1IER_OFFSET                0x00000618  /* Sequence Channel 1 Interrupt Enable Register */
 /* SQCH0DSC%sAR Registers (0-7) */
-#define R_MIPI_DSI_SQCH0DSCAR_OFFSET(m)           (0x00000780 + ((m) * 0x00000010))  /* Sequence Channel 0 Descriptor-m A Register (m = 0 to 7) */
+#define R_MIPI_DSI_SQCH0DSCAR_OFFSET(m)           (0x00000780 + ((m) * 0x00000010))  /* Sequence Channel 0 Descriptor-%s A Register */
+/* SQCH0DSC%sAR_L Registers (0-7) */
+#define R_MIPI_DSI_SQCH0DSCAR_L_OFFSET(m)         (0x00000780 + ((m) * 0x00000010))  /* Sequence Channel 0 Descriptor-%s A Register */
+/* SQCH0DSC%sAR_LL Registers (0-7) */
+#define R_MIPI_DSI_SQCH0DSCAR_LL_OFFSET(m)        (0x00000780 + ((m) * 0x00000010))  /* Sequence Channel 0 Descriptor-%s A Register */
+/* SQCH0DSC%sAR_LH Registers (0-7) */
+#define R_MIPI_DSI_SQCH0DSCAR_LH_OFFSET(m)        (0x00000781 + ((m) * 0x00000010))  /* Sequence Channel 0 Descriptor-%s A Register */
+/* SQCH0DSC%sAR_H Registers (0-7) */
+#define R_MIPI_DSI_SQCH0DSCAR_H_OFFSET(m)         (0x00000782 + ((m) * 0x00000010))  /* Sequence Channel 0 Descriptor-%s A Register */
+/* SQCH0DSC%sAR_HL Registers (0-7) */
+#define R_MIPI_DSI_SQCH0DSCAR_HL_OFFSET(m)        (0x00000782 + ((m) * 0x00000010))  /* Sequence Channel 0 Descriptor-%s A Register */
+/* SQCH0DSC%sAR_HH Registers (0-7) */
+#define R_MIPI_DSI_SQCH0DSCAR_HH_OFFSET(m)        (0x00000783 + ((m) * 0x00000010))  /* Sequence Channel 0 Descriptor-%s A Register */
 /* SQCH0DSC%sBR Registers (0-7) */
-#define R_MIPI_DSI_SQCH0DSCBR_OFFSET(m)           (0x00000784 + ((m) * 0x00000010))  /* Sequence Channel 0 Descriptor-m B Register (m = 0 to 7) */
+#define R_MIPI_DSI_SQCH0DSCBR_OFFSET(m)           (0x00000784 + ((m) * 0x00000010))  /* Sequence Channel 0 Descriptor-%s B Register */
 /* SQCH0DSC%sCR Registers (0-7) */
-#define R_MIPI_DSI_SQCH0DSCCR_OFFSET(m)           (0x00000788 + ((m) * 0x00000010))  /* Sequence Channel 0 Descriptor-m C Register */
+#define R_MIPI_DSI_SQCH0DSCCR_OFFSET(m)           (0x00000788 + ((m) * 0x00000010))  /* Sequence Channel 0 Descriptor-%s C Register */
+/* SQCH0DSC%sCR_L Registers (0-7) */
+#define R_MIPI_DSI_SQCH0DSCCR_L_OFFSET(m)         (0x00000788 + ((m) * 0x00000010))  /* Sequence Channel 0 Descriptor-%s C Register */
+/* SQCH0DSC%sCR_LL Registers (0-7) */
+#define R_MIPI_DSI_SQCH0DSCCR_LL_OFFSET(m)        (0x00000788 + ((m) * 0x00000010))  /* Sequence Channel 0 Descriptor-%s C Register */
+/* SQCH0DSC%sCR_H Registers (0-7) */
+#define R_MIPI_DSI_SQCH0DSCCR_H_OFFSET(m)         (0x0000078a + ((m) * 0x00000010))  /* Sequence Channel 0 Descriptor-%s C Register */
+/* SQCH0DSC%sCR_HL Registers (0-7) */
+#define R_MIPI_DSI_SQCH0DSCCR_HL_OFFSET(m)        (0x0000078a + ((m) * 0x00000010))  /* Sequence Channel 0 Descriptor-%s C Register */
+/* SQCH0DSC%sCR_HH Registers (0-7) */
+#define R_MIPI_DSI_SQCH0DSCCR_HH_OFFSET(m)        (0x0000078b + ((m) * 0x00000010))  /* Sequence Channel 0 Descriptor-%s C Register */
 /* SQCH0DSC%sDR Registers (0-7) */
-#define R_MIPI_DSI_SQCH0DSCDR_OFFSET(m)           (0x0000078c + ((m) * 0x00000010))  /* Sequence Channel 0 Descriptor-m D Register (m = 0 to 7) */
+#define R_MIPI_DSI_SQCH0DSCDR_OFFSET(m)           (0x0000078c + ((m) * 0x00000010))  /* Sequence Channel 0 Descriptor-%s D Register */
+/* SQCH0DSC%sDR_L Registers (0-7) */
+#define R_MIPI_DSI_SQCH0DSCDR_L_OFFSET(m)         (0x0000078c + ((m) * 0x00000010))  /* Sequence Channel 0 Descriptor-%s D Register */
+/* SQCH0DSC%sDR_LL Registers (0-7) */
+#define R_MIPI_DSI_SQCH0DSCDR_LL_OFFSET(m)        (0x0000078c + ((m) * 0x00000010))  /* Sequence Channel 0 Descriptor-%s D Register */
+/* SQCH0DSC%sDR_LH Registers (0-7) */
+#define R_MIPI_DSI_SQCH0DSCDR_LH_OFFSET(m)        (0x0000078d + ((m) * 0x00000010))  /* Sequence Channel 0 Descriptor-%s D Register */
+/* SQCH0DSC%sDR_H Registers (0-7) */
+#define R_MIPI_DSI_SQCH0DSCDR_H_OFFSET(m)         (0x0000078e + ((m) * 0x00000010))  /* Sequence Channel 0 Descriptor-%s D Register */
+/* SQCH0DSC%sDR_HL Registers (0-7) */
+#define R_MIPI_DSI_SQCH0DSCDR_HL_OFFSET(m)        (0x0000078e + ((m) * 0x00000010))  /* Sequence Channel 0 Descriptor-%s D Register */
+/* SQCH0DSC%sDR_HH Registers (0-7) */
+#define R_MIPI_DSI_SQCH0DSCDR_HH_OFFSET(m)        (0x0000078f + ((m) * 0x00000010))  /* Sequence Channel 0 Descriptor-%s D Register */
 /* SQCH1DSC%sAR Registers (0-7) */
-#define R_MIPI_DSI_SQCH1DSCAR_OFFSET(m)           (0x00000800 + ((m) * 0x00000010))  /* Sequence Channel 1 Descriptor-m A Register (m = 0 to 7) */
+#define R_MIPI_DSI_SQCH1DSCAR_OFFSET(m)           (0x00000800 + ((m) * 0x00000010))  /* Sequence Channel 1 Descriptor-%s A Register */
+/* SQCH1DSC%sAR_L Registers (0-7) */
+#define R_MIPI_DSI_SQCH1DSCAR_L_OFFSET(m)         (0x00000800 + ((m) * 0x00000010))  /* Sequence Channel 1 Descriptor-%s A Register */
+/* SQCH1DSC%sAR_LL Registers (0-7) */
+#define R_MIPI_DSI_SQCH1DSCAR_LL_OFFSET(m)        (0x00000800 + ((m) * 0x00000010))  /* Sequence Channel 1 Descriptor-%s A Register */
+/* SQCH1DSC%sAR_LH Registers (0-7) */
+#define R_MIPI_DSI_SQCH1DSCAR_LH_OFFSET(m)        (0x00000801 + ((m) * 0x00000010))  /* Sequence Channel 1 Descriptor-%s A Register */
+/* SQCH1DSC%sAR_H Registers (0-7) */
+#define R_MIPI_DSI_SQCH1DSCAR_H_OFFSET(m)         (0x00000802 + ((m) * 0x00000010))  /* Sequence Channel 1 Descriptor-%s A Register */
+/* SQCH1DSC%sAR_HL Registers (0-7) */
+#define R_MIPI_DSI_SQCH1DSCAR_HL_OFFSET(m)        (0x00000802 + ((m) * 0x00000010))  /* Sequence Channel 1 Descriptor-%s A Register */
+/* SQCH1DSC%sAR_HH Registers (0-7) */
+#define R_MIPI_DSI_SQCH1DSCAR_HH_OFFSET(m)        (0x00000803 + ((m) * 0x00000010))  /* Sequence Channel 1 Descriptor-%s A Register */
 /* SQCH1DSC%sBR Registers (0-7) */
-#define R_MIPI_DSI_SQCH1DSCBR_OFFSET(m)           (0x00000804 + ((m) * 0x00000010))  /* Sequence Channel 1 Descriptor-m B Register (m = 0 to 7) */
+#define R_MIPI_DSI_SQCH1DSCBR_OFFSET(m)           (0x00000804 + ((m) * 0x00000010))  /* Sequence Channel 1 Descriptor-%s B Register */
 /* SQCH1DSC%sCR Registers (0-7) */
-#define R_MIPI_DSI_SQCH1DSCCR_OFFSET(m)           (0x00000808 + ((m) * 0x00000010))  /* Sequence Channel 1 Descriptor-m C Register */
+#define R_MIPI_DSI_SQCH1DSCCR_OFFSET(m)           (0x00000808 + ((m) * 0x00000010))  /* Sequence Channel 1 Descriptor-%s C Register */
+/* SQCH1DSC%sCR_L Registers (0-7) */
+#define R_MIPI_DSI_SQCH1DSCCR_L_OFFSET(m)         (0x00000808 + ((m) * 0x00000010))  /* Sequence Channel 1 Descriptor-%s C Register */
+/* SQCH1DSC%sCR_LL Registers (0-7) */
+#define R_MIPI_DSI_SQCH1DSCCR_LL_OFFSET(m)        (0x00000808 + ((m) * 0x00000010))  /* Sequence Channel 1 Descriptor-%s C Register */
+/* SQCH1DSC%sCR_H Registers (0-7) */
+#define R_MIPI_DSI_SQCH1DSCCR_H_OFFSET(m)         (0x0000080a + ((m) * 0x00000010))  /* Sequence Channel 1 Descriptor-%s C Register */
+/* SQCH1DSC%sCR_HL Registers (0-7) */
+#define R_MIPI_DSI_SQCH1DSCCR_HL_OFFSET(m)        (0x0000080a + ((m) * 0x00000010))  /* Sequence Channel 1 Descriptor-%s C Register */
+/* SQCH1DSC%sCR_HH Registers (0-7) */
+#define R_MIPI_DSI_SQCH1DSCCR_HH_OFFSET(m)        (0x0000080b + ((m) * 0x00000010))  /* Sequence Channel 1 Descriptor-%s C Register */
 /* SQCH1DSC%sDR Registers (0-7) */
-#define R_MIPI_DSI_SQCH1DSCDR_OFFSET(m)           (0x0000080c + ((m) * 0x00000010))  /* Sequence Channel 1 Descriptor-m D Register (m = 0 to 7) */
+#define R_MIPI_DSI_SQCH1DSCDR_OFFSET(m)           (0x0000080c + ((m) * 0x00000010))  /* Sequence Channel 1 Descriptor-%s D Register */
+/* SQCH1DSC%sDR_L Registers (0-7) */
+#define R_MIPI_DSI_SQCH1DSCDR_L_OFFSET(m)         (0x0000080c + ((m) * 0x00000010))  /* Sequence Channel 1 Descriptor-%s D Register */
+/* SQCH1DSC%sDR_LL Registers (0-7) */
+#define R_MIPI_DSI_SQCH1DSCDR_LL_OFFSET(m)        (0x0000080c + ((m) * 0x00000010))  /* Sequence Channel 1 Descriptor-%s D Register */
+/* SQCH1DSC%sDR_LH Registers (0-7) */
+#define R_MIPI_DSI_SQCH1DSCDR_LH_OFFSET(m)        (0x0000080d + ((m) * 0x00000010))  /* Sequence Channel 1 Descriptor-%s D Register */
+/* SQCH1DSCmDR_H Registers (0-7) */
+#define R_MIPI_DSI_SQCH1DSCMDR_H_OFFSET(m)        (0x0000080e + ((m) * 0x00000010))  /* Sequence Channel 1 Descriptor-%s D Register */
+/* SQCH1DSC%sDR_HL Registers (0-7) */
+#define R_MIPI_DSI_SQCH1DSCDR_HL_OFFSET(m)        (0x0000080e + ((m) * 0x00000010))  /* Sequence Channel 1 Descriptor-%s D Register */
+/* SQCH1DSC%sDR_HH Registers (0-7) */
+#define R_MIPI_DSI_SQCH1DSCDR_HH_OFFSET(m)        (0x0000080f + ((m) * 0x00000010))  /* Sequence Channel 1 Descriptor-%s D Register */
 
 /* MIPI_DSI Register Addresses */
 
@@ -147,6 +227,12 @@
 #define R_MIPI_DSI_RXRINFOOWSR                    (R_MIPI_DSI_BASE + R_MIPI_DSI_RXRINFOOWSR_OFFSET)
 #define R_MIPI_DSI_RXRINFOOWSCR                   (R_MIPI_DSI_BASE + R_MIPI_DSI_RXRINFOOWSCR_OFFSET)
 #define R_MIPI_DSI_RXRSSXR(m)                     (R_MIPI_DSI_BASE + R_MIPI_DSI_RXRSSXR_OFFSET(m))
+#define R_MIPI_DSI_RXRSSR_L(m)                    (R_MIPI_DSI_BASE + R_MIPI_DSI_RXRSSR_L_OFFSET(m))
+#define R_MIPI_DSI_RXRSSR_LL(m)                   (R_MIPI_DSI_BASE + R_MIPI_DSI_RXRSSR_LL_OFFSET(m))
+#define R_MIPI_DSI_RXRSSR_LH(m)                   (R_MIPI_DSI_BASE + R_MIPI_DSI_RXRSSR_LH_OFFSET(m))
+#define R_MIPI_DSI_RXRSSR_H(m)                    (R_MIPI_DSI_BASE + R_MIPI_DSI_RXRSSR_H_OFFSET(m))
+#define R_MIPI_DSI_RXRSSR_HL(m)                   (R_MIPI_DSI_BASE + R_MIPI_DSI_RXRSSR_HL_OFFSET(m))
+#define R_MIPI_DSI_RXRSSR_HH(m)                   (R_MIPI_DSI_BASE + R_MIPI_DSI_RXRSSR_HH_OFFSET(m))
 #define R_MIPI_DSI_RXPPD0R                        (R_MIPI_DSI_BASE + R_MIPI_DSI_RXPPD0R_OFFSET)
 #define R_MIPI_DSI_RXPPD1R                        (R_MIPI_DSI_BASE + R_MIPI_DSI_RXPPD1R_OFFSET)
 #define R_MIPI_DSI_RXPPD2R                        (R_MIPI_DSI_BASE + R_MIPI_DSI_RXPPD2R_OFFSET)
@@ -181,17 +267,54 @@
 #define R_MIPI_DSI_SQCH1SCR                       (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1SCR_OFFSET)
 #define R_MIPI_DSI_SQCH1IER                       (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1IER_OFFSET)
 #define R_MIPI_DSI_SQCH0DSCAR(m)                  (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSCAR_OFFSET(m))
+#define R_MIPI_DSI_SQCH0DSCAR_L(m)                (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSCAR_L_OFFSET(m))
+#define R_MIPI_DSI_SQCH0DSCAR_LL(m)               (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSCAR_LL_OFFSET(m))
+#define R_MIPI_DSI_SQCH0DSCAR_LH(m)               (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSCAR_LH_OFFSET(m))
+#define R_MIPI_DSI_SQCH0DSCAR_H(m)                (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSCAR_H_OFFSET(m))
+#define R_MIPI_DSI_SQCH0DSCAR_HL(m)               (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSCAR_HL_OFFSET(m))
+#define R_MIPI_DSI_SQCH0DSCAR_HH(m)               (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSCAR_HH_OFFSET(m))
 #define R_MIPI_DSI_SQCH0DSCBR(m)                  (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSCBR_OFFSET(m))
 #define R_MIPI_DSI_SQCH0DSCCR(m)                  (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSCCR_OFFSET(m))
+#define R_MIPI_DSI_SQCH0DSCCR_L(m)                (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSCCR_L_OFFSET(m))
+#define R_MIPI_DSI_SQCH0DSCCR_LL(m)               (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSCCR_LL_OFFSET(m))
+#define R_MIPI_DSI_SQCH0DSCCR_H(m)                (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSCCR_H_OFFSET(m))
+#define R_MIPI_DSI_SQCH0DSCCR_HL(m)               (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSCCR_HL_OFFSET(m))
+#define R_MIPI_DSI_SQCH0DSCCR_HH(m)               (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSCCR_HH_OFFSET(m))
 #define R_MIPI_DSI_SQCH0DSCDR(m)                  (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSCDR_OFFSET(m))
+#define R_MIPI_DSI_SQCH0DSCDR_L(m)                (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSCDR_L_OFFSET(m))
+#define R_MIPI_DSI_SQCH0DSCDR_LL(m)               (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSCDR_LL_OFFSET(m))
+#define R_MIPI_DSI_SQCH0DSCDR_LH(m)               (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSCDR_LH_OFFSET(m))
+#define R_MIPI_DSI_SQCH0DSCDR_H(m)                (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSCDR_H_OFFSET(m))
+#define R_MIPI_DSI_SQCH0DSCDR_HL(m)               (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSCDR_HL_OFFSET(m))
+#define R_MIPI_DSI_SQCH0DSCDR_HH(m)               (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH0DSCDR_HH_OFFSET(m))
 #define R_MIPI_DSI_SQCH1DSCAR(m)                  (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSCAR_OFFSET(m))
+#define R_MIPI_DSI_SQCH1DSCAR_L(m)                (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSCAR_L_OFFSET(m))
+#define R_MIPI_DSI_SQCH1DSCAR_LL(m)               (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSCAR_LL_OFFSET(m))
+#define R_MIPI_DSI_SQCH1DSCAR_LH(m)               (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSCAR_LH_OFFSET(m))
+#define R_MIPI_DSI_SQCH1DSCAR_H(m)                (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSCAR_H_OFFSET(m))
+#define R_MIPI_DSI_SQCH1DSCAR_HL(m)               (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSCAR_HL_OFFSET(m))
+#define R_MIPI_DSI_SQCH1DSCAR_HH(m)               (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSCAR_HH_OFFSET(m))
 #define R_MIPI_DSI_SQCH1DSCBR(m)                  (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSCBR_OFFSET(m))
 #define R_MIPI_DSI_SQCH1DSCCR(m)                  (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSCCR_OFFSET(m))
+#define R_MIPI_DSI_SQCH1DSCCR_L(m)                (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSCCR_L_OFFSET(m))
+#define R_MIPI_DSI_SQCH1DSCCR_LL(m)               (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSCCR_LL_OFFSET(m))
+#define R_MIPI_DSI_SQCH1DSCCR_H(m)                (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSCCR_H_OFFSET(m))
+#define R_MIPI_DSI_SQCH1DSCCR_HL(m)               (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSCCR_HL_OFFSET(m))
+#define R_MIPI_DSI_SQCH1DSCCR_HH(m)               (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSCCR_HH_OFFSET(m))
 #define R_MIPI_DSI_SQCH1DSCDR(m)                  (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSCDR_OFFSET(m))
+#define R_MIPI_DSI_SQCH1DSCDR_L(m)                (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSCDR_L_OFFSET(m))
+#define R_MIPI_DSI_SQCH1DSCDR_LL(m)               (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSCDR_LL_OFFSET(m))
+#define R_MIPI_DSI_SQCH1DSCDR_LH(m)               (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSCDR_LH_OFFSET(m))
+#define R_MIPI_DSI_SQCH1DSCMDR_H(m)               (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSCMDR_H_OFFSET(m))
+#define R_MIPI_DSI_SQCH1DSCDR_HL(m)               (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSCDR_HL_OFFSET(m))
+#define R_MIPI_DSI_SQCH1DSCDR_HH(m)               (R_MIPI_DSI_BASE + R_MIPI_DSI_SQCH1DSCDR_HH_OFFSET(m))
 
 /* Register bit definitions */
 /* ISR Register bit definitions */
 #define R_MIPI_DSI_ISR_SQ0                        (1 << 0)  /* Sequence Channel-0 Interrupt Flag */
+
+#define R_MIPI_DSI_ISR_RESERVED_SHIFT             (29)  /* These bits are read as 000. */
+#define R_MIPI_DSI_ISR_RESERVED_MASK              0xe0000000
 
 #define R_MIPI_DSI_ISR_SQ1                        (1 << 4)  /* Sequence Channel-1 Interrupt Flag */
 
@@ -205,6 +328,9 @@
 
 /* LINKSR Register bit definitions */
 #define R_MIPI_DSI_LINKSR_SQ0RUN                  (1 << 0)  /* Sequence Channel-0 Running Flag */
+
+#define R_MIPI_DSI_LINKSR_RESERVED_SHIFT          (9)  /* These bits are read as 000. */
+#define R_MIPI_DSI_LINKSR_RESERVED_MASK           0xe00
 
 #define R_MIPI_DSI_LINKSR_SQ1RUN                  (1 << 4)  /* Sequence Channel-1 Running Flag */
 
@@ -220,6 +346,9 @@
 #  define R_MIPI_DSI_TXSETR_NUMLANE_00                    (0 << R_MIPI_DSI_TXSETR_NUMLANE_SHIFT)  /* 1 Lane (Use of Lane-0) */
 #  define R_MIPI_DSI_TXSETR_NUMLANE_01                    (1 << R_MIPI_DSI_TXSETR_NUMLANE_SHIFT)  /* 2 Lane (Use of Lane-0 and Lane-1) */
 
+#define R_MIPI_DSI_TXSETR_RESERVED_SHIFT          (10)  /* These bits are read as 000000. The write value should be 000000. */
+#define R_MIPI_DSI_TXSETR_RESERVED_MASK           0xfc00
+
 #define R_MIPI_DSI_TXSETR_CLEN                    (1 << 8)  /* Clock Lane Enable */
 
 #define R_MIPI_DSI_TXSETR_DLEN                    (1 << 9)  /* Data Lane Enable */
@@ -229,11 +358,20 @@
 
 #define R_MIPI_DSI_HSCLKSETR_HSCLMD               (1 << 1)  /* HS Clock Running Mode */
 
+#define R_MIPI_DSI_HSCLKSETR_RESERVED_SHIFT       (2)  /* These bits are read as 000000000000000000000000000000. The write value should be 000000000000000000000000000000. */
+#define R_MIPI_DSI_HSCLKSETR_RESERVED_MASK        0xfffffffc
+
 /* ULPSSETR Register bit definitions */
 #define R_MIPI_DSI_ULPSSETR_WKUP_SHIFT            (0)  /* ULPS Wakeup Period */
 #define R_MIPI_DSI_ULPSSETR_WKUP_MASK             0xff
 
+#define R_MIPI_DSI_ULPSSETR_RESERVED_SHIFT        (8)  /* These bits are read as 000000000000000000000000. The write value should be 000000000000000000000000. */
+#define R_MIPI_DSI_ULPSSETR_RESERVED_MASK         0xffffff00
+
 /* ULPSCR Register bit definitions */
+#define R_MIPI_DSI_ULPSCR_RESERVED_SHIFT          (30)  /* The write value should be 00. */
+#define R_MIPI_DSI_ULPSCR_RESERVED_MASK           0xc0000000
+
 #define R_MIPI_DSI_ULPSCR_CLENT                   (1 << 24)  /* CL ULPS Enter */
 
 #define R_MIPI_DSI_ULPSCR_CLEXIT                  (1 << 25)  /* CL ULPS Exit */
@@ -245,7 +383,10 @@
 /* RSTCR Register bit definitions */
 #define R_MIPI_DSI_RSTCR_SWRST                    (1 << 0)  /* Software Reset */
 
-#define R_MIPI_DSI_RSTCR_FTXSTP                   (1 << 16)  /* Force TX Stop Mode */
+#define R_MIPI_DSI_RSTCR_RESERVED_SHIFT           (25)  /* These bits are read as 0000000. The write value should be 0000000. */
+#define R_MIPI_DSI_RSTCR_RESERVED_MASK            0xfe000000
+
+#define R_MIPI_DSI_RSTCR_FTXSTP                   (1 << 16)  /* Force Tx Stop Mode */
 
 /* RSTSR Register bit definitions */
 #define R_MIPI_DSI_RSTSR_RSTHS                    (1 << 0)  /* HS Software Reset Status */
@@ -258,6 +399,9 @@
 
 #define R_MIPI_DSI_RSTSR_RSTV                     (1 << 4)  /* Video Software Reset Status */
 
+#define R_MIPI_DSI_RSTSR_RESERVED_SHIFT           (16)  /* These bits are read as 0000000000000000. */
+#define R_MIPI_DSI_RSTSR_RESERVED_MASK            0xffff0000
+
 #define R_MIPI_DSI_RSTSR_DL0STP                   (1 << 8)  /* Data Lane-0 Stop Status */
 
 #define R_MIPI_DSI_RSTSR_DL1STP                   (1 << 9)  /* Data Lane-1 Stop Status */
@@ -269,6 +413,9 @@
 #define R_MIPI_DSI_DSISETR_MRPSZ_MASK             0xffff
 
 #define R_MIPI_DSI_DSISETR_ECCEN                  (1 << 16)  /* ECC Check Enable */
+
+#define R_MIPI_DSI_DSISETR_RESERVED_SHIFT         (24)  /* These bits are read as 00000. The write value should be 00000. */
+#define R_MIPI_DSI_DSISETR_RESERVED_MASK          0x1f000000
 
 #define R_MIPI_DSI_DSISETR_VC0CRCEN               (1 << 20)  /* VC-0 CRC Check Enable */
 
@@ -343,9 +490,13 @@
 
 #define R_MIPI_DSI_RXSR_TATO                      (1 << 2)  /* Turnaround Acknowledge Timeout Interrupt Flag */
 
+#define R_MIPI_DSI_RXSR_RESERVED                  (1 << 31)  /* This bit is read as 0. */
+
 #define R_MIPI_DSI_RXSR_RXRESP                    (1 << 8)  /* Response Packet Receive Interrupt Flag */
 
 #define R_MIPI_DSI_RXSR_RXEOTP                    (1 << 10)  /* EoTp Receive Interrupt Flag */
+
+#define R_MIPI_DSI_RXSR_RXTE                      (1 << 13)  /* Tearing Effect Trigger Receive Interrupt Flag */
 
 #define R_MIPI_DSI_RXSR_RXACK                     (1 << 14)  /* ACK Trigger Receive Interrupt Flag */
 
@@ -375,8 +526,6 @@
 
 #define R_MIPI_DSI_RXSR_RXAKE                     (1 << 30)  /* Acknowledge and Error Report Receive Interrupt Flag */
 
-#define R_MIPI_DSI_RXSR_RXTE                      (1 << 13)  /* Tearing Effect Trigger Receive Interrupt Flag */
-
 /* RXSCR Register bit definitions */
 #define R_MIPI_DSI_RXSCR_BTAREND                  (1 << 0)  /* BTA Request End Interrupt Flag Clear */
 
@@ -384,9 +533,13 @@
 
 #define R_MIPI_DSI_RXSCR_TATO                     (1 << 2)  /* Turnaround Acknowledge Timeout Interrupt Flag Clear */
 
+#define R_MIPI_DSI_RXSCR_RESERVED                 (1 << 31)  /* This bit is read as 0. The write value should be 0. */
+
 #define R_MIPI_DSI_RXSCR_RXRESP                   (1 << 8)  /* Response Packet Receive Interrupt Flag Clear */
 
 #define R_MIPI_DSI_RXSCR_RXEOTP                   (1 << 10)  /* EoTp Receive Interrupt Flag Clear */
+
+#define R_MIPI_DSI_RXSCR_RXTE                     (1 << 13)  /* Tearing Effect Trigger Receive Interrupt Flag Clear */
 
 #define R_MIPI_DSI_RXSCR_RXACK                    (1 << 14)  /* ACK Trigger Receive Interrupt Flag Clear */
 
@@ -416,8 +569,6 @@
 
 #define R_MIPI_DSI_RXSCR_RXAKE                    (1 << 30)  /* Acknowledge and Error Report Receive Interrupt Flag Clear */
 
-#define R_MIPI_DSI_RXSCR_RXTE                     (1 << 13)  /* Tearing Effect Trigger Receive Interrupt Flag Clear */
-
 /* RXIER Register bit definitions */
 #define R_MIPI_DSI_RXIER_BTAREND                  (1 << 0)  /* BTA Request End Interrupt Enable */
 
@@ -425,9 +576,13 @@
 
 #define R_MIPI_DSI_RXIER_TATO                     (1 << 2)  /* Turnaround Acknowledge Timeout Interrupt Enable */
 
+#define R_MIPI_DSI_RXIER_RESERVED                 (1 << 31)  /* This bit is read as 0. The write value should be 0. */
+
 #define R_MIPI_DSI_RXIER_RXRESP                   (1 << 8)  /* Response Packet Receive Interrupt Enable */
 
 #define R_MIPI_DSI_RXIER_RXEOTP                   (1 << 10)  /* EoTp Receive Interrupt Enable */
+
+#define R_MIPI_DSI_RXIER_RXTE                     (1 << 13)  /* Tearing Effect Trigger Receive Interrupt Enable */
 
 #define R_MIPI_DSI_RXIER_RXACK                    (1 << 14)  /* ACK Trigger Receive Interrupt Enable */
 
@@ -435,7 +590,7 @@
 
 #define R_MIPI_DSI_RXIER_MLFERR                   (1 << 16)  /* Malform Error Interrupt Enable */
 
-#define R_MIPI_DSI_RXIER_ECCERRM                  (1 << 17)  /* Multi-bit ECC Error Interrupt Enable */
+#define R_MIPI_DSI_RXIER_ECCERRM                  (1 << 17)  /* Multi Bit ECC Error Interrupt Enable */
 
 #define R_MIPI_DSI_RXIER_UNEXERR                  (1 << 18)  /* Unexpected Packet Error Interrupt Enable */
 
@@ -456,8 +611,6 @@
 #define R_MIPI_DSI_RXIER_ECCERRS                  (1 << 28)  /* Single Bit ECC Error Interrupt Enable */
 
 #define R_MIPI_DSI_RXIER_RXAKE                    (1 << 30)  /* Acknowledge and Error Report Receive Interrupt Enable */
-
-#define R_MIPI_DSI_RXIER_RXTE                     (1 << 13)  /* Tearing Effect Trigger Receive Interrupt Enable */
 
 /* PRESPTOBTASETR Register bit definitions */
 #define R_MIPI_DSI_PRESPTOBTASETR_PRTBTA_SHIFT    (0)  /* Peripheral Response Timeout Count */
@@ -483,26 +636,29 @@
 
 #define R_MIPI_DSI_AKEPLATIR_VC_SHIFT             (16)  /* Virtual Channel ID */
 #define R_MIPI_DSI_AKEPLATIR_VC_MASK              0xf0000
-#  define R_MIPI_DSI_AKEPLATIR_VC_0X0                     (0 << R_MIPI_DSI_AKEPLATIR_VC_SHIFT)  /* No Error Report received */
-#  define R_MIPI_DSI_AKEPLATIR_VC_0X1                     (1 << R_MIPI_DSI_AKEPLATIR_VC_SHIFT)  /* From VC-0 */
-#  define R_MIPI_DSI_AKEPLATIR_VC_0X2                     (2 << R_MIPI_DSI_AKEPLATIR_VC_SHIFT)  /* From VC-1 */
-#  define R_MIPI_DSI_AKEPLATIR_VC_0X4                     (4 << R_MIPI_DSI_AKEPLATIR_VC_SHIFT)  /* From VC-2 */
-#  define R_MIPI_DSI_AKEPLATIR_VC_0X8                     (8 << R_MIPI_DSI_AKEPLATIR_VC_SHIFT)  /* From VC-3 */
+#  define R_MIPI_DSI_AKEPLATIR_VC_0000                    (0 << R_MIPI_DSI_AKEPLATIR_VC_SHIFT)  /* No Error Report received */
+#  define R_MIPI_DSI_AKEPLATIR_VC_0001                    (1 << R_MIPI_DSI_AKEPLATIR_VC_SHIFT)  /* From VC-0 */
+#  define R_MIPI_DSI_AKEPLATIR_VC_0010                    (2 << R_MIPI_DSI_AKEPLATIR_VC_SHIFT)  /* From VC-1 */
+#  define R_MIPI_DSI_AKEPLATIR_VC_0100                    (4 << R_MIPI_DSI_AKEPLATIR_VC_SHIFT)  /* From VC-2 */
+#  define R_MIPI_DSI_AKEPLATIR_VC_1000                    (8 << R_MIPI_DSI_AKEPLATIR_VC_SHIFT)  /* From VC-3 */
+
+#define R_MIPI_DSI_AKEPLATIR_RESERVED_SHIFT       (20)  /* These bits are read as 000000000000. */
+#define R_MIPI_DSI_AKEPLATIR_RESERVED_MASK        0xfff00000
 
 /* AKEPACMSR Register bit definitions */
 #define R_MIPI_DSI_AKEPACMSR_AEREP_SHIFT          (0)  /* Accumulated Error Report */
 #define R_MIPI_DSI_AKEPACMSR_AEREP_MASK           0xffff
 
-#define R_MIPI_DSI_AKEPACMSR_AVC0                 (1 << 16)  /* Virtual Channel-0 Accumulated Information */
-
-#define R_MIPI_DSI_AKEPACMSR_AVC1                 (1 << 17)  /* Virtual Channel-1 Accumulated Information */
-
-#define R_MIPI_DSI_AKEPACMSR_AVC2                 (1 << 18)  /* Virtual Channel-2 Accumulated Information */
-
-#define R_MIPI_DSI_AKEPACMSR_AVC3                 (1 << 19)  /* Virtual Channel-3 Accumulated Information */
-
 #define R_MIPI_DSI_AKEPACMSR_AVC_SHIFT            (16)  /* Virtual Channel ID */
 #define R_MIPI_DSI_AKEPACMSR_AVC_MASK             0xf0000
+#  define R_MIPI_DSI_AKEPACMSR_AVC_0000                   (0 << R_MIPI_DSI_AKEPACMSR_AVC_SHIFT)  /* No Error Report received */
+#  define R_MIPI_DSI_AKEPACMSR_AVC_0001                   (1 << R_MIPI_DSI_AKEPACMSR_AVC_SHIFT)  /* Virtual Channel-0 Accumulated Information */
+#  define R_MIPI_DSI_AKEPACMSR_AVC_0010                   (2 << R_MIPI_DSI_AKEPACMSR_AVC_SHIFT)  /* Virtual Channel-1 Accumulated Information */
+#  define R_MIPI_DSI_AKEPACMSR_AVC_0100                   (4 << R_MIPI_DSI_AKEPACMSR_AVC_SHIFT)  /* Virtual Channel-2 Accumulated Information */
+#  define R_MIPI_DSI_AKEPACMSR_AVC_1000                   (8 << R_MIPI_DSI_AKEPACMSR_AVC_SHIFT)  /* Virtual Channel-3 Accumulated Information */
+
+#define R_MIPI_DSI_AKEPACMSR_RESERVED_SHIFT       (20)  /* These bits are read as 000000000000. */
+#define R_MIPI_DSI_AKEPACMSR_RESERVED_MASK        0xfff00000
 
 /* AKEPSCR Register bit definitions */
 #define R_MIPI_DSI_AKEPSCR_AEREP_SHIFT            (0)  /* Accumulated Error Report Clear */
@@ -510,16 +666,16 @@
 #  define R_MIPI_DSI_AKEPSCR_AEREP_0                      (0 << R_MIPI_DSI_AKEPSCR_AEREP_SHIFT)  /* No operation */
 #  define R_MIPI_DSI_AKEPSCR_AEREP_1                      (1 << R_MIPI_DSI_AKEPSCR_AEREP_SHIFT)  /* Clear the AKEPACMSR.AEREP[15:0] bits */
 
-#define R_MIPI_DSI_AKEPSCR_AVC0                   (1 << 16)  /* Virtual Channel-0 Accumulated Information Clear */
-
-#define R_MIPI_DSI_AKEPSCR_AVC1                   (1 << 17)  /* Virtual Channel-1 Accumulated Information Clear */
-
-#define R_MIPI_DSI_AKEPSCR_AVC2                   (1 << 18)  /* Virtual Channel-2 Accumulated Information Clear */
-
-#define R_MIPI_DSI_AKEPSCR_AVC3                   (1 << 19)  /* Virtual Channel-3 Accumulated Information Clear */
-
 #define R_MIPI_DSI_AKEPSCR_AVC_SHIFT              (16)  /* Virtual Channel ID */
 #define R_MIPI_DSI_AKEPSCR_AVC_MASK               0xf0000
+#  define R_MIPI_DSI_AKEPSCR_AVC_0000                     (0 << R_MIPI_DSI_AKEPSCR_AVC_SHIFT)  /* No Error Report received */
+#  define R_MIPI_DSI_AKEPSCR_AVC_0001                     (1 << R_MIPI_DSI_AKEPSCR_AVC_SHIFT)  /* Virtual Channel-0 Accumulated Information */
+#  define R_MIPI_DSI_AKEPSCR_AVC_0010                     (2 << R_MIPI_DSI_AKEPSCR_AVC_SHIFT)  /* Virtual Channel-1 Accumulated Information */
+#  define R_MIPI_DSI_AKEPSCR_AVC_0100                     (4 << R_MIPI_DSI_AKEPSCR_AVC_SHIFT)  /* Virtual Channel-2 Accumulated Information */
+#  define R_MIPI_DSI_AKEPSCR_AVC_1000                     (8 << R_MIPI_DSI_AKEPSCR_AVC_SHIFT)  /* Virtual Channel-3 Accumulated Information */
+
+#define R_MIPI_DSI_AKEPSCR_RESERVED_SHIFT         (20)  /* These bits are read as 000000000000. The write value should be 000000000000. */
+#define R_MIPI_DSI_AKEPSCR_RESERVED_MASK          0xfff00000
 
 /* RXRSSR Register bit definitions */
 #define R_MIPI_DSI_RXRSSR_SLT0VLD                 (1 << 0)  /* Slot-0 Valid Flag */
@@ -530,6 +686,9 @@
 
 #define R_MIPI_DSI_RXRSSR_SLT3VLD                 (1 << 3)  /* Slot-3 Valid Flag */
 
+#define R_MIPI_DSI_RXRSSR_RESERVED_SHIFT          (25)  /* These bits are read as 0000000. */
+#define R_MIPI_DSI_RXRSSR_RESERVED_MASK           0xfe000000
+
 /* RXRSSCR Register bit definitions */
 #define R_MIPI_DSI_RXRSSCR_SLT0VLD                (1 << 0)  /* Slot-0 Valid Flag Clear */
 
@@ -538,6 +697,9 @@
 #define R_MIPI_DSI_RXRSSCR_SLT2VLD                (1 << 2)  /* Slot-2 Valid Flag Clear */
 
 #define R_MIPI_DSI_RXRSSCR_SLT3VLD                (1 << 3)  /* Slot-3 Valid Flag Clear */
+
+#define R_MIPI_DSI_RXRSSCR_RESERVED_SHIFT         (25)  /* These bits are read as 0000000. The write value should be 0000000. */
+#define R_MIPI_DSI_RXRSSCR_RESERVED_MASK          0xfe000000
 
 /* RXRINFOOWSR Register bit definitions */
 #define R_MIPI_DSI_RXRINFOOWSR_SL0OW              (1 << 0)  /* Slot-0 Information Overwrite Flag */
@@ -548,6 +710,9 @@
 
 #define R_MIPI_DSI_RXRINFOOWSR_SL3OW              (1 << 3)  /* Slot-3 Information Overwrite Flag */
 
+#define R_MIPI_DSI_RXRINFOOWSR_RESERVED_SHIFT     (25)  /* These bits are read as 0000000. */
+#define R_MIPI_DSI_RXRINFOOWSR_RESERVED_MASK      0xfe000000
+
 /* RXRINFOOWSCR Register bit definitions */
 #define R_MIPI_DSI_RXRINFOOWSCR_SL0OW             (1 << 0)  /* Slot-0 Information Overwrite Flag Clear */
 
@@ -556,6 +721,9 @@
 #define R_MIPI_DSI_RXRINFOOWSCR_SL2OW             (1 << 2)  /* Slot-2 Information Overwrite Flag Clear */
 
 #define R_MIPI_DSI_RXRINFOOWSCR_SL3OW             (1 << 3)  /* Slot-3 Information Overwrite Flag Clear */
+
+#define R_MIPI_DSI_RXRINFOOWSCR_RESERVED_SHIFT    (25)  /* These bits are read as 0000000. The write value should be 0000000. */
+#define R_MIPI_DSI_RXRINFOOWSCR_RESERVED_MASK     0xfe000000
 
 /* RXRSSR Register bit definitions */
 #define R_MIPI_DSI_RXRSSR_DATA0_SHIFT             (0)  /* Data 0 */
@@ -567,7 +735,7 @@
 #define R_MIPI_DSI_RXRSSR_DT_SHIFT                (16)  /* Data Type */
 #define R_MIPI_DSI_RXRSSR_DT_MASK                 0x3f0000
 
-#define R_MIPI_DSI_RXRSSR_VC_SHIFT                (22)  /* Virtual Channel ID */
+#define R_MIPI_DSI_RXRSSR_VC_SHIFT                (22)  /* Virtual Channel */
 #define R_MIPI_DSI_RXRSSR_VC_MASK                 0xc00000
 
 #define R_MIPI_DSI_RXRSSR_FMT                     (1 << 24)  /* Packet Format */
@@ -594,6 +762,68 @@
 
 #define R_MIPI_DSI_RXRSSR_SLT3VLD                 (1 << 3)  /* Slot-3 Valid Flag */
 
+/* RXRSSR_L Register bit definitions */
+#define R_MIPI_DSI_RXRSSR_L_DATA0_SHIFT           (0)  /* Data 0 */
+#define R_MIPI_DSI_RXRSSR_L_DATA0_MASK            0xff
+
+#define R_MIPI_DSI_RXRSSR_L_DATA1_SHIFT           (8)  /* Data 1 */
+#define R_MIPI_DSI_RXRSSR_L_DATA1_MASK            0xff00
+
+/* RXRSSR_LL Register bit definitions */
+#define R_MIPI_DSI_RXRSSR_LL_DATA0_SHIFT          (0)  /* Data 0 */
+#define R_MIPI_DSI_RXRSSR_LL_DATA0_MASK           0xff
+
+/* RXRSSR_LH Register bit definitions */
+#define R_MIPI_DSI_RXRSSR_LH_DATA1_SHIFT          (0)  /* Data 1 */
+#define R_MIPI_DSI_RXRSSR_LH_DATA1_MASK           0xff
+
+/* RXRSSR_H Register bit definitions */
+#define R_MIPI_DSI_RXRSSR_H_DT_SHIFT              (0)  /* Data Type */
+#define R_MIPI_DSI_RXRSSR_H_DT_MASK               0x3f
+
+#define R_MIPI_DSI_RXRSSR_H_VC_SHIFT              (6)  /* Virtual Channel */
+#define R_MIPI_DSI_RXRSSR_H_VC_MASK               0xc0
+
+#define R_MIPI_DSI_RXRSSR_H_FMT                   (1 << 8)  /* Packet Format */
+
+#define R_MIPI_DSI_RXRSSR_H_RXSUC                 (1 << 9)  /* Receive Success */
+
+#define R_MIPI_DSI_RXRSSR_H_RXFERR                (1 << 10)  /* Fatal Error */
+
+#define R_MIPI_DSI_RXRSSR_H_RXFAIL                (1 << 11)  /* Receive Fail */
+
+#define R_MIPI_DSI_RXRSSR_H_RXPFAIL               (1 << 12)  /* Receive Packet Data Fail */
+
+#define R_MIPI_DSI_RXRSSR_H_RXCERR                (1 << 13)  /* Receive Correctable Error */
+
+#define R_MIPI_DSI_RXRSSR_H_RXAKE                 (1 << 14)  /* Receive Acknowledge and Error Report Packet */
+
+#define R_MIPI_DSI_RXRSSR_H_INFOOW                (1 << 15)  /* Information Overwrite */
+
+/* RXRSSR_HL Register bit definitions */
+#define R_MIPI_DSI_RXRSSR_HL_DT_SHIFT             (0)  /* Data Type */
+#define R_MIPI_DSI_RXRSSR_HL_DT_MASK              0x3f
+
+#define R_MIPI_DSI_RXRSSR_HL_VC_SHIFT             (6)  /* Virtual Channel */
+#define R_MIPI_DSI_RXRSSR_HL_VC_MASK              0xc0
+
+/* RXRSSR_HH Register bit definitions */
+#define R_MIPI_DSI_RXRSSR_HH_FMT                  (1 << 0)  /* Packet Format */
+
+#define R_MIPI_DSI_RXRSSR_HH_RXSUC                (1 << 1)  /* Receive Success */
+
+#define R_MIPI_DSI_RXRSSR_HH_RXFERR               (1 << 2)  /* Fatal Error */
+
+#define R_MIPI_DSI_RXRSSR_HH_RXFAIL               (1 << 3)  /* Receive Fail */
+
+#define R_MIPI_DSI_RXRSSR_HH_RXPFAIL              (1 << 4)  /* Receive Packet Data Fail */
+
+#define R_MIPI_DSI_RXRSSR_HH_RXCERR               (1 << 5)  /* Receive Correctable Error */
+
+#define R_MIPI_DSI_RXRSSR_HH_RXAKE                (1 << 6)  /* Receive Acknowledge and Error Report Packet */
+
+#define R_MIPI_DSI_RXRSSR_HH_INFOOW               (1 << 7)  /* Information Overwrite */
+
 /* RXPPD0R Register bit definitions */
 #define R_MIPI_DSI_RXPPD0R_DATA0_SHIFT            (0)  /* Payload Data 0 */
 #define R_MIPI_DSI_RXPPD0R_DATA0_MASK             0xff
@@ -608,16 +838,16 @@
 #define R_MIPI_DSI_RXPPD0R_DATA3_MASK             0xff000000
 
 /* RXPPD1R Register bit definitions */
-#define R_MIPI_DSI_RXPPD1R_DATA4_SHIFT            (0)  /* Payload Data 4 */
+#define R_MIPI_DSI_RXPPD1R_DATA4_SHIFT            (0)  /* Payload Data 0 */
 #define R_MIPI_DSI_RXPPD1R_DATA4_MASK             0xff
 
-#define R_MIPI_DSI_RXPPD1R_DATA5_SHIFT            (8)  /* Payload Data 5 */
+#define R_MIPI_DSI_RXPPD1R_DATA5_SHIFT            (8)  /* Payload Data 1 */
 #define R_MIPI_DSI_RXPPD1R_DATA5_MASK             0xff00
 
-#define R_MIPI_DSI_RXPPD1R_DATA6_SHIFT            (16)  /* Payload Data 6 */
+#define R_MIPI_DSI_RXPPD1R_DATA6_SHIFT            (16)  /* Payload Data 2 */
 #define R_MIPI_DSI_RXPPD1R_DATA6_MASK             0xff0000
 
-#define R_MIPI_DSI_RXPPD1R_DATA7_SHIFT            (24)  /* Payload Data 7 */
+#define R_MIPI_DSI_RXPPD1R_DATA7_SHIFT            (24)  /* Payload Data 3 */
 #define R_MIPI_DSI_RXPPD1R_DATA7_MASK             0xff000000
 
 /* RXPPD2R Register bit definitions */
@@ -665,6 +895,9 @@
 
 #define R_MIPI_DSI_FERRSR_TATO                    (1 << 2)  /* Turnaround Acknowledge Timeout Interrupt Flag */
 
+#define R_MIPI_DSI_FERRSR_RESERVED_SHIFT          (29)  /* These bits are read as 000. */
+#define R_MIPI_DSI_FERRSR_RESERVED_MASK           0xe0000000
+
 #define R_MIPI_DSI_FERRSR_ESCENT                  (1 << 16)  /* Escape mode Entry Error Interrupt Flag */
 
 #define R_MIPI_DSI_FERRSR_SYNCESC                 (1 << 17)  /* LPDT Sync Error Interrupt Flag */
@@ -686,7 +919,10 @@
 
 #define R_MIPI_DSI_FERRSCR_TATO                   (1 << 2)  /* Turnaround Acknowledge Timeout Interrupt Flag Clear */
 
-#define R_MIPI_DSI_FERRSCR_ESCENT                 (1 << 16)  /* Escape Mode Entry Error Interrupt Flag Clear */
+#define R_MIPI_DSI_FERRSCR_RESERVED_SHIFT         (21)  /* These bits are read as 00000000000. The write value should be 00000000000. */
+#define R_MIPI_DSI_FERRSCR_RESERVED_MASK          0xffe00000
+
+#define R_MIPI_DSI_FERRSCR_ESCENT                 (1 << 16)  /* Escape mode Entry Error Interrupt Flag Clear */
 
 #define R_MIPI_DSI_FERRSCR_SYNCESC                (1 << 17)  /* LPDT Sync Error Interrupt Flag Clear */
 
@@ -703,6 +939,9 @@
 
 #define R_MIPI_DSI_FERRIER_TATO                   (1 << 2)  /* Turnaround Acknowledge Timeout Interrupt Enable */
 
+#define R_MIPI_DSI_FERRIER_RESERVED_SHIFT         (21)  /* These bits are read as 00000000000. The write value should be 00000000000. */
+#define R_MIPI_DSI_FERRIER_RESERVED_MASK          0xffe00000
+
 #define R_MIPI_DSI_FERRIER_ESCENT                 (1 << 16)  /* Escape mode Entry Error Interrupt Enable */
 
 #define R_MIPI_DSI_FERRIER_SYNCESC                (1 << 17)  /* LPDT Sync Error Interrupt Enable */
@@ -714,6 +953,9 @@
 #define R_MIPI_DSI_FERRIER_CLP1                   (1 << 20)  /* LP1 Contention Error Interrupt Enable */
 
 /* CLSTPTSETR Register bit definitions */
+#define R_MIPI_DSI_CLSTPTSETR_RESERVED_SHIFT      (12)  /* These bits are read as 0000. The write value should be 0000. */
+#define R_MIPI_DSI_CLSTPTSETR_RESERVED_MASK       0xf000
+
 #define R_MIPI_DSI_CLSTPTSETR_CLKSTPT_SHIFT       (2)  /* Clock Stop Time */
 #define R_MIPI_DSI_CLSTPTSETR_CLKSTPT_MASK        0xffc
 
@@ -727,6 +969,9 @@
 #define R_MIPI_DSI_LPTRNSTSETR_GOLPBKT_SHIFT      (0)  /* Go LP and Back Time */
 #define R_MIPI_DSI_LPTRNSTSETR_GOLPBKT_MASK       0x3ff
 
+#define R_MIPI_DSI_LPTRNSTSETR_RESERVED_SHIFT     (10)  /* These bits are read as 0000000000000000000000. The write value should be 0000000000000000000000. */
+#define R_MIPI_DSI_LPTRNSTSETR_RESERVED_MASK      0xfffffc00
+
 /* PLSR Register bit definitions */
 #define R_MIPI_DSI_PLSR_CLUAN                     (1 << 0)  /* Clock Lane UlpsActiveNot Status */
 
@@ -739,6 +984,9 @@
 #define R_MIPI_DSI_PLSR_DL0UAN                    (1 << 4)  /* Data Lane-0 UlpsActiveNot Status */
 
 #define R_MIPI_DSI_PLSR_DL1UAN                    (1 << 5)  /* Data Lane-1 UlpsActiveNot Status */
+
+#define R_MIPI_DSI_PLSR_RESERVED_SHIFT            (30)  /* These bits are read as 00. */
+#define R_MIPI_DSI_PLSR_RESERVED_MASK             0xc0000000
 
 #define R_MIPI_DSI_PLSR_DL0STP                    (1 << 8)  /* Data Lane-0 Stop Status */
 
@@ -763,6 +1011,9 @@
 #define R_MIPI_DSI_PLSR_DLULPEXT                  (1 << 29)  /* Data Lane ULPS Exit Interrupt Flag */
 
 /* PLSCR Register bit definitions */
+#define R_MIPI_DSI_PLSCR_RESERVED_SHIFT           (30)  /* These bits are read as 00. The write value should be 00. */
+#define R_MIPI_DSI_PLSCR_RESERVED_MASK            0xc0000000
+
 #define R_MIPI_DSI_PLSCR_DL0RX2TX                 (1 << 12)  /* Data Lane-0 RX to TX Transition Interrupt Flag Clear */
 
 #define R_MIPI_DSI_PLSCR_DL0TX2RX                 (1 << 13)  /* Data Lane-0 TX to RX Transition Interrupt Flag Clear */
@@ -780,6 +1031,9 @@
 #define R_MIPI_DSI_PLSCR_DLULPEXT                 (1 << 29)  /* Data Lane ULPS Exit Interrupt Flag Clear */
 
 /* PLIER Register bit definitions */
+#define R_MIPI_DSI_PLIER_RESERVED_SHIFT           (30)  /* These bits are read as 00. The write value should be 00. */
+#define R_MIPI_DSI_PLIER_RESERVED_MASK            0xc0000000
+
 #define R_MIPI_DSI_PLIER_DL0RX2TX                 (1 << 12)  /* Data Lane-0 RX to TX Transition Interrupt Enable */
 
 #define R_MIPI_DSI_PLIER_DL0TX2RX                 (1 << 13)  /* Data Lane-0 TX to RX Transition Interrupt Enable */
@@ -801,11 +1055,14 @@
 
 #define R_MIPI_DSI_VMSET0R_VSTOP                  (1 << 1)  /* Video Mode Operation Stop */
 
-#define R_MIPI_DSI_VMSET0R_HSANOLP                (1 << 8)  /* HSA Period No LP */
+#define R_MIPI_DSI_VMSET0R_RESERVED_SHIFT         (14)  /* These bits are read as 000000000000000000. The write value should be 000000000000000000. */
+#define R_MIPI_DSI_VMSET0R_RESERVED_MASK          0xffffc000
 
-#define R_MIPI_DSI_VMSET0R_HBPNOLP                (1 << 9)  /* HBP Period No LP */
+#define R_MIPI_DSI_VMSET0R_HSANOLP                (1 << 8)  /* HSA period No LP */
 
-#define R_MIPI_DSI_VMSET0R_HFPNOLP                (1 << 10)  /* HFP Period No LP */
+#define R_MIPI_DSI_VMSET0R_HBPNOLP                (1 << 9)  /* HBP period No LP */
+
+#define R_MIPI_DSI_VMSET0R_HFPNOLP                (1 << 10)  /* HFP period No LP */
 
 /* VMSET1R Register bit definitions */
 #define R_MIPI_DSI_VMSET1R_DLY_SHIFT              (2)  /* Delay Value */
@@ -820,6 +1077,8 @@
 
 #define R_MIPI_DSI_VMSR_VIRDY                     (1 << 3)  /* Video Mode Operation Ready Interrupt Flag */
 
+#define R_MIPI_DSI_VMSR_RESERVED                  (1 << 31)  /* This bit is read as 0. */
+
 #define R_MIPI_DSI_VMSR_TIMERR                    (1 << 20)  /* Timing Error Interrupt Flag */
 
 #define R_MIPI_DSI_VMSR_VBUFUDF                   (1 << 22)  /* Video Buffer Underflow Error Interrupt Flag */
@@ -830,6 +1089,8 @@
 #define R_MIPI_DSI_VMSCR_START                    (1 << 0)  /* Video Mode Operation Start Interrupt Flag Clear */
 
 #define R_MIPI_DSI_VMSCR_STOP                     (1 << 1)  /* Video Mode Operation Stop Interrupt Flag Clear */
+
+#define R_MIPI_DSI_VMSCR_RESERVED                 (1 << 31)  /* This bit is read as 0. The write value should be 0. */
 
 #define R_MIPI_DSI_VMSCR_VIRDY                    (1 << 3)  /* Video Mode Operation Ready Interrupt Flag Clear */
 
@@ -844,6 +1105,8 @@
 
 #define R_MIPI_DSI_VMIER_STOP                     (1 << 1)  /* Video Mode Operation Stop Interrupt Enable */
 
+#define R_MIPI_DSI_VMIER_RESERVED                 (1 << 31)  /* This bit is read as 0. The write value should be 0. */
+
 #define R_MIPI_DSI_VMIER_VIRDY                    (1 << 3)  /* Video Mode Operation Ready Interrupt Enable */
 
 #define R_MIPI_DSI_VMIER_TIMERR                   (1 << 20)  /* Timing Error Interrupt Enable */
@@ -853,13 +1116,16 @@
 #define R_MIPI_DSI_VMIER_VBUFOVF                  (1 << 23)  /* Video Buffer Overflow Error Interrupt Enable */
 
 /* VMPPSETR Register bit definitions */
+#define R_MIPI_DSI_VMPPSETR_RESERVED_SHIFT        (24)  /* These bits are read as 00000000. The write value should be 00000000. */
+#define R_MIPI_DSI_VMPPSETR_RESERVED_MASK         0xff000000
+
 #define R_MIPI_DSI_VMPPSETR_TXESYNC               (1 << 15)  /* Transmit End of Sync Pulse */
 
 #define R_MIPI_DSI_VMPPSETR_DT_SHIFT              (16)  /* Video Mode Data Type */
 #define R_MIPI_DSI_VMPPSETR_DT_MASK               0x3f0000
-#  define R_MIPI_DSI_VMPPSETR_DT_0X0E                     (14 << R_MIPI_DSI_VMPPSETR_DT_SHIFT)  /* Packed Pixel Stream, 16-bit RGB */
-#  define R_MIPI_DSI_VMPPSETR_DT_0X1E                     (30 << R_MIPI_DSI_VMPPSETR_DT_SHIFT)  /* Packed Pixel Stream, 18-bit RGB */
-#  define R_MIPI_DSI_VMPPSETR_DT_0X3E                     (62 << R_MIPI_DSI_VMPPSETR_DT_SHIFT)  /* Packed Pixel Stream, 24-bit RGB */
+#  define R_MIPI_DSI_VMPPSETR_DT_001110                   (14 << R_MIPI_DSI_VMPPSETR_DT_SHIFT)  /* Packed Pixel Stream, 16 bit RGB */
+#  define R_MIPI_DSI_VMPPSETR_DT_011110                   (30 << R_MIPI_DSI_VMPPSETR_DT_SHIFT)  /* Packed Pixel Stream, 18 bit RGB */
+#  define R_MIPI_DSI_VMPPSETR_DT_111110                   (62 << R_MIPI_DSI_VMPPSETR_DT_SHIFT)  /* Packed Pixel Stream, 24 bit RGB */
 
 #define R_MIPI_DSI_VMPPSETR_VC_SHIFT              (22)  /* Video Mode Virtual Channel */
 #define R_MIPI_DSI_VMPPSETR_VC_MASK               0xc00000
@@ -867,6 +1133,8 @@
 /* VMVSSETR Register bit definitions */
 #define R_MIPI_DSI_VMVSSETR_VSA_SHIFT             (0)  /* VSA Lines */
 #define R_MIPI_DSI_VMVSSETR_VSA_MASK              0xfff
+
+#define R_MIPI_DSI_VMVSSETR_RESERVED              (1 << 31)  /* This bit is read as 0. The write value should be 0. */
 
 #define R_MIPI_DSI_VMVSSETR_VSPOL                 (1 << 15)  /* VSYNC Polarity */
 
@@ -877,12 +1145,17 @@
 #define R_MIPI_DSI_VMVPSETR_VBP_SHIFT             (0)  /* VBP Lines */
 #define R_MIPI_DSI_VMVPSETR_VBP_MASK              0x1fff
 
+#define R_MIPI_DSI_VMVPSETR_RESERVED_SHIFT        (29)  /* These bits are read as 000. The write value should be 000. */
+#define R_MIPI_DSI_VMVPSETR_RESERVED_MASK         0xe0000000
+
 #define R_MIPI_DSI_VMVPSETR_VFP_SHIFT             (16)  /* VFP Lines */
 #define R_MIPI_DSI_VMVPSETR_VFP_MASK              0x1fff0000
 
 /* VMHSSETR Register bit definitions */
 #define R_MIPI_DSI_VMHSSETR_HSA_SHIFT             (0)  /* HSA Pixels */
 #define R_MIPI_DSI_VMHSSETR_HSA_MASK              0xfff
+
+#define R_MIPI_DSI_VMHSSETR_RESERVED              (1 << 31)  /* This bit is read as 0. The write value should be 0. */
 
 #define R_MIPI_DSI_VMHSSETR_HSPOL                 (1 << 15)  /* HSYNC Polarity */
 
@@ -893,20 +1166,31 @@
 #define R_MIPI_DSI_VMHPSETR_HBP_SHIFT             (0)  /* HBP Pixels */
 #define R_MIPI_DSI_VMHPSETR_HBP_MASK              0x1fff
 
+#define R_MIPI_DSI_VMHPSETR_RESERVED_SHIFT        (29)  /* These bits are read as 000. The write value should be 000. */
+#define R_MIPI_DSI_VMHPSETR_RESERVED_MASK         0xe0000000
+
 #define R_MIPI_DSI_VMHPSETR_HFP_SHIFT             (16)  /* HFP Pixels */
 #define R_MIPI_DSI_VMHPSETR_HFP_MASK              0x1fff0000
 
 /* SQCH0SET0R Register bit definitions */
 #define R_MIPI_DSI_SQCH0SET0R_START               (1 << 0)  /* Sequence Operation Start */
 
+#define R_MIPI_DSI_SQCH0SET0R_RESERVED            (1 << 31)  /* This bit is read as 0. The write value should be 0. */
+
 /* SQCH0SR Register bit definitions */
+#define R_MIPI_DSI_SQCH0SR_RESERVED               (1 << 31)  /* This bit is read as 0. */
+
 #define R_MIPI_DSI_SQCH0SR_RUNNING                (1 << 2)  /* Sequence Operation Running Status */
 
 #define R_MIPI_DSI_SQCH0SR_AACTFIN                (1 << 4)  /* All Actions Finish Interrupt Flag */
 
-#define R_MIPI_DSI_SQCH0SR_ADESFIN                (1 << 8)  /* All Descriptors Finish Interrupt Flag */
+#define R_MIPI_DSI_SQCH0SR_ADESFIN                (1 << 8)  /* All-Descriptors Finish Interrupt Flag */
 
-#define R_MIPI_DSI_SQCH0SR_TXIBERR                (1 << 24)  /* TX Internal Bus Error Interrupt Flag */
+#define R_MIPI_DSI_SQCH0SR_DABORT                 (1 << 16)  /* Descriptor Abort Interrupt Flag */
+
+#define R_MIPI_DSI_SQCH0SR_SIZEERR                (1 << 19)  /* Packet Size Error Interrupt Flag */
+
+#define R_MIPI_DSI_SQCH0SR_TXIBERR                (1 << 24)  /* Tx Internal Bus Error Interrupt Flag */
 
 #define R_MIPI_DSI_SQCH0SR_RXFERR                 (1 << 26)  /* Receive Fatal Error Interrupt Flag */
 
@@ -918,16 +1202,18 @@
 
 #define R_MIPI_DSI_SQCH0SR_RXAKE                  (1 << 30)  /* Receive Acknowledge and Error Report Packet Interrupt Flag */
 
-#define R_MIPI_DSI_SQCH0SR_DABORT                 (1 << 16)  /* Descriptor Abort Interrupt Flag */
-
-#define R_MIPI_DSI_SQCH0SR_SIZEERR                (1 << 19)  /* Packet Size Error Interrupt Flag */
-
 /* SQCH0SCR Register bit definitions */
+#define R_MIPI_DSI_SQCH0SCR_RESERVED              (1 << 31)  /* This bit is read as 0. The write value should be 0. */
+
 #define R_MIPI_DSI_SQCH0SCR_AACTFIN               (1 << 4)  /* All Actions Finish Interrupt Flag Clear */
 
-#define R_MIPI_DSI_SQCH0SCR_ADESFIN               (1 << 8)  /* All Descriptors Finish Interrupt Flag Clear */
+#define R_MIPI_DSI_SQCH0SCR_ADESFIN               (1 << 8)  /* All-Descriptors Finish Interrupt Flag Clear */
 
-#define R_MIPI_DSI_SQCH0SCR_TXIBERR               (1 << 24)  /* TX Internal Bus Error Interrupt Flag Clear */
+#define R_MIPI_DSI_SQCH0SCR_DABORT                (1 << 16)  /* Descriptor Abort Interrupt Flag Clear */
+
+#define R_MIPI_DSI_SQCH0SCR_SIZEERR               (1 << 19)  /* Packet Size Error Interrupt Flag Clear */
+
+#define R_MIPI_DSI_SQCH0SCR_TXIBERR               (1 << 24)  /* Tx Internal Bus Error Interrupt Flag Clear */
 
 #define R_MIPI_DSI_SQCH0SCR_RXFERR                (1 << 26)  /* Receive Fatal Error Interrupt Flag Clear */
 
@@ -939,16 +1225,18 @@
 
 #define R_MIPI_DSI_SQCH0SCR_RXAKE                 (1 << 30)  /* Receive Acknowledge and Error Report Packet Interrupt Flag Clear */
 
-#define R_MIPI_DSI_SQCH0SCR_DABORT                (1 << 16)  /* Descriptor Abort Interrupt Flag Clear */
-
-#define R_MIPI_DSI_SQCH0SCR_SIZEERR               (1 << 19)  /* Packet Size Error Interrupt Flag Clear */
-
 /* SQCH0IER Register bit definitions */
+#define R_MIPI_DSI_SQCH0IER_RESERVED              (1 << 31)  /* This bit is read as 0. The write value should be 0. */
+
 #define R_MIPI_DSI_SQCH0IER_AACTFIN               (1 << 4)  /* All Actions Finish Interrupt Enable */
 
-#define R_MIPI_DSI_SQCH0IER_ADESFIN               (1 << 8)  /* All Descriptors Finish Interrupt Enable */
+#define R_MIPI_DSI_SQCH0IER_ADESFIN               (1 << 8)  /* All-Descriptors Finish Interrupt Enable */
 
-#define R_MIPI_DSI_SQCH0IER_TXIBERR               (1 << 24)  /* TX Internal Bus Error Interrupt Enable */
+#define R_MIPI_DSI_SQCH0IER_DABORT                (1 << 16)  /* Descriptor Abort Interrupt Enable */
+
+#define R_MIPI_DSI_SQCH0IER_SIZEERR               (1 << 19)  /* Packet Size Error Interrupt Enable */
+
+#define R_MIPI_DSI_SQCH0IER_TXIBERR               (1 << 24)  /* Tx Internal Bus Error Interrupt Enable */
 
 #define R_MIPI_DSI_SQCH0IER_RXFERR                (1 << 26)  /* Receive Fatal Error Interrupt Enable */
 
@@ -960,23 +1248,25 @@
 
 #define R_MIPI_DSI_SQCH0IER_RXAKE                 (1 << 30)  /* Receive Acknowledge and Error Report Packet Interrupt Enable */
 
-#define R_MIPI_DSI_SQCH0IER_DABORT                (1 << 16)  /* Descriptor Abort Interrupt Enable */
-
-#define R_MIPI_DSI_SQCH0IER_SIZEERR               (1 << 19)  /* Packet Size Error Interrupt Enable */
-
 /* SQCH1SET0R Register bit definitions */
 #define R_MIPI_DSI_SQCH1SET0R_START               (1 << 0)  /* Sequence Operation Start */
 
+#define R_MIPI_DSI_SQCH1SET0R_RESERVED            (1 << 31)  /* This bit is read as 0. The write value should be 0. */
+
 /* SQCH1SR Register bit definitions */
+#define R_MIPI_DSI_SQCH1SR_RESERVED               (1 << 31)  /* This bit is read as 0. */
+
 #define R_MIPI_DSI_SQCH1SR_RUNNING                (1 << 2)  /* Sequence Operation Running Status */
 
 #define R_MIPI_DSI_SQCH1SR_AACTFIN                (1 << 4)  /* All Actions Finish Interrupt Flag */
 
-#define R_MIPI_DSI_SQCH1SR_ADESFIN                (1 << 8)  /* All Descriptors Finish Interrupt Flag */
+#define R_MIPI_DSI_SQCH1SR_ADESFIN                (1 << 8)  /* All-Descriptors Finish Interrupt Flag */
+
+#define R_MIPI_DSI_SQCH1SR_DABORT                 (1 << 16)  /* Descriptor Abort Interrupt Flag */
 
 #define R_MIPI_DSI_SQCH1SR_SIZEERR                (1 << 19)  /* Packet Size Error Interrupt Flag */
 
-#define R_MIPI_DSI_SQCH1SR_TXIBERR                (1 << 24)  /* TX Internal Bus Error Interrupt Flag */
+#define R_MIPI_DSI_SQCH1SR_TXIBERR                (1 << 24)  /* Tx Internal Bus Error Interrupt Flag */
 
 #define R_MIPI_DSI_SQCH1SR_RXFERR                 (1 << 26)  /* Receive Fatal Error Interrupt Flag */
 
@@ -988,16 +1278,18 @@
 
 #define R_MIPI_DSI_SQCH1SR_RXAKE                  (1 << 30)  /* Receive Acknowledge and Error Report Packet Interrupt Flag */
 
-#define R_MIPI_DSI_SQCH1SR_DABORT                 (1 << 16)  /* Descriptor Abort Interrupt Flag */
-
 /* SQCH1SCR Register bit definitions */
+#define R_MIPI_DSI_SQCH1SCR_RESERVED              (1 << 31)  /* This bit is read as 0. The write value should be 0. */
+
 #define R_MIPI_DSI_SQCH1SCR_AACTFIN               (1 << 4)  /* All Actions Finish Interrupt Flag Clear */
 
-#define R_MIPI_DSI_SQCH1SCR_ADESFIN               (1 << 8)  /* All Descriptors Finish Interrupt Flag Clear */
+#define R_MIPI_DSI_SQCH1SCR_ADESFIN               (1 << 8)  /* All-Descriptors Finish Interrupt Flag Clear */
+
+#define R_MIPI_DSI_SQCH1SCR_DABORT                (1 << 16)  /* Descriptor Abort Interrupt Flag Clear */
 
 #define R_MIPI_DSI_SQCH1SCR_SIZEERR               (1 << 19)  /* Packet Size Error Interrupt Flag Clear */
 
-#define R_MIPI_DSI_SQCH1SCR_TXIBERR               (1 << 24)  /* TX Internal Bus Error Interrupt Flag Clear */
+#define R_MIPI_DSI_SQCH1SCR_TXIBERR               (1 << 24)  /* Tx Internal Bus Error Interrupt Flag Clear */
 
 #define R_MIPI_DSI_SQCH1SCR_RXFERR                (1 << 26)  /* Receive Fatal Error Interrupt Flag Clear */
 
@@ -1009,16 +1301,18 @@
 
 #define R_MIPI_DSI_SQCH1SCR_RXAKE                 (1 << 30)  /* Receive Acknowledge and Error Report Packet Interrupt Flag Clear */
 
-#define R_MIPI_DSI_SQCH1SCR_DABORT                (1 << 16)  /* Descriptor Abort Interrupt Flag Clear */
-
 /* SQCH1IER Register bit definitions */
+#define R_MIPI_DSI_SQCH1IER_RESERVED              (1 << 31)  /* This bit is read as 0. The write value should be 0. */
+
 #define R_MIPI_DSI_SQCH1IER_AACTFIN               (1 << 4)  /* All Actions Finish Interrupt Enable */
 
-#define R_MIPI_DSI_SQCH1IER_ADESFIN               (1 << 8)  /* All Descriptors Finish Interrupt Enable */
+#define R_MIPI_DSI_SQCH1IER_ADESFIN               (1 << 8)  /* All-Descriptors Finish Interrupt Enable */
+
+#define R_MIPI_DSI_SQCH1IER_DABORT                (1 << 16)  /* Descriptor Abort Interrupt Enable */
 
 #define R_MIPI_DSI_SQCH1IER_SIZEERR               (1 << 19)  /* Packet Size Error Interrupt Enable */
 
-#define R_MIPI_DSI_SQCH1IER_TXIBERR               (1 << 24)  /* TX Internal Bus Error Interrupt Enable */
+#define R_MIPI_DSI_SQCH1IER_TXIBERR               (1 << 24)  /* Tx Internal Bus Error Interrupt Enable */
 
 #define R_MIPI_DSI_SQCH1IER_RXFERR                (1 << 26)  /* Receive Fatal Error Interrupt Enable */
 
@@ -1029,8 +1323,6 @@
 #define R_MIPI_DSI_SQCH1IER_RXCORERR              (1 << 29)  /* Receive Correctable Error Interrupt Enable */
 
 #define R_MIPI_DSI_SQCH1IER_RXAKE                 (1 << 30)  /* Receive Acknowledge and Error Report Packet Interrupt Enable */
-
-#define R_MIPI_DSI_SQCH1IER_DABORT                (1 << 16)  /* Descriptor Abort Interrupt Enable */
 
 /* SQCH0DSCAR Register bit definitions */
 #define R_MIPI_DSI_SQCH0DSCAR_DATA0_SHIFT         (0)  /* Data 0 */
@@ -1051,33 +1343,186 @@
 
 #define R_MIPI_DSI_SQCH0DSCAR_BTA_SHIFT           (26)  /* Bus Turn Around */
 #define R_MIPI_DSI_SQCH0DSCAR_BTA_MASK            0xc000000
-#  define R_MIPI_DSI_SQCH0DSCAR_BTA_00                    (0 << R_MIPI_DSI_SQCH0DSCAR_BTA_SHIFT)  /* TX request without BTA or no-operation */
-#  define R_MIPI_DSI_SQCH0DSCAR_BTA_01                    (1 << R_MIPI_DSI_SQCH0DSCAR_BTA_SHIFT)  /* TX non-read request with BTA */
-#  define R_MIPI_DSI_SQCH0DSCAR_BTA_10                    (2 << R_MIPI_DSI_SQCH0DSCAR_BTA_SHIFT)  /* TX read request with BTA */
-#  define R_MIPI_DSI_SQCH0DSCAR_BTA_11                    (3 << R_MIPI_DSI_SQCH0DSCAR_BTA_SHIFT)  /* BTA only */
+#  define R_MIPI_DSI_SQCH0DSCAR_BTA_00                    (0 << R_MIPI_DSI_SQCH0DSCAR_BTA_SHIFT)  /* Not assert BTA or No-operation */
+#  define R_MIPI_DSI_SQCH0DSCAR_BTA_01                    (1 << R_MIPI_DSI_SQCH0DSCAR_BTA_SHIFT)  /* Assert BTA  */
+#  define R_MIPI_DSI_SQCH0DSCAR_BTA_10                    (2 << R_MIPI_DSI_SQCH0DSCAR_BTA_SHIFT)  /* Assert BTA followed by READ request  (No WRITE request before BTA) */
+#  define R_MIPI_DSI_SQCH0DSCAR_BTA_11                    (3 << R_MIPI_DSI_SQCH0DSCAR_BTA_SHIFT)  /* Assert BTA only  (No WRITE request before BTA) */
 
 #define R_MIPI_DSI_SQCH0DSCAR_NXACT_SHIFT         (28)  /* Next Action */
 #define R_MIPI_DSI_SQCH0DSCAR_NXACT_MASK          0x30000000
-#  define R_MIPI_DSI_SQCH0DSCAR_NXACT_00                  (0 << R_MIPI_DSI_SQCH0DSCAR_NXACT_SHIFT)  /* Terminate the sequence operation after this descriptor processing is finished */
-#  define R_MIPI_DSI_SQCH0DSCAR_NXACT_01                  (1 << R_MIPI_DSI_SQCH0DSCAR_NXACT_SHIFT)  /* Start the next descriptor processing after this descriptor processing is finished */
+#  define R_MIPI_DSI_SQCH0DSCAR_NXACT_00                  (0 << R_MIPI_DSI_SQCH0DSCAR_NXACT_SHIFT)  /* Terminate the sequence operation after this descriptor processing is finished.  */
+#  define R_MIPI_DSI_SQCH0DSCAR_NXACT_01                  (1 << R_MIPI_DSI_SQCH0DSCAR_NXACT_SHIFT)  /* Start the next descriptor processing after this descriptor processing is finished.  */
+
+#define R_MIPI_DSI_SQCH0DSCAR_RESERVED_SHIFT      (30)  /* These bits are read as 00. The write value should be 00. */
+#define R_MIPI_DSI_SQCH0DSCAR_RESERVED_MASK       0xc0000000
+
+/* SQCH0DSCAR_L Register bit definitions */
+#define R_MIPI_DSI_SQCH0DSCAR_L_DATA0_SHIFT       (0)  /* Data 0 */
+#define R_MIPI_DSI_SQCH0DSCAR_L_DATA0_MASK        0xff
+
+#define R_MIPI_DSI_SQCH0DSCAR_L_DATA1_SHIFT       (8)  /* Data 1 */
+#define R_MIPI_DSI_SQCH0DSCAR_L_DATA1_MASK        0xff00
+
+/* SQCH0DSCAR_LL Register bit definitions */
+#define R_MIPI_DSI_SQCH0DSCAR_LL_DATA0_SHIFT      (0)  /* Data 0 */
+#define R_MIPI_DSI_SQCH0DSCAR_LL_DATA0_MASK       0xff
+
+/* SQCH0DSCAR_LH Register bit definitions */
+#define R_MIPI_DSI_SQCH0DSCAR_LH_DATA1_SHIFT      (0)  /* Data 1 */
+#define R_MIPI_DSI_SQCH0DSCAR_LH_DATA1_MASK       0xff
+
+/* SQCH0DSCAR_H Register bit definitions */
+#define R_MIPI_DSI_SQCH0DSCAR_H_DT_SHIFT          (0)  /* Data Type */
+#define R_MIPI_DSI_SQCH0DSCAR_H_DT_MASK           0x3f
+
+#define R_MIPI_DSI_SQCH0DSCAR_H_VC_SHIFT          (6)  /* Virtual Channel */
+#define R_MIPI_DSI_SQCH0DSCAR_H_VC_MASK           0xc0
+
+#define R_MIPI_DSI_SQCH0DSCAR_H_FMT               (1 << 8)  /* Format */
+
+#define R_MIPI_DSI_SQCH0DSCAR_H_SPD               (1 << 9)  /* Speed */
+
+#define R_MIPI_DSI_SQCH0DSCAR_H_BTA_SHIFT         (10)  /* Bus Turn Around */
+#define R_MIPI_DSI_SQCH0DSCAR_H_BTA_MASK          0xc00
+#  define R_MIPI_DSI_SQCH0DSCAR_H_BTA_00                  (0 << R_MIPI_DSI_SQCH0DSCAR_H_BTA_SHIFT)  /* Not assert BTA or No-operation */
+#  define R_MIPI_DSI_SQCH0DSCAR_H_BTA_01                  (1 << R_MIPI_DSI_SQCH0DSCAR_H_BTA_SHIFT)  /* Assert BTA  */
+#  define R_MIPI_DSI_SQCH0DSCAR_H_BTA_10                  (2 << R_MIPI_DSI_SQCH0DSCAR_H_BTA_SHIFT)  /* Assert BTA followed by READ request  (No WRITE request before BTA) */
+#  define R_MIPI_DSI_SQCH0DSCAR_H_BTA_11                  (3 << R_MIPI_DSI_SQCH0DSCAR_H_BTA_SHIFT)  /* Assert BTA only  (No WRITE request before BTA) */
+
+#define R_MIPI_DSI_SQCH0DSCAR_H_NXACT_SHIFT       (12)  /* Next Action */
+#define R_MIPI_DSI_SQCH0DSCAR_H_NXACT_MASK        0x3000
+#  define R_MIPI_DSI_SQCH0DSCAR_H_NXACT_00                (0 << R_MIPI_DSI_SQCH0DSCAR_H_NXACT_SHIFT)  /* Terminate the sequence operation after this descriptor processing is finished.  */
+#  define R_MIPI_DSI_SQCH0DSCAR_H_NXACT_01                (1 << R_MIPI_DSI_SQCH0DSCAR_H_NXACT_SHIFT)  /* Start the next descriptor processing after this descriptor processing is finished.  */
+
+#define R_MIPI_DSI_SQCH0DSCAR_H_RESERVED_SHIFT    (14)  /* These bits are read as 00. The write value should be 00. */
+#define R_MIPI_DSI_SQCH0DSCAR_H_RESERVED_MASK     0xc000
+
+/* SQCH0DSCAR_HL Register bit definitions */
+#define R_MIPI_DSI_SQCH0DSCAR_HL_DT_SHIFT         (0)  /* Data Type */
+#define R_MIPI_DSI_SQCH0DSCAR_HL_DT_MASK          0x3f
+
+#define R_MIPI_DSI_SQCH0DSCAR_HL_VC_SHIFT         (6)  /* Virtual Channel */
+#define R_MIPI_DSI_SQCH0DSCAR_HL_VC_MASK          0xc0
+
+/* SQCH0DSCAR_HH Register bit definitions */
+#define R_MIPI_DSI_SQCH0DSCAR_HH_FMT              (1 << 0)  /* Format */
+
+#define R_MIPI_DSI_SQCH0DSCAR_HH_SPD              (1 << 1)  /* Speed */
+
+#define R_MIPI_DSI_SQCH0DSCAR_HH_BTA_SHIFT        (2)  /* Bus Turn Around */
+#define R_MIPI_DSI_SQCH0DSCAR_HH_BTA_MASK         0xc
+#  define R_MIPI_DSI_SQCH0DSCAR_HH_BTA_00                 (0 << R_MIPI_DSI_SQCH0DSCAR_HH_BTA_SHIFT)  /* Not assert BTA or No-operation */
+#  define R_MIPI_DSI_SQCH0DSCAR_HH_BTA_01                 (1 << R_MIPI_DSI_SQCH0DSCAR_HH_BTA_SHIFT)  /* Assert BTA  */
+#  define R_MIPI_DSI_SQCH0DSCAR_HH_BTA_10                 (2 << R_MIPI_DSI_SQCH0DSCAR_HH_BTA_SHIFT)  /* Assert BTA followed by READ request  (No WRITE request before BTA) */
+#  define R_MIPI_DSI_SQCH0DSCAR_HH_BTA_11                 (3 << R_MIPI_DSI_SQCH0DSCAR_HH_BTA_SHIFT)  /* Assert BTA only  (No WRITE request before BTA) */
+
+#define R_MIPI_DSI_SQCH0DSCAR_HH_NXACT_SHIFT      (4)  /* Next Action */
+#define R_MIPI_DSI_SQCH0DSCAR_HH_NXACT_MASK       0x30
+#  define R_MIPI_DSI_SQCH0DSCAR_HH_NXACT_00               (0 << R_MIPI_DSI_SQCH0DSCAR_HH_NXACT_SHIFT)  /* Terminate the sequence operation after this descriptor processing is finished.  */
+#  define R_MIPI_DSI_SQCH0DSCAR_HH_NXACT_01               (1 << R_MIPI_DSI_SQCH0DSCAR_HH_NXACT_SHIFT)  /* Start the next descriptor processing after this descriptor processing is finished.  */
+
+#define R_MIPI_DSI_SQCH0DSCAR_HH_RESERVED_SHIFT   (6)  /* These bits are read as 00. The write value should be 00. */
+#define R_MIPI_DSI_SQCH0DSCAR_HH_RESERVED_MASK    0xc0
 
 /* SQCH0DSCBR Register bit definitions */
+#define R_MIPI_DSI_SQCH0DSCBR_RESERVED_SHIFT      (26)  /* These bits are read as 000000. The write value should be 000000. */
+#define R_MIPI_DSI_SQCH0DSCBR_RESERVED_MASK       0xfc000000
+
 #define R_MIPI_DSI_SQCH0DSCBR_DTSEL_SHIFT         (24)  /* Data Select */
 #define R_MIPI_DSI_SQCH0DSCBR_DTSEL_MASK          0x3000000
-#  define R_MIPI_DSI_SQCH0DSCBR_DTSEL_00                  (0 << R_MIPI_DSI_SQCH0DSCBR_DTSEL_SHIFT)  /* Use Packet Payload Data Register (TXPPDxR, RXPPDxR)  */
-#  define R_MIPI_DSI_SQCH0DSCBR_DTSEL_01                  (1 << R_MIPI_DSI_SQCH0DSCBR_DTSEL_SHIFT)  /* Use memory space */
+#  define R_MIPI_DSI_SQCH0DSCBR_DTSEL_00                  (0 << R_MIPI_DSI_SQCH0DSCBR_DTSEL_SHIFT)  /* Use Packet Payload Data Register (TXPPDxR, RXPPDxR) */
+#  define R_MIPI_DSI_SQCH0DSCBR_DTSEL_01                  (1 << R_MIPI_DSI_SQCH0DSCBR_DTSEL_SHIFT)  /* Use Sequence RAM */
 
 /* SQCH0DSCCR Register bit definitions */
 #define R_MIPI_DSI_SQCH0DSCCR_FINACT              (1 << 0)  /* Finish Action */
+
+#define R_MIPI_DSI_SQCH0DSCCR_RESERVED            (1 << 23)  /* This bit is read as 0. The write value should be 0. */
 
 #define R_MIPI_DSI_SQCH0DSCCR_AUXOP               (1 << 22)  /* Auxiliary Operation */
 
 #define R_MIPI_DSI_SQCH0DSCCR_ACTCODE_SHIFT       (24)  /* Action Code */
 #define R_MIPI_DSI_SQCH0DSCCR_ACTCODE_MASK        0xff000000
+#  define R_MIPI_DSI_SQCH0DSCCR_ACTCODE_00000000          (0 << R_MIPI_DSI_SQCH0DSCCR_ACTCODE_SHIFT)  /* Slot-0 (RXRSS0R) */
+#  define R_MIPI_DSI_SQCH0DSCCR_ACTCODE_00000001          (1 << R_MIPI_DSI_SQCH0DSCCR_ACTCODE_SHIFT)  /* Slot-1 (RXRSS1R) */
+#  define R_MIPI_DSI_SQCH0DSCCR_ACTCODE_00000010          (2 << R_MIPI_DSI_SQCH0DSCCR_ACTCODE_SHIFT)  /* Slot-2 (RXRSS2R) */
+#  define R_MIPI_DSI_SQCH0DSCCR_ACTCODE_00000011          (3 << R_MIPI_DSI_SQCH0DSCCR_ACTCODE_SHIFT)  /* Slot-3 (RXRSS3R) */
+#  define R_MIPI_DSI_SQCH0DSCCR_ACTCODE_00000000          (0 << R_MIPI_DSI_SQCH0DSCCR_ACTCODE_SHIFT)  /* Send Reset-Trigger  */
+#  define R_MIPI_DSI_SQCH0DSCCR_ACTCODE_00000100          (4 << R_MIPI_DSI_SQCH0DSCCR_ACTCODE_SHIFT)  /* Send Initial Skew calibration */
+#  define R_MIPI_DSI_SQCH0DSCCR_ACTCODE_00000101          (5 << R_MIPI_DSI_SQCH0DSCCR_ACTCODE_SHIFT)  /* Send Periodic Skew calibration */
+#  define R_MIPI_DSI_SQCH0DSCCR_ACTCODE_00001000          (8 << R_MIPI_DSI_SQCH0DSCCR_ACTCODE_SHIFT)  /* No-operation  */
+
+/* SQCH0DSCCR_L Register bit definitions */
+#define R_MIPI_DSI_SQCH0DSCCR_L_FINACT            (1 << 0)  /* Finish Action */
+
+#define R_MIPI_DSI_SQCH0DSCCR_L_RESERVED_SHIFT    (3)  /* These bits are read as 0000000000000. The write value should be 0000000000000. */
+#define R_MIPI_DSI_SQCH0DSCCR_L_RESERVED_MASK     0xfff8
+
+/* SQCH0DSCCR_LL Register bit definitions */
+#define R_MIPI_DSI_SQCH0DSCCR_LL_FINACT           (1 << 0)  /* Finish Action */
+
+#define R_MIPI_DSI_SQCH0DSCCR_LL_RESERVED_SHIFT   (3)  /* These bits are read as 00000. The write value should be 00000. */
+#define R_MIPI_DSI_SQCH0DSCCR_LL_RESERVED_MASK    0xf8
+
+/* SQCH0DSCCR_H Register bit definitions */
+#define R_MIPI_DSI_SQCH0DSCCR_H_RESERVED          (1 << 7)  /* This bit is read as 0. The write value should be 0. */
+
+#define R_MIPI_DSI_SQCH0DSCCR_H_AUXOP             (1 << 6)  /* Auxiliary Operation */
+
+#define R_MIPI_DSI_SQCH0DSCCR_H_ACTCODE_SHIFT     (8)  /* Action Code */
+#define R_MIPI_DSI_SQCH0DSCCR_H_ACTCODE_MASK      0xff00
+#  define R_MIPI_DSI_SQCH0DSCCR_H_ACTCODE_00000000        (0 << R_MIPI_DSI_SQCH0DSCCR_H_ACTCODE_SHIFT)  /* Slot-0 (RXRSS0R) */
+#  define R_MIPI_DSI_SQCH0DSCCR_H_ACTCODE_00000001        (1 << R_MIPI_DSI_SQCH0DSCCR_H_ACTCODE_SHIFT)  /* Slot-1 (RXRSS1R) */
+#  define R_MIPI_DSI_SQCH0DSCCR_H_ACTCODE_00000010        (2 << R_MIPI_DSI_SQCH0DSCCR_H_ACTCODE_SHIFT)  /* Slot-2 (RXRSS2R) */
+#  define R_MIPI_DSI_SQCH0DSCCR_H_ACTCODE_00000011        (3 << R_MIPI_DSI_SQCH0DSCCR_H_ACTCODE_SHIFT)  /* Slot-3 (RXRSS3R) */
+#  define R_MIPI_DSI_SQCH0DSCCR_H_ACTCODE_00000000        (0 << R_MIPI_DSI_SQCH0DSCCR_H_ACTCODE_SHIFT)  /* Send Reset-Trigger  */
+#  define R_MIPI_DSI_SQCH0DSCCR_H_ACTCODE_00000100        (4 << R_MIPI_DSI_SQCH0DSCCR_H_ACTCODE_SHIFT)  /* Send Initial Skew calibration */
+#  define R_MIPI_DSI_SQCH0DSCCR_H_ACTCODE_00000101        (5 << R_MIPI_DSI_SQCH0DSCCR_H_ACTCODE_SHIFT)  /* Send Periodic Skew calibration */
+#  define R_MIPI_DSI_SQCH0DSCCR_H_ACTCODE_00001000        (8 << R_MIPI_DSI_SQCH0DSCCR_H_ACTCODE_SHIFT)  /* No-operation  */
+
+/* SQCH0DSCCR_HL Register bit definitions */
+#define R_MIPI_DSI_SQCH0DSCCR_HL_RESERVED         (1 << 7)  /* This bit is read as 0. The write value should be 0. */
+
+#define R_MIPI_DSI_SQCH0DSCCR_HL_AUXOP            (1 << 6)  /* Auxiliary Operation */
+
+/* SQCH0DSCCR_HH Register bit definitions */
+#define R_MIPI_DSI_SQCH0DSCCR_HH_ACTCODE_SHIFT    (0)  /* Action Code */
+#define R_MIPI_DSI_SQCH0DSCCR_HH_ACTCODE_MASK     0xff
+#  define R_MIPI_DSI_SQCH0DSCCR_HH_ACTCODE_00000000       (0 << R_MIPI_DSI_SQCH0DSCCR_HH_ACTCODE_SHIFT)  /* Slot-0 (RXRSS0R) */
+#  define R_MIPI_DSI_SQCH0DSCCR_HH_ACTCODE_00000001       (1 << R_MIPI_DSI_SQCH0DSCCR_HH_ACTCODE_SHIFT)  /* Slot-1 (RXRSS1R) */
+#  define R_MIPI_DSI_SQCH0DSCCR_HH_ACTCODE_00000010       (2 << R_MIPI_DSI_SQCH0DSCCR_HH_ACTCODE_SHIFT)  /* Slot-2 (RXRSS2R) */
+#  define R_MIPI_DSI_SQCH0DSCCR_HH_ACTCODE_00000011       (3 << R_MIPI_DSI_SQCH0DSCCR_HH_ACTCODE_SHIFT)  /* Slot-3 (RXRSS3R) */
+#  define R_MIPI_DSI_SQCH0DSCCR_HH_ACTCODE_00000000       (0 << R_MIPI_DSI_SQCH0DSCCR_HH_ACTCODE_SHIFT)  /* Send Reset-Trigger  */
+#  define R_MIPI_DSI_SQCH0DSCCR_HH_ACTCODE_00000100       (4 << R_MIPI_DSI_SQCH0DSCCR_HH_ACTCODE_SHIFT)  /* Send Initial Skew calibration */
+#  define R_MIPI_DSI_SQCH0DSCCR_HH_ACTCODE_00000101       (5 << R_MIPI_DSI_SQCH0DSCCR_HH_ACTCODE_SHIFT)  /* Send Periodic Skew calibration */
+#  define R_MIPI_DSI_SQCH0DSCCR_HH_ACTCODE_00001000       (8 << R_MIPI_DSI_SQCH0DSCCR_HH_ACTCODE_SHIFT)  /* No-operation  */
 
 /* SQCH0DSCDR Register bit definitions */
 #define R_MIPI_DSI_SQCH0DSCDR_LADDR_SHIFT         (0)  /* Lower Address */
 #define R_MIPI_DSI_SQCH0DSCDR_LADDR_MASK          0xffffffff
+
+/* SQCH0DSCDR_L Register bit definitions */
+#define R_MIPI_DSI_SQCH0DSCDR_L_LADDR_SHIFT       (0)  /* Lower Address */
+#define R_MIPI_DSI_SQCH0DSCDR_L_LADDR_MASK        0xffff
+
+/* SQCH0DSCDR_LL Register bit definitions */
+#define R_MIPI_DSI_SQCH0DSCDR_LL_LADDR_SHIFT      (0)  /* Lower Address */
+#define R_MIPI_DSI_SQCH0DSCDR_LL_LADDR_MASK       0xff
+
+/* SQCH0DSCDR_LH Register bit definitions */
+#define R_MIPI_DSI_SQCH0DSCDR_LH_LADDR_SHIFT      (0)  /* Lower Address */
+#define R_MIPI_DSI_SQCH0DSCDR_LH_LADDR_MASK       0xff
+
+/* SQCH0DSCDR_H Register bit definitions */
+#define R_MIPI_DSI_SQCH0DSCDR_H_LADDR_SHIFT       (0)  /* Lower Address */
+#define R_MIPI_DSI_SQCH0DSCDR_H_LADDR_MASK        0xffff
+
+/* SQCH0DSCDR_HL Register bit definitions */
+#define R_MIPI_DSI_SQCH0DSCDR_HL_LADDR_SHIFT      (0)  /* Lower Address */
+#define R_MIPI_DSI_SQCH0DSCDR_HL_LADDR_MASK       0xff
+
+/* SQCH0DSCDR_HH Register bit definitions */
+#define R_MIPI_DSI_SQCH0DSCDR_HH_LADDR_SHIFT      (0)  /* Lower Address */
+#define R_MIPI_DSI_SQCH0DSCDR_HH_LADDR_MASK       0xff
 
 /* SQCH1DSCAR Register bit definitions */
 #define R_MIPI_DSI_SQCH1DSCAR_DATA0_SHIFT         (0)  /* Data 0 */
@@ -1098,33 +1543,186 @@
 
 #define R_MIPI_DSI_SQCH1DSCAR_BTA_SHIFT           (26)  /* Bus Turn Around */
 #define R_MIPI_DSI_SQCH1DSCAR_BTA_MASK            0xc000000
-#  define R_MIPI_DSI_SQCH1DSCAR_BTA_00                    (0 << R_MIPI_DSI_SQCH1DSCAR_BTA_SHIFT)  /* TX request without BTA or no-operation */
-#  define R_MIPI_DSI_SQCH1DSCAR_BTA_01                    (1 << R_MIPI_DSI_SQCH1DSCAR_BTA_SHIFT)  /* TX non-read request with BTA */
-#  define R_MIPI_DSI_SQCH1DSCAR_BTA_10                    (2 << R_MIPI_DSI_SQCH1DSCAR_BTA_SHIFT)  /* TX read request with BTA */
-#  define R_MIPI_DSI_SQCH1DSCAR_BTA_11                    (3 << R_MIPI_DSI_SQCH1DSCAR_BTA_SHIFT)  /* BTA only */
+#  define R_MIPI_DSI_SQCH1DSCAR_BTA_00                    (0 << R_MIPI_DSI_SQCH1DSCAR_BTA_SHIFT)  /* Not assert BTA or No-operation */
+#  define R_MIPI_DSI_SQCH1DSCAR_BTA_01                    (1 << R_MIPI_DSI_SQCH1DSCAR_BTA_SHIFT)  /* Assert BTA  */
+#  define R_MIPI_DSI_SQCH1DSCAR_BTA_10                    (2 << R_MIPI_DSI_SQCH1DSCAR_BTA_SHIFT)  /* Assert BTA followed by READ request (No WRITE request before BTA) */
+#  define R_MIPI_DSI_SQCH1DSCAR_BTA_11                    (3 << R_MIPI_DSI_SQCH1DSCAR_BTA_SHIFT)  /* Assert BTA only (No WRITE request before BTA) */
 
 #define R_MIPI_DSI_SQCH1DSCAR_NXACT_SHIFT         (28)  /* Next Action */
 #define R_MIPI_DSI_SQCH1DSCAR_NXACT_MASK          0x30000000
-#  define R_MIPI_DSI_SQCH1DSCAR_NXACT_00                  (0 << R_MIPI_DSI_SQCH1DSCAR_NXACT_SHIFT)  /* Terminate the sequence operation after this descriptor processing is finished */
-#  define R_MIPI_DSI_SQCH1DSCAR_NXACT_01                  (1 << R_MIPI_DSI_SQCH1DSCAR_NXACT_SHIFT)  /* Start the next descriptor processing after this descriptor processing is finished */
+#  define R_MIPI_DSI_SQCH1DSCAR_NXACT_00                  (0 << R_MIPI_DSI_SQCH1DSCAR_NXACT_SHIFT)  /* Terminate the sequence operation after this descriptor processing is finished.  */
+#  define R_MIPI_DSI_SQCH1DSCAR_NXACT_01                  (1 << R_MIPI_DSI_SQCH1DSCAR_NXACT_SHIFT)  /* Start the next descriptor processing after this descriptor processing is finished.  */
+
+#define R_MIPI_DSI_SQCH1DSCAR_RESERVED_SHIFT      (30)  /* These bits are read as 00. The write value should be 00. */
+#define R_MIPI_DSI_SQCH1DSCAR_RESERVED_MASK       0xc0000000
+
+/* SQCH1DSCAR_L Register bit definitions */
+#define R_MIPI_DSI_SQCH1DSCAR_L_DATA0_SHIFT       (0)  /* Data 0 */
+#define R_MIPI_DSI_SQCH1DSCAR_L_DATA0_MASK        0xff
+
+#define R_MIPI_DSI_SQCH1DSCAR_L_DATA1_SHIFT       (8)  /* Data 1 */
+#define R_MIPI_DSI_SQCH1DSCAR_L_DATA1_MASK        0xff00
+
+/* SQCH1DSCAR_LL Register bit definitions */
+#define R_MIPI_DSI_SQCH1DSCAR_LL_DATA0_SHIFT      (0)  /* Data 0 */
+#define R_MIPI_DSI_SQCH1DSCAR_LL_DATA0_MASK       0xff
+
+/* SQCH1DSCAR_LH Register bit definitions */
+#define R_MIPI_DSI_SQCH1DSCAR_LH_DATA1_SHIFT      (0)  /* Data 1 */
+#define R_MIPI_DSI_SQCH1DSCAR_LH_DATA1_MASK       0xff
+
+/* SQCH1DSCAR_H Register bit definitions */
+#define R_MIPI_DSI_SQCH1DSCAR_H_DT_SHIFT          (0)  /* Data Type */
+#define R_MIPI_DSI_SQCH1DSCAR_H_DT_MASK           0x3f
+
+#define R_MIPI_DSI_SQCH1DSCAR_H_VC_SHIFT          (6)  /* Virtual Channel */
+#define R_MIPI_DSI_SQCH1DSCAR_H_VC_MASK           0xc0
+
+#define R_MIPI_DSI_SQCH1DSCAR_H_FMT               (1 << 8)  /* Format */
+
+#define R_MIPI_DSI_SQCH1DSCAR_H_SPD               (1 << 9)  /* Speed */
+
+#define R_MIPI_DSI_SQCH1DSCAR_H_BTA_SHIFT         (10)  /* Bus Turn Around */
+#define R_MIPI_DSI_SQCH1DSCAR_H_BTA_MASK          0xc00
+#  define R_MIPI_DSI_SQCH1DSCAR_H_BTA_00                  (0 << R_MIPI_DSI_SQCH1DSCAR_H_BTA_SHIFT)  /* Not assert BTA or No-operation */
+#  define R_MIPI_DSI_SQCH1DSCAR_H_BTA_01                  (1 << R_MIPI_DSI_SQCH1DSCAR_H_BTA_SHIFT)  /* Assert BTA  */
+#  define R_MIPI_DSI_SQCH1DSCAR_H_BTA_10                  (2 << R_MIPI_DSI_SQCH1DSCAR_H_BTA_SHIFT)  /* Assert BTA followed by READ request (No WRITE request before BTA) */
+#  define R_MIPI_DSI_SQCH1DSCAR_H_BTA_11                  (3 << R_MIPI_DSI_SQCH1DSCAR_H_BTA_SHIFT)  /* Assert BTA only (No WRITE request before BTA) */
+
+#define R_MIPI_DSI_SQCH1DSCAR_H_NXACT_SHIFT       (12)  /* Next Action */
+#define R_MIPI_DSI_SQCH1DSCAR_H_NXACT_MASK        0x3000
+#  define R_MIPI_DSI_SQCH1DSCAR_H_NXACT_00                (0 << R_MIPI_DSI_SQCH1DSCAR_H_NXACT_SHIFT)  /* Terminate the sequence operation after this descriptor processing is finished.  */
+#  define R_MIPI_DSI_SQCH1DSCAR_H_NXACT_01                (1 << R_MIPI_DSI_SQCH1DSCAR_H_NXACT_SHIFT)  /* Start the next descriptor processing after this descriptor processing is finished.  */
+
+#define R_MIPI_DSI_SQCH1DSCAR_H_RESERVED_SHIFT    (14)  /* These bits are read as 00. The write value should be 00. */
+#define R_MIPI_DSI_SQCH1DSCAR_H_RESERVED_MASK     0xc000
+
+/* SQCH1DSCAR_HL Register bit definitions */
+#define R_MIPI_DSI_SQCH1DSCAR_HL_DT_SHIFT         (0)  /* Data Type */
+#define R_MIPI_DSI_SQCH1DSCAR_HL_DT_MASK          0x3f
+
+#define R_MIPI_DSI_SQCH1DSCAR_HL_VC_SHIFT         (6)  /* Virtual Channel */
+#define R_MIPI_DSI_SQCH1DSCAR_HL_VC_MASK          0xc0
+
+/* SQCH1DSCAR_HH Register bit definitions */
+#define R_MIPI_DSI_SQCH1DSCAR_HH_FMT              (1 << 0)  /* Format */
+
+#define R_MIPI_DSI_SQCH1DSCAR_HH_SPD              (1 << 1)  /* Speed */
+
+#define R_MIPI_DSI_SQCH1DSCAR_HH_BTA_SHIFT        (2)  /* Bus Turn Around */
+#define R_MIPI_DSI_SQCH1DSCAR_HH_BTA_MASK         0xc
+#  define R_MIPI_DSI_SQCH1DSCAR_HH_BTA_00                 (0 << R_MIPI_DSI_SQCH1DSCAR_HH_BTA_SHIFT)  /* Not assert BTA or No-operation */
+#  define R_MIPI_DSI_SQCH1DSCAR_HH_BTA_01                 (1 << R_MIPI_DSI_SQCH1DSCAR_HH_BTA_SHIFT)  /* Assert BTA  */
+#  define R_MIPI_DSI_SQCH1DSCAR_HH_BTA_10                 (2 << R_MIPI_DSI_SQCH1DSCAR_HH_BTA_SHIFT)  /* Assert BTA followed by READ request (No WRITE request before BTA) */
+#  define R_MIPI_DSI_SQCH1DSCAR_HH_BTA_11                 (3 << R_MIPI_DSI_SQCH1DSCAR_HH_BTA_SHIFT)  /* Assert BTA only (No WRITE request before BTA) */
+
+#define R_MIPI_DSI_SQCH1DSCAR_HH_NXACT_SHIFT      (4)  /* Next Action */
+#define R_MIPI_DSI_SQCH1DSCAR_HH_NXACT_MASK       0x30
+#  define R_MIPI_DSI_SQCH1DSCAR_HH_NXACT_00               (0 << R_MIPI_DSI_SQCH1DSCAR_HH_NXACT_SHIFT)  /* Terminate the sequence operation after this descriptor processing is finished.  */
+#  define R_MIPI_DSI_SQCH1DSCAR_HH_NXACT_01               (1 << R_MIPI_DSI_SQCH1DSCAR_HH_NXACT_SHIFT)  /* Start the next descriptor processing after this descriptor processing is finished.  */
+
+#define R_MIPI_DSI_SQCH1DSCAR_HH_RESERVED_SHIFT   (6)  /* These bits are read as 00. The write value should be 00. */
+#define R_MIPI_DSI_SQCH1DSCAR_HH_RESERVED_MASK    0xc0
 
 /* SQCH1DSCBR Register bit definitions */
+#define R_MIPI_DSI_SQCH1DSCBR_RESERVED_SHIFT      (26)  /* These bits are read as 000000. The write value should be 000000. */
+#define R_MIPI_DSI_SQCH1DSCBR_RESERVED_MASK       0xfc000000
+
 #define R_MIPI_DSI_SQCH1DSCBR_DTSEL_SHIFT         (24)  /* Data Select */
 #define R_MIPI_DSI_SQCH1DSCBR_DTSEL_MASK          0x3000000
-#  define R_MIPI_DSI_SQCH1DSCBR_DTSEL_00                  (0 << R_MIPI_DSI_SQCH1DSCBR_DTSEL_SHIFT)  /* Use Packet Payload Data Register (TXPPDxR, RXPPDxR)  */
-#  define R_MIPI_DSI_SQCH1DSCBR_DTSEL_01                  (1 << R_MIPI_DSI_SQCH1DSCBR_DTSEL_SHIFT)  /* Use memory space */
+#  define R_MIPI_DSI_SQCH1DSCBR_DTSEL_00                  (0 << R_MIPI_DSI_SQCH1DSCBR_DTSEL_SHIFT)  /* Use Packet Payload Data Register (TXPPDxR, RXPPDxR) */
+#  define R_MIPI_DSI_SQCH1DSCBR_DTSEL_01                  (1 << R_MIPI_DSI_SQCH1DSCBR_DTSEL_SHIFT)  /* Use Sequence RAM */
 
 /* SQCH1DSCCR Register bit definitions */
 #define R_MIPI_DSI_SQCH1DSCCR_FINACT              (1 << 0)  /* Finish Action */
+
+#define R_MIPI_DSI_SQCH1DSCCR_RESERVED            (1 << 23)  /* This bit is read as 0. The write value should be 0. */
 
 #define R_MIPI_DSI_SQCH1DSCCR_AUXOP               (1 << 22)  /* Auxiliary Operation */
 
 #define R_MIPI_DSI_SQCH1DSCCR_ACTCODE_SHIFT       (24)  /* Action Code */
 #define R_MIPI_DSI_SQCH1DSCCR_ACTCODE_MASK        0xff000000
+#  define R_MIPI_DSI_SQCH1DSCCR_ACTCODE_00000000          (0 << R_MIPI_DSI_SQCH1DSCCR_ACTCODE_SHIFT)  /* Slot-0 (RXRSS0R) */
+#  define R_MIPI_DSI_SQCH1DSCCR_ACTCODE_00000001          (1 << R_MIPI_DSI_SQCH1DSCCR_ACTCODE_SHIFT)  /* Slot-1 (RXRSS1R) */
+#  define R_MIPI_DSI_SQCH1DSCCR_ACTCODE_00000010          (2 << R_MIPI_DSI_SQCH1DSCCR_ACTCODE_SHIFT)  /* Slot-2 (RXRSS2R) */
+#  define R_MIPI_DSI_SQCH1DSCCR_ACTCODE_00000011          (3 << R_MIPI_DSI_SQCH1DSCCR_ACTCODE_SHIFT)  /* Slot-3 (RXRSS3R) */
+#  define R_MIPI_DSI_SQCH1DSCCR_ACTCODE_00000000          (0 << R_MIPI_DSI_SQCH1DSCCR_ACTCODE_SHIFT)  /* Send Reset-Trigger  */
+#  define R_MIPI_DSI_SQCH1DSCCR_ACTCODE_00000100          (4 << R_MIPI_DSI_SQCH1DSCCR_ACTCODE_SHIFT)  /* Send Initial Skew calibration */
+#  define R_MIPI_DSI_SQCH1DSCCR_ACTCODE_00000101          (5 << R_MIPI_DSI_SQCH1DSCCR_ACTCODE_SHIFT)  /* Send Periodic Skew calibration */
+#  define R_MIPI_DSI_SQCH1DSCCR_ACTCODE_00001000          (8 << R_MIPI_DSI_SQCH1DSCCR_ACTCODE_SHIFT)  /* No-operation  */
+
+/* SQCH1DSCCR_L Register bit definitions */
+#define R_MIPI_DSI_SQCH1DSCCR_L_FINACT            (1 << 0)  /* Finish Action */
+
+#define R_MIPI_DSI_SQCH1DSCCR_L_RESERVED_SHIFT    (3)  /* These bits are read as 0000000000000. The write value should be 0000000000000. */
+#define R_MIPI_DSI_SQCH1DSCCR_L_RESERVED_MASK     0xfff8
+
+/* SQCH1DSCCR_LL Register bit definitions */
+#define R_MIPI_DSI_SQCH1DSCCR_LL_FINACT           (1 << 0)  /* Finish Action */
+
+#define R_MIPI_DSI_SQCH1DSCCR_LL_RESERVED_SHIFT   (3)  /* These bits are read as 00000. The write value should be 00000. */
+#define R_MIPI_DSI_SQCH1DSCCR_LL_RESERVED_MASK    0xf8
+
+/* SQCH1DSCCR_H Register bit definitions */
+#define R_MIPI_DSI_SQCH1DSCCR_H_RESERVED          (1 << 7)  /* This bit is read as 0. The write value should be 0. */
+
+#define R_MIPI_DSI_SQCH1DSCCR_H_AUXOP             (1 << 6)  /* Auxiliary Operation */
+
+#define R_MIPI_DSI_SQCH1DSCCR_H_ACTCODE_SHIFT     (8)  /* Action Code */
+#define R_MIPI_DSI_SQCH1DSCCR_H_ACTCODE_MASK      0xff00
+#  define R_MIPI_DSI_SQCH1DSCCR_H_ACTCODE_00000000        (0 << R_MIPI_DSI_SQCH1DSCCR_H_ACTCODE_SHIFT)  /* Slot-0 (RXRSS0R) */
+#  define R_MIPI_DSI_SQCH1DSCCR_H_ACTCODE_00000001        (1 << R_MIPI_DSI_SQCH1DSCCR_H_ACTCODE_SHIFT)  /* Slot-1 (RXRSS1R) */
+#  define R_MIPI_DSI_SQCH1DSCCR_H_ACTCODE_00000010        (2 << R_MIPI_DSI_SQCH1DSCCR_H_ACTCODE_SHIFT)  /* Slot-2 (RXRSS2R) */
+#  define R_MIPI_DSI_SQCH1DSCCR_H_ACTCODE_00000011        (3 << R_MIPI_DSI_SQCH1DSCCR_H_ACTCODE_SHIFT)  /* Slot-3 (RXRSS3R) */
+#  define R_MIPI_DSI_SQCH1DSCCR_H_ACTCODE_00000000        (0 << R_MIPI_DSI_SQCH1DSCCR_H_ACTCODE_SHIFT)  /* Send Reset-Trigger  */
+#  define R_MIPI_DSI_SQCH1DSCCR_H_ACTCODE_00000100        (4 << R_MIPI_DSI_SQCH1DSCCR_H_ACTCODE_SHIFT)  /* Send Initial Skew calibration */
+#  define R_MIPI_DSI_SQCH1DSCCR_H_ACTCODE_00000101        (5 << R_MIPI_DSI_SQCH1DSCCR_H_ACTCODE_SHIFT)  /* Send Periodic Skew calibration */
+#  define R_MIPI_DSI_SQCH1DSCCR_H_ACTCODE_00001000        (8 << R_MIPI_DSI_SQCH1DSCCR_H_ACTCODE_SHIFT)  /* No-operation  */
+
+/* SQCH1DSCCR_HL Register bit definitions */
+#define R_MIPI_DSI_SQCH1DSCCR_HL_RESERVED         (1 << 7)  /* This bit is read as 0. The write value should be 0. */
+
+#define R_MIPI_DSI_SQCH1DSCCR_HL_AUXOP            (1 << 6)  /* Auxiliary Operation */
+
+/* SQCH1DSCCR_HH Register bit definitions */
+#define R_MIPI_DSI_SQCH1DSCCR_HH_ACTCODE_SHIFT    (0)  /* Action Code */
+#define R_MIPI_DSI_SQCH1DSCCR_HH_ACTCODE_MASK     0xff
+#  define R_MIPI_DSI_SQCH1DSCCR_HH_ACTCODE_00000000       (0 << R_MIPI_DSI_SQCH1DSCCR_HH_ACTCODE_SHIFT)  /* Slot-0 (RXRSS0R) */
+#  define R_MIPI_DSI_SQCH1DSCCR_HH_ACTCODE_00000001       (1 << R_MIPI_DSI_SQCH1DSCCR_HH_ACTCODE_SHIFT)  /* Slot-1 (RXRSS1R) */
+#  define R_MIPI_DSI_SQCH1DSCCR_HH_ACTCODE_00000010       (2 << R_MIPI_DSI_SQCH1DSCCR_HH_ACTCODE_SHIFT)  /* Slot-2 (RXRSS2R) */
+#  define R_MIPI_DSI_SQCH1DSCCR_HH_ACTCODE_00000011       (3 << R_MIPI_DSI_SQCH1DSCCR_HH_ACTCODE_SHIFT)  /* Slot-3 (RXRSS3R) */
+#  define R_MIPI_DSI_SQCH1DSCCR_HH_ACTCODE_00000000       (0 << R_MIPI_DSI_SQCH1DSCCR_HH_ACTCODE_SHIFT)  /* Send Reset-Trigger  */
+#  define R_MIPI_DSI_SQCH1DSCCR_HH_ACTCODE_00000100       (4 << R_MIPI_DSI_SQCH1DSCCR_HH_ACTCODE_SHIFT)  /* Send Initial Skew calibration */
+#  define R_MIPI_DSI_SQCH1DSCCR_HH_ACTCODE_00000101       (5 << R_MIPI_DSI_SQCH1DSCCR_HH_ACTCODE_SHIFT)  /* Send Periodic Skew calibration */
+#  define R_MIPI_DSI_SQCH1DSCCR_HH_ACTCODE_00001000       (8 << R_MIPI_DSI_SQCH1DSCCR_HH_ACTCODE_SHIFT)  /* No-operation  */
 
 /* SQCH1DSCDR Register bit definitions */
 #define R_MIPI_DSI_SQCH1DSCDR_LADDR_SHIFT         (0)  /* Lower Address */
 #define R_MIPI_DSI_SQCH1DSCDR_LADDR_MASK          0xffffffff
+
+/* SQCH1DSCDR_L Register bit definitions */
+#define R_MIPI_DSI_SQCH1DSCDR_L_LADDR_SHIFT       (0)  /* Lower Address */
+#define R_MIPI_DSI_SQCH1DSCDR_L_LADDR_MASK        0xffff
+
+/* SQCH1DSCDR_LL Register bit definitions */
+#define R_MIPI_DSI_SQCH1DSCDR_LL_LADDR_SHIFT      (0)  /* Lower Address */
+#define R_MIPI_DSI_SQCH1DSCDR_LL_LADDR_MASK       0xff
+
+/* SQCH1DSCDR_LH Register bit definitions */
+#define R_MIPI_DSI_SQCH1DSCDR_LH_LADDR_SHIFT      (0)  /* Lower Address */
+#define R_MIPI_DSI_SQCH1DSCDR_LH_LADDR_MASK       0xff
+
+/* SQCH1DSCMDR_H Register bit definitions */
+#define R_MIPI_DSI_SQCH1DSCMDR_H_LADDR_SHIFT      (0)  /* Lower Address */
+#define R_MIPI_DSI_SQCH1DSCMDR_H_LADDR_MASK       0xffff
+
+/* SQCH1DSCDR_HL Register bit definitions */
+#define R_MIPI_DSI_SQCH1DSCDR_HL_LADDR_SHIFT      (0)  /* Lower Address */
+#define R_MIPI_DSI_SQCH1DSCDR_HL_LADDR_MASK       0xff
+
+/* SQCH1DSCDR_HH Register bit definitions */
+#define R_MIPI_DSI_SQCH1DSCDR_HH_LADDR_SHIFT      (0)  /* Lower Address */
+#define R_MIPI_DSI_SQCH1DSCDR_HH_LADDR_MASK       0xff
 
 
 /* Maximum number of channels */

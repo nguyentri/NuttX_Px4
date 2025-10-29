@@ -40,41 +40,44 @@
 
 /* SRAM Register Offsets */
 
-#define R_SRAM_SRAMPRCR_S_OFFSET                  0x00000000  /* SRAM Protection Control Register for Secure */
+#define R_SRAM_SRAMPRCR_OFFSET                    0x00000000  /* SRAM Protection Control Register for Secure */
+#define R_SRAM_SRAMPRCR_NS_OFFSET                 0x00000004  /* SRAM Protection Control Register for Non-Secure */
 #define R_SRAM_SRAMWTSC_OFFSET                    0x00000008  /* SRAM Wait State Control Register */
 /* SRAMCR%s Registers (0-3) */
-#define R_SRAM_SRAMCR_OFFSET(m)                   (0x00000010 + ((m) * 0x00000004))  /* SRAM Control Register %s For ECC RAM */
-#define R_SRAM_SRAMECCRGN0_OFFSET                 0x00000030  /* SRAM ECC Region Control Register 0 */
-#define R_SRAM_SRAMECCRGN1_OFFSET                 0x00000034  /* SRAM ECC Region Control Register 1 */
-#define R_SRAM_SRAMECCRGN2_OFFSET                 0x00000038  /* SRAM ECC Region Control Register 2 */
-#define R_SRAM_SRAMECCRGN3_OFFSET                 0x0000003c  /* SRAM ECC Region Control Register 3 */
+#define R_SRAM_SRAMCR_OFFSET(m)                   (0x00000010 + ((m) * 0x00000004))  /* SRAM Control Register %s */
+/* SRAMECCRGN%s Registers (0-3) */
+#define R_SRAM_SRAMECCRGN_OFFSET(m)               (0x00000030 + ((m) * 0x00000004))  /* SRAM ECC Region Control Register %s */
 #define R_SRAM_SRAMESR_OFFSET                     0x00000040  /* SRAM Error Status Register For ECC RAM */
 #define R_SRAM_SRAMESCLR_OFFSET                   0x00000048  /* SRAM Error Status Clear Register For ECC RAM */
 /* SRAMEAR%s0 Registers (0-3) */
-#define R_SRAM_SRAMEAR0_OFFSET(m)                 (0x00000050 + ((m) * 0x00000010))  /* SRAM Error Address Register n0 For ECC RAM */
+#define R_SRAM_SRAMEAR0_OFFSET(m)                 (0x00000050 + ((m) * 0x00000010))  /* SRAM Error Address Register %s0 */
 /* SRAMEAR%s1 Registers (0-3) */
-#define R_SRAM_SRAMEAR1_OFFSET(m)                 (0x00000054 + ((m) * 0x00000010))  /* SRAM Error Address Register n1 For ECC RAM */
+#define R_SRAM_SRAMEAR1_OFFSET(m)                 (0x00000054 + ((m) * 0x00000010))  /* SRAM Error Address Register %s1 */
 
 /* SRAM Register Addresses */
 
-#define R_SRAM_SRAMPRCR_S                         (R_SRAM_BASE + R_SRAM_SRAMPRCR_S_OFFSET)
+#define R_SRAM_SRAMPRCR                           (R_SRAM_BASE + R_SRAM_SRAMPRCR_OFFSET)
+#define R_SRAM_SRAMPRCR_NS                        (R_SRAM_BASE + R_SRAM_SRAMPRCR_NS_OFFSET)
 #define R_SRAM_SRAMWTSC                           (R_SRAM_BASE + R_SRAM_SRAMWTSC_OFFSET)
 #define R_SRAM_SRAMCR(m)                          (R_SRAM_BASE + R_SRAM_SRAMCR_OFFSET(m))
-#define R_SRAM_SRAMECCRGN0                        (R_SRAM_BASE + R_SRAM_SRAMECCRGN0_OFFSET)
-#define R_SRAM_SRAMECCRGN1                        (R_SRAM_BASE + R_SRAM_SRAMECCRGN1_OFFSET)
-#define R_SRAM_SRAMECCRGN2                        (R_SRAM_BASE + R_SRAM_SRAMECCRGN2_OFFSET)
-#define R_SRAM_SRAMECCRGN3                        (R_SRAM_BASE + R_SRAM_SRAMECCRGN3_OFFSET)
+#define R_SRAM_SRAMECCRGN(m)                      (R_SRAM_BASE + R_SRAM_SRAMECCRGN_OFFSET(m))
 #define R_SRAM_SRAMESR                            (R_SRAM_BASE + R_SRAM_SRAMESR_OFFSET)
 #define R_SRAM_SRAMESCLR                          (R_SRAM_BASE + R_SRAM_SRAMESCLR_OFFSET)
 #define R_SRAM_SRAMEAR0(m)                        (R_SRAM_BASE + R_SRAM_SRAMEAR0_OFFSET(m))
 #define R_SRAM_SRAMEAR1(m)                        (R_SRAM_BASE + R_SRAM_SRAMEAR1_OFFSET(m))
 
 /* Register bit definitions */
-/* SRAMPRCR_S Register bit definitions */
-#define R_SRAM_SRAMPRCR_S_PR                      (1 << 0)  /* Register Write Control */
+/* SRAMPRCR Register bit definitions */
+#define R_SRAM_SRAMPRCR_PR                        (1 << 0)  /* Register Write Control */
 
-#define R_SRAM_SRAMPRCR_S_KW_SHIFT                (8)  /* Write Key Code */
-#define R_SRAM_SRAMPRCR_S_KW_MASK                 0xff00
+#define R_SRAM_SRAMPRCR_KW_SHIFT                  (8)  /* Write Key Code */
+#define R_SRAM_SRAMPRCR_KW_MASK                   0xff00
+
+/* SRAMPRCR_NS Register bit definitions */
+#define R_SRAM_SRAMPRCR_NS_PR                     (1 << 0)  /* Register Write Control */
+
+#define R_SRAM_SRAMPRCR_NS_KW_SHIFT               (8)  /* Write Key Code */
+#define R_SRAM_SRAMPRCR_NS_KW_MASK                0xff00
 
 /* SRAMWTSC Register bit definitions */
 #define R_SRAM_SRAMWTSC_WTEN                      (1 << 0)  /* SRAM wait enable */
@@ -93,40 +96,15 @@
 
 #define R_SRAM_SRAMCR_TSTBYP                      (1 << 7)  /* ECC Test Enable / ECC Bypass Select */
 
-/* SRAMECCRGN0 Register bit definitions */
-#define R_SRAM_SRAMECCRGN0_ECCRGN_SHIFT           (0)  /* ECC target region select */
-#define R_SRAM_SRAMECCRGN0_ECCRGN_MASK            0x7
-#  define R_SRAM_SRAMECCRGN0_ECCRGN_000                   (0 << R_SRAM_SRAMECCRGN0_ECCRGN_SHIFT)  /* No ECC target region */
-#  define R_SRAM_SRAMECCRGN0_ECCRGN_001                   (1 << R_SRAM_SRAMECCRGN0_ECCRGN_SHIFT)  /* 0x2200_0000–0x2201_FFFF 0x3200_0000–0x3201_FFFF (128 KB)  */
-#  define R_SRAM_SRAMECCRGN0_ECCRGN_010                   (2 << R_SRAM_SRAMECCRGN0_ECCRGN_SHIFT)  /* 0x2200_0000–0x2203_FFFF 0x3200_0000–0x3203_FFFF (256 KB)  */
-#  define R_SRAM_SRAMECCRGN0_ECCRGN_011                   (3 << R_SRAM_SRAMECCRGN0_ECCRGN_SHIFT)  /* 0x2200_0000–0x2205_FFFF 0x3200_0000–0x3205_FFFF (384 KB)  */
-#  define R_SRAM_SRAMECCRGN0_ECCRGN_100                   (4 << R_SRAM_SRAMECCRGN0_ECCRGN_SHIFT)  /* 0x2200_0000–0x2207_FFFF 0x3200_0000–0x3207_FFFF (512 KB)  */
-
-/* SRAMECCRGN1 Register bit definitions */
-#define R_SRAM_SRAMECCRGN1_ECCRGN_SHIFT           (0)  /* ECC target region select */
-#define R_SRAM_SRAMECCRGN1_ECCRGN_MASK            0x7
-#  define R_SRAM_SRAMECCRGN1_ECCRGN_000                   (0 << R_SRAM_SRAMECCRGN1_ECCRGN_SHIFT)  /* No ECC target region */
-#  define R_SRAM_SRAMECCRGN1_ECCRGN_001                   (1 << R_SRAM_SRAMECCRGN1_ECCRGN_SHIFT)  /* 0x2208_0000–0x2209_FFFF 0x3208_0000–0x3209_FFFF (128 KB)  */
-#  define R_SRAM_SRAMECCRGN1_ECCRGN_010                   (2 << R_SRAM_SRAMECCRGN1_ECCRGN_SHIFT)  /* 0x2208_0000–0x220B_FFFF 0x3208_0000–0x320B_FFFF (256 KB)  */
-#  define R_SRAM_SRAMECCRGN1_ECCRGN_011                   (3 << R_SRAM_SRAMECCRGN1_ECCRGN_SHIFT)  /* 0x2208_0000–0x220D_FFFF 0x3208_0000–0x320D_FFFF (384 KB)  */
-#  define R_SRAM_SRAMECCRGN1_ECCRGN_100                   (4 << R_SRAM_SRAMECCRGN1_ECCRGN_SHIFT)  /* 0x2208_0000–0x220F_FFFF 0x3208_0000–0x320F_FFFF (512 KB)  */
-
-/* SRAMECCRGN2 Register bit definitions */
-#define R_SRAM_SRAMECCRGN2_ECCRGN_SHIFT           (0)  /* ECC target region select */
-#define R_SRAM_SRAMECCRGN2_ECCRGN_MASK            0x7
-#  define R_SRAM_SRAMECCRGN2_ECCRGN_000                   (0 << R_SRAM_SRAMECCRGN2_ECCRGN_SHIFT)  /* No ECC target region */
-#  define R_SRAM_SRAMECCRGN2_ECCRGN_001                   (1 << R_SRAM_SRAMECCRGN2_ECCRGN_SHIFT)  /* 0x2210_0000–0x2211_FFFF 0x3210_0000–0x3211_FFFF (128 KB)  */
-#  define R_SRAM_SRAMECCRGN2_ECCRGN_010                   (2 << R_SRAM_SRAMECCRGN2_ECCRGN_SHIFT)  /* 0x2210_0000–0x2213_FFFF 0x3210_0000–0x3213_FFFF (256 KB)  */
-#  define R_SRAM_SRAMECCRGN2_ECCRGN_011                   (3 << R_SRAM_SRAMECCRGN2_ECCRGN_SHIFT)  /* 0x2210_0000–0x2215_FFFF 0x3210_0000–0x3215_FFFF (384 KB)  */
-#  define R_SRAM_SRAMECCRGN2_ECCRGN_100                   (4 << R_SRAM_SRAMECCRGN2_ECCRGN_SHIFT)  /* 0x2210_0000–0x2217_FFFF 0x3210_0000–0x3217_FFFF (512 KB)  */
-
-/* SRAMECCRGN3 Register bit definitions */
-#define R_SRAM_SRAMECCRGN3_ECCRGN_SHIFT           (0)  /* ECC target region select */
-#define R_SRAM_SRAMECCRGN3_ECCRGN_MASK            0x7
-#  define R_SRAM_SRAMECCRGN3_ECCRGN_000                   (0 << R_SRAM_SRAMECCRGN3_ECCRGN_SHIFT)  /* No ECC target region */
-#  define R_SRAM_SRAMECCRGN3_ECCRGN_001                   (1 << R_SRAM_SRAMECCRGN3_ECCRGN_SHIFT)  /* 0x2218_0000–0x2219_FFFF 0x3218_0000–0x3219_FFFF (128 KB)  */
+/* SRAMECCRGN Register bit definitions */
+#define R_SRAM_SRAMECCRGN_ECCRGN_SHIFT            (0)  /* ECC target Region select */
+#define R_SRAM_SRAMECCRGN_ECCRGN_MASK             0x7
 
 /* SRAMESR Register bit definitions */
+#define R_SRAM_SRAMESR_ERR_S0                     (1 << 0)  /* SRAM%s 1-bit ECC Error Status */
+
+#define R_SRAM_SRAMESR_ERR_S1                     (1 << 1)  /* SRAM%s 2-bit ECC Error Status */
+
 #define R_SRAM_SRAMESR_ERR00                      (1 << 0)  /* SRAM0 1-bit ECC Error Status */
 
 #define R_SRAM_SRAMESR_ERR01                      (1 << 1)  /* SRAM0 2-bit ECC Error Status */
@@ -144,6 +122,10 @@
 #define R_SRAM_SRAMESR_ERR31                      (1 << 7)  /* SRAM3 2-bit ECC Error Status */
 
 /* SRAMESCLR Register bit definitions */
+#define R_SRAM_SRAMESCLR_CLR_S0                   (1 << 0)  /* SRAM%s 1-bit ECC Error Status Clear */
+
+#define R_SRAM_SRAMESCLR_CLR_S1                   (1 << 1)  /* SRAM%s 2-bit ECC Error Status Clear */
+
 #define R_SRAM_SRAMESCLR_CLR00                    (1 << 0)  /* SRAM0 1-bit ECC Error Status Clear */
 
 #define R_SRAM_SRAMESCLR_CLR01                    (1 << 1)  /* SRAM0 2-bit ECC Error Status Clear */
@@ -159,6 +141,14 @@
 #define R_SRAM_SRAMESCLR_CLR30                    (1 << 6)  /* SRAM3 1-bit ECC Error Status Clear */
 
 #define R_SRAM_SRAMESCLR_CLR31                    (1 << 7)  /* SRAM3 2-bit ECC Error Status Clear */
+
+/* SRAMEAR Register bit definitions */
+#define R_SRAM_SRAMEAR_SRAMEAR_SHIFT              (0)  /* When an SRAM error occurs, it stores an error address */
+#define R_SRAM_SRAMEAR_SRAMEAR_MASK               0xffffffff
+
+/* SRAMEAR Register bit definitions */
+#define R_SRAM_SRAMEAR_SRAMEAR_SHIFT              (0)  /* When an SRAM error occurs, it stores an error address */
+#define R_SRAM_SRAMEAR_SRAMEAR_MASK               0xffffffff
 
 
 /* Maximum number of channels */

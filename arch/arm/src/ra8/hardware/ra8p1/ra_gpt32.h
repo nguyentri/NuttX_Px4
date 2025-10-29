@@ -1542,6 +1542,7 @@
 #  define R_GPT32_GTICCR_ICBGRP_10                        (2 << R_GPT32_GTICCR_ICBGRP_SHIFT)  /* Select group C */
 #  define R_GPT32_GTICCR_ICBGRP_11                        (3 << R_GPT32_GTICCR_ICBGRP_SHIFT)  /* Select group D */
 
+
 /* Maximum number of channels */
 
 #define GPT32_MAX_CHANNELS    14

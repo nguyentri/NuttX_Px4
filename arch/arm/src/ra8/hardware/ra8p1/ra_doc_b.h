@@ -69,7 +69,7 @@
 
 #define R_DOC_B_DOCR_DCSEL_SHIFT                  (4)  /* Detection Condition Select */
 #define R_DOC_B_DOCR_DCSEL_MASK                   0x70
-#  define R_DOC_B_DOCR_DCSEL_000                          (0 << R_DOC_B_DOCR_DCSEL_SHIFT)  /* Mismatch (DODSR0 ≠ DODIR) */
+#  define R_DOC_B_DOCR_DCSEL_000                          (0 << R_DOC_B_DOCR_DCSEL_SHIFT)  /* Mismatch (DODSR0 != DODIR) */
 #  define R_DOC_B_DOCR_DCSEL_001                          (1 << R_DOC_B_DOCR_DCSEL_SHIFT)  /* Match (DODSR0 = DODIR) */
 #  define R_DOC_B_DOCR_DCSEL_010                          (2 << R_DOC_B_DOCR_DCSEL_SHIFT)  /* Lower (DODSR0 > DODIR) */
 #  define R_DOC_B_DOCR_DCSEL_011                          (3 << R_DOC_B_DOCR_DCSEL_SHIFT)  /* Upper (DODSR0 < DODIR) */

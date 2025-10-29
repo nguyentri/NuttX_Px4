@@ -45,9 +45,9 @@
 /* DAC_B Register Offsets */
 
 #define R_DAC_B_DADR_OFFSET                       0x00000000  /* D/A Data Register */
-#define R_DAC_B_DACR0_OFFSET                      0x00000004  /* D/A Control 0 Register */
-#define R_DAC_B_DACR1_OFFSET                      0x00000008  /* D/A Control 1 Register */
-#define R_DAC_B_DACR2_OFFSET                      0x0000000c  /* D/A Control 2 Register */
+#define R_DAC_B_DACR0_OFFSET                      0x00000004  /* D/A Control Register 0 */
+#define R_DAC_B_DACR1_OFFSET                      0x00000008  /* D/A Control Register 1 */
+#define R_DAC_B_DACR2_OFFSET                      0x0000000c  /* D/A Control Register 2 */
 
 /* DAC_B Register Addresses */
 
@@ -62,17 +62,17 @@
 #define R_DAC_B_DADR_DADR_MASK                    0xffff
 
 /* DACR0 Register bit definitions */
-#define R_DAC_B_DACR0_DACEN                       (1 << 0)  /* D/A Output Enable */
+#define R_DAC_B_DACR0_DACEN                       (1 << 0)  /* DA enable bit */
 
-#define R_DAC_B_DACR0_DAE                         (1 << 15)  /* D/A Enable R/W */
+#define R_DAC_B_DACR0_DAE                         (1 << 15)  /* DA batch conversion control bit */
 
-#define R_DAC_B_DACR0_DAOUTDIS                    (1 << 31)  /* Analog Output Disables */
+#define R_DAC_B_DACR0_DAOUTDIS                    (1 << 31)  /* Analog output disable bit */
 
 /* DACR1 Register bit definitions */
-#define R_DAC_B_DACR1_DPSEL                       (1 << 16)  /* DADR Format Select R/W */
+#define R_DAC_B_DACR1_DPSEL                       (1 << 16)  /* Data placement selection bit */
 
 /* DACR2 Register bit definitions */
-#define R_DAC_B_DACR2_OFSSEL                      (1 << 8)  /* DAC Operating Voltage Mode Selection */
+#define R_DAC_B_DACR2_OFSSEL                      (1 << 8)  /* DAC-HM operating voltage mode select bit */
 
 
 /* Maximum number of channels */

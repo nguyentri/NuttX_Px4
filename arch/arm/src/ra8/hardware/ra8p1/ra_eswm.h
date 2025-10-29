@@ -55,9 +55,9 @@
 #define R_ESWM_TGIM0_OFFSET                       0x00000710  /* GWCA0 Interrupt Mirroring Register */
 #define R_ESWM_TEIM0_OFFSET                       0x00000720  /* ETHA0 Interrupt Mirroring Register */
 #define R_ESWM_TEIM1_OFFSET                       0x00000724  /* ETHA1 Interrupt Mirroring Register */
-#define R_ESWM_MIIRR_OFFSET                       0x00019400  /* Media-independent Interface Reset Register */
-#define R_ESWM_MIICR0_OFFSET                      0x00019404  /* Media-independent Interface Control Register 0 */
-#define R_ESWM_MIICR1_OFFSET                      0x00019408  /* Media-independent Interface Control Register 1 */
+#define R_ESWM_MIIRR_OFFSET                       0x00019400  /* Media Interface Reset Register */
+/* MIICR%s Registers (0-1) */
+#define R_ESWM_MIICR_OFFSET(m)                    (0x00019404 + ((m) * 0x00000004))  /* Media Interface Control Register %s */
 #define R_ESWM_MCCESR_OFFSET                      0x00019410  /* Media Clock Capture Event Select Register */
 #define R_ESWM_TASSTSR_OFFSET                     0x00019420  /* TAS Status Monitor Signal Select Register */
 
@@ -77,33 +77,39 @@
 #define R_ESWM_TEIM0                              (R_ESWM_BASE + R_ESWM_TEIM0_OFFSET)
 #define R_ESWM_TEIM1                              (R_ESWM_BASE + R_ESWM_TEIM1_OFFSET)
 #define R_ESWM_MIIRR                              (R_ESWM_BASE + R_ESWM_MIIRR_OFFSET)
-#define R_ESWM_MIICR0                             (R_ESWM_BASE + R_ESWM_MIICR0_OFFSET)
-#define R_ESWM_MIICR1                             (R_ESWM_BASE + R_ESWM_MIICR1_OFFSET)
+#define R_ESWM_MIICR(m)                           (R_ESWM_BASE + R_ESWM_MIICR_OFFSET(m))
 #define R_ESWM_MCCESR                             (R_ESWM_BASE + R_ESWM_MCCESR_OFFSET)
 #define R_ESWM_TASSTSR                            (R_ESWM_BASE + R_ESWM_TASSTSR_OFFSET)
 
 /* Register bit definitions */
 /* TPEMIMC0 Register bit definitions */
-#define R_ESWM_TPEMIMC0_SEIM                      (1 << 0)  /* Summarized Error Interrupt Mapping */
+#define R_ESWM_TPEMIMC0_SEIM                      (1 << 0)  /* Switch Error Interrupt Mapping */
 
 #define R_ESWM_TPEMIMC0_SEIGM                     (1 << 1)  /* Switch Error Interrupt GWCA Mapping */
 
-#define R_ESWM_TPEMIMC0_SEICM_SHIFT               (4)  /* Summarized Error Interrupt Core Mapping */
+#define R_ESWM_TPEMIMC0_SEICM_SHIFT               (4)  /* Switch Error Interrupt Core Mapping */
 #define R_ESWM_TPEMIMC0_SEICM_MASK                0x70
 
-#define R_ESWM_TPEMIMC0_SSICM0_SHIFT              (20)  /* Summarized Status Interrupt 0 Core Mapping */
-#define R_ESWM_TPEMIMC0_SSICM0_MASK               0x700000
+#define R_ESWM_TPEMIMC0_SSIM_S                    (1 << 16)  /* Switch Status Interrupt %s Mapping */
 
-#define R_ESWM_TPEMIMC0_SSICM1_SHIFT              (28)  /* Summarized Status Interrupt 1 Core Mapping */
-#define R_ESWM_TPEMIMC0_SSICM1_MASK               0x70000000
+#define R_ESWM_TPEMIMC0_SSIGM_S                   (1 << 17)  /* Switch Status Interrupt %s GWCA Mapping */
+
+#define R_ESWM_TPEMIMC0_SSICM_S_SHIFT             (20)  /* Switch Status Interrupt %s Core Mapping */
+#define R_ESWM_TPEMIMC0_SSICM_S_MASK              0x700000
 
 #define R_ESWM_TPEMIMC0_SSIM0                     (1 << 16)  /* Switch Status Interrupt 0 Mapping */
 
 #define R_ESWM_TPEMIMC0_SSIGM0                    (1 << 17)  /* Switch Status Interrupt 0 GWCA Mapping */
 
+#define R_ESWM_TPEMIMC0_SSICM0_SHIFT              (20)  /* Switch Status Interrupt 0 Core Mapping */
+#define R_ESWM_TPEMIMC0_SSICM0_MASK               0x700000
+
 #define R_ESWM_TPEMIMC0_SSIM1                     (1 << 24)  /* Switch Status Interrupt 1 Mapping */
 
 #define R_ESWM_TPEMIMC0_SSIGM1                    (1 << 25)  /* Switch Status Interrupt 1 GWCA Mapping */
+
+#define R_ESWM_TPEMIMC0_SSICM1_SHIFT              (28)  /* Switch Status Interrupt 1 Core Mapping */
+#define R_ESWM_TPEMIMC0_SSICM1_MASK               0x70000000
 
 /* TPEMIMC1 Register bit definitions */
 #define R_ESWM_TPEMIMC1_FEIM                      (1 << 0)  /* MFWD Error Interrupt Mapping */
@@ -208,17 +214,25 @@
 
 #define R_ESWM_TSIM_CIM                           (1 << 1)  /* COMA Interrupt Mirroring */
 
+#define R_ESWM_TSIM_GIM_S                         (1 << 2)  /* GWCA%s Interrupt Monitoring */
+
+#define R_ESWM_TSIM_EIM_S                         (1 << 4)  /* ETHA%s Interrupt Monitoring */
+
 #define R_ESWM_TSIM_GIM0                          (1 << 2)  /* GWCA0 Interrupt Monitoring */
+
+#define R_ESWM_TSIM_GIM1                          (1 << 3)  /* GWCA1 Interrupt Monitoring */
 
 #define R_ESWM_TSIM_EIM0                          (1 << 4)  /* ETHA0 Interrupt Monitoring */
 
 #define R_ESWM_TSIM_EIM1                          (1 << 5)  /* ETHA1 Interrupt Monitoring */
 
-#define R_ESWM_TSIM_GIM1                          (1 << 3)  /* GWCA1 Interrupt Monitoring */
-
 #define R_ESWM_TSIM_EIM2                          (1 << 6)  /* ETHA2 Interrupt Monitoring */
 
 /* TFIM Register bit definitions */
+#define R_ESWM_TFIM_FWEISIM_S                     (1 << 0)  /* FWEIS%s Interrupt Mirroring */
+
+#define R_ESWM_TFIM_FWMISIM0                      (1 << 9)  /* FWMIS0 Interrupt Mirroring */
+
 #define R_ESWM_TFIM_FWEISIM0                      (1 << 0)  /* FWEIS0 Interrupt Mirroring */
 
 #define R_ESWM_TFIM_FWEISIM1                      (1 << 1)  /* FWEIS1 Interrupt Mirroring */
@@ -237,9 +251,13 @@
 
 #define R_ESWM_TFIM_FWEISIM8                      (1 << 8)  /* FWEIS8 Interrupt Mirroring */
 
-#define R_ESWM_TFIM_FWMISIM0                      (1 << 9)  /* FWMIS0 Interrupt Mirroring */
-
 /* TCIM Register bit definitions */
+#define R_ESWM_TCIM_RSSISIM                       (1 << 0)  /* RSSIS Interrupt Mirroring */
+
+#define R_ESWM_TCIM_CAEISIM_S                     (1 << 1)  /* CAEIS%s Interrupt Mirroring */
+
+#define R_ESWM_TCIM_CAMISIM_S                     (1 << 3)  /* CAMIS%s Interrupt Mirroring */
+
 #define R_ESWM_TCIM_CAEISIM0                      (1 << 1)  /* CAEIS0 Interrupt Mirroring */
 
 #define R_ESWM_TCIM_CAEISIM1                      (1 << 2)  /* CAEIS1 Interrupt Mirroring */
@@ -248,12 +266,12 @@
 
 #define R_ESWM_TCIM_CAMISIM1                      (1 << 4)  /* CAMIS1 Interrupt Mirroring */
 
-#define R_ESWM_TCIM_RSSISIM                       (1 << 0)  /* RSSIS Interrupt Mirroring */
-
 /* TGIM0 Register bit definitions */
 #define R_ESWM_TGIM0_GWDISIM                      (1 << 0)  /* GWDIS Interrupt Mirroring */
 
 #define R_ESWM_TGIM0_GWTSDISIM                    (1 << 1)  /* GWTSDIS Interrupt Mirroring */
+
+#define R_ESWM_TGIM0_GWEISIM_S                    (1 << 2)  /* GWEIS%s Interrupt Mirroring */
 
 #define R_ESWM_TGIM0_GWEISIM0                     (1 << 2)  /* GWEIS0 Interrupt Mirroring */
 
@@ -268,76 +286,77 @@
 #define R_ESWM_TGIM0_GWEISIM5                     (1 << 7)  /* GWEIS5 Interrupt Mirroring */
 
 /* TEIM0 Register bit definitions */
+#define R_ESWM_TEIM0_EAEISIM_S                    (1 << 0)  /* EAEIS%s Interrupt Mirroring */
+
+#define R_ESWM_TEIM0_MEISIM                       (1 << 3)  /* MEIS Interrupt Mirroring */
+
+#define R_ESWM_TEIM0_MMISIM                       (1 << 4)  /* MMIS0 Interrupt Mirroring */
+
 #define R_ESWM_TEIM0_EAEISIM0                     (1 << 0)  /* EAEIS0 Interrupt Mirroring */
 
 #define R_ESWM_TEIM0_EAEISIM1                     (1 << 1)  /* EAEIS1 Interrupt Mirroring */
 
 #define R_ESWM_TEIM0_EAEISIM2                     (1 << 2)  /* EAEIS2 Interrupt Mirroring */
 
-#define R_ESWM_TEIM0_MEISIM                       (1 << 3)  /* MEIS Interrupt Mirroring */
-
-#define R_ESWM_TEIM0_MMISIM                       (1 << 4)  /* MMIS0 Interrupt Mirroring */
-
 /* TEIM1 Register bit definitions */
+#define R_ESWM_TEIM1_EAEISIM_S                    (1 << 0)  /* EAEIS%s Interrupt Mirroring */
+
+#define R_ESWM_TEIM1_MEISIM                       (1 << 3)  /* MEIS Interrupt Mirroring */
+
+#define R_ESWM_TEIM1_MMISIM                       (1 << 4)  /* MMIS0 Interrupt Mirroring */
+
 #define R_ESWM_TEIM1_EAEISIM0                     (1 << 0)  /* EAEIS0 Interrupt Mirroring */
 
 #define R_ESWM_TEIM1_EAEISIM1                     (1 << 1)  /* EAEIS1 Interrupt Mirroring */
 
 #define R_ESWM_TEIM1_EAEISIM2                     (1 << 2)  /* EAEIS2 Interrupt Mirroring */
 
-#define R_ESWM_TEIM1_MEISIM                       (1 << 3)  /* MEIS Interrupt Mirroring */
-
-#define R_ESWM_TEIM1_MMISIM                       (1 << 4)  /* MMIS0 Interrupt Mirroring */
-
 /* MIIRR Register bit definitions */
-#define R_ESWM_MIIRR_RGRST0                       (1 << 0)  /* RGMII0 Reset */
+#define R_ESWM_MIIRR_RGRST_S                      (1 << 0)  /* RGMII%s Interface Reset */
 
-#define R_ESWM_MIIRR_RGRST1                       (1 << 1)  /* RGMII1 Reset */
+#define R_ESWM_MIIRR_RMRST_S                      (1 << 8)  /* RMII%s Interface Reset */
 
-#define R_ESWM_MIIRR_RMRST0                       (1 << 8)  /* RMII0 Reset */
+#define R_ESWM_MIIRR_RGRST0                       (1 << 0)  /* RGMII0 Interface Reset */
 
-#define R_ESWM_MIIRR_RMRST1                       (1 << 9)  /* RMII1 Reset */
+#define R_ESWM_MIIRR_RGRST1                       (1 << 1)  /* RGMII1 Interface Reset */
 
-/* MIICR0 Register bit definitions */
-#define R_ESWM_MIICR0_MIISEL_SHIFT                (0)  /* Media-independent Interface Select */
-#define R_ESWM_MIICR0_MIISEL_MASK                 0x3
-#  define R_ESWM_MIICR0_MIISEL_00                         (0 << R_ESWM_MIICR0_MIISEL_SHIFT)  /* MII/GMII */
-#  define R_ESWM_MIICR0_MIISEL_01                         (1 << R_ESWM_MIICR0_MIISEL_SHIFT)  /* RGMII */
-#  define R_ESWM_MIICR0_MIISEL_10                         (2 << R_ESWM_MIICR0_MIISEL_SHIFT)  /* RMII */
-#  define R_ESWM_MIICR0_MIISEL_11                         (3 << R_ESWM_MIICR0_MIISEL_SHIFT)  /* Setting prohibited */
+#define R_ESWM_MIIRR_RMRST0                       (1 << 8)  /* RMII0 Interface Reset */
 
-#define R_ESWM_MIICR0_DIVSTP                      (1 << 8)  /* Clock Divider Stop */
+#define R_ESWM_MIIRR_RMRST1                       (1 << 9)  /* RMII1 Interface Reset */
 
-#define R_ESWM_MIICR0_TXCIDE                      (1 << 12)  /* RGMII TXC Internal Delay Enable */
+/* MIICR Register bit definitions */
+#define R_ESWM_MIICR_MIISEL_SHIFT                 (0)  /* MII Select */
+#define R_ESWM_MIICR_MIISEL_MASK                  0x3
+#  define R_ESWM_MIICR_MIISEL_00                          (0 << R_ESWM_MIICR_MIISEL_SHIFT)  /* MII/GMII */
+#  define R_ESWM_MIICR_MIISEL_01                          (1 << R_ESWM_MIICR_MIISEL_SHIFT)  /* RGMII */
+#  define R_ESWM_MIICR_MIISEL_10                          (2 << R_ESWM_MIICR_MIISEL_SHIFT)  /* RMII */
+#  define R_ESWM_MIICR_MIISEL_11                          (3 << R_ESWM_MIICR_MIISEL_SHIFT)  /* Setting prohibited */
 
-/* MIICR1 Register bit definitions */
-#define R_ESWM_MIICR1_MIISEL_SHIFT                (0)  /* Media-independent Interface Select */
-#define R_ESWM_MIICR1_MIISEL_MASK                 0x3
-#  define R_ESWM_MIICR1_MIISEL_00                         (0 << R_ESWM_MIICR1_MIISEL_SHIFT)  /* MII/GMII */
-#  define R_ESWM_MIICR1_MIISEL_01                         (1 << R_ESWM_MIICR1_MIISEL_SHIFT)  /* RGMII */
-#  define R_ESWM_MIICR1_MIISEL_10                         (2 << R_ESWM_MIICR1_MIISEL_SHIFT)  /* RMII */
-#  define R_ESWM_MIICR1_MIISEL_11                         (3 << R_ESWM_MIICR1_MIISEL_SHIFT)  /* Setting prohibited */
+#define R_ESWM_MIICR_DIVSTP                       (1 << 8)  /* Clock Divider Stop */
 
-#define R_ESWM_MIICR1_DIVSTP                      (1 << 8)  /* Clock Divider Stop */
-
-#define R_ESWM_MIICR1_TXCIDE                      (1 << 12)  /* RGMII TXC Internal Delay Enable */
+#define R_ESWM_MIICR_TXCIDE                       (1 << 12)  /* TXC Internal Delay Enable in RGMII */
 
 /* MCCESR Register bit definitions */
-#define R_ESWM_MCCESR_MCCES0                      (1 << 0)  /* Media Clock 0 Capture Event Select */
+#define R_ESWM_MCCESR_MCCES_S                     (1 << 0)  /* Media Clock Capture Event Select %s */
 
-#define R_ESWM_MCCESR_MCCES1                      (1 << 1)  /* Media Clock 1 Capture Event Select */
+#define R_ESWM_MCCESR_MCCES0                      (1 << 0)  /* Media Clock Capture Event Select 0 */
+
+#define R_ESWM_MCCESR_MCCES1                      (1 << 1)  /* Media Clock Capture Event Select 1 */
 
 /* TASSTSR Register bit definitions */
-#define R_ESWM_TASSTSR_MSS0_SHIFT                 (0)  /* ET_TAS_STA0 Monitor Signal Select */
+#define R_ESWM_TASSTSR_MSS_S_SHIFT                (0)  /* Select signal to output ET_TAS_STA%s pin from race_etha0_tas_gate_state[8:0] and race_etha1_tas_gate_state[8:0] */
+#define R_ESWM_TASSTSR_MSS_S_MASK                 0x1f
+
+#define R_ESWM_TASSTSR_MSS0_SHIFT                 (0)  /* Select signal to output ET_TAS_STA pin from race_etha0_tas_gate_state[8 0] and race_etha1_tas_gate_state[8:0] */
 #define R_ESWM_TASSTSR_MSS0_MASK                  0x1f
 
-#define R_ESWM_TASSTSR_MSS1_SHIFT                 (8)  /* ET_TAS_STA1 Monitor Signal Select */
+#define R_ESWM_TASSTSR_MSS1_SHIFT                 (8)  /* Select signal to output ET_TAS_STA pin from race_etha0_tas_gate_state[ :0] and race_etha1_tas_gate_state[8:0] */
 #define R_ESWM_TASSTSR_MSS1_MASK                  0x1f00
 
-#define R_ESWM_TASSTSR_MSS2_SHIFT                 (16)  /* ET_TAS_STA2 Monitor Signal Select */
+#define R_ESWM_TASSTSR_MSS2_SHIFT                 (16)  /* Select signal to output ET_TAS_STA pin from race_etha0_tas_gate_state 8:0] and race_etha1_tas_gate_state[8:0] */
 #define R_ESWM_TASSTSR_MSS2_MASK                  0x1f0000
 
-#define R_ESWM_TASSTSR_MSS3_SHIFT                 (24)  /* ET_TAS_STA3 Monitor Signal Select */
+#define R_ESWM_TASSTSR_MSS3_SHIFT                 (24)  /* Select signal to output ET_TAS_STA pin from race_etha0_tas_gate_state 8:0] and race_etha1_tas_gate_state[8:0] */
 #define R_ESWM_TASSTSR_MSS3_MASK                  0x1f000000
 
 

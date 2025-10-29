@@ -96,7 +96,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: ra8_adc_b_initialize
+ * Name: ra8_adc_initialize
  *
  * Description:
  *   Initialize the ADC-B subsystem for RA8P1
@@ -110,7 +110,7 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct adc_dev_s *ra8_adc_b_initialize(uint32_t chanlist,
+FAR struct adc_dev_s *ra8_adc_initialize(uint32_t chanlist,
                                            int nchannels);
 
 #ifdef __cplusplus

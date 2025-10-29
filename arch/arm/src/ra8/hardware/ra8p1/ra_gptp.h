@@ -44,74 +44,77 @@
 #define R_GPTP_PTPTMEC_OFFSET                     0x00000010  /* Timer Enable Configuration Register */
 #define R_GPTP_PTPTMDC_OFFSET                     0x00000014  /* Timer Disable Configuration Register */
 /* PTPTIVC%s Registers (0-1) */
-#define R_GPTP_PTPTIVC_OFFSET(m)                  (0x00000020 + ((m) * 0x00000040))  /* Timer %s Increment Value Configuration Register */
-/* PTPTOVC%sL Registers (0-1) */
-#define R_GPTP_PTPTOVCL_OFFSET(m)                 (0x00000030 + ((m) * 0x00000040))  /* Timer %s Offset Value Configuration Register L */
+#define R_GPTP_PTPTIVC_OFFSET(m)                  (0x00000020 + ((m) * 0x00000040))  /* Timer Increment Value Configuration Register %s */
+/* PTPTOVCL%s Registers (0-1) */
+#define R_GPTP_PTPTOVCL_OFFSET(m)                 (0x00000030 + ((m) * 0x00000040))  /* Timer Offset Value Configuration Register L%s */
 /* PTPTOVCM%s Registers (0-1) */
-#define R_GPTP_PTPTOVCM_OFFSET(m)                 (0x00000034 + ((m) * 0x00000040))  /* Timer %s Offset Value Configuration Register M */
-/* PTPTOVC%sU Registers (0-1) */
-#define R_GPTP_PTPTOVCU_OFFSET(m)                 (0x00000038 + ((m) * 0x00000040))  /* Timer %s Offset Value Configuration Register U */
-/* PTPAVTPTM%sL Registers (0-1) */
-#define R_GPTP_PTPAVTPTML_OFFSET(m)               (0x00000040 + ((m) * 0x00000040))  /* AVTP Timer %s Monitoring Register L */
-/* PTPAVTPTM%sU Registers (0-1) */
-#define R_GPTP_PTPAVTPTMU_OFFSET(m)               (0x00000044 + ((m) * 0x00000040))  /* AVTP Timer %s Monitoring Register U */
-/* PTPGPTPTM%sL Registers (0-1) */
-#define R_GPTP_PTPGPTPTML_OFFSET(m)               (0x00000050 + ((m) * 0x00000040))  /* GPTP Timer %s Monitoring Register L */
-/* PTPGPTPTM%sM Registers (0-1) */
-#define R_GPTP_PTPGPTPTMM_OFFSET(m)               (0x00000054 + ((m) * 0x00000040))  /* GPTP Timer %s Monitoring Register M */
-/* PTPGPTPTM%sU Registers (0-1) */
-#define R_GPTP_PTPGPTPTMU_OFFSET(m)               (0x00000058 + ((m) * 0x00000040))  /* GPTP Timer %s Monitoring Register U */
+#define R_GPTP_PTPTOVCM_OFFSET(m)                 (0x00000034 + ((m) * 0x00000040))  /* Timer Offset Value Configuration Register M%s */
+/* PTPTOVCU%s Registers (0-1) */
+#define R_GPTP_PTPTOVCU_OFFSET(m)                 (0x00000038 + ((m) * 0x00000040))  /* Timer Offset Value Configuration Register U%s */
+/* PTPAVTPTML%s Registers (0-1) */
+#define R_GPTP_PTPAVTPTML_OFFSET(m)               (0x00000040 + ((m) * 0x00000040))  /* AVTP Timer Monitoring Register L%s */
+/* PTPAVTPTMU%s Registers (0-1) */
+#define R_GPTP_PTPAVTPTMU_OFFSET(m)               (0x00000044 + ((m) * 0x00000040))  /* AVTP Timer Monitoring Register U%s */
+/* PTPGPTPTML%s Registers (0-1) */
+#define R_GPTP_PTPGPTPTML_OFFSET(m)               (0x00000050 + ((m) * 0x00000040))  /* GPTP Timer Monitoring Register L%s */
+/* PTPGPTPTMM%s Registers (0-1) */
+#define R_GPTP_PTPGPTPTMM_OFFSET(m)               (0x00000054 + ((m) * 0x00000040))  /* GPTP Timer Monitoring Register M%s */
+/* PTPGPTPTMU%s Registers (0-1) */
+#define R_GPTP_PTPGPTPTMU_OFFSET(m)               (0x00000058 + ((m) * 0x00000040))  /* GPTP Timer Monitoring Register U%s */
 /* PTPMCCC%s Registers (0-1) */
-#define R_GPTP_PTPMCCC_OFFSET(m)                  (0x00000200 + ((m) * 0x00000010))  /* Media Clock %s Capture Configuration Register */
-/* PTPMCCM%sL Registers (0-1) */
-#define R_GPTP_PTPMCCML_OFFSET(m)                 (0x00000204 + ((m) * 0x00000010))  /* Media Clock %s Capture Monitoring Register L */
-/* PTPMCCM%sM Registers (0-1) */
-#define R_GPTP_PTPMCCMM_OFFSET(m)                 (0x00000208 + ((m) * 0x00000010))  /* Media Clock %s Capture Monitoring Register M */
-/* PTPMCCM%sU Registers (0-1) */
-#define R_GPTP_PTPMCCMU_OFFSET(m)                 (0x0000020c + ((m) * 0x00000010))  /* Media Clock %s Capture Monitoring Register U */
+#define R_GPTP_PTPMCCC_OFFSET(m)                  (0x00000200 + ((m) * 0x00000010))  /* Media Clock Capture Configuration Register %s */
+/* PTPMCCML%s Registers (0-1) */
+#define R_GPTP_PTPMCCML_OFFSET(m)                 (0x00000204 + ((m) * 0x00000010))  /* Media Clock Capture Monitoring Register L%s */
+/* PTPMCCMM%s Registers (0-1) */
+#define R_GPTP_PTPMCCMM_OFFSET(m)                 (0x00000208 + ((m) * 0x00000010))  /* Media Clock Capture Monitoring Register M%s */
+/* PTPMCCMU%s Registers (0-1) */
+#define R_GPTP_PTPMCCMU_OFFSET(m)                 (0x0000020c + ((m) * 0x00000010))  /* Media Clock Capture Monitoring Register U%s */
 /* PTPMCRC%s Registers (0-1) */
-#define R_GPTP_PTPMCRC_OFFSET(m)                  (0x00000300 + ((m) * 0x00000010))  /* Media Clock %s Recovery Configuration Register */
-/* PTPMCRTC%sL Registers (0-1) */
-#define R_GPTP_PTPMCRTCL_OFFSET(m)                (0x00000304 + ((m) * 0x00000010))  /* Media Clock %s Recovery Time Configuration Register L */
-/* PTPMCRTC%sM Registers (0-1) */
-#define R_GPTP_PTPMCRTCM_OFFSET(m)                (0x00000308 + ((m) * 0x00000010))  /* Media Clock %s Recovery Time Configuration Register M */
-/* PTPMCRTC%sU Registers (0-1) */
-#define R_GPTP_PTPMCRTCU_OFFSET(m)                (0x0000030c + ((m) * 0x00000010))  /* Media Clock %s Recovery Time Configuration Register U */
+#define R_GPTP_PTPMCRC_OFFSET(m)                  (0x00000300 + ((m) * 0x00000010))  /* Media Clock Recovery Configuration Register %s */
+/* PTPMCRTCL%s Registers (0-1) */
+#define R_GPTP_PTPMCRTCL_OFFSET(m)                (0x00000304 + ((m) * 0x00000010))  /* Media Clock Recovery Time Configuration Register L%s */
+/* PTPMCRTCM%s Registers (0-1) */
+#define R_GPTP_PTPMCRTCM_OFFSET(m)                (0x00000308 + ((m) * 0x00000010))  /* Media Clock Recovery Time Configuration Register M%s */
+/* PTPMCRTCU%s Registers (0-1) */
+#define R_GPTP_PTPMCRTCU_OFFSET(m)                (0x0000030c + ((m) * 0x00000010))  /* Media Clock Recovery Time Configuration Register U%s */
 /* PTPMCPC%s Registers (0-1) */
-#define R_GPTP_PTPMCPC_OFFSET(m)                  (0x00000400 + ((m) * 0x00000004))  /* Media Clock %s Pin Configuration Register */
-/* PTPCCC%s0 Registers (0-7) */
-#define R_GPTP_PTPCCC0_OFFSET(m)                  (0x00000500 + ((m) * 0x00000008))  /* Cyclic Compare %s Configuration Register 0 (c = 0 to 7) */
-/* PTPCCC%s1 Registers (0-7) */
-#define R_GPTP_PTPCCC1_OFFSET(m)                  (0x00000504 + ((m) * 0x00000008))  /* Cyclic Compare %s Configuration Register 1 (c = 0 to 7) */
+#define R_GPTP_PTPMCPC_OFFSET(m)                  (0x00000400 + ((m) * 0x00000004))  /* Media Clock Pin Configuration Register %s */
+/* PTPCCC0%s Registers (0-7) */
+#define R_GPTP_PTPCCC0_OFFSET(m)                  (0x00000500 + ((m) * 0x00000008))  /* Cyclic Compare Configuration Register 0%s */
+/* PTPCCC1%s Registers (0-7) */
+#define R_GPTP_PTPCCC1_OFFSET(m)                  (0x00000504 + ((m) * 0x00000008))  /* Cyclic Compare Configuration Register 1%s */
 #define R_GPTP_PTPIS0_OFFSET                      0x00000700  /* Interrupt Status Register 0 */
 #define R_GPTP_PTPIE0_OFFSET                      0x00000704  /* Interrupt Enable Register 0 */
 #define R_GPTP_PTPID0_OFFSET                      0x00000708  /* Interrupt Disable Register 0 */
 #define R_GPTP_PTPIS1_OFFSET                      0x00000710  /* Interrupt Status Register 1 */
 #define R_GPTP_PTPIE1_OFFSET                      0x00000714  /* Interrupt Enable Register 1 */
 #define R_GPTP_PTPID1_OFFSET                      0x00000718  /* Interrupt Disable Register 1 */
+#define R_GPTP_PTPSCR0_OFFSET                     0x00000780  /* Security Configuration Register 0 */
+#define R_GPTP_PTPSCR1_OFFSET                     0x00000784  /* Security Configuration Register 1 */
+#define R_GPTP_PTPSCR2_OFFSET                     0x00000788  /* Security Configuration Register 2 */
 #define R_GPTP_POTCFGR_OFFSET                     0x00001000  /* Pulse Output Timer Configuration Register */
 /* POTCR%s Registers (0-3) */
 #define R_GPTP_POTCR_OFFSET(m)                    (0x00001004 + ((m) * 0x00000030))  /* Pulse Output Timer Control Register %s */
-/* POTSTR%sU Registers (0-3) */
-#define R_GPTP_POTSTRU_OFFSET(m)                  (0x00001008 + ((m) * 0x00000030))  /* Pulse Output Start Time Setting Register nU */
-/* POTSTR%sM Registers (0-3) */
-#define R_GPTP_POTSTRM_OFFSET(m)                  (0x0000100c + ((m) * 0x00000030))  /* Pulse Output Start Time Setting Register nM */
-/* POTSTR%sL Registers (0-3) */
-#define R_GPTP_POTSTRL_OFFSET(m)                  (0x00001010 + ((m) * 0x00000030))  /* Pulse Output Start Time Setting Register nL */
-/* POTPER%sU Registers (0-3) */
-#define R_GPTP_POTPERU_OFFSET(m)                  (0x00001014 + ((m) * 0x00000030))  /* Period Setting Register nU */
-/* POTPER%sM Registers (0-3) */
-#define R_GPTP_POTPERM_OFFSET(m)                  (0x00001018 + ((m) * 0x00000030))  /* Period Setting Register nM */
-/* POTPER%sL Registers (0-3) */
-#define R_GPTP_POTPERL_OFFSET(m)                  (0x0000101c + ((m) * 0x00000030))  /* Period Setting Register nL */
+/* POTSTRU%s Registers (0-3) */
+#define R_GPTP_POTSTRU_OFFSET(m)                  (0x00001008 + ((m) * 0x00000030))  /* Pulse Output Start Time Setting Register U%s */
+/* POTSTRM%s Registers (0-3) */
+#define R_GPTP_POTSTRM_OFFSET(m)                  (0x0000100c + ((m) * 0x00000030))  /* Pulse Output Start Time Setting Register M%s */
+/* POTSTRL%s Registers (0-3) */
+#define R_GPTP_POTSTRL_OFFSET(m)                  (0x00001010 + ((m) * 0x00000030))  /* Pulse Output Start Time Setting Register L%s */
+/* POTPERU%s Registers (0-3) */
+#define R_GPTP_POTPERU_OFFSET(m)                  (0x00001014 + ((m) * 0x00000030))  /* Period Setting Register U%s */
+/* POTPERM%s Registers (0-3) */
+#define R_GPTP_POTPERM_OFFSET(m)                  (0x00001018 + ((m) * 0x00000030))  /* Period Setting Register M%s */
+/* POTPERL%s Registers (0-3) */
+#define R_GPTP_POTPERL_OFFSET(m)                  (0x0000101c + ((m) * 0x00000030))  /* Period Setting Register L%s */
 /* POTPWR%s Registers (0-3) */
 #define R_GPTP_POTPWR_OFFSET(m)                   (0x00001020 + ((m) * 0x00000030))  /* Pulse Width Setting Register %s */
-/* POTCPR%sU Registers (0-3) */
-#define R_GPTP_POTCPRU_OFFSET(m)                  (0x00001028 + ((m) * 0x00000030))  /* Time Capture Register nU */
-/* POTCPR%sM Registers (0-3) */
-#define R_GPTP_POTCPRM_OFFSET(m)                  (0x0000102c + ((m) * 0x00000030))  /* Time Capture Register nM */
-/* POTCPR%sL Registers (0-3) */
-#define R_GPTP_POTCPRL_OFFSET(m)                  (0x00001030 + ((m) * 0x00000030))  /* Time Capture Register nL */
+/* POTCPRU%s Registers (0-3) */
+#define R_GPTP_POTCPRU_OFFSET(m)                  (0x00001028 + ((m) * 0x00000030))  /* Time Capture Register U%s */
+/* POTCPRM%s Registers (0-3) */
+#define R_GPTP_POTCPRM_OFFSET(m)                  (0x0000102c + ((m) * 0x00000030))  /* Time Capture Register M%s */
+/* POTCPRL%s Registers (0-3) */
+#define R_GPTP_POTCPRL_OFFSET(m)                  (0x00001030 + ((m) * 0x00000030))  /* Time Capture Register L%s */
 
 /* GPTP Register Addresses */
 
@@ -144,6 +147,9 @@
 #define R_GPTP_PTPIS1                             (R_GPTP_BASE + R_GPTP_PTPIS1_OFFSET)
 #define R_GPTP_PTPIE1                             (R_GPTP_BASE + R_GPTP_PTPIE1_OFFSET)
 #define R_GPTP_PTPID1                             (R_GPTP_BASE + R_GPTP_PTPID1_OFFSET)
+#define R_GPTP_PTPSCR0                            (R_GPTP_BASE + R_GPTP_PTPSCR0_OFFSET)
+#define R_GPTP_PTPSCR1                            (R_GPTP_BASE + R_GPTP_PTPSCR1_OFFSET)
+#define R_GPTP_PTPSCR2                            (R_GPTP_BASE + R_GPTP_PTPSCR2_OFFSET)
 #define R_GPTP_POTCFGR                            (R_GPTP_BASE + R_GPTP_POTCFGR_OFFSET)
 #define R_GPTP_POTCR(m)                           (R_GPTP_BASE + R_GPTP_POTCR_OFFSET(m))
 #define R_GPTP_POTSTRU(m)                         (R_GPTP_BASE + R_GPTP_POTSTRU_OFFSET(m))
@@ -163,19 +169,10 @@
 #define R_GPTP_PTPIPV_IPV_MASK                    0xffffffff
 
 /* PTPTMEC Register bit definitions */
-#define R_GPTP_PTPTMEC_TE0                        (1 << 0)  /* Timer q Enable (q = 0, 1) */
-
-#define R_GPTP_PTPTMEC_TE1                        (1 << 1)  /* Timer q Enable (q = 0, 1) */
-
 #define R_GPTP_PTPTMEC_TE_SHIFT                   (0)  /* Timer Enable */
 #define R_GPTP_PTPTMEC_TE_MASK                    0x3
 
 /* PTPTMDC Register bit definitions */
-#define R_GPTP_PTPTMDC_TD1_TO_TD0_SHIFT           (0)  /* Timer n Disable (n = 0, 1) */
-#define R_GPTP_PTPTMDC_TD1_TO_TD0_MASK            0x3
-#  define R_GPTP_PTPTMDC_TD1_TO_TD0_0                     (0 << R_GPTP_PTPTMDC_TD1_TO_TD0_SHIFT)  /* No effect */
-#  define R_GPTP_PTPTMDC_TD1_TO_TD0_1                     (1 << R_GPTP_PTPTMDC_TD1_TO_TD0_SHIFT)  /* Bit q of this register clears PTPTMEC.TEq */
-
 #define R_GPTP_PTPTMDC_TD_SHIFT                   (0)  /* Timer Disable */
 #define R_GPTP_PTPTMDC_TD_MASK                    0x3
 
@@ -242,7 +239,7 @@
 
 #define R_GPTP_PTPMCCMU_MCNEC                     (1 << 17)  /* Media Clock Negative Edge Captured */
 
-#define R_GPTP_PTPMCCMU_MCSWC                     (1 << 18)  /* Media Clock Software Captured */
+#define R_GPTP_PTPMCCMU_MCSWC                     (1 << 18)  /* Media Clock SoftWare Captured */
 
 #define R_GPTP_PTPMCCMU_MCCN_SHIFT                (24)  /* Media Clock Capture Number */
 #define R_GPTP_PTPMCCMU_MCCN_MASK                 0x3000000
@@ -271,10 +268,10 @@
 
 #define R_GPTP_PTPMCRTCU_MRTT_SHIFT               (16)  /* Media Clock Recovery Trigger Type */
 #define R_GPTP_PTPMCRTCU_MRTT_MASK                0x30000
-#  define R_GPTP_PTPMCRTCU_MRTT_00                        (0 << R_GPTP_PTPMCRTCU_MRTT_SHIFT)  /* When timer match, time recovery pin is set to 1 */
-#  define R_GPTP_PTPMCRTCU_MRTT_01                        (1 << R_GPTP_PTPMCRTCU_MRTT_SHIFT)  /* When timer match, time recovery pin is set to 0 */
-#  define R_GPTP_PTPMCRTCU_MRTT_10                        (2 << R_GPTP_PTPMCRTCU_MRTT_SHIFT)  /* When timer match, time recovery pin is inverted */
-#  define R_GPTP_PTPMCRTCU_MRTT_11                        (3 << R_GPTP_PTPMCRTCU_MRTT_SHIFT)  /* When timer match, a positive pulse of length PTPMCRCm.MRPL is output on time recovery pin */
+#  define R_GPTP_PTPMCRTCU_MRTT_0_0                       (0 << R_GPTP_PTPMCRTCU_MRTT_SHIFT)  /* When timer match, time recovery pin is set to 1. */
+#  define R_GPTP_PTPMCRTCU_MRTT_0_1                       (0 << R_GPTP_PTPMCRTCU_MRTT_SHIFT)  /* When timer match, time recovery pin is set to 0. */
+#  define R_GPTP_PTPMCRTCU_MRTT_1_0                       (0 << R_GPTP_PTPMCRTCU_MRTT_SHIFT)  /* When timer match, time recovery pin is inverted. */
+#  define R_GPTP_PTPMCRTCU_MRTT_1_1                       (0 << R_GPTP_PTPMCRTCU_MRTT_SHIFT)  /* When timer match, a positive pulse of length PTPMCRCm.MRPLm is output on time recovery pin. */
 
 #define R_GPTP_PTPMCRTCU_MCRN_SHIFT               (18)  /* Media Clock Recovery Number */
 #define R_GPTP_PTPMCRTCU_MCRN_MASK                0x1c0000
@@ -296,12 +293,6 @@
 #define R_GPTP_PTPCCC_CCV_MASK                    0xffffffff
 
 /* PTPIS0 Register bit definitions */
-#define R_GPTP_PTPIS0_MCCS1_TO_MCCS0_SHIFT        (0)  /* Media Clock n Capture Status Flag (n = 0, 1) */
-#define R_GPTP_PTPIS0_MCCS1_TO_MCCS0_MASK         0x3
-
-#define R_GPTP_PTPIS0_MCCOES1_TO_MCCOES0_SHIFT    (16)  /* Media Clock n Capture Overflow Error Status Flag (n = 0, 1) */
-#define R_GPTP_PTPIS0_MCCOES1_TO_MCCOES0_MASK     0x30000
-
 #define R_GPTP_PTPIS0_MCCS_SHIFT                  (0)  /* Media Clock Capture Status */
 #define R_GPTP_PTPIS0_MCCS_MASK                   0x3
 
@@ -309,16 +300,6 @@
 #define R_GPTP_PTPIS0_MCCOES_MASK                 0x30000
 
 /* PTPIE0 Register bit definitions */
-#define R_GPTP_PTPIE0_MCCE1_TO_MCCE0_SHIFT        (0)  /* Media Clock m Capture Enable (m = 0, 1) */
-#define R_GPTP_PTPIE0_MCCE1_TO_MCCE0_MASK         0x3
-#  define R_GPTP_PTPIE0_MCCE1_TO_MCCE0_0                  (0 << R_GPTP_PTPIE0_MCCE1_TO_MCCE0_SHIFT)  /* Interrupt m disabled */
-#  define R_GPTP_PTPIE0_MCCE1_TO_MCCE0_1                  (1 << R_GPTP_PTPIE0_MCCE1_TO_MCCE0_SHIFT)  /* Interrupt m enabled */
-
-#define R_GPTP_PTPIE0_MCCOEE1_TO_MCCOEE0_SHIFT    (16)  /* Media Clock m Capture Overflow Error Enable (m = 0, 1) */
-#define R_GPTP_PTPIE0_MCCOEE1_TO_MCCOEE0_MASK     0x30000
-#  define R_GPTP_PTPIE0_MCCOEE1_TO_MCCOEE0_0              (0 << R_GPTP_PTPIE0_MCCOEE1_TO_MCCOEE0_SHIFT)  /* Interrupt m disabled */
-#  define R_GPTP_PTPIE0_MCCOEE1_TO_MCCOEE0_1              (1 << R_GPTP_PTPIE0_MCCOEE1_TO_MCCOEE0_SHIFT)  /* Interrupt m enabled */
-
 #define R_GPTP_PTPIE0_MCCE_SHIFT                  (0)  /* Media Clock Capture Enable */
 #define R_GPTP_PTPIE0_MCCE_MASK                   0x3
 
@@ -326,12 +307,6 @@
 #define R_GPTP_PTPIE0_MCCOEE_MASK                 0x30000
 
 /* PTPID0 Register bit definitions */
-#define R_GPTP_PTPID0_MCCD1_TO_MCCD0_SHIFT        (0)  /* Media Clock m Capture Disable (m = 0, 1) */
-#define R_GPTP_PTPID0_MCCD1_TO_MCCD0_MASK         0x3
-
-#define R_GPTP_PTPID0_MCCOED1_TO_MCCOED0_SHIFT    (16)  /* Media Clock m Capture Overflow Error Disable (m = 0, 1) */
-#define R_GPTP_PTPID0_MCCOED1_TO_MCCOED0_MASK     0x30000
-
 #define R_GPTP_PTPID0_MCCD_SHIFT                  (0)  /* Media Clock Capture Disable */
 #define R_GPTP_PTPID0_MCCD_MASK                   0x3
 
@@ -339,27 +314,36 @@
 #define R_GPTP_PTPID0_MCCOED_MASK                 0x30000
 
 /* PTPIS1 Register bit definitions */
-#define R_GPTP_PTPIS1_MCRMS1_TO_MCRMS0_SHIFT      (0)  /* Media Clock m Recovery Match Status Flag (m = 0, 1) */
-#define R_GPTP_PTPIS1_MCRMS1_TO_MCRMS0_MASK       0x3
-
 #define R_GPTP_PTPIS1_MCRMS_SHIFT                 (0)  /* Media Clock Recovery Match Status */
 #define R_GPTP_PTPIS1_MCRMS_MASK                  0x3
 
 /* PTPIE1 Register bit definitions */
-#define R_GPTP_PTPIE1_MCRME1_TO_MCRME0_SHIFT      (0)  /* Media Clock m Recovery Match Enable (m = 0, 1) */
-#define R_GPTP_PTPIE1_MCRME1_TO_MCRME0_MASK       0x3
-#  define R_GPTP_PTPIE1_MCRME1_TO_MCRME0_0                (0 << R_GPTP_PTPIE1_MCRME1_TO_MCRME0_SHIFT)  /* Interrupt m disabled */
-#  define R_GPTP_PTPIE1_MCRME1_TO_MCRME0_1                (1 << R_GPTP_PTPIE1_MCRME1_TO_MCRME0_SHIFT)  /* Interrupt m enabled */
-
 #define R_GPTP_PTPIE1_MCRME_SHIFT                 (0)  /* Media Clock Recovery Match Enable */
 #define R_GPTP_PTPIE1_MCRME_MASK                  0x3
 
 /* PTPID1 Register bit definitions */
-#define R_GPTP_PTPID1_MCRMD1_TO_MCRMD0_SHIFT      (0)  /* Media Clock m Recovery Match Disable (m = 0, 1) */
-#define R_GPTP_PTPID1_MCRMD1_TO_MCRMD0_MASK       0x3
-
 #define R_GPTP_PTPID1_MCRMD_SHIFT                 (0)  /* Media Clock Recovery Match Disable */
 #define R_GPTP_PTPID1_MCRMD_MASK                  0x3
+
+/* PTPSCR0 Register bit definitions */
+#define R_GPTP_PTPSCR0_TRSL_SHIFT                 (0)  /*  */
+#define R_GPTP_PTPSCR0_TRSL_MASK                  0x3
+
+#define R_GPTP_PTPSCR0_MCRSL_SHIFT                (16)  /*  */
+#define R_GPTP_PTPSCR0_MCRSL_MASK                 0x30000
+
+/* PTPSCR1 Register bit definitions */
+#define R_GPTP_PTPSCR1_MRRSL_SHIFT                (0)  /*  */
+#define R_GPTP_PTPSCR1_MRRSL_MASK                 0x3
+
+#define R_GPTP_PTPSCR1_MRRRSL_SHIFT               (16)  /*  */
+#define R_GPTP_PTPSCR1_MRRRSL_MASK                0x30000
+
+/* PTPSCR2 Register bit definitions */
+#define R_GPTP_PTPSCR2_CCRSL_SHIFT                (0)  /*  */
+#define R_GPTP_PTPSCR2_CCRSL_MASK                 0x3
+
+#define R_GPTP_PTPSCR2_VRSL                       (1 << 16)  /*  */
 
 /* POTCFGR Register bit definitions */
 #define R_GPTP_POTCFGR_REFSEL                     (1 << 0)  /* Reference Timer Select */

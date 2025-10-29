@@ -48,7 +48,7 @@
 #define R_VIN_SPPRC_OFFSET                        0x00000014  /* Start Pixel Pre-Clip Register */
 #define R_VIN_EPPRC_OFFSET                        0x00000018  /* End Pixel Pre-Clip Register */
 #define R_VIN_CSI_IFMD_OFFSET                     0x00000020  /* CSI2 Interface Mode Register */
-#define R_VIN_CSIFLD_OFFSET                       0x00000024  /* Field Detection Control Register */
+#define R_VIN_CSIFLD_OFFSET                       0x00000024  /* Field detection control Register */
 #define R_VIN_IS_OFFSET                           0x0000002c  /* Image Stride Register */
 #define R_VIN_MB1_OFFSET                          0x00000030  /* Memory Base 1 Register */
 #define R_VIN_MB2_OFFSET                          0x00000034  /* Memory Base 2 Register */
@@ -57,7 +57,7 @@
 #define R_VIN_IE_OFFSET                           0x00000040  /* Interrupt Enable Register */
 #define R_VIN_INTS_OFFSET                         0x00000044  /* Interrupt Status Register */
 #define R_VIN_SI_OFFSET                           0x00000048  /* Scanline Interrupt Register */
-#define R_VIN_MTCSTOP_OFFSET                      0x00000054  /* AXI Transfer Stop Control Register */
+#define R_VIN_MTCSTOP_OFFSET                      0x00000054  /* AXI transfer stop control register */
 #define R_VIN_DMR_OFFSET                          0x00000058  /* Data Mode Register */
 #define R_VIN_UVAOF_OFFSET                        0x00000060  /* UV Address Offset Register */
 #define R_VIN_UDS_CTRL_OFFSET                     0x00000080  /* Scaling Control Registers */
@@ -351,6 +351,33 @@
 #define R_VIN_UVAOF_UVAOF_SHIFT                   (7)  /* UV Data Address Offset */
 #define R_VIN_UVAOF_UVAOF_MASK                    0xffffff80
 
+/* CSCE1 Register bit definitions */
+#define R_VIN_CSCE1_YMUL2_SHIFT                   (0)  /* Y Multiplication Coefficient 2 for RGB Calculation */
+#define R_VIN_CSCE1_YMUL2_MASK                    0x3fff
+
+#define R_VIN_CSCE1_ROUND                         (1 << 16)  /* ROUND off enable */
+
+/* CSCE2 Register bit definitions */
+#define R_VIN_CSCE2_CSUB2_SHIFT                   (0)  /* CbCr Subtraction Coefficient 2 for RGB Calculation */
+#define R_VIN_CSCE2_CSUB2_MASK                    0xfff
+
+#define R_VIN_CSCE2_YSUB2_SHIFT                   (16)  /* Y Subtraction Coefficient 2 for RGB Calculation */
+#define R_VIN_CSCE2_YSUB2_MASK                    0xfff0000
+
+/* CSCE3 Register bit definitions */
+#define R_VIN_CSCE3_GCRMUL2_SHIFT                 (0)  /* Cr Multiplication Coefficient 2 for G Calculation */
+#define R_VIN_CSCE3_GCRMUL2_MASK                  0x3fff
+
+#define R_VIN_CSCE3_RCRMUL2_SHIFT                 (16)  /* Cr Multiplication Coefficient 2 for R Calculation */
+#define R_VIN_CSCE3_RCRMUL2_MASK                  0x3fff0000
+
+/* CSCE4 Register bit definitions */
+#define R_VIN_CSCE4_BCBMUL2_SHIFT                 (0)  /* Cb Multiplication Coefficient 2 for B Calculation */
+#define R_VIN_CSCE4_BCBMUL2_MASK                  0x3fff
+
+#define R_VIN_CSCE4_GCBMUL2_SHIFT                 (16)  /* Cb Multiplication Coefficient 2 for G Calculation */
+#define R_VIN_CSCE4_GCBMUL2_MASK                  0x3fff0000
+
 /* UDS_CTRL Register bit definitions */
 #define R_VIN_UDS_CTRL_NE_BCB                     (1 << 16)  /* B/Cb Interpolation Method When Bilinear/Nearest Neighbor Interpolation is Selected */
 
@@ -470,33 +497,6 @@
 
 #define R_VIN_CRCCR3_CRCLSFT_SHIFT                (24)  /* Cr Calculation Shift Down Volume */
 #define R_VIN_CRCCR3_CRCLSFT_MASK                 0x1f000000
-
-/* CSCE1 Register bit definitions */
-#define R_VIN_CSCE1_YMUL2_SHIFT                   (0)  /* Y Multiplication Coefficient 2 for RGB Calculation */
-#define R_VIN_CSCE1_YMUL2_MASK                    0x3fff
-
-#define R_VIN_CSCE1_ROUND                         (1 << 16)  /* ROUND off enable */
-
-/* CSCE2 Register bit definitions */
-#define R_VIN_CSCE2_CSUB2_SHIFT                   (0)  /* CbCr Subtraction Coefficient 2 for RGB Calculation */
-#define R_VIN_CSCE2_CSUB2_MASK                    0xfff
-
-#define R_VIN_CSCE2_YSUB2_SHIFT                   (16)  /* Y Subtraction Coefficient 2 for RGB Calculation */
-#define R_VIN_CSCE2_YSUB2_MASK                    0xfff0000
-
-/* CSCE3 Register bit definitions */
-#define R_VIN_CSCE3_GCRMUL2_SHIFT                 (0)  /* Cr Multiplication Coefficient 2 for G Calculation */
-#define R_VIN_CSCE3_GCRMUL2_MASK                  0x3fff
-
-#define R_VIN_CSCE3_RCRMUL2_SHIFT                 (16)  /* Cr Multiplication Coefficient 2 for R Calculation */
-#define R_VIN_CSCE3_RCRMUL2_MASK                  0x3fff0000
-
-/* CSCE4 Register bit definitions */
-#define R_VIN_CSCE4_BCBMUL2_SHIFT                 (0)  /* Cb Multiplication Coefficient 2 for B Calculation */
-#define R_VIN_CSCE4_BCBMUL2_MASK                  0x3fff
-
-#define R_VIN_CSCE4_GCBMUL2_SHIFT                 (16)  /* Cb Multiplication Coefficient 2 for G Calculation */
-#define R_VIN_CSCE4_GCBMUL2_MASK                  0x3fff0000
 
 
 /* Maximum number of channels */

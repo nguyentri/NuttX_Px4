@@ -70,39 +70,45 @@
 
 /* Register bit definitions */
 /* ULPTCNT Register bit definitions */
-#define R_ULPT_ULPTCNT_ULPTCNT_SHIFT              (0)  /* Setting range : 0x00000000 to 0xFFFFFFFF */
+#define R_ULPT_ULPTCNT_ULPTCNT_SHIFT              (0)  /* 32bit counter and reload registerNOTE : When 1 is written to the TSTOP bit in the ULPTCR register, the 32-bit counter is forcibly stopped and set to FFFFFFFFH. */
 #define R_ULPT_ULPTCNT_ULPTCNT_MASK               0xffffffff
 
 /* ULPTCMA Register bit definitions */
-#define R_ULPT_ULPTCMA_ULPTCMA_SHIFT              (0)  /* 32-bit Compare Match A Data */
+#define R_ULPT_ULPTCMA_ULPTCMA_SHIFT              (0)  /* ULPT Compare Match A RegisterNOTE : When 1 is written to the TSTOP bit in the ULPTCR register, set to FFFFFFFFH */
 #define R_ULPT_ULPTCMA_ULPTCMA_MASK               0xffffffff
 
 /* ULPTCMB Register bit definitions */
-#define R_ULPT_ULPTCMB_ULPTCMB_SHIFT              (0)  /* 32-bit Compare Match B Data */
+#define R_ULPT_ULPTCMB_ULPTCMB_SHIFT              (0)  /* AGT Compare Match B RegisterNOTE : When 1 is written to the TSTOP bit in the ULPTCR register, set to FFFFFFFFH */
 #define R_ULPT_ULPTCMB_ULPTCMB_MASK               0xffffffff
 
 /* ULPTCR Register bit definitions */
-#define R_ULPT_ULPTCR_TSTART                      (1 << 0)  /* Counter Start */
+#define R_ULPT_ULPTCR_TSTART                      (1 << 0)  /* ULPT count start */
 
-#define R_ULPT_ULPTCR_TCSTF                       (1 << 1)  /* Counter Status Flag */
+#define R_ULPT_ULPTCR_TCSTF                       (1 << 1)  /* ULPT count status flag */
 
-#define R_ULPT_ULPTCR_TSTOP                       (1 << 2)  /* Counter Forcible Stop */
+#define R_ULPT_ULPTCR_TSTOP                       (1 << 2)  /* ULPT count forced stop */
 
-#define R_ULPT_ULPTCR_TUNDF                       (1 << 5)  /* Underflow Flag */
+#define R_ULPT_ULPTCR_RESERVED_SHIFT              (3)  /* These bits are read as 00. The write value should be 00. */
+#define R_ULPT_ULPTCR_RESERVED_MASK               0x18
 
-#define R_ULPT_ULPTCR_TCMAF                       (1 << 6)  /* Compare Match A Flag */
+#define R_ULPT_ULPTCR_TUNDF                       (1 << 5)  /* ULPT underflow flag */
 
-#define R_ULPT_ULPTCR_TCMBF                       (1 << 7)  /* Compare Match B Flag */
+#define R_ULPT_ULPTCR_TCMAF                       (1 << 6)  /* ULPT compare match A flag */
+
+#define R_ULPT_ULPTCR_TCMBF                       (1 << 7)  /* ULPT compare match B flag */
 
 /* ULPTMR1 Register bit definitions */
-#define R_ULPT_ULPTMR1_TMOD1                      (1 << 1)  /* Operating Mode */
+#define R_ULPT_ULPTMR1_RESERVED_SHIFT             (6)  /* These bits are read as 00. The write value should be 00. */
+#define R_ULPT_ULPTMR1_RESERVED_MASK              0xc0
 
-#define R_ULPT_ULPTMR1_TEDGPL                     (1 << 3)  /* ULPTEVIn Edge Polarity */
+#define R_ULPT_ULPTMR1_TMOD1                      (1 << 1)  /* ULPT operating mode select */
 
-#define R_ULPT_ULPTMR1_TCK1                       (1 << 5)  /* Count Source */
+#define R_ULPT_ULPTMR1_TEDGPL                     (1 << 3)  /* ULPTEVI edge polarity select */
+
+#define R_ULPT_ULPTMR1_TCK1                       (1 << 5)  /* ULPT count source select */
 
 /* ULPTMR2 Register bit definitions */
-#define R_ULPT_ULPTMR2_CKS_SHIFT                  (0)  /* ULPTLCLK/ULPTSCLK Count Source Clock Division Ratio */
+#define R_ULPT_ULPTMR2_CKS_SHIFT                  (0)  /* fsub/LOCO count source clock frequency division ratio select */
 #define R_ULPT_ULPTMR2_CKS_MASK                   0x7
 #  define R_ULPT_ULPTMR2_CKS_000                          (0 << R_ULPT_ULPTMR2_CKS_SHIFT)  /* 1/1 */
 #  define R_ULPT_ULPTMR2_CKS_001                          (1 << R_ULPT_ULPTMR2_CKS_SHIFT)  /* 1/2 */
@@ -113,54 +119,66 @@
 #  define R_ULPT_ULPTMR2_CKS_110                          (6 << R_ULPT_ULPTMR2_CKS_SHIFT)  /* 1/64 */
 #  define R_ULPT_ULPTMR2_CKS_111                          (7 << R_ULPT_ULPTMR2_CKS_SHIFT)  /* 1/128 */
 
-#define R_ULPT_ULPTMR2_LPM                        (1 << 7)  /* Low Power Mode */
+#define R_ULPT_ULPTMR2_RESERVED_SHIFT             (3)  /* These bits are read as 0000. The write value should be 0000. */
+#define R_ULPT_ULPTMR2_RESERVED_MASK              0x78
+
+#define R_ULPT_ULPTMR2_LPM                        (1 << 7)  /* ULPT Low Power Mode */
 
 /* ULPTMR3 Register bit definitions */
-#define R_ULPT_ULPTMR3_TCNTCTL                    (1 << 0)  /* Count Function Select */
+#define R_ULPT_ULPTMR3_TCNTCTL                    (1 << 0)  /* ULPT count function select */
 
-#define R_ULPT_ULPTMR3_TEVPOL                     (1 << 1)  /* ULPTEVIn Polarity Switch */
+#define R_ULPT_ULPTMR3_TEVPOL                     (1 << 1)  /* ULPTEVI polarity switch */
 
-#define R_ULPT_ULPTMR3_TOPOL                      (1 << 2)  /* ULPTOn Polarity Select */
+#define R_ULPT_ULPTMR3_TOPOL                      (1 << 2)  /* ULPTO polarity select */
 
-#define R_ULPT_ULPTMR3_TEECTL_SHIFT               (4)  /* ULPTEEn Function Select */
+#define R_ULPT_ULPTMR3_RESERVED                   (1 << 3)  /* This bit is read as 0. The write value should be 0. */
+
+#define R_ULPT_ULPTMR3_TEECTL_SHIFT               (4)  /* ULPTEE function select */
 #define R_ULPT_ULPTMR3_TEECTL_MASK                0x30
 #  define R_ULPT_ULPTMR3_TEECTL_00                        (0 << R_ULPT_ULPTMR3_TEECTL_SHIFT)  /* Count enable mode */
 #  define R_ULPT_ULPTMR3_TEECTL_10                        (2 << R_ULPT_ULPTMR3_TEECTL_SHIFT)  /* Count start mode */
 #  define R_ULPT_ULPTMR3_TEECTL_11                        (3 << R_ULPT_ULPTMR3_TEECTL_SHIFT)  /* Count restart mode */
 
-#define R_ULPT_ULPTMR3_TEEPOL_SHIFT               (6)  /* ULPTEEn Edge Polarity Select */
+#define R_ULPT_ULPTMR3_TEEPOL_SHIFT               (6)  /* ULPTEE edge polarity select */
 #define R_ULPT_ULPTMR3_TEEPOL_MASK                0xc0
-#  define R_ULPT_ULPTMR3_TEEPOL_00                        (0 << R_ULPT_ULPTMR3_TEEPOL_SHIFT)  /* Rising edge */
-#  define R_ULPT_ULPTMR3_TEEPOL_01                        (1 << R_ULPT_ULPTMR3_TEEPOL_SHIFT)  /* Falling edge */
+#  define R_ULPT_ULPTMR3_TEEPOL_00                        (0 << R_ULPT_ULPTMR3_TEEPOL_SHIFT)  /* Rise edge */
+#  define R_ULPT_ULPTMR3_TEEPOL_01                        (1 << R_ULPT_ULPTMR3_TEEPOL_SHIFT)  /* Fall edge */
 #  define R_ULPT_ULPTMR3_TEEPOL_10                        (2 << R_ULPT_ULPTMR3_TEEPOL_SHIFT)  /* Both edges */
 
 /* ULPTIOC Register bit definitions */
-#define R_ULPT_ULPTIOC_TOE                        (1 << 2)  /* ULPTOn Output Enable */
+#define R_ULPT_ULPTIOC_RESERVED                   (1 << 7)  /* This bit is read as 0. The write value should be 0. */
 
-#define R_ULPT_ULPTIOC_TIPF_SHIFT                 (4)  /* ULPTEVIn Input Filter */
+#define R_ULPT_ULPTIOC_TOE                        (1 << 2)  /* ULPTO output enable */
+
+#define R_ULPT_ULPTIOC_TIPF_SHIFT                 (4)  /* ULPTEVI input filter select */
 #define R_ULPT_ULPTIOC_TIPF_MASK                  0x30
 #  define R_ULPT_ULPTIOC_TIPF_00                          (0 << R_ULPT_ULPTIOC_TIPF_SHIFT)  /* No filter */
-#  define R_ULPT_ULPTIOC_TIPF_01                          (1 << R_ULPT_ULPTIOC_TIPF_SHIFT)  /* Filter sampling at PCLKB */
-#  define R_ULPT_ULPTIOC_TIPF_10                          (2 << R_ULPT_ULPTIOC_TIPF_SHIFT)  /* Filter sampling at PCLKB/8 */
-#  define R_ULPT_ULPTIOC_TIPF_11                          (3 << R_ULPT_ULPTIOC_TIPF_SHIFT)  /* Filter sampling at PCLKB/32 */
+#  define R_ULPT_ULPTIOC_TIPF_01                          (1 << R_ULPT_ULPTIOC_TIPF_SHIFT)  /* Filter sampled at PCLKB */
+#  define R_ULPT_ULPTIOC_TIPF_10                          (2 << R_ULPT_ULPTIOC_TIPF_SHIFT)  /* Filter sampled at PCLKB/8 */
+#  define R_ULPT_ULPTIOC_TIPF_11                          (3 << R_ULPT_ULPTIOC_TIPF_SHIFT)  /* Filter sampled at PCLKB/32 */
 
-#define R_ULPT_ULPTIOC_TIOGT0                     (1 << 6)  /* ULPTEVIn Count Control */
+#define R_ULPT_ULPTIOC_TIOGT0                     (1 << 6)  /* ULPTEVI count control */
 
 /* ULPTISR Register bit definitions */
-#define R_ULPT_ULPTISR_RCCPSEL2                   (1 << 2)  /* ULPTEEn Polarity Select */
+#define R_ULPT_ULPTISR_RESERVED_SHIFT             (3)  /* These bits are read as 00000. The write value should be 00000. */
+#define R_ULPT_ULPTISR_RESERVED_MASK              0xf8
+
+#define R_ULPT_ULPTISR_RCCPSEL2                   (1 << 2)  /* ULPTEE polarty selection */
 
 /* ULPTCMSR Register bit definitions */
-#define R_ULPT_ULPTCMSR_TCMEA                     (1 << 0)  /* Compare Match A Register Enable */
+#define R_ULPT_ULPTCMSR_TCMEA                     (1 << 0)  /* Compare match A register enable */
 
-#define R_ULPT_ULPTCMSR_TOEA                      (1 << 1)  /* ULPTOAn Output Enable */
+#define R_ULPT_ULPTCMSR_TOEA                      (1 << 1)  /* ULPTOA output enable */
 
-#define R_ULPT_ULPTCMSR_TOPOLA                    (1 << 2)  /* ULPTOAn Polarity Select */
+#define R_ULPT_ULPTCMSR_TOPOLA                    (1 << 2)  /* ULPTOA polarity select */
 
-#define R_ULPT_ULPTCMSR_TCMEB                     (1 << 4)  /* Compare Match B Register Enable */
+#define R_ULPT_ULPTCMSR_RESERVED                  (1 << 7)  /* This bit is read as 0. The write value should be 0. */
 
-#define R_ULPT_ULPTCMSR_TOEB                      (1 << 5)  /* ULPTOBn Output Enable */
+#define R_ULPT_ULPTCMSR_TCMEB                     (1 << 4)  /* Compare match B register enable */
 
-#define R_ULPT_ULPTCMSR_TOPOLB                    (1 << 6)  /* ULPTOBn Polarity Select */
+#define R_ULPT_ULPTCMSR_TOEB                      (1 << 5)  /* ULPTOB output enable */
+
+#define R_ULPT_ULPTCMSR_TOPOLB                    (1 << 6)  /* ULPTOB polarity select */
 
 
 /* Maximum number of channels */

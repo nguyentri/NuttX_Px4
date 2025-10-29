@@ -40,28 +40,50 @@
 
 /* DTC Register Offsets */
 
+#define R_DTC_DTCCR_OFFSET                        0x00000000  /* DTC Control Register */
+#define R_DTC_DTCVBR_OFFSET                       0x00000004  /* DTC Vector Base Register */
+#define R_DTC_DTCADMOD_OFFSET                     0x00000008  /* DTC Address Mode Register */
 #define R_DTC_DTCST_OFFSET                        0x0000000c  /* DTC Module Start Register */
 #define R_DTC_DTCSTS_OFFSET                       0x0000000e  /* DTC Status Register */
-#define R_DTC_DTCCR_SEC_OFFSET                    0x00000010  /* DTC Control Register for Secure Region */
-#define R_DTC_DTCVBR_SEC_OFFSET                   0x00000014  /* DTC Vector Base Register for Secure Region */
+#define R_DTC_DTCCR_SEC_OFFSET                    0x00000010  /* DTC Control Register for secure Region */
+#define R_DTC_DTCVBR_SEC_OFFSET                   0x00000014  /* DTC Vector Base Register for secure Region */
 #define R_DTC_DTCDISP_OFFSET                      0x00000018  /* DTC Address Displacement Register */
 #define R_DTC_DTEVR_OFFSET                        0x00000020  /* DTC Error Vector Register */
+#define R_DTC_DTCIBR_OFFSET                       0x00000024  /* DTC Index Table Base Register */
+#define R_DTC_DTCOR_OFFSET                        0x00000028  /* DTC Operation Register */
+#define R_DTC_DTCSQE_OFFSET                       0x0000002c  /* DTC Sequence Transfer Enable Register */
 
 /* DTC Register Addresses */
 
+#define R_DTC_DTCCR                               (R_DTC_BASE + R_DTC_DTCCR_OFFSET)
+#define R_DTC_DTCVBR                              (R_DTC_BASE + R_DTC_DTCVBR_OFFSET)
+#define R_DTC_DTCADMOD                            (R_DTC_BASE + R_DTC_DTCADMOD_OFFSET)
 #define R_DTC_DTCST                               (R_DTC_BASE + R_DTC_DTCST_OFFSET)
 #define R_DTC_DTCSTS                              (R_DTC_BASE + R_DTC_DTCSTS_OFFSET)
 #define R_DTC_DTCCR_SEC                           (R_DTC_BASE + R_DTC_DTCCR_SEC_OFFSET)
 #define R_DTC_DTCVBR_SEC                          (R_DTC_BASE + R_DTC_DTCVBR_SEC_OFFSET)
 #define R_DTC_DTCDISP                             (R_DTC_BASE + R_DTC_DTCDISP_OFFSET)
 #define R_DTC_DTEVR                               (R_DTC_BASE + R_DTC_DTEVR_OFFSET)
+#define R_DTC_DTCIBR                              (R_DTC_BASE + R_DTC_DTCIBR_OFFSET)
+#define R_DTC_DTCOR                               (R_DTC_BASE + R_DTC_DTCOR_OFFSET)
+#define R_DTC_DTCSQE                              (R_DTC_BASE + R_DTC_DTCSQE_OFFSET)
 
 /* Register bit definitions */
+/* DTCCR Register bit definitions */
+#define R_DTC_DTCCR_RRS                           (1 << 4)  /* DTC Transfer Information Read Skip Enable. */
+
+/* DTCVBR Register bit definitions */
+#define R_DTC_DTCVBR_DTCVBR_SHIFT                 (0)  /* DTC Vector Base Address. */
+#define R_DTC_DTCVBR_DTCVBR_MASK                  0xffffffff
+
+/* DTCADMOD Register bit definitions */
+#define R_DTC_DTCADMOD_SHORT                      (1 << 0)  /* Short-Address Mode Set */
+
 /* DTCST Register bit definitions */
 #define R_DTC_DTCST_DTCST                         (1 << 0)  /* DTC Module Start */
 
 /* DTCSTS Register bit definitions */
-#define R_DTC_DTCSTS_VECN_SHIFT                   (0)  /* DTC-Activating Vector Number Monitoring */
+#define R_DTC_DTCSTS_VECN_SHIFT                   (0)  /* DTC-Activating Vector Number MonitoringThese bits indicate the vector number for the activating source when DTC transfer is in progress.The value is only valid if DTC transfer is in progress (the value of the ACT flag is 1) */
 #define R_DTC_DTCSTS_VECN_MASK                    0xff
 
 #define R_DTC_DTCSTS_ACT                          (1 << 15)  /* DTC Active Flag */
@@ -84,6 +106,19 @@
 #define R_DTC_DTEVR_DTEVSAM                       (1 << 8)  /* DTC Error Vector Number SA Monitor */
 
 #define R_DTC_DTEVR_DTESTA                        (1 << 16)  /* DTC Error Status Flag */
+
+/* DTCIBR Register bit definitions */
+#define R_DTC_DTCIBR_DTCIBR_SHIFT                 (10)  /* DTC Index Table Base Address */
+#define R_DTC_DTCIBR_DTCIBR_MASK                  0xfffffc00
+
+/* DTCOR Register bit definitions */
+#define R_DTC_DTCOR_SQTFRL                        (1 << 0)  /* Sequence Transfer Stop */
+
+/* DTCSQE Register bit definitions */
+#define R_DTC_DTCSQE_VECN_SHIFT                   (0)  /* DTC Sequence Transfer Vector Number Specified */
+#define R_DTC_DTCSQE_VECN_MASK                    0xff
+
+#define R_DTC_DTCSQE_ESPSEL                       (1 << 15)  /* DTC Sequence Transfer Enable */
 
 
 /* Maximum number of channels */

@@ -118,7 +118,7 @@ struct ra8_adc_priv_s
 
 /* ADC operations */
 
-static int  ra8_adc_bind(FAR struct adc_dev_s *dev,
+static int  ra8_adcind(FAR struct adc_dev_s *dev,
                          FAR const struct adc_callback_s *callback);
 static void ra8_adc_reset(FAR struct adc_dev_s *dev);
 static int  ra8_adc_setup(FAR struct adc_dev_s *dev);
@@ -161,7 +161,7 @@ static void ra8_adc_cleanup_dtc(FAR struct ra8_adc_priv_s *priv);
 
 static const struct adc_ops_s g_adcops =
 {
-  .ao_bind        = ra8_adc_bind,
+  .ao_bind        = ra8_adcind,
   .ao_reset       = ra8_adc_reset,
   .ao_setup       = ra8_adc_setup,
   .ao_shutdown    = ra8_adc_shutdown,
@@ -543,14 +543,14 @@ static int ra8_adc_interrupt(int irq, FAR void *context, FAR void *arg)
 }
 
 /****************************************************************************
- * Name: ra8_adc_bind
+ * Name: ra8_adcind
  *
  * Description:
  *   Bind the upper-half driver callbacks to the lower-half implementation.
  *
  ****************************************************************************/
 
-static int ra8_adc_bind(FAR struct adc_dev_s *dev,
+static int ra8_adcind(FAR struct adc_dev_s *dev,
                         FAR const struct adc_callback_s *callback)
 {
   FAR struct ra8_adc_priv_s *priv = (FAR struct ra8_adc_priv_s *)dev->ad_priv;

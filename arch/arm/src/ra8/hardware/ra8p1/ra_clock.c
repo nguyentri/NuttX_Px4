@@ -101,14 +101,14 @@
 #define RA_PRV_STARTUP_SCKDIVCR_PCLKB_BITS       ((CONFIG_RA_PCKB_DIV & 0xFU) << 8U)
 #define RA_PRV_STARTUP_SCKDIVCR_PCLKC_BITS       ((CONFIG_RA_PCKC_DIV & 0xFU) << 4U)
 #define RA_PRV_STARTUP_SCKDIVCR_PCLKD_BITS       (CONFIG_RA_PCKD_DIV & 0xFU)
-//#define RA_PRV_STARTUP_SCKDIVCR                  (RA_PRV_STARTUP_SCKDIVCR_FCLK_BITS | \
+/*#define RA_PRV_STARTUP_SCKDIVCR                  (RA_PRV_STARTUP_SCKDIVCR_FCLK_BITS | \
                                                   RA_PRV_STARTUP_SCKDIVCR_ICLK_BITS | \
                                                   RA_PRV_STARTUP_SCKDIVCR_PCLKE_BITS | \
                                                   RA_PRV_STARTUP_SCKDIVCR_BCLK_BITS | \
                                                   RA_PRV_STARTUP_SCKDIVCR_PCLKA_BITS | \
                                                   RA_PRV_STARTUP_SCKDIVCR_PCLKB_BITS | \
                                                   RA_PRV_STARTUP_SCKDIVCR_PCLKC_BITS | \
-                                                  RA_PRV_STARTUP_SCKDIVCR_PCLKD_BITS)
+                                                  RA_PRV_STARTUP_SCKDIVCR_PCLKD_BITS) */
 //#define RA_PRV_STARTUP_SCKDIVCR2                 (CONFIG_RA_CPUCLK_DIV)
 #define RA_PRV_STARTUP_SCKDIVCR                  (0x32233432)
 #define RA_PRV_STARTUP_SCKDIVCR2                  0x2120
@@ -515,11 +515,11 @@ static void ra_clock_init(void)
 #if defined(CONFIG_RA_PLL_SOURCE_MAIN_OSC)
   /* Configure main oscillator drive strength based on configured main OSC frequency */
 #if CONFIG_RA_MAIN_OSC_FREQUENCY <= 8000000
-  putreg8(R_SYSC_MOMCR_MODRV0_000 | R_SYSC_MOMCR_MOSEL, R_SYSC_MOMCR);
+  putreg8(R_SYSC_MOMCR_MODRV0_000, R_SYSC_MOMCR);
 #elif CONFIG_RA_MAIN_OSC_FREQUENCY <= 24000000
-  putreg8(R_SYSC_MOMCR_MODRV0_011 | R_SYSC_MOMCR_MOSEL, R_SYSC_MOMCR);
+  putreg8(R_SYSC_MOMCR_MODRV0_011, R_SYSC_MOMCR);
 #else
-  putreg8(R_SYSC_MOMCR_MODRV0_101 | R_SYSC_MOMCR_MOSEL, R_SYSC_MOMCR);
+  putreg8(R_SYSC_MOMCR_MODRV0_101, R_SYSC_MOMCR);
 #endif
 
   /* Enable main oscillator (clear stop) */

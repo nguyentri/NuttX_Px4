@@ -54,33 +54,33 @@
 #define R_MFWD_FWSDMPTC_OFFSET                    0x00000050  /* Source-Destination Mirroring Path Target Configuration Register */
 #define R_MFWD_FWSDMPVC_OFFSET                    0x00000054  /* Source-Destination Mirroring Path Vector Configuration Register */
 /* FWLBWMC%s Registers (0-2) */
-#define R_MFWD_FWLBWMC_OFFSET(m)                  (0x00000080 + ((m) * 0x00000004))  /* Port %s Level Based Watermark Configuration Register */
-/* FWPC%s0 Registers (0-2) */
-#define R_MFWD_FWPC0_OFFSET(m)                    (0x00000100 + ((m) * 0x00000010))  /* Port %s Configuration Register 0 */
-/* FWPC%s1 Registers (0-2) */
-#define R_MFWD_FWPC1_OFFSET(m)                    (0x00000104 + ((m) * 0x00000010))  /* Port %s Configuration Register 1 */
-/* FWPC%s2 Registers (0-2) */
-#define R_MFWD_FWPC2_OFFSET(m)                    (0x00000108 + ((m) * 0x00000010))  /* Port %s Configuration Register 2 */
-/* FWCTGC%s0 Registers (0-7) */
-#define R_MFWD_FWCTGC0_OFFSET(m)                  (0x00000400 + ((m) * 0x00000040))  /* Cut-Through General Configuration Register i0 */
-/* FWCTGC%s1 Registers (0-7) */
-#define R_MFWD_FWCTGC1_OFFSET(m)                  (0x00000404 + ((m) * 0x00000040))  /* Cut-Through General Configuration Register i1 */
-/* FWCTTC%s0 Registers (0-7) */
-#define R_MFWD_FWCTTC0_OFFSET(m)                  (0x00000408 + ((m) * 0x00000040))  /* Cut-Through Target Configuration Register i0 */
-/* FWCTTC%s1 Registers (0-7) */
-#define R_MFWD_FWCTTC1_OFFSET(m)                  (0x0000040c + ((m) * 0x00000040))  /* Cut-Through Target Configuration Register i1 */
-/* FWCTTC%s20 Registers (0-7) */
-#define R_MFWD_FWCTTC20_OFFSET(m)                 (0x00000410 + ((m) * 0x00000040))  /* Cut-Through Target Configuration Register i20 */
-/* FWCTSC%s0 Registers (0-7) */
-#define R_MFWD_FWCTSC0_OFFSET(m)                  (0x00000420 + ((m) * 0x00000040))  /* Cut-Through Separation Configuration Register i0 */
-/* FWCTSC%s1 Registers (0-7) */
-#define R_MFWD_FWCTSC1_OFFSET(m)                  (0x00000424 + ((m) * 0x00000040))  /* Cut-Through Separation Configuration Register i1 */
-/* FWCTSC%s2 Registers (0-7) */
-#define R_MFWD_FWCTSC2_OFFSET(m)                  (0x00000428 + ((m) * 0x00000040))  /* Cut-Through Separation Configuration Register i2 */
-/* FWCTSC%s3 Registers (0-7) */
-#define R_MFWD_FWCTSC3_OFFSET(m)                  (0x0000042c + ((m) * 0x00000040))  /* Cut-Through Separation Configuration Register i3 */
-/* FWCTSC%s4 Registers (0-7) */
-#define R_MFWD_FWCTSC4_OFFSET(m)                  (0x00000430 + ((m) * 0x00000040))  /* Cut-Through Separation Configuration Register i4 */
+#define R_MFWD_FWLBWMC_OFFSET(m)                  (0x00000080 + ((m) * 0x00000004))  /* Level Based Watermark Configuration Register %s */
+/* FWPC0%s Registers (0-2) */
+#define R_MFWD_FWPC0_OFFSET(m)                    (0x00000100 + ((m) * 0x00000010))  /* Port Configuration Register 0%s */
+/* FWPC1%s Registers (0-2) */
+#define R_MFWD_FWPC1_OFFSET(m)                    (0x00000104 + ((m) * 0x00000010))  /* Port Configuration Register 1%s */
+/* FWPC2%s Registers (0-2) */
+#define R_MFWD_FWPC2_OFFSET(m)                    (0x00000108 + ((m) * 0x00000010))  /* Port Configuration Register 2%s */
+/* FWCTGC0%s Registers (0-7) */
+#define R_MFWD_FWCTGC0_OFFSET(m)                  (0x00000400 + ((m) * 0x00000040))  /* Cut-Through General Configuration Register 0%s */
+/* FWCTGC1%s Registers (0-7) */
+#define R_MFWD_FWCTGC1_OFFSET(m)                  (0x00000404 + ((m) * 0x00000040))  /* Cut-Through General Configuration Register 1%s */
+/* FWCTTC0%s Registers (0-7) */
+#define R_MFWD_FWCTTC0_OFFSET(m)                  (0x00000408 + ((m) * 0x00000040))  /* Cut-Through Target Configuration Register 0%s */
+/* FWCTTC1%s Registers (0-7) */
+#define R_MFWD_FWCTTC1_OFFSET(m)                  (0x0000040c + ((m) * 0x00000040))  /* Cut-Through Target Configuration Register 1%s */
+/* FWCTTC20%s Registers (0-7) */
+#define R_MFWD_FWCTTC20_OFFSET(m)                 (0x00000410 + ((m) * 0x00000040))  /* Cut-Through Target Configuration Register 20%s */
+/* FWCTSC0%s Registers (0-7) */
+#define R_MFWD_FWCTSC0_OFFSET(m)                  (0x00000420 + ((m) * 0x00000040))  /* Cut-Through Separation Configuration Register 0%s */
+/* FWCTSC1%s Registers (0-7) */
+#define R_MFWD_FWCTSC1_OFFSET(m)                  (0x00000424 + ((m) * 0x00000040))  /* Cut-Through Separation Configuration Register 1%s */
+/* FWCTSC2%s Registers (0-7) */
+#define R_MFWD_FWCTSC2_OFFSET(m)                  (0x00000428 + ((m) * 0x00000040))  /* Cut-Through Separation Configuration Register 2%s */
+/* FWCTSC3%s Registers (0-7) */
+#define R_MFWD_FWCTSC3_OFFSET(m)                  (0x0000042c + ((m) * 0x00000040))  /* Cut-Through Separation Configuration Register 3%s */
+/* FWCTSC4%s Registers (0-7) */
+#define R_MFWD_FWCTSC4_OFFSET(m)                  (0x00000430 + ((m) * 0x00000040))  /* Cut-Through Separation Configuration Register 4%s */
 /* FWTWBFC%s Registers (0-15) */
 #define R_MFWD_FWTWBFC_OFFSET(m)                  (0x00001000 + ((m) * 0x00000010))  /* Two-Byte Filter Configuration Register %s */
 /* FWTWBFVC%s Registers (0-15) */
@@ -97,26 +97,26 @@
 #define R_MFWD_FWFOBFV0C_OFFSET(m)                (0x00001804 + ((m) * 0x00000010))  /* Four-Byte Filter Value 0 Configuration Register %s */
 /* FWFOBFV1C%s Registers (0-15) */
 #define R_MFWD_FWFOBFV1C_OFFSET(m)                (0x00001808 + ((m) * 0x00000010))  /* Four-Byte Filter Value 1 Configuration Register %s */
-/* FWRFC%s Registers (0-15) */
+/* FWRFC%s Registers (0-1) */
 #define R_MFWD_FWRFC_OFFSET(m)                    (0x00001c00 + ((m) * 0x00000010))  /* Range Filter Configuration Register %s */
-/* FWRFVC%s Registers (0-15) */
+/* FWRFVC%s Registers (0-1) */
 #define R_MFWD_FWRFVC_OFFSET(m)                   (0x00001c04 + ((m) * 0x00000010))  /* Range Filter Value Configuration Register %s */
 /* FWCFC%s Registers (0-15) */
 #define R_MFWD_FWCFC_OFFSET(m)                    (0x00002000 + ((m) * 0x00000040))  /* Cascade Filter Configuration Register %s */
 /* FWCFMC%s0 Registers (0-15) */
-#define R_MFWD_FWCFMC0_OFFSET(m)                  (0x00002004 + ((m) * 0x00000040))  /* Cascade Filter Mapping Configuration Register i0 */
+#define R_MFWD_FWCFMC0_OFFSET(m)                  (0x00002004 + ((m) * 0x00000040))  /* Cascade Filter Mapping Configuration Register %s0 */
 /* FWCFMC%s1 Registers (0-15) */
-#define R_MFWD_FWCFMC1_OFFSET(m)                  (0x00002008 + ((m) * 0x00000040))  /* Cascade Filter Mapping Configuration Register i1 */
+#define R_MFWD_FWCFMC1_OFFSET(m)                  (0x00002008 + ((m) * 0x00000040))  /* Cascade Filter Mapping Configuration Register %s1 */
 /* FWCFMC%s2 Registers (0-15) */
-#define R_MFWD_FWCFMC2_OFFSET(m)                  (0x0000200c + ((m) * 0x00000040))  /* Cascade Filter Mapping Configuration Register i2 */
+#define R_MFWD_FWCFMC2_OFFSET(m)                  (0x0000200c + ((m) * 0x00000040))  /* Cascade Filter Mapping Configuration Register %s2 */
 /* FWCFMC%s3 Registers (0-15) */
-#define R_MFWD_FWCFMC3_OFFSET(m)                  (0x00002010 + ((m) * 0x00000040))  /* Cascade Filter Mapping Configuration Register i3 */
+#define R_MFWD_FWCFMC3_OFFSET(m)                  (0x00002010 + ((m) * 0x00000040))  /* Cascade Filter Mapping Configuration Register %s3 */
 /* FWCFMC%s4 Registers (0-15) */
-#define R_MFWD_FWCFMC4_OFFSET(m)                  (0x00002014 + ((m) * 0x00000040))  /* Cascade Filter Mapping Configuration Register i4 */
+#define R_MFWD_FWCFMC4_OFFSET(m)                  (0x00002014 + ((m) * 0x00000040))  /* Cascade Filter Mapping Configuration Register %s4 */
 /* FWCFMC%s5 Registers (0-15) */
-#define R_MFWD_FWCFMC5_OFFSET(m)                  (0x00002018 + ((m) * 0x00000040))  /* Cascade Filter Mapping Configuration Register i5 */
+#define R_MFWD_FWCFMC5_OFFSET(m)                  (0x00002018 + ((m) * 0x00000040))  /* Cascade Filter Mapping Configuration Register %s5 */
 /* FWCFMC%s6 Registers (0-15) */
-#define R_MFWD_FWCFMC6_OFFSET(m)                  (0x0000201c + ((m) * 0x00000040))  /* Cascade Filter Mapping Configuration Register i6 */
+#define R_MFWD_FWCFMC6_OFFSET(m)                  (0x0000201c + ((m) * 0x00000040))  /* Cascade Filter Mapping Configuration Register %s6 */
 #define R_MFWD_FWIP4SC_OFFSET                     0x00004008  /* IPv4 Stream Configuration Register */
 #define R_MFWD_FWIP6SC_OFFSET                     0x00004018  /* IPv6 Stream Configuration Register */
 #define R_MFWD_FWIP6OC_OFFSET                     0x0000401c  /* IPv6 Offset Configuration Register */
@@ -219,9 +219,9 @@
 #define R_MFWD_FWVLANTSR20_OFFSET                 0x00004960  /* VLAN Table Search Result Register 20 */
 #define R_MFWD_FWVLANTSR3_OFFSET                  0x00004970  /* VLAN Table Search Result Register 3 */
 /* FWPBFC%s Registers (0-2) */
-#define R_MFWD_FWPBFC_OFFSET(m)                   (0x00004a00 + ((m) * 0x00000010))  /* Port %s Port Based Forwarding Configuration Register */
-/* FWPBFCSDC%s0 Registers (0-2) */
-#define R_MFWD_FWPBFCSDC0_OFFSET(m)               (0x00004a04 + ((m) * 0x00000010))  /* Port %s Port Based Forwarding CSD Configuration Register 0 */
+#define R_MFWD_FWPBFC_OFFSET(m)                   (0x00004a00 + ((m) * 0x00000010))  /* Port Based Forwarding Configuration Register %s */
+/* FWPBFCSDC0%s Registers (0-2) */
+#define R_MFWD_FWPBFCSDC0_OFFSET(m)               (0x00004a04 + ((m) * 0x00000010))  /* Port Based Forwarding CSD Configuration Register 0%s */
 #define R_MFWD_FWL23URL0_OFFSET                   0x00004e00  /* Layer 2/Layer 3 Update Rule Learn Register 0 */
 #define R_MFWD_FWL23URL1_OFFSET                   0x00004e04  /* Layer 2/Layer 3 Update Rule Learn Register 1 */
 #define R_MFWD_FWL23URL2_OFFSET                   0x00004e08  /* Layer 2/Layer 3 Update Rule Learn Register 2 */
@@ -234,21 +234,21 @@
 #define R_MFWD_FWL23URRR2_OFFSET                  0x00004e3c  /* Layer 2/Layer 3 Update Rule Read Result Register 2 */
 #define R_MFWD_FWL23URRR3_OFFSET                  0x00004e40  /* Layer 2/Layer 3 Update Rule Read Result Register 3 */
 /* FWL23URMC%s Registers (0-31) */
-#define R_MFWD_FWL23URMC_OFFSET(m)                (0x00004f00 + ((m) * 0x00000004))  /* Layer 2/Layer 3 Update Remapping Configuration Register %s */
+#define R_MFWD_FWL23URMC_OFFSET(m)                (0x00004f00 + ((m) * 0x00000004))  /* Layer 2/Layer 3 Update ReMapping Configuration Register %s */
 /* FWPMFGC%s Registers (0-15) */
 #define R_MFWD_FWPMFGC_OFFSET(m)                  (0x00005000 + ((m) * 0x00000004))  /* PSFP MSDU Filter Global Configuration Register %s */
 /* FWPMTRFC%s Registers (0-31) */
-#define R_MFWD_FWPMTRFC_OFFSET(m)                 (0x00005600 + ((m) * 0x00000020))  /* PSFP Meter %s Filter Configuration Register */
+#define R_MFWD_FWPMTRFC_OFFSET(m)                 (0x00005600 + ((m) * 0x00000020))  /* PSFP Meter Filter Configuration Register %s */
 /* FWPMTRCBSC%s Registers (0-31) */
-#define R_MFWD_FWPMTRCBSC_OFFSET(m)               (0x00005604 + ((m) * 0x00000020))  /* PSFP Meter %s CBS Configuration Register */
+#define R_MFWD_FWPMTRCBSC_OFFSET(m)               (0x00005604 + ((m) * 0x00000020))  /* PSFP Meter CBS Configuration Register %s */
 /* FWPMTRCIRC%s Registers (0-31) */
-#define R_MFWD_FWPMTRCIRC_OFFSET(m)               (0x00005608 + ((m) * 0x00000020))  /* PSFP Meter %s CIR Configuration Register */
+#define R_MFWD_FWPMTRCIRC_OFFSET(m)               (0x00005608 + ((m) * 0x00000020))  /* PSFP Meter CIR Configuration Register %s */
 /* FWPMTREBSC%s Registers (0-7) */
-#define R_MFWD_FWPMTREBSC_OFFSET(m)               (0x0000560c + ((m) * 0x00000020))  /* PSFP Meter %s EBS Configuration Register */
+#define R_MFWD_FWPMTREBSC_OFFSET(m)               (0x0000560c + ((m) * 0x00000020))  /* PSFP Meter EBS Configuration Register %s */
 /* FWPMTREIRC%s Registers (0-7) */
-#define R_MFWD_FWPMTREIRC_OFFSET(m)               (0x00005610 + ((m) * 0x00000020))  /* PSFP Meter %s EIR Configuration Register */
+#define R_MFWD_FWPMTREIRC_OFFSET(m)               (0x00005610 + ((m) * 0x00000020))  /* PSFP Meter EIR Configuration Register %s */
 /* FWPMTRFM%s Registers (0-31) */
-#define R_MFWD_FWPMTRFM_OFFSET(m)                 (0x00005614 + ((m) * 0x00000020))  /* PSFP Meter %s Filter Monitoring Register */
+#define R_MFWD_FWPMTRFM_OFFSET(m)                 (0x00005614 + ((m) * 0x00000020))  /* PSFP Meter Filter Monitoring Register %s */
 #define R_MFWD_FWFTL0_OFFSET                      0x00006000  /* FRER Table Learn Register 0 */
 #define R_MFWD_FWFTL1_OFFSET                      0x00006004  /* FRER Table Learn Register 1 */
 #define R_MFWD_FWFTLR_OFFSET                      0x00006008  /* FRER Table Learn Result Register */
@@ -260,50 +260,50 @@
 #define R_MFWD_FWFTRR1_OFFSET                     0x00006038  /* FRER Table Read Result Register 1 */
 #define R_MFWD_FWFTRR2_OFFSET                     0x0000603c  /* FRER Table Read Result Register 2 */
 /* FWSEQNGC%s Registers (0-31) */
-#define R_MFWD_FWSEQNGC_OFFSET(m)                 (0x00006100 + ((m) * 0x00000008))  /* Sequence Number Generation %s Configuration Register */
+#define R_MFWD_FWSEQNGC_OFFSET(m)                 (0x00006100 + ((m) * 0x00000008))  /* Sequence Number Generation Configuration Register %s */
 /* FWSEQNGM%s Registers (0-31) */
-#define R_MFWD_FWSEQNGM_OFFSET(m)                 (0x00006104 + ((m) * 0x00000008))  /* Sequence Number Generation %s Monitoring Register */
+#define R_MFWD_FWSEQNGM_OFFSET(m)                 (0x00006104 + ((m) * 0x00000008))  /* Sequence Number Generation Monitoring Register %s */
 #define R_MFWD_FWSEQNRC_OFFSET                    0x00006200  /* Sequence Number Reset Configuration Register */
 /* FWCTFDCN%s Registers (0-1) */
-#define R_MFWD_FWCTFDCN_OFFSET(m)                 (0x00006300 + ((m) * 0x00000020))  /* Port %s Cut-Through Forwarded Descriptor Counter Register */
+#define R_MFWD_FWCTFDCN_OFFSET(m)                 (0x00006300 + ((m) * 0x00000020))  /* Cut-Through Forwarded Descriptor Counter Register %s */
 /* FWLTHFDCN%s Registers (0-2) */
-#define R_MFWD_FWLTHFDCN_OFFSET(m)                (0x00006304 + ((m) * 0x00000020))  /* Port %s Layer 3 Forwarded Descriptor Counter Register */
+#define R_MFWD_FWLTHFDCN_OFFSET(m)                (0x00006304 + ((m) * 0x00000020))  /* Layer 3 Forwarded Descriptor Counter Register %s */
 /* FWLTWFDCN%s Registers (0-2) */
-#define R_MFWD_FWLTWFDCN_OFFSET(m)                (0x0000630c + ((m) * 0x00000020))  /* Port %s Layer 2 Forwarded Descriptor Counter Register */
+#define R_MFWD_FWLTWFDCN_OFFSET(m)                (0x0000630c + ((m) * 0x00000020))  /* Layer 2 Forwarded Descriptor Counter Register %s */
 /* FWPBFDCN%s Registers (0-2) */
-#define R_MFWD_FWPBFDCN_OFFSET(m)                 (0x00006310 + ((m) * 0x00000020))  /* Port %s Port Based Forwarded Descriptor Counter Register */
+#define R_MFWD_FWPBFDCN_OFFSET(m)                 (0x00006310 + ((m) * 0x00000020))  /* Port Based Forwarded Descriptor Counter Register %s */
 /* FWMHLCN%s Registers (0-2) */
-#define R_MFWD_FWMHLCN_OFFSET(m)                  (0x00006314 + ((m) * 0x00000020))  /* Port %s MAC Hardware Learn Counter Register */
-#define R_MFWD_FWDDFDCN2_OFFSET                   0x00006340  /* Port 2 Direct Descriptor Forwarded Descriptor Counter Register */
+#define R_MFWD_FWMHLCN_OFFSET(m)                  (0x00006314 + ((m) * 0x00000020))  /* MAC Hardware Learn Counter Register %s */
+#define R_MFWD_FWDDFDCN0_OFFSET                   0x00006340  /* Direct Descriptor Forwarded Descriptor Counter Register 0 */
 /* FWWMRDCN%s Registers (0-2) */
-#define R_MFWD_FWWMRDCN_OFFSET(m)                 (0x00006504 + ((m) * 0x00000020))  /* Port %s Watermark Rejected Descriptor Counter Register */
+#define R_MFWD_FWWMRDCN_OFFSET(m)                 (0x00006504 + ((m) * 0x00000020))  /* Watermark Rejected Descriptor Counter Register %s */
 /* FWCTRDCN%s Registers (0-1) */
-#define R_MFWD_FWCTRDCN_OFFSET(m)                 (0x00006508 + ((m) * 0x00000020))  /* Port %s Cut-Through Rejected Descriptor Counter Register */
+#define R_MFWD_FWCTRDCN_OFFSET(m)                 (0x00006508 + ((m) * 0x00000020))  /* Cut-Through Rejected Descriptor Counter Register %s */
 /* FWLTHRDCN%s Registers (0-2) */
-#define R_MFWD_FWLTHRDCN_OFFSET(m)                (0x0000650c + ((m) * 0x00000020))  /* Port %s Layer 3 Rejected Descriptor Counter Register */
+#define R_MFWD_FWLTHRDCN_OFFSET(m)                (0x0000650c + ((m) * 0x00000020))  /* Layer 3 Rejected Descriptor Counter Register %s */
 /* FWLTWRDCN%s Registers (0-2) */
-#define R_MFWD_FWLTWRDCN_OFFSET(m)                (0x00006514 + ((m) * 0x00000020))  /* Port %s Layer 2 Rejected Descriptor Counter Register */
+#define R_MFWD_FWLTWRDCN_OFFSET(m)                (0x00006514 + ((m) * 0x00000020))  /* Layer 2 Rejected Descriptor Counter Register %s */
 /* FWPBRDCN%s Registers (0-2) */
-#define R_MFWD_FWPBRDCN_OFFSET(m)                 (0x00006518 + ((m) * 0x00000020))  /* Port %s Port Based Rejected Descriptor Counter Register */
-#define R_MFWD_FWDDRDCN2_OFFSET                   0x00006548  /* Port 2 Direct Descriptor Rejected Descriptor Counter Register */
+#define R_MFWD_FWPBRDCN_OFFSET(m)                 (0x00006518 + ((m) * 0x00000020))  /* Port Based Rejected Descriptor Counter Register %s */
+#define R_MFWD_FWDDRDCN0_OFFSET                   0x00006548  /* Direct Descriptor Rejected Descriptor Counter Register 0 */
 /* FWPMFDCN%s Registers (0-15) */
-#define R_MFWD_FWPMFDCN_OFFSET(m)                 (0x00006700 + ((m) * 0x00000004))  /* PSFP MSDU %s Filtered Descriptor Counter Register */
+#define R_MFWD_FWPMFDCN_OFFSET(m)                 (0x00006700 + ((m) * 0x00000004))  /* PSFP MSDU Filtered Descriptor Counter Register %s */
 /* FWPMGDCN%s Registers (0-31) */
-#define R_MFWD_FWPMGDCN_OFFSET(m)                 (0x00006800 + ((m) * 0x00000010))  /* PSFP Meter %s Green Descriptor Counter Register */
+#define R_MFWD_FWPMGDCN_OFFSET(m)                 (0x00006800 + ((m) * 0x00000010))  /* PSFP Meter Green Descriptor Counter Register %s */
 /* FWPMYDCN%s Registers (0-7) */
-#define R_MFWD_FWPMYDCN_OFFSET(m)                 (0x00006804 + ((m) * 0x00000010))  /* PSFP Meter %s Yellow Descriptor Counter Register */
+#define R_MFWD_FWPMYDCN_OFFSET(m)                 (0x00006804 + ((m) * 0x00000010))  /* PSFP Meter Yellow Descriptor Counter Register */
 /* FWPMRDCN%s Registers (0-31) */
-#define R_MFWD_FWPMRDCN_OFFSET(m)                 (0x00006808 + ((m) * 0x00000010))  /* PSFP Meter %s Red Descriptor Counter Register */
+#define R_MFWD_FWPMRDCN_OFFSET(m)                 (0x00006808 + ((m) * 0x00000010))  /* PSFP Meter Red Descriptor Counter Register %s */
 /* FWFRPPCN%s Registers (0-127) */
-#define R_MFWD_FWFRPPCN_OFFSET(m)                 (0x00006a00 + ((m) * 0x00000008))  /* FRER %s Passed Packet Counter Register */
+#define R_MFWD_FWFRPPCN_OFFSET(m)                 (0x00006a00 + ((m) * 0x00000008))  /* FRER Passed Packet Counter Register %s */
 /* FWFRDPCN%s Registers (0-127) */
-#define R_MFWD_FWFRDPCN_OFFSET(m)                 (0x00006a04 + ((m) * 0x00000008))  /* FRER %s Discarded Packet Counter Register */
+#define R_MFWD_FWFRDPCN_OFFSET(m)                 (0x00006a04 + ((m) * 0x00000008))  /* FRER Discarded Packet Counter Register %s */
 /* FWEIS0%s Registers (0-2) */
-#define R_MFWD_FWEIS0_OFFSET(m)                   (0x00007900 + ((m) * 0x00000010))  /* Port %s Error Interrupt Status Register 0 */
+#define R_MFWD_FWEIS0_OFFSET(m)                   (0x00007900 + ((m) * 0x00000010))  /* Error Interrupt Status Register 0%s */
 /* FWEIE0%s Registers (0-2) */
-#define R_MFWD_FWEIE0_OFFSET(m)                   (0x00007904 + ((m) * 0x00000010))  /* Port %s Error Interrupt Enable Register 0 */
+#define R_MFWD_FWEIE0_OFFSET(m)                   (0x00007904 + ((m) * 0x00000010))  /* Error Interrupt Enable Register 0%s */
 /* FWEID0%s Registers (0-2) */
-#define R_MFWD_FWEID0_OFFSET(m)                   (0x00007908 + ((m) * 0x00000010))  /* Port %s Error Interrupt Disable Register 0 */
+#define R_MFWD_FWEID0_OFFSET(m)                   (0x00007908 + ((m) * 0x00000010))  /* Error Interrupt Disable Register 0%s */
 #define R_MFWD_FWEIS1_OFFSET                      0x00007a00  /* Error Interrupt Status Register 1 */
 #define R_MFWD_FWEIE1_OFFSET                      0x00007a04  /* Error Interrupt Enable Register 1 */
 #define R_MFWD_FWEID1_OFFSET                      0x00007a08  /* Error Interrupt Disable Register 1 */
@@ -313,42 +313,24 @@
 #define R_MFWD_FWEIS5_OFFSET                      0x00007a40  /* Error Interrupt Status Register 5 */
 #define R_MFWD_FWEIE5_OFFSET                      0x00007a44  /* Error Interrupt Enable Register 5 */
 #define R_MFWD_FWEID5_OFFSET                      0x00007a48  /* Error Interrupt Disable Register 5 */
-#define R_MFWD_FWEIS60_OFFSET                     0x00007a50  /* Error Interrupt Status Register 60 */
-#define R_MFWD_FWEIE60_OFFSET                     0x00007a54  /* Error Interrupt Enable Register 60 */
-#define R_MFWD_FWEID60_OFFSET                     0x00007a58  /* Error Interrupt Disable Register 60 */
-#define R_MFWD_FWEIS61_OFFSET                     0x00007a60  /* Error Interrupt Status Register 61 */
-#define R_MFWD_FWEIE61_OFFSET                     0x00007a64  /* Error Interrupt Enable Register 61 */
-#define R_MFWD_FWEID61_OFFSET                     0x00007a68  /* Error Interrupt Disable Register 61 */
-#define R_MFWD_FWEIS62_OFFSET                     0x00007a70  /* Error Interrupt Status Register 62 */
-#define R_MFWD_FWEIE62_OFFSET                     0x00007a74  /* Error Interrupt Enable Register 62 */
-#define R_MFWD_FWEID62_OFFSET                     0x00007a78  /* Error Interrupt Disable Register 62 */
-#define R_MFWD_FWEIS63_OFFSET                     0x00007a80  /* Error Interrupt Status Register 63 */
-#define R_MFWD_FWEIE63_OFFSET                     0x00007a84  /* Error Interrupt Enable Register 63 */
-#define R_MFWD_FWEID63_OFFSET                     0x00007a88  /* Error Interrupt Disable Register 63 */
-#define R_MFWD_FWEIS70_OFFSET                     0x00007a90  /* Error Interrupt Status Register 70 */
-#define R_MFWD_FWEIE70_OFFSET                     0x00007a94  /* Error Interrupt Enable Register 70 */
-#define R_MFWD_FWEID70_OFFSET                     0x00007a98  /* Error Interrupt Disable Register 70 */
-#define R_MFWD_FWEIS71_OFFSET                     0x00007aa0  /* Error Interrupt Status Register 71 */
-#define R_MFWD_FWEIE71_OFFSET                     0x00007aa4  /* Error Interrupt Enable Register 71 */
-#define R_MFWD_FWEID71_OFFSET                     0x00007aa8  /* Error Interrupt Disable Register 71 */
-#define R_MFWD_FWEIS72_OFFSET                     0x00007ab0  /* Error Interrupt Status Register 72 */
-#define R_MFWD_FWEIE72_OFFSET                     0x00007ab4  /* Error Interrupt Enable Register 72 */
-#define R_MFWD_FWEID72_OFFSET                     0x00007ab8  /* Error Interrupt Disable Register 72 */
-#define R_MFWD_FWEIS73_OFFSET                     0x00007ac0  /* Error Interrupt Status Register 73 */
-#define R_MFWD_FWEIE73_OFFSET                     0x00007ac4  /* Error Interrupt Enable Register 73 */
-#define R_MFWD_FWEID73_OFFSET                     0x00007ac8  /* Forwarding Engine Error Interrupt Disable 73 */
-#define R_MFWD_FWEIS80_OFFSET                     0x00007ad0  /* Error Interrupt Status Register 80 */
-#define R_MFWD_FWEIE80_OFFSET                     0x00007ad4  /* Error Interrupt Enable Register 80 */
-#define R_MFWD_FWEID80_OFFSET                     0x00007ad8  /* Error Interrupt Disable Register 80 */
-#define R_MFWD_FWEIS81_OFFSET                     0x00007ae0  /* Error Interrupt Status Register 81 */
-#define R_MFWD_FWEIE81_OFFSET                     0x00007ae4  /* Error Interrupt Enable Register 81 */
-#define R_MFWD_FWEID81_OFFSET                     0x00007ae8  /* Error Interrupt Disable Register 81 */
-#define R_MFWD_FWEIS82_OFFSET                     0x00007af0  /* Error Interrupt Status Register 82 */
-#define R_MFWD_FWEIE82_OFFSET                     0x00007af4  /* Error Interrupt Enable Register 82 */
-#define R_MFWD_FWEID82_OFFSET                     0x00007af8  /* Error Interrupt Disable Register 82 */
-#define R_MFWD_FWEIS83_OFFSET                     0x00007b00  /* Error Interrupt Status Register 83 */
-#define R_MFWD_FWEIE83_OFFSET                     0x00007b04  /* Error Interrupt Enable Register 83 */
-#define R_MFWD_FWEID83_OFFSET                     0x00007b08  /* Error Interrupt Disable Register 83 */
+/* FWEIS6%s Registers (0-3) */
+#define R_MFWD_FWEIS6_OFFSET(m)                   (0x00007a50 + ((m) * 0x00000010))  /* Error Interrupt Status Register 6%s */
+/* FWEIE6%s Registers (0-3) */
+#define R_MFWD_FWEIE6_OFFSET(m)                   (0x00007a54 + ((m) * 0x00000010))  /* Error Interrupt Enable Register 6%s */
+/* FWEID6%s Registers (0-3) */
+#define R_MFWD_FWEID6_OFFSET(m)                   (0x00007a58 + ((m) * 0x00000010))  /* Error Interrupt Disable Register 6%s */
+/* FWEIS7%s Registers (0-3) */
+#define R_MFWD_FWEIS7_OFFSET(m)                   (0x00007a90 + ((m) * 0x00000010))  /* Error Interrupt Status Register 7%s */
+/* FWEIE7%s Registers (0-3) */
+#define R_MFWD_FWEIE7_OFFSET(m)                   (0x00007a94 + ((m) * 0x00000010))  /* Error Interrupt Enable Register 7%s */
+/* FWEID7%s Registers (0-3) */
+#define R_MFWD_FWEID7_OFFSET(m)                   (0x00007a98 + ((m) * 0x00000010))  /* Error Interrupt Disable Register 7%s */
+/* FWEIS8%s Registers (0-3) */
+#define R_MFWD_FWEIS8_OFFSET(m)                   (0x00007ad0 + ((m) * 0x00000010))  /* Error Interrupt Status Register 8%s */
+/* FWEIE8%s Registers (0-3) */
+#define R_MFWD_FWEIE8_OFFSET(m)                   (0x00007ad4 + ((m) * 0x00000010))  /* Error Interrupt Enable Register 8%s */
+/* FWEID8%s Registers (0-3) */
+#define R_MFWD_FWEID8_OFFSET(m)                   (0x00007ad8 + ((m) * 0x00000010))  /* Error Interrupt Disable Register 8%s */
 #define R_MFWD_FWMIS0_OFFSET                      0x00007c00  /* Monitoring Interrupt Status Register 0 */
 #define R_MFWD_FWMIE0_OFFSET                      0x00007c04  /* Monitoring Interrupt Enable Register 0 */
 #define R_MFWD_FWMID0_OFFSET                      0x00007c08  /* Monitoring Interrupt Disable Register 0 */
@@ -540,13 +522,13 @@
 #define R_MFWD_FWLTWFDCN(m)                       (R_MFWD_BASE + R_MFWD_FWLTWFDCN_OFFSET(m))
 #define R_MFWD_FWPBFDCN(m)                        (R_MFWD_BASE + R_MFWD_FWPBFDCN_OFFSET(m))
 #define R_MFWD_FWMHLCN(m)                         (R_MFWD_BASE + R_MFWD_FWMHLCN_OFFSET(m))
-#define R_MFWD_FWDDFDCN2                          (R_MFWD_BASE + R_MFWD_FWDDFDCN2_OFFSET)
+#define R_MFWD_FWDDFDCN0                          (R_MFWD_BASE + R_MFWD_FWDDFDCN0_OFFSET)
 #define R_MFWD_FWWMRDCN(m)                        (R_MFWD_BASE + R_MFWD_FWWMRDCN_OFFSET(m))
 #define R_MFWD_FWCTRDCN(m)                        (R_MFWD_BASE + R_MFWD_FWCTRDCN_OFFSET(m))
 #define R_MFWD_FWLTHRDCN(m)                       (R_MFWD_BASE + R_MFWD_FWLTHRDCN_OFFSET(m))
 #define R_MFWD_FWLTWRDCN(m)                       (R_MFWD_BASE + R_MFWD_FWLTWRDCN_OFFSET(m))
 #define R_MFWD_FWPBRDCN(m)                        (R_MFWD_BASE + R_MFWD_FWPBRDCN_OFFSET(m))
-#define R_MFWD_FWDDRDCN2                          (R_MFWD_BASE + R_MFWD_FWDDRDCN2_OFFSET)
+#define R_MFWD_FWDDRDCN0                          (R_MFWD_BASE + R_MFWD_FWDDRDCN0_OFFSET)
 #define R_MFWD_FWPMFDCN(m)                        (R_MFWD_BASE + R_MFWD_FWPMFDCN_OFFSET(m))
 #define R_MFWD_FWPMGDCN(m)                        (R_MFWD_BASE + R_MFWD_FWPMGDCN_OFFSET(m))
 #define R_MFWD_FWPMYDCN(m)                        (R_MFWD_BASE + R_MFWD_FWPMYDCN_OFFSET(m))
@@ -565,42 +547,15 @@
 #define R_MFWD_FWEIS5                             (R_MFWD_BASE + R_MFWD_FWEIS5_OFFSET)
 #define R_MFWD_FWEIE5                             (R_MFWD_BASE + R_MFWD_FWEIE5_OFFSET)
 #define R_MFWD_FWEID5                             (R_MFWD_BASE + R_MFWD_FWEID5_OFFSET)
-#define R_MFWD_FWEIS60                            (R_MFWD_BASE + R_MFWD_FWEIS60_OFFSET)
-#define R_MFWD_FWEIE60                            (R_MFWD_BASE + R_MFWD_FWEIE60_OFFSET)
-#define R_MFWD_FWEID60                            (R_MFWD_BASE + R_MFWD_FWEID60_OFFSET)
-#define R_MFWD_FWEIS61                            (R_MFWD_BASE + R_MFWD_FWEIS61_OFFSET)
-#define R_MFWD_FWEIE61                            (R_MFWD_BASE + R_MFWD_FWEIE61_OFFSET)
-#define R_MFWD_FWEID61                            (R_MFWD_BASE + R_MFWD_FWEID61_OFFSET)
-#define R_MFWD_FWEIS62                            (R_MFWD_BASE + R_MFWD_FWEIS62_OFFSET)
-#define R_MFWD_FWEIE62                            (R_MFWD_BASE + R_MFWD_FWEIE62_OFFSET)
-#define R_MFWD_FWEID62                            (R_MFWD_BASE + R_MFWD_FWEID62_OFFSET)
-#define R_MFWD_FWEIS63                            (R_MFWD_BASE + R_MFWD_FWEIS63_OFFSET)
-#define R_MFWD_FWEIE63                            (R_MFWD_BASE + R_MFWD_FWEIE63_OFFSET)
-#define R_MFWD_FWEID63                            (R_MFWD_BASE + R_MFWD_FWEID63_OFFSET)
-#define R_MFWD_FWEIS70                            (R_MFWD_BASE + R_MFWD_FWEIS70_OFFSET)
-#define R_MFWD_FWEIE70                            (R_MFWD_BASE + R_MFWD_FWEIE70_OFFSET)
-#define R_MFWD_FWEID70                            (R_MFWD_BASE + R_MFWD_FWEID70_OFFSET)
-#define R_MFWD_FWEIS71                            (R_MFWD_BASE + R_MFWD_FWEIS71_OFFSET)
-#define R_MFWD_FWEIE71                            (R_MFWD_BASE + R_MFWD_FWEIE71_OFFSET)
-#define R_MFWD_FWEID71                            (R_MFWD_BASE + R_MFWD_FWEID71_OFFSET)
-#define R_MFWD_FWEIS72                            (R_MFWD_BASE + R_MFWD_FWEIS72_OFFSET)
-#define R_MFWD_FWEIE72                            (R_MFWD_BASE + R_MFWD_FWEIE72_OFFSET)
-#define R_MFWD_FWEID72                            (R_MFWD_BASE + R_MFWD_FWEID72_OFFSET)
-#define R_MFWD_FWEIS73                            (R_MFWD_BASE + R_MFWD_FWEIS73_OFFSET)
-#define R_MFWD_FWEIE73                            (R_MFWD_BASE + R_MFWD_FWEIE73_OFFSET)
-#define R_MFWD_FWEID73                            (R_MFWD_BASE + R_MFWD_FWEID73_OFFSET)
-#define R_MFWD_FWEIS80                            (R_MFWD_BASE + R_MFWD_FWEIS80_OFFSET)
-#define R_MFWD_FWEIE80                            (R_MFWD_BASE + R_MFWD_FWEIE80_OFFSET)
-#define R_MFWD_FWEID80                            (R_MFWD_BASE + R_MFWD_FWEID80_OFFSET)
-#define R_MFWD_FWEIS81                            (R_MFWD_BASE + R_MFWD_FWEIS81_OFFSET)
-#define R_MFWD_FWEIE81                            (R_MFWD_BASE + R_MFWD_FWEIE81_OFFSET)
-#define R_MFWD_FWEID81                            (R_MFWD_BASE + R_MFWD_FWEID81_OFFSET)
-#define R_MFWD_FWEIS82                            (R_MFWD_BASE + R_MFWD_FWEIS82_OFFSET)
-#define R_MFWD_FWEIE82                            (R_MFWD_BASE + R_MFWD_FWEIE82_OFFSET)
-#define R_MFWD_FWEID82                            (R_MFWD_BASE + R_MFWD_FWEID82_OFFSET)
-#define R_MFWD_FWEIS83                            (R_MFWD_BASE + R_MFWD_FWEIS83_OFFSET)
-#define R_MFWD_FWEIE83                            (R_MFWD_BASE + R_MFWD_FWEIE83_OFFSET)
-#define R_MFWD_FWEID83                            (R_MFWD_BASE + R_MFWD_FWEID83_OFFSET)
+#define R_MFWD_FWEIS6(m)                          (R_MFWD_BASE + R_MFWD_FWEIS6_OFFSET(m))
+#define R_MFWD_FWEIE6(m)                          (R_MFWD_BASE + R_MFWD_FWEIE6_OFFSET(m))
+#define R_MFWD_FWEID6(m)                          (R_MFWD_BASE + R_MFWD_FWEID6_OFFSET(m))
+#define R_MFWD_FWEIS7(m)                          (R_MFWD_BASE + R_MFWD_FWEIS7_OFFSET(m))
+#define R_MFWD_FWEIE7(m)                          (R_MFWD_BASE + R_MFWD_FWEIE7_OFFSET(m))
+#define R_MFWD_FWEID7(m)                          (R_MFWD_BASE + R_MFWD_FWEID7_OFFSET(m))
+#define R_MFWD_FWEIS8(m)                          (R_MFWD_BASE + R_MFWD_FWEIS8_OFFSET(m))
+#define R_MFWD_FWEIE8(m)                          (R_MFWD_BASE + R_MFWD_FWEIE8_OFFSET(m))
+#define R_MFWD_FWEID8(m)                          (R_MFWD_BASE + R_MFWD_FWEID8_OFFSET(m))
 #define R_MFWD_FWMIS0                             (R_MFWD_BASE + R_MFWD_FWMIS0_OFFSET)
 #define R_MFWD_FWMIE0                             (R_MFWD_BASE + R_MFWD_FWMIE0_OFFSET)
 #define R_MFWD_FWMID0                             (R_MFWD_BASE + R_MFWD_FWMID0_OFFSET)
@@ -615,24 +570,25 @@
 #  define R_MFWD_FWGC_SVM_11                              (3 << R_MFWD_FWGC_SVM_SHIFT)  /* Reserved */
 
 /* FWTTC0 Register bit definitions */
-#define R_MFWD_FWTTC0_CTT_SHIFT                   (0)  /* C-TAG TPID [801.2Q] */
+#define R_MFWD_FWTTC0_CTT_SHIFT                   (0)  /* C-TAG TPID */
 #define R_MFWD_FWTTC0_CTT_MASK                    0xffff
 
-#define R_MFWD_FWTTC0_STT_SHIFT                   (16)  /* S-TAG TPID [801.2Q] */
+#define R_MFWD_FWTTC0_STT_SHIFT                   (16)  /* S-TAG TPID */
 #define R_MFWD_FWTTC0_STT_MASK                    0xffff0000
 
 /* FWTTC1 Register bit definitions */
-#define R_MFWD_FWTTC1_RTT_SHIFT                   (0)  /* R-TAG TPID [801.2CB] */
+#define R_MFWD_FWTTC1_RTT_SHIFT                   (0)  /* R-TAG TPID */
 #define R_MFWD_FWTTC1_RTT_MASK                    0xffff
 
 /* FWCEPTC Register bit definitions */
 #define R_MFWD_FWCEPTC_EPCSD_SHIFT                (0)  /* Exceptional Path CPU Sub Destination */
-#define R_MFWD_FWCEPTC_EPCSD_MASK                 0x3f
+#define R_MFWD_FWCEPTC_EPCSD_MASK                 0x7f
 
 #define R_MFWD_FWCEPTC_EPIPV_SHIFT                (12)  /* Exceptional Path Internal Priority Value */
 #define R_MFWD_FWCEPTC_EPIPV_MASK                 0x7000
 
-#define R_MFWD_FWCEPTC_EPCS                       (1 << 16)  /* Exceptional Path CPU Select */
+#define R_MFWD_FWCEPTC_EPCS_SHIFT                 (16)  /* Exceptional Path CPU Select */
+#define R_MFWD_FWCEPTC_EPCS_MASK                  0x30000
 
 #define R_MFWD_FWCEPTC_EPSL                       (1 << 24)  /* Exceptional Path Security Level */
 
@@ -662,6 +618,8 @@
 #define R_MFWD_FWCEPRC0_EOEEF                     (1 << 11)  /* Ethernet Oversize Error Exceptional Forwarding */
 
 #define R_MFWD_FWCEPRC0_ETFEF                     (1 << 12)  /* Ethernet TAG Filtering Exceptional Forwarding */
+
+#define R_MFWD_FWCEPRC0_GAREEEF                   (1 << 16)  /* GWCA AXI RAM ECC Error Exceptional Forwarding */
 
 #define R_MFWD_FWCEPRC0_GAXEEF                    (1 << 17)  /* GWCA AXI Error Exceptional Forwarding */
 
@@ -713,12 +671,13 @@
 
 /* FWCLPTC Register bit definitions */
 #define R_MFWD_FWCLPTC_LPCSD_SHIFT                (0)  /* Learning Path CPU Sub Destination */
-#define R_MFWD_FWCLPTC_LPCSD_MASK                 0x3f
+#define R_MFWD_FWCLPTC_LPCSD_MASK                 0x7f
 
 #define R_MFWD_FWCLPTC_LPIPV_SHIFT                (12)  /* Learning Path Internal Priority Value */
 #define R_MFWD_FWCLPTC_LPIPV_MASK                 0x7000
 
-#define R_MFWD_FWCLPTC_LPCS                       (1 << 16)  /* Learning Path CPU Select */
+#define R_MFWD_FWCLPTC_LPCS_SHIFT                 (16)  /* Learning Path CPU Select */
+#define R_MFWD_FWCLPTC_LPCS_MASK                  0x30000
 
 #define R_MFWD_FWCLPTC_LPSL                       (1 << 24)  /* Learning Path Security Level */
 
@@ -735,14 +694,15 @@
 
 /* FWCMPTC Register bit definitions */
 #define R_MFWD_FWCMPTC_CMPCSD_SHIFT               (0)  /* CPU Mirroring Path CPU Sub Destination */
-#define R_MFWD_FWCMPTC_CMPCSD_MASK                0x3f
+#define R_MFWD_FWCMPTC_CMPCSD_MASK                0x7f
 
 #define R_MFWD_FWCMPTC_CMPIPV_SHIFT               (12)  /* CPU Mirroring Path Internal Priority Value */
 #define R_MFWD_FWCMPTC_CMPIPV_MASK                0x7000
 
 #define R_MFWD_FWCMPTC_CMPIPU                     (1 << 15)  /* CPU Mirroring Path Internal Priority Update */
 
-#define R_MFWD_FWCMPTC_CMPCS                      (1 << 16)  /* CPU Mirroring Path CPU Select */
+#define R_MFWD_FWCMPTC_CMPCS_SHIFT                (16)  /* CPU Mirroring Path CPU Select */
+#define R_MFWD_FWCMPTC_CMPCS_MASK                 0x30000
 
 #define R_MFWD_FWCMPTC_CMPSL                      (1 << 24)  /* CPU Mirroring Path Security Level */
 
@@ -752,95 +712,42 @@
 
 #define R_MFWD_FWEMPTC_EMPIPU                     (1 << 15)  /* Ethernet Mirroring Path Internal Priority Update */
 
-#define R_MFWD_FWEMPTC_EMPPS                      (1 << 16)  /* Ethernet Mirroring Path Port Select */
+#define R_MFWD_FWEMPTC_EMPPS_SHIFT                (16)  /* Ethernet Mirroring Path CPU Select */
+#define R_MFWD_FWEMPTC_EMPPS_MASK                 0x30000
 
 #define R_MFWD_FWEMPTC_EMPSL                      (1 << 24)  /* Ethernet Mirroring Path Security Level */
 
 /* FWSDMPTC Register bit definitions */
 #define R_MFWD_FWSDMPTC_SDMPCSD_SHIFT             (0)  /* Source-Destination Mirroring Path CPU Sub Destination */
-#define R_MFWD_FWSDMPTC_SDMPCSD_MASK              0x3f
+#define R_MFWD_FWSDMPTC_SDMPCSD_MASK              0x7f
 
 #define R_MFWD_FWSDMPTC_SDMPIPV_SHIFT             (12)  /* Source-Destination Mirroring Path Internal Priority Value */
 #define R_MFWD_FWSDMPTC_SDMPIPV_MASK              0x7000
 
 #define R_MFWD_FWSDMPTC_SDMPIPU                   (1 << 15)  /* Source-Destination Mirroring Path Internal Priority Update */
 
-#define R_MFWD_FWSDMPTC_SDMPPS_SHIFT              (16)  /* Source-Destination Mirroring Path Port Select */
+#define R_MFWD_FWSDMPTC_SDMPPS_SHIFT              (16)  /* Source-Destination Mirroring Path CPU Select */
 #define R_MFWD_FWSDMPTC_SDMPPS_MASK               0x30000
 
 #define R_MFWD_FWSDMPTC_SDMPSL                    (1 << 24)  /* Source-Destination Mirroring Path Security Level */
 
 /* FWSDMPVC Register bit definitions */
 #define R_MFWD_FWSDMPVC_SDMDV_SHIFT               (0)  /* Source-Destination Mirroring Destination Vector */
-#define R_MFWD_FWSDMPVC_SDMDV_MASK                0x7
+#define R_MFWD_FWSDMPVC_SDMDV_MASK                0x7f
 
 #define R_MFWD_FWSDMPVC_SDMSV_SHIFT               (16)  /* Source-Destination Mirroring Source Vector */
-#define R_MFWD_FWSDMPVC_SDMSV_MASK                0x70000
+#define R_MFWD_FWSDMPVC_SDMSV_MASK                0x7f0000
 
 /* FWLBWMC Register bit definitions */
-#define R_MFWD_FWLBWMC_WMCLPR0                    (1 << 0)  /* Watermark Critical Level Priority n Reject (n = 0 to 15) */
+#define R_MFWD_FWLBWMC_WMCLPR_SHIFT               (0)  /* Watermark Critical Level Priority Rejected */
+#define R_MFWD_FWLBWMC_WMCLPR_MASK                0xffff
+#  define R_MFWD_FWLBWMC_WMCLPR_0                         (0 << R_MFWD_FWLBWMC_WMCLPR_SHIFT)  /* Frames coming for port i and that should be forwarded with {DEI,IPV} equal to j are forwarded. */
+#  define R_MFWD_FWLBWMC_WMCLPR_1                         (1 << R_MFWD_FWLBWMC_WMCLPR_SHIFT)  /* Frames coming for port i and that should be forwarded with {DEI,IPV} equal to j are discarded when watermark critical level is set for port i (WM.CREITICAL[i] is set [COMA]). */
 
-#define R_MFWD_FWLBWMC_WMCLPR1                    (1 << 1)  /* Watermark Critical Level Priority n Reject (n = 0 to 15) */
-
-#define R_MFWD_FWLBWMC_WMCLPR2                    (1 << 2)  /* Watermark Critical Level Priority n Reject (n = 0 to 15) */
-
-#define R_MFWD_FWLBWMC_WMCLPR3                    (1 << 3)  /* Watermark Critical Level Priority n Reject (n = 0 to 15) */
-
-#define R_MFWD_FWLBWMC_WMCLPR4                    (1 << 4)  /* Watermark Critical Level Priority n Reject (n = 0 to 15) */
-
-#define R_MFWD_FWLBWMC_WMCLPR5                    (1 << 5)  /* Watermark Critical Level Priority n Reject (n = 0 to 15) */
-
-#define R_MFWD_FWLBWMC_WMCLPR6                    (1 << 6)  /* Watermark Critical Level Priority n Reject (n = 0 to 15) */
-
-#define R_MFWD_FWLBWMC_WMCLPR7                    (1 << 7)  /* Watermark Critical Level Priority n Reject (n = 0 to 15) */
-
-#define R_MFWD_FWLBWMC_WMCLPR8                    (1 << 8)  /* Watermark Critical Level Priority n Reject (n = 0 to 15) */
-
-#define R_MFWD_FWLBWMC_WMCLPR9                    (1 << 9)  /* Watermark Critical Level Priority n Reject (n = 0 to 15) */
-
-#define R_MFWD_FWLBWMC_WMCLPR10                   (1 << 10)  /* Watermark Critical Level Priority n Reject (n = 0 to 15) */
-
-#define R_MFWD_FWLBWMC_WMCLPR11                   (1 << 11)  /* Watermark Critical Level Priority n Reject (n = 0 to 15) */
-
-#define R_MFWD_FWLBWMC_WMCLPR12                   (1 << 12)  /* Watermark Critical Level Priority n Reject (n = 0 to 15) */
-
-#define R_MFWD_FWLBWMC_WMCLPR13                   (1 << 13)  /* Watermark Critical Level Priority n Reject (n = 0 to 15) */
-
-#define R_MFWD_FWLBWMC_WMCLPR14                   (1 << 14)  /* Watermark Critical Level Priority n Reject (n = 0 to 15) */
-
-#define R_MFWD_FWLBWMC_WMCLPR15                   (1 << 15)  /* Watermark Critical Level Priority n Reject (n = 0 to 15) */
-
-#define R_MFWD_FWLBWMC_WMFLPR0                    (1 << 16)  /* Watermark Flush Level Priority n Reject (n = 0 to 15) */
-
-#define R_MFWD_FWLBWMC_WMFLPR1                    (1 << 17)  /* Watermark Flush Level Priority n Reject (n = 0 to 15) */
-
-#define R_MFWD_FWLBWMC_WMFLPR2                    (1 << 18)  /* Watermark Flush Level Priority n Reject (n = 0 to 15) */
-
-#define R_MFWD_FWLBWMC_WMFLPR3                    (1 << 19)  /* Watermark Flush Level Priority n Reject (n = 0 to 15) */
-
-#define R_MFWD_FWLBWMC_WMFLPR4                    (1 << 20)  /* Watermark Flush Level Priority n Reject (n = 0 to 15) */
-
-#define R_MFWD_FWLBWMC_WMFLPR5                    (1 << 21)  /* Watermark Flush Level Priority n Reject (n = 0 to 15) */
-
-#define R_MFWD_FWLBWMC_WMFLPR6                    (1 << 22)  /* Watermark Flush Level Priority n Reject (n = 0 to 15) */
-
-#define R_MFWD_FWLBWMC_WMFLPR7                    (1 << 23)  /* Watermark Flush Level Priority n Reject (n = 0 to 15) */
-
-#define R_MFWD_FWLBWMC_WMFLPR8                    (1 << 24)  /* Watermark Flush Level Priority n Reject (n = 0 to 15) */
-
-#define R_MFWD_FWLBWMC_WMFLPR9                    (1 << 25)  /* Watermark Flush Level Priority n Reject (n = 0 to 15) */
-
-#define R_MFWD_FWLBWMC_WMFLPR10                   (1 << 26)  /* Watermark Flush Level Priority n Reject (n = 0 to 15) */
-
-#define R_MFWD_FWLBWMC_WMFLPR11                   (1 << 27)  /* Watermark Flush Level Priority n Reject (n = 0 to 15) */
-
-#define R_MFWD_FWLBWMC_WMFLPR12                   (1 << 28)  /* Watermark Flush Level Priority n Reject (n = 0 to 15) */
-
-#define R_MFWD_FWLBWMC_WMFLPR13                   (1 << 29)  /* Watermark Flush Level Priority n Reject (n = 0 to 15) */
-
-#define R_MFWD_FWLBWMC_WMFLPR14                   (1 << 30)  /* Watermark Flush Level Priority n Reject (n = 0 to 15) */
-
-#define R_MFWD_FWLBWMC_WMFLPR15                   (1 << 31)  /* Watermark Flush Level Priority n Reject (n = 0 to 15) */
+#define R_MFWD_FWLBWMC_WMFLPR_SHIFT               (16)  /* Watermark Flush Level Priority Rejected */
+#define R_MFWD_FWLBWMC_WMFLPR_MASK                0xffff0000
+#  define R_MFWD_FWLBWMC_WMFLPR_0                         (0 << R_MFWD_FWLBWMC_WMFLPR_SHIFT)  /* Frames coming for port i and that should be forwarded with {DEI,IPV} equal to j are forwarded. */
+#  define R_MFWD_FWLBWMC_WMFLPR_1                         (1 << R_MFWD_FWLBWMC_WMFLPR_SHIFT)  /* Frames coming for port i and that should be forwarded with {DEI,IPV} equal to j are discarded when watermark flush level is set for port i (WM.FLUSH[i] is set [COMA]). */
 
 /* FWPC Register bit definitions */
 #define R_MFWD_FWPC_LTHTA                         (1 << 0)  /* L3 Table Active */
@@ -849,17 +756,17 @@
 
 #define R_MFWD_FWPC_LTHRUSS                       (1 << 2)  /* L3 Reject Unknown Secure Streams */
 
-#define R_MFWD_FWPC_IP4UE                         (1 << 3)  /* IPv4 UDP Enable */
+#define R_MFWD_FWPC_IP4UE                         (1 << 3)  /* IPv4 UDP Enabled */
 
-#define R_MFWD_FWPC_IP4TE                         (1 << 4)  /* IPv4 TCP Enable */
+#define R_MFWD_FWPC_IP4TE                         (1 << 4)  /* IPv4 TCP Enabled */
 
-#define R_MFWD_FWPC_IP4OE                         (1 << 5)  /* IPv4 Other Enable */
+#define R_MFWD_FWPC_IP4OE                         (1 << 5)  /* IPv4 Other Enabled */
 
-#define R_MFWD_FWPC_IP6UE                         (1 << 6)  /* IPv6 UDP Enable */
+#define R_MFWD_FWPC_IP6UE                         (1 << 6)  /* IPv6 UDP Enabled */
 
-#define R_MFWD_FWPC_IP6TE                         (1 << 7)  /* IPv6 TCP Enable */
+#define R_MFWD_FWPC_IP6TE                         (1 << 7)  /* IPv6 TCP Enabled */
 
-#define R_MFWD_FWPC_IP6OE                         (1 << 8)  /* IPv6 Other Enable */
+#define R_MFWD_FWPC_IP6OE                         (1 << 8)  /* IPv6 Other Enabled */
 
 #define R_MFWD_FWPC_L2SE                          (1 << 9)  /* L2 Stream Enable */
 
@@ -890,18 +797,16 @@
 
 #define R_MFWD_FWPC_DDSL                          (1 << 1)  /* Direct Descriptor Security Level */
 
-#define R_MFWD_FWPC_LTHFM0                        (1 << 16)  /* Layer 3 Forwarding Mask n (n = 0 to 2) */
-
-#define R_MFWD_FWPC_LTHFM1                        (1 << 17)  /* Layer 3 Forwarding Mask n (n = 0 to 2) */
-
-#define R_MFWD_FWPC_LTHFM2                        (1 << 18)  /* Layer 3 Forwarding Mask n (n = 0 to 2) */
+#define R_MFWD_FWPC_LTHFM_SHIFT                   (16)  /* Layer 3 Forwarding Mask */
+#define R_MFWD_FWPC_LTHFM_MASK                    0x7f0000
+#  define R_MFWD_FWPC_LTHFM_0                             (0 << R_MFWD_FWPC_LTHFM_SHIFT)  /* Frames forwarded by Layer 3 forwarding can be forwarded to port j. */
+#  define R_MFWD_FWPC_LTHFM_1                             (1 << R_MFWD_FWPC_LTHFM_SHIFT)  /* Frames forwarded by Layer 3 forwarding cannot be forwarded to port j. */
 
 /* FWPC Register bit definitions */
-#define R_MFWD_FWPC_LTWFM0                        (1 << 16)  /* Layer 2 Forwarding Mask n (n = 0 to 2) */
-
-#define R_MFWD_FWPC_LTWFM1                        (1 << 17)  /* Layer 2 Forwarding Mask n (n = 0 to 2) */
-
-#define R_MFWD_FWPC_LTWFM2                        (1 << 18)  /* Layer 2 Forwarding Mask n (n = 0 to 2) */
+#define R_MFWD_FWPC_LTWFM_SHIFT                   (16)  /* Layer 2 Forwarding Mask */
+#define R_MFWD_FWPC_LTWFM_MASK                    0x7f0000
+#  define R_MFWD_FWPC_LTWFM_0                             (0 << R_MFWD_FWPC_LTWFM_SHIFT)  /* Frames forwarded by Layer 2 forwarding can be forwarded to port j. */
+#  define R_MFWD_FWPC_LTWFM_1                             (1 << R_MFWD_FWPC_LTWFM_SHIFT)  /* Frames forwarded by Layer 2 forwarding cannot be forwarded to port j. */
 
 /* FWCTGC Register bit definitions */
 #define R_MFWD_FWCTGC_CTMDE                       (1 << 0)  /* Cut-Through MAC Destination Enable */
@@ -928,7 +833,7 @@
 #define R_MFWD_FWCTGC_CTVCTRL_MASK                0x3000
 #  define R_MFWD_FWCTGC_CTVCTRL_00                        (0 << R_MFWD_FWCTGC_CTVCTRL_SHIFT)  /* The ingress matching separation rule i frame is a No TAG frame. */
 #  define R_MFWD_FWCTGC_CTVCTRL_01                        (1 << R_MFWD_FWCTGC_CTVCTRL_SHIFT)  /* The ingress matching separation rule i frame is a C-TAG frame. */
-#  define R_MFWD_FWCTGC_CTVCTRL_10                        (2 << R_MFWD_FWCTGC_CTVCTRL_SHIFT)  /* The ingress matching separation rule i frame is an SC-TAG frame. */
+#  define R_MFWD_FWCTGC_CTVCTRL_10                        (2 << R_MFWD_FWCTGC_CTVCTRL_SHIFT)  /* The ingress matching separation rule i frame is a SC-TAG frame. */
 #  define R_MFWD_FWCTGC_CTVCTRL_11                        (3 << R_MFWD_FWCTGC_CTVCTRL_SHIFT)  /* The ingress matching separation rule i frame is a CoS TAG frame. */
 
 #define R_MFWD_FWCTGC_CTRTGI                      (1 << 14)  /* Cut-Through R-TAG In [GWCA] [ETHA] */
@@ -939,11 +844,12 @@
 
 /* FWCTTC Register bit definitions */
 #define R_MFWD_FWCTTC_CTDV_SHIFT                  (0)  /* Cut-through Destination Vector */
-#define R_MFWD_FWCTTC_CTDV_MASK                   0x7
+#define R_MFWD_FWCTTC_CTDV_MASK                   0x7f
 
-#define R_MFWD_FWCTTC_CTDFM0                      (1 << 16)  /* Cut-Through Destination n Forwarding Mode (n = 0 to 1) */
-
-#define R_MFWD_FWCTTC_CTDFM1                      (1 << 17)  /* Cut-Through Destination n Forwarding Mode (n = 0 to 1) */
+#define R_MFWD_FWCTTC_CTDFM_SHIFT                 (16)  /* Cut-through Destination Forwarding Mode */
+#define R_MFWD_FWCTTC_CTDFM_MASK                  0xf0000
+#  define R_MFWD_FWCTTC_CTDFM_0                           (0 << R_MFWD_FWCTTC_CTDFM_SHIFT)  /* Frame is forwarded in Cut-through mode. */
+#  define R_MFWD_FWCTTC_CTDFM_1                           (1 << R_MFWD_FWCTTC_CTDFM_SHIFT)  /* Frame is forwarded in Store and forward mode. */
 
 /* FWCTTC Register bit definitions */
 #define R_MFWD_FWCTTC_CTIPV_SHIFT                 (12)  /* Cut-through Internal Priority Value */
@@ -957,7 +863,7 @@
 
 /* FWCTTC Register bit definitions */
 #define R_MFWD_FWCTTC_CTCSD_SHIFT                 (0)  /* Cut-Through CPU Sub Destination */
-#define R_MFWD_FWCTTC_CTCSD_MASK                  0x3f
+#define R_MFWD_FWCTTC_CTCSD_MASK                  0x7f
 
 /* FWCTSC Register bit definitions */
 #define R_MFWD_FWCTSC_CTDMAU_SHIFT                (0)  /* Cut-Through Destination MAC Address Upper Part */
@@ -995,7 +901,8 @@
 #define R_MFWD_FWCTSC_CTET_SHIFT                  (0)  /* Cut-Through Ethernet Type */
 #define R_MFWD_FWCTSC_CTET_MASK                   0xffff
 
-#define R_MFWD_FWCTSC_CTSPN                       (1 << 16)  /* Cut-Through Source Port Number */
+#define R_MFWD_FWCTSC_CTSPN_SHIFT                 (16)  /* Cut-Through Source Port Number */
+#define R_MFWD_FWCTSC_CTSPN_MASK                  0x30000
 
 /* FWTWBFC Register bit definitions */
 #define R_MFWD_FWTWBFC_TWBFUM_SHIFT               (0)  /* Two-Byte Filter Unit Mode */
@@ -1062,21 +969,18 @@
 #define R_MFWD_FWRFC_RFOV_MASK                    0xff0000
 
 /* FWRFVC Register bit definitions */
-#define R_MFWD_FWRFVC_RFSV0_SHIFT                 (0)  /* Range Filter Start Value 0 */
-#define R_MFWD_FWRFVC_RFSV0_MASK                  0xff
-
-#define R_MFWD_FWRFVC_RFSV1_SHIFT                 (8)  /* Range Filter Start Value 1 */
-#define R_MFWD_FWRFVC_RFSV1_MASK                  0xff00
+#define R_MFWD_FWRFVC_RFSV_S_SHIFT                (0)  /* Range Filter Start Value %s */
+#define R_MFWD_FWRFVC_RFSV_S_MASK                 0xff
 
 #define R_MFWD_FWRFVC_RFRV_SHIFT                  (16)  /* Range Filter Range Value */
 #define R_MFWD_FWRFVC_RFRV_MASK                   0xf0000
 
 /* FWCFC Register bit definitions */
-#define R_MFWD_FWCFC_CFEFFV2_TO_CFEFFV0_SHIFT     (0)  /* Cascade Filter E-Frame Filter Valid n (n = 0 to 2) */
-#define R_MFWD_FWCFC_CFEFFV2_TO_CFEFFV0_MASK      0x7
+#define R_MFWD_FWCFC_CFEFFV_SHIFT                 (0)  /* Cascade Filter E-Frame Filter Valid */
+#define R_MFWD_FWCFC_CFEFFV_MASK                  0x7f
 
-#define R_MFWD_FWCFC_CFPFFV1_TO_CFPFFV0_SHIFT     (16)  /* Cascade Filter E-Frame Filter Valid n (n = 0 to 1) */
-#define R_MFWD_FWCFC_CFPFFV1_TO_CFPFFV0_MASK      0x30000
+#define R_MFWD_FWCFC_CFPFFV_SHIFT                 (16)  /* Cascade Filter P-Frame Filter Valid */
+#define R_MFWD_FWCFC_CFPFFV_MASK                  0xf0000
 
 /* FWCFMC Register bit definitions */
 #define R_MFWD_FWCFMC_CFFN_SHIFT                  (0)  /* Cascade Filter Filter Number */
@@ -1186,7 +1090,7 @@
 
 #define R_MFWD_FWIP6SC_IP6IIDH                    (1 << 9)  /* IPv6 Include IP Destination in Hash */
 
-#define R_MFWD_FWIP6SC_IP6IPH                     (1 << 10)  /* IPv6 Include Protocol in Hash (Next Header) */
+#define R_MFWD_FWIP6SC_IP6IPH                     (1 << 10)  /* IPv6 Include Protocol in Hash */
 
 #define R_MFWD_FWIP6SC_IP6ISPTH                   (1 << 11)  /* IPv6 Include Source Port in Hash */
 
@@ -1211,15 +1115,10 @@
 #define R_MFWD_FWIP6SC_IP6IDPTS                   (1 << 24)  /* IPv6 Include Destination Port in Stream */
 
 /* FWIP6OC Register bit definitions */
-#define R_MFWD_FWIP6OC_IP6IPOM0                   (1 << 0)  /* IPv6 IP Offset mode 0 */
+#define R_MFWD_FWIP6OC_IP6IPOM_S                  (1 << 0)  /* IPv6 IP Offset mode %s */
 
-#define R_MFWD_FWIP6OC_IP6IPO0_SHIFT              (4)  /* IPv6 IP Offset 0 */
-#define R_MFWD_FWIP6OC_IP6IPO0_MASK               0xf0
-
-#define R_MFWD_FWIP6OC_IP6IPOM1                   (1 << 16)  /* IPv6 IP Offset mode 1 */
-
-#define R_MFWD_FWIP6OC_IP6IPO1_SHIFT              (20)  /* IPv6 IP Offset 1 */
-#define R_MFWD_FWIP6OC_IP6IPO1_MASK               0xf00000
+#define R_MFWD_FWIP6OC_IP6IPO_S_SHIFT             (4)  /* IPv6 IP Offset %s */
+#define R_MFWD_FWIP6OC_IP6IPO_S_MASK              0xf0
 
 /* FWL2SC Register bit definitions */
 #define R_MFWD_FWL2SC_L2IMDS                      (1 << 0)  /* Layer 2 Include MAC Destination in Stream */
@@ -1239,11 +1138,11 @@
 #define R_MFWD_FWL2SC_L2ICDS                      (1 << 7)  /* Layer 2 Include C-TAG DEI in Stream */
 
 /* FWSFHEC Register bit definitions */
-#define R_MFWD_FWSFHEC_IP4HE15_TO_IP4HE0_SHIFT    (0)  /* IPv4 Stream Filter Hash Equation n (n = 0 to 15) */
-#define R_MFWD_FWSFHEC_IP4HE15_TO_IP4HE0_MASK     0xffff
+#define R_MFWD_FWSFHEC_IP4HE_SHIFT                (0)  /* Stream Filter Hash Equation */
+#define R_MFWD_FWSFHEC_IP4HE_MASK                 0xffff
 
-#define R_MFWD_FWSFHEC_IP6HE15_TO_IP6HE0_SHIFT    (16)  /* IPv6 Stream Filter Hash Equation n (n = 0 to 15) */
-#define R_MFWD_FWSFHEC_IP6HE15_TO_IP6HE0_MASK     0xffff0000
+#define R_MFWD_FWSFHEC_IP6HE_SHIFT                (16)  /* Stream Filter Hash Equation */
+#define R_MFWD_FWSFHEC_IP6HE_MASK                 0xffff0000
 
 /* FWSHCR0 Register bit definitions */
 #define R_MFWD_FWSHCR0_SHCMDP0_SHIFT              (0)  /* Software Hash Calculation MAC Destination Part 0 */
@@ -1304,7 +1203,7 @@
 #define R_MFWD_FWSHCR9_SHCIDP0_MASK               0xffffffff
 
 /* FWSHCR10 Register bit definitions */
-#define R_MFWD_FWSHCR10_SHCIDP1_SHIFT             (0)  /* Software Hash Calculation IP Source Destination Part 1 */
+#define R_MFWD_FWSHCR10_SHCIDP1_SHIFT             (0)  /* Software Hash Calculation IP Destination Part 1 */
 #define R_MFWD_FWSHCR10_SHCIDP1_MASK              0xffffffff
 
 /* FWSHCR11 Register bit definitions */
@@ -1330,14 +1229,14 @@
 
 /* FWLTHHEC Register bit definitions */
 #define R_MFWD_FWLTHHEC_LTHHMC_SHIFT              (0)  /* L3 Hash Maximum Collision */
-#define R_MFWD_FWLTHHEC_LTHHMC_MASK               0xff
+#define R_MFWD_FWLTHHEC_LTHHMC_MASK               0x3ff
 
 #define R_MFWD_FWLTHHEC_LTHHMUE_SHIFT             (16)  /* L3 Hash Maximum Unsecure Entry */
-#define R_MFWD_FWLTHHEC_LTHHMUE_MASK              0x1ff0000
+#define R_MFWD_FWLTHHEC_LTHHMUE_MASK              0x7ff0000
 
 /* FWLTHHC Register bit definitions */
-#define R_MFWD_FWLTHHC_LTHHE7_TO_LTHHE0_SHIFT     (0)  /* L3 Hash Equation n (n = 0 to 7) */
-#define R_MFWD_FWLTHHC_LTHHE7_TO_LTHHE0_MASK      0xff
+#define R_MFWD_FWLTHHC_LTHHE_SHIFT                (0)  /* L3 Hash Equation */
+#define R_MFWD_FWLTHHC_LTHHE_MASK                 0x3ff
 
 /* FWLTHTL0 Register bit definitions */
 #define R_MFWD_FWLTHTL0_LTHSLP0_SHIFT             (0)  /* L3 Stream Learn Part 0 */
@@ -1375,10 +1274,10 @@
 
 #define R_MFWD_FWLTHTL6_LTHFRERVL                 (1 << 15)  /* L3 FRER Valid Learn */
 
-#define R_MFWD_FWLTHTL6_LTHMTRNL_SHIFT            (16)  /* L3 Meter Number Learn */
+#define R_MFWD_FWLTHTL6_LTHMTRNL_SHIFT            (16)  /* L3 MeTeR Number Learn */
 #define R_MFWD_FWLTHTL6_LTHMTRNL_MASK             0x1f0000
 
-#define R_MFWD_FWLTHTL6_LTHMTRVL                  (1 << 31)  /* L3 Meter Valid Learn */
+#define R_MFWD_FWLTHTL6_LTHMTRVL                  (1 << 31)  /* L3 MeTeR Valid Learn */
 
 /* FWLTHTL7 Register bit definitions */
 #define R_MFWD_FWLTHTL7_LTHRNL_SHIFT              (0)  /* L3 Routing Number Learn */
@@ -1387,15 +1286,15 @@
 #define R_MFWD_FWLTHTL7_LTHRVL                    (1 << 15)  /* L3 Routing Valid Learn */
 
 #define R_MFWD_FWLTHTL7_LTHSLVL_SHIFT             (16)  /* L3 Source Lock Vector Learn */
-#define R_MFWD_FWLTHTL7_LTHSLVL_MASK              0x70000
+#define R_MFWD_FWLTHTL7_LTHSLVL_MASK              0x7f0000
 
 /* FWLTHTL80 Register bit definitions */
 #define R_MFWD_FWLTHTL80_LTHCSDL_SHIFT            (0)  /* L3 CPU Sub-Destination Learn */
-#define R_MFWD_FWLTHTL80_LTHCSDL_MASK             0x3f
+#define R_MFWD_FWLTHTL80_LTHCSDL_MASK             0x7f
 
 /* FWLTHTL9 Register bit definitions */
 #define R_MFWD_FWLTHTL9_LTHDVL_SHIFT              (0)  /* L3 Destination Vector Learn */
-#define R_MFWD_FWLTHTL9_LTHDVL_MASK               0x7
+#define R_MFWD_FWLTHTL9_LTHDVL_MASK               0x7f
 
 #define R_MFWD_FWLTHTL9_LTHIPVL_SHIFT             (16)  /* L3 Internal Priority Value Learn */
 #define R_MFWD_FWLTHTL9_LTHIPVL_MASK              0x70000
@@ -1411,10 +1310,12 @@
 
 #define R_MFWD_FWLTHTLR_LTHLSF                    (1 << 1)  /* L3 Learn Security Fail */
 
+#define R_MFWD_FWLTHTLR_LTHLEF                    (1 << 2)  /* L3 Learn ECC Fail */
+
 #define R_MFWD_FWLTHTLR_LTHLO                     (1 << 3)  /* L3 Learn Overwrite */
 
 #define R_MFWD_FWLTHTLR_LTHLCN_SHIFT              (16)  /* L3 Learn Collision Number */
-#define R_MFWD_FWLTHTLR_LTHLCN_MASK               0xff0000
+#define R_MFWD_FWLTHTLR_LTHLCN_MASK               0x3ff0000
 
 #define R_MFWD_FWLTHTLR_LTHTL                     (1 << 31)  /* L3 Table Learn */
 
@@ -1425,14 +1326,16 @@
 
 /* FWLTHTEM Register bit definitions */
 #define R_MFWD_FWLTHTEM_LTHTEN_SHIFT              (0)  /* L3 Table Entry Number */
-#define R_MFWD_FWLTHTEM_LTHTEN_MASK               0x1ff
+#define R_MFWD_FWLTHTEM_LTHTEN_MASK               0x7ff
 
 #define R_MFWD_FWLTHTEM_LTHTUEN_SHIFT             (16)  /* L3 Table Unsecure Entry Number */
-#define R_MFWD_FWLTHTEM_LTHTUEN_MASK              0x1ff0000
+#define R_MFWD_FWLTHTEM_LTHTUEN_MASK              0x7ff0000
 
 /* FWLTHTS0 Register bit definitions */
 #define R_MFWD_FWLTHTS0_LTHSSP0_SHIFT             (0)  /* L3 Stream Search Part 0 */
 #define R_MFWD_FWLTHTS0_LTHSSP0_MASK              0x7
+
+#define R_MFWD_FWLTHTS0_LTHSSPFS                  (1 << 24)  /* L3 Stream Search Perfect Filter Select */
 
 /* FWLTHTS1 Register bit definitions */
 #define R_MFWD_FWLTHTS1_LTHSSP1_SHIFT             (0)  /* L3 Stream Search Part 1 */
@@ -1451,12 +1354,14 @@
 #define R_MFWD_FWLTHTS4_LTHSSP4_MASK              0xffffffff
 
 /* FWLTHTSR0 Register bit definitions */
+#define R_MFWD_FWLTHTSR0_LTHSEF                   (1 << 0)  /* L3 Search ECC Fail */
+
 #define R_MFWD_FWLTHTSR0_LTHSNF                   (1 << 1)  /* L3 Search Not found */
 
 #define R_MFWD_FWLTHTSR0_LTHSLS                   (1 << 8)  /* L3 Security Level Search */
 
 #define R_MFWD_FWLTHTSR0_LTHSCN_SHIFT             (16)  /* L3 Search Collision Number */
-#define R_MFWD_FWLTHTSR0_LTHSCN_MASK              0xff0000
+#define R_MFWD_FWLTHTSR0_LTHSCN_MASK              0x3ff0000
 
 #define R_MFWD_FWLTHTSR0_LTHTS                    (1 << 31)  /* L3 Table Search */
 
@@ -1468,31 +1373,31 @@
 
 /* FWLTHTSR2 Register bit definitions */
 #define R_MFWD_FWLTHTSR2_LTHFRERNS_SHIFT          (0)  /* L3 FRER Number Search */
-#define R_MFWD_FWLTHTSR2_LTHFRERNS_MASK           0x7f
+#define R_MFWD_FWLTHTSR2_LTHFRERNS_MASK           0x3f
 
 #define R_MFWD_FWLTHTSR2_LTHFRERVS                (1 << 15)  /* L3 FRER Valid Search */
 
-#define R_MFWD_FWLTHTSR2_LTHMTRNS_SHIFT           (16)  /* L3 Meter Number Search */
+#define R_MFWD_FWLTHTSR2_LTHMTRNS_SHIFT           (16)  /* L3 MeTeR Number Search */
 #define R_MFWD_FWLTHTSR2_LTHMTRNS_MASK            0x1f0000
 
-#define R_MFWD_FWLTHTSR2_LTHMTRVS                 (1 << 31)  /* L3 Meter Valid Search */
+#define R_MFWD_FWLTHTSR2_LTHMTRVS                 (1 << 31)  /* L3 MeTeR Valid Search */
 
 /* FWLTHTSR3 Register bit definitions */
 #define R_MFWD_FWLTHTSR3_LTHRNS_SHIFT             (0)  /* L3 Routing Number Search */
-#define R_MFWD_FWLTHTSR3_LTHRNS_MASK              0x7
+#define R_MFWD_FWLTHTSR3_LTHRNS_MASK              0xff
 
 #define R_MFWD_FWLTHTSR3_LTHRVS                   (1 << 15)  /* L3 Routing Valid Search */
 
 #define R_MFWD_FWLTHTSR3_LTHSLVS_SHIFT            (16)  /* L3 Source Lock Vector Search */
-#define R_MFWD_FWLTHTSR3_LTHSLVS_MASK             0x70000
+#define R_MFWD_FWLTHTSR3_LTHSLVS_MASK             0x7f0000
 
 /* FWLTHTSR40 Register bit definitions */
 #define R_MFWD_FWLTHTSR40_LTHCSDS_SHIFT           (0)  /* L3 CPU Sub-Destination Search */
-#define R_MFWD_FWLTHTSR40_LTHCSDS_MASK            0x3f
+#define R_MFWD_FWLTHTSR40_LTHCSDS_MASK            0x7f
 
 /* FWLTHTSR5 Register bit definitions */
 #define R_MFWD_FWLTHTSR5_LTHDVS_SHIFT             (0)  /* L3 Destination Vector Search */
-#define R_MFWD_FWLTHTSR5_LTHDVS_MASK              0x7
+#define R_MFWD_FWLTHTSR5_LTHDVS_MASK              0x7f
 
 #define R_MFWD_FWLTHTSR5_LTHIPVS_SHIFT            (16)  /* L3 Internal Priority Value Search */
 #define R_MFWD_FWLTHTSR5_LTHIPVS_MASK             0x70000
@@ -1505,9 +1410,11 @@
 
 /* FWLTHTR Register bit definitions */
 #define R_MFWD_FWLTHTR_LTHAR_SHIFT                (0)  /* L3 Address Read */
-#define R_MFWD_FWLTHTR_LTHAR_MASK                 0xff
+#define R_MFWD_FWLTHTR_LTHAR_MASK                 0x3ff
 
 /* FWLTHTRR0 Register bit definitions */
+#define R_MFWD_FWLTHTRR0_LTHREF                   (1 << 0)  /* L3 Read ECC Fail */
+
 #define R_MFWD_FWLTHTRR0_LTHEVR                   (1 << 1)  /* L3 Entry Valid Read */
 
 #define R_MFWD_FWLTHTRR0_LTHTR                    (1 << 31)  /* L3 Table Read */
@@ -1542,14 +1449,14 @@
 
 /* FWLTHTRR7 Register bit definitions */
 #define R_MFWD_FWLTHTRR7_LTHFRERNR_SHIFT          (0)  /* L3 FRER Number Read */
-#define R_MFWD_FWLTHTRR7_LTHFRERNR_MASK           0x7f
+#define R_MFWD_FWLTHTRR7_LTHFRERNR_MASK           0x3f
 
 #define R_MFWD_FWLTHTRR7_LTHFRERVR                (1 << 15)  /* L3 FRER Valid Read */
 
-#define R_MFWD_FWLTHTRR7_LTHMTRNR_SHIFT           (16)  /* L3 Meter Number Read */
+#define R_MFWD_FWLTHTRR7_LTHMTRNR_SHIFT           (16)  /* L3 MeTeR Number Read */
 #define R_MFWD_FWLTHTRR7_LTHMTRNR_MASK            0x1f0000
 
-#define R_MFWD_FWLTHTRR7_LTHMTRVR                 (1 << 31)  /* L3 Meter Valid Read */
+#define R_MFWD_FWLTHTRR7_LTHMTRVR                 (1 << 31)  /* L3 MeTeR Valid Read */
 
 /* FWLTHTRR8 Register bit definitions */
 #define R_MFWD_FWLTHTRR8_LTHRNR_SHIFT             (0)  /* L3 Routing Number Read */
@@ -1558,15 +1465,15 @@
 #define R_MFWD_FWLTHTRR8_LTHRVR                   (1 << 15)  /* L3 Routing Valid Read */
 
 #define R_MFWD_FWLTHTRR8_LTHSLVR_SHIFT            (16)  /* L3 Source Lock Vector Read */
-#define R_MFWD_FWLTHTRR8_LTHSLVR_MASK             0x70000
+#define R_MFWD_FWLTHTRR8_LTHSLVR_MASK             0x7f0000
 
 /* FWLTHTRR90 Register bit definitions */
 #define R_MFWD_FWLTHTRR90_LTHCSDR_SHIFT           (0)  /* L3 CPU Sub-Destination Read */
-#define R_MFWD_FWLTHTRR90_LTHCSDR_MASK            0x3f
+#define R_MFWD_FWLTHTRR90_LTHCSDR_MASK            0x7f
 
 /* FWLTHTRR10 Register bit definitions */
 #define R_MFWD_FWLTHTRR10_LTHDVR_SHIFT            (0)  /* L3 Destination Vector Read */
-#define R_MFWD_FWLTHTRR10_LTHDVR_MASK             0x7
+#define R_MFWD_FWLTHTRR10_LTHDVR_MASK             0x7f
 
 #define R_MFWD_FWLTHTRR10_LTHIPVR_SHIFT           (16)  /* L3 Internal Priority Value Read */
 #define R_MFWD_FWLTHTRR10_LTHIPVR_MASK            0x70000
@@ -1585,13 +1492,13 @@
 #define R_MFWD_FWMACHEC_MACHMUE_MASK              0xfff0000
 
 /* FWMACHC Register bit definitions */
-#define R_MFWD_FWMACHC_MACHE10_TO_MACHE0_SHIFT    (0)  /* MAC Hash Equation n (n = 0 to 10) */
-#define R_MFWD_FWMACHC_MACHE10_TO_MACHE0_MASK     0x7ff
+#define R_MFWD_FWMACHC_MACHE_SHIFT                (0)  /* MAC Hash Equation */
+#define R_MFWD_FWMACHC_MACHE_MASK                 0x7ff
 
 /* FWMACTL0 Register bit definitions */
 #define R_MFWD_FWMACTL0_MACSLL                    (1 << 8)  /* MAC Security Level Learn */
 
-#define R_MFWD_FWMACTL0_MACDEL                    (1 << 9)  /* MAC Dynamic Entry Learn */
+#define R_MFWD_FWMACTL0_MACDEL                    (1 << 9)  /* MAC Dynamic Entry Limit */
 
 #define R_MFWD_FWMACTL0_MACHLDL                   (1 << 10)  /* MAC Hardware Learning Disable Learn */
 
@@ -1607,18 +1514,18 @@
 
 /* FWMACTL3 Register bit definitions */
 #define R_MFWD_FWMACTL3_MACSSLVL_SHIFT            (0)  /* MAC Source Source Lock Vector Learn */
-#define R_MFWD_FWMACTL3_MACSSLVL_MASK             0x7
+#define R_MFWD_FWMACTL3_MACSSLVL_MASK             0x7f
 
 #define R_MFWD_FWMACTL3_MACDSLVL_SHIFT            (16)  /* MAC Destination Source Lock Vector Learn */
-#define R_MFWD_FWMACTL3_MACDSLVL_MASK             0x70000
+#define R_MFWD_FWMACTL3_MACDSLVL_MASK             0x7f0000
 
 /* FWMACTL40 Register bit definitions */
 #define R_MFWD_FWMACTL40_MACCSDL_SHIFT            (0)  /* MAC CPU Sub-Destination Learn */
-#define R_MFWD_FWMACTL40_MACCSDL_MASK             0x3f
+#define R_MFWD_FWMACTL40_MACCSDL_MASK             0x7f
 
 /* FWMACTL5 Register bit definitions */
 #define R_MFWD_FWMACTL5_MACDVL_SHIFT              (0)  /* MAC Destination Vector Learn */
-#define R_MFWD_FWMACTL5_MACDVL_MASK               0x7
+#define R_MFWD_FWMACTL5_MACDVL_MASK               0x7f
 
 #define R_MFWD_FWMACTL5_MACIPVL_SHIFT             (16)  /* MAC Internal Priority Value Learn */
 #define R_MFWD_FWMACTL5_MACIPVL_MASK              0x70000
@@ -1634,10 +1541,12 @@
 
 #define R_MFWD_FWMACTLR_MACLSF                    (1 << 1)  /* MAC Learn Security Fail */
 
+#define R_MFWD_FWMACTLR_MACLEF                    (1 << 2)  /* MAC Learn ECC Fail */
+
 #define R_MFWD_FWMACTLR_MACLO                     (1 << 3)  /* MAC Learn Overwrite */
 
 #define R_MFWD_FWMACTLR_MACLCN_SHIFT              (16)  /* MAC Learn Collision Number */
-#define R_MFWD_FWMACTLR_MACLCN_MASK               0x7ff0000
+#define R_MFWD_FWMACTLR_MACLCN_MASK               0x3ff0000
 
 #define R_MFWD_FWMACTLR_MACTL                     (1 << 31)  /* MAC Table Learn */
 
@@ -1648,10 +1557,10 @@
 
 /* FWMACTEM Register bit definitions */
 #define R_MFWD_FWMACTEM_MACTEN_SHIFT              (0)  /* MAC Table Entry Number */
-#define R_MFWD_FWMACTEM_MACTEN_MASK               0xfff
+#define R_MFWD_FWMACTEM_MACTEN_MASK               0x7ff
 
 #define R_MFWD_FWMACTEM_MACTUEN_SHIFT             (16)  /* MAC Table Unsecure Entry Number */
-#define R_MFWD_FWMACTEM_MACTUEN_MASK              0xfff0000
+#define R_MFWD_FWMACTEM_MACTUEN_MASK              0x7ff0000
 
 /* FWMACTS0 Register bit definitions */
 #define R_MFWD_FWMACTS0_MACMASP0_SHIFT            (0)  /* MAC MAC Address Search Part 0 */
@@ -1662,6 +1571,8 @@
 #define R_MFWD_FWMACTS1_MACMASP1_MASK             0xffffffff
 
 /* FWMACTSR0 Register bit definitions */
+#define R_MFWD_FWMACTSR0_MACSEF                   (1 << 0)  /* MAC Search ECC Fail */
+
 #define R_MFWD_FWMACTSR0_MACSNF                   (1 << 1)  /* MAC Search Not found */
 
 #define R_MFWD_FWMACTSR0_MACSLS                   (1 << 8)  /* MAC Security Level Search */
@@ -1671,24 +1582,24 @@
 #define R_MFWD_FWMACTSR0_MACHLDS                  (1 << 10)  /* MAC Hardware Learning Disable Search */
 
 #define R_MFWD_FWMACTSR0_MACSCN_SHIFT             (16)  /* MAC Search Collision Number */
-#define R_MFWD_FWMACTSR0_MACSCN_MASK              0x7ff0000
+#define R_MFWD_FWMACTSR0_MACSCN_MASK              0x3ff0000
 
 #define R_MFWD_FWMACTSR0_MACTS                    (1 << 31)  /* MAC Table Search */
 
 /* FWMACTSR1 Register bit definitions */
 #define R_MFWD_FWMACTSR1_MACSSLVS_SHIFT           (0)  /* MAC Source Source Lock Vector Search */
-#define R_MFWD_FWMACTSR1_MACSSLVS_MASK            0x7
+#define R_MFWD_FWMACTSR1_MACSSLVS_MASK            0x7f
 
 #define R_MFWD_FWMACTSR1_MACDSLVS_SHIFT           (16)  /* MAC Destination Source Lock Vector Search */
-#define R_MFWD_FWMACTSR1_MACDSLVS_MASK            0x70000
+#define R_MFWD_FWMACTSR1_MACDSLVS_MASK            0x7f0000
 
 /* FWMACTSR20 Register bit definitions */
 #define R_MFWD_FWMACTSR20_MACCSDS_SHIFT           (0)  /* MAC CPU Sub-Destination Search */
-#define R_MFWD_FWMACTSR20_MACCSDS_MASK            0x3f
+#define R_MFWD_FWMACTSR20_MACCSDS_MASK            0x7f
 
 /* FWMACTSR3 Register bit definitions */
 #define R_MFWD_FWMACTSR3_MACDVS_SHIFT             (0)  /* MAC Destination Vector Search */
-#define R_MFWD_FWMACTSR3_MACDVS_MASK              0x7
+#define R_MFWD_FWMACTSR3_MACDVS_MASK              0x7f
 
 #define R_MFWD_FWMACTSR3_MACIPVS_SHIFT            (16)  /* MAC Internal Priority Value Search */
 #define R_MFWD_FWMACTSR3_MACIPVS_MASK             0x70000
@@ -1701,10 +1612,12 @@
 
 /* FWMACTR Register bit definitions */
 #define R_MFWD_FWMACTR_MACAR_SHIFT                (0)  /* MAC Address Read */
-#define R_MFWD_FWMACTR_MACAR_MASK                 0x7ff
+#define R_MFWD_FWMACTR_MACAR_MASK                 0x3ff
 
 /* FWMACTRR0 Register bit definitions */
 #define R_MFWD_FWMACTRR0_MACEVR                   (1 << 0)  /* MAC Entry Valid Read */
+
+#define R_MFWD_FWMACTRR0_MACREF                   (1 << 1)  /* MAC Read ECC Fail */
 
 #define R_MFWD_FWMACTRR0_MACTR                    (1 << 31)  /* MAC Table Read */
 
@@ -1722,23 +1635,23 @@
 #define R_MFWD_FWMACTRR2_MACMARP0_MASK            0xffff
 
 /* FWMACTRR3 Register bit definitions */
-#define R_MFWD_FWMACTRR3_MACMARP1_SHIFT           (0)  /* MAC MAC Address Read Part 1 */
+#define R_MFWD_FWMACTRR3_MACMARP1_SHIFT           (0)  /* MAC MAC address Read Part 1 */
 #define R_MFWD_FWMACTRR3_MACMARP1_MASK            0xffffffff
 
 /* FWMACTRR4 Register bit definitions */
 #define R_MFWD_FWMACTRR4_MACSSLVR_SHIFT           (0)  /* MAC Source Source Lock Vector Read */
-#define R_MFWD_FWMACTRR4_MACSSLVR_MASK            0x7
+#define R_MFWD_FWMACTRR4_MACSSLVR_MASK            0x7f
 
 #define R_MFWD_FWMACTRR4_MACDSLVR_SHIFT           (16)  /* MAC Destination Source Lock Vector Read */
-#define R_MFWD_FWMACTRR4_MACDSLVR_MASK            0x70000
+#define R_MFWD_FWMACTRR4_MACDSLVR_MASK            0x7f0000
 
 /* FWMACTRR50 Register bit definitions */
 #define R_MFWD_FWMACTRR50_MACCSDR_SHIFT           (0)  /* MAC CPU Sub-Destination Read */
-#define R_MFWD_FWMACTRR50_MACCSDR_MASK            0x3f
+#define R_MFWD_FWMACTRR50_MACCSDR_MASK            0x7f
 
 /* FWMACTRR6 Register bit definitions */
 #define R_MFWD_FWMACTRR6_MACDVR_SHIFT             (0)  /* MAC Destination Vector Read */
-#define R_MFWD_FWMACTRR6_MACDVR_MASK              0x7
+#define R_MFWD_FWMACTRR6_MACDVR_MASK              0x7f
 
 #define R_MFWD_FWMACTRR6_MACIPVR_SHIFT            (16)  /* MAC Internal Priority Value Read */
 #define R_MFWD_FWMACTRR6_MACIPVR_MASK             0x70000
@@ -1765,9 +1678,9 @@
 
 #define R_MFWD_FWMACAGC_MACDES                    (1 << 24)  /* MAC Dynamic Entry Suppression */
 
-#define R_MFWD_FWMACAGC_MACAGOG                   (1 << 28)  /* MAC Aging Ongoing */
+#define R_MFWD_FWMACAGC_MACAGOG                   (1 << 28)  /* MAC Aging OnGoing */
 
-#define R_MFWD_FWMACAGC_MACDESOG                  (1 << 29)  /* MAC Dynamic Entry Suppression Ongoing */
+#define R_MFWD_FWMACAGC_MACDESOG                  (1 << 29)  /* MAC Dynamic Entry Suppression OnGoing */
 
 /* FWMACAGM0 Register bit definitions */
 #define R_MFWD_FWMACAGM0_AGMACAP0_SHIFT           (0)  /* Aged MAC Address Part 0 */
@@ -1794,15 +1707,15 @@
 
 /* FWVLANTL2 Register bit definitions */
 #define R_MFWD_FWVLANTL2_VLANSLVL_SHIFT           (0)  /* VLAN Source Lock Vector Learn */
-#define R_MFWD_FWVLANTL2_VLANSLVL_MASK            0x7
+#define R_MFWD_FWVLANTL2_VLANSLVL_MASK            0x7f
 
 /* FWVLANTL30 Register bit definitions */
 #define R_MFWD_FWVLANTL30_VLANCSDL_SHIFT          (0)  /* VLAN CPU Sub-Destination Learn */
-#define R_MFWD_FWVLANTL30_VLANCSDL_MASK           0x3f
+#define R_MFWD_FWVLANTL30_VLANCSDL_MASK           0x7f
 
 /* FWVLANTL4 Register bit definitions */
 #define R_MFWD_FWVLANTL4_VLANDVL_SHIFT            (0)  /* VLAN Destination Vector Learn */
-#define R_MFWD_FWVLANTL4_VLANDVL_MASK             0x7
+#define R_MFWD_FWVLANTL4_VLANDVL_MASK             0x7f
 
 #define R_MFWD_FWVLANTL4_VLANIPVL_SHIFT           (16)  /* VLAN Internal Priority Value Learn */
 #define R_MFWD_FWVLANTL4_VLANIPVL_MASK            0x70000
@@ -1817,6 +1730,8 @@
 #define R_MFWD_FWVLANTLR_VLANLF                   (1 << 0)  /* VLAN Learn Fail */
 
 #define R_MFWD_FWVLANTLR_VLANLSF                  (1 << 1)  /* VLAN Learn Security Fail */
+
+#define R_MFWD_FWVLANTLR_VLANLEF                  (1 << 2)  /* VLAN Learn ECC Fail */
 
 #define R_MFWD_FWVLANTLR_VLANLO                   (1 << 3)  /* VLAN Learn Overwrite */
 
@@ -1839,6 +1754,8 @@
 #define R_MFWD_FWVLANTS_VLANVIDS_MASK             0xfff
 
 /* FWVLANTSR0 Register bit definitions */
+#define R_MFWD_FWVLANTSR0_VLANSEF                 (1 << 0)  /* VLAN Search ECC Fail */
+
 #define R_MFWD_FWVLANTSR0_VLANSNF                 (1 << 1)  /* VLAN Search Not found */
 
 #define R_MFWD_FWVLANTSR0_VLANSLS                 (1 << 8)  /* VLAN Security Level Search */
@@ -1849,15 +1766,15 @@
 
 /* FWVLANTSR1 Register bit definitions */
 #define R_MFWD_FWVLANTSR1_VLANSLVS_SHIFT          (0)  /* VLAN Source Lock Vector Search */
-#define R_MFWD_FWVLANTSR1_VLANSLVS_MASK           0x7
+#define R_MFWD_FWVLANTSR1_VLANSLVS_MASK           0x7f
 
 /* FWVLANTSR20 Register bit definitions */
 #define R_MFWD_FWVLANTSR20_VLANCSDS_SHIFT         (0)  /* VLAN CPU Sub-Destination Search */
-#define R_MFWD_FWVLANTSR20_VLANCSDS_MASK          0x3f
+#define R_MFWD_FWVLANTSR20_VLANCSDS_MASK          0x7f
 
 /* FWVLANTSR3 Register bit definitions */
 #define R_MFWD_FWVLANTSR3_VLANDVS_SHIFT           (0)  /* VLAN Destination Vector Search */
-#define R_MFWD_FWVLANTSR3_VLANDVS_MASK            0x7
+#define R_MFWD_FWVLANTSR3_VLANDVS_MASK            0x7f
 
 #define R_MFWD_FWVLANTSR3_VLANIPVS_SHIFT          (16)  /* VLAN Internal Priority Value Search */
 #define R_MFWD_FWVLANTSR3_VLANIPVS_MASK           0x70000
@@ -1870,7 +1787,7 @@
 
 /* FWPBFC Register bit definitions */
 #define R_MFWD_FWPBFC_PBDV_SHIFT                  (0)  /* Port Based Destination Vector */
-#define R_MFWD_FWPBFC_PBDV_MASK                   0x7
+#define R_MFWD_FWPBFC_PBDV_MASK                   0x7f
 
 #define R_MFWD_FWPBFC_PBIPV_SHIFT                 (16)  /* Port Based Internal Priority Value */
 #define R_MFWD_FWPBFC_PBIPV_MASK                  0x70000
@@ -1893,14 +1810,14 @@
 
 /* FWPBFCSDC Register bit definitions */
 #define R_MFWD_FWPBFCSDC_PBCSD_SHIFT              (0)  /* Port Based CPU Sub Destination */
-#define R_MFWD_FWPBFCSDC_PBCSD_MASK               0x3f
+#define R_MFWD_FWPBFCSDC_PBCSD_MASK               0x7f
 
 /* FWL23URL0 Register bit definitions */
 #define R_MFWD_FWL23URL0_L23URNL_SHIFT            (0)  /* Layer 2/Layer 3 Update Routing Number Learn */
 #define R_MFWD_FWL23URL0_L23URNL_MASK             0xff
 
 #define R_MFWD_FWL23URL0_L23URPVL_SHIFT           (16)  /* Layer 2/Layer 3 Update Routing Port Valid Learn */
-#define R_MFWD_FWL23URL0_L23URPVL_MASK            0x70000
+#define R_MFWD_FWL23URL0_L23URPVL_MASK            0x7f0000
 
 /* FWL23URL1 Register bit definitions */
 #define R_MFWD_FWL23URL1_L23UMDALP0_SHIFT         (0)  /* Layer 2/Layer 3 Update MAC Destination Address Learn Part 0 */
@@ -1964,7 +1881,9 @@
 
 /* FWL23URRR0 Register bit definitions */
 #define R_MFWD_FWL23URRR0_L23URPVR_SHIFT          (0)  /* Layer 2/Layer 3 Update Routing Port Valid Read */
-#define R_MFWD_FWL23URRR0_L23URPVR_MASK           0x7
+#define R_MFWD_FWL23URRR0_L23URPVR_MASK           0x7f
+
+#define R_MFWD_FWL23URRR0_L23UREF                 (1 << 16)  /* Layer 2/Layer 3 Update Read ECC Fail */
 
 #define R_MFWD_FWL23URRR0_L23URR                  (1 << 31)  /* Layer 2/Layer 3 Update Rule Read */
 
@@ -1994,7 +1913,7 @@
 #define R_MFWD_FWL23URRR1_L23URTUR_MASK           0x6000000
 
 /* FWL23URRR2 Register bit definitions */
-#define R_MFWD_FWL23URRR2_L23UMDARP1_SHIFT        (0)  /* Layer 2/Layer 3 Update MAC Destination Address Read Part 1 */
+#define R_MFWD_FWL23URRR2_L23UMDARP1_SHIFT        (0)  /* Layer 2/Layer 3 MAC Destination Address Read Part 1 */
 #define R_MFWD_FWL23URRR2_L23UMDARP1_MASK         0xffffffff
 
 /* FWL23URRR3 Register bit definitions */
@@ -2015,16 +1934,16 @@
 #define R_MFWD_FWL23URRR3_L23USDEIR               (1 << 31)  /* Layer 2/Layer 3 Update MAC S-TAG DEI Read */
 
 /* FWL23URMC Register bit definitions */
-#define R_MFWD_FWL23URMC_RMRN_SHIFT               (0)  /* Remapping Rule Number */
+#define R_MFWD_FWL23URMC_RMRN_SHIFT               (0)  /* ReMaping Rule Number */
 #define R_MFWD_FWL23URMC_RMRN_MASK                0xff
 
-#define R_MFWD_FWL23URMC_RMDPN_SHIFT              (12)  /* Remapping Destination Port Number */
-#define R_MFWD_FWL23URMC_RMDPN_MASK               0x3000
+#define R_MFWD_FWL23URMC_RMDPN_SHIFT              (12)  /* ReMaping Destination Port Number */
+#define R_MFWD_FWL23URMC_RMDPN_MASK               0x7000
 
-#define R_MFWD_FWL23URMC_RMNRN_SHIFT              (16)  /* Remapping New Rule Number */
+#define R_MFWD_FWL23URMC_RMNRN_SHIFT              (16)  /* ReMaping New Rule Number */
 #define R_MFWD_FWL23URMC_RMNRN_MASK               0xff0000
 
-#define R_MFWD_FWL23URMC_RME                      (1 << 28)  /* Remapping Enable */
+#define R_MFWD_FWL23URMC_RME                      (1 << 28)  /* ReMaping Enable */
 
 /* FWPMFGC Register bit definitions */
 #define R_MFWD_FWPMFGC_MSDUV_SHIFT                (0)  /* MSDU Value */
@@ -2037,17 +1956,17 @@
 
 #define R_MFWD_FWPMTRFC_MTRFM_SHIFT               (1)  /* Meter Filter Mode */
 #define R_MFWD_FWPMTRFC_MTRFM_MASK                0x6
-#  define R_MFWD_FWPMTRFC_MTRFM_00                        (0 << R_MFWD_FWPMTRFC_MTRFM_SHIFT)  /* Normal mode: Any frame linked to Meter filter i thanks to L3 table received when not enough token is available will be red. */
-#  define R_MFWD_FWPMTRFC_MTRFM_01                        (1 << R_MFWD_FWPMTRFC_MTRFM_SHIFT)  /* Throttle mode: Any frame linked to Meter filter i thanks to L3 table received when not enough token is available or when FWEIS5.PMRFSi is set will be red. */
-#  define R_MFWD_FWPMTRFC_MTRFM_10                        (2 << R_MFWD_FWPMTRFC_MTRFM_SHIFT)  /* ATS mode: Any frame linked to Meter filter i thanks to L3 table received when not enough token is available will be stored in ATS RAM until enough tokens are available. When enough tokens are available, frame will be forwarded as yellow or green. */
-#  define R_MFWD_FWPMTRFC_MTRFM_11                        (3 << R_MFWD_FWPMTRFC_MTRFM_SHIFT)  /* ATS throttle mode: Any frame linked to Meter filter i thanks to L3 table received when not enough token is available will be stored in ATS RAM until enough tokens are available. When enough tokens are available, frame will be forwarded as yellow or green if FWEIS5.PMRFSi is not set and will be red if FWEIS5.PMRFSi is set. */
+#  define R_MFWD_FWPMTRFC_MTRFM_00                        (0 << R_MFWD_FWPMTRFC_MTRFM_SHIFT)  /* Normal mode */
+#  define R_MFWD_FWPMTRFC_MTRFM_01                        (1 << R_MFWD_FWPMTRFC_MTRFM_SHIFT)  /* Throttle mode */
+#  define R_MFWD_FWPMTRFC_MTRFM_10                        (2 << R_MFWD_FWPMTRFC_MTRFM_SHIFT)  /* ATS mode */
+#  define R_MFWD_FWPMTRFC_MTRFM_11                        (3 << R_MFWD_FWPMTRFC_MTRFM_SHIFT)  /* ATS throttle mode */
 
 #define R_MFWD_FWPMTRFC_MTRFRFD                   (1 << 3)  /* Meter Filter Red Frame Drop */
 
 #define R_MFWD_FWPMTRFC_MTRCF                     (1 << 4)  /* Meter Coupling Flag */
 
-#define R_MFWD_FWPMTRFC_MTRCM15_TO_MTRCM0_SHIFT   (16)  /* Meter Color Mode n (n = 0 to 15) */
-#define R_MFWD_FWPMTRFC_MTRCM15_TO_MTRCM0_MASK    0xffff0000
+#define R_MFWD_FWPMTRFC_MTRCM_SHIFT               (16)  /* Meter Color Mode */
+#define R_MFWD_FWPMTRFC_MTRCM_MASK                0xffff0000
 
 /* FWPMTRCBSC Register bit definitions */
 #define R_MFWD_FWPMTRCBSC_CBS_SHIFT               (0)  /* CBS */
@@ -2066,10 +1985,10 @@
 #define R_MFWD_FWPMTREIRC_EIR_MASK                0xfffff
 
 /* FWPMTRFM Register bit definitions */
-#define R_MFWD_FWPMTRFM_MTRARDN_SHIFT             (0)  /* Meter ATS RAM Descriptor Number */
+#define R_MFWD_FWPMTRFM_MTRARDN_SHIFT             (0)  /* MeTeR ATS RAM Descriptor Number */
 #define R_MFWD_FWPMTRFM_MTRARDN_MASK              0x1f
 
-#define R_MFWD_FWPMTRFM_MTRARDNMN_SHIFT           (16)  /* Meter ATS RAM Descriptor Number Maximum Number */
+#define R_MFWD_FWPMTRFM_MTRARDNMN_SHIFT           (16)  /* MeTeR ATS RAM Descriptor Number Maximum Number i */
 #define R_MFWD_FWPMTRFM_MTRARDNMN_MASK            0x1f0000
 
 /* FWFTL0 Register bit definitions */
@@ -2127,6 +2046,8 @@
 #define R_MFWD_FWFTRR0_FSRRTR_SHIFT               (16)  /* FRER Set Recovery Remaining Ticks Read */
 #define R_MFWD_FWFTRR0_FSRRTR_MASK                0x3ff0000
 
+#define R_MFWD_FWFTRR0_FTREF                      (1 << 30)  /* FRER Table Read ECC Fail */
+
 #define R_MFWD_FWFTRR0_FTR                        (1 << 31)  /* FRER Table Read */
 
 /* FWFTRR1 Register bit definitions */
@@ -2147,76 +2068,15 @@
 #define R_MFWD_FWSEQNGC_SEQNGRN_SHIFT             (0)  /* SEQuence Number Generation Routing Number */
 #define R_MFWD_FWSEQNGC_SEQNGRN_MASK              0xff
 
-#define R_MFWD_FWSEQNGC_SEQNGE                    (1 << 16)  /* SEQuence Number Generation Enable */
+#define R_MFWD_FWSEQNGC_SEQNGE                    (1 << 16)  /* SEQuence Number Generation Emable */
 
 /* FWSEQNGM Register bit definitions */
 #define R_MFWD_FWSEQNGM_SEQN_SHIFT                (0)  /* SEQuence Number */
 #define R_MFWD_FWSEQNGM_SEQN_MASK                 0xffff
 
 /* FWSEQNRC Register bit definitions */
-#define R_MFWD_FWSEQNRC_SEQNR00                   (1 << 0)  /* Sequence Number Generation Reset n (n = 0 to 31) */
-
-#define R_MFWD_FWSEQNRC_SEQNR01                   (1 << 1)  /* Sequence Number Generation Reset n (n = 0 to 31) */
-
-#define R_MFWD_FWSEQNRC_SEQNR02                   (1 << 2)  /* Sequence Number Generation Reset n (n = 0 to 31) */
-
-#define R_MFWD_FWSEQNRC_SEQNR03                   (1 << 3)  /* Sequence Number Generation Reset n (n = 0 to 31) */
-
-#define R_MFWD_FWSEQNRC_SEQNR04                   (1 << 4)  /* Sequence Number Generation Reset n (n = 0 to 31) */
-
-#define R_MFWD_FWSEQNRC_SEQNR05                   (1 << 5)  /* Sequence Number Generation Reset n (n = 0 to 31) */
-
-#define R_MFWD_FWSEQNRC_SEQNR06                   (1 << 6)  /* Sequence Number Generation Reset n (n = 0 to 31) */
-
-#define R_MFWD_FWSEQNRC_SEQNR07                   (1 << 7)  /* Sequence Number Generation Reset n (n = 0 to 31) */
-
-#define R_MFWD_FWSEQNRC_SEQNR08                   (1 << 8)  /* Sequence Number Generation Reset n (n = 0 to 31) */
-
-#define R_MFWD_FWSEQNRC_SEQNR09                   (1 << 9)  /* Sequence Number Generation Reset n (n = 0 to 31) */
-
-#define R_MFWD_FWSEQNRC_SEQNR10                   (1 << 10)  /* Sequence Number Generation Reset n (n = 0 to 31) */
-
-#define R_MFWD_FWSEQNRC_SEQNR11                   (1 << 11)  /* Sequence Number Generation Reset n (n = 0 to 31) */
-
-#define R_MFWD_FWSEQNRC_SEQNR12                   (1 << 12)  /* Sequence Number Generation Reset n (n = 0 to 31) */
-
-#define R_MFWD_FWSEQNRC_SEQNR13                   (1 << 13)  /* Sequence Number Generation Reset n (n = 0 to 31) */
-
-#define R_MFWD_FWSEQNRC_SEQNR14                   (1 << 14)  /* Sequence Number Generation Reset n (n = 0 to 31) */
-
-#define R_MFWD_FWSEQNRC_SEQNR15                   (1 << 15)  /* Sequence Number Generation Reset n (n = 0 to 31) */
-
-#define R_MFWD_FWSEQNRC_SEQNR16                   (1 << 16)  /* Sequence Number Generation Reset n (n = 0 to 31) */
-
-#define R_MFWD_FWSEQNRC_SEQNR17                   (1 << 17)  /* Sequence Number Generation Reset n (n = 0 to 31) */
-
-#define R_MFWD_FWSEQNRC_SEQNR18                   (1 << 18)  /* Sequence Number Generation Reset n (n = 0 to 31) */
-
-#define R_MFWD_FWSEQNRC_SEQNR19                   (1 << 19)  /* Sequence Number Generation Reset n (n = 0 to 31) */
-
-#define R_MFWD_FWSEQNRC_SEQNR20                   (1 << 20)  /* Sequence Number Generation Reset n (n = 0 to 31) */
-
-#define R_MFWD_FWSEQNRC_SEQNR21                   (1 << 21)  /* Sequence Number Generation Reset n (n = 0 to 31) */
-
-#define R_MFWD_FWSEQNRC_SEQNR22                   (1 << 22)  /* Sequence Number Generation Reset n (n = 0 to 31) */
-
-#define R_MFWD_FWSEQNRC_SEQNR23                   (1 << 23)  /* Sequence Number Generation Reset n (n = 0 to 31) */
-
-#define R_MFWD_FWSEQNRC_SEQNR24                   (1 << 24)  /* Sequence Number Generation Reset n (n = 0 to 31) */
-
-#define R_MFWD_FWSEQNRC_SEQNR25                   (1 << 25)  /* Sequence Number Generation Reset n (n = 0 to 31) */
-
-#define R_MFWD_FWSEQNRC_SEQNR26                   (1 << 26)  /* Sequence Number Generation Reset n (n = 0 to 31) */
-
-#define R_MFWD_FWSEQNRC_SEQNR27                   (1 << 27)  /* Sequence Number Generation Reset n (n = 0 to 31) */
-
-#define R_MFWD_FWSEQNRC_SEQNR28                   (1 << 28)  /* Sequence Number Generation Reset n (n = 0 to 31) */
-
-#define R_MFWD_FWSEQNRC_SEQNR29                   (1 << 29)  /* Sequence Number Generation Reset n (n = 0 to 31) */
-
-#define R_MFWD_FWSEQNRC_SEQNR30                   (1 << 30)  /* Sequence Number Generation Reset n (n = 0 to 31) */
-
-#define R_MFWD_FWSEQNRC_SEQNR31                   (1 << 31)  /* Sequence Number Generation Reset n (n = 0 to 31) */
+#define R_MFWD_FWSEQNRC_SEQNR_SHIFT               (0)  /* Sequence Number Generation Reset */
+#define R_MFWD_FWSEQNRC_SEQNR_MASK                0xffffffff
 
 /* FWCTFDCN Register bit definitions */
 #define R_MFWD_FWCTFDCN_CTFDN_SHIFT               (0)  /* Cut-Through Forwarded Descriptor Number */
@@ -2238,9 +2098,9 @@
 #define R_MFWD_FWMHLCN_MHLN_SHIFT                 (0)  /* MAC Hardware Learn Number */
 #define R_MFWD_FWMHLCN_MHLN_MASK                  0xffffffff
 
-/* FWDDFDCN2 Register bit definitions */
-#define R_MFWD_FWDDFDCN2_DDFDN_SHIFT              (0)  /* Direct Descriptor Forwarded Descriptor Number */
-#define R_MFWD_FWDDFDCN2_DDFDN_MASK               0xffffffff
+/* FWDDFDCN0 Register bit definitions */
+#define R_MFWD_FWDDFDCN0_DDFDN_SHIFT              (0)  /* Direct Descriptor Forwarded Descriptor Number */
+#define R_MFWD_FWDDFDCN0_DDFDN_MASK               0xffffffff
 
 /* FWWMRDCN Register bit definitions */
 #define R_MFWD_FWWMRDCN_WMRDN_SHIFT               (0)  /* Watermark rejected Descriptor Number */
@@ -2262,9 +2122,9 @@
 #define R_MFWD_FWPBRDCN_PBRDN_SHIFT               (0)  /* Port Based rejected Descriptor Number */
 #define R_MFWD_FWPBRDCN_PBRDN_MASK                0xffff
 
-/* FWDDRDCN2 Register bit definitions */
-#define R_MFWD_FWDDRDCN2_DDRDN_SHIFT              (0)  /* Direct Descriptor rejected Descriptor Number */
-#define R_MFWD_FWDDRDCN2_DDRDN_MASK               0xffff
+/* FWDDRDCN0 Register bit definitions */
+#define R_MFWD_FWDDRDCN0_DDRDN_SHIFT              (0)  /* Direct Descriptor rejected Descriptor Number */
+#define R_MFWD_FWDDRDCN0_DDRDN_MASK               0xffff
 
 /* FWPMFDCN Register bit definitions */
 #define R_MFWD_FWPMFDCN_PMFDN_SHIFT               (0)  /* PSFP MSDU Filtered Descriptor Number */
@@ -2291,45 +2151,45 @@
 #define R_MFWD_FWFRDPCN_DPC_MASK                  0xffff
 
 /* FWEIS Register bit definitions */
-#define R_MFWD_FWEIS_LTHSPFS                      (1 << 0)  /* Layer 3 Source Port Filtering Status Flag */
+#define R_MFWD_FWEIS_LTHSPFS                      (1 << 0)  /* Layer 3 Source Port Filtering Status */
 
-#define R_MFWD_FWEIS_LTHNTFS                      (1 << 2)  /* Layer 3 No Target Filtering Status Flag */
+#define R_MFWD_FWEIS_LTHNTFS                      (1 << 2)  /* Layer 3 No Target Filtering Status */
 
-#define R_MFWD_FWEIS_LTHUFS                       (1 << 3)  /* Layer 3 Unknown Filtering Status Flag */
+#define R_MFWD_FWEIS_LTHUFS                       (1 << 3)  /* Layer 3 Unknown Filtering Status */
 
-#define R_MFWD_FWEIS_LTWDSPFS                     (1 << 10)  /* Layer 2 Destination Source Port Filtering Status Flag */
+#define R_MFWD_FWEIS_LTWDSPFS                     (1 << 10)  /* Layer 2 Destination Source Port Filtering Status */
 
-#define R_MFWD_FWEIS_LTWSSPFS                     (1 << 11)  /* Layer 2 Source Source Port Filtering Status Flag */
+#define R_MFWD_FWEIS_LTWSSPFS                     (1 << 11)  /* Layer 2 Source Source Port Filtering Status */
 
-#define R_MFWD_FWEIS_LTWVSPFS                     (1 << 12)  /* Layer 2 VLAN Source Port Filtering Status Flag */
+#define R_MFWD_FWEIS_LTWVSPFS                     (1 << 12)  /* Layer 2 VLAN Source Port Filtering Status */
 
-#define R_MFWD_FWEIS_LTWNTFS                      (1 << 13)  /* Layer 2 No Target Filtering Status Flag */
+#define R_MFWD_FWEIS_LTWNTFS                      (1 << 13)  /* Layer 2 No Target Filtering Status */
 
-#define R_MFWD_FWEIS_LTWSUFS                      (1 << 14)  /* Layer 2 Source Unknown Filtering Status Flag */
+#define R_MFWD_FWEIS_LTWSUFS                      (1 << 14)  /* Layer 2 Source Unknown Filtering Status */
 
-#define R_MFWD_FWEIS_LTWDUFS                      (1 << 15)  /* Layer 2 Destination Unknown Filtering Status Flag */
+#define R_MFWD_FWEIS_LTWDUFS                      (1 << 15)  /* Layer 2 Destination Unknown Filtering Status */
 
-#define R_MFWD_FWEIS_LTWVUFS                      (1 << 16)  /* Layer 2 VLAN Unknown Filtering Status Flag */
+#define R_MFWD_FWEIS_LTWVUFS                      (1 << 16)  /* Layer 2 VLAN Unknown Filtering Status */
 
-#define R_MFWD_FWEIS_PBNTFS                       (1 << 17)  /* Port Based No Target Filtering Status Flag */
+#define R_MFWD_FWEIS_PBNTFS                       (1 << 17)  /* Port Based No Target Filtering Status */
 
-#define R_MFWD_FWEIS_SMHLFS                       (1 << 18)  /* Source MAC Hardware Learning Fail Status Flag */
+#define R_MFWD_FWEIS_SMHLFS                       (1 << 18)  /* Source MAC Hardware Learning Fail Status */
 
-#define R_MFWD_FWEIS_SMHMFS                       (1 << 19)  /* Source MAC Hardware Migration Fail Status Flag */
+#define R_MFWD_FWEIS_SMHMFS                       (1 << 19)  /* Source MAC Hardware Migration Fail Status */
 
-#define R_MFWD_FWEIS_WMCFS                        (1 << 22)  /* Watermark Critical Filtering Status Flag */
+#define R_MFWD_FWEIS_WMCFS                        (1 << 22)  /* Watermark Critical Filtering Status */
 
-#define R_MFWD_FWEIS_WMFFS                        (1 << 23)  /* Watermark Flush Filtering Status Flag */
+#define R_MFWD_FWEIS_WMFFS                        (1 << 23)  /* Watermark Flush Filtering Status */
 
-#define R_MFWD_FWEIS_WMISFS                       (1 << 24)  /* Watermark IPV Secure Filtering Status Flag */
+#define R_MFWD_FWEIS_WMISFS                       (1 << 24)  /* Watermark IPV Secure Filtering Status */
 
-#define R_MFWD_FWEIS_WMIUFS                       (1 << 25)  /* Watermark IPV Unsecure Filtering Status Flag */
+#define R_MFWD_FWEIS_WMIUFS                       (1 << 25)  /* Watermark IPV Unsecure Filtering Status */
 
-#define R_MFWD_FWEIS_DDES                         (1 << 26)  /* Direct Descriptor Error Status Flag */
+#define R_MFWD_FWEIS_DDES                         (1 << 26)  /* Direct Descriptor Error Status i */
 
-#define R_MFWD_FWEIS_DDSES                        (1 << 28)  /* Direct Descriptor Security Error Status Flag */
+#define R_MFWD_FWEIS_DDSES                        (1 << 28)  /* Direct Descriptor Security Error Status */
 
-#define R_MFWD_FWEIS_DDNTFS                       (1 << 29)  /* Direct Descriptor No Target Filtering Status Flag */
+#define R_MFWD_FWEIS_DDNTFS                       (1 << 29)  /* Direct Descriptor No Target Filtering Status */
 
 /* FWEIE Register bit definitions */
 #define R_MFWD_FWEIE_LTHSPFE                      (1 << 0)  /* Layer 3 Source Port Filtering Enable */
@@ -2418,206 +2278,126 @@
 #define R_MFWD_FWEID_DDNTFD                       (1 << 29)  /* Direct Descriptor No Target Filtering Disable */
 
 /* FWEIS1 Register bit definitions */
-#define R_MFWD_FWEIS1_LTHTSES                     (1 << 1)  /* L3 Table Security Error Status Flag */
+#define R_MFWD_FWEIS1_LTHTEES                     (1 << 0)  /* L3 Table ECC Error Status */
 
-#define R_MFWD_FWEIS1_MACTSES                     (1 << 5)  /* MAC Table Security Error Status Flag */
+#define R_MFWD_FWEIS1_LTHTSES                     (1 << 1)  /* L3 Table Security Error Status */
 
-#define R_MFWD_FWEIS1_VLANTSES                    (1 << 7)  /* VLAN Table Security Error Status Flag */
+#define R_MFWD_FWEIS1_MACTEES                     (1 << 4)  /* MAC Table ECC Error Status */
+
+#define R_MFWD_FWEIS1_MACTSES                     (1 << 5)  /* MAC Table Security Error Status */
+
+#define R_MFWD_FWEIS1_VLANTEES                    (1 << 6)  /* VLAN Table ECC Error Status */
+
+#define R_MFWD_FWEIS1_VLANTSES                    (1 << 7)  /* VLAN Table Security Error Status */
+
+#define R_MFWD_FWEIS1_L23UEES                     (1 << 8)  /* Layer 2/Layer 3 Update ECC Error Status */
+
+#define R_MFWD_FWEIS1_AREES                       (1 << 16)  /* ATS RAM ECC Error Status */
 
 /* FWEIE1 Register bit definitions */
+#define R_MFWD_FWEIE1_LTHTEEE                     (1 << 0)  /* L3 Table ECC Error Enable */
+
 #define R_MFWD_FWEIE1_LTHTSEE                     (1 << 1)  /* L3 Table Security Error Enable */
+
+#define R_MFWD_FWEIE1_MACTEEE                     (1 << 4)  /* MAC Table ECC Error Enable */
 
 #define R_MFWD_FWEIE1_MACTSEE                     (1 << 5)  /* MAC Table Security Error Enable */
 
+#define R_MFWD_FWEIE1_VLANTEEE                    (1 << 6)  /* VLAN Table ECC Error Enable */
+
 #define R_MFWD_FWEIE1_VLANTSEE                    (1 << 7)  /* VLAN Table Security Error Enable */
 
+#define R_MFWD_FWEIE1_L23UEEE                     (1 << 8)  /* Layer 2/Layer 3 Update ECC Error Enable */
+
+#define R_MFWD_FWEIE1_AREEE                       (1 << 16)  /* ATS RAM ECC Error Enable */
+
 /* FWEID1 Register bit definitions */
+#define R_MFWD_FWEID1_LTHTEED                     (1 << 0)  /* L3 Table ECC Error Disable */
+
 #define R_MFWD_FWEID1_LTHTSED                     (1 << 1)  /* L3 Table Security Error Disable */
+
+#define R_MFWD_FWEID1_MACTEED                     (1 << 4)  /* MAC Table ECC Error Disable */
 
 #define R_MFWD_FWEID1_MACTSED                     (1 << 5)  /* MAC Table Security Error Disable */
 
+#define R_MFWD_FWEID1_VLANTEED                    (1 << 6)  /* VLAN Table ECC Error Disable */
+
 #define R_MFWD_FWEID1_VLANTSED                    (1 << 7)  /* VLAN Table Security Error Disable */
 
-#define R_MFWD_FWEID1_L23UEED                     (1 << 8)  /* Layer 2/Layer 3 Update Error Disable */
+#define R_MFWD_FWEID1_L23UEED                     (1 << 8)  /* Layer 2/Layer 3 Update ECC Error Disable */
+
+#define R_MFWD_FWEID1_AREED                       (1 << 16)  /* ATS RAM ECC Error Disable */
 
 /* FWEIS2 Register bit definitions */
-#define R_MFWD_FWEIS2_PMFS15_TO_PMFS0_SHIFT       (0)  /* PSFP MSDU n Filtering Status Flag (n = 0 to 15) */
-#define R_MFWD_FWEIS2_PMFS15_TO_PMFS0_MASK        0xffff
+#define R_MFWD_FWEIS2_PMFS_SHIFT                  (0)  /* PSFP MSDU Filtering Status */
+#define R_MFWD_FWEIS2_PMFS_MASK                   0xffff
 
 /* FWEIE2 Register bit definitions */
-#define R_MFWD_FWEIE2_PMFE15_TO_PMFE0_SHIFT       (0)  /* PSFP MSDU n Filtering Enable (n = 0 to 15) */
-#define R_MFWD_FWEIE2_PMFE15_TO_PMFE0_MASK        0xffff
-#  define R_MFWD_FWEIE2_PMFE15_TO_PMFE0_0                 (0 << R_MFWD_FWEIE2_PMFE15_TO_PMFE0_SHIFT)  /* Interrupt disabled. */
-#  define R_MFWD_FWEIE2_PMFE15_TO_PMFE0_1                 (1 << R_MFWD_FWEIE2_PMFE15_TO_PMFE0_SHIFT)  /* Interrupt Enabled. */
+#define R_MFWD_FWEIE2_PMFE_SHIFT                  (0)  /* PSFP MSDU Filtering Enable */
+#define R_MFWD_FWEIE2_PMFE_MASK                   0xffff
+#  define R_MFWD_FWEIE2_PMFE_0                            (0 << R_MFWD_FWEIE2_PMFE_SHIFT)  /* Interrupt disabled. */
+#  define R_MFWD_FWEIE2_PMFE_1                            (1 << R_MFWD_FWEIE2_PMFE_SHIFT)  /* Interrupt Enabled. */
 
 /* FWEID2 Register bit definitions */
-#define R_MFWD_FWEID2_PMFD15_TO_PMFD0_SHIFT       (0)  /* PSFP MSDU n Filtering Disable (n = 0 to 15) */
-#define R_MFWD_FWEID2_PMFD15_TO_PMFD0_MASK        0xffff
+#define R_MFWD_FWEID2_PMFD_SHIFT                  (0)  /* PSFP MSDU Filtering Disable */
+#define R_MFWD_FWEID2_PMFD_MASK                   0xffff
 
 /* FWEIS5 Register bit definitions */
-#define R_MFWD_FWEIS5_PMRFS31_TO_PMRFS0_SHIFT     (0)  /* PSFP Meter n Filtering Status Flag (n = 0 to 31) */
-#define R_MFWD_FWEIS5_PMRFS31_TO_PMRFS0_MASK      0xffffffff
+#define R_MFWD_FWEIS5_PMRFS_SHIFT                 (0)  /* PSFP Meter Filtering Status */
+#define R_MFWD_FWEIS5_PMRFS_MASK                  0xffffffff
 
 /* FWEIE5 Register bit definitions */
-#define R_MFWD_FWEIE5_PMRFE31_TO_PMRFE0_SHIFT     (0)  /* PSFP Meter n Filtering Enable (n = 0 to 31) */
-#define R_MFWD_FWEIE5_PMRFE31_TO_PMRFE0_MASK      0xffffffff
+#define R_MFWD_FWEIE5_PMRFE_SHIFT                 (0)  /* PSFP Meter Filtering Enable */
+#define R_MFWD_FWEIE5_PMRFE_MASK                  0xffffffff
 
 /* FWEID5 Register bit definitions */
-#define R_MFWD_FWEID5_PMRFD31_TO_PMRFD0_SHIFT     (0)  /* PSFP Meter n Filtering Disable (n = 0 to 31) */
-#define R_MFWD_FWEID5_PMRFD31_TO_PMRFD0_MASK      0xffffffff
+#define R_MFWD_FWEID5_PMRFD_SHIFT                 (0)  /* PSFP Meter Filtering Disable */
+#define R_MFWD_FWEID5_PMRFD_MASK                  0xffffffff
 
-/* FWEIS60 Register bit definitions */
-#define R_MFWD_FWEIS60_FFS31_TO_FFS0_SHIFT        (0)  /* FRER n Filtering Status Flag (n = 96 to 127) */
-#define R_MFWD_FWEIS60_FFS31_TO_FFS0_MASK         0xffffffff
+/* FWEIS Register bit definitions */
+#define R_MFWD_FWEIS_FFS_SHIFT                    (0)  /* FRER Filtering Status */
+#define R_MFWD_FWEIS_FFS_MASK                     0xffffffff
 
-/* FWEIE60 Register bit definitions */
-#define R_MFWD_FWEIE60_FFE31_TO_FFE0_SHIFT        (0)  /* FRER n Filtering Enable (n = 96 to 127) */
-#define R_MFWD_FWEIE60_FFE31_TO_FFE0_MASK         0xffffffff
+/* FWEIE Register bit definitions */
+#define R_MFWD_FWEIE_FFE_SHIFT                    (0)  /* FRER Filtering Enable */
+#define R_MFWD_FWEIE_FFE_MASK                     0xffffffff
 
-/* FWEID60 Register bit definitions */
-#define R_MFWD_FWEID60_FFD31_TO_FFD0_SHIFT        (0)  /* FRER n Filtering Disable (n = 96 to 127) */
-#define R_MFWD_FWEID60_FFD31_TO_FFD0_MASK         0xffffffff
+/* FWEID Register bit definitions */
+#define R_MFWD_FWEID_FFD_SHIFT                    (0)  /* FRER Filtering Disable */
+#define R_MFWD_FWEID_FFD_MASK                     0xffffffff
 
-/* FWEIS61 Register bit definitions */
-#define R_MFWD_FWEIS61_FFS31_TO_FFS0_SHIFT        (0)  /* FRER n Filtering Status Flag (n = 64 to 95) */
-#define R_MFWD_FWEIS61_FFS31_TO_FFS0_MASK         0xffffffff
+/* FWEIS Register bit definitions */
+#define R_MFWD_FWEIS_FOORS_SHIFT                  (0)  /* FRER Out Of Range Status */
+#define R_MFWD_FWEIS_FOORS_MASK                   0xffffffff
 
-/* FWEIE61 Register bit definitions */
-#define R_MFWD_FWEIE61_FFE31_TO_FFE0_SHIFT        (0)  /* FRER n Filtering Enable (n = 64 to 95) */
-#define R_MFWD_FWEIE61_FFE31_TO_FFE0_MASK         0xffffffff
+/* FWEIE Register bit definitions */
+#define R_MFWD_FWEIE_FOORE_SHIFT                  (0)  /* FRER Out Of Range Enable */
+#define R_MFWD_FWEIE_FOORE_MASK                   0xffffffff
 
-/* FWEID61 Register bit definitions */
-#define R_MFWD_FWEID61_FFD31_TO_FFD0_SHIFT        (0)  /* FRER n Filtering Disable (n = 64 to 95) */
-#define R_MFWD_FWEID61_FFD31_TO_FFD0_MASK         0xffffffff
+/* FWEID Register bit definitions */
+#define R_MFWD_FWEID_FOORD_SHIFT                  (0)  /* FRER Out Of Range Disable */
+#define R_MFWD_FWEID_FOORD_MASK                   0xffffffff
 
-/* FWEIS62 Register bit definitions */
-#define R_MFWD_FWEIS62_FFS31_TO_FFS0_SHIFT        (0)  /* FRER n Filtering Status Flag (n = 32 to 63) */
-#define R_MFWD_FWEIS62_FFS31_TO_FFS0_MASK         0xffffffff
+/* FWEIS Register bit definitions */
+#define R_MFWD_FWEIS_TOS_SHIFT                    (0)  /* Timeout Status */
+#define R_MFWD_FWEIS_TOS_MASK                     0xffffffff
 
-/* FWEIE62 Register bit definitions */
-#define R_MFWD_FWEIE62_FFE31_TO_FFE0_SHIFT        (0)  /* FRER n Filtering Enable (n = 32 to 63) */
-#define R_MFWD_FWEIE62_FFE31_TO_FFE0_MASK         0xffffffff
+/* FWEIE Register bit definitions */
+#define R_MFWD_FWEIE_TOE_SHIFT                    (0)  /* Timeout Enable */
+#define R_MFWD_FWEIE_TOE_MASK                     0xffffffff
 
-/* FWEID62 Register bit definitions */
-#define R_MFWD_FWEID62_FFD31_TO_FFD0_SHIFT        (0)  /* FRER n Filtering Disable (n = 32 to 63) */
-#define R_MFWD_FWEID62_FFD31_TO_FFD0_MASK         0xffffffff
-
-/* FWEIS63 Register bit definitions */
-#define R_MFWD_FWEIS63_FFS31_TO_FFS0_SHIFT        (0)  /* FRER n Filtering Status Flag (n = 0 to 31) */
-#define R_MFWD_FWEIS63_FFS31_TO_FFS0_MASK         0xffffffff
-
-/* FWEIE63 Register bit definitions */
-#define R_MFWD_FWEIE63_FFE31_TO_FFE0_SHIFT        (0)  /* FRER n Filtering Enable (n = 0 to 31) */
-#define R_MFWD_FWEIE63_FFE31_TO_FFE0_MASK         0xffffffff
-
-/* FWEID63 Register bit definitions */
-#define R_MFWD_FWEID63_FFD31_TO_FFD0_SHIFT        (0)  /* FRER n Filtering Disable (n = 0 to 31) */
-#define R_MFWD_FWEID63_FFD31_TO_FFD0_MASK         0xffffffff
-
-/* FWEIS70 Register bit definitions */
-#define R_MFWD_FWEIS70_FOORS31_TO_FOORS0_SHIFT    (0)  /* FRER n Out Of Range Status Flag (n = 96 to 127) */
-#define R_MFWD_FWEIS70_FOORS31_TO_FOORS0_MASK     0xffffffff
-
-/* FWEIE70 Register bit definitions */
-#define R_MFWD_FWEIE70_FOORE31_TO_FOORE0_SHIFT    (0)  /* FRER n Out Of Range Enable (n = 96 to 127) */
-#define R_MFWD_FWEIE70_FOORE31_TO_FOORE0_MASK     0xffffffff
-
-/* FWEID70 Register bit definitions */
-#define R_MFWD_FWEID70_FOORD31_TO_FOORD0_SHIFT    (0)  /* FRER n Out Of Range Disable (n = 96 to 127) */
-#define R_MFWD_FWEID70_FOORD31_TO_FOORD0_MASK     0xffffffff
-
-/* FWEIS71 Register bit definitions */
-#define R_MFWD_FWEIS71_FOORS31_TO_FOORS0_SHIFT    (0)  /* FRER n Out Of Range Status Flag (n = 64 to 95) */
-#define R_MFWD_FWEIS71_FOORS31_TO_FOORS0_MASK     0xffffffff
-
-/* FWEIE71 Register bit definitions */
-#define R_MFWD_FWEIE71_FOORE31_TO_FOORE0_SHIFT    (0)  /* FRER n Out Of Range Enable (n = 64 to 95) */
-#define R_MFWD_FWEIE71_FOORE31_TO_FOORE0_MASK     0xffffffff
-
-/* FWEID71 Register bit definitions */
-#define R_MFWD_FWEID71_FOORD31_TO_FOORD0_SHIFT    (0)  /* FRER n Out Of Range Disable (n = 64 to 95) */
-#define R_MFWD_FWEID71_FOORD31_TO_FOORD0_MASK     0xffffffff
-
-/* FWEIS72 Register bit definitions */
-#define R_MFWD_FWEIS72_FOORS31_TO_FOORS0_SHIFT    (0)  /* FRER n Out Of Range Status Flag (n = 32 to 63) */
-#define R_MFWD_FWEIS72_FOORS31_TO_FOORS0_MASK     0xffffffff
-
-/* FWEIE72 Register bit definitions */
-#define R_MFWD_FWEIE72_FOORE31_TO_FOORE0_SHIFT    (0)  /* FRER n Out Of Range Enable (n = 32 to 63) */
-#define R_MFWD_FWEIE72_FOORE31_TO_FOORE0_MASK     0xffffffff
-
-/* FWEID72 Register bit definitions */
-#define R_MFWD_FWEID72_FOORD31_TO_FOORD0_SHIFT    (0)  /* FRER n Out Of Range Disable (n = 32 to 63) */
-#define R_MFWD_FWEID72_FOORD31_TO_FOORD0_MASK     0xffffffff
-
-/* FWEIS73 Register bit definitions */
-#define R_MFWD_FWEIS73_FOORS31_TO_FOORS0_SHIFT    (0)  /* FRER n Out Of Range Status Flag (n = 0 to 31) */
-#define R_MFWD_FWEIS73_FOORS31_TO_FOORS0_MASK     0xffffffff
-
-/* FWEIE73 Register bit definitions */
-#define R_MFWD_FWEIE73_FOORE31_TO_FOORE0_SHIFT    (0)  /* FRER n Out Of Range Enable (n = 0 to 31) */
-#define R_MFWD_FWEIE73_FOORE31_TO_FOORE0_MASK     0xffffffff
-
-/* FWEID73 Register bit definitions */
-#define R_MFWD_FWEID73_FOORD31_TO_FOORD0_SHIFT    (0)  /* FRER n Out Of Range Disable (n = 0 to 31) */
-#define R_MFWD_FWEID73_FOORD31_TO_FOORD0_MASK     0xffffffff
-
-/* FWEIS80 Register bit definitions */
-#define R_MFWD_FWEIS80_TOS31_TO_TOS0_SHIFT        (0)  /* Timeout Status Flag n (n = 96 to 127) */
-#define R_MFWD_FWEIS80_TOS31_TO_TOS0_MASK         0xffffffff
-
-/* FWEIE80 Register bit definitions */
-#define R_MFWD_FWEIE80_TOE31_TO_TOE0_SHIFT        (0)  /* Timeout Enable n (n = 96 to 127) */
-#define R_MFWD_FWEIE80_TOE31_TO_TOE0_MASK         0xffffffff
-
-/* FWEID80 Register bit definitions */
-#define R_MFWD_FWEID80_TOD31_TO_TOD0_SHIFT        (0)  /* Timeout Disable n (n = 96 to 127) */
-#define R_MFWD_FWEID80_TOD31_TO_TOD0_MASK         0xffffffff
-
-/* FWEIS81 Register bit definitions */
-#define R_MFWD_FWEIS81_TOS31_TO_TOS0_SHIFT        (0)  /* Timeout Status Flag n (n = 64 to 95) */
-#define R_MFWD_FWEIS81_TOS31_TO_TOS0_MASK         0xffffffff
-
-/* FWEIE81 Register bit definitions */
-#define R_MFWD_FWEIE81_TOE31_TO_TOE0_SHIFT        (0)  /* Timeout Enable n (n = 64 to 95) */
-#define R_MFWD_FWEIE81_TOE31_TO_TOE0_MASK         0xffffffff
-
-/* FWEID81 Register bit definitions */
-#define R_MFWD_FWEID81_TOD31_TO_TOD0_SHIFT        (0)  /* Timeout Disable n (n = 64 to 95) */
-#define R_MFWD_FWEID81_TOD31_TO_TOD0_MASK         0xffffffff
-
-/* FWEIS82 Register bit definitions */
-#define R_MFWD_FWEIS82_TOS31_TO_TOS0_SHIFT        (0)  /* Timeout Status Flag n (n = 32 to 63) */
-#define R_MFWD_FWEIS82_TOS31_TO_TOS0_MASK         0xffffffff
-
-/* FWEIE82 Register bit definitions */
-#define R_MFWD_FWEIE82_TOE31_TO_TOE0_SHIFT        (0)  /* Timeout Enable n (n = 32 to 63) */
-#define R_MFWD_FWEIE82_TOE31_TO_TOE0_MASK         0xffffffff
-
-/* FWEID82 Register bit definitions */
-#define R_MFWD_FWEID82_TOD31_TO_TOD0_SHIFT        (0)  /* Timeout Disable n (n = 32 to 63) */
-#define R_MFWD_FWEID82_TOD31_TO_TOD0_MASK         0xffffffff
-
-/* FWEIS83 Register bit definitions */
-#define R_MFWD_FWEIS83_TOS31_TO_TOS0_SHIFT        (0)  /* Timeout Status Flag n (n = 0 to 31) */
-#define R_MFWD_FWEIS83_TOS31_TO_TOS0_MASK         0xffffffff
-
-/* FWEIE83 Register bit definitions */
-#define R_MFWD_FWEIE83_TOE31_TO_TOE0_SHIFT        (0)  /* Timeout Enable n (n = 0 to 31) */
-#define R_MFWD_FWEIE83_TOE31_TO_TOE0_MASK         0xffffffff
-
-/* FWEID83 Register bit definitions */
-#define R_MFWD_FWEID83_TOD31_TO_TOD0_SHIFT        (0)  /* Timeout Disable n (n = 0 to 31) */
-#define R_MFWD_FWEID83_TOD31_TO_TOD0_MASK         0xffffffff
+/* FWEID Register bit definitions */
+#define R_MFWD_FWEID_TOD_SHIFT                    (0)  /* Timeout Disable */
+#define R_MFWD_FWEID_TOD_MASK                     0xffffffff
 
 /* FWMIS0 Register bit definitions */
-#define R_MFWD_FWMIS0_LTHTFS                      (1 << 0)  /* L3 Table Full Status Flag */
+#define R_MFWD_FWMIS0_LTHTFS                      (1 << 0)  /* L3 Table Full Status */
 
-#define R_MFWD_FWMIS0_MACTFS                      (1 << 2)  /* MAC Table Full Status Flag */
+#define R_MFWD_FWMIS0_MACTFS                      (1 << 2)  /* MAC Table Full Status */
 
-#define R_MFWD_FWMIS0_VLANTFS                     (1 << 3)  /* VLAN Table Full Status Flag */
+#define R_MFWD_FWMIS0_VLANTFS                     (1 << 3)  /* VLAN Table Full Status */
 
-#define R_MFWD_FWMIS0_MACADAS                     (1 << 17)  /* MAC Address Deleted Aging Status Flag */
+#define R_MFWD_FWMIS0_MACADAS                     (1 << 17)  /* MAC Address Deleted Aging Status */
 
 /* FWMIE0 Register bit definitions */
 #define R_MFWD_FWMIE0_LTHTFE                      (1 << 0)  /* L3 Table Full Enable */

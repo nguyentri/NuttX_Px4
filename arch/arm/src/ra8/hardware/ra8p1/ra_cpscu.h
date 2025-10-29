@@ -40,11 +40,15 @@
 
 /* CPSCU Register Offsets */
 
+#define R_CPSCU_CSAR_OFFSET                       0x00000000  /* Cache Security Attribution Register */
 #define R_CPSCU_SRAMSAR_OFFSET                    0x00000010  /* SRAM Security Attribution Register */
+#define R_CPSCU_STBRAMSAR_OFFSET                  0x00000014  /* Standby RAM memory Security Attribution Register */
 #define R_CPSCU_DTCSAR_OFFSET                     0x00000030  /* DTC Controller Security Attribution Register */
 #define R_CPSCU_DMACSAR_OFFSET                    0x00000034  /* DMAC Controller Security Attribution Register */
 #define R_CPSCU_ICUSARA_OFFSET                    0x00000040  /* Interrupt Controller Unit Security Attribution Register A */
 #define R_CPSCU_ICUSARB_OFFSET                    0x00000044  /* Interrupt Controller Unit Security Attribution Register B */
+#define R_CPSCU_ICUSARC_OFFSET                    0x00000048  /* ICU Security Attribution Register C */
+#define R_CPSCU_ICUSARD_OFFSET                    0x0000004c  /* ICU Security Attribution Register D */
 #define R_CPSCU_ICUSARE_OFFSET                    0x00000050  /* Interrupt Controller Unit Security Attribution Register E */
 #define R_CPSCU_ICUSARF_OFFSET                    0x00000054  /* Interrupt Controller Unit Security Attribution Register F */
 #define R_CPSCU_ICUSARG_OFFSET                    0x00000070  /* Interrupt Controller Unit Security Attribution Register G */
@@ -57,18 +61,20 @@
 #define R_CPSCU_BUSSARB_OFFSET                    0x00000104  /* Bus Security Attribution Register B */
 #define R_CPSCU_BUSSARC_OFFSET                    0x00000110  /* Bus Security Attribution Register C */
 #define R_CPSCU_BUSPARC_OFFSET                    0x00000114  /* Bus Privileged Attribution Register C */
+#define R_CPSCU_NMISR_OFFSET                      0x00000120  /* Non-Maskable Interrupt Status Register */
 #define R_CPSCU_MMPUSARA_OFFSET                   0x00000130  /* Master Memory Protection Unit Security Attribution Register A */
 #define R_CPSCU_MMPUSARB_OFFSET                   0x00000134  /* Master Memory Protection Unit Security Attribution Register B */
 #define R_CPSCU_CPUSAR_OFFSET                     0x00000170  /* CPU Security Attribution Register */
 #define R_CPSCU_DEBUGSAR_OFFSET                   0x00000180  /* Debug Security Attribution Register */
-#define R_CPSCU_DMACCHSAR_OFFSET                  0x000001a0  /* DMA Channel Security Attribution Register */
+#define R_CPSCU_DMACCHSAR_OFFSET                  0x000001a0  /* DMAC channel Security Attribution Register */
+#define R_CPSCU_CPUDSAR_OFFSET                    0x000001b0  /* CPU Debug Security Attribution Register */
 #define R_CPSCU_DMACCHPAR_OFFSET                  0x000001f0  /* DMA Channel Privilege Attribution Register */
-/* SRAMSABAR%s Registers (0-3) */
-#define R_CPSCU_SRAMSABAR_OFFSET(m)               (0x00000400 + ((m) * 0x00000004))  /* SRAM Security Attribute Boundary Address Register (n = 0 to 3) */
+/* SRAMSABAR%s Registers () */
+#define R_CPSCU_SRAMSABAR_OFFSET(m)               (0x00000400 + ((m) * 0x00000004))  /* SRAM Security Attribute Boundary Address Register */
 #define R_CPSCU_CACHESAR_OFFSET                   0x00000500  /* Cache Security Attribution Register */
 #define R_CPSCU_TCMSAR_OFFSET                     0x00000504  /* TCM Security Attribution Register */
-#define R_CPSCU_TCMSABARC_OFFSET                  0x00000508  /* TCM Security Attribute Boundary Address Register */
-#define R_CPSCU_TCMSABARS_OFFSET                  0x0000050c  /* TCM Security Attribute Boundary Address Register */
+/* TCMSABAR%s Registers (C,S) */
+#define R_CPSCU_TCMSABAR_OFFSET(m)                (0x00000508 + ((m) * 0x00000004))  /* TCM Security Attribute Boundary Address Register */
 #define R_CPSCU_SRAMESAR_OFFSET                   0x00000510  /* SRAM ECC region Security Attribute Register */
 #define R_CPSCU_TEVTRCR_OFFSET                    0x00000600  /* Trusted Event Route Control Register */
 #define R_CPSCU_IPCSAR_OFFSET                     0x00000610  /* IPC Security Attribution Register */
@@ -76,11 +82,15 @@
 
 /* CPSCU Register Addresses */
 
+#define R_CPSCU_CSAR                              (R_CPSCU_BASE + R_CPSCU_CSAR_OFFSET)
 #define R_CPSCU_SRAMSAR                           (R_CPSCU_BASE + R_CPSCU_SRAMSAR_OFFSET)
+#define R_CPSCU_STBRAMSAR                         (R_CPSCU_BASE + R_CPSCU_STBRAMSAR_OFFSET)
 #define R_CPSCU_DTCSAR                            (R_CPSCU_BASE + R_CPSCU_DTCSAR_OFFSET)
 #define R_CPSCU_DMACSAR                           (R_CPSCU_BASE + R_CPSCU_DMACSAR_OFFSET)
 #define R_CPSCU_ICUSARA                           (R_CPSCU_BASE + R_CPSCU_ICUSARA_OFFSET)
 #define R_CPSCU_ICUSARB                           (R_CPSCU_BASE + R_CPSCU_ICUSARB_OFFSET)
+#define R_CPSCU_ICUSARC                           (R_CPSCU_BASE + R_CPSCU_ICUSARC_OFFSET)
+#define R_CPSCU_ICUSARD                           (R_CPSCU_BASE + R_CPSCU_ICUSARD_OFFSET)
 #define R_CPSCU_ICUSARE                           (R_CPSCU_BASE + R_CPSCU_ICUSARE_OFFSET)
 #define R_CPSCU_ICUSARF                           (R_CPSCU_BASE + R_CPSCU_ICUSARF_OFFSET)
 #define R_CPSCU_ICUSARG                           (R_CPSCU_BASE + R_CPSCU_ICUSARG_OFFSET)
@@ -93,24 +103,36 @@
 #define R_CPSCU_BUSSARB                           (R_CPSCU_BASE + R_CPSCU_BUSSARB_OFFSET)
 #define R_CPSCU_BUSSARC                           (R_CPSCU_BASE + R_CPSCU_BUSSARC_OFFSET)
 #define R_CPSCU_BUSPARC                           (R_CPSCU_BASE + R_CPSCU_BUSPARC_OFFSET)
+#define R_CPSCU_NMISR                             (R_CPSCU_BASE + R_CPSCU_NMISR_OFFSET)
 #define R_CPSCU_MMPUSARA                          (R_CPSCU_BASE + R_CPSCU_MMPUSARA_OFFSET)
 #define R_CPSCU_MMPUSARB                          (R_CPSCU_BASE + R_CPSCU_MMPUSARB_OFFSET)
 #define R_CPSCU_CPUSAR                            (R_CPSCU_BASE + R_CPSCU_CPUSAR_OFFSET)
 #define R_CPSCU_DEBUGSAR                          (R_CPSCU_BASE + R_CPSCU_DEBUGSAR_OFFSET)
 #define R_CPSCU_DMACCHSAR                         (R_CPSCU_BASE + R_CPSCU_DMACCHSAR_OFFSET)
+#define R_CPSCU_CPUDSAR                           (R_CPSCU_BASE + R_CPSCU_CPUDSAR_OFFSET)
 #define R_CPSCU_DMACCHPAR                         (R_CPSCU_BASE + R_CPSCU_DMACCHPAR_OFFSET)
 #define R_CPSCU_SRAMSABAR(m)                      (R_CPSCU_BASE + R_CPSCU_SRAMSABAR_OFFSET(m))
 #define R_CPSCU_CACHESAR                          (R_CPSCU_BASE + R_CPSCU_CACHESAR_OFFSET)
 #define R_CPSCU_TCMSAR                            (R_CPSCU_BASE + R_CPSCU_TCMSAR_OFFSET)
-#define R_CPSCU_TCMSABARC                         (R_CPSCU_BASE + R_CPSCU_TCMSABARC_OFFSET)
-#define R_CPSCU_TCMSABARS                         (R_CPSCU_BASE + R_CPSCU_TCMSABARS_OFFSET)
+#define R_CPSCU_TCMSABAR(m)                       (R_CPSCU_BASE + R_CPSCU_TCMSABAR_OFFSET(m))
 #define R_CPSCU_SRAMESAR                          (R_CPSCU_BASE + R_CPSCU_SRAMESAR_OFFSET)
 #define R_CPSCU_TEVTRCR                           (R_CPSCU_BASE + R_CPSCU_TEVTRCR_OFFSET)
 #define R_CPSCU_IPCSAR                            (R_CPSCU_BASE + R_CPSCU_IPCSAR_OFFSET)
 #define R_CPSCU_IPCPAR                            (R_CPSCU_BASE + R_CPSCU_IPCPAR_OFFSET)
 
 /* Register bit definitions */
+/* CSAR Register bit definitions */
+#define R_CPSCU_CSAR_CACHESA                      (1 << 0)  /* Security Attributes of Registers for Cache Control */
+
+#define R_CPSCU_CSAR_CACHELSA                     (1 << 1)  /* Security Attributes of Registers for Cache Line Configuration */
+
+#define R_CPSCU_CSAR_CACHEESA                     (1 << 2)  /* Security Attributes of Registers for Cache Error */
+
 /* SRAMSAR Register bit definitions */
+#define R_CPSCU_SRAMSAR_SRAMSA_S                  (1 << 0)  /* SRAM%s Register Security Attribution */
+
+#define R_CPSCU_SRAMSAR_SRAMWTSA                  (1 << 8)  /* Security attribution for SRAMWTSC */
+
 #define R_CPSCU_SRAMSAR_SRAMSA0                   (1 << 0)  /* SRAM0 Register Security Attribution */
 
 #define R_CPSCU_SRAMSAR_SRAMSA1                   (1 << 1)  /* SRAM1 Register Security Attribution */
@@ -119,38 +141,54 @@
 
 #define R_CPSCU_SRAMSAR_SRAMSA3                   (1 << 3)  /* SRAM3 Register Security Attribution */
 
-#define R_CPSCU_SRAMSAR_SRAMWTSA                  (1 << 8)  /* SRAMWTSC Security Attribution */
+/* STBRAMSAR Register bit definitions */
+#define R_CPSCU_STBRAMSAR_NSBSTBR_SHIFT           (0)  /* Security attributes of each region for Standby RAM */
+#define R_CPSCU_STBRAMSAR_NSBSTBR_MASK            0xf
+#  define R_CPSCU_STBRAMSAR_NSBSTBR_0X0                   (0 << R_CPSCU_STBRAMSAR_NSBSTBR_SHIFT)  /* Region7-0 are all Secure. */
+#  define R_CPSCU_STBRAMSAR_NSBSTBR_0X1                   (1 << R_CPSCU_STBRAMSAR_NSBSTBR_SHIFT)  /* Region7 is Non-secure. Region6-0 are Secure */
+#  define R_CPSCU_STBRAMSAR_NSBSTBR_0X2                   (2 << R_CPSCU_STBRAMSAR_NSBSTBR_SHIFT)  /* Region7-6 are Non-secure. Region5-0 are Secure. */
+#  define R_CPSCU_STBRAMSAR_NSBSTBR_0X3                   (3 << R_CPSCU_STBRAMSAR_NSBSTBR_SHIFT)  /* Region7-5 are Non-secure. Region4-0 are Secure. */
+#  define R_CPSCU_STBRAMSAR_NSBSTBR_0X4                   (4 << R_CPSCU_STBRAMSAR_NSBSTBR_SHIFT)  /* Region7-4 are Non-secure. Region 3-0 are Secure. */
+#  define R_CPSCU_STBRAMSAR_NSBSTBR_0X5                   (5 << R_CPSCU_STBRAMSAR_NSBSTBR_SHIFT)  /* Region7-3 are Non-secure. Region 2-0 are Secure. */
+#  define R_CPSCU_STBRAMSAR_NSBSTBR_0X6                   (6 << R_CPSCU_STBRAMSAR_NSBSTBR_SHIFT)  /* Region7-2 are Non-secure. Region 1-0 are Secure. */
+#  define R_CPSCU_STBRAMSAR_NSBSTBR_0X7                   (7 << R_CPSCU_STBRAMSAR_NSBSTBR_SHIFT)  /* Region7-1 are Non-Secure. Region0 is Secure. */
 
 /* DTCSAR Register bit definitions */
+#define R_CPSCU_DTCSAR_DTCSTSA_S                  (1 << 0)  /* DTC%s Security Attribution */
+
 #define R_CPSCU_DTCSAR_DTCSTSA0                   (1 << 0)  /* DTC0 Security Attribution */
 
 #define R_CPSCU_DTCSAR_DTCSTSA1                   (1 << 16)  /* DTC1 Security Attribution */
 
 /* DMACSAR Register bit definitions */
+#define R_CPSCU_DMACSAR_DMASTSA_S                 (1 << 0)  /* DMAC%s DMAST Security Attribution */
+
 #define R_CPSCU_DMACSAR_DMASTSA0                  (1 << 0)  /* DMAC0 DMAST Security Attribution */
 
 #define R_CPSCU_DMACSAR_DMASTSA1                  (1 << 16)  /* DMAC1 DMAST Security Attribution */
 
 /* ICUSARA Register bit definitions */
-#define R_CPSCU_ICUSARA_SAIRQCR00                 (1 << 0)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
+#define R_CPSCU_ICUSARA_SAIRQCR_S                 (1 << 0)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
 
-#define R_CPSCU_ICUSARA_SAIRQCR01                 (1 << 1)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
+#define R_CPSCU_ICUSARA_SAIRQCR0                  (1 << 0)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
 
-#define R_CPSCU_ICUSARA_SAIRQCR02                 (1 << 2)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
+#define R_CPSCU_ICUSARA_SAIRQCR1                  (1 << 1)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
 
-#define R_CPSCU_ICUSARA_SAIRQCR03                 (1 << 3)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
+#define R_CPSCU_ICUSARA_SAIRQCR2                  (1 << 2)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
 
-#define R_CPSCU_ICUSARA_SAIRQCR04                 (1 << 4)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
+#define R_CPSCU_ICUSARA_SAIRQCR3                  (1 << 3)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
 
-#define R_CPSCU_ICUSARA_SAIRQCR05                 (1 << 5)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
+#define R_CPSCU_ICUSARA_SAIRQCR4                  (1 << 4)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
 
-#define R_CPSCU_ICUSARA_SAIRQCR06                 (1 << 6)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
+#define R_CPSCU_ICUSARA_SAIRQCR5                  (1 << 5)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
 
-#define R_CPSCU_ICUSARA_SAIRQCR07                 (1 << 7)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
+#define R_CPSCU_ICUSARA_SAIRQCR6                  (1 << 6)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
 
-#define R_CPSCU_ICUSARA_SAIRQCR08                 (1 << 8)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
+#define R_CPSCU_ICUSARA_SAIRQCR7                  (1 << 7)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
 
-#define R_CPSCU_ICUSARA_SAIRQCR09                 (1 << 9)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
+#define R_CPSCU_ICUSARA_SAIRQCR8                  (1 << 8)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
+
+#define R_CPSCU_ICUSARA_SAIRQCR9                  (1 << 9)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
 
 #define R_CPSCU_ICUSARA_SAIRQCR10                 (1 << 10)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
 
@@ -196,49 +234,37 @@
 
 #define R_CPSCU_ICUSARA_SAIRQCR31                 (1 << 31)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
 
-#define R_CPSCU_ICUSARA_SAIRQCR0                  (1 << 0)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
-
-#define R_CPSCU_ICUSARA_SAIRQCR1                  (1 << 1)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
-
-#define R_CPSCU_ICUSARA_SAIRQCR2                  (1 << 2)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
-
-#define R_CPSCU_ICUSARA_SAIRQCR3                  (1 << 3)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
-
-#define R_CPSCU_ICUSARA_SAIRQCR4                  (1 << 4)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
-
-#define R_CPSCU_ICUSARA_SAIRQCR5                  (1 << 5)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
-
-#define R_CPSCU_ICUSARA_SAIRQCR6                  (1 << 6)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
-
-#define R_CPSCU_ICUSARA_SAIRQCR7                  (1 << 7)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
-
-#define R_CPSCU_ICUSARA_SAIRQCR8                  (1 << 8)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
-
-#define R_CPSCU_ICUSARA_SAIRQCR9                  (1 << 9)  /* Security attributes of registers for the IRQCR, WUPEN0, WUPEN1 registers */
-
 /* ICUSARB Register bit definitions */
-#define R_CPSCU_ICUSARB_SANMI                     (1 << 0)  /* Security attributes of the NMICR register */
+#define R_CPSCU_ICUSARB_SANMI_S                   (1 << 0)  /* Security Attributes of registers */
 
-#define R_CPSCU_ICUSARB_SANMI0                    (1 << 0)  /* Security attributes of the ICU0.NMISR, ICU0.NMIER, ICU0.NMICLR registers */
+#define R_CPSCU_ICUSARB_SANMI0                    (1 << 0)  /* Security Attributes of registers */
 
-#define R_CPSCU_ICUSARB_SANMI1                    (1 << 1)  /* Security attributes of the ICU1.NMISR, ICU1.NMIER, ICU1.NMICLR registers */
+#define R_CPSCU_ICUSARB_SANMI1                    (1 << 1)  /* Security Attributes of registers */
 
 #define R_CPSCU_ICUSARB_SANMI2                    (1 << 2)  /* Security Attributes of registers */
+
+/* ICUSARC Register bit definitions */
+#define R_CPSCU_ICUSARC_SADMACN_SHIFT             (0)  /* Security Attributes of registers for DMAC channel */
+#define R_CPSCU_ICUSARC_SADMACN_MASK              0xff
+
+#define R_CPSCU_ICUSARC_SADMACN_SHIFT             (0)  /* Security Attributes of registers for DMAC channel */
+#define R_CPSCU_ICUSARC_SADMACN_MASK              0xff
+
+/* ICUSARD Register bit definitions */
+#define R_CPSCU_ICUSARD_SASELSR0                  (1 << 0)  /* Security Attributes of registers for SELSR0 */
 
 /* ICUSARE Register bit definitions */
 #define R_CPSCU_ICUSARE_SAIWDTWUP                 (1 << 16)  /* Security attributes of registers for WUPEN0.b16 */
 
-#define R_CPSCU_ICUSARE_SAPVD1WUP                 (1 << 18)  /* Security attributes of registers for WUPEN0.b18 */
+#define R_CPSCU_ICUSARE_SALVD1WUP                 (1 << 18)  /* Security Attributes of registers for WUPEN0.b18 */
 
-#define R_CPSCU_ICUSARE_SAPVD2WUP                 (1 << 19)  /* Security attributes of registers for WUPEN0.b19 */
+#define R_CPSCU_ICUSARE_SALVD2WUP                 (1 << 19)  /* Security Attributes of registers for WUPEN0.b19 */
 
 #define R_CPSCU_ICUSARE_SAVBATTWUP                (1 << 20)  /* Security attributes of registers for WUPEN0.b20 */
 
 #define R_CPSCU_ICUSARE_SARTCALMWUP               (1 << 24)  /* Security attributes of registers for WUPEN0.b24 */
 
 #define R_CPSCU_ICUSARE_SARTCPRDWUP               (1 << 25)  /* Security attributes of registers for WUPEN0.b25 */
-
-#define R_CPSCU_ICUSARE_SAUSBHSWUP                (1 << 26)  /* Security attributes of registers for WUPEN0.b26 */
 
 #define R_CPSCU_ICUSARE_SAUSBFS0WUP               (1 << 27)  /* Security attributes of registers for WUPEN0.b27 */
 
@@ -250,11 +276,13 @@
 
 #define R_CPSCU_ICUSARE_SAIIC0WUP                 (1 << 31)  /* Security attributes of registers for WUPEN0.b31 */
 
-#define R_CPSCU_ICUSARE_SALVD1WUP                 (1 << 18)  /* Security Attributes of registers for WUPEN0.b18 */
-
-#define R_CPSCU_ICUSARE_SALVD2WUP                 (1 << 19)  /* Security Attributes of registers for WUPEN0.b19 */
-
 /* ICUSARF Register bit definitions */
+#define R_CPSCU_ICUSARF_SAAGT3UDWUP               (1 << 0)  /* Security Attributes of registers for WUPEN1.b 0 */
+
+#define R_CPSCU_ICUSARF_SAAGT3CAWUP               (1 << 1)  /* Security Attributes of registers for WUPEN1.b 1 */
+
+#define R_CPSCU_ICUSARF_SAAGT3CBWUP               (1 << 2)  /* Security Attributes of registers for WUPEN1.b 2 */
+
 #define R_CPSCU_ICUSARF_SACOMPHS0WUP              (1 << 3)  /* Security attributes of registers for WUPEN1.b3 */
 
 #define R_CPSCU_ICUSARF_SASOSCWUP                 (1 << 7)  /* Security attributes of registers for WUPEN1.b7 */
@@ -275,32 +303,28 @@
 
 #define R_CPSCU_ICUSARF_SAPDMWUP                  (1 << 15)  /* Security attributes of registers for WUPEN1.b15 */
 
-#define R_CPSCU_ICUSARF_SAAGT3UDWUP               (1 << 0)  /* Security Attributes of registers for WUPEN1.b 0 */
-
-#define R_CPSCU_ICUSARF_SAAGT3CAWUP               (1 << 1)  /* Security Attributes of registers for WUPEN1.b 1 */
-
-#define R_CPSCU_ICUSARF_SAAGT3CBWUP               (1 << 2)  /* Security Attributes of registers for WUPEN1.b 2 */
-
 /* ICUSARG Register bit definitions */
-#define R_CPSCU_ICUSARG_SAIELSR00                 (1 << 0)  /* Security attributes of registers for ICU0 event link setting0 */
+#define R_CPSCU_ICUSARG_SAIELSR_S                 (1 << 0)  /* Security attributes of registers for ICU0 event link setting0 */
 
-#define R_CPSCU_ICUSARG_SAIELSR01                 (1 << 1)  /* Security attributes of registers for ICU0 event link setting0 */
+#define R_CPSCU_ICUSARG_SAIELSR0                  (1 << 0)  /* Security attributes of registers for ICU0 event link setting0 */
 
-#define R_CPSCU_ICUSARG_SAIELSR02                 (1 << 2)  /* Security attributes of registers for ICU0 event link setting0 */
+#define R_CPSCU_ICUSARG_SAIELSR1                  (1 << 1)  /* Security attributes of registers for ICU0 event link setting0 */
 
-#define R_CPSCU_ICUSARG_SAIELSR03                 (1 << 3)  /* Security attributes of registers for ICU0 event link setting0 */
+#define R_CPSCU_ICUSARG_SAIELSR2                  (1 << 2)  /* Security attributes of registers for ICU0 event link setting0 */
 
-#define R_CPSCU_ICUSARG_SAIELSR04                 (1 << 4)  /* Security attributes of registers for ICU0 event link setting0 */
+#define R_CPSCU_ICUSARG_SAIELSR3                  (1 << 3)  /* Security attributes of registers for ICU0 event link setting0 */
 
-#define R_CPSCU_ICUSARG_SAIELSR05                 (1 << 5)  /* Security attributes of registers for ICU0 event link setting0 */
+#define R_CPSCU_ICUSARG_SAIELSR4                  (1 << 4)  /* Security attributes of registers for ICU0 event link setting0 */
 
-#define R_CPSCU_ICUSARG_SAIELSR06                 (1 << 6)  /* Security attributes of registers for ICU0 event link setting0 */
+#define R_CPSCU_ICUSARG_SAIELSR5                  (1 << 5)  /* Security attributes of registers for ICU0 event link setting0 */
 
-#define R_CPSCU_ICUSARG_SAIELSR07                 (1 << 7)  /* Security attributes of registers for ICU0 event link setting0 */
+#define R_CPSCU_ICUSARG_SAIELSR6                  (1 << 6)  /* Security attributes of registers for ICU0 event link setting0 */
 
-#define R_CPSCU_ICUSARG_SAIELSR08                 (1 << 8)  /* Security attributes of registers for ICU0 event link setting0 */
+#define R_CPSCU_ICUSARG_SAIELSR7                  (1 << 7)  /* Security attributes of registers for ICU0 event link setting0 */
 
-#define R_CPSCU_ICUSARG_SAIELSR09                 (1 << 9)  /* Security attributes of registers for ICU0 event link setting0 */
+#define R_CPSCU_ICUSARG_SAIELSR8                  (1 << 8)  /* Security attributes of registers for ICU0 event link setting0 */
+
+#define R_CPSCU_ICUSARG_SAIELSR9                  (1 << 9)  /* Security attributes of registers for ICU0 event link setting0 */
 
 #define R_CPSCU_ICUSARG_SAIELSR10                 (1 << 10)  /* Security attributes of registers for ICU0 event link setting0 */
 
@@ -346,222 +370,210 @@
 
 #define R_CPSCU_ICUSARG_SAIELSR31                 (1 << 31)  /* Security attributes of registers for ICU0 event link setting0 */
 
-#define R_CPSCU_ICUSARG_SAIELSR0                  (1 << 0)  /* Security attributes of registers for ICU0 event link setting0 */
-
-#define R_CPSCU_ICUSARG_SAIELSR1                  (1 << 1)  /* Security attributes of registers for ICU0 event link setting0 */
-
-#define R_CPSCU_ICUSARG_SAIELSR2                  (1 << 2)  /* Security attributes of registers for ICU0 event link setting0 */
-
-#define R_CPSCU_ICUSARG_SAIELSR3                  (1 << 3)  /* Security attributes of registers for ICU0 event link setting0 */
-
-#define R_CPSCU_ICUSARG_SAIELSR4                  (1 << 4)  /* Security attributes of registers for ICU0 event link setting0 */
-
-#define R_CPSCU_ICUSARG_SAIELSR5                  (1 << 5)  /* Security attributes of registers for ICU0 event link setting0 */
-
-#define R_CPSCU_ICUSARG_SAIELSR6                  (1 << 6)  /* Security attributes of registers for ICU0 event link setting0 */
-
-#define R_CPSCU_ICUSARG_SAIELSR7                  (1 << 7)  /* Security attributes of registers for ICU0 event link setting0 */
-
-#define R_CPSCU_ICUSARG_SAIELSR8                  (1 << 8)  /* Security attributes of registers for ICU0 event link setting0 */
-
-#define R_CPSCU_ICUSARG_SAIELSR9                  (1 << 9)  /* Security attributes of registers for ICU0 event link setting0 */
-
 /* ICUSARH Register bit definitions */
-#define R_CPSCU_ICUSARH_SAIELSR32                 (1 << 0)  /* Security attributes of registers for ICU0event link setting1. */
+#define R_CPSCU_ICUSARH_SAIELSR_S                 (1 << 0)  /* Security attributes of registers for ICU0 event link setting1 */
 
-#define R_CPSCU_ICUSARH_SAIELSR33                 (1 << 1)  /* Security attributes of registers for ICU0event link setting1. */
+#define R_CPSCU_ICUSARH_SAIELSR32                 (1 << 0)  /* Security attributes of registers for ICU0 event link setting1 */
 
-#define R_CPSCU_ICUSARH_SAIELSR34                 (1 << 2)  /* Security attributes of registers for ICU0event link setting1. */
+#define R_CPSCU_ICUSARH_SAIELSR33                 (1 << 1)  /* Security attributes of registers for ICU0 event link setting1 */
 
-#define R_CPSCU_ICUSARH_SAIELSR35                 (1 << 3)  /* Security attributes of registers for ICU0event link setting1. */
+#define R_CPSCU_ICUSARH_SAIELSR34                 (1 << 2)  /* Security attributes of registers for ICU0 event link setting1 */
 
-#define R_CPSCU_ICUSARH_SAIELSR36                 (1 << 4)  /* Security attributes of registers for ICU0event link setting1. */
+#define R_CPSCU_ICUSARH_SAIELSR35                 (1 << 3)  /* Security attributes of registers for ICU0 event link setting1 */
 
-#define R_CPSCU_ICUSARH_SAIELSR37                 (1 << 5)  /* Security attributes of registers for ICU0event link setting1. */
+#define R_CPSCU_ICUSARH_SAIELSR36                 (1 << 4)  /* Security attributes of registers for ICU0 event link setting1 */
 
-#define R_CPSCU_ICUSARH_SAIELSR38                 (1 << 6)  /* Security attributes of registers for ICU0event link setting1. */
+#define R_CPSCU_ICUSARH_SAIELSR37                 (1 << 5)  /* Security attributes of registers for ICU0 event link setting1 */
 
-#define R_CPSCU_ICUSARH_SAIELSR39                 (1 << 7)  /* Security attributes of registers for ICU0event link setting1. */
+#define R_CPSCU_ICUSARH_SAIELSR38                 (1 << 6)  /* Security attributes of registers for ICU0 event link setting1 */
 
-#define R_CPSCU_ICUSARH_SAIELSR40                 (1 << 8)  /* Security attributes of registers for ICU0event link setting1. */
+#define R_CPSCU_ICUSARH_SAIELSR39                 (1 << 7)  /* Security attributes of registers for ICU0 event link setting1 */
 
-#define R_CPSCU_ICUSARH_SAIELSR41                 (1 << 9)  /* Security attributes of registers for ICU0event link setting1. */
+#define R_CPSCU_ICUSARH_SAIELSR40                 (1 << 8)  /* Security attributes of registers for ICU0 event link setting1 */
 
-#define R_CPSCU_ICUSARH_SAIELSR42                 (1 << 10)  /* Security attributes of registers for ICU0event link setting1. */
+#define R_CPSCU_ICUSARH_SAIELSR41                 (1 << 9)  /* Security attributes of registers for ICU0 event link setting1 */
 
-#define R_CPSCU_ICUSARH_SAIELSR43                 (1 << 11)  /* Security attributes of registers for ICU0event link setting1. */
+#define R_CPSCU_ICUSARH_SAIELSR42                 (1 << 10)  /* Security attributes of registers for ICU0 event link setting1 */
 
-#define R_CPSCU_ICUSARH_SAIELSR44                 (1 << 12)  /* Security attributes of registers for ICU0event link setting1. */
+#define R_CPSCU_ICUSARH_SAIELSR43                 (1 << 11)  /* Security attributes of registers for ICU0 event link setting1 */
 
-#define R_CPSCU_ICUSARH_SAIELSR45                 (1 << 13)  /* Security attributes of registers for ICU0event link setting1. */
+#define R_CPSCU_ICUSARH_SAIELSR44                 (1 << 12)  /* Security attributes of registers for ICU0 event link setting1 */
 
-#define R_CPSCU_ICUSARH_SAIELSR46                 (1 << 14)  /* Security attributes of registers for ICU0event link setting1. */
+#define R_CPSCU_ICUSARH_SAIELSR45                 (1 << 13)  /* Security attributes of registers for ICU0 event link setting1 */
 
-#define R_CPSCU_ICUSARH_SAIELSR47                 (1 << 15)  /* Security attributes of registers for ICU0event link setting1. */
+#define R_CPSCU_ICUSARH_SAIELSR46                 (1 << 14)  /* Security attributes of registers for ICU0 event link setting1 */
 
-#define R_CPSCU_ICUSARH_SAIELSR48                 (1 << 16)  /* Security attributes of registers for ICU0event link setting1. */
+#define R_CPSCU_ICUSARH_SAIELSR47                 (1 << 15)  /* Security attributes of registers for ICU0 event link setting1 */
 
-#define R_CPSCU_ICUSARH_SAIELSR49                 (1 << 17)  /* Security attributes of registers for ICU0event link setting1. */
+#define R_CPSCU_ICUSARH_SAIELSR48                 (1 << 16)  /* Security attributes of registers for ICU0 event link setting1 */
 
-#define R_CPSCU_ICUSARH_SAIELSR50                 (1 << 18)  /* Security attributes of registers for ICU0event link setting1. */
+#define R_CPSCU_ICUSARH_SAIELSR49                 (1 << 17)  /* Security attributes of registers for ICU0 event link setting1 */
 
-#define R_CPSCU_ICUSARH_SAIELSR51                 (1 << 19)  /* Security attributes of registers for ICU0event link setting1. */
+#define R_CPSCU_ICUSARH_SAIELSR50                 (1 << 18)  /* Security attributes of registers for ICU0 event link setting1 */
 
-#define R_CPSCU_ICUSARH_SAIELSR52                 (1 << 20)  /* Security attributes of registers for ICU0event link setting1. */
+#define R_CPSCU_ICUSARH_SAIELSR51                 (1 << 19)  /* Security attributes of registers for ICU0 event link setting1 */
 
-#define R_CPSCU_ICUSARH_SAIELSR53                 (1 << 21)  /* Security attributes of registers for ICU0event link setting1. */
+#define R_CPSCU_ICUSARH_SAIELSR52                 (1 << 20)  /* Security attributes of registers for ICU0 event link setting1 */
 
-#define R_CPSCU_ICUSARH_SAIELSR54                 (1 << 22)  /* Security attributes of registers for ICU0event link setting1. */
+#define R_CPSCU_ICUSARH_SAIELSR53                 (1 << 21)  /* Security attributes of registers for ICU0 event link setting1 */
 
-#define R_CPSCU_ICUSARH_SAIELSR55                 (1 << 23)  /* Security attributes of registers for ICU0event link setting1. */
+#define R_CPSCU_ICUSARH_SAIELSR54                 (1 << 22)  /* Security attributes of registers for ICU0 event link setting1 */
 
-#define R_CPSCU_ICUSARH_SAIELSR56                 (1 << 24)  /* Security attributes of registers for ICU0event link setting1. */
+#define R_CPSCU_ICUSARH_SAIELSR55                 (1 << 23)  /* Security attributes of registers for ICU0 event link setting1 */
 
-#define R_CPSCU_ICUSARH_SAIELSR57                 (1 << 25)  /* Security attributes of registers for ICU0event link setting1. */
+#define R_CPSCU_ICUSARH_SAIELSR56                 (1 << 24)  /* Security attributes of registers for ICU0 event link setting1 */
 
-#define R_CPSCU_ICUSARH_SAIELSR58                 (1 << 26)  /* Security attributes of registers for ICU0event link setting1. */
+#define R_CPSCU_ICUSARH_SAIELSR57                 (1 << 25)  /* Security attributes of registers for ICU0 event link setting1 */
 
-#define R_CPSCU_ICUSARH_SAIELSR59                 (1 << 27)  /* Security attributes of registers for ICU0event link setting1. */
+#define R_CPSCU_ICUSARH_SAIELSR58                 (1 << 26)  /* Security attributes of registers for ICU0 event link setting1 */
 
-#define R_CPSCU_ICUSARH_SAIELSR60                 (1 << 28)  /* Security attributes of registers for ICU0event link setting1. */
+#define R_CPSCU_ICUSARH_SAIELSR59                 (1 << 27)  /* Security attributes of registers for ICU0 event link setting1 */
 
-#define R_CPSCU_ICUSARH_SAIELSR61                 (1 << 29)  /* Security attributes of registers for ICU0event link setting1. */
+#define R_CPSCU_ICUSARH_SAIELSR60                 (1 << 28)  /* Security attributes of registers for ICU0 event link setting1 */
 
-#define R_CPSCU_ICUSARH_SAIELSR62                 (1 << 30)  /* Security attributes of registers for ICU0event link setting1. */
+#define R_CPSCU_ICUSARH_SAIELSR61                 (1 << 29)  /* Security attributes of registers for ICU0 event link setting1 */
 
-#define R_CPSCU_ICUSARH_SAIELSR63                 (1 << 31)  /* Security attributes of registers for ICU0event link setting1. */
+#define R_CPSCU_ICUSARH_SAIELSR62                 (1 << 30)  /* Security attributes of registers for ICU0 event link setting1 */
+
+#define R_CPSCU_ICUSARH_SAIELSR63                 (1 << 31)  /* Security attributes of registers for ICU0 event link setting1 */
 
 /* ICUSARI Register bit definitions */
-#define R_CPSCU_ICUSARI_SAIELSR64                 (1 << 0)  /* Security attributes of registers for ICU0 event link setting2. */
+#define R_CPSCU_ICUSARI_SAIELSR_S                 (1 << 0)  /* Security attributes of registers for ICU0 event link setting2 */
 
-#define R_CPSCU_ICUSARI_SAIELSR65                 (1 << 1)  /* Security attributes of registers for ICU0 event link setting2. */
+#define R_CPSCU_ICUSARI_SAIELSR64                 (1 << 0)  /* Security attributes of registers for ICU0 event link setting2 */
 
-#define R_CPSCU_ICUSARI_SAIELSR66                 (1 << 2)  /* Security attributes of registers for ICU0 event link setting2. */
+#define R_CPSCU_ICUSARI_SAIELSR65                 (1 << 1)  /* Security attributes of registers for ICU0 event link setting2 */
 
-#define R_CPSCU_ICUSARI_SAIELSR67                 (1 << 3)  /* Security attributes of registers for ICU0 event link setting2. */
+#define R_CPSCU_ICUSARI_SAIELSR66                 (1 << 2)  /* Security attributes of registers for ICU0 event link setting2 */
 
-#define R_CPSCU_ICUSARI_SAIELSR68                 (1 << 4)  /* Security attributes of registers for ICU0 event link setting2. */
+#define R_CPSCU_ICUSARI_SAIELSR67                 (1 << 3)  /* Security attributes of registers for ICU0 event link setting2 */
 
-#define R_CPSCU_ICUSARI_SAIELSR69                 (1 << 5)  /* Security attributes of registers for ICU0 event link setting2. */
+#define R_CPSCU_ICUSARI_SAIELSR68                 (1 << 4)  /* Security attributes of registers for ICU0 event link setting2 */
 
-#define R_CPSCU_ICUSARI_SAIELSR70                 (1 << 6)  /* Security attributes of registers for ICU0 event link setting2. */
+#define R_CPSCU_ICUSARI_SAIELSR69                 (1 << 5)  /* Security attributes of registers for ICU0 event link setting2 */
 
-#define R_CPSCU_ICUSARI_SAIELSR71                 (1 << 7)  /* Security attributes of registers for ICU0 event link setting2. */
+#define R_CPSCU_ICUSARI_SAIELSR70                 (1 << 6)  /* Security attributes of registers for ICU0 event link setting2 */
 
-#define R_CPSCU_ICUSARI_SAIELSR72                 (1 << 8)  /* Security attributes of registers for ICU0 event link setting2. */
+#define R_CPSCU_ICUSARI_SAIELSR71                 (1 << 7)  /* Security attributes of registers for ICU0 event link setting2 */
 
-#define R_CPSCU_ICUSARI_SAIELSR73                 (1 << 9)  /* Security attributes of registers for ICU0 event link setting2. */
+#define R_CPSCU_ICUSARI_SAIELSR72                 (1 << 8)  /* Security attributes of registers for ICU0 event link setting2 */
 
-#define R_CPSCU_ICUSARI_SAIELSR74                 (1 << 10)  /* Security attributes of registers for ICU0 event link setting2. */
+#define R_CPSCU_ICUSARI_SAIELSR73                 (1 << 9)  /* Security attributes of registers for ICU0 event link setting2 */
 
-#define R_CPSCU_ICUSARI_SAIELSR75                 (1 << 11)  /* Security attributes of registers for ICU0 event link setting2. */
+#define R_CPSCU_ICUSARI_SAIELSR74                 (1 << 10)  /* Security attributes of registers for ICU0 event link setting2 */
 
-#define R_CPSCU_ICUSARI_SAIELSR76                 (1 << 12)  /* Security attributes of registers for ICU0 event link setting2. */
+#define R_CPSCU_ICUSARI_SAIELSR75                 (1 << 11)  /* Security attributes of registers for ICU0 event link setting2 */
 
-#define R_CPSCU_ICUSARI_SAIELSR77                 (1 << 13)  /* Security attributes of registers for ICU0 event link setting2. */
+#define R_CPSCU_ICUSARI_SAIELSR76                 (1 << 12)  /* Security attributes of registers for ICU0 event link setting2 */
 
-#define R_CPSCU_ICUSARI_SAIELSR78                 (1 << 14)  /* Security attributes of registers for ICU0 event link setting2. */
+#define R_CPSCU_ICUSARI_SAIELSR77                 (1 << 13)  /* Security attributes of registers for ICU0 event link setting2 */
 
-#define R_CPSCU_ICUSARI_SAIELSR79                 (1 << 15)  /* Security attributes of registers for ICU0 event link setting2. */
+#define R_CPSCU_ICUSARI_SAIELSR78                 (1 << 14)  /* Security attributes of registers for ICU0 event link setting2 */
 
-#define R_CPSCU_ICUSARI_SAIELSR80                 (1 << 16)  /* Security attributes of registers for ICU0 event link setting2. */
+#define R_CPSCU_ICUSARI_SAIELSR79                 (1 << 15)  /* Security attributes of registers for ICU0 event link setting2 */
 
-#define R_CPSCU_ICUSARI_SAIELSR81                 (1 << 17)  /* Security attributes of registers for ICU0 event link setting2. */
+#define R_CPSCU_ICUSARI_SAIELSR80                 (1 << 16)  /* Security attributes of registers for ICU0 event link setting2 */
 
-#define R_CPSCU_ICUSARI_SAIELSR82                 (1 << 18)  /* Security attributes of registers for ICU0 event link setting2. */
+#define R_CPSCU_ICUSARI_SAIELSR81                 (1 << 17)  /* Security attributes of registers for ICU0 event link setting2 */
 
-#define R_CPSCU_ICUSARI_SAIELSR83                 (1 << 19)  /* Security attributes of registers for ICU0 event link setting2. */
+#define R_CPSCU_ICUSARI_SAIELSR82                 (1 << 18)  /* Security attributes of registers for ICU0 event link setting2 */
 
-#define R_CPSCU_ICUSARI_SAIELSR84                 (1 << 20)  /* Security attributes of registers for ICU0 event link setting2. */
+#define R_CPSCU_ICUSARI_SAIELSR83                 (1 << 19)  /* Security attributes of registers for ICU0 event link setting2 */
 
-#define R_CPSCU_ICUSARI_SAIELSR85                 (1 << 21)  /* Security attributes of registers for ICU0 event link setting2. */
+#define R_CPSCU_ICUSARI_SAIELSR84                 (1 << 20)  /* Security attributes of registers for ICU0 event link setting2 */
 
-#define R_CPSCU_ICUSARI_SAIELSR86                 (1 << 22)  /* Security attributes of registers for ICU0 event link setting2. */
+#define R_CPSCU_ICUSARI_SAIELSR85                 (1 << 21)  /* Security attributes of registers for ICU0 event link setting2 */
 
-#define R_CPSCU_ICUSARI_SAIELSR87                 (1 << 23)  /* Security attributes of registers for ICU0 event link setting2. */
+#define R_CPSCU_ICUSARI_SAIELSR86                 (1 << 22)  /* Security attributes of registers for ICU0 event link setting2 */
 
-#define R_CPSCU_ICUSARI_SAIELSR88                 (1 << 24)  /* Security attributes of registers for ICU0 event link setting2. */
+#define R_CPSCU_ICUSARI_SAIELSR87                 (1 << 23)  /* Security attributes of registers for ICU0 event link setting2 */
 
-#define R_CPSCU_ICUSARI_SAIELSR89                 (1 << 25)  /* Security attributes of registers for ICU0 event link setting2. */
+#define R_CPSCU_ICUSARI_SAIELSR88                 (1 << 24)  /* Security attributes of registers for ICU0 event link setting2 */
 
-#define R_CPSCU_ICUSARI_SAIELSR90                 (1 << 26)  /* Security attributes of registers for ICU0 event link setting2. */
+#define R_CPSCU_ICUSARI_SAIELSR89                 (1 << 25)  /* Security attributes of registers for ICU0 event link setting2 */
 
-#define R_CPSCU_ICUSARI_SAIELSR91                 (1 << 27)  /* Security attributes of registers for ICU0 event link setting2. */
+#define R_CPSCU_ICUSARI_SAIELSR90                 (1 << 26)  /* Security attributes of registers for ICU0 event link setting2 */
 
-#define R_CPSCU_ICUSARI_SAIELSR92                 (1 << 28)  /* Security attributes of registers for ICU0 event link setting2. */
+#define R_CPSCU_ICUSARI_SAIELSR91                 (1 << 27)  /* Security attributes of registers for ICU0 event link setting2 */
 
-#define R_CPSCU_ICUSARI_SAIELSR93                 (1 << 29)  /* Security attributes of registers for ICU0 event link setting2. */
+#define R_CPSCU_ICUSARI_SAIELSR92                 (1 << 28)  /* Security attributes of registers for ICU0 event link setting2 */
 
-#define R_CPSCU_ICUSARI_SAIELSR94                 (1 << 30)  /* Security attributes of registers for ICU0 event link setting2. */
+#define R_CPSCU_ICUSARI_SAIELSR93                 (1 << 29)  /* Security attributes of registers for ICU0 event link setting2 */
 
-#define R_CPSCU_ICUSARI_SAIELSR95                 (1 << 31)  /* Security attributes of registers for ICU0 event link setting2. */
+#define R_CPSCU_ICUSARI_SAIELSR94                 (1 << 30)  /* Security attributes of registers for ICU0 event link setting2 */
+
+#define R_CPSCU_ICUSARI_SAIELSR95                 (1 << 31)  /* Security attributes of registers for ICU0 event link setting2 */
 
 /* ICUSARJ Register bit definitions */
-#define R_CPSCU_ICUSARJ_SAIELSR0                  (1 << 0)  /* Security attributes of registers for ICU1 event link setting0. */
+#define R_CPSCU_ICUSARJ_SAIELSR_S                 (1 << 0)  /* Security attributes of registers for ICU1 event link setting0 */
 
-#define R_CPSCU_ICUSARJ_SAIELSR1                  (1 << 1)  /* Security attributes of registers for ICU1 event link setting0. */
+#define R_CPSCU_ICUSARJ_SAIELSR0                  (1 << 0)  /* Security attributes of registers for ICU1 event link setting0 */
 
-#define R_CPSCU_ICUSARJ_SAIELSR2                  (1 << 2)  /* Security attributes of registers for ICU1 event link setting0. */
+#define R_CPSCU_ICUSARJ_SAIELSR1                  (1 << 1)  /* Security attributes of registers for ICU1 event link setting0 */
 
-#define R_CPSCU_ICUSARJ_SAIELSR3                  (1 << 3)  /* Security attributes of registers for ICU1 event link setting0. */
+#define R_CPSCU_ICUSARJ_SAIELSR2                  (1 << 2)  /* Security attributes of registers for ICU1 event link setting0 */
 
-#define R_CPSCU_ICUSARJ_SAIELSR4                  (1 << 4)  /* Security attributes of registers for ICU1 event link setting0. */
+#define R_CPSCU_ICUSARJ_SAIELSR3                  (1 << 3)  /* Security attributes of registers for ICU1 event link setting0 */
 
-#define R_CPSCU_ICUSARJ_SAIELSR5                  (1 << 5)  /* Security attributes of registers for ICU1 event link setting0. */
+#define R_CPSCU_ICUSARJ_SAIELSR4                  (1 << 4)  /* Security attributes of registers for ICU1 event link setting0 */
 
-#define R_CPSCU_ICUSARJ_SAIELSR6                  (1 << 6)  /* Security attributes of registers for ICU1 event link setting0. */
+#define R_CPSCU_ICUSARJ_SAIELSR5                  (1 << 5)  /* Security attributes of registers for ICU1 event link setting0 */
 
-#define R_CPSCU_ICUSARJ_SAIELSR7                  (1 << 7)  /* Security attributes of registers for ICU1 event link setting0. */
+#define R_CPSCU_ICUSARJ_SAIELSR6                  (1 << 6)  /* Security attributes of registers for ICU1 event link setting0 */
 
-#define R_CPSCU_ICUSARJ_SAIELSR8                  (1 << 8)  /* Security attributes of registers for ICU1 event link setting0. */
+#define R_CPSCU_ICUSARJ_SAIELSR7                  (1 << 7)  /* Security attributes of registers for ICU1 event link setting0 */
 
-#define R_CPSCU_ICUSARJ_SAIELSR9                  (1 << 9)  /* Security attributes of registers for ICU1 event link setting0. */
+#define R_CPSCU_ICUSARJ_SAIELSR8                  (1 << 8)  /* Security attributes of registers for ICU1 event link setting0 */
 
-#define R_CPSCU_ICUSARJ_SAIELSR10                 (1 << 10)  /* Security attributes of registers for ICU1 event link setting0. */
+#define R_CPSCU_ICUSARJ_SAIELSR9                  (1 << 9)  /* Security attributes of registers for ICU1 event link setting0 */
 
-#define R_CPSCU_ICUSARJ_SAIELSR11                 (1 << 11)  /* Security attributes of registers for ICU1 event link setting0. */
+#define R_CPSCU_ICUSARJ_SAIELSR10                 (1 << 10)  /* Security attributes of registers for ICU1 event link setting0 */
 
-#define R_CPSCU_ICUSARJ_SAIELSR12                 (1 << 12)  /* Security attributes of registers for ICU1 event link setting0. */
+#define R_CPSCU_ICUSARJ_SAIELSR11                 (1 << 11)  /* Security attributes of registers for ICU1 event link setting0 */
 
-#define R_CPSCU_ICUSARJ_SAIELSR13                 (1 << 13)  /* Security attributes of registers for ICU1 event link setting0. */
+#define R_CPSCU_ICUSARJ_SAIELSR12                 (1 << 12)  /* Security attributes of registers for ICU1 event link setting0 */
 
-#define R_CPSCU_ICUSARJ_SAIELSR14                 (1 << 14)  /* Security attributes of registers for ICU1 event link setting0. */
+#define R_CPSCU_ICUSARJ_SAIELSR13                 (1 << 13)  /* Security attributes of registers for ICU1 event link setting0 */
 
-#define R_CPSCU_ICUSARJ_SAIELSR15                 (1 << 15)  /* Security attributes of registers for ICU1 event link setting0. */
+#define R_CPSCU_ICUSARJ_SAIELSR14                 (1 << 14)  /* Security attributes of registers for ICU1 event link setting0 */
 
-#define R_CPSCU_ICUSARJ_SAIELSR16                 (1 << 16)  /* Security attributes of registers for ICU1 event link setting0. */
+#define R_CPSCU_ICUSARJ_SAIELSR15                 (1 << 15)  /* Security attributes of registers for ICU1 event link setting0 */
 
-#define R_CPSCU_ICUSARJ_SAIELSR17                 (1 << 17)  /* Security attributes of registers for ICU1 event link setting0. */
+#define R_CPSCU_ICUSARJ_SAIELSR16                 (1 << 16)  /* Security attributes of registers for ICU1 event link setting0 */
 
-#define R_CPSCU_ICUSARJ_SAIELSR18                 (1 << 18)  /* Security attributes of registers for ICU1 event link setting0. */
+#define R_CPSCU_ICUSARJ_SAIELSR17                 (1 << 17)  /* Security attributes of registers for ICU1 event link setting0 */
 
-#define R_CPSCU_ICUSARJ_SAIELSR19                 (1 << 19)  /* Security attributes of registers for ICU1 event link setting0. */
+#define R_CPSCU_ICUSARJ_SAIELSR18                 (1 << 18)  /* Security attributes of registers for ICU1 event link setting0 */
 
-#define R_CPSCU_ICUSARJ_SAIELSR20                 (1 << 20)  /* Security attributes of registers for ICU1 event link setting0. */
+#define R_CPSCU_ICUSARJ_SAIELSR19                 (1 << 19)  /* Security attributes of registers for ICU1 event link setting0 */
 
-#define R_CPSCU_ICUSARJ_SAIELSR21                 (1 << 21)  /* Security attributes of registers for ICU1 event link setting0. */
+#define R_CPSCU_ICUSARJ_SAIELSR20                 (1 << 20)  /* Security attributes of registers for ICU1 event link setting0 */
 
-#define R_CPSCU_ICUSARJ_SAIELSR22                 (1 << 22)  /* Security attributes of registers for ICU1 event link setting0. */
+#define R_CPSCU_ICUSARJ_SAIELSR21                 (1 << 21)  /* Security attributes of registers for ICU1 event link setting0 */
 
-#define R_CPSCU_ICUSARJ_SAIELSR23                 (1 << 23)  /* Security attributes of registers for ICU1 event link setting0. */
+#define R_CPSCU_ICUSARJ_SAIELSR22                 (1 << 22)  /* Security attributes of registers for ICU1 event link setting0 */
 
-#define R_CPSCU_ICUSARJ_SAIELSR24                 (1 << 24)  /* Security attributes of registers for ICU1 event link setting0. */
+#define R_CPSCU_ICUSARJ_SAIELSR23                 (1 << 23)  /* Security attributes of registers for ICU1 event link setting0 */
 
-#define R_CPSCU_ICUSARJ_SAIELSR25                 (1 << 25)  /* Security attributes of registers for ICU1 event link setting0. */
+#define R_CPSCU_ICUSARJ_SAIELSR24                 (1 << 24)  /* Security attributes of registers for ICU1 event link setting0 */
 
-#define R_CPSCU_ICUSARJ_SAIELSR26                 (1 << 26)  /* Security attributes of registers for ICU1 event link setting0. */
+#define R_CPSCU_ICUSARJ_SAIELSR25                 (1 << 25)  /* Security attributes of registers for ICU1 event link setting0 */
 
-#define R_CPSCU_ICUSARJ_SAIELSR27                 (1 << 27)  /* Security attributes of registers for ICU1 event link setting0. */
+#define R_CPSCU_ICUSARJ_SAIELSR26                 (1 << 26)  /* Security attributes of registers for ICU1 event link setting0 */
 
-#define R_CPSCU_ICUSARJ_SAIELSR28                 (1 << 28)  /* Security attributes of registers for ICU1 event link setting0. */
+#define R_CPSCU_ICUSARJ_SAIELSR27                 (1 << 27)  /* Security attributes of registers for ICU1 event link setting0 */
 
-#define R_CPSCU_ICUSARJ_SAIELSR29                 (1 << 29)  /* Security attributes of registers for ICU1 event link setting0. */
+#define R_CPSCU_ICUSARJ_SAIELSR28                 (1 << 28)  /* Security attributes of registers for ICU1 event link setting0 */
 
-#define R_CPSCU_ICUSARJ_SAIELSR30                 (1 << 30)  /* Security attributes of registers for ICU1 event link setting0. */
+#define R_CPSCU_ICUSARJ_SAIELSR29                 (1 << 29)  /* Security attributes of registers for ICU1 event link setting0 */
 
-#define R_CPSCU_ICUSARJ_SAIELSR31                 (1 << 31)  /* Security attributes of registers for ICU1 event link setting0. */
+#define R_CPSCU_ICUSARJ_SAIELSR30                 (1 << 30)  /* Security attributes of registers for ICU1 event link setting0 */
+
+#define R_CPSCU_ICUSARJ_SAIELSR31                 (1 << 31)  /* Security attributes of registers for ICU1 event link setting0 */
 
 /* ICUSARK Register bit definitions */
+#define R_CPSCU_ICUSARK_SAIELSR_S                 (1 << 0)  /* Security attributes of registers for ICU1 event link setting1 */
+
 #define R_CPSCU_ICUSARK_SAIELSR32                 (1 << 0)  /* Security attributes of registers for ICU1 event link setting1 */
 
 #define R_CPSCU_ICUSARK_SAIELSR33                 (1 << 1)  /* Security attributes of registers for ICU1 event link setting1 */
@@ -627,69 +639,71 @@
 #define R_CPSCU_ICUSARK_SAIELSR63                 (1 << 31)  /* Security attributes of registers for ICU1 event link setting1 */
 
 /* ICUSARL Register bit definitions */
-#define R_CPSCU_ICUSARL_SAIELSR64                 (1 << 0)  /* Security attributes of registers for ICU1 event link setting2. */
+#define R_CPSCU_ICUSARL_SAIELSR_S                 (1 << 0)  /* Security attributes of registers for ICU1 event link setting2 */
 
-#define R_CPSCU_ICUSARL_SAIELSR65                 (1 << 1)  /* Security attributes of registers for ICU1 event link setting2. */
+#define R_CPSCU_ICUSARL_SAIELSR64                 (1 << 0)  /* Security attributes of registers for ICU1 event link setting2 */
 
-#define R_CPSCU_ICUSARL_SAIELSR66                 (1 << 2)  /* Security attributes of registers for ICU1 event link setting2. */
+#define R_CPSCU_ICUSARL_SAIELSR65                 (1 << 1)  /* Security attributes of registers for ICU1 event link setting2 */
 
-#define R_CPSCU_ICUSARL_SAIELSR67                 (1 << 3)  /* Security attributes of registers for ICU1 event link setting2. */
+#define R_CPSCU_ICUSARL_SAIELSR66                 (1 << 2)  /* Security attributes of registers for ICU1 event link setting2 */
 
-#define R_CPSCU_ICUSARL_SAIELSR68                 (1 << 4)  /* Security attributes of registers for ICU1 event link setting2. */
+#define R_CPSCU_ICUSARL_SAIELSR67                 (1 << 3)  /* Security attributes of registers for ICU1 event link setting2 */
 
-#define R_CPSCU_ICUSARL_SAIELSR69                 (1 << 5)  /* Security attributes of registers for ICU1 event link setting2. */
+#define R_CPSCU_ICUSARL_SAIELSR68                 (1 << 4)  /* Security attributes of registers for ICU1 event link setting2 */
 
-#define R_CPSCU_ICUSARL_SAIELSR70                 (1 << 6)  /* Security attributes of registers for ICU1 event link setting2. */
+#define R_CPSCU_ICUSARL_SAIELSR69                 (1 << 5)  /* Security attributes of registers for ICU1 event link setting2 */
 
-#define R_CPSCU_ICUSARL_SAIELSR71                 (1 << 7)  /* Security attributes of registers for ICU1 event link setting2. */
+#define R_CPSCU_ICUSARL_SAIELSR70                 (1 << 6)  /* Security attributes of registers for ICU1 event link setting2 */
 
-#define R_CPSCU_ICUSARL_SAIELSR72                 (1 << 8)  /* Security attributes of registers for ICU1 event link setting2. */
+#define R_CPSCU_ICUSARL_SAIELSR71                 (1 << 7)  /* Security attributes of registers for ICU1 event link setting2 */
 
-#define R_CPSCU_ICUSARL_SAIELSR73                 (1 << 9)  /* Security attributes of registers for ICU1 event link setting2. */
+#define R_CPSCU_ICUSARL_SAIELSR72                 (1 << 8)  /* Security attributes of registers for ICU1 event link setting2 */
 
-#define R_CPSCU_ICUSARL_SAIELSR74                 (1 << 10)  /* Security attributes of registers for ICU1 event link setting2. */
+#define R_CPSCU_ICUSARL_SAIELSR73                 (1 << 9)  /* Security attributes of registers for ICU1 event link setting2 */
 
-#define R_CPSCU_ICUSARL_SAIELSR75                 (1 << 11)  /* Security attributes of registers for ICU1 event link setting2. */
+#define R_CPSCU_ICUSARL_SAIELSR74                 (1 << 10)  /* Security attributes of registers for ICU1 event link setting2 */
 
-#define R_CPSCU_ICUSARL_SAIELSR76                 (1 << 12)  /* Security attributes of registers for ICU1 event link setting2. */
+#define R_CPSCU_ICUSARL_SAIELSR75                 (1 << 11)  /* Security attributes of registers for ICU1 event link setting2 */
 
-#define R_CPSCU_ICUSARL_SAIELSR77                 (1 << 13)  /* Security attributes of registers for ICU1 event link setting2. */
+#define R_CPSCU_ICUSARL_SAIELSR76                 (1 << 12)  /* Security attributes of registers for ICU1 event link setting2 */
 
-#define R_CPSCU_ICUSARL_SAIELSR78                 (1 << 14)  /* Security attributes of registers for ICU1 event link setting2. */
+#define R_CPSCU_ICUSARL_SAIELSR77                 (1 << 13)  /* Security attributes of registers for ICU1 event link setting2 */
 
-#define R_CPSCU_ICUSARL_SAIELSR79                 (1 << 15)  /* Security attributes of registers for ICU1 event link setting2. */
+#define R_CPSCU_ICUSARL_SAIELSR78                 (1 << 14)  /* Security attributes of registers for ICU1 event link setting2 */
 
-#define R_CPSCU_ICUSARL_SAIELSR80                 (1 << 16)  /* Security attributes of registers for ICU1 event link setting2. */
+#define R_CPSCU_ICUSARL_SAIELSR79                 (1 << 15)  /* Security attributes of registers for ICU1 event link setting2 */
 
-#define R_CPSCU_ICUSARL_SAIELSR81                 (1 << 17)  /* Security attributes of registers for ICU1 event link setting2. */
+#define R_CPSCU_ICUSARL_SAIELSR80                 (1 << 16)  /* Security attributes of registers for ICU1 event link setting2 */
 
-#define R_CPSCU_ICUSARL_SAIELSR82                 (1 << 18)  /* Security attributes of registers for ICU1 event link setting2. */
+#define R_CPSCU_ICUSARL_SAIELSR81                 (1 << 17)  /* Security attributes of registers for ICU1 event link setting2 */
 
-#define R_CPSCU_ICUSARL_SAIELSR83                 (1 << 19)  /* Security attributes of registers for ICU1 event link setting2. */
+#define R_CPSCU_ICUSARL_SAIELSR82                 (1 << 18)  /* Security attributes of registers for ICU1 event link setting2 */
 
-#define R_CPSCU_ICUSARL_SAIELSR84                 (1 << 20)  /* Security attributes of registers for ICU1 event link setting2. */
+#define R_CPSCU_ICUSARL_SAIELSR83                 (1 << 19)  /* Security attributes of registers for ICU1 event link setting2 */
 
-#define R_CPSCU_ICUSARL_SAIELSR85                 (1 << 21)  /* Security attributes of registers for ICU1 event link setting2. */
+#define R_CPSCU_ICUSARL_SAIELSR84                 (1 << 20)  /* Security attributes of registers for ICU1 event link setting2 */
 
-#define R_CPSCU_ICUSARL_SAIELSR86                 (1 << 22)  /* Security attributes of registers for ICU1 event link setting2. */
+#define R_CPSCU_ICUSARL_SAIELSR85                 (1 << 21)  /* Security attributes of registers for ICU1 event link setting2 */
 
-#define R_CPSCU_ICUSARL_SAIELSR87                 (1 << 23)  /* Security attributes of registers for ICU1 event link setting2. */
+#define R_CPSCU_ICUSARL_SAIELSR86                 (1 << 22)  /* Security attributes of registers for ICU1 event link setting2 */
 
-#define R_CPSCU_ICUSARL_SAIELSR88                 (1 << 24)  /* Security attributes of registers for ICU1 event link setting2. */
+#define R_CPSCU_ICUSARL_SAIELSR87                 (1 << 23)  /* Security attributes of registers for ICU1 event link setting2 */
 
-#define R_CPSCU_ICUSARL_SAIELSR89                 (1 << 25)  /* Security attributes of registers for ICU1 event link setting2. */
+#define R_CPSCU_ICUSARL_SAIELSR88                 (1 << 24)  /* Security attributes of registers for ICU1 event link setting2 */
 
-#define R_CPSCU_ICUSARL_SAIELSR90                 (1 << 26)  /* Security attributes of registers for ICU1 event link setting2. */
+#define R_CPSCU_ICUSARL_SAIELSR89                 (1 << 25)  /* Security attributes of registers for ICU1 event link setting2 */
 
-#define R_CPSCU_ICUSARL_SAIELSR91                 (1 << 27)  /* Security attributes of registers for ICU1 event link setting2. */
+#define R_CPSCU_ICUSARL_SAIELSR90                 (1 << 26)  /* Security attributes of registers for ICU1 event link setting2 */
 
-#define R_CPSCU_ICUSARL_SAIELSR92                 (1 << 28)  /* Security attributes of registers for ICU1 event link setting2. */
+#define R_CPSCU_ICUSARL_SAIELSR91                 (1 << 27)  /* Security attributes of registers for ICU1 event link setting2 */
 
-#define R_CPSCU_ICUSARL_SAIELSR93                 (1 << 29)  /* Security attributes of registers for ICU1 event link setting2. */
+#define R_CPSCU_ICUSARL_SAIELSR92                 (1 << 28)  /* Security attributes of registers for ICU1 event link setting2 */
 
-#define R_CPSCU_ICUSARL_SAIELSR94                 (1 << 30)  /* Security attributes of registers for ICU1 event link setting2. */
+#define R_CPSCU_ICUSARL_SAIELSR93                 (1 << 29)  /* Security attributes of registers for ICU1 event link setting2 */
 
-#define R_CPSCU_ICUSARL_SAIELSR95                 (1 << 31)  /* Security attributes of registers for ICU1 event link setting2. */
+#define R_CPSCU_ICUSARL_SAIELSR94                 (1 << 30)  /* Security attributes of registers for ICU1 event link setting2 */
+
+#define R_CPSCU_ICUSARL_SAIELSR95                 (1 << 31)  /* Security attributes of registers for ICU1 event link setting2 */
 
 /* BUSSARA Register bit definitions */
 #define R_CPSCU_BUSSARA_BUSSA0                    (1 << 0)  /* Bus Security Attribution A0 */
@@ -703,38 +717,55 @@
 /* BUSPARC Register bit definitions */
 #define R_CPSCU_BUSPARC_BUSPA0                    (1 << 0)  /* External bus controller privilege attribution */
 
+/* NMISR Register bit definitions */
+#define R_CPSCU_NMISR_IWDTST                      (1 << 0)  /* IWDT Underflow/Refresh Error Interrupt Status Flag */
+
+#define R_CPSCU_NMISR_WDTST                       (1 << 1)  /* WDT Underflow/Refresh Error Interrupt Status Flag */
+
+#define R_CPSCU_NMISR_PVD1ST                      (1 << 2)  /* Voltage Monitor 1 Interrupt Status Flag */
+
+#define R_CPSCU_NMISR_PVD2ST                      (1 << 3)  /* Voltage Monitor 2 Interrupt Status Flag */
+
+#define R_CPSCU_NMISR_SOSTST                      (1 << 5)  /* Sub Oscillation Stop Detection Interrupt Status Flag */
+
+#define R_CPSCU_NMISR_OSTST                       (1 << 6)  /* Main Clock Oscillation Stop Detection Interrupt Status Flag */
+
+#define R_CPSCU_NMISR_NMIST                       (1 << 7)  /* NMI Pin Interrupt Status Flag */
+
+#define R_CPSCU_NMISR_BUSST                       (1 << 12)  /* Bus Error Interrupt Status Flag */
+
+#define R_CPSCU_NMISR_CMST                        (1 << 13)  /* Common Memory Error Interrupt Status Flag */
+
+#define R_CPSCU_NMISR_LMST                        (1 << 14)  /* Local Memory Error Interrupt Status Flag */
+
+#define R_CPSCU_NMISR_LUST                        (1 << 15)  /* LockUp Error Interrupt Status Flag */
+
+#define R_CPSCU_NMISR_FPUEXCST                    (1 << 16)  /* FPU Exception Interrupt Status Flag */
+
+#define R_CPSCU_NMISR_MRCRDST                     (1 << 17)  /* MRAM MRC read Error Interrupt Status Flag */
+
+#define R_CPSCU_NMISR_MRERDST                     (1 << 18)  /* MRAM MRE read Error Interrupt Status Flag */
+
+#define R_CPSCU_NMISR_IPCST                       (1 << 20)  /* IPC NMI CPU mutual Interrupt Status Flag */
+
 /* MMPUSARA Register bit definitions */
-#define R_CPSCU_MMPUSARA_MMPUASA0                 (1 << 0)  /* MMPUAn Security Attribution (n = 0 to 7) */
+#define R_CPSCU_MMPUSARA_MMPUASA_S                (1 << 0)  /* MMPUA%s Security Attribution */
 
-#define R_CPSCU_MMPUSARA_MMPUASA1                 (1 << 1)  /* MMPUAn Security Attribution (n = 0 to 7) */
+#define R_CPSCU_MMPUSARA_MMPUASA0                 (1 << 0)  /* MMPUA0 Security Attribution */
 
-#define R_CPSCU_MMPUSARA_MMPUASA2                 (1 << 2)  /* MMPUAn Security Attribution (n = 0 to 7) */
+#define R_CPSCU_MMPUSARA_MMPUASA1                 (1 << 1)  /* MMPUA1 Security Attribution */
 
-#define R_CPSCU_MMPUSARA_MMPUASA3                 (1 << 3)  /* MMPUAn Security Attribution (n = 0 to 7) */
+#define R_CPSCU_MMPUSARA_MMPUASA2                 (1 << 2)  /* MMPUA2 Security Attribution */
 
-#define R_CPSCU_MMPUSARA_MMPUASA4                 (1 << 4)  /* MMPUAn Security Attribution (n = 0 to 7) */
+#define R_CPSCU_MMPUSARA_MMPUASA3                 (1 << 3)  /* MMPUA3 Security Attribution */
 
-#define R_CPSCU_MMPUSARA_MMPUASA5                 (1 << 5)  /* MMPUAn Security Attribution (n = 0 to 7) */
+#define R_CPSCU_MMPUSARA_MMPUASA4                 (1 << 4)  /* MMPUA4 Security Attribution */
 
-#define R_CPSCU_MMPUSARA_MMPUASA6                 (1 << 6)  /* MMPUAn Security Attribution (n = 0 to 7) */
+#define R_CPSCU_MMPUSARA_MMPUASA5                 (1 << 5)  /* MMPUA5 Security Attribution */
 
-#define R_CPSCU_MMPUSARA_MMPUASA7                 (1 << 7)  /* MMPUAn Security Attribution (n = 0 to 7) */
+#define R_CPSCU_MMPUSARA_MMPUASA6                 (1 << 6)  /* MMPUA6 Security Attribution */
 
-#define R_CPSCU_MMPUSARA_MMPUASA16                (1 << 16)  /* MMPUAn Security Attribution (n = 16 to 23) */
-
-#define R_CPSCU_MMPUSARA_MMPUASA17                (1 << 17)  /* MMPUAn Security Attribution (n = 16 to 23) */
-
-#define R_CPSCU_MMPUSARA_MMPUASA18                (1 << 18)  /* MMPUAn Security Attribution (n = 16 to 23) */
-
-#define R_CPSCU_MMPUSARA_MMPUASA19                (1 << 19)  /* MMPUAn Security Attribution (n = 16 to 23) */
-
-#define R_CPSCU_MMPUSARA_MMPUASA20                (1 << 20)  /* MMPUAn Security Attribution (n = 16 to 23) */
-
-#define R_CPSCU_MMPUSARA_MMPUASA21                (1 << 21)  /* MMPUAn Security Attribution (n = 16 to 23) */
-
-#define R_CPSCU_MMPUSARA_MMPUASA22                (1 << 22)  /* MMPUAn Security Attribution (n = 16 to 23) */
-
-#define R_CPSCU_MMPUSARA_MMPUASA23                (1 << 23)  /* MMPUAn Security Attribution (n = 16 to 23) */
+#define R_CPSCU_MMPUSARA_MMPUASA7                 (1 << 7)  /* MMPUA7 Security Attribution */
 
 #define R_CPSCU_MMPUSARA_MMPUASA8                 (1 << 8)  /* MMPUA8 Security Attribution */
 
@@ -751,6 +782,22 @@
 #define R_CPSCU_MMPUSARA_MMPUASA14                (1 << 14)  /* MMPUA14 Security Attribution */
 
 #define R_CPSCU_MMPUSARA_MMPUASA15                (1 << 15)  /* MMPUA15 Security Attribution */
+
+#define R_CPSCU_MMPUSARA_MMPUASA16                (1 << 16)  /* MMPUA16 Security Attribution */
+
+#define R_CPSCU_MMPUSARA_MMPUASA17                (1 << 17)  /* MMPUA17 Security Attribution */
+
+#define R_CPSCU_MMPUSARA_MMPUASA18                (1 << 18)  /* MMPUA18 Security Attribution */
+
+#define R_CPSCU_MMPUSARA_MMPUASA19                (1 << 19)  /* MMPUA19 Security Attribution */
+
+#define R_CPSCU_MMPUSARA_MMPUASA20                (1 << 20)  /* MMPUA20 Security Attribution */
+
+#define R_CPSCU_MMPUSARA_MMPUASA21                (1 << 21)  /* MMPUA21 Security Attribution */
+
+#define R_CPSCU_MMPUSARA_MMPUASA22                (1 << 22)  /* MMPUA22 Security Attribution */
+
+#define R_CPSCU_MMPUSARA_MMPUASA23                (1 << 23)  /* MMPUA23 Security Attribution */
 
 #define R_CPSCU_MMPUSARA_MMPUASA24                (1 << 24)  /* MMPUA24 Security Attribution */
 
@@ -769,11 +816,11 @@
 #define R_CPSCU_MMPUSARA_MMPUASA31                (1 << 31)  /* MMPUA31 Security Attribution */
 
 /* MMPUSARB Register bit definitions */
+#define R_CPSCU_MMPUSARB_MMPUBSA_S                (1 << 0)  /* MMPUB%s Security Attribution */
+
 #define R_CPSCU_MMPUSARB_MMPUBSA0                 (1 << 0)  /* MMPUB0 Security Attribution */
 
 #define R_CPSCU_MMPUSARB_MMPUBSA1                 (1 << 1)  /* MMPUB1 Security Attribution */
-
-#define R_CPSCU_MMPUSARB_MMPUBSA8                 (1 << 8)  /* MMPUB8 Security Attribution */
 
 #define R_CPSCU_MMPUSARB_MMPUBSA2                 (1 << 2)  /* MMPUB2 Security Attribution */
 
@@ -786,6 +833,8 @@
 #define R_CPSCU_MMPUSARB_MMPUBSA6                 (1 << 6)  /* MMPUB6 Security Attribution */
 
 #define R_CPSCU_MMPUSARB_MMPUBSA7                 (1 << 7)  /* MMPUB7 Security Attribution */
+
+#define R_CPSCU_MMPUSARB_MMPUBSA8                 (1 << 8)  /* MMPUB8 Security Attribution */
 
 #define R_CPSCU_MMPUSARB_MMPUBSA9                 (1 << 9)  /* MMPUB9 Security Attribution */
 
@@ -834,45 +883,19 @@
 #define R_CPSCU_MMPUSARB_MMPUBSA31                (1 << 31)  /* MMPUB31 Security Attribution */
 
 /* CPUSAR Register bit definitions */
-#define R_CPSCU_CPUSAR_CPUSA0                     (1 << 0)  /* CPU Security Attribution 0 (CPU0) */
+#define R_CPSCU_CPUSAR_CPUSA_S                    (1 << 0)  /* CPU Security Attribution %s */
 
-#define R_CPSCU_CPUSAR_CPUSA1                     (1 << 1)  /* CPU Security Attribution 1 (CPU1) */
+#define R_CPSCU_CPUSAR_CPUSA0                     (1 << 0)  /* CPU Security Attribution 0 */
+
+#define R_CPSCU_CPUSAR_CPUSA1                     (1 << 1)  /* CPU Security Attribution 1 */
 
 /* DEBUGSAR Register bit definitions */
 #define R_CPSCU_DEBUGSAR_DBGSA0                   (1 << 0)  /* Debug Security Attribution 0 */
 
 /* DMACCHSAR Register bit definitions */
-#define R_CPSCU_DMACCHSAR_SADMAC000               (1 << 0)  /* Security attributes of output and registers for DMAC0 channel */
+#define R_CPSCU_DMACCHSAR_SADMAC0_S               (1 << 0)  /* Security attributes of registers for DMAC0 channel */
 
-#define R_CPSCU_DMACCHSAR_SADMAC001               (1 << 1)  /* Security attributes of output and registers for DMAC0 channel */
-
-#define R_CPSCU_DMACCHSAR_SADMAC002               (1 << 2)  /* Security attributes of output and registers for DMAC0 channel */
-
-#define R_CPSCU_DMACCHSAR_SADMAC003               (1 << 3)  /* Security attributes of output and registers for DMAC0 channel */
-
-#define R_CPSCU_DMACCHSAR_SADMAC004               (1 << 4)  /* Security attributes of output and registers for DMAC0 channel */
-
-#define R_CPSCU_DMACCHSAR_SADMAC005               (1 << 5)  /* Security attributes of output and registers for DMAC0 channel */
-
-#define R_CPSCU_DMACCHSAR_SADMAC006               (1 << 6)  /* Security attributes of output and registers for DMAC0 channel */
-
-#define R_CPSCU_DMACCHSAR_SADMAC007               (1 << 7)  /* Security attributes of output and registers for DMAC0 channel */
-
-#define R_CPSCU_DMACCHSAR_SADMAC100               (1 << 16)  /* Security attributes of output and registers for DMAC1 channel */
-
-#define R_CPSCU_DMACCHSAR_SADMAC101               (1 << 17)  /* Security attributes of output and registers for DMAC1 channel */
-
-#define R_CPSCU_DMACCHSAR_SADMAC102               (1 << 18)  /* Security attributes of output and registers for DMAC1 channel */
-
-#define R_CPSCU_DMACCHSAR_SADMAC103               (1 << 19)  /* Security attributes of output and registers for DMAC1 channel */
-
-#define R_CPSCU_DMACCHSAR_SADMAC104               (1 << 20)  /* Security attributes of output and registers for DMAC1 channel */
-
-#define R_CPSCU_DMACCHSAR_SADMAC105               (1 << 21)  /* Security attributes of output and registers for DMAC1 channel */
-
-#define R_CPSCU_DMACCHSAR_SADMAC106               (1 << 22)  /* Security attributes of output and registers for DMAC1 channel */
-
-#define R_CPSCU_DMACCHSAR_SADMAC107               (1 << 23)  /* Security attributes of output and registers for DMAC1 channel */
+#define R_CPSCU_DMACCHSAR_SADMAC1_S               (1 << 16)  /* Security attributes of registers for DMAC1 channel */
 
 #define R_CPSCU_DMACCHSAR_SADMAC00                (1 << 0)  /* Security attributes of registers for DMAC0 channel */
 
@@ -906,38 +929,13 @@
 
 #define R_CPSCU_DMACCHSAR_SADMAC17                (1 << 23)  /* Security attributes of registers for DMAC1 channel */
 
+/* CPUDSAR Register bit definitions */
+#define R_CPSCU_CPUDSAR_CPUDSA0                   (1 << 0)  /* CPU Debug Security Attribution 0 */
+
 /* DMACCHPAR Register bit definitions */
-#define R_CPSCU_DMACCHPAR_PADMAC000               (1 << 0)  /* Privilege attributes of outputs and registers for DMAC0 channel */
+#define R_CPSCU_DMACCHPAR_PADMAC0_S               (1 << 0)  /* Privilege attributes of outputs and registers for DMAC0 channel */
 
-#define R_CPSCU_DMACCHPAR_PADMAC001               (1 << 1)  /* Privilege attributes of outputs and registers for DMAC0 channel */
-
-#define R_CPSCU_DMACCHPAR_PADMAC002               (1 << 2)  /* Privilege attributes of outputs and registers for DMAC0 channel */
-
-#define R_CPSCU_DMACCHPAR_PADMAC003               (1 << 3)  /* Privilege attributes of outputs and registers for DMAC0 channel */
-
-#define R_CPSCU_DMACCHPAR_PADMAC004               (1 << 4)  /* Privilege attributes of outputs and registers for DMAC0 channel */
-
-#define R_CPSCU_DMACCHPAR_PADMAC005               (1 << 5)  /* Privilege attributes of outputs and registers for DMAC0 channel */
-
-#define R_CPSCU_DMACCHPAR_PADMAC006               (1 << 6)  /* Privilege attributes of outputs and registers for DMAC0 channel */
-
-#define R_CPSCU_DMACCHPAR_PADMAC007               (1 << 7)  /* Privilege attributes of outputs and registers for DMAC0 channel */
-
-#define R_CPSCU_DMACCHPAR_PADMAC100               (1 << 16)  /* Privilege attributes of outputs and registers for DMAC1 channel */
-
-#define R_CPSCU_DMACCHPAR_PADMAC101               (1 << 17)  /* Privilege attributes of outputs and registers for DMAC1 channel */
-
-#define R_CPSCU_DMACCHPAR_PADMAC102               (1 << 18)  /* Privilege attributes of outputs and registers for DMAC1 channel */
-
-#define R_CPSCU_DMACCHPAR_PADMAC103               (1 << 19)  /* Privilege attributes of outputs and registers for DMAC1 channel */
-
-#define R_CPSCU_DMACCHPAR_PADMAC104               (1 << 20)  /* Privilege attributes of outputs and registers for DMAC1 channel */
-
-#define R_CPSCU_DMACCHPAR_PADMAC105               (1 << 21)  /* Privilege attributes of outputs and registers for DMAC1 channel */
-
-#define R_CPSCU_DMACCHPAR_PADMAC106               (1 << 22)  /* Privilege attributes of outputs and registers for DMAC1 channel */
-
-#define R_CPSCU_DMACCHPAR_PADMAC107               (1 << 23)  /* Privilege attributes of outputs and registers for DMAC1 channel */
+#define R_CPSCU_DMACCHPAR_PADMAC1_S               (1 << 16)  /* Privilege attributes of outputs and registers for DMAC1 channel */
 
 #define R_CPSCU_DMACCHPAR_PADMAC00                (1 << 0)  /* Privilege attributes of outputs and registers for DMAC0 channel */
 
@@ -971,21 +969,21 @@
 
 #define R_CPSCU_DMACCHPAR_PADMAC17                (1 << 23)  /* Privilege attributes of outputs and registers for DMAC1 channel */
 
-/* CACHESAR Register bit definitions */
-#define R_CPSCU_CACHESAR_CACHESA                  (1 << 0)  /* Security attributes of registers for cache control */
+/* SRAMSABAR Register bit definitions */
+#define R_CPSCU_SRAMSABAR_SRAMSABAR_SHIFT         (13)  /* Boundary address between secure and non-secure */
+#define R_CPSCU_SRAMSABAR_SRAMSABAR_MASK          0x1fe000
 
-#define R_CPSCU_CACHESAR_CACHEESA                 (1 << 2)  /* Security attributes of registers for cache error */
+/* CACHESAR Register bit definitions */
+#define R_CPSCU_CACHESAR_CACHESA                  (1 << 0)  /* Security attributes of registers for CACHE Control */
+
+#define R_CPSCU_CACHESAR_CACHEESA                 (1 << 2)  /* Security attributes of registers for CACHE Error */
 
 /* TCMSAR Register bit definitions */
-#define R_CPSCU_TCMSAR_TCMSA                      (1 << 0)  /* Security attributes of registers for TCM control */
+#define R_CPSCU_TCMSAR_TCMSA                      (1 << 0)  /* Security attributes of registers for TCM Control */
 
-/* TCMSABARC Register bit definitions */
-#define R_CPSCU_TCMSABARC_TCMSABA_SHIFT           (13)  /* Boundary address between secure and non-secure (start address of non-secure region). */
-#define R_CPSCU_TCMSABARC_TCMSABA_MASK            0x7e000
-
-/* TCMSABARS Register bit definitions */
-#define R_CPSCU_TCMSABARS_TCMSABA_SHIFT           (13)  /* Boundary address between secure and non-secure (start address of non-secure region). */
-#define R_CPSCU_TCMSABARS_TCMSABA_MASK            0x7e000
+/* TCMSABAR Register bit definitions */
+#define R_CPSCU_TCMSABAR_TCMSABA_SHIFT            (13)  /* Boundary address between secure and non-secure. (Start address of non-secure region) */
+#define R_CPSCU_TCMSABAR_TCMSABA_MASK             0x7e000
 
 /* SRAMESAR Register bit definitions */
 #define R_CPSCU_SRAMESAR_SRAMESA                  (1 << 0)  /* ECC region Security Attribution */
@@ -993,18 +991,16 @@
 /* TEVTRCR Register bit definitions */
 #define R_CPSCU_TEVTRCR_TEVTE                     (1 << 0)  /* Trusted Event Route Control Register for ELC */
 
+#define R_CPSCU_TEVTRCR_TEVTEICU_S                (1 << 1)  /* Trusted Event Route Control Register for ICU%s */
+
 #define R_CPSCU_TEVTRCR_TEVTEICU0                 (1 << 1)  /* Trusted Event Route Control Register for ICU0 */
 
 #define R_CPSCU_TEVTRCR_TEVTEICU1                 (1 << 2)  /* Trusted Event Route Control Register for ICU1 */
 
 /* IPCSAR Register bit definitions */
-#define R_CPSCU_IPCSAR_SAIPCSEM0                  (1 << 0)  /* Security attributes of registers for IPCSEMn (n = 0 to 7) */
+#define R_CPSCU_IPCSAR_SAIPCSEM_S                 (1 << 0)  /* Security attributes of registers for IPCSEMn */
 
-#define R_CPSCU_IPCSAR_SAIPCSEM1                  (1 << 1)  /* Security attributes of registers for IPCSEMn (n = 8 to 15) */
-
-#define R_CPSCU_IPCSAR_SAIPCNMI0                  (1 << 8)  /* Security attributes of IPC0NMISTA, IPC0NMISET and IPC0NMICLR */
-
-#define R_CPSCU_IPCSAR_SAIPCNMI1                  (1 << 9)  /* Security attributes of IPC1NMISTA, IPC1NMISET and IPC1NMICLR */
+#define R_CPSCU_IPCSAR_SAIPCNMI_S                 (1 << 8)  /* Security attributes of the registers */
 
 #define R_CPSCU_IPCSAR_SAIPCIR0                   (1 << 16)  /* Security attributes of registers for IPC0STA0, IPC0ISET0, IPC0TXD0, IPC0RXD0 and IPC0CLR0 */
 
@@ -1014,14 +1010,18 @@
 
 #define R_CPSCU_IPCSAR_SAIPCIR3                   (1 << 19)  /* Security attributes of registers for IPC1STA1, IPC1ISET1, IPC1TXD1, IPC1RXD1 and IPC1CLR1 */
 
+#define R_CPSCU_IPCSAR_SAIPCSEM0                  (1 << 0)  /* Security attributes of registers for IPCSEMn */
+
+#define R_CPSCU_IPCSAR_SAIPCSEM1                  (1 << 1)  /* Security attributes of registers for IPCSEMn */
+
+#define R_CPSCU_IPCSAR_SAIPCNMI0                  (1 << 8)  /* Security attributes of the registers */
+
+#define R_CPSCU_IPCSAR_SAIPCNMI1                  (1 << 9)  /* Security attributes of the registers */
+
 /* IPCPAR Register bit definitions */
-#define R_CPSCU_IPCPAR_PAIPCSEM0                  (1 << 0)  /* Privileged attributes of registers for IPCSEMn (n = 0 to 7) */
+#define R_CPSCU_IPCPAR_PAIPCSEM_S                 (1 << 0)  /* Privileged attributes of registers for IPCSEMn */
 
-#define R_CPSCU_IPCPAR_PAIPCSEM1                  (1 << 1)  /* Privileged attributes of registers for IPCSEMn (n = 8 to 15) */
-
-#define R_CPSCU_IPCPAR_PAIPCNMI0                  (1 << 8)  /* Privileged attributes of registers for IPC0NMISTA, IPC0NMISET and IPC0NMICLR */
-
-#define R_CPSCU_IPCPAR_PAIPCNMI1                  (1 << 9)  /* Privileged attributes of registers for IPC1NMISTA, IPC1NMISET and IPC1NMICLR */
+#define R_CPSCU_IPCPAR_PAIPCNMI_S                 (1 << 8)  /* Privileged attributes of registers */
 
 #define R_CPSCU_IPCPAR_PAIPCIR0                   (1 << 16)  /* Privileged attributes of registers for IPC0STA0, IPC0ISET0, IPC0TXD0, IPC0RXD0 and IPC0CLR0 */
 
@@ -1030,6 +1030,14 @@
 #define R_CPSCU_IPCPAR_PAIPCIR2                   (1 << 18)  /* Privileged attributes of registers for IPC1STA0, IPC1ISET0, IPC1TXD0, IPC1RXD0 and IPC1CLR0 */
 
 #define R_CPSCU_IPCPAR_PAIPCIR3                   (1 << 19)  /* Privileged attributes of registers for IPC1STA1, IPC1ISET1, IPC1TXD1, IPC1RXD1 and IPC1CLR1 */
+
+#define R_CPSCU_IPCPAR_PAIPCSEM0                  (1 << 0)  /* Privileged attributes of registers for IPCSEMn */
+
+#define R_CPSCU_IPCPAR_PAIPCSEM1                  (1 << 1)  /* Privileged attributes of registers for IPCSEMn */
+
+#define R_CPSCU_IPCPAR_PAIPCNMI0                  (1 << 8)  /* Privileged attributes of registers */
+
+#define R_CPSCU_IPCPAR_PAIPCNMI1                  (1 << 9)  /* Privileged attributes of registers */
 
 
 /* Maximum number of channels */

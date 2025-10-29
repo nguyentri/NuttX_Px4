@@ -110,168 +110,168 @@
 
 /* Register bit definitions */
 /* MCG Register bit definitions */
-#define R_MIPI_CSI_MCG_VER_SHIFT                  (0)  /* Version of this IP */
+#define R_MIPI_CSI_MCG_VER_SHIFT                  (0)  /* VERsion of this ip */
 #define R_MIPI_CSI_MCG_VER_MASK                   0xf
 
 #define R_MIPI_CSI_MCG_SDLN_SHIFT                 (8)  /* Number of Supported Data Lanes */
 #define R_MIPI_CSI_MCG_SDLN_MASK                  0xf00
-#  define R_MIPI_CSI_MCG_SDLN_0X2                         (2 << R_MIPI_CSI_MCG_SDLN_SHIFT)  /* Operable with 2 lanes or 1 lane */
+#  define R_MIPI_CSI_MCG_SDLN_0X2                         (2 << R_MIPI_CSI_MCG_SDLN_SHIFT)  /* Operable with 2 lanes or 1 lane. */
 
-#define R_MIPI_CSI_MCG_GSNM_SHIFT                 (16)  /* Number of Generic Short Packet FIFO */
+#define R_MIPI_CSI_MCG_GSNM_SHIFT                 (16)  /* NuMber of Generic Short packt FIFO */
 #define R_MIPI_CSI_MCG_GSNM_MASK                  0xff0000
 
 /* MCT0 Register bit definitions */
-#define R_MIPI_CSI_MCT0_VDLN_SHIFT                (0)  /* Number of Valid Data Lanes */
+#define R_MIPI_CSI_MCT0_VDLN_SHIFT                (0)  /* Numer of Valid Data Lanes */
 #define R_MIPI_CSI_MCT0_VDLN_MASK                 0xf
 #  define R_MIPI_CSI_MCT0_VDLN_0X1                        (1 << R_MIPI_CSI_MCT0_VDLN_SHIFT)  /* Operation with one lane */
 #  define R_MIPI_CSI_MCT0_VDLN_0X2                        (2 << R_MIPI_CSI_MCT0_VDLN_SHIFT)  /* Operation with two lanes */
 
-#define R_MIPI_CSI_MCT0_ZLMD                      (1 << 16)  /* Zero Length Long Packet Output Mode */
+#define R_MIPI_CSI_MCT0_ZLMD                      (1 << 16)  /* Zero Length long packet output MoDe */
 
-#define R_MIPI_CSI_MCT0_EDMD                      (1 << 17)  /* ErrframeData Notification Mode */
+#define R_MIPI_CSI_MCT0_EDMD                      (1 << 17)  /* ErrframeData notification MoDe */
 
-#define R_MIPI_CSI_MCT0_RVMD                      (1 << 19)  /* Reserved Packet Reception Mode */
+#define R_MIPI_CSI_MCT0_RVMD                      (1 << 19)  /* ReserVed packet reception MoDe */
 
-#define R_MIPI_CSI_MCT0_GRMD                      (1 << 20)  /* Generic CSI-2 Rule Mode */
+#define R_MIPI_CSI_MCT0_GRMD                      (1 << 20)  /* Generic csi-2 Rule MoDe */
 
-#define R_MIPI_CSI_MCT0_ECCV13                    (1 << 24)  /* ECC Check CSI-2 Ver 1.3 Mode */
+#define R_MIPI_CSI_MCT0_ECCV13                    (1 << 24)  /* ECC check csi-2 Ver 1.3 mode */
 
-#define R_MIPI_CSI_MCT0_LFSREN                    (1 << 25)  /* LFSR Enable Mode */
+#define R_MIPI_CSI_MCT0_LFSREN                    (1 << 25)  /* LFSR Enable mode */
 
 /* MCT2 Register bit definitions */
-#define R_MIPI_CSI_MCT2_FRRCLK_SHIFT              (0)  /* Frequency clock rate to determine packet reception end (internal setting parameter) */
+#define R_MIPI_CSI_MCT2_FRRCLK_SHIFT              (0)  /* clock FRequency Rate to judge packet reception end */
 #define R_MIPI_CSI_MCT2_FRRCLK_MASK               0x1ff
 
-#define R_MIPI_CSI_MCT2_FRRSKW_SHIFT              (16)  /* Frequency clock rate to adjust data lane skew (internal setting parameter) */
+#define R_MIPI_CSI_MCT2_FRRSKW_SHIFT              (16)  /* clock FRequency Rate to adjust data lane SKew */
 #define R_MIPI_CSI_MCT2_FRRSKW_MASK               0x1ff0000
 
 /* MCT3 Register bit definitions */
 #define R_MIPI_CSI_MCT3_RXEN                      (1 << 0)  /* RX (reception) Enable */
 
 /* RTCT Register bit definitions */
-#define R_MIPI_CSI_RTCT_VSRST                     (1 << 0)  /* Video Pixel Interface Software Reset */
+#define R_MIPI_CSI_RTCT_VSRST                     (1 << 0)  /* Video pixel interface Software ReSeT */
 
 /* RTST Register bit definitions */
-#define R_MIPI_CSI_RTST_VSRSTS                    (1 << 0)  /* Video Pixel Interface Software Reset Status */
+#define R_MIPI_CSI_RTST_VSRSTS                    (1 << 0)  /* Video pixel interface Software ReSeT Status */
 
 /* EPCT Register bit definitions */
 #define R_MIPI_CSI_EPCT_SLP_SHIFT                 (0)  /* Long Packet Spacers */
 #define R_MIPI_CSI_EPCT_SLP_MASK                  0x7fff
 
-#define R_MIPI_CSI_EPCT_EPDOP                     (1 << 15)  /* EPD Option Select */
+#define R_MIPI_CSI_EPCT_EPDOP                     (1 << 15)  /* EPD OPtion select */
 
-#define R_MIPI_CSI_EPCT_SSP_SHIFT                 (16)  /* EPD Short Packet Spacers */
+#define R_MIPI_CSI_EPCT_SSP_SHIFT                 (16)  /* epd Short Packet Spacers */
 #define R_MIPI_CSI_EPCT_SSP_MASK                  0x7fff0000
 
-#define R_MIPI_CSI_EPCT_EPDEN                     (1 << 31)  /* Enable EPD Operation */
+#define R_MIPI_CSI_EPCT_EPDEN                     (1 << 31)  /* ENable EPD operation */
 
 /* EMCT Register bit definitions */
-#define R_MIPI_CSI_EMCT_VLSIEN_SHIFT              (4)  /* Enable Variable Length Spacer Insertions */
+#define R_MIPI_CSI_EMCT_VLSIEN_SHIFT              (4)  /* ENable Variable-Length Spacer Insertions */
 #define R_MIPI_CSI_EMCT_VLSIEN_MASK               0x30
-#  define R_MIPI_CSI_EMCT_VLSIEN_00                       (0 << R_MIPI_CSI_EMCT_VLSIEN_SHIFT)  /* Variable length spacer invalid (spacer number is fixed length) */
-#  define R_MIPI_CSI_EMCT_VLSIEN_01                       (1 << R_MIPI_CSI_EMCT_VLSIEN_SHIFT)  /* Variable length spacer valid (spacer number is 1 × n/lane) */
-#  define R_MIPI_CSI_EMCT_VLSIEN_10                       (2 << R_MIPI_CSI_EMCT_VLSIEN_SHIFT)  /* Variable length spacer valid (spacer number is 2 × n/lane) */
-#  define R_MIPI_CSI_EMCT_VLSIEN_11                       (3 << R_MIPI_CSI_EMCT_VLSIEN_SHIFT)  /* Variable length spacer valid (spacer number is 4 × n/lane) */
+#  define R_MIPI_CSI_EMCT_VLSIEN_00                       (0 << R_MIPI_CSI_EMCT_VLSIEN_SHIFT)  /* Variable length Spacer invalid (Spacer number is fixed length) */
+#  define R_MIPI_CSI_EMCT_VLSIEN_01                       (1 << R_MIPI_CSI_EMCT_VLSIEN_SHIFT)  /* Variable length Spacer valid (Spacer number is 1xn/Lane) */
+#  define R_MIPI_CSI_EMCT_VLSIEN_10                       (2 << R_MIPI_CSI_EMCT_VLSIEN_SHIFT)  /* Variable length Spacer valid (Spacer number is 2xn/Lane) */
+#  define R_MIPI_CSI_EMCT_VLSIEN_11                       (3 << R_MIPI_CSI_EMCT_VLSIEN_SHIFT)  /* Variable length Spacer valid (Spacer number is 4xn/Lane) */
 
-#define R_MIPI_CSI_EMCT_EOTPEN                    (1 << 6)  /* Enable EOTP */
+#define R_MIPI_CSI_EMCT_EOTPEN                    (1 << 6)  /* ENable EOTP */
 
 /* MIST Register bit definitions */
-#define R_MIPI_CSI_MIST_DL0S                      (1 << 0)  /* Interrupt status of data lane 0 */
+#define R_MIPI_CSI_MIST_DL0S                      (1 << 0)  /* interrupt Status related to Data Lane 0 */
 
-#define R_MIPI_CSI_MIST_DL1S                      (1 << 1)  /* Interrupt status of data lane 1 */
+#define R_MIPI_CSI_MIST_DL1S                      (1 << 1)  /* interrupt Status related to Data Lane 1 */
 
-#define R_MIPI_CSI_MIST_PMS                       (1 << 8)  /* Interrupt status of power management */
+#define R_MIPI_CSI_MIST_PMS                       (1 << 8)  /* interrupt Status related to Power Management */
 
-#define R_MIPI_CSI_MIST_GSTS                      (1 << 9)  /* Interrupt status of generic short packet */
+#define R_MIPI_CSI_MIST_GSTS                      (1 << 9)  /* interrupt Status related to Generic ShorT packet */
 
-#define R_MIPI_CSI_MIST_RXS                       (1 << 10)  /* Interrupt status of RX (reception) */
+#define R_MIPI_CSI_MIST_RXS                       (1 << 10)  /* interrupt Status related to RX (Reception) */
 
-#define R_MIPI_CSI_MIST_VC0S                      (1 << 16)  /* Interrupt status of virtual channel 0 */
+#define R_MIPI_CSI_MIST_VC0S                      (1 << 16)  /* interrupt Status related to Vitrtual Channel 0 */
 
-#define R_MIPI_CSI_MIST_VC1S                      (1 << 17)  /* Interrupt status of virtual channel 1 */
+#define R_MIPI_CSI_MIST_VC1S                      (1 << 17)  /* interrupt Status related to Vitrtual Channel 1 */
 
-#define R_MIPI_CSI_MIST_VC2S                      (1 << 18)  /* Interrupt status of virtual channel 2 */
+#define R_MIPI_CSI_MIST_VC2S                      (1 << 18)  /* interrupt Status related to Vitrtual Channel 2 */
 
-#define R_MIPI_CSI_MIST_VC3S                      (1 << 19)  /* Interrupt status of virtual channel 3 */
+#define R_MIPI_CSI_MIST_VC3S                      (1 << 19)  /* interrupt Status related to Vitrtual Channel 3 */
 
-#define R_MIPI_CSI_MIST_VC4S                      (1 << 20)  /* Interrupt status of virtual channel 4 */
+#define R_MIPI_CSI_MIST_VC4S                      (1 << 20)  /* interrupt Status related to Vitrtual Channel 4 */
 
-#define R_MIPI_CSI_MIST_VC5S                      (1 << 21)  /* Interrupt status of virtual channel 5 */
+#define R_MIPI_CSI_MIST_VC5S                      (1 << 21)  /* interrupt Status related to Vitrtual Channel 5 */
 
-#define R_MIPI_CSI_MIST_VC6S                      (1 << 22)  /* Interrupt status of virtual channel 6 */
+#define R_MIPI_CSI_MIST_VC6S                      (1 << 22)  /* interrupt Status related to Vitrtual Channel 6 */
 
-#define R_MIPI_CSI_MIST_VC7S                      (1 << 23)  /* Interrupt status of virtual channel 7 */
+#define R_MIPI_CSI_MIST_VC7S                      (1 << 23)  /* interrupt Status related to Vitrtual Channel 7 */
 
-#define R_MIPI_CSI_MIST_VC8S                      (1 << 24)  /* Interrupt status of virtual channel 8 */
+#define R_MIPI_CSI_MIST_VC8S                      (1 << 24)  /* interrupt Status related to Vitrtual Channel 8 */
 
-#define R_MIPI_CSI_MIST_VC9S                      (1 << 25)  /* Interrupt status of virtual channel 9 */
+#define R_MIPI_CSI_MIST_VC9S                      (1 << 25)  /* interrupt Status related to Vitrtual Channel 9 */
 
-#define R_MIPI_CSI_MIST_VC10S                     (1 << 26)  /* Interrupt status of virtual channel 10 */
+#define R_MIPI_CSI_MIST_VC10S                     (1 << 26)  /* interrupt Status related to Vitrtual Channel 10 */
 
-#define R_MIPI_CSI_MIST_VC11S                     (1 << 27)  /* Interrupt status of virtual channel 11 */
+#define R_MIPI_CSI_MIST_VC11S                     (1 << 27)  /* interrupt Status related to Vitrtual Channel 11 */
 
-#define R_MIPI_CSI_MIST_VC12S                     (1 << 28)  /* Interrupt status of virtual channel 12 */
+#define R_MIPI_CSI_MIST_VC12S                     (1 << 28)  /* interrupt Status related to Vitrtual Channel 12 */
 
-#define R_MIPI_CSI_MIST_VC13S                     (1 << 29)  /* Interrupt status of virtual channel 13 */
+#define R_MIPI_CSI_MIST_VC13S                     (1 << 29)  /* interrupt Status related to Vitrtual Channel 13 */
 
-#define R_MIPI_CSI_MIST_VC14S                     (1 << 30)  /* Interrupt status of virtual channel 14 */
+#define R_MIPI_CSI_MIST_VC14S                     (1 << 30)  /* interrupt Status related to Vitrtual Channel 14 */
 
-#define R_MIPI_CSI_MIST_VC15S                     (1 << 31)  /* Interrupt status of virtual channel 15 */
+#define R_MIPI_CSI_MIST_VC15S                     (1 << 31)  /* interrupt Status related to Vitrtual Channel 15 */
 
 /* DTEL Register bit definitions */
-#define R_MIPI_CSI_DTEL_DTEN_SHIFT                (0)  /* Data Type Enable (DT = 0x00 to 0x1F) */
+#define R_MIPI_CSI_DTEL_DTEN_SHIFT                (0)  /* Data Type ENable (DT = 0x00 to 0x1F) */
 #define R_MIPI_CSI_DTEL_DTEN_MASK                 0xffffffff
-#  define R_MIPI_CSI_DTEL_DTEN_0                          (0 << R_MIPI_CSI_DTEL_DTEN_SHIFT)  /* Does not receive data */
-#  define R_MIPI_CSI_DTEL_DTEN_1                          (1 << R_MIPI_CSI_DTEL_DTEN_SHIFT)  /* Receives data */
+#  define R_MIPI_CSI_DTEL_DTEN_0                          (0 << R_MIPI_CSI_DTEL_DTEN_SHIFT)  /* Does not receive data. */
+#  define R_MIPI_CSI_DTEL_DTEN_1                          (1 << R_MIPI_CSI_DTEL_DTEN_SHIFT)  /* Receives data. */
 
 /* DTEH Register bit definitions */
-#define R_MIPI_CSI_DTEH_DTEN_SHIFT                (0)  /* Data Type Enable (DT = 0x20 to 0x3F) */
+#define R_MIPI_CSI_DTEH_DTEN_SHIFT                (0)  /* Data Type ENable (DT = 0x20 to 0x3F) */
 #define R_MIPI_CSI_DTEH_DTEN_MASK                 0xffffffff
-#  define R_MIPI_CSI_DTEH_DTEN_0                          (0 << R_MIPI_CSI_DTEH_DTEN_SHIFT)  /* Does not receive data */
-#  define R_MIPI_CSI_DTEH_DTEN_1                          (1 << R_MIPI_CSI_DTEH_DTEN_SHIFT)  /* Receives data */
+#  define R_MIPI_CSI_DTEH_DTEN_0                          (0 << R_MIPI_CSI_DTEH_DTEN_SHIFT)  /* Does not receive data. */
+#  define R_MIPI_CSI_DTEH_DTEN_1                          (1 << R_MIPI_CSI_DTEH_DTEN_SHIFT)  /* Receives data. */
 
 /* RXST Register bit definitions */
-#define R_MIPI_CSI_RXST_FRM0                      (1 << 0)  /* Frame of virtual channel 0 active */
+#define R_MIPI_CSI_RXST_FRM0                      (1 << 0)  /* FRaMe of virtual channel 0 active */
 
-#define R_MIPI_CSI_RXST_FRM1                      (1 << 1)  /* Frame of virtual channel 1 active */
+#define R_MIPI_CSI_RXST_FRM1                      (1 << 1)  /* FRaMe of virtual channel 1 active */
 
-#define R_MIPI_CSI_RXST_FRM2                      (1 << 2)  /* Frame of virtual channel 2 active */
+#define R_MIPI_CSI_RXST_FRM2                      (1 << 2)  /* FRaMe of virtual channel 2 active */
 
-#define R_MIPI_CSI_RXST_FRM3                      (1 << 3)  /* Frame of virtual channel 3 active */
+#define R_MIPI_CSI_RXST_FRM3                      (1 << 3)  /* FRaMe of virtual channel 3 active */
 
-#define R_MIPI_CSI_RXST_FRM4                      (1 << 4)  /* Frame of virtual channel 4 active */
+#define R_MIPI_CSI_RXST_FRM4                      (1 << 4)  /* FRaMe of virtual channel 4 active */
 
-#define R_MIPI_CSI_RXST_FRM5                      (1 << 5)  /* Frame of virtual channel 5 active */
+#define R_MIPI_CSI_RXST_FRM5                      (1 << 5)  /* FRaMe of virtual channel 5 active */
 
-#define R_MIPI_CSI_RXST_FRM6                      (1 << 6)  /* Frame of virtual channel 6 active */
+#define R_MIPI_CSI_RXST_FRM6                      (1 << 6)  /* FRaMe of virtual channel 6 active */
 
-#define R_MIPI_CSI_RXST_FRM7                      (1 << 7)  /* Frame of virtual channel 7 active */
+#define R_MIPI_CSI_RXST_FRM7                      (1 << 7)  /* FRaMe of virtual channel 7 active */
 
-#define R_MIPI_CSI_RXST_FRM8                      (1 << 8)  /* Frame of virtual channel 8 active */
+#define R_MIPI_CSI_RXST_FRM8                      (1 << 8)  /* FRaMe of virtual channel 8 active */
 
 #define R_MIPI_CSI_RXST_FRM9                      (1 << 9)  /* FRaMe of virtual channel 9 active */
 
-#define R_MIPI_CSI_RXST_FRM10                     (1 << 10)  /* Frame of virtual channel 10 active */
+#define R_MIPI_CSI_RXST_FRM10                     (1 << 10)  /* FRaMe of virtual channel 10 active */
 
-#define R_MIPI_CSI_RXST_FRM11                     (1 << 11)  /* Frame of virtual channel 11 active */
+#define R_MIPI_CSI_RXST_FRM11                     (1 << 11)  /* FRaMe of virtual channel 11 active */
 
-#define R_MIPI_CSI_RXST_FRM12                     (1 << 12)  /* Frame of virtual channel 12 active */
+#define R_MIPI_CSI_RXST_FRM12                     (1 << 12)  /* FRaMe of virtual channel 12 active */
 
-#define R_MIPI_CSI_RXST_FRM13                     (1 << 13)  /* Frame of virtual channel 13 active */
+#define R_MIPI_CSI_RXST_FRM13                     (1 << 13)  /* FRaMe of virtual channel 13 active */
 
-#define R_MIPI_CSI_RXST_FRM14                     (1 << 14)  /* Frame of virtual channel 14 active */
+#define R_MIPI_CSI_RXST_FRM14                     (1 << 14)  /* FRaMe of virtual channel 14 active */
 
-#define R_MIPI_CSI_RXST_FRM15                     (1 << 15)  /* Frame of virtual channel 15 active */
+#define R_MIPI_CSI_RXST_FRM15                     (1 << 15)  /* FRaMe of virtual channel 15 active */
 
-#define R_MIPI_CSI_RXST_RACT                      (1 << 16)  /* Rx (Reception) active status */
+#define R_MIPI_CSI_RXST_RACT                      (1 << 16)  /* Rx (Reception) ACTive status */
 
-#define R_MIPI_CSI_RXST_RACTDET                   (1 << 17)  /* RX (Reception) Active Detect */
+#define R_MIPI_CSI_RXST_RACTDET                   (1 << 17)  /* Rx (Reception) ACTive DETect */
 
 /* RXSC Register bit definitions */
-#define R_MIPI_CSI_RXSC_RACTDETC                  (1 << 17)  /* RX (Reception) Active Detect Status Clear */
+#define R_MIPI_CSI_RXSC_RACTDETC                  (1 << 17)  /* Rx (Reception) ACTive DETect status Clear */
 
 /* RXIE Register bit definitions */
-#define R_MIPI_CSI_RXIE_RACTDETE                  (1 << 17)  /* RX (Reception) Active Detect Interrupt Enable */
+#define R_MIPI_CSI_RXIE_RACTDETE                  (1 << 17)  /* Rx (Reception) ACTive DETect interrupt Enable */
 
 /* DLST Register bit definitions */
 #define R_MIPI_CSI_DLST_ESH                       (1 << 0)  /* ErrSotHs detect on data lane (N) status */
@@ -284,9 +284,9 @@
 
 #define R_MIPI_CSI_DLST_EUL                       (1 << 16)  /* Exit from ULps detect on data lane (N) status */
 
-#define R_MIPI_CSI_DLST_RUL                       (1 << 17)  /* Entry to ULPS detect on data lane (N) status */
+#define R_MIPI_CSI_DLST_RUL                       (1 << 17)  /* entry to ULps detect on data lane (N) status */
 
-#define R_MIPI_CSI_DLST_ULP                       (1 << 24)  /* RxULPsesc of data lane (N) status */
+#define R_MIPI_CSI_DLST_ULP                       (1 << 24)  /* rxULPsesc of data lane (N) status */
 
 /* DLSC Register bit definitions */
 #define R_MIPI_CSI_DLSC_ESHC                      (1 << 0)  /* ErrSotHs detect on data lane (N) status Clear */
@@ -368,7 +368,7 @@
 
 #define R_MIPI_CSI_VCSC_AECDC                     (1 << 15)  /* ECc 2-bit (Double) error packet with any virtual channels Detect status Clear */
 
-#define R_MIPI_CSI_VCSC_OVFC                      (1 << 16)  /* Generic short packet with virtual channel (M) discard by FIFO Overflow Status Clear */
+#define R_MIPI_CSI_VCSC_OVFC                      (1 << 16)  /* generic short packet with virtual channel (M) discard by fifo OVerFlow status Clear */
 
 #define R_MIPI_CSI_VCSC_FSRC                      (1 << 24)  /* Frame Start packet with virtual channel (M) Reception status Clear */
 
@@ -399,7 +399,7 @@
 
 #define R_MIPI_CSI_VCIE_FRDE                      (1 << 9)  /* errFRameData of virtual channel (M) detect interrupt Enable */
 
-#define R_MIPI_CSI_VCIE_OVFE                      (1 << 16)  /* Generic short packet with virtual channel (M) discarded by FIFO Overflow interrupt Enable */
+#define R_MIPI_CSI_VCIE_OVFE                      (1 << 16)  /* generic short packet with virtual channel (M) discard by fifo OVerFlow interrupt Enable */
 
 #define R_MIPI_CSI_VCIE_FSRE                      (1 << 24)  /* Frame Start packet with virtual channel (M) Reception interrupt Enable */
 
@@ -424,7 +424,7 @@
 
 #define R_MIPI_CSI_PMST_DUN                       (1 << 5)  /* eNtry to Ulps detect on all valid Data lanes status */
 
-#define R_MIPI_CSI_PMST_CUX                       (1 << 6)  /* eXit from Ulps detect on Clock lane status */
+#define R_MIPI_CSI_PMST_CUX                       (1 << 6)  /* eXit frum Ulps detect on Clock lane status */
 
 #define R_MIPI_CSI_PMST_CUN                       (1 << 7)  /* eNtry to Ulps detect on Clock lane status */
 
@@ -455,7 +455,7 @@
 
 #define R_MIPI_CSI_PMSC_DUNC                      (1 << 5)  /* eNtry to Ulps detect on all valid Data lanes status Clear */
 
-#define R_MIPI_CSI_PMSC_CUXC                      (1 << 6)  /* eXit from Ulps detect on Clock lane status Clear */
+#define R_MIPI_CSI_PMSC_CUXC                      (1 << 6)  /* eXit frum Ulps detect on Clock lane status Clear */
 
 #define R_MIPI_CSI_PMSC_CUNC                      (1 << 7)  /* eNtry to Ulps detect on Clock lane status Clear */
 
@@ -480,31 +480,31 @@
 #define R_MIPI_CSI_GSCT_SHTH_SHIFT                (0)  /* Stored generic short packet THreshold */
 #define R_MIPI_CSI_GSCT_SHTH_MASK                 0x7f
 
-#define R_MIPI_CSI_GSCT_GFIF                      (1 << 16)  /* Generic short packet store in FIFO */
+#define R_MIPI_CSI_GSCT_GFIF                      (1 << 16)  /* Generic short packet store in FIFo */
 
 /* GSST Register bit definitions */
-#define R_MIPI_CSI_GSST_GNE                       (1 << 0)  /* Generic short packet FIFO Not Empty */
+#define R_MIPI_CSI_GSST_GNE                       (1 << 0)  /* Generic short packet fifo Not Empty */
 
-#define R_MIPI_CSI_GSST_GTH                       (1 << 1)  /* More than THreshold Generic short packets existed in FIFO */
+#define R_MIPI_CSI_GSST_GTH                       (1 << 1)  /* more than THreshold Generic short packets existed in fifo */
 
 #define R_MIPI_CSI_GSST_GOV                       (1 << 4)  /* Generic short packet fifo OVerflow status */
 
-#define R_MIPI_CSI_GSST_PNUM_SHIFT                (8)  /* NUMber of stored generic short Packets in FIFO */
+#define R_MIPI_CSI_GSST_PNUM_SHIFT                (8)  /* NUMber of stored generic short Packets in fifo */
 #define R_MIPI_CSI_GSST_PNUM_MASK                 0xff00
 
-#define R_MIPI_CSI_GSST_GCD                       (1 << 16)  /* Generic short packet FIFO Clear status */
+#define R_MIPI_CSI_GSST_GCD                       (1 << 16)  /* Generic short packet fifo Clear status */
 
-#define R_MIPI_CSI_GSST_STRDS                     (1 << 17)  /* Generic short packet SToRe DiSable */
+#define R_MIPI_CSI_GSST_STRDS                     (1 << 17)  /* generic short packet SToRe DiSable */
 
 /* GSSC Register bit definitions */
-#define R_MIPI_CSI_GSSC_GOVC                      (1 << 4)  /* Generic short packet FIFO OVerflow status Clear */
+#define R_MIPI_CSI_GSSC_GOVC                      (1 << 4)  /* Generic short packet fifo OVerflow status Clear */
 
 /* GSIE Register bit definitions */
-#define R_MIPI_CSI_GSIE_GNEE                      (1 << 0)  /* Generic short packet FIFO Not Empty interrupt Enable */
+#define R_MIPI_CSI_GSIE_GNEE                      (1 << 0)  /* Generic short packet fifo Not Empty interrupt Enable */
 
-#define R_MIPI_CSI_GSIE_GTHE                      (1 << 1)  /* More than THreshold Generic short packets existed in FIFO interrupt Enable */
+#define R_MIPI_CSI_GSIE_GTHE                      (1 << 1)  /* more than THreshold Generic short packets existed in fifo interrupt Enable */
 
-#define R_MIPI_CSI_GSIE_GOVE                      (1 << 4)  /* Generic short packet FIFO OVerflow interrupt Enable */
+#define R_MIPI_CSI_GSIE_GOVE                      (1 << 4)  /* Generic short packet fifo OVerflow interrupt Enable */
 
 /* GSHT Register bit definitions */
 #define R_MIPI_CSI_GSHT_SPDT_SHIFT                (0)  /* Stored Packet DaTa */
@@ -517,11 +517,11 @@
 #define R_MIPI_CSI_GSHT_SPVC_MASK                 0xf000000
 
 /* GSIU Register bit definitions */
-#define R_MIPI_CSI_GSIU_FINC                      (1 << 0)  /* Generic short packet FIFO update (INCrement internal pointer) */
+#define R_MIPI_CSI_GSIU_FINC                      (1 << 0)  /* generic short packet Fifo update (INCrement internal pointer) */
 
-#define R_MIPI_CSI_GSIU_GFCLR                     (1 << 8)  /* Generic short packet FIFO CLeaR */
+#define R_MIPI_CSI_GSIU_GFCLR                     (1 << 8)  /* Generic short packet Fifo CLeaR */
 
-#define R_MIPI_CSI_GSIU_GFEN                      (1 << 16)  /* Generic short packet FIFO ENable */
+#define R_MIPI_CSI_GSIU_GFEN                      (1 << 16)  /* Generic short packet Fifo ENable */
 
 
 /* Maximum number of channels */

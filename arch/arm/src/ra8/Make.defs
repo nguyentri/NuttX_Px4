@@ -44,11 +44,12 @@ CHIP_CSRCS += ra_serial.c
 
 # ADC driver
 ifeq ($(CONFIG_RA_ADC),y)
+ifeq ($(CONFIG_RA8E1_GROUP), y)
 CHIP_CSRCS += ra_adc.c
 endif
-
-ifeq ($(CONFIG_RA_ADC_B),y)
+ifeq ($(CONFIG_RA8P1_GROUP), y)
 CHIP_CSRCS += ra_adc_b.c
+endif
 endif
 
 # I2C driver

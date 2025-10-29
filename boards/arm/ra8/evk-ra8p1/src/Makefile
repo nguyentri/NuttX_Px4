@@ -41,12 +41,12 @@ CSRCS += ra8p1_user_leds.c
 endif
 
 # I2C support
-ifneq ($(CONFIG_RA_I2C),y)
+ifeq ($(CONFIG_RA_I2C),y)
 CSRCS += ra8p1_i2c.c
 endif
 
 # ADC B support
-ifneq ($(CONFIG_RA_ADC_B),y)
+ifeq ($(CONFIG_RA_ADC_B),y)
 CSRCS += ra8p1_adc_b.c
 endif
 

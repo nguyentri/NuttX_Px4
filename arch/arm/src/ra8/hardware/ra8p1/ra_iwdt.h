@@ -41,10 +41,10 @@
 /* IWDT Register Offsets */
 
 #define R_IWDT_IWDTRR_OFFSET                      0x00000000  /* IWDT Refresh Register */
-#define R_IWDT_IWDTCR_OFFSET                      0x00000002  /* IWDT Control Register */
+#define R_IWDT_IWDTCR_OFFSET                      0x00000002  /* IWDT Control Register  */
 #define R_IWDT_IWDTSR_OFFSET                      0x00000004  /* IWDT Status Register */
-#define R_IWDT_IWDTRCR_OFFSET                     0x00000006  /* IWDT Reset Control Register */
-#define R_IWDT_IWDTCSTPR_OFFSET                   0x00000008  /* IWDT Count Stop Control Register */
+#define R_IWDT_IWDTRCR_OFFSET                     0x00000006  /* IWDT Reset Control Register  */
+#define R_IWDT_IWDTCSTPR_OFFSET                   0x00000008  /* IWDT Count Stop Control Register  */
 
 /* IWDT Register Addresses */
 
@@ -56,50 +56,53 @@
 
 /* Register bit definitions */
 /* IWDTRR Register bit definitions */
-#define R_IWDT_IWDTRR_REFRESH_SHIFT               (0)  /* Refresh Register */
-#define R_IWDT_IWDTRR_REFRESH_MASK                0xff
-
 #define R_IWDT_IWDTRR_IWDTRR_SHIFT                (0)  /* The counter is refreshed by writing 0x00 and then writing 0xFF to this register. */
 #define R_IWDT_IWDTRR_IWDTRR_MASK                 0xff
 
 /* IWDTCR Register bit definitions */
-#define R_IWDT_IWDTCR_TOPS_SHIFT                  (0)  /* Timeout Period Select */
-#define R_IWDT_IWDTCR_TOPS_MASK                   0x3
-#  define R_IWDT_IWDTCR_TOPS_00                           (0 << R_IWDT_IWDTCR_TOPS_SHIFT)  /* 128 cycles (0x007F) */
-#  define R_IWDT_IWDTCR_TOPS_01                           (1 << R_IWDT_IWDTCR_TOPS_SHIFT)  /* 512 cycles (0x01FF) */
-#  define R_IWDT_IWDTCR_TOPS_10                           (2 << R_IWDT_IWDTCR_TOPS_SHIFT)  /* 1024 cycles (0x03FF) */
-#  define R_IWDT_IWDTCR_TOPS_11                           (3 << R_IWDT_IWDTCR_TOPS_SHIFT)  /* 2048 cycles (0x07FF) */
-
-#define R_IWDT_IWDTCR_CKS_SHIFT                   (4)  /* Clock Division Ratio Select */
-#define R_IWDT_IWDTCR_CKS_MASK                    0xf0
-
-#define R_IWDT_IWDTCR_RPES_SHIFT                  (8)  /* Window End Position Select */
-#define R_IWDT_IWDTCR_RPES_MASK                   0x300
-#  define R_IWDT_IWDTCR_RPES_00                           (0 << R_IWDT_IWDTCR_RPES_SHIFT)  /* 75% */
-#  define R_IWDT_IWDTCR_RPES_01                           (1 << R_IWDT_IWDTCR_RPES_SHIFT)  /* 50% */
-#  define R_IWDT_IWDTCR_RPES_10                           (2 << R_IWDT_IWDTCR_RPES_SHIFT)  /* 25% */
-#  define R_IWDT_IWDTCR_RPES_11                           (3 << R_IWDT_IWDTCR_RPES_SHIFT)  /* 0% (No window end position setting) */
-
-#define R_IWDT_IWDTCR_RPSS_SHIFT                  (12)  /* Window Start Position Select */
+#define R_IWDT_IWDTCR_RPSS_SHIFT                  (12)  /* Window Start Position Selection */
 #define R_IWDT_IWDTCR_RPSS_MASK                   0x3000
 #  define R_IWDT_IWDTCR_RPSS_00                           (0 << R_IWDT_IWDTCR_RPSS_SHIFT)  /* 25% */
 #  define R_IWDT_IWDTCR_RPSS_01                           (1 << R_IWDT_IWDTCR_RPSS_SHIFT)  /* 50% */
 #  define R_IWDT_IWDTCR_RPSS_10                           (2 << R_IWDT_IWDTCR_RPSS_SHIFT)  /* 75% */
-#  define R_IWDT_IWDTCR_RPSS_11                           (3 << R_IWDT_IWDTCR_RPSS_SHIFT)  /* 100% (No window start position setting) */
+#  define R_IWDT_IWDTCR_RPSS_11                           (3 << R_IWDT_IWDTCR_RPSS_SHIFT)  /* 100% (window start position is not specified) */
+
+#define R_IWDT_IWDTCR_RPES_SHIFT                  (8)  /* Window End Position Selection */
+#define R_IWDT_IWDTCR_RPES_MASK                   0x300
+#  define R_IWDT_IWDTCR_RPES_00                           (0 << R_IWDT_IWDTCR_RPES_SHIFT)  /* 75% */
+#  define R_IWDT_IWDTCR_RPES_01                           (1 << R_IWDT_IWDTCR_RPES_SHIFT)  /* 50% */
+#  define R_IWDT_IWDTCR_RPES_10                           (2 << R_IWDT_IWDTCR_RPES_SHIFT)  /* 25% */
+#  define R_IWDT_IWDTCR_RPES_11                           (3 << R_IWDT_IWDTCR_RPES_SHIFT)  /* 0% (window end position is not specified) */
+
+#define R_IWDT_IWDTCR_CKS_SHIFT                   (4)  /* Clock Division Ratio Selection */
+#define R_IWDT_IWDTCR_CKS_MASK                    0xf0
+#  define R_IWDT_IWDTCR_CKS_0000                          (0 << R_IWDT_IWDTCR_CKS_SHIFT)  /* IWDTCLK */
+#  define R_IWDT_IWDTCR_CKS_0010                          (2 << R_IWDT_IWDTCR_CKS_SHIFT)  /* IWDTCLK/16 */
+#  define R_IWDT_IWDTCR_CKS_0011                          (3 << R_IWDT_IWDTCR_CKS_SHIFT)  /* IWDTCLK/32 */
+#  define R_IWDT_IWDTCR_CKS_0010                          (2 << R_IWDT_IWDTCR_CKS_SHIFT)  /* IWDTCLK/64 */
+#  define R_IWDT_IWDTCR_CKS_1111                          (15 << R_IWDT_IWDTCR_CKS_SHIFT)  /* IWDTCLK/128 */
+#  define R_IWDT_IWDTCR_CKS_0101                          (5 << R_IWDT_IWDTCR_CKS_SHIFT)  /* IWDTCLK/256 */
+
+#define R_IWDT_IWDTCR_TOPS_SHIFT                  (0)  /* Timeout Period Selection */
+#define R_IWDT_IWDTCR_TOPS_MASK                   0x3
+#  define R_IWDT_IWDTCR_TOPS_00                           (0 << R_IWDT_IWDTCR_TOPS_SHIFT)  /* 128 cycles (03FFh) */
+#  define R_IWDT_IWDTCR_TOPS_01                           (1 << R_IWDT_IWDTCR_TOPS_SHIFT)  /* 512 cycles (0FFFh) */
+#  define R_IWDT_IWDTCR_TOPS_10                           (2 << R_IWDT_IWDTCR_TOPS_SHIFT)  /* 1,024 cycles (1FFFh) */
+#  define R_IWDT_IWDTCR_TOPS_11                           (3 << R_IWDT_IWDTCR_TOPS_SHIFT)  /* 2,048 cycles (3FFFh) */
 
 /* IWDTSR Register bit definitions */
-#define R_IWDT_IWDTSR_CNTVAL_SHIFT                (0)  /* Down-Counter Value */
-#define R_IWDT_IWDTSR_CNTVAL_MASK                 0x3fff
+#define R_IWDT_IWDTSR_REFEF                       (1 << 15)  /* Refresh Error Flag */
 
 #define R_IWDT_IWDTSR_UNDFF                       (1 << 14)  /* Underflow Flag */
 
-#define R_IWDT_IWDTSR_REFEF                       (1 << 15)  /* Refresh Error Flag */
+#define R_IWDT_IWDTSR_CNTVAL_SHIFT                (0)  /* Down-Counter Value */
+#define R_IWDT_IWDTSR_CNTVAL_MASK                 0x3fff
 
 /* IWDTRCR Register bit definitions */
-#define R_IWDT_IWDTRCR_RSTIRQS                    (1 << 7)  /* Reset Interrupt Request Select */
+#define R_IWDT_IWDTRCR_RSTIRQS                    (1 << 7)  /* Reset Interrupt Request Selection */
 
 /* IWDTCSTPR Register bit definitions */
-#define R_IWDT_IWDTCSTPR_SLCSTP                   (1 << 7)  /* CPU Sleep-Mode Count Stop Select */
+#define R_IWDT_IWDTCSTPR_SLCSTP                   (1 << 7)  /* Sleep-Mode Count Stop Control */
 
 
 /* Maximum number of channels */

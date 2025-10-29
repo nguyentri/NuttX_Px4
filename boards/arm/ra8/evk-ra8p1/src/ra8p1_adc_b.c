@@ -124,7 +124,7 @@ int ra8_adc_setup(void)
     }
 
   /* Initialize the ADC-B module */
-  adc_dev = ra8_adc_b_initialize(chanlist, nchannels);
+  adc_dev = ra8_adc_initialize(chanlist, nchannels);
   if (adc_dev == NULL)
     {
       aerr("ERROR: Failed to initialize ADC-B\n");
@@ -154,7 +154,7 @@ int ra8_adc_setup(void)
 weak_function int board_adc_initialize(void)
 {
 #ifdef CONFIG_RA_ADC_B
-  return ra8_adc_b_setup();
+  return ra8_adc_setup();
 #else
   return OK;
 #endif

@@ -2121,7 +2121,7 @@
 #  define R_SYSC_MOMCR_MODRV0_011                         (3 << R_SYSC_MOMCR_MODRV0_SHIFT)  /* 8MHz to 24MHz */
 #  define R_SYSC_MOMCR_MODRV0_101                         (5 << R_SYSC_MOMCR_MODRV0_SHIFT)  /* 8MHz to 48MHz */
 
-#define R_SYSC_MOMCR_MOSEL                        (0 << 6)  /* Main Clock Oscillator Switching */
+#define R_SYSC_MOMCR_MOSEL                        (1 << 6)  /* Main Clock Oscillator Switching */
 
 /* FWEPROR Register bit definitions */
 #define R_SYSC_FWEPROR_FLWE_SHIFT                 (0)  /* Flash Programming and Erasure */

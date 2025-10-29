@@ -806,7 +806,7 @@ static int ra_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgs, int
           /* Writing - send all bytes */
           while (priv->dcnt > 0 && ret == OK)
             {
-              ret = ra_i2c_wait_event(priv, R_IIC_STATE_TIMEOUT_US);
+              ret = ra_i2c_wait_event(priv, I2C_STATE_TIMEOUT_US);
               if (ret == OK)
                 {
                   ret = ra_i2c_senddata(priv);

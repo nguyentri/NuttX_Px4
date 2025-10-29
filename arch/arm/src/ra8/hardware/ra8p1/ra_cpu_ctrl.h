@@ -40,23 +40,25 @@
 
 /* CPU_CTRL Register Offsets */
 
-/* CPU%sLCKUPCR Registers (0-1) */
+/* CPU%sLCKUPCR Registers () */
 #define R_CPU_CTRL_CPULCKUPCR_OFFSET(m)           (0x00000030 + ((m) * 0x00000004))  /* CPU%s Lockup Control Register */
-/* CPU%sINITVTOR Registers (0-1) */
-#define R_CPU_CTRL_CPUINITVTOR_OFFSET(m)          (0x00000040 + ((m) * 0x00000004))  /* CPU Initial Vector Base Address Register */
-/* CPU%sWAITCR Registers (0-1) */
+/* CPU%sINITVTOR Registers () */
+#define R_CPU_CTRL_CPUINITVTOR_OFFSET(m)          (0x00000040 + ((m) * 0x00000004))  /* CPU%s Initial Vector Base Address Register */
+/* CPU%sWAITCR Registers () */
 #define R_CPU_CTRL_CPUWAITCR_OFFSET(m)            (0x00000050 + ((m) * 0x00000004))  /* CPU%s CPUWAIT Control Register */
-/* CPU%sACTCSR Registers (0-1) */
+/* CPU%sACTCSR Registers () */
 #define R_CPU_CTRL_CPUACTCSR_OFFSET(m)            (0x00000060 + ((m) * 0x00000004))  /* CPU%s Activation Control and Status Register */
 #define R_CPU_CTRL_CPU0LMECR_OFFSET               0x00000070  /* CPU0 Local Memory Error Control Register */
 #define R_CPU_CTRL_CPUIDR_OFFSET                  0x00000078  /* CPU Identification Register */
-#define R_CPU_CTRL_CPU0STATM_OFFSET               0x00000080  /* CPU0 Status Monitor Register */
-#define R_CPU_CTRL_CPU1STATM_OFFSET               0x00000084  /* CPU1 Status Monitor Register */
+/* CPU%sSTATM Registers () */
+#define R_CPU_CTRL_CPUSTATM_OFFSET(m)             (0x00000080 + ((m) * 0x00000004))  /* CPU%s Status Monitor Register */
 #define R_CPU_CTRL_SECEXTMON_OFFSET               0x00000090  /* CPU SECEXT Monitor Register */
 #define R_CPU_CTRL_NSCPUCR_OFFSET                 0x00000094  /* Non-secure CPU Control Register */
-#define R_CPU_CTRL_CPU0LOCKCR_OFFSET              0x00000400  /* CPU0 Function Lock Control Register */
-#define R_CPU_CTRL_CPU1LOCKCR_OFFSET              0x00000404  /* CPU1 Function Lock Control Register */
-/* CPU%sCRPT Registers (0-1) */
+/* CPU%sLOCKCR Registers () */
+#define R_CPU_CTRL_CPULOCKCR_OFFSET(m)            (0x00000400 + ((m) * 0x00000004))  /* CPU%s Function Lock Control Register */
+/* CPU%sLOCKCRNS Registers () */
+#define R_CPU_CTRL_CPULOCKCRNS_OFFSET(m)          (0x00000500 + ((m) * 0x00000004))  /* CPU%s Non-secure Function Lock Control Register */
+/* CPU%sCRPT Registers () */
 #define R_CPU_CTRL_CPUCRPT_OFFSET(m)              (0x00000840 + ((m) * 0x00000004))  /* CPU%s Control Register Protection Register */
 
 /* CPU_CTRL Register Addresses */
@@ -67,12 +69,11 @@
 #define R_CPU_CTRL_CPUACTCSR(m)                   (R_CPU_CTRL_BASE + R_CPU_CTRL_CPUACTCSR_OFFSET(m))
 #define R_CPU_CTRL_CPU0LMECR                      (R_CPU_CTRL_BASE + R_CPU_CTRL_CPU0LMECR_OFFSET)
 #define R_CPU_CTRL_CPUIDR                         (R_CPU_CTRL_BASE + R_CPU_CTRL_CPUIDR_OFFSET)
-#define R_CPU_CTRL_CPU0STATM                      (R_CPU_CTRL_BASE + R_CPU_CTRL_CPU0STATM_OFFSET)
-#define R_CPU_CTRL_CPU1STATM                      (R_CPU_CTRL_BASE + R_CPU_CTRL_CPU1STATM_OFFSET)
+#define R_CPU_CTRL_CPUSTATM(m)                    (R_CPU_CTRL_BASE + R_CPU_CTRL_CPUSTATM_OFFSET(m))
 #define R_CPU_CTRL_SECEXTMON                      (R_CPU_CTRL_BASE + R_CPU_CTRL_SECEXTMON_OFFSET)
 #define R_CPU_CTRL_NSCPUCR                        (R_CPU_CTRL_BASE + R_CPU_CTRL_NSCPUCR_OFFSET)
-#define R_CPU_CTRL_CPU0LOCKCR                     (R_CPU_CTRL_BASE + R_CPU_CTRL_CPU0LOCKCR_OFFSET)
-#define R_CPU_CTRL_CPU1LOCKCR                     (R_CPU_CTRL_BASE + R_CPU_CTRL_CPU1LOCKCR_OFFSET)
+#define R_CPU_CTRL_CPULOCKCR(m)                   (R_CPU_CTRL_BASE + R_CPU_CTRL_CPULOCKCR_OFFSET(m))
+#define R_CPU_CTRL_CPULOCKCRNS(m)                 (R_CPU_CTRL_BASE + R_CPU_CTRL_CPULOCKCRNS_OFFSET(m))
 #define R_CPU_CTRL_CPUCRPT(m)                     (R_CPU_CTRL_BASE + R_CPU_CTRL_CPUCRPT_OFFSET(m))
 
 /* Register bit definitions */
@@ -80,41 +81,36 @@
 #define R_CPU_CTRL_CPULCKUPCR_OAD                 (1 << 0)  /* Operation after detection of CPUn lockup */
 
 /* CPUINITVTOR Register bit definitions */
-#define R_CPU_CTRL_CPUINITVTOR_CPUINITVTOR_SHIFT  (0)  /* CPUn Initial Vector Base Address */
-#define R_CPU_CTRL_CPUINITVTOR_CPUINITVTOR_MASK   0xffffffff
+#define R_CPU_CTRL_CPUINITVTOR_CPUNINITVTOR_SHIFT (0)  /* CPUn Initial Vector Base Address */
+#define R_CPU_CTRL_CPUINITVTOR_CPUNINITVTOR_MASK  0xffffffff
 
 /* CPUWAITCR Register bit definitions */
-#define R_CPU_CTRL_CPUWAITCR_CPUWAIT              (1 << 0)  /* Writing 1 to stall the CPUn when it is out of reset. */
+#define R_CPU_CTRL_CPUWAITCR_CPUWAIT              (1 << 0)  /* Writing 1 to stall the CPUn when it is out of reset */
 
 /* CPUACTCSR Register bit definitions */
 #define R_CPU_CTRL_CPUACTCSR_ACTREQ               (1 << 0)  /* CPUn activation request */
 
-#define R_CPU_CTRL_CPUACTCSR_ACT                  (1 << 7)  /* CPUn activation status */
+#define R_CPU_CTRL_CPUACTCSR_ACT                  (1 << 7)  /* CPUn activation state */
 
-#define R_CPU_CTRL_CPUACTCSR_KEY_SHIFT            (8)  /* Key Code */
+#define R_CPU_CTRL_CPUACTCSR_KEY_SHIFT            (8)  /* Key code */
 #define R_CPU_CTRL_CPUACTCSR_KEY_MASK             0xff00
 
 /* CPU0LMECR Register bit definitions */
-#define R_CPU_CTRL_CPU0LMECR_SYRSTEN              (1 << 0)  /* System Reset Request Enable */
+#define R_CPU_CTRL_CPU0LMECR_SYRSTEN              (1 << 0)  /* System Reset request enable */
 
 /* CPUIDR Register bit definitions */
 #define R_CPU_CTRL_CPUIDR_CPUID                   (1 << 0)  /* CPU Identification */
 
-/* CPU0STATM Register bit definitions */
-#define R_CPU_CTRL_CPU0STATM_SLEEPING             (1 << 0)  /* CPU0 Sleeping State */
+/* CPUSTATM Register bit definitions */
+#define R_CPU_CTRL_CPUSTATM_SLEEPING              (1 << 0)  /* Sleeping State */
 
-#define R_CPU_CTRL_CPU0STATM_SLEEPDEEP            (1 << 1)  /* CPU0 SLEEPDEEP state */
+#define R_CPU_CTRL_CPUSTATM_SLEEPDEEP             (1 << 1)  /* Indicates that the processor is at a Deep Sleep mode */
 
-#define R_CPU_CTRL_CPU0STATM_SAHBSTP              (1 << 4)  /*  */
-
-/* CPU1STATM Register bit definitions */
-#define R_CPU_CTRL_CPU1STATM_SLEEPING             (1 << 0)  /* CPU1 Sleeping State */
-
-#define R_CPU_CTRL_CPU1STATM_SLEEPDEEP            (1 << 1)  /* CPU1 SLEEPDEEP state */
-
-#define R_CPU_CTRL_CPU1STATM_SAHBSTP              (1 << 4)  /* S-AHB Status Flag */
+#define R_CPU_CTRL_CPUSTATM_SAHBSTP               (1 << 4)  /* S-AHB Status Flag */
 
 /* SECEXTMON Register bit definitions */
+#define R_CPU_CTRL_SECEXTMON_SECEXT_S             (1 << 0)  /* CPU%s Security Extension */
+
 #define R_CPU_CTRL_SECEXTMON_SECEXT0              (1 << 0)  /* CPU0 Security Extension */
 
 #define R_CPU_CTRL_SECEXTMON_SECEXT1              (1 << 1)  /* CPU1 Security Extension */
@@ -122,36 +118,28 @@
 /* NSCPUCR Register bit definitions */
 #define R_CPU_CTRL_NSCPUCR_RSTREQEN               (1 << 0)  /* System Reset Request Enable */
 
-/* CPU0LOCKCR Register bit definitions */
-#define R_CPU_CTRL_CPU0LOCKCR_LCKSVTAIR           (1 << 0)  /* Disables writes to the following secure registers from software or from a debug agent that is connected to the processor. */
+/* CPULOCKCR Register bit definitions */
+#define R_CPU_CTRL_CPULOCKCR_LCKSVTAIR            (1 << 0)  /* Disables writes to secure registers VTOR_S, AIRCR.PRIS, AIRCR.BFHFNMINS */
 
-#define R_CPU_CTRL_CPU0LOCKCR_LCKSMPU             (1 << 1)  /* Disables writes to registers that are associated with the Secure MPU region from software or from a debug agent connected to the processor. */
+#define R_CPU_CTRL_CPULOCKCR_LCKSMPU              (1 << 1)  /* Disables writes to registers that are associated with the Secure MPU region */
 
-#define R_CPU_CTRL_CPU0LOCKCR_LCKSAU              (1 << 2)  /* This signal disables writes to registers that are associated with the SAU region from software or from a debug agent connected to the processor. */
+#define R_CPU_CTRL_CPULOCKCR_LCKSAU               (1 << 2)  /* Disables writes to registers that are associated with the SAU region */
 
-#define R_CPU_CTRL_CPU0LOCKCR_LCKITGU             (1 << 3)  /* ITGUCTRL, ITGU_LUTn */
+#define R_CPU_CTRL_CPULOCKCR_LCKITGU              (1 << 3)  /* Disables writes to registers that are associated with the ITCM interface */
 
-#define R_CPU_CTRL_CPU0LOCKCR_LCKDTGU             (1 << 4)  /* DTGUCTRL, DTGU_LUTn */
+#define R_CPU_CTRL_CPULOCKCR_LCKDTGU              (1 << 4)  /* Disables writes to registers that are associated with the DTCM interface */
 
-#define R_CPU_CTRL_CPU0LOCKCR_LCKDCAIC            (1 << 5)  /*  */
+#define R_CPU_CTRL_CPULOCKCR_LCKDCAIC             (1 << 5)  /* Disable access to the instruction cache direct cache access registers DCAICLR and DCAICRR */
 
-/* CPU1LOCKCR Register bit definitions */
-#define R_CPU_CTRL_CPU1LOCKCR_LCKSVTAIR           (1 << 0)  /* Disables writes to the following secure registers from software or from a debug agent that is connected to the processor. */
+/* CPULOCKCRNS Register bit definitions */
+#define R_CPU_CTRL_CPULOCKCRNS_LCKNSVTOR          (1 << 0)  /* Disables writes to the VTOR_NS register */
 
-#define R_CPU_CTRL_CPU1LOCKCR_LCKSMPU             (1 << 1)  /* Disables writes to registers that are associated with the Secure MPU region from software or from a debug agent connected to the processor. */
-
-#define R_CPU_CTRL_CPU1LOCKCR_LCKSAU              (1 << 2)  /* This signal disables writes to registers that are associated with the SAU region from software or from a debug agent connected to the processor. */
-
-#define R_CPU_CTRL_CPU1LOCKCR_LCKITGU             (1 << 3)  /* Disables writes to registers that are associated with the ITCM interface */
-
-#define R_CPU_CTRL_CPU1LOCKCR_LCKDTGU             (1 << 4)  /* Disables writes to registers that are associated with the DTCM interface */
-
-#define R_CPU_CTRL_CPU1LOCKCR_LCKDCAIC            (1 << 5)  /* Disable access to the instruction cache direct cache access registers DCAICLR and DCAICRR */
+#define R_CPU_CTRL_CPULOCKCRNS_LCKNSMPU           (1 << 1)  /* Disables writes to registers that are associated with the Non-secure MPU region */
 
 /* CPUCRPT Register bit definitions */
 #define R_CPU_CTRL_CPUCRPT_PROTECT                (1 << 0)  /* Protection of register */
 
-#define R_CPU_CTRL_CPUCRPT_KEY_SHIFT              (8)  /* The KEY[7:0] bits enable or disable writing to the PROTECT bit. */
+#define R_CPU_CTRL_CPUCRPT_KEY_SHIFT              (8)  /* Key to enable/disable writing to PROTECT */
 #define R_CPU_CTRL_CPUCRPT_KEY_MASK               0xff00
 
 

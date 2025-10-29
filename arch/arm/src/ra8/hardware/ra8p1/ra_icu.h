@@ -32,48 +32,170 @@
 /* ICU Base Address */
 #ifndef R_ICU_BASE
 #if !defined(CONFIG_RA_TZ_NONSECURE_BUILD) || (CONFIG_RA_TZ_NONSECURE_BUILD == 0)
-#define R_ICU_BASE           0x4000c000
+#define R_ICU_BASE           0x40006000
 #else
-#define R_ICU_BASE           0x5000c000
+#define R_ICU_BASE           0x50006000
 #endif
 #endif
 
 /* ICU Register Offsets */
 
-#define R_ICU_NMIER_OFFSET                        0x00000100  /* Non-Maskable Interrupt Enable Register */
-#define R_ICU_NMICLR_OFFSET                       0x00000110  /* Non-Maskable Interrupt Status Clear Register */
-#define R_ICU_NMISR_OFFSET                        0x00000120  /* Non-Maskable Interrupt Status Register */
-#define R_ICU_WUPEN0_OFFSET                       0x000001a0  /* Wake Up Interrupt Enable Register 0 */
-#define R_ICU_WUPEN1_OFFSET                       0x000001a4  /* Wake Up Interrupt Enable Register 1 */
-#define R_ICU_DSLPWUPIRQEN0_OFFSET                0x00000214  /* Deep Sleep Wake Up IRQ Enable Register 0 */
-#define R_ICU_DSLPWUPIRQEN1_OFFSET                0x00000218  /* Deep Sleep Wake Up IRQ Enable Register 1 */
-#define R_ICU_DSLPWUPIRQEN2_OFFSET                0x0000021c  /* Deep Sleep Wake Up IRQ Enable Register 2 */
-#define R_ICU_DELSRM_OFFSET                       0x00000280  /* DMAC Event Link Setting Register m (m = 0 to 7) */
-/* IELSR%s Registers (0-95) */
-#define R_ICU_IELSR_OFFSET(m)                     (0x00000300 + ((m) * 0x00000004))  /* Interrupt Controller Unit Event Link Setting Register %s */
+/* IRQCRa[%s] Registers () */
+#define R_ICU_IRQCRA_OFFSET(m)                    (0x00000000 + ((m) * 0x00000001))  /* IRQ Control Register %s */
+#define R_ICU_NMICR_OFFSET                        0x00000010  /* NMI Pin Interrupt Control Register */
+/* IRQCRb[%s] Registers () */
+#define R_ICU_IRQCRB_OFFSET(m)                    (0x00000014 + ((m) * 0x00000001))  /* IRQ Control Register %s */
+/* INTSELR[%s] Registers () */
+#define R_ICU_INTSELR_OFFSET(m)                   (0x00000040 + ((m) * 0x00000004))  /* Interrupt request select Register */
+#define R_ICU_NMIER_OFFSET                        0x00006100  /* Non-Maskable Interrupt Enable Register */
+#define R_ICU_NMICLR_OFFSET                       0x00006110  /* Non-Maskable Interrupt Status Clear Register */
+#define R_ICU_NMISR_OFFSET                        0x00006120  /* Non-Maskable Interrupt Status Register */
+#define R_ICU_WUPEN0_OFFSET                       0x000061a0  /* Wake Up Interrupt Enable Register 0 */
+#define R_ICU_WUPEN1_OFFSET                       0x000061a4  /* Wake Up Interrupt Enable Register 1 */
+/* DSLPWUPIRQEN[%s] Registers () */
+#define R_ICU_DSLPWUPIRQEN_OFFSET(m)              (0x00006210 + ((m) * 0x00000004))  /* Deep Sleep Wake Up IRQ Enable Register */
+/* DELSR[%s] Registers () */
+#define R_ICU_DELSR_OFFSET(m)                     (0x00006280 + ((m) * 0x00000004))  /* DMAC Event Link Setting Registers */
+/* IELSR[%s] Registers () */
+#define R_ICU_IELSR_OFFSET(m)                     (0x00006300 + ((m) * 0x00000004))  /* ICU Event Link Setting Register %s */
 
 /* ICU Register Addresses */
 
+#define R_ICU_IRQCRA(m)                           (R_ICU_BASE + R_ICU_IRQCRA_OFFSET(m))
+#define R_ICU_NMICR                               (R_ICU_BASE + R_ICU_NMICR_OFFSET)
+#define R_ICU_IRQCRB(m)                           (R_ICU_BASE + R_ICU_IRQCRB_OFFSET(m))
+#define R_ICU_INTSELR(m)                          (R_ICU_BASE + R_ICU_INTSELR_OFFSET(m))
 #define R_ICU_NMIER                               (R_ICU_BASE + R_ICU_NMIER_OFFSET)
 #define R_ICU_NMICLR                              (R_ICU_BASE + R_ICU_NMICLR_OFFSET)
 #define R_ICU_NMISR                               (R_ICU_BASE + R_ICU_NMISR_OFFSET)
 #define R_ICU_WUPEN0                              (R_ICU_BASE + R_ICU_WUPEN0_OFFSET)
 #define R_ICU_WUPEN1                              (R_ICU_BASE + R_ICU_WUPEN1_OFFSET)
-#define R_ICU_DSLPWUPIRQEN0                       (R_ICU_BASE + R_ICU_DSLPWUPIRQEN0_OFFSET)
-#define R_ICU_DSLPWUPIRQEN1                       (R_ICU_BASE + R_ICU_DSLPWUPIRQEN1_OFFSET)
-#define R_ICU_DSLPWUPIRQEN2                       (R_ICU_BASE + R_ICU_DSLPWUPIRQEN2_OFFSET)
-#define R_ICU_DELSRM                              (R_ICU_BASE + R_ICU_DELSRM_OFFSET)
+#define R_ICU_DSLPWUPIRQEN(m)                     (R_ICU_BASE + R_ICU_DSLPWUPIRQEN_OFFSET(m))
+#define R_ICU_DELSR(m)                            (R_ICU_BASE + R_ICU_DELSR_OFFSET(m))
 #define R_ICU_IELSR(m)                            (R_ICU_BASE + R_ICU_IELSR_OFFSET(m))
 
 /* Register bit definitions */
+/* IRQCRA Register bit definitions */
+#define R_ICU_IRQCRA_IRQMD_SHIFT                  (0)  /* IRQ Detection Sense Select */
+#define R_ICU_IRQCRA_IRQMD_MASK                   0x3
+#  define R_ICU_IRQCRA_IRQMD_00                           (0 << R_ICU_IRQCRA_IRQMD_SHIFT)  /* Falling edge */
+#  define R_ICU_IRQCRA_IRQMD_01                           (1 << R_ICU_IRQCRA_IRQMD_SHIFT)  /* Rising edge */
+#  define R_ICU_IRQCRA_IRQMD_10                           (2 << R_ICU_IRQCRA_IRQMD_SHIFT)  /* Rising and falling edges */
+#  define R_ICU_IRQCRA_IRQMD_11                           (3 << R_ICU_IRQCRA_IRQMD_SHIFT)  /* Low level */
+
+#define R_ICU_IRQCRA_FCLKSEL_SHIFT                (4)  /* IRQ Digital Filter Sampling Clock Select */
+#define R_ICU_IRQCRA_FCLKSEL_MASK                 0x30
+#  define R_ICU_IRQCRA_FCLKSEL_00                         (0 << R_ICU_IRQCRA_FCLKSEL_SHIFT)  /* PCLKB */
+#  define R_ICU_IRQCRA_FCLKSEL_01                         (1 << R_ICU_IRQCRA_FCLKSEL_SHIFT)  /* PCLKB/8 */
+#  define R_ICU_IRQCRA_FCLKSEL_10                         (2 << R_ICU_IRQCRA_FCLKSEL_SHIFT)  /* PCLKB/32 */
+#  define R_ICU_IRQCRA_FCLKSEL_11                         (3 << R_ICU_IRQCRA_FCLKSEL_SHIFT)  /* PCLKB/64 */
+
+#define R_ICU_IRQCRA_FLTEN                        (1 << 7)  /* IRQ Digital Filter Enable */
+
+/* NMICR Register bit definitions */
+#define R_ICU_NMICR_NMIMD                         (1 << 0)  /* NMI Detection Set */
+
+#define R_ICU_NMICR_NFCLKSEL_SHIFT                (4)  /* NMI Digital Filter Sampling Clock */
+#define R_ICU_NMICR_NFCLKSEL_MASK                 0x30
+#  define R_ICU_NMICR_NFCLKSEL_00                         (0 << R_ICU_NMICR_NFCLKSEL_SHIFT)  /* PCLKB */
+#  define R_ICU_NMICR_NFCLKSEL_01                         (1 << R_ICU_NMICR_NFCLKSEL_SHIFT)  /* PCLKB/8 */
+#  define R_ICU_NMICR_NFCLKSEL_10                         (2 << R_ICU_NMICR_NFCLKSEL_SHIFT)  /* PCLKB/32 */
+#  define R_ICU_NMICR_NFCLKSEL_11                         (3 << R_ICU_NMICR_NFCLKSEL_SHIFT)  /* PCLKB/64 */
+
+#define R_ICU_NMICR_NFLTEN                        (1 << 7)  /* NMI Digital Filter Enable */
+
+/* IRQCRB Register bit definitions */
+#define R_ICU_IRQCRB_IRQMD_SHIFT                  (0)  /* IRQ Detection Sense Select */
+#define R_ICU_IRQCRB_IRQMD_MASK                   0x3
+#  define R_ICU_IRQCRB_IRQMD_00                           (0 << R_ICU_IRQCRB_IRQMD_SHIFT)  /* Falling edge */
+#  define R_ICU_IRQCRB_IRQMD_01                           (1 << R_ICU_IRQCRB_IRQMD_SHIFT)  /* Rising edge */
+#  define R_ICU_IRQCRB_IRQMD_10                           (2 << R_ICU_IRQCRB_IRQMD_SHIFT)  /* Rising and falling edges */
+#  define R_ICU_IRQCRB_IRQMD_11                           (3 << R_ICU_IRQCRB_IRQMD_SHIFT)  /* Low level */
+
+#define R_ICU_IRQCRB_FCLKSEL_SHIFT                (4)  /* IRQ Digital Filter Sampling Clock Select */
+#define R_ICU_IRQCRB_FCLKSEL_MASK                 0x30
+#  define R_ICU_IRQCRB_FCLKSEL_00                         (0 << R_ICU_IRQCRB_FCLKSEL_SHIFT)  /* PCLKB */
+#  define R_ICU_IRQCRB_FCLKSEL_01                         (1 << R_ICU_IRQCRB_FCLKSEL_SHIFT)  /* PCLKB/8 */
+#  define R_ICU_IRQCRB_FCLKSEL_10                         (2 << R_ICU_IRQCRB_FCLKSEL_SHIFT)  /* PCLKB/32 */
+#  define R_ICU_IRQCRB_FCLKSEL_11                         (3 << R_ICU_IRQCRB_FCLKSEL_SHIFT)  /* PCLKB/64 */
+
+#define R_ICU_IRQCRB_FLTEN                        (1 << 7)  /* IRQ Digital Filter Enable */
+
+/* INTSELR Register bit definitions */
+#define R_ICU_INTSELR_IS_S                        (1 << 0)  /* Selects which CPU receives interrupt requests */
+
+#define R_ICU_INTSELR_IS0                         (1 << 0)  /* Selects which CPU receives interrupt requests */
+
+#define R_ICU_INTSELR_IS1                         (1 << 1)  /* Selects which CPU receives interrupt requests */
+
+#define R_ICU_INTSELR_IS2                         (1 << 2)  /* Selects which CPU receives interrupt requests */
+
+#define R_ICU_INTSELR_IS3                         (1 << 3)  /* Selects which CPU receives interrupt requests */
+
+#define R_ICU_INTSELR_IS4                         (1 << 4)  /* Selects which CPU receives interrupt requests */
+
+#define R_ICU_INTSELR_IS5                         (1 << 5)  /* Selects which CPU receives interrupt requests */
+
+#define R_ICU_INTSELR_IS6                         (1 << 6)  /* Selects which CPU receives interrupt requests */
+
+#define R_ICU_INTSELR_IS7                         (1 << 7)  /* Selects which CPU receives interrupt requests */
+
+#define R_ICU_INTSELR_IS8                         (1 << 8)  /* Selects which CPU receives interrupt requests */
+
+#define R_ICU_INTSELR_IS9                         (1 << 9)  /* Selects which CPU receives interrupt requests */
+
+#define R_ICU_INTSELR_IS10                        (1 << 10)  /* Selects which CPU receives interrupt requests */
+
+#define R_ICU_INTSELR_IS11                        (1 << 11)  /* Selects which CPU receives interrupt requests */
+
+#define R_ICU_INTSELR_IS12                        (1 << 12)  /* Selects which CPU receives interrupt requests */
+
+#define R_ICU_INTSELR_IS13                        (1 << 13)  /* Selects which CPU receives interrupt requests */
+
+#define R_ICU_INTSELR_IS14                        (1 << 14)  /* Selects which CPU receives interrupt requests */
+
+#define R_ICU_INTSELR_IS15                        (1 << 15)  /* Selects which CPU receives interrupt requests */
+
+#define R_ICU_INTSELR_IS16                        (1 << 16)  /* Selects which CPU receives interrupt requests */
+
+#define R_ICU_INTSELR_IS17                        (1 << 17)  /* Selects which CPU receives interrupt requests */
+
+#define R_ICU_INTSELR_IS18                        (1 << 18)  /* Selects which CPU receives interrupt requests */
+
+#define R_ICU_INTSELR_IS19                        (1 << 19)  /* Selects which CPU receives interrupt requests */
+
+#define R_ICU_INTSELR_IS20                        (1 << 20)  /* Selects which CPU receives interrupt requests */
+
+#define R_ICU_INTSELR_IS21                        (1 << 21)  /* Selects which CPU receives interrupt requests */
+
+#define R_ICU_INTSELR_IS22                        (1 << 22)  /* Selects which CPU receives interrupt requests */
+
+#define R_ICU_INTSELR_IS23                        (1 << 23)  /* Selects which CPU receives interrupt requests */
+
+#define R_ICU_INTSELR_IS24                        (1 << 24)  /* Selects which CPU receives interrupt requests */
+
+#define R_ICU_INTSELR_IS25                        (1 << 25)  /* Selects which CPU receives interrupt requests */
+
+#define R_ICU_INTSELR_IS26                        (1 << 26)  /* Selects which CPU receives interrupt requests */
+
+#define R_ICU_INTSELR_IS27                        (1 << 27)  /* Selects which CPU receives interrupt requests */
+
+#define R_ICU_INTSELR_IS28                        (1 << 28)  /* Selects which CPU receives interrupt requests */
+
+#define R_ICU_INTSELR_IS29                        (1 << 29)  /* Selects which CPU receives interrupt requests */
+
+#define R_ICU_INTSELR_IS30                        (1 << 30)  /* Selects which CPU receives interrupt requests */
+
+#define R_ICU_INTSELR_IS31                        (1 << 31)  /* Selects which CPU receives interrupt requests */
+
 /* NMIER Register bit definitions */
 #define R_ICU_NMIER_IWDTEN                        (1 << 0)  /* IWDT Underflow/Refresh Error Interrupt Enable */
 
 #define R_ICU_NMIER_WDTEN                         (1 << 1)  /* WDT Underflow/Refresh Error Interrupt Enable */
 
-#define R_ICU_NMIER_PVD1EN                        (1 << 2)  /* Voltage monitor 1 Interrupt Enable */
+#define R_ICU_NMIER_PVD1EN                        (1 << 2)  /* Voltage-Monitoring 1 Interrupt Enable */
 
-#define R_ICU_NMIER_PVD2EN                        (1 << 3)  /* Voltage monitor 2 Interrupt Enable */
+#define R_ICU_NMIER_PVD2EN                        (1 << 3)  /* Voltage-Monitoring 2 Interrupt Enable */
 
 #define R_ICU_NMIER_SOSTEN                        (1 << 5)  /* Sub Oscillation Stop Detection Interrupt Enable */
 
@@ -81,15 +203,15 @@
 
 #define R_ICU_NMIER_NMIEN                         (1 << 7)  /* NMI Pin Interrupt Enable */
 
-#define R_ICU_NMIER_BUSEN                         (1 << 12)  /*  */
+#define R_ICU_NMIER_BUSEN                         (1 << 12)  /* BUS error Interrupt Enable */
 
-#define R_ICU_NMIER_CMEN                          (1 << 13)  /*  */
+#define R_ICU_NMIER_CMEN                          (1 << 13)  /* Common Memory error Interrupt Enable */
 
 #define R_ICU_NMIER_LMEN                          (1 << 14)  /* Local Memory Error Interrupt Enable */
 
-#define R_ICU_NMIER_LUEN                          (1 << 15)  /*  */
+#define R_ICU_NMIER_LUEN                          (1 << 15)  /* LockUp Interrupt Enable */
 
-#define R_ICU_NMIER_FPUEXCEN                      (1 << 16)  /* FPU Exception Interrupt Enable */
+#define R_ICU_NMIER_FPUFLTEN                      (1 << 16)  /* FPU FAULT Interrupt Enable */
 
 #define R_ICU_NMIER_MRCRDEN                       (1 << 17)  /* MRAM MRC read Error Interrupt Enable */
 
@@ -97,183 +219,141 @@
 
 #define R_ICU_NMIER_IPCEN                         (1 << 20)  /* IPC NMI CPU mutual Interrupt Enable */
 
-#define R_ICU_NMIER_FPUFLTEN                      (1 << 16)  /* FPU FAULT Interrupt Enable */
-
 /* NMICLR Register bit definitions */
-#define R_ICU_NMICLR_IWDTCLR                      (1 << 0)  /* IWDT Underflow/Refresh Error Interrupt Status Flag Clear */
+#define R_ICU_NMICLR_IWDTCLR                      (1 << 0)  /* IWDT Clear */
 
-#define R_ICU_NMICLR_WDTCLR                       (1 << 1)  /* WDT Underflow/Refresh Error Interrupt Status Flag Clear */
+#define R_ICU_NMICLR_WDTCLR                       (1 << 1)  /* WDT Clear */
 
-#define R_ICU_NMICLR_PVD1CLR                      (1 << 2)  /* Voltage Monitor 1 Interrupt Status Flag Clear */
+#define R_ICU_NMICLR_PVD1CLR                      (1 << 2)  /* PVD1 Clear */
 
-#define R_ICU_NMICLR_PVD2CLR                      (1 << 3)  /* Voltage Monitor 2 Interrupt Status Flag Clear */
+#define R_ICU_NMICLR_PVD2CLR                      (1 << 3)  /* PVD2 Clear */
 
-#define R_ICU_NMICLR_SOSTCLR                      (1 << 5)  /* Oscillation Stop Detection Interrupt Status Flag Clear */
+#define R_ICU_NMICLR_SOSTCLR                      (1 << 5)  /* Sub OST Clear */
 
-#define R_ICU_NMICLR_OSTCLR                       (1 << 6)  /* Oscillation Stop Detection Interrupt Status Flag Clear */
+#define R_ICU_NMICLR_OSTCLR                       (1 << 6)  /* OST Clear */
 
-#define R_ICU_NMICLR_NMICLR                       (1 << 7)  /* NMI Pin Interrupt Status Flag Clear */
+#define R_ICU_NMICLR_NMICLR                       (1 << 7)  /* NMI Clear */
 
-#define R_ICU_NMICLR_BUSCLR                       (1 << 12)  /*  */
+#define R_ICU_NMICLR_BUSCLR                       (1 << 12)  /* Bus Clear */
 
-#define R_ICU_NMICLR_CMCLR                        (1 << 13)  /*  */
+#define R_ICU_NMICLR_CMCLR                        (1 << 13)  /* CM Clear */
 
-#define R_ICU_NMICLR_LMCLR                        (1 << 14)  /*  */
+#define R_ICU_NMICLR_LMCLR                        (1 << 14)  /* LM Clear */
 
-#define R_ICU_NMICLR_LUCLR                        (1 << 15)  /*  */
-
-#define R_ICU_NMICLR_FPUEXCCLR                    (1 << 16)  /* FPU Exception Interrupt Status Flag Clear */
-
-#define R_ICU_NMICLR_MRCRDCLR                     (1 << 17)  /* MRAM MRC read Error Interrupt Status Flag Clear */
-
-#define R_ICU_NMICLR_MRERDCLR                     (1 << 18)  /* MRAM MRE read Error Interrupt Status Flag Clear */
-
-#define R_ICU_NMICLR_IPCCLR                       (1 << 20)  /* IPC NMI CPU mutual Interrupt Status Flag Clear */
+#define R_ICU_NMICLR_LUCLR                        (1 << 15)  /* LU Clear */
 
 #define R_ICU_NMICLR_FPUFLTCLR                    (1 << 16)  /* FPU FAULT Clear */
 
+#define R_ICU_NMICLR_MRCRDCLR                     (1 << 17)  /* MRAM MRC read Error Interrupt Clear */
+
+#define R_ICU_NMICLR_MRERDCLR                     (1 << 18)  /* MRAM MRE read Error Interrupt Clear */
+
+#define R_ICU_NMICLR_IPCCLR                       (1 << 20)  /* IPC NMI CPU mutual Interrupt Clear */
+
 /* NMISR Register bit definitions */
-#define R_ICU_NMISR_IWDTST                        (1 << 0)  /* IWDT Underflow/Refresh Error Interrupt Status Flag */
+#define R_ICU_NMISR_IWDTST                        (1 << 0)  /* IWDT Underflow/Refresh Error Status Flag */
 
-#define R_ICU_NMISR_WDTST                         (1 << 1)  /* WDT Underflow/Refresh Error Interrupt Status Flag */
+#define R_ICU_NMISR_WDTST                         (1 << 1)  /* WDT Underflow/Refresh Error Status Flag */
 
-#define R_ICU_NMISR_PVD1ST                        (1 << 2)  /* Voltage Monitor 1 Interrupt Status Flag */
+#define R_ICU_NMISR_PVD1ST                        (1 << 2)  /* Voltage-Monitoring 1 Interrupt Status Flag */
 
-#define R_ICU_NMISR_PVD2ST                        (1 << 3)  /* Voltage Monitor 2 Interrupt Status Flag */
+#define R_ICU_NMISR_PVD2ST                        (1 << 3)  /* Voltage-Monitoring 2 Interrupt Status Flag */
 
 #define R_ICU_NMISR_SOSTST                        (1 << 5)  /* Sub Oscillation Stop Detection Interrupt Status Flag */
 
-#define R_ICU_NMISR_OSTST                         (1 << 6)  /* Main Clock Oscillation Stop Detection Interrupt Status Flag */
+#define R_ICU_NMISR_OSTST                         (1 << 6)  /* Oscillation Stop Detection Interrupt Status Flag */
 
-#define R_ICU_NMISR_NMIST                         (1 << 7)  /* NMI Pin Interrupt Status Flag */
+#define R_ICU_NMISR_NMIST                         (1 << 7)  /* NMI Status Flag */
 
-#define R_ICU_NMISR_BUSST                         (1 << 12)  /* Bus Error Interrupt Status Flag */
+#define R_ICU_NMISR_BUSST                         (1 << 12)  /* BUS error Interrupt Status Flag */
 
-#define R_ICU_NMISR_CMST                          (1 << 13)  /*  */
+#define R_ICU_NMISR_CMST                          (1 << 13)  /* Common Memory error Interrupt Status Flag */
 
-#define R_ICU_NMISR_LMST                          (1 << 14)  /*  */
+#define R_ICU_NMISR_LMST                          (1 << 14)  /* Local Memory Error Interrupt Status Flag */
 
-#define R_ICU_NMISR_LUST                          (1 << 15)  /*  */
-
-#define R_ICU_NMISR_FPUEXCST                      (1 << 16)  /*  */
-
-#define R_ICU_NMISR_MRCRDST                       (1 << 17)  /*  */
-
-#define R_ICU_NMISR_MRERDST                       (1 << 18)  /*  */
-
-#define R_ICU_NMISR_IPCST                         (1 << 20)  /*  */
+#define R_ICU_NMISR_LUST                          (1 << 15)  /* LockUp Interrupt Status Flag */
 
 #define R_ICU_NMISR_FPUFLTST                      (1 << 16)  /* FPU FAULT Interrupt Status Flag */
 
-/* WUPEN0 Register bit definitions */
-#define R_ICU_WUPEN0_IRQWUPEN0                    (1 << 0)  /*  */
+#define R_ICU_NMISR_MRCRDST                       (1 << 17)  /* MRAM MRC read Error Interrupt Status Flag */
 
-#define R_ICU_WUPEN0_IRQWUPEN1                    (1 << 1)  /*  */
+#define R_ICU_NMISR_MRERDST                       (1 << 18)  /* MRAM MRE read Error Interrupt Status Flag */
 
-#define R_ICU_WUPEN0_IRQWUPEN2                    (1 << 2)  /*  */
+#define R_ICU_NMISR_IPCST                         (1 << 20)  /* IPC NMI CPU mutual Interrupt Status Flag */
 
-#define R_ICU_WUPEN0_IRQWUPEN3                    (1 << 3)  /*  */
+/* WUPEN Register bit definitions */
+#define R_ICU_WUPEN_IRQWUPEN_S                    (1 << 0)  /* IRQ%s Interrupt Deep Sleep/Software Standby Returns Enable bit */
 
-#define R_ICU_WUPEN0_IRQWUPEN4                    (1 << 4)  /*  */
+#define R_ICU_WUPEN_WUPEN_S                       (1 << 16)  /* Peripheral Interrupt Deep Sleep/Software Standby Returns Enable bit %s */
 
-#define R_ICU_WUPEN0_IRQWUPEN5                    (1 << 5)  /*  */
+#define R_ICU_WUPEN_IRQWUPEN0                     (1 << 0)  /* IRQ0 Interrupt Deep Sleep/Software Standby Returns Enable bit */
 
-#define R_ICU_WUPEN0_IRQWUPEN6                    (1 << 6)  /*  */
+#define R_ICU_WUPEN_IRQWUPEN1                     (1 << 1)  /* IRQ1 Interrupt Deep Sleep/Software Standby Returns Enable bit */
 
-#define R_ICU_WUPEN0_IRQWUPEN7                    (1 << 7)  /*  */
+#define R_ICU_WUPEN_IRQWUPEN2                     (1 << 2)  /* IRQ2 Interrupt Deep Sleep/Software Standby Returns Enable bit */
 
-#define R_ICU_WUPEN0_IRQWUPEN8                    (1 << 8)  /*  */
+#define R_ICU_WUPEN_IRQWUPEN3                     (1 << 3)  /* IRQ3 Interrupt Deep Sleep/Software Standby Returns Enable bit */
 
-#define R_ICU_WUPEN0_IRQWUPEN9                    (1 << 9)  /*  */
+#define R_ICU_WUPEN_IRQWUPEN4                     (1 << 4)  /* IRQ4 Interrupt Deep Sleep/Software Standby Returns Enable bit */
 
-#define R_ICU_WUPEN0_IRQWUPEN10                   (1 << 10)  /*  */
+#define R_ICU_WUPEN_IRQWUPEN5                     (1 << 5)  /* IRQ5 Interrupt Deep Sleep/Software Standby Returns Enable bit */
 
-#define R_ICU_WUPEN0_IRQWUPEN11                   (1 << 11)  /*  */
+#define R_ICU_WUPEN_IRQWUPEN6                     (1 << 6)  /* IRQ6 Interrupt Deep Sleep/Software Standby Returns Enable bit */
 
-#define R_ICU_WUPEN0_IRQWUPEN12                   (1 << 12)  /*  */
+#define R_ICU_WUPEN_IRQWUPEN7                     (1 << 7)  /* IRQ7 Interrupt Deep Sleep/Software Standby Returns Enable bit */
 
-#define R_ICU_WUPEN0_IRQWUPEN13                   (1 << 13)  /*  */
+#define R_ICU_WUPEN_IRQWUPEN8                     (1 << 8)  /* IRQ8 Interrupt Deep Sleep/Software Standby Returns Enable bit */
 
-#define R_ICU_WUPEN0_IRQWUPEN14                   (1 << 14)  /*  */
+#define R_ICU_WUPEN_IRQWUPEN9                     (1 << 9)  /* IRQ9 Interrupt Deep Sleep/Software Standby Returns Enable bit */
 
-#define R_ICU_WUPEN0_IRQWUPEN15                   (1 << 15)  /*  */
+#define R_ICU_WUPEN_IRQWUPEN10                    (1 << 10)  /* IRQ10 Interrupt Deep Sleep/Software Standby Returns Enable bit */
 
-#define R_ICU_WUPEN0_IWDTWUPEN                    (1 << 16)  /* IWDT Interrupt Software Standby Mode Returns Enable bit */
+#define R_ICU_WUPEN_IRQWUPEN11                    (1 << 11)  /* IRQ11 Interrupt Deep Sleep/Software Standby Returns Enable bit */
 
-#define R_ICU_WUPEN0_PVD1WUPEN                    (1 << 18)  /* PVD1 Interrupt Software Standby Mode Returns Enable bit */
+#define R_ICU_WUPEN_IRQWUPEN12                    (1 << 12)  /* IRQ12 Interrupt Deep Sleep/Software Standby Returns Enable bit */
 
-#define R_ICU_WUPEN0_PVD2WUPEN                    (1 << 19)  /* PVD2 Interrupt Software Standby Mode Returns Enable bit */
+#define R_ICU_WUPEN_IRQWUPEN13                    (1 << 13)  /* IRQ13 Interrupt Deep Sleep/Software Standby Returns Enable bit */
 
-#define R_ICU_WUPEN0_VBATTWUPEN                   (1 << 20)  /* VBATT Monitor Interrupt Software Standby Mode Returns Enable bit */
+#define R_ICU_WUPEN_IRQWUPEN14                    (1 << 14)  /* IRQ14 Interrupt Deep Sleep/Software Standby Returns Enable bit */
 
-#define R_ICU_WUPEN0_RTCALMWUPEN                  (1 << 24)  /* RTC Alarm Interrupt Software Standby Mode Returns Enable bit */
+#define R_ICU_WUPEN_IRQWUPEN15                    (1 << 15)  /* IRQ15 Interrupt Deep Sleep/Software Standby Returns Enable bit */
 
-#define R_ICU_WUPEN0_RTCPRDWUPEN                  (1 << 25)  /* RTC Period Interrupt Software Standby Mode Returns Enable bit */
+#define R_ICU_WUPEN_WUPEN0                        (1 << 16)  /* Peripheral Interrupt Deep Sleep/Software Standby Returns Enable bit 0 */
 
-#define R_ICU_WUPEN0_USBHSWUPEN                   (1 << 26)  /* USBHS Interrupt Software Standby Mode Returns Enable bit */
+#define R_ICU_WUPEN_WUPEN1                        (1 << 17)  /* Peripheral Interrupt Deep Sleep/Software Standby Returns Enable bit 1 */
 
-#define R_ICU_WUPEN0_USBFS0WUPEN                  (1 << 27)  /* USBFS Interrupt Software Standby Mode Returns Enable bit */
+#define R_ICU_WUPEN_WUPEN2                        (1 << 18)  /* Peripheral Interrupt Deep Sleep/Software Standby Returns Enable bit 2 */
 
-#define R_ICU_WUPEN0_AGT1UDWUPEN                  (1 << 28)  /* AGT1 Underflow Interrupt Software Standby Mode Returns Enable bit */
+#define R_ICU_WUPEN_WUPEN3                        (1 << 19)  /* Peripheral Interrupt Deep Sleep/Software Standby Returns Enable bit 3 */
 
-#define R_ICU_WUPEN0_AGT1CAWUPEN                  (1 << 29)  /* AGT1 Compare Match A Interrupt Software Standby Mode Returns Enable bit */
+#define R_ICU_WUPEN_WUPEN4                        (1 << 20)  /* Peripheral Interrupt Deep Sleep/Software Standby Returns Enable bit 4 */
 
-#define R_ICU_WUPEN0_AGT1CBWUPEN                  (1 << 30)  /* AGT1 Compare Match B Interrupt Software Standby Mode Returns Enable bit */
+#define R_ICU_WUPEN_WUPEN5                        (1 << 21)  /* Peripheral Interrupt Deep Sleep/Software Standby Returns Enable bit 5 */
 
-#define R_ICU_WUPEN0_RIIC0WUPEN                   (1 << 31)  /* RIIC0 Address Match Interrupt Software Standby Mode Returns Enable bit */
+#define R_ICU_WUPEN_WUPEN6                        (1 << 22)  /* Peripheral Interrupt Deep Sleep/Software Standby Returns Enable bit 6 */
+
+#define R_ICU_WUPEN_WUPEN7                        (1 << 23)  /* Peripheral Interrupt Deep Sleep/Software Standby Returns Enable bit 7 */
+
+#define R_ICU_WUPEN_WUPEN8                        (1 << 24)  /* Peripheral Interrupt Deep Sleep/Software Standby Returns Enable bit 8 */
+
+#define R_ICU_WUPEN_WUPEN9                        (1 << 25)  /* Peripheral Interrupt Deep Sleep/Software Standby Returns Enable bit 9 */
+
+#define R_ICU_WUPEN_WUPEN10                       (1 << 26)  /* Peripheral Interrupt Deep Sleep/Software Standby Returns Enable bit 10 */
+
+#define R_ICU_WUPEN_WUPEN11                       (1 << 27)  /* Peripheral Interrupt Deep Sleep/Software Standby Returns Enable bit 11 */
+
+#define R_ICU_WUPEN_WUPEN12                       (1 << 28)  /* Peripheral Interrupt Deep Sleep/Software Standby Returns Enable bit 12 */
+
+#define R_ICU_WUPEN_WUPEN13                       (1 << 29)  /* Peripheral Interrupt Deep Sleep/Software Standby Returns Enable bit 13 */
+
+#define R_ICU_WUPEN_WUPEN14                       (1 << 30)  /* Peripheral Interrupt Deep Sleep/Software Standby Returns Enable bit 14 */
+
+#define R_ICU_WUPEN_WUPEN15                       (1 << 31)  /* Peripheral Interrupt Deep Sleep/Software Standby Returns Enable bit 15 */
 
 /* WUPEN1 Register bit definitions */
-#define R_ICU_WUPEN1_COMPHS0WUPEN                 (1 << 3)  /* Comparator-HS0 Interrupt Software Standby Mode returns Enable bit */
+#define R_ICU_WUPEN1_WUPEN_S                      (1 << 0)  /* Peripheral Interrupt Deep Sleep/Software Standby Returns Enable bit %s */
 
-#define R_ICU_WUPEN1_SOSCWUPEN                    (1 << 7)  /* Sub Oscillation Stop Detection Interrupt Software Standby Returns Enable bit */
-
-#define R_ICU_WUPEN1_ULP0UWUPEN                   (1 << 8)  /* ULPT0 Underflow Interrupt Software Standby Mode returns Enable bit */
-
-#define R_ICU_WUPEN1_ULP0AWUPEN                   (1 << 9)  /* ULPT0 Compare Match A Interrupt Software Standby Mode returns Enable bit */
-
-#define R_ICU_WUPEN1_ULP0BWUPEN                   (1 << 10)  /* ULPT0 Compare Match B Interrupt Software Standby Mode returns Enable bit */
-
-#define R_ICU_WUPEN1_I3CWUPEN                     (1 << 11)  /* I3C Wakeup Condition Detection Interrupt Software Standby Mode returns Enable bit */
-
-#define R_ICU_WUPEN1_ULP1UWUPEN                   (1 << 12)  /* ULPT1 Underflow Interrupt Software Standby Mode returns Enable bit */
-
-#define R_ICU_WUPEN1_ULP1AWUPEN                   (1 << 13)  /* ULPT1 Compare Match A Interrupt Software Standby Mode returns Enable bit */
-
-#define R_ICU_WUPEN1_ULP1BWUPEN                   (1 << 14)  /* ULPT1 Compare Match B Interrupt Software Standby Mode returns Enable bit */
-
-#define R_ICU_WUPEN1_PDMWUPEN                     (1 << 15)  /* PDMIF Sound Detection Interrupt Software Standby Returns Enable bit */
-
-#define R_ICU_WUPEN1_IRQWUPEN16                   (1 << 16)  /* Interrupt Software Standby Returns Enable bits IRQ31 to IRQ16 */
-
-#define R_ICU_WUPEN1_IRQWUPEN17                   (1 << 17)  /* Interrupt Software Standby Returns Enable bits IRQ31 to IRQ16 */
-
-#define R_ICU_WUPEN1_IRQWUPEN18                   (1 << 18)  /* Interrupt Software Standby Returns Enable bits IRQ31 to IRQ16 */
-
-#define R_ICU_WUPEN1_IRQWUPEN19                   (1 << 19)  /* Interrupt Software Standby Returns Enable bits IRQ31 to IRQ16 */
-
-#define R_ICU_WUPEN1_IRQWUPEN20                   (1 << 20)  /* Interrupt Software Standby Returns Enable bits IRQ31 to IRQ16 */
-
-#define R_ICU_WUPEN1_IRQWUPEN21                   (1 << 21)  /* Interrupt Software Standby Returns Enable bits IRQ31 to IRQ16 */
-
-#define R_ICU_WUPEN1_IRQWUPEN22                   (1 << 22)  /* Interrupt Software Standby Returns Enable bits IRQ31 to IRQ16 */
-
-#define R_ICU_WUPEN1_IRQWUPEN23                   (1 << 23)  /* Interrupt Software Standby Returns Enable bits IRQ31 to IRQ16 */
-
-#define R_ICU_WUPEN1_IRQWUPEN24                   (1 << 24)  /* Interrupt Software Standby Returns Enable bits IRQ31 to IRQ16 */
-
-#define R_ICU_WUPEN1_IRQWUPEN25                   (1 << 25)  /* Interrupt Software Standby Returns Enable bits IRQ31 to IRQ16 */
-
-#define R_ICU_WUPEN1_IRQWUPEN26                   (1 << 26)  /* Interrupt Software Standby Returns Enable bits IRQ31 to IRQ16 */
-
-#define R_ICU_WUPEN1_IRQWUPEN27                   (1 << 27)  /* Interrupt Software Standby Returns Enable bits IRQ31 to IRQ16 */
-
-#define R_ICU_WUPEN1_IRQWUPEN28                   (1 << 28)  /* Interrupt Software Standby Returns Enable bits IRQ31 to IRQ16 */
-
-#define R_ICU_WUPEN1_IRQWUPEN29                   (1 << 29)  /* Interrupt Software Standby Returns Enable bits IRQ31 to IRQ16 */
-
-#define R_ICU_WUPEN1_IRQWUPEN30                   (1 << 30)  /* Interrupt Software Standby Returns Enable bits IRQ31 to IRQ16 */
-
-#define R_ICU_WUPEN1_IRQWUPEN31                   (1 << 31)  /* Interrupt Software Standby Returns Enable bits IRQ31 to IRQ16 */
+#define R_ICU_WUPEN1_IRQWUPEN_S                   (1 << 16)  /* IRQ%s Interrupt Deep Sleep/Software Standby Returns Enable bit */
 
 #define R_ICU_WUPEN1_WUPEN16                      (1 << 0)  /* Peripheral Interrupt Deep Sleep/Software Standby Returns Enable bit 16 */
 
@@ -307,211 +387,115 @@
 
 #define R_ICU_WUPEN1_WUPEN31                      (1 << 15)  /* Peripheral Interrupt Deep Sleep/Software Standby Returns Enable bit 31 */
 
-/* DSLPWUPIRQEN0 Register bit definitions */
-#define R_ICU_DSLPWUPIRQEN0_IRQ00                 (1 << 0)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_WUPEN1_IRQWUPEN16                   (1 << 16)  /* IRQ16 Interrupt Deep Sleep/Software Standby Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN0_IRQ01                 (1 << 1)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_WUPEN1_IRQWUPEN17                   (1 << 17)  /* IRQ17 Interrupt Deep Sleep/Software Standby Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN0_IRQ02                 (1 << 2)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_WUPEN1_IRQWUPEN18                   (1 << 18)  /* IRQ18 Interrupt Deep Sleep/Software Standby Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN0_IRQ03                 (1 << 3)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_WUPEN1_IRQWUPEN19                   (1 << 19)  /* IRQ19 Interrupt Deep Sleep/Software Standby Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN0_IRQ04                 (1 << 4)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_WUPEN1_IRQWUPEN20                   (1 << 20)  /* IRQ20 Interrupt Deep Sleep/Software Standby Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN0_IRQ05                 (1 << 5)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_WUPEN1_IRQWUPEN21                   (1 << 21)  /* IRQ21 Interrupt Deep Sleep/Software Standby Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN0_IRQ06                 (1 << 6)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_WUPEN1_IRQWUPEN22                   (1 << 22)  /* IRQ22 Interrupt Deep Sleep/Software Standby Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN0_IRQ07                 (1 << 7)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_WUPEN1_IRQWUPEN23                   (1 << 23)  /* IRQ23 Interrupt Deep Sleep/Software Standby Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN0_IRQ08                 (1 << 8)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_WUPEN1_IRQWUPEN24                   (1 << 24)  /* IRQ24 Interrupt Deep Sleep/Software Standby Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN0_IRQ09                 (1 << 9)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_WUPEN1_IRQWUPEN25                   (1 << 25)  /* IRQ25 Interrupt Deep Sleep/Software Standby Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN0_IRQ10                 (1 << 10)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_WUPEN1_IRQWUPEN26                   (1 << 26)  /* IRQ26 Interrupt Deep Sleep/Software Standby Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN0_IRQ11                 (1 << 11)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_WUPEN1_IRQWUPEN27                   (1 << 27)  /* IRQ27 Interrupt Deep Sleep/Software Standby Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN0_IRQ12                 (1 << 12)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_WUPEN1_IRQWUPEN28                   (1 << 28)  /* IRQ28 Interrupt Deep Sleep/Software Standby Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN0_IRQ13                 (1 << 13)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_WUPEN1_IRQWUPEN29                   (1 << 29)  /* IRQ29 Interrupt Deep Sleep/Software Standby Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN0_IRQ14                 (1 << 14)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_WUPEN1_IRQWUPEN30                   (1 << 30)  /* IRQ30 Interrupt Deep Sleep/Software Standby Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN0_IRQ15                 (1 << 15)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_WUPEN1_IRQWUPEN31                   (1 << 31)  /* IRQ31 Interrupt Deep Sleep/Software Standby Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN0_IRQ16                 (1 << 16)  /* IRQ Deep Sleep Returns Enable bit. */
+/* DSLPWUPIRQEN Register bit definitions */
+#define R_ICU_DSLPWUPIRQEN_IRQ_S                  (1 << 0)  /* IRQ Deep Sleep Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN0_IRQ17                 (1 << 17)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_DSLPWUPIRQEN_IRQ0                   (1 << 0)  /* IRQ Deep Sleep Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN0_IRQ18                 (1 << 18)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_DSLPWUPIRQEN_IRQ1                   (1 << 1)  /* IRQ Deep Sleep Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN0_IRQ19                 (1 << 19)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_DSLPWUPIRQEN_IRQ2                   (1 << 2)  /* IRQ Deep Sleep Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN0_IRQ20                 (1 << 20)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_DSLPWUPIRQEN_IRQ3                   (1 << 3)  /* IRQ Deep Sleep Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN0_IRQ21                 (1 << 21)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_DSLPWUPIRQEN_IRQ4                   (1 << 4)  /* IRQ Deep Sleep Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN0_IRQ22                 (1 << 22)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_DSLPWUPIRQEN_IRQ5                   (1 << 5)  /* IRQ Deep Sleep Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN0_IRQ23                 (1 << 23)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_DSLPWUPIRQEN_IRQ6                   (1 << 6)  /* IRQ Deep Sleep Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN0_IRQ24                 (1 << 24)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_DSLPWUPIRQEN_IRQ7                   (1 << 7)  /* IRQ Deep Sleep Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN0_IRQ25                 (1 << 25)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_DSLPWUPIRQEN_IRQ8                   (1 << 8)  /* IRQ Deep Sleep Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN0_IRQ26                 (1 << 26)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_DSLPWUPIRQEN_IRQ9                   (1 << 9)  /* IRQ Deep Sleep Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN0_IRQ27                 (1 << 27)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_DSLPWUPIRQEN_IRQ10                  (1 << 10)  /* IRQ Deep Sleep Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN0_IRQ28                 (1 << 28)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_DSLPWUPIRQEN_IRQ11                  (1 << 11)  /* IRQ Deep Sleep Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN0_IRQ29                 (1 << 29)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_DSLPWUPIRQEN_IRQ12                  (1 << 12)  /* IRQ Deep Sleep Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN0_IRQ30                 (1 << 30)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_DSLPWUPIRQEN_IRQ13                  (1 << 13)  /* IRQ Deep Sleep Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN0_IRQ31                 (1 << 31)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_DSLPWUPIRQEN_IRQ14                  (1 << 14)  /* IRQ Deep Sleep Returns Enable bit */
 
-/* DSLPWUPIRQEN1 Register bit definitions */
-#define R_ICU_DSLPWUPIRQEN1_IRQ32                 (1 << 0)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_DSLPWUPIRQEN_IRQ15                  (1 << 15)  /* IRQ Deep Sleep Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN1_IRQ33                 (1 << 1)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_DSLPWUPIRQEN_IRQ16                  (1 << 16)  /* IRQ Deep Sleep Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN1_IRQ34                 (1 << 2)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_DSLPWUPIRQEN_IRQ17                  (1 << 17)  /* IRQ Deep Sleep Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN1_IRQ35                 (1 << 3)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_DSLPWUPIRQEN_IRQ18                  (1 << 18)  /* IRQ Deep Sleep Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN1_IRQ36                 (1 << 4)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_DSLPWUPIRQEN_IRQ19                  (1 << 19)  /* IRQ Deep Sleep Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN1_IRQ37                 (1 << 5)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_DSLPWUPIRQEN_IRQ20                  (1 << 20)  /* IRQ Deep Sleep Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN1_IRQ38                 (1 << 6)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_DSLPWUPIRQEN_IRQ21                  (1 << 21)  /* IRQ Deep Sleep Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN1_IRQ39                 (1 << 7)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_DSLPWUPIRQEN_IRQ22                  (1 << 22)  /* IRQ Deep Sleep Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN1_IRQ40                 (1 << 8)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_DSLPWUPIRQEN_IRQ23                  (1 << 23)  /* IRQ Deep Sleep Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN1_IRQ41                 (1 << 9)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_DSLPWUPIRQEN_IRQ24                  (1 << 24)  /* IRQ Deep Sleep Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN1_IRQ42                 (1 << 10)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_DSLPWUPIRQEN_IRQ25                  (1 << 25)  /* IRQ Deep Sleep Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN1_IRQ43                 (1 << 11)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_DSLPWUPIRQEN_IRQ26                  (1 << 26)  /* IRQ Deep Sleep Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN1_IRQ44                 (1 << 12)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_DSLPWUPIRQEN_IRQ27                  (1 << 27)  /* IRQ Deep Sleep Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN1_IRQ45                 (1 << 13)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_DSLPWUPIRQEN_IRQ28                  (1 << 28)  /* IRQ Deep Sleep Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN1_IRQ46                 (1 << 14)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_DSLPWUPIRQEN_IRQ29                  (1 << 29)  /* IRQ Deep Sleep Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN1_IRQ47                 (1 << 15)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_DSLPWUPIRQEN_IRQ30                  (1 << 30)  /* IRQ Deep Sleep Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN1_IRQ48                 (1 << 16)  /* IRQ Deep Sleep Returns Enable bit. */
+#define R_ICU_DSLPWUPIRQEN_IRQ31                  (1 << 31)  /* IRQ Deep Sleep Returns Enable bit */
 
-#define R_ICU_DSLPWUPIRQEN1_IRQ49                 (1 << 17)  /* IRQ Deep Sleep Returns Enable bit. */
+/* DELSR Register bit definitions */
+#define R_ICU_DELSR_DELS_SHIFT                    (0)  /* DMAC Event Link Select */
+#define R_ICU_DELSR_DELS_MASK                     0x3ff
 
-#define R_ICU_DSLPWUPIRQEN1_IRQ50                 (1 << 18)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN1_IRQ51                 (1 << 19)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN1_IRQ52                 (1 << 20)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN1_IRQ53                 (1 << 21)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN1_IRQ54                 (1 << 22)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN1_IRQ55                 (1 << 23)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN1_IRQ56                 (1 << 24)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN1_IRQ57                 (1 << 25)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN1_IRQ58                 (1 << 26)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN1_IRQ59                 (1 << 27)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN1_IRQ60                 (1 << 28)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN1_IRQ61                 (1 << 29)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN1_IRQ62                 (1 << 30)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN1_IRQ63                 (1 << 31)  /* IRQ Deep Sleep Returns Enable bit. */
-
-/* DSLPWUPIRQEN2 Register bit definitions */
-#define R_ICU_DSLPWUPIRQEN2_IRQ64                 (1 << 0)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN2_IRQ65                 (1 << 1)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN2_IRQ66                 (1 << 2)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN2_IRQ67                 (1 << 3)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN2_IRQ68                 (1 << 4)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN2_IRQ69                 (1 << 5)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN2_IRQ70                 (1 << 6)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN2_IRQ71                 (1 << 7)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN2_IRQ72                 (1 << 8)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN2_IRQ73                 (1 << 9)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN2_IRQ74                 (1 << 10)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN2_IRQ75                 (1 << 11)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN2_IRQ76                 (1 << 12)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN2_IRQ77                 (1 << 13)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN2_IRQ78                 (1 << 14)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN2_IRQ79                 (1 << 15)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN2_IRQ80                 (1 << 16)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN2_IRQ81                 (1 << 17)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN2_IRQ82                 (1 << 18)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN2_IRQ83                 (1 << 19)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN2_IRQ84                 (1 << 20)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN2_IRQ85                 (1 << 21)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN2_IRQ86                 (1 << 22)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN2_IRQ87                 (1 << 23)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN2_IRQ88                 (1 << 24)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN2_IRQ89                 (1 << 25)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN2_IRQ90                 (1 << 26)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN2_IRQ91                 (1 << 27)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN2_IRQ92                 (1 << 28)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN2_IRQ93                 (1 << 29)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN2_IRQ94                 (1 << 30)  /* IRQ Deep Sleep Returns Enable bit. */
-
-#define R_ICU_DSLPWUPIRQEN2_IRQ95                 (1 << 31)  /* IRQ Deep Sleep Returns Enable bit. */
-
-/* DELSRM Register bit definitions */
-#define R_ICU_DELSRM_DELS_SHIFT                   (0)  /* DMAC Event Link Select */
-#define R_ICU_DELSRM_DELS_MASK                    0x3ff
-#  define R_ICU_DELSRM_DELS_0X00                          (0 << R_ICU_DELSRM_DELS_SHIFT)  /* Disable interrupts to the associated DMAC module */
-
-#define R_ICU_DELSRM_IR                           (1 << 16)  /* DMAC Activation Request Status flag */
+#define R_ICU_DELSR_IR                            (1 << 16)  /* DMAC Activation Request Status Flag */
 
 /* IELSR Register bit definitions */
 #define R_ICU_IELSR_IELS_SHIFT                    (0)  /* ICU Event Link Select */
 #define R_ICU_IELSR_IELS_MASK                     0x3ff
+#  define R_ICU_IELSR_IELS_0X000                          (0 << R_ICU_IELSR_IELS_SHIFT)  /* Nothing is selected */
 
 #define R_ICU_IELSR_IR                            (1 << 16)  /* Interrupt Status Flag */
 

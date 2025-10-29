@@ -44,26 +44,23 @@
 #define R_COMA_RRC_OFFSET                         0x00000004  /* Reset Configuration Register */
 #define R_COMA_RCEC_OFFSET                        0x00000008  /* Clock Enable Configuration Register */
 #define R_COMA_RCDC_OFFSET                        0x0000000c  /* Clock Disable Configuration Register */
-/* CABPIBWMC%s Registers (0-7) */
+/* CABPIBWMC[%s] Registers () */
 #define R_COMA_CABPIBWMC_OFFSET(m)                (0x00000020 + ((m) * 0x00000004))  /* Buffer Pool IPV Based Watermark Configuration Register %s */
 #define R_COMA_CABPWMLC_OFFSET                    0x00000040  /* Buffer Pool Watermark Level Configuration Register */
-#define R_COMA_CABPPFLCI_OFFSET                   0x00000050  /* Buffer Pointer Pause Frame Level i Configuration Register */
-/* CABPPWMLC%s Registers (0-2) */
+/* CABPPFLC[%s] Registers () */
+#define R_COMA_CABPPFLC_OFFSET(m)                 (0x00000050 + ((m) * 0x00000004))  /* Buffer Pointer Pause Frame Level %s Configuration Register */
+/* CABPPWMLC[%s] Registers () */
 #define R_COMA_CABPPWMLC_OFFSET(m)                (0x00000060 + ((m) * 0x00000004))  /* Port %s Buffer Pool Watermark Level Configuration Register */
-/* CABPPPFLC0%s Registers (0-1) */
-#define R_COMA_CABPPPFLC0_OFFSET(m)               (0x000000a0 + ((m) * 0x00000004))  /* Port i Buffer Pointer Pause Frame Level %s Configuration Register  */
-/* CABPPPFLC1%s Registers (0-1) */
-#define R_COMA_CABPPPFLC1_OFFSET(m)               (0x000000a8 + ((m) * 0x00000004))  /* Port i Buffer Pointer Pause Frame Level %s Configuration Register  */
-/* CABPPPFLC2%s Registers (0-1) */
-#define R_COMA_CABPPPFLC2_OFFSET(m)               (0x000000b0 + ((m) * 0x00000004))  /* Port i Buffer Pointer Pause Frame Level %s Configuration Register  */
-/* CABPULC%s Registers (0-2) */
-#define R_COMA_CABPULC_OFFSET(m)                  (0x00000100 + ((m) * 0x00000004))  /* Port %s Buffer Pointer Utilization Level Configuration Register i */
+/* CABPPPFLC%s Registers () */
+#define R_COMA_CABPPPFLC_OFFSET(m)                (0x000000a0 + ((m) * 0x00000008))  /*  */
+/* CABPULC[%s] Registers () */
+#define R_COMA_CABPULC_OFFSET(m)                  (0x00000100 + ((m) * 0x00000004))  /* Buffer Pointer Utilization Level Configuration Register %s */
 #define R_COMA_CABPIRM_OFFSET                     0x00000140  /* Buffer Pool Initialization Register Monitoring Register */
 #define R_COMA_CABPPCM_OFFSET                     0x00000144  /* Buffer Pool Pointer Count Monitoring Register */
 #define R_COMA_CABPLCM_OFFSET                     0x00000148  /* Buffer Pool Pointer Least Count Monitoring Register */
-/* CABPCPM%s Registers (0-2) */
+/* CABPCPM[%s] Registers () */
 #define R_COMA_CABPCPM_OFFSET(m)                  (0x00000180 + ((m) * 0x00000004))  /* Port %s Buffer Pointer Count Monitoring Register */
-/* CABPMCPM%s Registers (0-2) */
+/* CABPMCPM[%s] Registers () */
 #define R_COMA_CABPMCPM_OFFSET(m)                 (0x00000200 + ((m) * 0x00000004))  /* Port %s Buffer Pointer Maximum Count Monitoring Register */
 #define R_COMA_CARDNM_OFFSET                      0x00000300  /* Rejected Descriptor Number Monitoring Register */
 #define R_COMA_CARDMNM_OFFSET                     0x00000304  /* Rejected Descriptor Maximum Number Monitoring Register */
@@ -89,11 +86,9 @@
 #define R_COMA_RCDC                               (R_COMA_BASE + R_COMA_RCDC_OFFSET)
 #define R_COMA_CABPIBWMC(m)                       (R_COMA_BASE + R_COMA_CABPIBWMC_OFFSET(m))
 #define R_COMA_CABPWMLC                           (R_COMA_BASE + R_COMA_CABPWMLC_OFFSET)
-#define R_COMA_CABPPFLCI                          (R_COMA_BASE + R_COMA_CABPPFLCI_OFFSET)
+#define R_COMA_CABPPFLC(m)                        (R_COMA_BASE + R_COMA_CABPPFLC_OFFSET(m))
 #define R_COMA_CABPPWMLC(m)                       (R_COMA_BASE + R_COMA_CABPPWMLC_OFFSET(m))
-#define R_COMA_CABPPPFLC0(m)                      (R_COMA_BASE + R_COMA_CABPPPFLC0_OFFSET(m))
-#define R_COMA_CABPPPFLC1(m)                      (R_COMA_BASE + R_COMA_CABPPPFLC1_OFFSET(m))
-#define R_COMA_CABPPPFLC2(m)                      (R_COMA_BASE + R_COMA_CABPPPFLC2_OFFSET(m))
+#define R_COMA_CABPPPFLC(m)                       (R_COMA_BASE + R_COMA_CABPPPFLC_OFFSET(m))
 #define R_COMA_CABPULC(m)                         (R_COMA_BASE + R_COMA_CABPULC_OFFSET(m))
 #define R_COMA_CABPIRM                            (R_COMA_BASE + R_COMA_CABPIRM_OFFSET)
 #define R_COMA_CABPPCM                            (R_COMA_BASE + R_COMA_CABPPCM_OFFSET)
@@ -133,34 +128,23 @@
 #define R_COMA_RIPV_FBIPV_SHIFT                   (16)  /* Fabric Bus IP Version Number */
 #define R_COMA_RIPV_FBIPV_MASK                    0xf0000
 
-#define R_COMA_RIPV_CAIPV_SHIFT                   (20)  /* Ethernet Common Agent IP Version Number */
+#define R_COMA_RIPV_CAIPV_SHIFT                   (20)  /* Common Agent IP Version Number */
 #define R_COMA_RIPV_CAIPV_MASK                    0xf00000
 
 /* RRC Register bit definitions */
 #define R_COMA_RRC_RR                             (1 << 0)  /* Software Reset */
 
 /* RCEC Register bit definitions */
-#define R_COMA_RCEC_ACE0                          (1 << 0)  /* Agent i Clock Enable (i = 0 to 2) */
-
-#define R_COMA_RCEC_ACE1                          (1 << 1)  /* Agent i Clock Enable (i = 0 to 2) */
-
-#define R_COMA_RCEC_ACE2                          (1 << 2)  /* Agent i Clock Enable (i = 0 to 2) */
-
-#define R_COMA_RCEC_RCE                           (1 << 16)  /* Clock Enable */
-
 #define R_COMA_RCEC_ACE_SHIFT                     (0)  /* Agent Clock Enable */
 #define R_COMA_RCEC_ACE_MASK                      0x7f
 
+#define R_COMA_RCEC_RCE                           (1 << 16)  /* Clock Enable */
+
 /* RCDC Register bit definitions */
-#define R_COMA_RCDC_ACD2_TO_ACD0_SHIFT            (0)  /* Agent i Clock Disable (i = 0 to 2) */
-#define R_COMA_RCDC_ACD2_TO_ACD0_MASK             0x7
-#  define R_COMA_RCDC_ACD2_TO_ACD0_0                      (0 << R_COMA_RCDC_ACD2_TO_ACD0_SHIFT)  /* No effect */
-#  define R_COMA_RCDC_ACD2_TO_ACD0_1                      (1 << R_COMA_RCDC_ACD2_TO_ACD0_SHIFT)  /* Clears bit i in RCEC.ACEi register */
-
-#define R_COMA_RCDC_RCD                           (1 << 16)  /* Clock Disable */
-
 #define R_COMA_RCDC_ACD_SHIFT                     (0)  /* Agent Clock Disable */
 #define R_COMA_RCDC_ACD_MASK                      0x7f
+
+#define R_COMA_RCDC_RCD                           (1 << 16)  /* Clock Disable */
 
 /* CABPIBWMC Register bit definitions */
 #define R_COMA_CABPIBWMC_IBUWMPN_SHIFT            (0)  /* IPV Based Unsecure Watermark Pointer Number */
@@ -176,12 +160,12 @@
 #define R_COMA_CABPWMLC_WMCL_SHIFT                (16)  /* Watermark Critical Level */
 #define R_COMA_CABPWMLC_WMCL_MASK                 0x1fff0000
 
-/* CABPPFLCI Register bit definitions */
-#define R_COMA_CABPPFLCI_PDL_SHIFT                (0)  /* Pause De-Assertion Level */
-#define R_COMA_CABPPFLCI_PDL_MASK                 0x3ff
+/* CABPPFLC Register bit definitions */
+#define R_COMA_CABPPFLC_PDL_SHIFT                 (0)  /* Pause De-Assertion Level */
+#define R_COMA_CABPPFLC_PDL_MASK                  0x1fff
 
-#define R_COMA_CABPPFLCI_PAL_SHIFT                (16)  /* Pause Assertion Level */
-#define R_COMA_CABPPFLCI_PAL_MASK                 0x3ff0000
+#define R_COMA_CABPPFLC_PAL_SHIFT                 (16)  /* Pause Assertion Level */
+#define R_COMA_CABPPFLC_PAL_MASK                  0x1fff0000
 
 /* CABPPWMLC Register bit definitions */
 #define R_COMA_CABPPWMLC_PWMFL_SHIFT              (0)  /* Watermark Flush Level */
@@ -190,32 +174,11 @@
 #define R_COMA_CABPPWMLC_PWMCL_SHIFT              (16)  /* Watermark Critical Level */
 #define R_COMA_CABPPWMLC_PWMCL_MASK               0x1fff0000
 
-/* CABPPPFLC Register bit definitions */
-#define R_COMA_CABPPPFLC_PPDL_SHIFT               (0)  /* Pause De-Assertion Level */
-#define R_COMA_CABPPPFLC_PPDL_MASK                0x3ff
-
-#define R_COMA_CABPPPFLC_PPAL_SHIFT               (16)  /* Pause Assertion Level */
-#define R_COMA_CABPPPFLC_PPAL_MASK                0x3ff0000
-
-/* CABPPPFLC Register bit definitions */
-#define R_COMA_CABPPPFLC_PPDL_SHIFT               (0)  /* Pause De-Assertion Level */
-#define R_COMA_CABPPPFLC_PPDL_MASK                0x3ff
-
-#define R_COMA_CABPPPFLC_PPAL_SHIFT               (16)  /* Pause Assertion Level */
-#define R_COMA_CABPPPFLC_PPAL_MASK                0x3ff0000
-
-/* CABPPPFLC Register bit definitions */
-#define R_COMA_CABPPPFLC_PPDL_SHIFT               (0)  /* Pause De-Assertion Level */
-#define R_COMA_CABPPPFLC_PPDL_MASK                0x3ff
-
-#define R_COMA_CABPPPFLC_PPAL_SHIFT               (16)  /* Pause Assertion Level */
-#define R_COMA_CABPPPFLC_PPAL_MASK                0x3ff0000
-
 /* CABPULC Register bit definitions */
-#define R_COMA_CABPULC_MXNPN_SHIFT                (0)  /* Maximum Number of Pointer */
+#define R_COMA_CABPULC_MXNPN_SHIFT                (0)  /* Maximum Number of Pointer for Port */
 #define R_COMA_CABPULC_MXNPN_MASK                 0x1fff
 
-#define R_COMA_CABPULC_MNNPN_SHIFT                (16)  /* Minimum Number of Pointer */
+#define R_COMA_CABPULC_MNNPN_SHIFT                (16)  /* Minimum Number of Pointer for Port */
 #define R_COMA_CABPULC_MNNPN_MASK                 0x1fff0000
 
 /* CABPIRM Register bit definitions */
@@ -255,54 +218,48 @@
 #define R_COMA_CARDCN_RDN_MASK                    0xffffffff
 
 /* CAEIS0 Register bit definitions */
-#define R_COMA_CAEIS0_BPOPS                       (1 << 8)  /* Buffer Pool Out of Pointer Status Flag */
-
-#define R_COMA_CAEIS0_WMCLOS                      (1 << 9)  /* Watermark Critical Level Overtook Status Flag */
-
-#define R_COMA_CAEIS0_WMFLOS                      (1 << 10)  /* Watermark Flush Level Overtook Status Flag */
-
 #define R_COMA_CAEIS0_PECCES                      (1 << 0)  /* Pointer ECC Error Interrupt Status */
 
 #define R_COMA_CAEIS0_DSECCES                     (1 << 1)  /* Descriptor ECC Error Interrupt Status */
 
 #define R_COMA_CAEIS0_BPECCES                     (1 << 2)  /* Buffer Pool ECC Error Interrupt Status */
 
+#define R_COMA_CAEIS0_BPOPS                       (1 << 8)  /* Buffer Pool Out of Pointer Status */
+
+#define R_COMA_CAEIS0_WMCLOS                      (1 << 9)  /* Watermark Critical Level Overtook Status */
+
+#define R_COMA_CAEIS0_WMFLOS                      (1 << 10)  /* Watermark Flush Level Overtook Status */
+
 #define R_COMA_CAEIS0_EEIPLN_SHIFT                (16)  /* ECC Error Inducing Pointer Loss Number */
 #define R_COMA_CAEIS0_EEIPLN_MASK                 0xf0000
 
 /* CAEIE0 Register bit definitions */
-#define R_COMA_CAEIE0_BPOPE                       (1 << 8)  /* Buffer Pool Out of Pointer Enable */
-
-#define R_COMA_CAEIE0_WMCLOE                      (1 << 9)  /* Watermark Critical Level Overtook Enable */
-
-#define R_COMA_CAEIE0_WMFLOE                      (1 << 10)  /* Watermark Flush Level Overtook Enable */
-
 #define R_COMA_CAEIE0_PECCEE                      (1 << 0)  /* Pointer ECC Error Interrupt Enable */
 
 #define R_COMA_CAEIE0_DSECCEE                     (1 << 1)  /* Descriptor ECC Error Interrupt Enable */
 
 #define R_COMA_CAEIE0_BPECCEE                     (1 << 2)  /* Buffer Pool ECC Error Interrupt Enable */
 
+#define R_COMA_CAEIE0_BPOPE                       (1 << 8)  /* Buffer Pool Out of Pointer Enable */
+
+#define R_COMA_CAEIE0_WMCLOE                      (1 << 9)  /* Watermark Critical Level Overtook Enable */
+
+#define R_COMA_CAEIE0_WMFLOE                      (1 << 10)  /* Watermark Flush Level Overtook Enable */
+
 /* CAEID0 Register bit definitions */
-#define R_COMA_CAEID0_BPOPD                       (1 << 8)  /* Buffer Pool Out of Pointer Disable */
-
-#define R_COMA_CAEID0_WMCLOD                      (1 << 9)  /* Watermark Critical Level Overtook Disable */
-
-#define R_COMA_CAEID0_WMFLOD                      (1 << 10)  /* Watermark Flush Level Overtook Disable */
-
 #define R_COMA_CAEID0_PECCED                      (1 << 0)  /* Pointer ECC Error Interrupt Disable */
 
 #define R_COMA_CAEID0_DSECCED                     (1 << 1)  /* Descriptor ECC Error Interrupt Disable */
 
 #define R_COMA_CAEID0_BPECCED                     (1 << 2)  /* Buffer Pool ECC Error Interrupt Disable */
 
+#define R_COMA_CAEID0_BPOPD                       (1 << 8)  /* Buffer Pool Out of Pointer Disable */
+
+#define R_COMA_CAEID0_WMCLOD                      (1 << 9)  /* Watermark Critical Level Overtook Disable */
+
+#define R_COMA_CAEID0_WMFLOD                      (1 << 10)  /* Watermark Flush Level Overtook Disable */
+
 /* CAEIS1 Register bit definitions */
-#define R_COMA_CAEIS1_PWMCLOS2_TO_PWMCLOS0_SHIFT  (0)  /* Port n Watermark Critical Level Overtook Status Flag (n = 0 to 2) */
-#define R_COMA_CAEIS1_PWMCLOS2_TO_PWMCLOS0_MASK   0x7
-
-#define R_COMA_CAEIS1_PWMFLOS2_TO_PWMFLOS0_SHIFT  (16)  /* Port n Watermark Flush Level Overtook Status Flag (n = 0 to 2) */
-#define R_COMA_CAEIS1_PWMFLOS2_TO_PWMFLOS0_MASK   0x70000
-
 #define R_COMA_CAEIS1_PWMCLOS_SHIFT               (0)  /* Port Watermark Critical Level Overtook Status */
 #define R_COMA_CAEIS1_PWMCLOS_MASK                0x7f
 
@@ -310,12 +267,6 @@
 #define R_COMA_CAEIS1_PWMFLOS_MASK                0x7f0000
 
 /* CAEIE1 Register bit definitions */
-#define R_COMA_CAEIE1_PWMCLOE2_TO_PWMCLOE0_SHIFT  (0)  /* Port n Watermark Critical Level Overtook Enable (n = 0 to 2) */
-#define R_COMA_CAEIE1_PWMCLOE2_TO_PWMCLOE0_MASK   0x7
-
-#define R_COMA_CAEIE1_PWMFLOE2_TO_PWMFLOE0_SHIFT  (16)  /* Port n Watermark Flush Level Overtook Enable (n = 0 to 2) */
-#define R_COMA_CAEIE1_PWMFLOE2_TO_PWMFLOE0_MASK   0x70000
-
 #define R_COMA_CAEIE1_PWMCLOE_SHIFT               (0)  /* Port Watermark Critical Level Overtook Enable */
 #define R_COMA_CAEIE1_PWMCLOE_MASK                0x7f
 
@@ -323,12 +274,6 @@
 #define R_COMA_CAEIE1_PWMFLOE_MASK                0x7f0000
 
 /* CAEID1 Register bit definitions */
-#define R_COMA_CAEID1_PWMCLOD2_TO_PWMCLOD0_SHIFT  (0)  /* Port n Watermark Critical Level Overtook Disable (n = 0 to 2) */
-#define R_COMA_CAEID1_PWMCLOD2_TO_PWMCLOD0_MASK   0x7
-
-#define R_COMA_CAEID1_PWMFLOD2_TO_PWMFLOD0_SHIFT  (16)  /* Port n Watermark Flush Level Overtook Disable (n = 0 to 2) */
-#define R_COMA_CAEID1_PWMFLOD2_TO_PWMFLOD0_MASK   0x70000
-
 #define R_COMA_CAEID1_PWMCLOD_SHIFT               (0)  /* Port Watermark Critical Level Overtook Disable */
 #define R_COMA_CAEID1_PWMCLOD_MASK                0x7f
 
@@ -336,71 +281,26 @@
 #define R_COMA_CAEID1_PWMFLOD_MASK                0x7f0000
 
 /* CAMIS0 Register bit definitions */
-#define R_COMA_CAMIS0_PFS1_TO_PFS0_SHIFT          (0)  /* Pause Frame Status Flag n (n= 0 to 1) */
-#define R_COMA_CAMIS0_PFS1_TO_PFS0_MASK           0x3
-
 #define R_COMA_CAMIS0_PFS_SHIFT                   (0)  /* Pause Frame Status */
 #define R_COMA_CAMIS0_PFS_MASK                    0x3
 
 /* CAMIE0 Register bit definitions */
-#define R_COMA_CAMIE0_PFE1_TO_PFE0_SHIFT          (0)  /* Pause Frame Enable n (n = 0 to 1) */
-#define R_COMA_CAMIE0_PFE1_TO_PFE0_MASK           0x3
-
 #define R_COMA_CAMIE0_PFE_SHIFT                   (0)  /* Pause Frame Enable */
 #define R_COMA_CAMIE0_PFE_MASK                    0x3
 
 /* CAMID0 Register bit definitions */
-#define R_COMA_CAMID0_PFD1_TO_PFD0_SHIFT          (0)  /* Pause Frame Disable n (n = 0 to 1) */
-#define R_COMA_CAMID0_PFD1_TO_PFD0_MASK           0x3
-
 #define R_COMA_CAMID0_PFD_SHIFT                   (0)  /* Pause Frame Disable */
 #define R_COMA_CAMID0_PFD_MASK                    0x3
 
 /* CAMIS1 Register bit definitions */
-#define R_COMA_CAMIS1_PPFS00                      (1 << 0)  /* Port 0 Pause Frame Status Flag 0 */
-
-#define R_COMA_CAMIS1_PPFS01                      (1 << 1)  /* Port 0 Pause Frame Status Flag 1 */
-
-#define R_COMA_CAMIS1_PPFS10                      (1 << 2)  /* Port 1 Pause Frame Status Flag 0 */
-
-#define R_COMA_CAMIS1_PPFS11                      (1 << 3)  /* Port 1 Pause Frame Status Flag 1 */
-
-#define R_COMA_CAMIS1_PPFS20                      (1 << 4)  /* Port 2 Pause Frame Status Flag 0 */
-
-#define R_COMA_CAMIS1_PPFS21                      (1 << 5)  /* Port 2 Pause Frame Status Flag 1 */
-
 #define R_COMA_CAMIS1_PPFS_SHIFT                  (0)  /* Port Pause Frame Status */
 #define R_COMA_CAMIS1_PPFS_MASK                   0x3fff
 
 /* CAMIE1 Register bit definitions */
-#define R_COMA_CAMIE1_PPFE00                      (1 << 0)  /* Port 0 Pause Frame Enable 0 */
-
-#define R_COMA_CAMIE1_PPFE01                      (1 << 1)  /* Port 0 Pause Frame Enable 1 */
-
-#define R_COMA_CAMIE1_PPFE10                      (1 << 2)  /* Port 1 Pause Frame Enable 0 */
-
-#define R_COMA_CAMIE1_PPFE11                      (1 << 3)  /* Port 1 Pause Frame Enable 1 */
-
-#define R_COMA_CAMIE1_PPFE20                      (1 << 4)  /* Port 2 Pause Frame Enable 0 */
-
-#define R_COMA_CAMIE1_PPFE21                      (1 << 5)  /* Port 2 Pause Frame Enable 1 */
-
 #define R_COMA_CAMIE1_PPFE_SHIFT                  (0)  /* Port Pause Frame Enable */
 #define R_COMA_CAMIE1_PPFE_MASK                   0x3fff
 
 /* CAMID1 Register bit definitions */
-#define R_COMA_CAMID1_PPFD00                      (1 << 0)  /* Port 0 Pause Frame Disable 0 */
-
-#define R_COMA_CAMID1_PPFD01                      (1 << 1)  /* Port 0 Pause Frame Disable 1 */
-
-#define R_COMA_CAMID1_PPFD10                      (1 << 2)  /* Port 1 Pause Frame Disable 0 */
-
-#define R_COMA_CAMID1_PPFD11                      (1 << 3)  /* Port 1 Pause Frame Disable 1 */
-
-#define R_COMA_CAMID1_PPFD20                      (1 << 4)  /* Port 2 Pause Frame Disable 0 */
-
-#define R_COMA_CAMID1_PPFD21                      (1 << 5)  /* Port 2 Pause Frame Disable 1 */
-
 #define R_COMA_CAMID1_PPFD_SHIFT                  (0)  /* Port Pause Frame Disable */
 #define R_COMA_CAMID1_PPFD_MASK                   0x3fff
 

@@ -41,9 +41,9 @@
 /* ELC Register Offsets */
 
 #define R_ELC_ELCR_OFFSET                         0x00000000  /* Event Link Controller Register */
-/* ELSEGR%s Registers (0-3) */
-#define R_ELC_ELSEGR_OFFSET(m)                    (0x00000004 + ((m) * 0x00000004))  /* Event Link Software Event Generation Register %s */
-/* ELSR%s Registers (0-52) */
+/* ELSEGR[%s] Registers () */
+#define R_ELC_ELSEGR_OFFSET(m)                    (0x00000004 + ((m) * 0x00000004))  /* Event Link Software Event Generation Register */
+/* ELSR[%s] Registers () */
 #define R_ELC_ELSR_OFFSET(m)                      (0x00000020 + ((m) * 0x00000004))  /* Event Link Setting Register %s */
 #define R_ELC_ELCSARA_OFFSET                      0x00000100  /* Event Link Controller Security Attribution Register A */
 #define R_ELC_ELCSARB_OFFSET                      0x00000104  /* Event Link Controller Security Attribution Register B */
@@ -68,19 +68,10 @@
 /* ELCR Register bit definitions */
 #define R_ELC_ELCR_ELCON                          (1 << 7)  /* All Event Link Enable */
 
-/* ELSEGR Register bit definitions */
-#define R_ELC_ELSEGR_SEG                          (1 << 0)  /* Software Event Generation */
-
-#define R_ELC_ELSEGR_WE                           (1 << 6)  /* SEG Bit Write Enable */
-
-#define R_ELC_ELSEGR_WI                           (1 << 7)  /* ELSEGR Register Write Disable */
-
-/* ELSR Register bit definitions */
-#define R_ELC_ELSR_ELS_SHIFT                      (0)  /* Event Link Select */
-#define R_ELC_ELSR_ELS_MASK                       0x3ff
-
 /* ELCSARA Register bit definitions */
-#define R_ELC_ELCSARA_ELCR                        (1 << 0)  /* Event Link Controller Register Security Attribution */
+#define R_ELC_ELCSARA_ELCR                        (1 << 0)  /* Event Link Controller RegisterSecurity Attribution */
+
+#define R_ELC_ELCSARA_ELSEGR_S                    (1 << 1)  /* Event Link Software Event Generation Register %s Security Attribution */
 
 #define R_ELC_ELCSARA_ELSEGR0                     (1 << 1)  /* Event Link Software Event Generation Register 0 Security Attribution */
 
@@ -91,55 +82,23 @@
 #define R_ELC_ELCSARA_ELSEGR3                     (1 << 4)  /* Event Link Software Event Generation Register 3 Security Attribution */
 
 /* ELCSARB Register bit definitions */
-#define R_ELC_ELCSARB_ELSR0                       (1 << 0)  /* Event Link Setting Register n Security Attribution */
+#define R_ELC_ELCSARB_ELSR_S                      (1 << 0)  /* Event Link Setting Register %s Security Attribution */
 
-#define R_ELC_ELCSARB_ELSR1                       (1 << 1)  /* Event Link Setting Register n Security Attribution */
+#define R_ELC_ELCSARB_ELSR0                       (1 << 0)  /* Event Link Setting Register 0 Security Attribution */
 
-#define R_ELC_ELCSARB_ELSR2                       (1 << 2)  /* Event Link Setting Register n Security Attribution */
+#define R_ELC_ELCSARB_ELSR1                       (1 << 1)  /* Event Link Setting Register 1 Security Attribution */
 
-#define R_ELC_ELCSARB_ELSR3                       (1 << 3)  /* Event Link Setting Register n Security Attribution */
+#define R_ELC_ELCSARB_ELSR2                       (1 << 2)  /* Event Link Setting Register 2 Security Attribution */
 
-#define R_ELC_ELCSARB_ELSR4                       (1 << 4)  /* Event Link Setting Register n Security Attribution */
+#define R_ELC_ELCSARB_ELSR3                       (1 << 3)  /* Event Link Setting Register 3 Security Attribution */
 
-#define R_ELC_ELCSARB_ELSR5                       (1 << 5)  /* Event Link Setting Register n Security Attribution */
+#define R_ELC_ELCSARB_ELSR4                       (1 << 4)  /* Event Link Setting Register 4 Security Attribution */
 
-#define R_ELC_ELCSARB_ELSR6                       (1 << 6)  /* Event Link Setting Register n Security Attribution */
+#define R_ELC_ELCSARB_ELSR5                       (1 << 5)  /* Event Link Setting Register 5 Security Attribution */
 
-#define R_ELC_ELCSARB_ELSR7                       (1 << 7)  /* Event Link Setting Register n Security Attribution */
+#define R_ELC_ELCSARB_ELSR6                       (1 << 6)  /* Event Link Setting Register 6 Security Attribution */
 
-#define R_ELC_ELCSARB_ELSR12                      (1 << 12)  /* Event Link Setting Register n Security Attribution */
-
-#define R_ELC_ELCSARB_ELSR13                      (1 << 13)  /* Event Link Setting Register n Security Attribution */
-
-#define R_ELC_ELCSARB_ELSR14                      (1 << 14)  /* Event Link Setting Register n Security Attribution */
-
-#define R_ELC_ELCSARB_ELSR15                      (1 << 15)  /* Event Link Setting Register n Security Attribution */
-
-#define R_ELC_ELCSARB_ELSR16                      (1 << 16)  /* Event Link Setting Register n Security Attribution */
-
-#define R_ELC_ELCSARB_ELSR17                      (1 << 17)  /* Event Link Setting Register n Security Attribution */
-
-#define R_ELC_ELCSARB_ELSR19                      (1 << 19)  /* Event Link Setting Register n Security Attribution */
-
-#define R_ELC_ELCSARB_ELSR20                      (1 << 20)  /* Event Link Setting Register n Security Attribution */
-
-#define R_ELC_ELCSARB_ELSR21                      (1 << 21)  /* Event Link Setting Register n Security Attribution */
-
-#define R_ELC_ELCSARB_ELSR22                      (1 << 22)  /* Event Link Setting Register n Security Attribution */
-
-#define R_ELC_ELCSARB_ELSR23                      (1 << 23)  /* Event Link Setting Register n Security Attribution */
-
-#define R_ELC_ELCSARB_ELSR24                      (1 << 24)  /* Event Link Setting Register n Security Attribution */
-
-#define R_ELC_ELCSARB_ELSR25                      (1 << 25)  /* Event Link Setting Register n Security Attribution */
-
-#define R_ELC_ELCSARB_ELSR26                      (1 << 26)  /* Event Link Setting Register n Security Attribution */
-
-#define R_ELC_ELCSARB_ELSR27                      (1 << 27)  /* Event Link Setting Register n Security Attribution */
-
-#define R_ELC_ELCSARB_ELSR30                      (1 << 30)  /* Event Link Setting Register n Security Attribution */
-
-#define R_ELC_ELCSARB_ELSR31                      (1 << 31)  /* Event Link Setting Register n Security Attribution */
+#define R_ELC_ELCSARB_ELSR7                       (1 << 7)  /* Event Link Setting Register 7 Security Attribution */
 
 #define R_ELC_ELCSARB_ELSR8                       (1 << 8)  /* Event Link Setting Register 8 Security Attribution */
 
@@ -149,17 +108,48 @@
 
 #define R_ELC_ELCSARB_ELSR11                      (1 << 11)  /* Event Link Setting Register 11 Security Attribution */
 
+#define R_ELC_ELCSARB_ELSR12                      (1 << 12)  /* Event Link Setting Register 12 Security Attribution */
+
+#define R_ELC_ELCSARB_ELSR13                      (1 << 13)  /* Event Link Setting Register 13 Security Attribution */
+
+#define R_ELC_ELCSARB_ELSR14                      (1 << 14)  /* Event Link Setting Register 14 Security Attribution */
+
+#define R_ELC_ELCSARB_ELSR15                      (1 << 15)  /* Event Link Setting Register 15 Security Attribution */
+
+#define R_ELC_ELCSARB_ELSR16                      (1 << 16)  /* Event Link Setting Register 16 Security Attribution */
+
+#define R_ELC_ELCSARB_ELSR17                      (1 << 17)  /* Event Link Setting Register 17 Security Attribution */
+
 #define R_ELC_ELCSARB_ELSR18                      (1 << 18)  /* Event Link Setting Register 18 Security Attribution */
+
+#define R_ELC_ELCSARB_ELSR19                      (1 << 19)  /* Event Link Setting Register 19 Security Attribution */
+
+#define R_ELC_ELCSARB_ELSR20                      (1 << 20)  /* Event Link Setting Register 20 Security Attribution */
+
+#define R_ELC_ELCSARB_ELSR21                      (1 << 21)  /* Event Link Setting Register 21 Security Attribution */
+
+#define R_ELC_ELCSARB_ELSR22                      (1 << 22)  /* Event Link Setting Register 22 Security Attribution */
+
+#define R_ELC_ELCSARB_ELSR23                      (1 << 23)  /* Event Link Setting Register 23 Security Attribution */
+
+#define R_ELC_ELCSARB_ELSR24                      (1 << 24)  /* Event Link Setting Register 24 Security Attribution */
+
+#define R_ELC_ELCSARB_ELSR25                      (1 << 25)  /* Event Link Setting Register 25 Security Attribution */
+
+#define R_ELC_ELCSARB_ELSR26                      (1 << 26)  /* Event Link Setting Register 26 Security Attribution */
+
+#define R_ELC_ELCSARB_ELSR27                      (1 << 27)  /* Event Link Setting Register 27 Security Attribution */
 
 #define R_ELC_ELCSARB_ELSR28                      (1 << 28)  /* Event Link Setting Register 28 Security Attribution */
 
 #define R_ELC_ELCSARB_ELSR29                      (1 << 29)  /* Event Link Setting Register 29 Security Attribution */
 
+#define R_ELC_ELCSARB_ELSR30                      (1 << 30)  /* Event Link Setting Register 30 Security Attribution */
+
+#define R_ELC_ELCSARB_ELSR31                      (1 << 31)  /* Event Link Setting Register 31 Security Attribution */
+
 /* ELCSARC Register bit definitions */
-#define R_ELC_ELCSARC_ELSR_SHIFT                  (0)  /* Event Link Setting Register n Security Attribution */
-#define R_ELC_ELCSARC_ELSR_MASK                   0x1fffff
-#  define R_ELC_ELCSARC_ELSR_0                            (0 << R_ELC_ELCSARC_ELSR_SHIFT)  /* Secure */
-#  define R_ELC_ELCSARC_ELSR_1                            (1 << R_ELC_ELCSARC_ELSR_SHIFT)  /* Non-secure */
+#define R_ELC_ELCSARC_ELSR_S                      (1 << 0)  /* Event Link Setting Register %s Security Attribution */
 
 #define R_ELC_ELCSARC_ELSR0                       (1 << 0)  /* Event Link Setting Register 0 Security Attribution */
 
@@ -228,6 +218,8 @@
 /* ELCPARA Register bit definitions */
 #define R_ELC_ELCPARA_ELCR                        (1 << 0)  /* Event Link Controller Register Privilege Attribution */
 
+#define R_ELC_ELCPARA_ELSEGR_S                    (1 << 1)  /* Event Link Software Event Generation Register %s Privilege Attribution */
+
 #define R_ELC_ELCPARA_ELSEGR0                     (1 << 1)  /* Event Link Software Event Generation Register 0 Privilege Attribution */
 
 #define R_ELC_ELCPARA_ELSEGR1                     (1 << 2)  /* Event Link Software Event Generation Register 1 Privilege Attribution */
@@ -237,55 +229,23 @@
 #define R_ELC_ELCPARA_ELSEGR3                     (1 << 4)  /* Event Link Software Event Generation Register 3 Privilege Attribution */
 
 /* ELCPARB Register bit definitions */
-#define R_ELC_ELCPARB_ELSR0                       (1 << 0)  /* Event Link Setting Register n Privilege Attribution */
+#define R_ELC_ELCPARB_ELSR_S                      (1 << 0)  /* Event Link Setting Register %s Privilege Attribution */
 
-#define R_ELC_ELCPARB_ELSR1                       (1 << 1)  /* Event Link Setting Register n Privilege Attribution */
+#define R_ELC_ELCPARB_ELSR0                       (1 << 0)  /* Event Link Setting Register 0 Privilege Attribution */
 
-#define R_ELC_ELCPARB_ELSR2                       (1 << 2)  /* Event Link Setting Register n Privilege Attribution */
+#define R_ELC_ELCPARB_ELSR1                       (1 << 1)  /* Event Link Setting Register 1 Privilege Attribution */
 
-#define R_ELC_ELCPARB_ELSR3                       (1 << 3)  /* Event Link Setting Register n Privilege Attribution */
+#define R_ELC_ELCPARB_ELSR2                       (1 << 2)  /* Event Link Setting Register 2 Privilege Attribution */
 
-#define R_ELC_ELCPARB_ELSR4                       (1 << 4)  /* Event Link Setting Register n Privilege Attribution */
+#define R_ELC_ELCPARB_ELSR3                       (1 << 3)  /* Event Link Setting Register 3 Privilege Attribution */
 
-#define R_ELC_ELCPARB_ELSR5                       (1 << 5)  /* Event Link Setting Register n Privilege Attribution */
+#define R_ELC_ELCPARB_ELSR4                       (1 << 4)  /* Event Link Setting Register 4 Privilege Attribution */
 
-#define R_ELC_ELCPARB_ELSR6                       (1 << 6)  /* Event Link Setting Register n Privilege Attribution */
+#define R_ELC_ELCPARB_ELSR5                       (1 << 5)  /* Event Link Setting Register 5 Privilege Attribution */
 
-#define R_ELC_ELCPARB_ELSR7                       (1 << 7)  /* Event Link Setting Register n Privilege Attribution */
+#define R_ELC_ELCPARB_ELSR6                       (1 << 6)  /* Event Link Setting Register 6 Privilege Attribution */
 
-#define R_ELC_ELCPARB_ELSR12                      (1 << 12)  /* Event Link Setting Register n Privilege Attribution */
-
-#define R_ELC_ELCPARB_ELSR13                      (1 << 13)  /* Event Link Setting Register n Privilege Attribution */
-
-#define R_ELC_ELCPARB_ELSR14                      (1 << 14)  /* Event Link Setting Register n Privilege Attribution */
-
-#define R_ELC_ELCPARB_ELSR15                      (1 << 15)  /* Event Link Setting Register n Privilege Attribution */
-
-#define R_ELC_ELCPARB_ELSR16                      (1 << 16)  /* Event Link Setting Register n Privilege Attribution */
-
-#define R_ELC_ELCPARB_ELSR17                      (1 << 17)  /* Event Link Setting Register n Privilege Attribution */
-
-#define R_ELC_ELCPARB_ELSR19                      (1 << 19)  /* Event Link Setting Register n Privilege Attribution */
-
-#define R_ELC_ELCPARB_ELSR20                      (1 << 20)  /* Event Link Setting Register n Privilege Attribution */
-
-#define R_ELC_ELCPARB_ELSR21                      (1 << 21)  /* Event Link Setting Register n Privilege Attribution */
-
-#define R_ELC_ELCPARB_ELSR22                      (1 << 22)  /* Event Link Setting Register n Privilege Attribution */
-
-#define R_ELC_ELCPARB_ELSR23                      (1 << 23)  /* Event Link Setting Register n Privilege Attribution */
-
-#define R_ELC_ELCPARB_ELSR24                      (1 << 24)  /* Event Link Setting Register n Privilege Attribution */
-
-#define R_ELC_ELCPARB_ELSR25                      (1 << 25)  /* Event Link Setting Register n Privilege Attribution */
-
-#define R_ELC_ELCPARB_ELSR26                      (1 << 26)  /* Event Link Setting Register n Privilege Attribution */
-
-#define R_ELC_ELCPARB_ELSR27                      (1 << 27)  /* Event Link Setting Register n Privilege Attribution */
-
-#define R_ELC_ELCPARB_ELSR30                      (1 << 30)  /* Event Link Setting Register n Privilege Attribution */
-
-#define R_ELC_ELCPARB_ELSR31                      (1 << 31)  /* Event Link Setting Register n Privilege Attribution */
+#define R_ELC_ELCPARB_ELSR7                       (1 << 7)  /* Event Link Setting Register 7 Privilege Attribution */
 
 #define R_ELC_ELCPARB_ELSR8                       (1 << 8)  /* Event Link Setting Register 8 Privilege Attribution */
 
@@ -295,17 +255,48 @@
 
 #define R_ELC_ELCPARB_ELSR11                      (1 << 11)  /* Event Link Setting Register 11 Privilege Attribution */
 
+#define R_ELC_ELCPARB_ELSR12                      (1 << 12)  /* Event Link Setting Register 12 Privilege Attribution */
+
+#define R_ELC_ELCPARB_ELSR13                      (1 << 13)  /* Event Link Setting Register 13 Privilege Attribution */
+
+#define R_ELC_ELCPARB_ELSR14                      (1 << 14)  /* Event Link Setting Register 14 Privilege Attribution */
+
+#define R_ELC_ELCPARB_ELSR15                      (1 << 15)  /* Event Link Setting Register 15 Privilege Attribution */
+
+#define R_ELC_ELCPARB_ELSR16                      (1 << 16)  /* Event Link Setting Register 16 Privilege Attribution */
+
+#define R_ELC_ELCPARB_ELSR17                      (1 << 17)  /* Event Link Setting Register 17 Privilege Attribution */
+
 #define R_ELC_ELCPARB_ELSR18                      (1 << 18)  /* Event Link Setting Register 18 Privilege Attribution */
+
+#define R_ELC_ELCPARB_ELSR19                      (1 << 19)  /* Event Link Setting Register 19 Privilege Attribution */
+
+#define R_ELC_ELCPARB_ELSR20                      (1 << 20)  /* Event Link Setting Register 20 Privilege Attribution */
+
+#define R_ELC_ELCPARB_ELSR21                      (1 << 21)  /* Event Link Setting Register 21 Privilege Attribution */
+
+#define R_ELC_ELCPARB_ELSR22                      (1 << 22)  /* Event Link Setting Register 22 Privilege Attribution */
+
+#define R_ELC_ELCPARB_ELSR23                      (1 << 23)  /* Event Link Setting Register 23 Privilege Attribution */
+
+#define R_ELC_ELCPARB_ELSR24                      (1 << 24)  /* Event Link Setting Register 24 Privilege Attribution */
+
+#define R_ELC_ELCPARB_ELSR25                      (1 << 25)  /* Event Link Setting Register 25 Privilege Attribution */
+
+#define R_ELC_ELCPARB_ELSR26                      (1 << 26)  /* Event Link Setting Register 26 Privilege Attribution */
+
+#define R_ELC_ELCPARB_ELSR27                      (1 << 27)  /* Event Link Setting Register 27 Privilege Attribution */
 
 #define R_ELC_ELCPARB_ELSR28                      (1 << 28)  /* Event Link Setting Register 28 Privilege Attribution */
 
 #define R_ELC_ELCPARB_ELSR29                      (1 << 29)  /* Event Link Setting Register 29 Privilege Attribution */
 
+#define R_ELC_ELCPARB_ELSR30                      (1 << 30)  /* Event Link Setting Register 30 Privilege Attribution */
+
+#define R_ELC_ELCPARB_ELSR31                      (1 << 31)  /* Event Link Setting Register 31 Privilege Attribution */
+
 /* ELCPARC Register bit definitions */
-#define R_ELC_ELCPARC_ELSR_SHIFT                  (0)  /* Event Link Setting Register n Privilege Attribution */
-#define R_ELC_ELCPARC_ELSR_MASK                   0x1fffff
-#  define R_ELC_ELCPARC_ELSR_0                            (0 << R_ELC_ELCPARC_ELSR_SHIFT)  /* Privileged */
-#  define R_ELC_ELCPARC_ELSR_1                            (1 << R_ELC_ELCPARC_ELSR_SHIFT)  /* Unprivileged */
+#define R_ELC_ELCPARC_ELSR_S                      (1 << 0)  /* Event Link Setting Register %s Privilege Attribution */
 
 #define R_ELC_ELCPARC_ELSR0                       (1 << 0)  /* Event Link Setting Register 0 Privilege Attribution */
 

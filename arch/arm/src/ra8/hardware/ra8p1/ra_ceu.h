@@ -42,7 +42,7 @@
 
 #define R_CEU_CAPSR_OFFSET                        0x00000000  /* Capture Start Register */
 #define R_CEU_CAPCR_OFFSET                        0x00000004  /* Capture Control Register */
-#define R_CEU_CAMCR_OFFSET                        0x00000008  /* Capture Interface Control Register */
+#define R_CEU_CAMCR_OFFSET                        0x00000008  /* Capture interface control register */
 #define R_CEU_CMCYR_OFFSET                        0x0000000c  /* Capture Interface Cycle Register */
 #define R_CEU_CAMOR_OFFSET                        0x00000010  /* Capture Interface Offset Register */
 #define R_CEU_CAPWR_OFFSET                        0x00000014  /* Capture Interface Width Register */
@@ -68,7 +68,7 @@
 #define R_CEU_CDACR2_OFFSET                       0x00000094  /* Capture Data Address C Register 2 */
 #define R_CEU_CDBYR2_OFFSET                       0x00000098  /* Capture Data Bottom-Field Address Y Register 2 */
 #define R_CEU_CDBCR2_OFFSET                       0x0000009c  /* Capture Data Bottom-Field Address C Register 2 */
-#define R_CEU_CBWER_OFFSET                        0x000000a0  /* CEU Bufferable Write Enable Register */
+#define R_CEU_AXIBUSCTL2_OFFSET                   0x000000a0  /* AXI Bus Control Register 2 */
 #define R_CEU_CAMOR_B_OFFSET                      0x00001010  /* Capture Interface Offset Register */
 #define R_CEU_CAPWR_B_OFFSET                      0x00001014  /* Capture Interface Width Register */
 #define R_CEU_CFLCR_B_OFFSET                      0x00001030  /* Capture Filter Control Register */
@@ -132,7 +132,7 @@
 #define R_CEU_CDACR2                              (R_CEU_BASE + R_CEU_CDACR2_OFFSET)
 #define R_CEU_CDBYR2                              (R_CEU_BASE + R_CEU_CDBYR2_OFFSET)
 #define R_CEU_CDBCR2                              (R_CEU_BASE + R_CEU_CDBCR2_OFFSET)
-#define R_CEU_CBWER                               (R_CEU_BASE + R_CEU_CBWER_OFFSET)
+#define R_CEU_AXIBUSCTL2                          (R_CEU_BASE + R_CEU_AXIBUSCTL2_OFFSET)
 #define R_CEU_CAMOR_B                             (R_CEU_BASE + R_CEU_CAMOR_B_OFFSET)
 #define R_CEU_CAPWR_B                             (R_CEU_BASE + R_CEU_CAPWR_B_OFFSET)
 #define R_CEU_CFLCR_B                             (R_CEU_BASE + R_CEU_CFLCR_B_OFFSET)
@@ -170,10 +170,10 @@
 /* CAPSR Register bit definitions */
 #define R_CEU_CAPSR_CE                            (1 << 0)  /* Capture enable */
 
-#define R_CEU_CAPSR_CPKIL                         (1 << 16)  /* Software reset of capturing */
+#define R_CEU_CAPSR_CPKIL                         (1 << 16)  /* Write 1 to this bit to perform a software reset of capturing. */
 
 /* CAPCR Register bit definitions */
-#define R_CEU_CAPCR_CTNCP                         (1 << 16)  /* Continuous capture */
+#define R_CEU_CAPCR_CTNCP                         (1 << 16)  /* When capturing is started with this bit set to 1, capturing continues until the CE bit in CAPSR is cleared to 0 or a software reset is initiated by the CPKIL bit in CAPSR (see ). Continuous capture must be set before capturing is started. */
 
 #define R_CEU_CAPCR_MTCM_SHIFT                    (20)  /* Specify the unit for transferring data to a bus bridge module. */
 #define R_CEU_CAPCR_MTCM_MASK                     0x300000
@@ -186,13 +186,13 @@
 #define R_CEU_CAPCR_FDRP_MASK                     0xff000000
 
 /* CAMCR Register bit definitions */
-#define R_CEU_CAMCR_HDPOL                         (1 << 0)  /* Sets the polarity for detection of the horizontal sync signal (HD) input from an external module. */
+#define R_CEU_CAMCR_HDPOL                         (1 << 0)  /* Sets the polarity for detection of the horizontal sync signal input from an external module. */
 
-#define R_CEU_CAMCR_VDPOL                         (1 << 1)  /* Sets the polarity for detection of the vertical sync signal (VD) input from an external module. */
+#define R_CEU_CAMCR_VDPOL                         (1 << 1)  /* Sets the polarity for detection of the vertical sync signal input from an external module. */
 
 #define R_CEU_CAMCR_JPG_SHIFT                     (4)  /* These bits select the fetched data type. */
 #define R_CEU_CAMCR_JPG_MASK                      0x30
-#  define R_CEU_CAMCR_JPG_00                              (0 << R_CEU_CAMCR_JPG_SHIFT)  /* Image capture mode (input data are separated into the luminance component data (Y) and the chrominance component data (CbCr) for output to the memory)  */
+#  define R_CEU_CAMCR_JPG_00                              (0 << R_CEU_CAMCR_JPG_SHIFT)  /* Image capture mode (input data are separated into Y data and CbCr data for output to the memory)  */
 #  define R_CEU_CAMCR_JPG_01                              (1 << R_CEU_CAMCR_JPG_SHIFT)  /* Data synchronous fetch mode (specified size of input data are output to the specified memory addresses in order of input and in synchronization with the sync signal)  */
 #  define R_CEU_CAMCR_JPG_10                              (2 << R_CEU_CAMCR_JPG_SHIFT)  /* Data enable fetch mode (input data are fetched with HD as an enable signal and output to the specified addresses in memory in order of input)  */
 #  define R_CEU_CAMCR_JPG_11                              (3 << R_CEU_CAMCR_JPG_SHIFT)  /* Setting prohibited */
@@ -208,13 +208,13 @@
 
 #define R_CEU_CAMCR_FLDPOL                        (1 << 16)  /* Sets the polarity of the field identification signal (FLD) from an external module. */
 
-#define R_CEU_CAMCR_DSEL                          (1 << 24)  /* Sets the edge for fetching the image data (D15 to D0) from an external module. */
+#define R_CEU_CAMCR_DSEL                          (1 << 24)  /* Sets the edge for fetching the image data (D7 to D0) from an external module. */
 
-#define R_CEU_CAMCR_FLDSEL                        (1 << 25)  /* Sets the edge for capturing FLD from an external module. */
+#define R_CEU_CAMCR_FLDSEL                        (1 << 25)  /* Sets the edge for capturing the field identification signal (FLD) from an external module. */
 
-#define R_CEU_CAMCR_HDSEL                         (1 << 26)  /* Sets the edge for capturing HD from an external module. */
+#define R_CEU_CAMCR_HDSEL                         (1 << 26)  /* Sets the edge for capturing the horizontal sync signal (HD) from an external module. */
 
-#define R_CEU_CAMCR_VDSEL                         (1 << 27)  /* Sets the edge for capturing VD from an external module. */
+#define R_CEU_CAMCR_VDSEL                         (1 << 27)  /* Sets the edge for capturing the vertical sync signal (VD) from an external module. */
 
 /* CMCYR Register bit definitions */
 #define R_CEU_CMCYR_HCYL_SHIFT                    (0)  /* Horizontal Cycle Count of External Module */
@@ -273,14 +273,14 @@
 #define R_CEU_CFLCR_VMANT_MASK                    0xf0000000
 
 /* CFSZR Register bit definitions */
-#define R_CEU_CFSZR_HFCLP_SHIFT                   (0)  /* Specify the horizontal clipping value of the filter output size (8-pixel units). */
+#define R_CEU_CFSZR_HFCLP_SHIFT                   (0)  /* Specify the horizontal clipping value of the filter output size (4-pixel units). */
 #define R_CEU_CFSZR_HFCLP_MASK                    0xfff
 
-#define R_CEU_CFSZR_VFCLP_SHIFT                   (16)  /* Specify the vertical clipping value of the filter output size (4-pixel units). */
+#define R_CEU_CFSZR_VFCLP_SHIFT                   (16)  /* Set the vertical clipping value of the filter output size (4-pixel units). */
 #define R_CEU_CFSZR_VFCLP_MASK                    0xfff0000
 
 /* CDWDR Register bit definitions */
-#define R_CEU_CDWDR_CHDW_SHIFT                    (0)  /* Specify the horizontal image size in the memory area where the captured image is to be stored (8-byte units). */
+#define R_CEU_CDWDR_CHDW_SHIFT                    (0)  /* Specify the horizontal image size in the memory area where the captured image is to be stored (4-byte units). */
 #define R_CEU_CDWDR_CHDW_MASK                     0x1fff
 
 /* CDAYR Register bit definitions */
@@ -292,11 +292,11 @@
 #define R_CEU_CDACR_CACR_MASK                     0xffffffff
 
 /* CDBYR Register bit definitions */
-#define R_CEU_CDBYR_CBYR_SHIFT                    (0)  /* Set the address for storing the luminance component data of the captured bottom-field data (8-pixel units). */
+#define R_CEU_CDBYR_CBYR_SHIFT                    (0)  /* Set the address for storing the Y (luminance) component data of the captured bottom-field data (4-pixel units). */
 #define R_CEU_CDBYR_CBYR_MASK                     0xffffffff
 
 /* CDBCR Register bit definitions */
-#define R_CEU_CDBCR_CBCR_SHIFT                    (0)  /* Set the address for storing the chrominance component data of the captured bottom-field data (8-pixel units). */
+#define R_CEU_CDBCR_CBCR_SHIFT                    (0)  /* Set the address for storing the C (chrominance) component data of the captured bottom-field data (4-pixel units). */
 #define R_CEU_CDBCR_CBCR_MASK                     0xffffffff
 
 /* CBDSR Register bit definitions */
@@ -304,7 +304,7 @@
 #define R_CEU_CBDSR_CBVS_MASK                     0x7fffff
 
 /* CFWCR Register bit definitions */
-#define R_CEU_CFWCR_FWE                           (1 << 0)  /* Firewall Operation */
+#define R_CEU_CFWCR_FWE                           (1 << 0)  /* With the setting of FWE = 1, when an address exceeds the value set with FWV, the address is retained and an interrupt source FWF is set. After this, the address is not incremented and data is overwritten on the upper limit address. */
 
 #define R_CEU_CFWCR_FWV_SHIFT                     (5)  /* Specify the upper limit of a write address. */
 #define R_CEU_CFWCR_FWV_MASK                      0xffffffe0
@@ -321,7 +321,7 @@
 
 #define R_CEU_CDOCR_CDS                           (1 << 4)  /* Sets the image format when outputting the image data captured in the YCbCr422 format to the memory. */
 
-#define R_CEU_CDOCR_CBE                           (1 << 16)  /*  Controls the number of lines of captured data to be written to the memory. */
+#define R_CEU_CDOCR_CBE                           (1 << 16)  /* Controls the number of lines of captured data to be written to the memory. */
 
 /* CEIER Register bit definitions */
 #define R_CEU_CEIER_CPEIE                         (1 << 0)  /* One-Frame Capture End Interrupt Enable */
@@ -405,19 +405,20 @@
 #define R_CEU_CDAYR2_CAYR2_MASK                   0xffffffff
 
 /* CDACR2 Register bit definitions */
-#define R_CEU_CDACR2_CACR2_SHIFT                  (0)  /* Capture Data Address C */
+#define R_CEU_CDACR2_CACR2_SHIFT                  (0)  /* Capture Data Address C2 */
 #define R_CEU_CDACR2_CACR2_MASK                   0xffffffff
 
 /* CDBYR2 Register bit definitions */
-#define R_CEU_CDBYR2_CBYR2_SHIFT                  (0)  /* Set the address for storing the luminance component data of the captured bottom-field data (8-pixel units). */
+#define R_CEU_CDBYR2_CBYR2_SHIFT                  (0)  /* Set the address for storing the Y component data of the captured bottom-field data (4-pixel units). */
 #define R_CEU_CDBYR2_CBYR2_MASK                   0xffffffff
 
 /* CDBCR2 Register bit definitions */
-#define R_CEU_CDBCR2_CBCR2_SHIFT                  (0)  /* Set the address for storing the chrominance component data of the captured bottom-field data (8-pixel units). */
+#define R_CEU_CDBCR2_CBCR2_SHIFT                  (0)  /* Set the address for storing the C component data of the captured bottom-field data (4-pixel units). */
 #define R_CEU_CDBCR2_CBCR2_MASK                   0xffffffff
 
-/* CBWER Register bit definitions */
-#define R_CEU_CBWER_BWE                           (1 << 0)  /*  */
+/* AXIBUSCTL2 Register bit definitions */
+#define R_CEU_AXIBUSCTL2_AWCACHE_SHIFT            (0)  /* AWCACHE[3:0] Signals for Capture Engine Unit */
+#define R_CEU_AXIBUSCTL2_AWCACHE_MASK             0xf
 
 /* CAMOR_B Register bit definitions */
 #define R_CEU_CAMOR_B_HOFST_SHIFT                 (0)  /* Specify the capture start location in terms of the number of clock cycles from a horizontal sync signal (1-cycle units). */
@@ -447,14 +448,14 @@
 #define R_CEU_CFLCR_B_VMANT_MASK                  0xf0000000
 
 /* CFSZR_B Register bit definitions */
-#define R_CEU_CFSZR_B_HFCLP_SHIFT                 (0)  /* Specify the horizontal clipping value of the filter output size (8-pixel units). */
+#define R_CEU_CFSZR_B_HFCLP_SHIFT                 (0)  /* Specify the horizontal clipping value of the filter output size (4-pixel units). */
 #define R_CEU_CFSZR_B_HFCLP_MASK                  0xfff
 
-#define R_CEU_CFSZR_B_VFCLP_SHIFT                 (16)  /* Specify the vertical clipping value of the filter output size (4-pixel units). */
+#define R_CEU_CFSZR_B_VFCLP_SHIFT                 (16)  /* Set the vertical clipping value of the filter output size (4-pixel units). */
 #define R_CEU_CFSZR_B_VFCLP_MASK                  0xfff0000
 
 /* CDWDR_B Register bit definitions */
-#define R_CEU_CDWDR_B_CHDW_SHIFT                  (0)  /* Specify the horizontal image size in the memory area where the captured image is to be stored (8-byte units). */
+#define R_CEU_CDWDR_B_CHDW_SHIFT                  (0)  /* Specify the horizontal image size in the memory area where the captured image is to be stored (4-byte units). */
 #define R_CEU_CDWDR_B_CHDW_MASK                   0x1fff
 
 /* CDAYR_B Register bit definitions */
@@ -466,11 +467,11 @@
 #define R_CEU_CDACR_B_CACR_MASK                   0xffffffff
 
 /* CDBYR_B Register bit definitions */
-#define R_CEU_CDBYR_B_CBYR_SHIFT                  (0)  /* Set the address for storing the luminance component data of the captured bottom-field data (8-pixel units). */
+#define R_CEU_CDBYR_B_CBYR_SHIFT                  (0)  /* Set the address for storing the Y (luminance) component data of the captured bottom-field data (4-pixel units). */
 #define R_CEU_CDBYR_B_CBYR_MASK                   0xffffffff
 
 /* CDBCR_B Register bit definitions */
-#define R_CEU_CDBCR_B_CBCR_SHIFT                  (0)  /* Set the address for storing the chrominance component data of the captured bottom-field data (8-pixel units). */
+#define R_CEU_CDBCR_B_CBCR_SHIFT                  (0)  /* Set the address for storing the C (chrominance) component data of the captured bottom-field data (4-pixel units). */
 #define R_CEU_CDBCR_B_CBCR_MASK                   0xffffffff
 
 /* CBDSR_B Register bit definitions */
@@ -489,22 +490,22 @@
 
 #define R_CEU_CDOCR_B_CDS                         (1 << 4)  /* Sets the image format when outputting the image data captured in the YCbCr422 format to the memory. */
 
-#define R_CEU_CDOCR_B_CBE                         (1 << 16)  /*  Controls the number of lines of captured data to be written to the memory. */
+#define R_CEU_CDOCR_B_CBE                         (1 << 16)  /* Controls the number of lines of captured data to be written to the memory. */
 
 /* CDAYR2_B Register bit definitions */
 #define R_CEU_CDAYR2_B_CAYR2_SHIFT                (0)  /* Capture Data Address Y */
 #define R_CEU_CDAYR2_B_CAYR2_MASK                 0xffffffff
 
 /* CDACR2_B Register bit definitions */
-#define R_CEU_CDACR2_B_CACR2_SHIFT                (0)  /* Capture Data Address C */
+#define R_CEU_CDACR2_B_CACR2_SHIFT                (0)  /* Capture Data Address C2 */
 #define R_CEU_CDACR2_B_CACR2_MASK                 0xffffffff
 
 /* CDBYR2_B Register bit definitions */
-#define R_CEU_CDBYR2_B_CBYR2_SHIFT                (0)  /* Set the address for storing the luminance component data of the captured bottom-field data (8-pixel units). */
+#define R_CEU_CDBYR2_B_CBYR2_SHIFT                (0)  /* Set the address for storing the Y component data of the captured bottom-field data (4-pixel units). */
 #define R_CEU_CDBYR2_B_CBYR2_MASK                 0xffffffff
 
 /* CDBCR2_B Register bit definitions */
-#define R_CEU_CDBCR2_B_CBCR2_SHIFT                (0)  /* Set the address for storing the chrominance component data of the captured bottom-field data (8-pixel units). */
+#define R_CEU_CDBCR2_B_CBCR2_SHIFT                (0)  /* Set the address for storing the C component data of the captured bottom-field data (4-pixel units). */
 #define R_CEU_CDBCR2_B_CBCR2_MASK                 0xffffffff
 
 /* CAMOR_M Register bit definitions */
@@ -535,14 +536,14 @@
 #define R_CEU_CFLCR_M_VMANT_MASK                  0xf0000000
 
 /* CFSZR_M Register bit definitions */
-#define R_CEU_CFSZR_M_HFCLP_SHIFT                 (0)  /* Specify the horizontal clipping value of the filter output size (8-pixel units). */
+#define R_CEU_CFSZR_M_HFCLP_SHIFT                 (0)  /* Specify the horizontal clipping value of the filter output size (4-pixel units). */
 #define R_CEU_CFSZR_M_HFCLP_MASK                  0xfff
 
-#define R_CEU_CFSZR_M_VFCLP_SHIFT                 (16)  /* Specify the vertical clipping value of the filter output size (4-pixel units). */
+#define R_CEU_CFSZR_M_VFCLP_SHIFT                 (16)  /* Set the vertical clipping value of the filter output size (4-pixel units). */
 #define R_CEU_CFSZR_M_VFCLP_MASK                  0xfff0000
 
 /* CDWDR_M Register bit definitions */
-#define R_CEU_CDWDR_M_CHDW_SHIFT                  (0)  /* Specify the horizontal image size in the memory area where the captured image is to be stored (8-byte units). */
+#define R_CEU_CDWDR_M_CHDW_SHIFT                  (0)  /* Specify the horizontal image size in the memory area where the captured image is to be stored (4-byte units). */
 #define R_CEU_CDWDR_M_CHDW_MASK                   0x1fff
 
 /* CDAYR_M Register bit definitions */
@@ -554,11 +555,11 @@
 #define R_CEU_CDACR_M_CACR_MASK                   0xffffffff
 
 /* CDBYR_M Register bit definitions */
-#define R_CEU_CDBYR_M_CBYR_SHIFT                  (0)  /* Set the address for storing the luminance component data of the captured bottom-field data (8-pixel units). */
+#define R_CEU_CDBYR_M_CBYR_SHIFT                  (0)  /* Set the address for storing the Y (luminance) component data of the captured bottom-field data (4-pixel units). */
 #define R_CEU_CDBYR_M_CBYR_MASK                   0xffffffff
 
 /* CDBCR_M Register bit definitions */
-#define R_CEU_CDBCR_M_CBCR_SHIFT                  (0)  /* Set the address for storing the chrominance component data of the captured bottom-field data (8-pixel units). */
+#define R_CEU_CDBCR_M_CBCR_SHIFT                  (0)  /* Set the address for storing the C (chrominance) component data of the captured bottom-field data (4-pixel units). */
 #define R_CEU_CDBCR_M_CBCR_MASK                   0xffffffff
 
 /* CBDSR_M Register bit definitions */
@@ -577,22 +578,22 @@
 
 #define R_CEU_CDOCR_M_CDS                         (1 << 4)  /* Sets the image format when outputting the image data captured in the YCbCr422 format to the memory. */
 
-#define R_CEU_CDOCR_M_CBE                         (1 << 16)  /*  Controls the number of lines of captured data to be written to the memory. */
+#define R_CEU_CDOCR_M_CBE                         (1 << 16)  /* Controls the number of lines of captured data to be written to the memory. */
 
 /* CDAYR2_M Register bit definitions */
 #define R_CEU_CDAYR2_M_CAYR2_SHIFT                (0)  /* Capture Data Address Y */
 #define R_CEU_CDAYR2_M_CAYR2_MASK                 0xffffffff
 
 /* CDACR2_M Register bit definitions */
-#define R_CEU_CDACR2_M_CACR2_SHIFT                (0)  /* Capture Data Address C */
+#define R_CEU_CDACR2_M_CACR2_SHIFT                (0)  /* Capture Data Address C2 */
 #define R_CEU_CDACR2_M_CACR2_MASK                 0xffffffff
 
 /* CDBYR2_M Register bit definitions */
-#define R_CEU_CDBYR2_M_CBYR2_SHIFT                (0)  /* Set the address for storing the luminance component data of the captured bottom-field data (8-pixel units). */
+#define R_CEU_CDBYR2_M_CBYR2_SHIFT                (0)  /* Set the address for storing the Y component data of the captured bottom-field data (4-pixel units). */
 #define R_CEU_CDBYR2_M_CBYR2_MASK                 0xffffffff
 
 /* CDBCR2_M Register bit definitions */
-#define R_CEU_CDBCR2_M_CBCR2_SHIFT                (0)  /* Set the address for storing the chrominance component data of the captured bottom-field data (8-pixel units). */
+#define R_CEU_CDBCR2_M_CBCR2_SHIFT                (0)  /* Set the address for storing the C component data of the captured bottom-field data (4-pixel units). */
 #define R_CEU_CDBCR2_M_CBCR2_MASK                 0xffffffff
 
 

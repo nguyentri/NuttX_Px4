@@ -41,7 +41,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ra8_adc_b_initialize
+ * Name: ra8_adc_initialize
  *
  * Description:
  *   Initialize the ADC-B subsystem for RA8P1. This is a compatibility
@@ -56,10 +56,10 @@
  *
  ****************************************************************************/
 
-FAR struct adc_dev_s *ra8_adc_b_initialize(uint32_t chanlist,
+FAR struct adc_dev_s *ra8_adc_initialize(uint32_t chanlist,
                                            int nchannels)
 {
-  ainfo("ADC-B: ra8_adc_b_initialize called (chanlist=0x%08lx, nchannels=%d)\n",
+  ainfo("ADC-B: ra8_adc_initialize called (chanlist=0x%08lx, nchannels=%d)\n",
         chanlist, nchannels);
 
   /* Note: The actual ADC-B device initialization and registration is
