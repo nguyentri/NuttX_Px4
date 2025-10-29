@@ -320,7 +320,7 @@ static char g_uart9txbuffer[CONFIG_SCI9_TXBUFSIZE];
 #ifdef CONFIG_RA_SCI0_UART
 static struct up_dev_s  g_uart0priv =
 {
-  .scibase      = R_SCI0_B_BASE,
+  .scibase      = R_SCI_B_CH_BASE(0),
   .mstp         = R_MSTP_MSTPCRB_SCI0,
   .rxi_irq      = -1,               /* Will be assigned by ICU */
   .txi_irq      = -1,               /* Will be assigned by ICU */
@@ -356,7 +356,7 @@ static uart_dev_t g_uart0port =
 #ifdef CONFIG_RA_SCI1_UART
 static struct up_dev_s  g_uart1priv =
 {
-  .scibase      = R_SCI1_B_BASE,
+  .scibase      = R_SCI_B_CH_BASE(1),
   .mstp         = R_MSTP_MSTPCRB_SCI1,
   .rxi_irq      = -1,               /* Will be assigned by ICU */
   .txi_irq      = -1,               /* Will be assigned by ICU */
@@ -428,7 +428,7 @@ static uart_dev_t  g_uart2port =
 #ifdef CONFIG_RA_SCI3_UART
 static struct up_dev_s  g_uart3priv =
 {
-  .scibase      = R_SCI3_B_BASE,
+  .scibase      = R_SCI_B_CH_BASE(3),
   .mstp         = R_MSTP_MSTPCRB_SCI3,
   .rxi_irq      = -1,               /* Will be assigned by ICU */
   .txi_irq      = -1,               /* Will be assigned by ICU */
@@ -464,7 +464,7 @@ static uart_dev_t  g_uart3port =
 #ifdef CONFIG_RA_SCI4_UART
 static struct up_dev_s  g_uart4priv =
 {
-  .scibase      = R_SCI4_B_BASE,
+  .scibase      = R_SCI_B_CH_BASE(4),
   .mstp         = R_MSTP_MSTPCRB_SCI4,
   .rxi_irq      = -1,               /* Will be assigned by ICU */
   .txi_irq      = -1,               /* Will be assigned by ICU */
@@ -500,7 +500,7 @@ static uart_dev_t  g_uart4port =
 #ifdef CONFIG_RA_SCI9_UART
 static struct up_dev_s  g_uart9priv =
 {
-  .scibase      = R_SCI9_B_BASE,
+  .scibase      = R_SCI_B_CH_BASE(9),
   .mstp         = R_MSTP_MSTPCRB_SCI9,
   .rxi_irq      = -1,               /* Will be assigned by ICU */
   .txi_irq      = -1,               /* Will be assigned by ICU */
@@ -583,7 +583,6 @@ static const uint16_t g_div_coefficient[13] =
 };
 
 /* Common baud rate lookup table for different SCICLK frequencies */
-/* Based on RA8E1 Hardware Manual Table 30.11 and 30.12 examples */
 struct common_baudrate_settings_s
 {
   uint32_t baud;
@@ -807,7 +806,7 @@ static int up_calculate_baud_setting(uint32_t baudrate, struct baud_setting *p_b
 
 static inline uint32_t up_serialin(struct up_dev_s *priv, int offset)
 {
-  /* RA8E1 uses SCI_B with 32-bit registers */
+  /* RA uses SCI_B with 32-bit registers */
   if (offset >= R_SCI_B_CCR0_OFFSET)
     {
       return getreg32(priv->scibase + offset);
@@ -825,7 +824,7 @@ static inline uint32_t up_serialin(struct up_dev_s *priv, int offset)
 static inline void up_serialout(struct up_dev_s *priv, int offset,
                                    uint32_t value)
 {
-  /* RA8E1 uses SCI_B with 32-bit registers */
+  /* RA uses SCI_B with 32-bit registers */
   if (offset >= R_SCI_B_CCR0_OFFSET)
     {
       putreg32(value, priv->scibase + offset);
@@ -848,7 +847,7 @@ static void up_disableallints(struct up_dev_s *priv, uint32_t *ie)
 
   flags = enter_critical_section();
 
-  /* RA8E1 uses SCI_B with 32-bit registers */
+  /* RA uses SCI_B with 32-bit registers */
   if (ie)
     {
       /* Return the current interrupt mask */
@@ -874,7 +873,7 @@ static void up_disableallints(struct up_dev_s *priv, uint32_t *ie)
 
 static void up_sci_config(struct up_dev_s *priv)
 {
-  /* RA8E1 uses SCI_B (version 2) registers */
+  /* RA uses SCI_B (version 2) registers */
   uint32_t regval;
   struct baud_setting baud_setting;
   int ret;

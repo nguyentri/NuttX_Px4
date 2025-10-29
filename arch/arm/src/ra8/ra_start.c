@@ -495,8 +495,11 @@ int main(void){
   ra_vector_table_init();
 
   /* Memory Initialization */
-  /* Initialize RAM Sections (BSS, data, TCM) */
+  /* Initialize internal RAM Sections (BSS, data, TCM) */
   ra_ram_init(0);
+
+  /* Initialize external RAM Sections (BSS, data, TCM) */
+  ra_ram_init(1);
 
   /* Initialize GPIO security attribution */
   ra_gpio_security_init();
@@ -654,7 +657,7 @@ void ra_tcm_init(void)
  ****************************************************************************/
 void ra_ram_init (const uint32_t external)
 {
-#if 1 // Disable standard NuttX RAM initialization
+#if 0 // Disable standard NuttX RAM initialization
     const register uint32_t *src;
     register uint32_t *dest;
 
