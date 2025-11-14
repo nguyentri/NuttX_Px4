@@ -47,6 +47,12 @@
 #include "chip.h"
 #include "hardware/ra_memorymap.h"
 
+#include "ra_gpio.h"
+#include "ra_clock.h"
+#include "ra_dtc.h"
+#include "ra_mstp.h"
+#include "ra_spi.h"
+
 #ifdef CONFIG_RA_SPI
 
 /****************************************************************************
