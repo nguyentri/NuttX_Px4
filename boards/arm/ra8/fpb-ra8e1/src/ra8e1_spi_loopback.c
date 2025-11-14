@@ -145,7 +145,7 @@ int ra_spi_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
  * This will allow the SPI driver to pick up bits/mode/frequency
  * for each device without requiring board-specific code elsewhere.
  */
-const struct ra_spi_cs_config_s g_loopback_cs[] =
+const struct ra_spi_ext_dev_config_s g_loopback_cs[] =
 {
   /* Device 0: SPI0 */
   {
@@ -179,10 +179,10 @@ const struct ra_spi_cs_config_s g_loopback_cs[] =
   }
 };
 
-/* Strong implementation of ra_spi_get_cs_config used by the loopback demo.
+/* Strong implementation of ra_spi_get_dev_config used by the loopback demo.
  * Returns a pointer to the CS config for the given devid, or NULL if none.
  */
-const struct ra_spi_cs_config_s *ra_spi_get_cs_config(struct spi_dev_s *dev, uint32_t devid)
+const struct ra_spi_ext_dev_config_s *ra_spi_get_dev_config(struct spi_dev_s *dev, uint32_t devid)
 {
   UNUSED(dev);
 

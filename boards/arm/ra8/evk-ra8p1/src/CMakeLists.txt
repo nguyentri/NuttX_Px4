@@ -34,6 +34,18 @@ if(CONFIG_RA_I2C)
   list(APPEND SRCS ra8p1_i2c.c)
 endif()
 
+if(CONFIG_RA8P1_SPI_LOOPBACK_EXAMPLE)
+  list(APPEND SRCS ra8p1_spi_loopback.c)
+endif()
+
+if(CONFIG_PWM)
+  list(APPEND SRCS ra8p1_gpt_pwm.c)
+endif()
+
+if(CONFIG_RA_ADC_B)
+  list(APPEND SRCS ra8p1_adc_b.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 set_property(GLOBAL PROPERTY LD_SCRIPT

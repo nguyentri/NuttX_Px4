@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA_RA8_SPI_H
-#define __ARCH_ARM_SRC_RA_RA8_SPI_H
+#ifndef __ARCH_ARM_SRC_RA8_RA_SPI_H
+#define __ARCH_ARM_SRC_RA8_RA_SPI_H
 
 /****************************************************************************
  * Included Files
@@ -61,15 +61,26 @@ typedef enum {
   RA_SPI_CS_HARDWARE = 2     /* Use hardware SSx pin for chip select */
 } ra_spi_cs_type;
 
-/* Chip Select Configuration */
-struct ra_spi_cs_config_s
+typedef enum {
+  RA_SPI_DIR_MSB_FIRST = 0,  /* MSB first */
+  RA_SPI_DIR_LSB_FIRST = 1   /* LSB first */
+} ra_spi_dir_type;
+
+/* SPI Device external device configuration with runtime state
+ * It is used to write to SPCMDm : SPI Command Register (m = 0 to 7) if multiple devices are on the same spi bus
+ * If GPIO CS is used, the CS pin is configured in ra_spi_select() function and SPCMD0
+ * Note: This structure extends ra_spi_ext_dev_config_s
+ */
+struct ra_spi_ext_dev_config_s
 {
   uint32_t devid;           /* Device ID */
   uint32_t max_frequency;   /* Maximum frequency for this device */
-  uint8_t  mode;            /* SPI mode */
-  uint8_t  bits;            /* Data bits per transfer */
-  gpio_pinset_t cs_gpio;    /* GPIO Chip Select and Slave Select pin definitions */
-  ra_spi_cs_type     cs_type;         /* Use hardware SS0 or GPIO */
+  uint8_t  cur_mode;            /* SPI mode */
+  uint8_t  cur_bits;            /* Data bits per transfer */
+  ra_spi_dir_type    cur_dir;       /* Data direction */
+  gpio_pinset_t      cs_gpio;    /* GPIO Chip Select and Slave Select pin definitions */
+  ra_spi_cs_type     cs_type;   /* Use hardware SS0 or GPIO */
+
   uint8_t  ssl_select;      /* SSL select value (0-3) */
   uint8_t  setup_delay;     /* CS setup delay */
   uint8_t  hold_delay;      /* CS hold delay */
@@ -142,14 +153,22 @@ int ra_spi_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
 /****************************************************************************
- * Name: ra_spi_get_cs_config
+ * Name: ra_spi_get_dev_config
  *
  * Description:
  *   Get CS configuration for a specific device (weak function)
  *
  ****************************************************************************/
 
-const struct ra_spi_cs_config_s *ra_spi_get_cs_config(struct spi_dev_s *dev, uint32_t devid);
+const struct ra_spi_ext_dev_config_s *ra_spi_get_dev_config(struct spi_dev_s *dev, uint32_t devid);
+
+/**
+ * Set the SPI bit order (MSB-first or LSB-first)
+ *
+ * @param dev      The SPI device handle
+ * @param lsbfirst true for LSB-first, false for MSB-first
+ */
+void ra_spi_setbitorder(struct spi_dev_s *dev, bool lsbfirst);
 
 /**
  * Enable/disable SPI loopback features on the given SPI device.
@@ -167,4 +186,4 @@ const struct ra_spi_cs_config_s *ra_spi_get_cs_config(struct spi_dev_s *dev, uin
 int ra_spi_set_loopback(FAR struct spi_dev_s *dev, bool loopback2,
                         bool moifv, bool moife);
 
-#endif /* __ARCH_ARM_SRC_RA_RA8_SPI_H */
+#endif /* __ARCH_ARM_SRC_RA8_RA_SPI_H */

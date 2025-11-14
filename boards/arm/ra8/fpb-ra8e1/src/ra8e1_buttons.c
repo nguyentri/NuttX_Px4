@@ -28,6 +28,7 @@
 #include <stdbool.h>
 #include <errno.h>
 #include <debug.h>
+#include <syslog.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
@@ -44,6 +45,7 @@
 
 static bool g_led1_state = true; /* Active low, true = off */
 static bool g_led2_state = true; /* Active low, true = off */
+static volatile uint32_t g_button_press_count = 0;
 
 /****************************************************************************
  * Private Functions
@@ -51,21 +53,35 @@ static bool g_led2_state = true; /* Active low, true = off */
 
 /****************************************************************************
  * Name: button_handler_isr
+ *
+ * Description:
+ *   External interrupt handler for button press.
+ *   This demonstrates:
+ *   - External interrupt handling
+ *   - GPIO reading/writing
+ *   - LED control from ISR
+ *
  ****************************************************************************/
 
 static int button_handler_isr(int irq, void *context, void *arg)
 {
-  /* Clear  pending isr */
-  ra_icu clear_irq(irq);
+  /* Increment press counter */
 
-  /* Toggle both LEDs */
+  g_button_press_count++;
+
+  /* Toggle both LEDs to provide visual feedback */
+
   g_led1_state = !g_led1_state;
   g_led2_state = !g_led2_state;
 
   ra_gpiowrite(GPIO_LED1, g_led1_state);
   ra_gpiowrite(GPIO_LED2, g_led2_state);
 
-  return 0;
+  /* Log button press (keep brief for ISR) */
+
+  syslog(LOG_INFO, "Button pressed! Count: %lu\n", g_button_press_count);
+
+  return OK;
 }
 
 /****************************************************************************
@@ -74,14 +90,39 @@ static int button_handler_isr(int irq, void *context, void *arg)
 
 /****************************************************************************
  * Name: board_button_initialize
+ *
+ * Description:
+ *   Initialize button with external interrupt capability.
+ *   This demonstrates:
+ *   - GPIO configuration for input with pull-up
+ *   - External interrupt configuration (falling edge)
+ *   - LED initialization for output
+ *
  ****************************************************************************/
+
 uint32_t board_button_initialize(void)
 {
-  /* Configure the button pin as an input with pullup and interrupt on falling edge */
-  ra_configgpio(GPIO_SW1);
+  int ret;
 
-  /* Attach the button interrupt handler */
-  (void)ra_icu_attach(RA_ELC_ICU_IRQ0, button_handler_isr, NULL, true);
+  /* Configure button pin with external interrupt
+   * - Input with pull-up resistor
+   * - Interrupt on falling edge (button press)
+   * - Interrupt handler: button_handler_isr
+   */
+  ret = ra_configgpio(GPIO_SW1);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to configure button GPIO: %d\n", ret);
+      return ret;
+    }
+  ret = ra_gpiosetevent(GPIO_SW1, false, true, false,
+                        button_handler_isr, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to configure button interrupt: %d\n",
+             ret);
+      return ret;
+    }
 
-  return 0;
+  return OK;
 }

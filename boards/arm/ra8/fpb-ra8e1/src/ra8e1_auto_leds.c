@@ -48,10 +48,10 @@
 
 /*  There are two user-controllable LEDs on board the RA8E1 FPB board:
  *
- *     LED              GPIO
- *     ---------------- -----
- *     LED1 Green       P404
- *     LED2 Green       P408
+ *     LED              GPIO        Active
+ *     ---------------- -----       ------
+ *     LED1 Green       P404        Low
+ *     LED2 Green       P408        Low
  *
  * These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
  * defined.  In that case, the usage by the board port is defined in
@@ -60,7 +60,7 @@
  *
  *   SYMBOL                MEANING                         LED STATE
  *                                                   LED1       LED2
- *   -------------------  -----------------------  --------- ---------
+ *   -------------------  --------------------------  --------- ---------
  *   LED_STARTED          NuttX has been started     OFF       OFF
  *   LED_HEAPALLOCATE     Heap has been allocated    OFF       OFF
  *   LED_IRQSENABLED      Interrupts enabled         OFF       OFF
@@ -68,8 +68,10 @@
  *   LED_INIRQ            In an interrupt            N/C       ON
  *   LED_SIGNAL           In a signal handler        N/C       ON
  *   LED_ASSERTION        An assertion failed        N/C       ON
- *   LED_PANIC            The system has crashed     N/C     Blinking
- *   LED_IDLE             MCU is in sleep mode       ------ Not used ------
+ *   LED_PANIC            The system has crashed     N/C       Blinking
+ *   LED_IDLE             MCU is in sleep mode       Not used
+ *
+ * Note: LEDs are active low (write false/0 to turn on, true/1 to turn off)
  */
 
 /****************************************************************************
@@ -82,9 +84,11 @@
 
 void board_autoled_initialize(void)
 {
-  /* Configure LED GPIOs for output */
-  ra_configgpio(GPIO_LED1);
-  ra_configgpio(GPIO_LED2);
+    /* Configure LED GPIOs for output */
+    ra_configgpio(GPIO_LED1);
+    ra_configgpio(GPIO_LED2);
+    ra_gpiowrite(GPIO_LED1, true);
+    ra_gpiowrite(GPIO_LED2, true);
 }
 
 /****************************************************************************
@@ -93,31 +97,31 @@ void board_autoled_initialize(void)
 
 void board_autoled_on(int led)
 {
-  switch (led)
-    {
-      /* 0: LED_STARTED, LED_HEAPALLOCATE, LED_IRQSENABLED: LED1=OFF LED2=OFF */
-      default:
-      case 0:
-        ra_gpiowrite(GPIO_LED1, true);  /* LED off (active low) */
-        ra_gpiowrite(GPIO_LED2, true);  /* LED off (active low) */
-        break;
+//   switch (led)
+//     {
+//       /* 0: LED_STARTED, LED_HEAPALLOCATE, LED_IRQSENABLED: LED1=OFF LED2=OFF */
+//       default:
+//       case 0:
+//         ra_gpiowrite(GPIO_LED1, true);  /* LED off (active low) */
+//         ra_gpiowrite(GPIO_LED2, true);  /* LED off (active low) */
+//         break;
 
-      /* 1: LED_STACKCREATED: LED1=ON LED2=OFF */
-      case 1:
-        ra_gpiowrite(GPIO_LED1, false); /* LED on (active low) */
-        ra_gpiowrite(GPIO_LED2, true);  /* LED off (active low) */
-        break;
+//       /* 1: LED_STACKCREATED: LED1=ON LED2=OFF */
+//       case 1:
+//         ra_gpiowrite(GPIO_LED1, false); /* LED on (active low) */
+//         ra_gpiowrite(GPIO_LED2, true);  /* LED off (active low) */
+//         break;
 
-      /* 2: LED_INIRQ, LED_SIGNAL, LED_ASSERTION: LED1=N/C LED2=ON */
-      case 2:
-        ra_gpiowrite(GPIO_LED2, false); /* LED on (active low) */
-        break;
+//       /* 2: LED_INIRQ, LED_SIGNAL, LED_ASSERTION: LED1=N/C LED2=ON */
+//       case 2:
+//         ra_gpiowrite(GPIO_LED2, false); /* LED on (active low) */
+//         break;
 
-      /* 3: LED_PANIC: LED2=Blinking */
-      case 3:
-        ra_gpiowrite(GPIO_LED2, false); /* LED on (active low) */
-        break;
-    }
+//       /* 3: LED_PANIC: LED2=Blinking */
+//       case 3:
+//         ra_gpiowrite(GPIO_LED2, false); /* LED on (active low) */
+//         break;
+//     }
 }
 
 /****************************************************************************
@@ -126,24 +130,24 @@ void board_autoled_on(int led)
 
 void board_autoled_off(int led)
 {
-  switch (led)
-    {
-      /* 0-1: LED_STARTED, LED_HEAPALLOCATE, LED_IRQSENABLED, LED_STACKCREATED */
-      default:
-      case 0:
-      case 1:
-        break;
+//   switch (led)
+//     {
+//       /* 0-1: LED_STARTED, LED_HEAPALLOCATE, LED_IRQSENABLED, LED_STACKCREATED */
+//       default:
+//       case 0:
+//       case 1:
+//         break;
 
-      /* 2: LED_INIRQ, LED_SIGNAL, LED_ASSERTION: LED1=N/C LED2=OFF */
-      case 2:
-        ra_gpiowrite(GPIO_LED2, true);  /* LED off (active low) */
-        break;
+//       /* 2: LED_INIRQ, LED_SIGNAL, LED_ASSERTION: LED1=N/C LED2=OFF */
+//       case 2:
+//         ra_gpiowrite(GPIO_LED2, true);  /* LED off (active low) */
+//         break;
 
-      /* 3: LED_PANIC: LED2=Blinking */
-      case 3:
-        ra_gpiowrite(GPIO_LED2, true);  /* LED off (active low) */
-        break;
-    }
+//       /* 3: LED_PANIC: LED2=Blinking */
+//       case 3:
+//         ra_gpiowrite(GPIO_LED2, true);  /* LED off (active low) */
+//         break;
+//     }
 }
 
 #endif /* CONFIG_ARCH_LEDS */

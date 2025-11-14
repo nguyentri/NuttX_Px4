@@ -20,7 +20,6 @@
 *.obj
 *.profraw
 *.rel
-*.src
 *.srec
 *.swp
 *.sym

@@ -27,7 +27,10 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
 #include <errno.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <nuttx/irq.h>
@@ -52,7 +55,25 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
+#if defined(CONFIG_RA8E1_GROUP)
+const static uint32_t g_irq_event[16] = {
+    RA_ELC_ICU_IRQ0, RA_ELC_ICU_IRQ1, RA_ELC_ICU_IRQ2, RA_ELC_ICU_IRQ3,
+    RA_ELC_ICU_IRQ4, RA_ELC_ICU_IRQ5, RA_ELC_ICU_IRQ6, RA_ELC_ICU_IRQ7,
+    RA_ELC_ICU_IRQ8, RA_ELC_ICU_IRQ9, RA_ELC_ICU_IRQ10, RA_ELC_ICU_IRQ11,
+    RA_ELC_ICU_IRQ12, RA_ELC_ICU_IRQ13, RA_ELC_ICU_IRQ14, RA_ELC_ICU_IRQ15
+};
+#elif defined(CONFIG_RA8P1_GROUP)
+const static uint32_t g_irq_event[32] = {
+    RA_ELC_ICU_IRQ0, RA_ELC_ICU_IRQ1, RA_ELC_ICU_IRQ2, RA_ELC_ICU_IRQ3,
+    RA_ELC_ICU_IRQ4, RA_ELC_ICU_IRQ5, RA_ELC_ICU_IRQ6, RA_ELC_ICU_IRQ7,
+    RA_ELC_ICU_IRQ8, RA_ELC_ICU_IRQ9, RA_ELC_ICU_IRQ10, RA_ELC_ICU_IRQ11,
+    RA_ELC_ICU_IRQ12, RA_ELC_ICU_IRQ13, RA_ELC_ICU_IRQ14, RA_ELC_ICU_IRQ15,
+    RA_ELC_ICU_IRQ16, RA_ELC_ICU_IRQ17, RA_ELC_ICU_IRQ18, RA_ELC_ICU_IRQ19,
+    RA_ELC_ICU_IRQ20, RA_ELC_ICU_IRQ21, RA_ELC_ICU_IRQ22, RA_ELC_ICU_IRQ23,
+    RA_ELC_ICU_IRQ24, RA_ELC_ICU_IRQ25, RA_ELC_ICU_IRQ26, RA_ELC_ICU_IRQ27,
+    RA_ELC_ICU_IRQ28, RA_ELC_ICU_IRQ29, RA_ELC_ICU_IRQ30, RA_ELC_ICU_IRQ31
+};
+#endif
 /* PFS protection counter for safe register access */
 static volatile uint32_t g_pfs_protect_counter = 0;
 
@@ -237,7 +258,7 @@ static uint32_t ra_gpio_get_pfs_config(gpio_pinset_t cfgset)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ra_gpio_find_irq_for_pin
+ * Name: ra_gpio_find_irq
  *
  * Description:
  *   Extract IRQ number from gpio_pinset_t configuration
@@ -246,11 +267,11 @@ static uint32_t ra_gpio_get_pfs_config(gpio_pinset_t cfgset)
  *   pinset - GPIO pin configuration with encoded IRQ number
  *
  * Returned Value:
- *   External IRQ number (0-15) or -1 if pin is not configured for interrupts
+ *   External IRQ number (0-32) or -1 if pin is not configured for interrupts
  *
  ****************************************************************************/
 
-static int ra_gpio_find_irq_for_pin(gpio_pinset_t pinset)
+static int ra_gpio_find_irq(gpio_pinset_t pinset)
 {
   uint32_t cfg = GPIO_GET_CFG(pinset);
 
@@ -261,55 +282,10 @@ static int ra_gpio_find_irq_for_pin(gpio_pinset_t pinset)
       return -1;
     }
 
-  /* EXINT channel on RA devices is determined by the pin number (Pm0 -> EXINT0, Pm1 -> EXINT1, etc.)
-   * Return the pin index (0..15) as the external IRQ channel.
-   */
-  int pin = GPIO_GET_PIN(pinset);
-  if (pin < 0 || pin > 15)
-    {
-      return -1;
-    }
+  /* Get IRQ number from cfg*/
+  int irq = GPIO_GET_IRQ_NUM(pinset);
 
-  return pin;
-}
-
-/****************************************************************************
- * Name: ra_gpio_get_irq_event
- *
- * Description:
- *   Get ICU event number for external IRQ
- *
- * Input Parameters:
- *   irq_num - External IRQ number (0-15)
- *
- * Returned Value:
- *   ICU event number
- *
- ****************************************************************************/
-
-static int ra_gpio_get_irq_event(int irq_num)
-{
-  /* Map external IRQ numbers to their ICU event numbers */
-  switch (irq_num)
-    {
-      case 0:  return RA_ELC_ICU_IRQ0;
-      case 1:  return RA_ELC_ICU_IRQ1;
-      case 2:  return RA_ELC_ICU_IRQ2;
-      case 3:  return RA_ELC_ICU_IRQ3;
-      case 4:  return RA_ELC_ICU_IRQ4;
-      case 5:  return RA_ELC_ICU_IRQ5;
-      case 6:  return RA_ELC_ICU_IRQ6;
-      case 7:  return RA_ELC_ICU_IRQ7;
-      case 8:  return RA_ELC_ICU_IRQ8;
-      case 9:  return RA_ELC_ICU_IRQ9;
-      case 10: return RA_ELC_ICU_IRQ10;
-      case 11: return RA_ELC_ICU_IRQ11;
-      case 12: return RA_ELC_ICU_IRQ12;
-      case 13: return RA_ELC_ICU_IRQ13;
-      case 14: return RA_ELC_ICU_IRQ14;
-      case 15: return RA_ELC_ICU_IRQ15;
-      default: return -1;
-    }
+  return irq;
 }
 
 /****************************************************************************
@@ -654,6 +630,7 @@ int ra_gpiosetevent(uint32_t pinset, bool rising, bool falling,
 {
   uint8_t port;
   uint8_t pin;
+  uint8_t irq_mode;
   uint32_t pfs_addr;
   uint32_t pfs_value;
   int irq_num;
@@ -673,7 +650,7 @@ int ra_gpiosetevent(uint32_t pinset, bool rising, bool falling,
     }
 
   /* Find which external IRQ is encoded in this pin configuration */
-  irq_num = ra_gpio_find_irq_for_pin(pinset);
+  irq_num = ra_gpio_find_irq(pinset);
   if (irq_num < 0)
     {
       /* This pin is not configured for external interrupts */
@@ -681,7 +658,7 @@ int ra_gpiosetevent(uint32_t pinset, bool rising, bool falling,
     }
 
   /* Get the ICU event number for this external IRQ */
-  icu_event = ra_gpio_get_irq_event(irq_num);
+  icu_event = g_irq_event[irq_num];
   if (icu_event < 0)
     {
       return -ENOTSUP;
@@ -770,16 +747,6 @@ int ra_gpiosetevent(uint32_t pinset, bool rising, bool falling,
 
   ra_pin_access_disable();
 
-  /* Set up ICU interrupt link */
-  icu_irq = ra_icu_attach(icu_event, ra_gpio_irq_handler,
-                          &g_gpio_irqs[slot], true);
-  if (icu_irq < 0)
-    {
-      return icu_irq; /* ICU attach failed */
-    }
-
-  /* Configure external IRQ for appropriate edge detection mode */
-  uint8_t irq_mode;
   if (rising && falling)
     {
       irq_mode = RA_ICU_IRQ_EDGE_BOTH;
@@ -801,8 +768,15 @@ int ra_gpiosetevent(uint32_t pinset, bool rising, bool falling,
   ret = ra_icu_filter_config(irq_num, irq_mode, false, RA_ICU_FILTER_PCLK_DIV_1);
   if (ret < 0)
     {
-      ra_icu_detach(icu_irq);
-      return ret;
+      return ret; /* ICU filter configuration failed */
+    }
+
+  /* Set up ICU interrupt link */
+  icu_irq = ra_icu_attach(icu_event, ra_gpio_irq_handler,
+                          &g_gpio_irqs[slot], true);
+  if (icu_irq < 0)
+    {
+      return icu_irq; /* ICU attach failed */
     }
 
   /* Store interrupt information */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/ra8/fpb-ra8e1/src/ra8e1_spi_loopback.c
+ * boards/arm/ra8/fpb-ra8p1/src/ra8p1_spi_loopback.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,7 +24,7 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_RA8E1_SPI_LOOPBACK_EXAMPLE
+#ifdef CONFIG_RA8P1_SPI_LOOPBACK_EXAMPLE
 
 #include <sys/types.h>
 #include <stdio.h>
@@ -41,7 +41,7 @@
 #include <arch/board/board.h>
 #include "ra_spi.h"
 #include "ra_gpio.h"
-#include "fpb-ra8e1.h"
+#include "fpb-ra8p1.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -145,7 +145,7 @@ int ra_spi_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
  * This will allow the SPI driver to pick up bits/mode/frequency
  * for each device without requiring board-specific code elsewhere.
  */
-const struct ra_spi_cs_config_s g_loopback_cs[] =
+const struct ra_spi_ext_dev_config_s g_loopback_cs[] =
 {
   /* Device 0: SPI0 */
   {
@@ -179,10 +179,10 @@ const struct ra_spi_cs_config_s g_loopback_cs[] =
   }
 };
 
-/* Strong implementation of ra_spi_get_cs_config used by the loopback demo.
+/* Strong implementation of ra_spi_get_dev_config used by the loopback demo.
  * Returns a pointer to the CS config for the given devid, or NULL if none.
  */
-const struct ra_spi_cs_config_s *ra_spi_get_cs_config(struct spi_dev_s *dev, uint32_t devid)
+const struct ra_spi_ext_dev_config_s *ra_spi_get_dev_config(struct spi_dev_s *dev, uint32_t devid)
 {
   UNUSED(dev);
 
@@ -399,14 +399,14 @@ static int spi_test_loopback(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ra8e1_spi_loopback_init
+ * Name: ra8p1_spi_loopback_init
  *
  * Description:
  *   Initialize SPI loopback demo
  *
  ****************************************************************************/
 
-int ra8e1_spi_loopback_init(void)
+int ra8p1_spi_loopback_init(void)
 {
   int ret;
 
@@ -444,14 +444,14 @@ int ra8e1_spi_loopback_init(void)
 }
 
 /****************************************************************************
- * Name: ra8e1_spi_loopback_test
+ * Name: ra8p1_spi_loopback_test
  *
  * Description:
  *   Run SPI loopback tests
  *
  ****************************************************************************/
 
-int ra8e1_spi_loopback_test(void)
+int ra8p1_spi_loopback_test(void)
 {
   int ret;
 
@@ -459,7 +459,7 @@ int ra8e1_spi_loopback_test(void)
 
   if (!g_spi_loopback.spi0 || !g_spi_loopback.spi1)
     {
-      syslog(LOG_ERR, "SPI devices not initialized. Call ra8e1_spi_loopback_init() first.\n");
+      syslog(LOG_ERR, "SPI devices not initialized. Call ra8p1_spi_loopback_init() first.\n");
       return -EINVAL;
     }
 
@@ -486,24 +486,24 @@ int ra8e1_spi_loopback_test(void)
 }
 
 /****************************************************************************
- * Name: ra8e1_spi_loopback_main
+ * Name: ra8p1_spi_loopback_main
  *
  * Description:
  *   Main entry point for SPI loopback demo
  *
  ****************************************************************************/
 
-int ra8e1_spi_loopback_main(int argc, char *argv[])
+int ra8p1_spi_loopback_main(int argc, char *argv[])
 {
   int ret;
 
-  syslog(LOG_INFO, "RA8E1 SPI Loopback Test\n");
+  syslog(LOG_INFO, "RA8P1 SPI Loopback Test\n");
   syslog(LOG_INFO, "=======================\n");
   syslog(LOG_INFO, "This test verifies SPI loopback functionality:\n");
   syslog(LOG_INFO, "- SPI0 and SPI1 both configured as masters\n");
 
   /* Run the test */
-  ret = ra8e1_spi_loopback_test();
+  ret = ra8p1_spi_loopback_test();
   if (ret < 0)
     {
       syslog(LOG_INFO, "Test failed: %d\n", ret);
@@ -514,4 +514,4 @@ int ra8e1_spi_loopback_main(int argc, char *argv[])
   return OK;
 }
 
-#endif /* CONFIG_RA8E1_SPI_LOOPBACK_EXAMPLE */
+#endif /* CONFIG_RA8P1_SPI_LOOPBACK_EXAMPLE */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/ra8/fpb-ra8e1/src/ra8e1_bringup.c
+ * boards/arm/ra8/evk-ra8p1/src/ra8p1_bringup.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -123,7 +123,7 @@ int ra8p1_bringup(void)
 
 #ifdef CONFIG_RA_GPIO
   /* Initialize GPIO drivers */
-  ret = ra8e1_gpio_initialize();
+  ret = ra8p1_gpio_initialize();
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize GPIO: %d\n", ret);

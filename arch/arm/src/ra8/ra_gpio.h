@@ -53,6 +53,11 @@
 #define GPIO_PORT_MASK                  (0xF0000000UL)
 #define GPIO_PIN_MASK                   (0x0F000000UL)
 #define GPIO_CFG_MASK                   (0x00FFFFFFUL)
+#if defined(CONFIG_RA8E1_GROUP)
+#define GPIO_IRQ_MASK                   (0x0000000FUL) // IRQ number in bits 3-0: Max 16 IRQs
+#elif defined(CONFIG_RA8P1_GROUP)
+#define GPIO_IRQ_MASK                   (0x0000002FUL) // IRQ number in bits 5, 3-0: Max 32 IRQs
+#endif
 
 #define GPIO_PORT_SHIFT                 (28)
 #define GPIO_PIN_SHIFT                  (24)
@@ -61,6 +66,7 @@
 #define GPIO_GET_PORT(pinset)           (((pinset) & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT)
 #define GPIO_GET_PIN(pinset)            (((pinset) & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT)
 #define GPIO_GET_CFG(pinset)            ((pinset) & GPIO_CFG_MASK)
+#define GPIO_GET_IRQ_NUM(pinset)       ((pinset) & GPIO_IRQ_MASK)
 
 
 /****************************************************************************

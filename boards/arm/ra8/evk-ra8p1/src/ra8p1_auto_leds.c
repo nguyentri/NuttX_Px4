@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/ra8/fpb-ra8e1/src/ra8e1_auto_leds.c
+ * boards/arm/ra8/evk-ra8p1/src/ra8p1_auto_leds.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -36,7 +36,7 @@
 #include "chip.h"
 #include "ra_gpio.h"
 
-/* The board.h file may override pin configurations defined in <hardware/ra8e1/ra8e1_pinmap.h> */
+/* The board.h file may override pin configurations defined in <hardware/ra8p1/ra8p1_pinmap.h> */
 
 #include <arch/board/board.h>
 
@@ -46,7 +46,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/*  There are two user-controllable LEDs on board the RA8E1 FPB board:
+/*  There are two user-controllable LEDs on board the RA8P1 FPB board:
  *
  *     LED              GPIO
  *     ---------------- -----
@@ -55,7 +55,7 @@
  *
  * These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
  * defined.  In that case, the usage by the board port is defined in
- * include/board.h and src/ra8e1_auto_leds.c. The LEDs are used to encode
+ * include/board.h and src/ra8p1_auto_leds.c. The LEDs are used to encode
  * OS-related events as follows:
  *
  *   SYMBOL                MEANING                         LED STATE

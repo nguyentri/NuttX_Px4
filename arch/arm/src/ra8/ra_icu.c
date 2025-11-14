@@ -321,11 +321,11 @@ int ra_icu_filter_config(int icu_irq, uint8_t mode, bool filter_enable,
       return -EINVAL;
     }
 
-  /* Configure the IRQCR register for this external interrupt */
-  regval = 0;
+  /* IELSR Must be zero when modifying the IRQCR bits. */
+  putreg32(0, R_ICU_IELSR(icu_irq));
 
   /* Set interrupt detection mode */
-  regval |= (mode & R_ICU_COMMON_IRQCR_IRQMD_MASK) << R_ICU_COMMON_IRQCR_IRQMD_SHIFT;
+  regval = (mode & R_ICU_COMMON_IRQCR_IRQMD_MASK) << R_ICU_COMMON_IRQCR_IRQMD_SHIFT;
 
   /* Set filter configuration if enabled */
   if (filter_enable)

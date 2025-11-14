@@ -109,7 +109,7 @@ struct spi_masterslave_s
 #define SLAVE_DEVICE_ID     0x2000
 
 /* SPI device configurations for master-slave test */
-static const struct ra_spi_cs_config_s g_masterslave_spi_devices[] =
+static const struct ra_spi_ext_dev_config_s g_masterslave_spi_devices[] =
 {
   {
     .devid      = MASTER_DEVICE_ID, // SPI0 as Master

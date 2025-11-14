@@ -111,6 +111,7 @@
 #  include "hardware/ra8p1/ra_faci.h"
 #  include "hardware/ra8p1/ra_fcache.h"
 #  include "hardware/ra8p1/ra_glcdc.h"
+#  include "hardware/ra8p1/ra_gpt.h"
 #  include "hardware/ra8p1/ra_gpt32.h"
 #  include "hardware/ra8p1/ra_gpt_gtclk.h"
 #  include "hardware/ra8p1/ra_gpt_ops.h"

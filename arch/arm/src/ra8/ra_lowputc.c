@@ -276,8 +276,8 @@ void ra_lowsetup(void)
   ra_configgpio(GPIO_SCI2_TX);
 #endif
 #if defined(CONFIG_RA_SCI3_UART)
-  ra_configgpio(GPIO_SCI3_RX);
-  ra_configgpio(GPIO_SCI3_TX);
+  //ra_configgpio(GPIO_SCI3_RX);
+  //ra_configgpio(GPIO_SCI3_TX);
 #endif
 #if defined(CONFIG_RA_SCI4_UART)
   /* TODO: Add proper GPIO pin configuration for SCI4 when pins are determined */

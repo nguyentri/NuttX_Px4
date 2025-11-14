@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/ra8/fpb-ra8e1/src/ra8e1_user_leds.c
+ * boards/arm/ra8/evk-ra8p1/src/ra8p1_user_leds.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *

@@ -45,3 +45,11 @@ config IMU_MODULE_DEBUG
 		Enable debug output for IMU sensor module
 
 endif # SENSORS_IMU_MODULE
+
+config RA8P1_SPI_LOOPBACK_EXAMPLE
+	bool "SPI loopback test example"
+	default n
+	depends on RA_SPI
+	---help---
+		Enable SPI internal loopback test example for verifying
+		SPI driver functionality on EVK-RA8P1 board.
