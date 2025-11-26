@@ -58,10 +58,10 @@
  ****************************************************************************/
 
 /* SPI0 (Pmod 2): P601=RSPCKB, P600=MISOB (shared), P603=MOSIB, P604=SSLB0 */
-#define GPIO_SPI0_SCK   GPIO_RSPCKB_1        /* P601 - Pmod 2 SCK (pin 4) */
-#define GPIO_SPI0_MISO  GPIO_MISOB_1         /* P602 - Pmod 2 MISO (pin 3, shared with RXD0) */
-#define GPIO_SPI0_MOSI  GPIO_MOSIB_1         /* P603 - Pmod 2 MOSI (pin 2, shared with TXD0) */
-#define GPIO_SPI0_CS0   GPIO_SSLB0_A_1       /* P604 - Pmod 2 CS (pin 1) */
+#define GPIO_SPI0_SCK   GPIO_RSPCKA_B_1        /* P601 - Pmod 2 SCK (pin 4) */
+#define GPIO_SPI0_MISO  GPIO_MISO2_B_1         /* P602 - Pmod 2 MISO (pin 3, shared with RXD0) */
+#define GPIO_SPI0_MOSI  GPIO_MOSI2_B_1         /* P603 - Pmod 2 MOSI (pin 2, shared with TXD0) */
+#define GPIO_SPI0_CS0   GPIO_SSLE2_A_1         /* P604 - Pmod 2 CS (pin 1) */
 
 /* SPI1 (Pmod 1): P803=SCK2, P802=MISO2, P801=MOSI2, P804=SS2 */
 #define GPIO_SPI1_SCK   GPIO_RSPCKA_C_1      /* P803 - Pmod 1 SCK (pin 4) */
@@ -512,6 +512,38 @@
 /* LED bits for use with board_userled_all() */
 #define LED_1_BIT    		(1 << LED_1)
 #define LED_2_BIT    		(1 << LED_2)
+
+/* GPIO initialization list pattern */
+#define RA8_GPIO_INIT_LIST  { \
+  GPIO_RXD2_B,                  /* Console RX - P802 */ \
+  GPIO_TXD2_B,                  /* Console TX - P801 */ \
+  GPIO_RXD0_B,                  /* Pmod 2 UART RX - P602 */ \
+  GPIO_TXD0_B,                  /* Pmod 2 UART TX - P603 */ \
+  GPIO_RXD7_A,                  /* Arduino/mikroBUS UART RX - P808 */ \
+  GPIO_TXD7_A,                  /* Arduino/mikroBUS UART TX - P809 */ \
+  GPIO_RSPCKA_B_1,              /* SPI0 Clock - P601 */ \
+  GPIO_MISO2_B_1,               /* SPI0 MISO - P602 */ \
+  GPIO_MOSI2_B_1,               /* SPI0 MOSI - P603 */ \
+  GPIO_SSLE2_A_1,               /* SPI0 CS0 - P604 */ \
+  GPIO_RSPCKA_C_1,              /* SPI1 Clock - P803 */ \
+  GPIO_MISO2_A_1,               /* SPI1 MISO - P802 */ \
+  GPIO_MOSI2_A_1,               /* SPI1 MOSI - P801 */ \
+  GPIO_SSLE2_A_1,               /* SPI1 CS0 - P804 */ \
+  GPIO_SCL0_B_1,                /* I2C0 Clock - P400 */ \
+  GPIO_SDA0_B_1,                /* I2C0 Data - P401 */ \
+  GPIO_SCL1_A_2,                /* I2C1 Clock - P512 */ \
+  GPIO_SDA1_B_1,                /* I2C1 Data - P511 */ \
+  GPIO_GTIOC0A_1,               /* GPT0 Channel A - P211 */ \
+  GPIO_GTIOC10A_1,              /* GPT1 Channel A - P109 */ \
+  GPIO_GTIOC11A_1,              /* GPT2 Channel A - P711 */ \
+  GPIO_GTIOC12A_1,              /* GPT3 Channel A - P708 */ \
+  GPIO_GTIOC13A_1,              /* GPT4 Channel A - P502 */ \
+  GPIO_P600_OUTPUT_HIGH,        /* Blue LED - P600 */ \
+  GPIO_P303_OUTPUT_HIGH,        /* Green LED - P303 */ \
+  GPIO_PA07_OUTPUT_HIGH,        /* Red LED - PA07 */ \
+  GPIO_IRQ13_P009_DS,           /* User Button SW1 - P009 */ \
+  GPIO_P408_INPUT_PULLUP        /* User Button SW2 - P008 */ \
+}
 
 
 /****************************************************************************

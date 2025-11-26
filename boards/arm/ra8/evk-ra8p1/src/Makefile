@@ -21,8 +21,7 @@
 include $(TOPDIR)/Make.defs
 
 # Core board initialization files
-CSRCS = ra8p1_boot.c ra8p1_bringup.c
-CSRCS += ra8p1_app_examples.c
+CSRCS = ra8p1_boot.c ra8p1_bringup.c ra8p1_gpio.c ra8p1_app_examples.c
 
 ############################################################################
 # Board-specific initialization
@@ -53,6 +52,11 @@ endif
 # GPT PWM support
 ifeq ($(CONFIG_PWM),y)
 CSRCS += ra8p1_gpt_pwm.c
+endif
+
+# SPI loopback example support
+ifeq ($(CONFIG_RA8P1_SPI_LOOPBACK_EXAMPLE),y)
+CSRCS += ra8p1_spi_loopback.c
 endif
 
 include $(TOPDIR)/boards/Board.mk

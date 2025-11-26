@@ -92,19 +92,16 @@ int ra8e1_bringup(void)
     }
 #endif
 
-
-#ifdef CONFIG_RTC_DRIVER
-  /* Initialize RTC driver */
-  ret = board_rtc_initialize();
+  /* Initialize GPIO pins and drivers */
+  ret = ra8e1_gpio_initialize();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize RTC: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to initialize GPIO: %d\n", ret);
     }
   else
     {
-      syslog(LOG_INFO, "RTC initialized successfully\n");
+      syslog(LOG_INFO, "GPIO initialized successfully\n");
     }
-#endif
 
 #ifdef HAVE_LEDS
   /* Initialize LED support */
@@ -121,22 +118,22 @@ int ra8e1_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_RA_GPIO
-  /* Initialize GPIO drivers */
-  ret = ra8e1_gpio_initialize();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize GPIO: %d\n", ret);
-    }
-  else
-    {
-      syslog(LOG_INFO, "GPIO drivers initialized successfully\n");
-    }
-#endif
-
 #ifdef CONFIG_ARCH_BUTTONS
   /* Initialize buttons */
   board_button_initialize();
+#endif
+
+#ifdef CONFIG_RTC_DRIVER
+  /* Initialize RTC driver */
+  ret = board_rtc_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize RTC: %d\n", ret);
+    }
+  else
+    {
+      syslog(LOG_INFO, "RTC initialized successfully\n");
+    }
 #endif
 
   ra8e1_app_examples();

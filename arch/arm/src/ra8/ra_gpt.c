@@ -53,7 +53,6 @@
 #include "ra_gpt.h"
 #include "ra_mstp.h"
 #include "ra_clock.h"
-#include "ra_gpio.h"
 #include <syslog.h>
 
 /****************************************************************************
@@ -91,8 +90,6 @@ struct ra_gpt_channel_config_s
   uint32_t max_period;            /* Maximum period in timer counts, 16-bit timer: 65535 and 32-bit timer: 4294967295 */
   uint32_t channel;                /* GPT channel (0-13) */
   uint32_t elc;                    /* ELC event input number */
-  gpio_pinset_t pin_a;             /* GTIOCA pin configuration */
-  gpio_pinset_t pin_b;             /* GTIOCB pin configuration */
 };
 
 /* GPT device state structure */
@@ -179,8 +176,6 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 0,
     .elc        = RA_ELC_GPT0_CAPTURE_COMPARE_A,  /* GPT0 capture/compare A IRQ, typically not used when control ECS */
-    .pin_a      = GPIO_GPT0_A,  /* Configure based on board */
-    .pin_b      = 0,  /* Configure based on board */
   },
 #endif
 #ifdef CONFIG_RA_GPT1 // not configured
@@ -191,8 +186,6 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 1,
     .elc        = RA_ELC_GPT1_COUNTER_OVERFLOW,  /* GPT1 overflow IRQ */
-    .pin_a      = 0,  /* Configure based on board */
-    .pin_b      = 0,  /* Configure based on board */
   },
 #endif
 #ifdef CONFIG_RA_GPT2
@@ -203,8 +196,6 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 2,
     .elc        = RA_ELC_GPT2_CAPTURE_COMPARE_A,  /* GPT2 capture/compare A IRQ */
-    .pin_a      = GPIO_GPT2_A,  /* Configure based on board */
-    .pin_b      = 0,  /* Configure based on board */
   },
 #endif
 #ifdef CONFIG_RA_GPT3
@@ -215,8 +206,6 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 3,
     .elc        = RA_ELC_GPT3_CAPTURE_COMPARE_A,  /* GPT3 capture/compare A IRQ */
-    .pin_a      = GPIO_GPT3_A,  /* Configure based on board */
-    .pin_b      = 0,  /* Configure based on board */
   },
 #endif
 #ifdef CONFIG_RA_GPT4
@@ -227,8 +216,6 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 4,
     .elc        = RA_ELC_GPT4_CAPTURE_COMPARE_A,  /* GPT4 capture/compare A IRQ */
-    .pin_a      = GPIO_GPT4_A,  /* Configure based on board */
-    .pin_b      = 0,  /* Configure based on board */
   },
 #endif
 #ifdef CONFIG_RA_GPT5
@@ -239,8 +226,6 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 5,
     .elc        = RA_ELC_GPT5_CAPTURE_COMPARE_A,  /* GPT5 capture/compare A IRQ */
-    .pin_a      = GPIO_GPT5_A,  /* Configure based on board */
-    .pin_b      = 0,  /* Configure based on board */
   },
 #endif
 /* Add more channels as needed */
@@ -933,15 +918,7 @@ struct pwm_lowerhalf_s *ra_gpt_initialize(int channel)
           lower->pwm_mode = true;
           lower->started = false;
 
-          /* Configure GPIO pins for PWM output */
-          if( lower->config->pin_a != 0 )
-            {
-              ra_configgpio(lower->config->pin_a);
-            }
-          if( lower->config->pin_b != 0 )
-            {
-              ra_configgpio(lower->config->pin_b);
-            }
+          /* GPIO pins for PWM output are configured at board level */
 
           /* Take the GPT out of module stop state */
           ra_mstp_start(lower->config->mstp);

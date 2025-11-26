@@ -1273,21 +1273,21 @@ int ra8e1_spi_gy912_init(void)
   spiinfo("Initializing SPI GY-912 example\n");
 
   /* Configure GPIO pins for SPI1 */
-  ret = ra_configgpio(GPIO_SPI1_SCK);
+  ret = ra_gpioconfig(GPIO_SPI1_SCK);
   if (ret < 0)
     {
       spierr("Failed to configure SPI1_SCK: %d\n", ret);
       return ret;
     }
 
-  ret = ra_configgpio(GPIO_SPI1_MOSI);
+  ret = ra_gpioconfig(GPIO_SPI1_MOSI);
   if (ret < 0)
     {
       spierr("Failed to configure SPI1_MOSI: %d\n", ret);
       return ret;
     }
 
-  ret = ra_configgpio(GPIO_SPI1_MISO);
+  ret = ra_gpioconfig(GPIO_SPI1_MISO);
   if (ret < 0)
     {
       spierr("Failed to configure SPI1_MISO: %d\n", ret);
@@ -1295,14 +1295,14 @@ int ra8e1_spi_gy912_init(void)
     }
 
   /* Configure Chip Select pins as GPIO outputs (active low) */
-  ret = ra_configgpio(GPIO_SPI1_CS0);  /* ICM20948 CS - P408 */
+  ret = ra_gpioconfig(GPIO_SPI1_CS0);  /* ICM20948 CS - P408 */
   if (ret < 0)
     {
       spierr("Failed to configure SPI1_CS0: %d\n", ret);
       return ret;
     }
 
-  ret = ra_configgpio(GPIO_SPI1_CS1);  /* BMP388 CS - P407 */
+  ret = ra_gpioconfig(GPIO_SPI1_CS1);  /* BMP388 CS - P407 */
   if (ret < 0)
     {
       spierr("Failed to configure SPI1_CS1: %d\n", ret);
@@ -1310,7 +1310,7 @@ int ra8e1_spi_gy912_init(void)
     }
 
   /* Configure Data Ready pin as input with pull-up */
-  ret = ra_configgpio(GPIO_IMU_DRDY);  /* P409 - ICM20948 Data Ready */
+  ret = ra_gpioconfig(GPIO_IMU_DRDY);  /* P409 - ICM20948 Data Ready */
   if (ret < 0)
     {
       spierr("Failed to configure IMU_DRDY: %d\n", ret);

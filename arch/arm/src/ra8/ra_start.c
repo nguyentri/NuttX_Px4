@@ -38,8 +38,8 @@
 #include "nvic.h"
 #include "chip.h"
 #include "ra_clock.h"
-#include "ra_lowputc.h"
 #include "ra_start.h"
+#include "ra_gpio.h"
 #include "hardware/ra_hardware.h"
 #include "hardware/ra_memorymap.h"
 
@@ -435,6 +435,50 @@ static volatile uint16_t g_register_protect_counters[4] = {0};
 /* Function prototype for nx_start */
 void nx_start(void);
 
+
+/****************************************************************************
+ * Name: ra_earlyserialgpioinit
+ *
+ * Description:
+ *   This performs pin initialization of the serial console.
+ *    * Full UART register configuration will be done in arm_earlyserialinit()
+ *
+ ****************************************************************************/
+
+static void ra_earlyserialgpioinit(void)
+{
+  /* Only GPIO configuration and module power-up
+   * Full SCI_B configuration is done later in arm_earlyserialinit()
+   * This avoids duplication between lowputc and serial driver initialization
+   */
+
+  /* Configure GPIO pins for console UART only */
+#if defined(CONFIG_SCI0_SERIAL_CONSOLE)
+  ra_gpioconfig(GPIO_SCI0_RX);
+  ra_gpioconfig(GPIO_SCI0_TX);
+#endif
+#if defined(CONFIG_SCI1_SERIAL_CONSOLE)
+  ra_gpioconfig(GPIO_SCI1_RX);
+  ra_gpioconfig(GPIO_SCI1_TX);
+#endif
+#if defined(CONFIG_SCI2_SERIAL_CONSOLE)
+  ra_gpioconfig(GPIO_SCI2_RX);
+  ra_gpioconfig(GPIO_SCI2_TX);
+#endif
+#if defined(CONFIG_SCI3_SERIAL_CONSOLE)
+  ra_gpioconfig(GPIO_SCI3_RX);
+  ra_gpioconfig(GPIO_SCI3_TX);
+#endif
+#if defined(CONFIG_SCI4_SERIAL_CONSOLE)
+  ra_gpioconfig(GPIO_SCI4_RX); */
+  ra_gpioconfig(GPIO_SCI4_TX); */
+#endif
+#if defined(CONFIG_SCI9_SERIAL_CONSOLE)
+  ra_gpioconfig(GPIO_SCI9_RX);
+  ra_gpioconfig(GPIO_SCI9_TX);
+#endif
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -508,7 +552,7 @@ int main(void){
 #ifdef USE_EARLYSERIALINIT
   /* Low-level Hardware Setup */
   /* Configure the uart pins for arm_earlyserialinit */
-  ra_lowsetup();
+  ra_earlyserialgpioinit();
 
   /* The 'A' character is not displayed because the UART hardware is not fully ready */
   //showprogress('A');

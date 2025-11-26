@@ -109,7 +109,7 @@ uint32_t board_button_initialize(void)
    * - Interrupt on falling edge (button press)
    * - Interrupt handler: button_handler_isr
    */
-  ret = ra_configgpio(GPIO_SW1);
+  ret = ra_gpioconfig(GPIO_SW1);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to configure button GPIO: %d\n", ret);

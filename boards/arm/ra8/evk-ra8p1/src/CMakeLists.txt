@@ -18,7 +18,7 @@
 #
 # ##############################################################################
 
-set(SRCS ra8p1_boot.c ra8p1_bringup.c ra8p1_app_examples.c)
+set(SRCS ra8p1_boot.c ra8p1_bringup.c ra8p1_gpio.c ra8p1_app_examples.c)
 
 if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS ra8p1_auto_leds.c)

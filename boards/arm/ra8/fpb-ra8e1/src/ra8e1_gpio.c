@@ -163,6 +163,7 @@ static int gpout_write(struct gpio_dev_s *dev, bool value)
  *
  * Description:
  *   Initialize GPIO drivers for use with /apps/examples/gpio
+ *   This function also initializes all board GPIO pins if not already done.
  *
  ****************************************************************************/
 
@@ -171,6 +172,15 @@ int ra8e1_gpio_initialize(void)
   int pincount = 0;
   int i;
   int ret = 0;
+
+  /* First, configure all board GPIO pins using centralized list */
+  const uint32_t gpio_list[] = RA8_GPIO_INIT_LIST;
+  ret = ra_gpioconfiglist(gpio_list, sizeof(gpio_list) / sizeof(uint32_t));
+  if (ret < 0)
+    {
+      gpioerr("ERROR: Failed to configure GPIO pins: %d\n", ret);
+      return ret;
+    }
 
 #if BOARD_NGPIOIN > 0
   for (i = 0; i < BOARD_NGPIOIN; i++, pincount++)
@@ -189,7 +199,7 @@ int ra8e1_gpio_initialize(void)
 
       /* Configure the pin that will be used as input */
 
-      ra_configgpio(g_gpioinputs[i]);
+      ra_gpioconfig(g_gpioinputs[i]);
     }
 #endif
 
@@ -210,10 +220,35 @@ int ra8e1_gpio_initialize(void)
 
       /* Configure the pin that will be used as output */
 
-      ra_configgpio(g_gpiooutputs[i]);
+      ra_gpioconfig(g_gpiooutputs[i]);
     }
 #endif
 
   return ret;
 }
+#else
+/****************************************************************************
+ * Name: ra8e1_gpio_initialize
+ *
+ * Description:
+ *   Initialize GPIO drivers for use with /apps/examples/gpio
+ *   This function also initializes all board GPIO pins if not already done.
+ *
+ ****************************************************************************/
+
+int ra8e1_gpio_initialize(void)
+{
+  int ret = 0;
+
+  /* First, configure all board GPIO pins using centralized list */
+  const uint32_t gpio_list[] = RA8_GPIO_INIT_LIST;
+  ret = ra_gpioconfiglist(gpio_list, sizeof(gpio_list) / sizeof(uint32_t));
+  if (ret < 0)
+    {
+      gpioerr("ERROR: Failed to configure GPIO pins: %d\n", ret);
+      return ret;
+    }
+    return ret;
+}
+
 #endif

@@ -46,7 +46,6 @@
 #include "arm_internal.h"
 #include "chip.h"
 #include "hardware/ra_memorymap.h"
-#include "ra_gpio.h"
 #include "ra_icu.h"
 #include "ra_mstp.h"
 #include "ra_i2c.h"
@@ -59,12 +58,6 @@
  ****************************************************************************/
 
 /* Debug ********************************************************************/
-
-#ifdef CONFIG_DEBUG_I2C_INFO
-#  define i2c_dumpgpio(m) ra_dumpgpio(m)
-#else
-#  define i2c_dumpgpio(m)
-#endif
 
 /* DTC timeout */
 #define DTC_TIMEOUT_MS          1000
@@ -185,10 +178,6 @@ static const struct ra_i2c_config_s ra_i2c0_config =
   .txi_elc      = RA_ELC_IIC0_TXI,  /* EVENT_IIC0_TXI */
   .tei_elc      = RA_ELC_IIC0_TEI,  /* EVENT_IIC0_TEI */
   .eri_elc      = RA_ELC_IIC0_ERI,  /* EVENT_IIC0_ERI */
-
-  /* Pin configuration  */
-  .scl_pin      = GPIO_SCL0_A_1,  /* P410 (SCL0) */ //GPIO_SCL0_B_1 /* P408 (SCL0) */
-  .sda_pin      = GPIO_SDA0_A_1,  /* P409 (SDA0) */ //GPIO_SDA0_B_1 /* P407 (SDA0) */
 };
 
 static struct ra_i2c_priv_s ra_i2c0_priv =
@@ -215,10 +204,6 @@ static const struct ra_i2c_config_s ra_i2c1_config =
   .txi_elc      = RA_ELC_IIC1_TXI,  /* EVENT_IIC1_TXI */
   .tei_elc      = RA_ELC_IIC1_TEI,  /* EVENT_IIC1_TEI */
   .eri_elc      = RA_ELC_IIC1_ERI,  /* EVENT_IIC1_ERI */
-
-  /* Pin configuration - default pins for I2C1 */
-  .scl_pin      = GPIO_SCL1_B_1,  /* P205 (SCL1) */ //GPIO_SCL1_A_1 /* P512 (SCL1) */
-  .sda_pin      = GPIO_SDA1_B_1,  /* P206 (SDA1) */ //GPIO_SDA1_A_1 /* P511 (SDA1) */
 };
 
 static struct ra_i2c_priv_s ra_i2c1_priv =
@@ -882,10 +867,6 @@ static int ra_i2c_init(struct ra_i2c_priv_s *priv)
 
   /* Enable I2C module clock */
   ra_mstp_start(config->mstp);
-
-  /* Configure I2C pins - TODO: Implement proper GPIO configuration */
-  /* ra_configgpio(config->scl_pin); */
-  /* ra_configgpio(config->sda_pin); */
 
   /* Reset I2C peripheral */
   ra_i2c_modifyreg(priv, R_IIC_ICCR1_OFFSET, 0, R_IIC_ICCR1_IICRST);

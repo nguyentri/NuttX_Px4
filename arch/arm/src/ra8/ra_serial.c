@@ -48,7 +48,6 @@
 #include "chip.h"
 #include "hardware/ra_memorymap.h"
 #include "ra_mstp.h"
-#include "ra_lowputc.h"
 #include "ra_icu.h"
 #include "ra_gpio.h"
 #include "ra_clock.h"

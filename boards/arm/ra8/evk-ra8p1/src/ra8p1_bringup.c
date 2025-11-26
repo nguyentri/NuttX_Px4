@@ -37,8 +37,7 @@
 #include <nuttx/timers/pwm.h>
 
 #include <arch/board/board.h>
-#include "ra_gpt.h"
-
+#include "arm_internal.h"
 #include "evk-ra8p1.h"
 
 /****************************************************************************
@@ -92,19 +91,8 @@ int ra8p1_bringup(void)
     }
 #endif
 
-
-#ifdef CONFIG_RTC_DRIVER
-  /* Initialize RTC driver */
-  ret = board_rtc_initialize();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize RTC: %d\n", ret);
-    }
-  else
-    {
-      syslog(LOG_INFO, "RTC initialized successfully\n");
-    }
-#endif
+  /* Configure all GPIO pins */
+  ra8p1_gpio_initialize();
 
 #ifdef HAVE_LEDS
   /* Initialize LED support */
@@ -121,22 +109,22 @@ int ra8p1_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_RA_GPIO
-  /* Initialize GPIO drivers */
-  ret = ra8p1_gpio_initialize();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize GPIO: %d\n", ret);
-    }
-  else
-    {
-      syslog(LOG_INFO, "GPIO drivers initialized successfully\n");
-    }
-#endif
-
 #ifdef CONFIG_ARCH_BUTTONS
   /* Initialize buttons */
   board_button_initialize();
+#endif
+
+#ifdef CONFIG_RTC_DRIVER
+  /* Initialize RTC driver */
+  ret = board_rtc_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize RTC: %d\n", ret);
+    }
+  else
+    {
+      syslog(LOG_INFO, "RTC initialized successfully\n");
+    }
 #endif
 
 #if defined(CONFIG_RA_I2C0) || defined(CONFIG_RA_I2C1)

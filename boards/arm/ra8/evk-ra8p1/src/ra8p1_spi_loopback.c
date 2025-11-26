@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/ra8/fpb-ra8p1/src/ra8p1_spi_loopback.c
+ * boards/arm/ra8/evk-ra8p1/src/ra8p1_spi_loopback.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -41,7 +41,6 @@
 #include <arch/board/board.h>
 #include "ra_spi.h"
 #include "ra_gpio.h"
-#include "fpb-ra8p1.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -87,115 +86,6 @@ struct spi_loopback_s
  ****************************************************************************/
 
 static struct spi_loopback_s g_spi_loopback;
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: ra_spi_select (strong override for loopback)
- *
- * Description:
- *   Enable/disable the SPI chip select for loopback test
- *   For loopback testing, CS is not used
- *
- ****************************************************************************/
-
-void ra_spi_select(struct spi_dev_s *dev, uint32_t devid, bool selected)
-{
-  /* No CS control needed for loopback testing */
-  /* MOSI is connected directly to MISO for each SPI controller */
-  UNUSED(dev);
-  UNUSED(devid);
-  UNUSED(selected);
-}
-
-/****************************************************************************
- * Name: ra_spi_status (strong override for loopback)
- *
- * Description:
- *   Return status information for loopback test
- *
- ****************************************************************************/
-
-uint8_t ra_spi_status(struct spi_dev_s *dev, uint32_t devid)
-{
-  /* For loopback test, device is always present */
-  UNUSED(dev);
-  UNUSED(devid);
-  return SPI_STATUS_PRESENT;
-}
-
-/****************************************************************************
- * Name: ra_spi_cmddata (strong override for loopback)
- *
- * Description:
- *   Control the SPI CMD/DATA GPIO for loopback test
- *
- ****************************************************************************/
-
-int ra_spi_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
-{
-  /* Loopback test doesn't use CMD/DATA line */
-  return 0;
-}
-
-/*
- * Provide a minimal fixed CS configuration for the loopback demo.
- * This will allow the SPI driver to pick up bits/mode/frequency
- * for each device without requiring board-specific code elsewhere.
- */
-const struct ra_spi_ext_dev_config_s g_loopback_cs[] =
-{
-  /* Device 0: SPI0 */
-  {
-    .devid = RA_SPI_BUS_0,
-    .max_frequency = SPI_FREQUENCY,
-    .mode = SPI_MODE,
-    .bits = 8,
-    .cs_gpio = 0,
-    .cs_type = RA_SPI_CS_CLK_SYS,
-    .ssl_select = 0,
-    .setup_delay = 0,
-    .hold_delay = 0,
-    .negation_delay = 0,
-    .active_low = true,
-    .name = "loopback-spi0",
-  },
-  /* Device 1: SPI1 */
-  {
-    .devid = RA_SPI_BUS_1,
-    .max_frequency = SPI_FREQUENCY,
-    .mode = SPI_MODE,
-    .bits = 8,
-    .cs_gpio = 0,
-    .cs_type = RA_SPI_CS_CLK_SYS,
-    .ssl_select = 0,
-    .setup_delay = 0,
-    .hold_delay = 0,
-    .negation_delay = 0,
-    .active_low = true,
-    .name = "loopback-spi1",
-  }
-};
-
-/* Strong implementation of ra_spi_get_dev_config used by the loopback demo.
- * Returns a pointer to the CS config for the given devid, or NULL if none.
- */
-const struct ra_spi_ext_dev_config_s *ra_spi_get_dev_config(struct spi_dev_s *dev, uint32_t devid)
-{
-  UNUSED(dev);
-
-  for (size_t i = 0; i < sizeof(g_loopback_cs) / sizeof(g_loopback_cs[0]); i++)
-    {
-      if (g_loopback_cs[i].devid == devid)
-        {
-          return &g_loopback_cs[i];
-        }
-    }
-
-  return NULL;
-}
 
 /****************************************************************************
  * Private Functions

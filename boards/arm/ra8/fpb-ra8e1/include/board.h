@@ -68,15 +68,15 @@
 #define GPIO_GPT4_A     GPIO_GTIOC4A_2         /* P302 - Motor 4 */
 
 /* I2C Pin Definitions */
-#define GPIO_I2C3_SDA   	GPIO_SDA3_MOSI3_TXD3_A /* P511 - Expansion I2C */
-#define GPIO_I2C3_SCL   	GPIO_SCL3_MISO3_RXD3_A /* P512 - Expansion I2C */
+#define GPIO_I2C3_SDA   	GPIO_TXD3_MOSI3_SDA3_A /* P511 - Expansion I2C */
+#define GPIO_I2C3_SCL   	GPIO_RXD3_MISO3_SCL3_A /* P512 - Expansion I2C */
 
 /* LED Pin Definitions */
 #define GPIO_LED1       GPIO_P404_OUTPUT_HIGH  /* P404 - LED1 */
 #define GPIO_LED2       GPIO_P405_OUTPUT_HIGH  /* P405 - LED2 */
 
 /* Button Pin Definitions */
-#define GPIO_SW1        	GPIO_IRQ13_P009        /* P009 - User Button */
+#define GPIO_SW1        	GPIO_IRQ13_P009_DS        /* P009 - User Button */
 
 /* IMU Data Ready Pin */
 #define GPIO_IMU_DRDY		GPIO_P409_INPUT_PULLUP /* P409 - ICM20948 Data Ready */
@@ -117,6 +117,30 @@
 #define LED_1_BIT    		(1 << LED_1)
 #define LED_2_BIT    		(1 << LED_2)
 
+/* GPIO initialization list pattern */
+#define RA8_GPIO_INIT_LIST { \
+  GPIO_SCI0_RX,     /* Telemetry RX */ \
+  GPIO_SCI0_TX,     /* Telemetry TX */ \
+  GPIO_SCI2_RX,     /* Console RX */ \
+  GPIO_SCI2_TX,     /* Console TX */ \
+  GPIO_SCI3_RX,     /* RC Input RX */ \
+  GPIO_SCI3_TX,     /* RC Input TX */ \
+  GPIO_SPI1_SCK,    /* SPI1 Clock */ \
+  GPIO_SPI1_MOSI,   /* SPI1 MOSI */ \
+  GPIO_SPI1_MISO,   /* SPI1 MISO */ \
+  GPIO_SPI1_CS0,    /* ICM20948 CS */ \
+  GPIO_SPI1_CS1,    /* BMP388 CS */ \
+  GPIO_GPT0_A,      /* Motor 2 PWM */ \
+  GPIO_GPT2_A,      /* Motor 3 PWM */ \
+  GPIO_GPT3_A,      /* Motor 1 PWM */ \
+  GPIO_GPT4_A,      /* Motor 4 PWM */ \
+  GPIO_I2C3_SDA,    /* Expansion I2C SDA */ \
+  GPIO_I2C3_SCL,    /* Expansion I2C SCL */ \
+  GPIO_LED1,        /* LED1 */ \
+  GPIO_LED2,        /* LED2 */ \
+  GPIO_SW1,         /* User Button */ \
+  GPIO_IMU_DRDY     /* IMU Data Ready */ \
+}
 
 /****************************************************************************
  * Public Function Prototypes

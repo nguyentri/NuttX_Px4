@@ -264,7 +264,7 @@ static int ra8e1_adc_setup(void)
 
   for (int i = 0; i < BOARD_ADC_CHANNELS; i++)
     {
-      ret = ra_configgpio(g_adc_channels[i].pinset);
+      ret = ra_gpioconfig(g_adc_channels[i].pinset);
       if (ret < 0)
         {
           aerr("ERROR: Failed to configure GPIO for ADC channel %d: %d\n",

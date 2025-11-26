@@ -85,8 +85,8 @@
 void board_autoled_initialize(void)
 {
     /* Configure LED GPIOs for output */
-    ra_configgpio(GPIO_LED1);
-    ra_configgpio(GPIO_LED2);
+    ra_gpioconfig(GPIO_LED1);
+    ra_gpioconfig(GPIO_LED2);
     ra_gpiowrite(GPIO_LED1, true);
     ra_gpiowrite(GPIO_LED2, true);
 }

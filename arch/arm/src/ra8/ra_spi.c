@@ -47,7 +47,6 @@
 #include "chip.h"
 #include "hardware/ra_memorymap.h"
 
-#include "ra_gpio.h"
 #include "ra_clock.h"
 #include "ra_dtc.h"
 #include "ra_mstp.h"
@@ -122,11 +121,6 @@ struct ra_spi_config_s
   int  tei_elc;            /* Even Link for Transfer end interrupt */
   int  eri_elc;            /* Even Link for Error interrupt */
   uint32_t mstpcrb_bit;   /* Module stop control bit */
-
-  /* Pin configuration - hardware specific */
-  gpio_pinset_t sck_pin;       /* SCK pin configuration */
-  gpio_pinset_t miso_pin;      /* MISO pin configuration */
-  gpio_pinset_t mosi_pin;      /* MOSI pin configuration */
 
   bool     master_mode;        /* true: master, false: slave */
   struct ra_spi_ext_dev_config_s *dev_config;  /* Array of external device configurations */
@@ -279,11 +273,6 @@ static const struct ra_spi_config_s ra_spi0_config =
 
   .mstpcrb_bit = R_MSTP_MSTPCRB_SPI0,
 
- /* Pin configuration - uses board-specific definitions from board.h */
-  .sck_pin     = GPIO_SPI0_SCK,     /* SPI Clock pin */
-  .miso_pin    = GPIO_SPI0_MISO,    /* SPI MISO pin */
-  .mosi_pin    = GPIO_SPI0_MOSI,    /* SPI MOSI pin */
-
   .master_mode = true,  /* Default to master mode */
 
   .dev_config = NULL,  /* Application-specific external device configurations will be initialized by the runtime */
@@ -316,11 +305,6 @@ static const struct ra_spi_config_s ra_spi1_config =
   .eri_elc     = RA_ELC_SPI1_ERI,
 
   .mstpcrb_bit = R_MSTP_MSTPCRB_SPI1,
-
-  /* Pin configuration - uses board-specific definitions from board.h */
-  .sck_pin     = GPIO_SPI1_SCK,     /* SPI Clock pin */
-  .miso_pin    = GPIO_SPI1_MISO,    /* SPI MISO pin */
-  .mosi_pin    = GPIO_SPI1_MOSI,    /* SPI MOSI pin */
 
   .master_mode = true,  /* Default to master mode */
 
@@ -1442,11 +1426,6 @@ static void ra_spi_bus_initialize(struct ra_spi_priv_s *priv)
   uint32_t spcmd0 = 0;
   uint32_t spdcr  = 0;
 
-  /* Configure GPIO pins for SPI */
-  ra_configgpio(priv->config->sck_pin);
-  ra_configgpio(priv->config->miso_pin);
-  ra_configgpio(priv->config->mosi_pin);
-
   /* Enable SPI module via MSTP */
 #if defined(CONFIG_RA_SPI0)
   if (priv->config->base == R_SPI_B_CH_BASE(0))
@@ -1782,11 +1761,7 @@ void weak_function ra_spi_select(struct spi_dev_s *dev, uint32_t devid,
     priv->devid = devid;
 
     /* Assert CS */
-    if (dev_config->cs_type == R_SPI_B_CS_GPIO)
-      {
-        DEBUGASSERT(dev_config->cs_gpio != 0);
-        ra_gpiowrite(dev_config->cs_gpio, !selected);
-      }
+    /* CS control is now handled at board level */
 }
 
 /****************************************************************************

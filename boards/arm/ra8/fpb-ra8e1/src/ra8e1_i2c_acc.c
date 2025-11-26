@@ -446,7 +446,7 @@ static int accel_setup_interrupt(void)
   int ret;
 
   /* Configure GPIO pin for interrupt */
-  ret = ra_configgpio(ACCEL_INT_GPIO);
+  ret = ra_gpioconfig(ACCEL_INT_GPIO);
   if (ret < 0)
     {
       _err("Failed to configure interrupt GPIO: %d\n", ret);

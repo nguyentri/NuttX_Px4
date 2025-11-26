@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/ra8/fpb-ra8p1/src/ra8p1_app_examples.c
+ * boards/arm/ra8/evk-ra8p1/src/ra8p1_app_examples.c
  *
  * Unified example wrappers that provide a single entry point
  * ra8p1_<app>_example() for each board example to simplify calls

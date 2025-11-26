@@ -74,6 +74,16 @@ int ra8p1_bringup(void);
 int ra8p1_app_examples(void);
 
 /****************************************************************************
+ * Name: ra8p1_gpio_initialize
+ *
+ * Description:
+ *   Initialize all board GPIO pins using centralized configuration
+ *
+ ****************************************************************************/
+
+int ra8p1_gpio_initialize(void);
+
+/****************************************************************************
  * Name: board_ra8p1_initialize
  *
  * Description:
@@ -109,7 +119,7 @@ int board_adc_initialize(void);
 #endif
 
 /****************************************************************************
- * RA8P1 driver interfaces for use by applications on the fpb-ra8p1 board
+ * RA8P1 driver interfaces for use by applications on the evk-ra8p1 board
  ****************************************************************************/
 
 #ifdef CONFIG_RA8P1_GPIO

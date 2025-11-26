@@ -37,8 +37,6 @@
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/i2c/i2c_slave.h>
 
-#include "ra_gpio.h"
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -63,10 +61,6 @@ struct ra_i2c_config_s
   uint32_t txi_elc;       /* TX event/ELC */
   uint32_t tei_elc;       /* TE event/ELC */
   uint32_t eri_elc;       /* ER event/ELC */
-
-  /* Pin configuration */
-  gpio_pinset_t scl_pin;       /* SCL pin configuration */
-  gpio_pinset_t sda_pin;       /* SDA pin configuration */
 };
 
 /* I2C Device Private Data */

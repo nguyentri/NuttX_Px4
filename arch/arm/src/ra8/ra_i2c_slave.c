@@ -149,10 +149,6 @@ static const struct ra_i2c_config_s ra_i2c0_slave_config =
   .tei_irq      = 0x37,  /* EVENT_IIC0_TEI */
   .eri_irq      = 0x38,  /* EVENT_IIC0_ERI */
   .mstpcrb_bit  = 1 << 24,   /* MSTPCRB bit for IIC0 */
-
-  /* Pin configuration */
-  .scl_pin      = (5 << 8) | 12,  /* P512 (SCL1) */
-  .sda_pin      = (5 << 8) | 11,  /* P511 (SDA1) */
 };
 
 static struct ra_i2c_slave_priv_s ra_i2c0_slave_priv =
@@ -179,10 +175,6 @@ static const struct ra_i2c_config_s ra_i2c1_slave_config =
   .tei_irq      = 0x3C,  /* EVENT_IIC1_TEI */
   .eri_irq      = 0x3D,  /* EVENT_IIC1_ERI */
   .mstpcrb_bit  = 1 << 23,   /* MSTPCRB bit for IIC1 */
-
-  /* Pin configuration */
-  .scl_pin      = (5 << 8) | 12,  /* P512 (SCL1) */
-  .sda_pin      = (5 << 8) | 11,  /* P511 (SDA1) */
 };
 
 static struct ra_i2c_slave_priv_s ra_i2c1_slave_priv =
@@ -390,13 +382,7 @@ static int ra_i2c_slave_init(struct ra_i2c_slave_priv_s *priv)
   uint32_t regval;
 
   /* Enable I2C module clock */
-  regval = getreg32(0x40036038);  /* MSTPCRB register */
-  regval &= ~config->mstpcrb_bit;
-  putreg32(regval, 0x40036038);
-
-  /* Configure I2C pins - TODO: Implement proper GPIO configuration */
-  /* ra_configgpio(config->scl_pin); */
-  /* ra_configgpio(config->sda_pin); */
+  ra_mstp_start(config->mstp);
 
   /* Reset I2C peripheral */
   ra_i2c_slave_modifyreg(priv, R_IIC_ICCR1_OFFSET, 0, R_IIC_ICCR1_IICRST);

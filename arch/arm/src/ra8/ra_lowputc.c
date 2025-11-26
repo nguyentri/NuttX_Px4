@@ -31,7 +31,6 @@
 #include <nuttx/spinlock.h>
 
 #include "arm_internal.h"
-#include "ra_lowputc.h"
 #include "ra_gpio.h"
 #include "chip.h"
 #include "ra_mstp.h"
@@ -244,48 +243,4 @@ int up_putc(int ch)
   arm_lowputc(ch);
 #endif
   return ch;
-}
-
-/****************************************************************************
- * Name: ra_lowsetup
- *
- * Description:
- *   This performs pin initialization of the serial console.
- *    * Full UART register configuration will be done in arm_earlyserialinit()
- *
- ****************************************************************************/
-
-void ra_lowsetup(void)
-{
-  /* Only GPIO configuration and module power-up
-   * Full SCI_B configuration is done later in arm_earlyserialinit()
-   * This avoids duplication between lowputc and serial driver initialization
-   */
-
-  /* Configure GPIO pins for console UART only */
-#if defined(CONFIG_RA_SCI0_UART)
-  ra_configgpio(GPIO_SCI0_RX);
-  ra_configgpio(GPIO_SCI0_TX);
-#endif
-#if defined(CONFIG_RA_SCI1_UART)
-  ra_configgpio(GPIO_SCI1_RX);
-  ra_configgpio(GPIO_SCI1_TX);
-#endif
-#if defined(CONFIG_RA_SCI2_UART)
-  ra_configgpio(GPIO_SCI2_RX);
-  ra_configgpio(GPIO_SCI2_TX);
-#endif
-#if defined(CONFIG_RA_SCI3_UART)
-  //ra_configgpio(GPIO_SCI3_RX);
-  //ra_configgpio(GPIO_SCI3_TX);
-#endif
-#if defined(CONFIG_RA_SCI4_UART)
-  /* TODO: Add proper GPIO pin configuration for SCI4 when pins are determined */
-  /* ra_configgpio(GPIO_SCI4_RX); */
-  /* ra_configgpio(GPIO_SCI4_TX); */
-#endif
-#if defined(CONFIG_RA_SCI9_UART)
-  ra_configgpio(GPIO_SCI9_RX);
-  ra_configgpio(GPIO_SCI9_TX);
-#endif
 }

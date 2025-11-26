@@ -74,6 +74,19 @@ int ra8e1_bringup(void);
 int ra8e1_app_examples(void);
 
 /****************************************************************************
+ * Name: ra8e1_gpio_initialize
+ *
+ * Description:
+ *   Initialize GPIO pins and drivers for use with /apps/examples/gpio.
+ *   This function configures all board GPIO pins using the centralized
+ *   RA8_GPIO_INIT_LIST and registers GPIO drivers if CONFIG_DEV_GPIO is
+ *   enabled.
+ *
+ ****************************************************************************/
+
+int ra8e1_gpio_initialize(void);
+
+/****************************************************************************
  * Name: ra8e1_boardinitialize
  *
  * Description:
@@ -106,14 +119,6 @@ void board_autoled_off(int led);
 
 #ifdef CONFIG_RTC_DRIVER
 int board_rtc_initialize(void);
-#endif
-
-/****************************************************************************
- * RA8E1 driver interfaces for use by applications on the fpb-ra8e1 board
- ****************************************************************************/
-
-#ifdef CONFIG_RA8E1_GPIO
-int ra8e1_gpio_initialize(void);
 #endif
 
 /****************************************************************************

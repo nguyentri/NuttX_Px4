@@ -44,7 +44,6 @@
 #include "arm_internal.h"
 #include "chip.h"
 #include "hardware/ra_memorymap.h"
-#include "ra_gpio.h"
 #include "ra_mstp.h"
 #include "ra_icu.h"
 #include "ra_adc.h"
@@ -80,7 +79,6 @@
 struct ra8_adc_chan_s
 {
   uint8_t channel;                    /* ADC channel number */
-  gpio_pinset_t pinmux;               /* Pin multiplexing configuration */
 };
 
 /* RA8 ADC private data structure */
@@ -175,11 +173,9 @@ static const struct ra8_adc_chan_s g_adc0_channels[] =
 {
   {
     .channel = RA_ADC_CHANNEL_AN000,    /* Battery voltage (P004) */
-    .pinmux  = GPIO_P004_ANALOG,
   },
   {
     .channel = RA_ADC_CHANNEL_AN001,    /* Reserved AN001 (P003) - Battery current AN104 mapped differently */
-    .pinmux  = GPIO_P003_ANALOG,
   },
   /* Add more channels as needed */
 };
@@ -191,7 +187,6 @@ static const struct ra8_adc_chan_s g_adc1_channels[] =
 {
   {
     .channel = RA_ADC_CHANNEL_AN104,    /* Battery current (P003) mapped to ADC1 */
-    .pinmux  = GPIO_P005_ANALOG,
   },
   /* Add more ADC1 channels as needed */
 };
@@ -821,17 +816,7 @@ FAR struct adc_dev_s *ra8_adc_initialize(int intf, uint32_t chanlist,
     }
 #endif
 
-  /* Configure pins for enabled channels */
-
-  for (int i = 0; i < num_channels; i++)
-    {
-      if (chanlist & ADC_CHANNEL_MASK(channels[i].channel))
-        {
-          ra_configgpio(channels[i].pinmux);
-          ainfo("ADC%d: Configured pin for channel %d\n",
-                intf, channels[i].channel);
-        }
-    }
+  /* GPIO configuration for ADC channels is handled at board level */
 
   ainfo("ADC%d initialization complete\n", intf);
   return dev;

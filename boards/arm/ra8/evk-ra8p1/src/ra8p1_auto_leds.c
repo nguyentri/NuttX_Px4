@@ -82,9 +82,7 @@
 
 void board_autoled_initialize(void)
 {
-  /* Configure LED GPIOs for output */
-  ra_configgpio(GPIO_LED1);
-  ra_configgpio(GPIO_LED2);
+  /* LED GPIOs are configured by ra_gpioconfiglist() in board bringup */
 }
 
 /****************************************************************************

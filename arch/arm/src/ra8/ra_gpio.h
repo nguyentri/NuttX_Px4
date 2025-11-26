@@ -127,14 +127,14 @@ typedef uint32_t gpio_pinset_t;
 
 
 /****************************************************************************
- * Name: ra_configgpio
+ * Name: ra_gpioconfig
  *
  * Description:
  *   Configure a GPIO pin based on bit-encoded description of the pin.
  *
  ****************************************************************************/
 
-int ra_configgpio(gpio_pinset_t cfgset);
+int ra_gpioconfig(gpio_pinset_t cfgset);
 
 /****************************************************************************
  * Name: ra_gpiowrite
@@ -157,7 +157,7 @@ void ra_gpiowrite(gpio_pinset_t pinset, bool value);
 bool ra_gpioread(gpio_pinset_t pinset);
 
 /****************************************************************************
- * Name: ra_gpio_set_pullup
+ * Name: ra_gpiosetpullup
  *
  * Description:
  *   Enable/disable pull-up resistor on GPIO pin
@@ -168,10 +168,10 @@ bool ra_gpioread(gpio_pinset_t pinset);
  *
  ****************************************************************************/
 
-void ra_gpio_set_pullup(gpio_pinset_t pinset, bool enable);
+void ra_gpiosetpullup(gpio_pinset_t pinset, bool enable);
 
 /****************************************************************************
- * Name: ra_gpio_set_drive_strength
+ * Name: ra_gpiosetdrivestrength
  *
  * Description:
  *   Set GPIO pin drive strength
@@ -182,7 +182,7 @@ void ra_gpio_set_pullup(gpio_pinset_t pinset, bool enable);
  *
  ****************************************************************************/
 
-void ra_gpio_set_drive_strength(gpio_pinset_t pinset, uint8_t strength);
+void ra_gpiosetdrivestrength(gpio_pinset_t pinset, uint8_t strength);
 
 /****************************************************************************
  * Name: ra_gpiosetevent
@@ -205,6 +205,23 @@ void ra_gpio_set_drive_strength(gpio_pinset_t pinset, uint8_t strength);
 
 int ra_gpiosetevent(uint32_t pinset, bool rising, bool falling,
                     bool event, xcpt_t func, void *arg);
+
+/****************************************************************************
+ * Name: ra_gpioconfiglist
+ *
+ * Description:
+ *   Configure a list of GPIO pins based on an array of encoded pin
+ *   configurations.
+ *
+ * Input Parameters:
+ *   cfgset - Pointer to an array of GPIO configuration encodings
+ *   count  - Number of entries in the cfgset array
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+int ra_gpioconfiglist(const gpio_pinset_t *cfgset, size_t count);
 
 #undef EXTERN
 #if defined(__cplusplus)
