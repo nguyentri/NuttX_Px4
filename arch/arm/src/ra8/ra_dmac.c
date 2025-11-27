@@ -79,7 +79,7 @@ typedef struct ra_dmac_ctrl_s
  ****************************************************************************/
 
 /* DMAC channel control blocks */
-static ra_dmac_ctrl_t g_dmac_channels[RA_DMAC_NUM_CHANNELS];
+static ra_dmac_ctrl_t g_dmac_channels[DMAC_MAX_CHANNELS];
 
 /* DMAC module initialized flag */
 static bool g_dmac_initialized = false;
@@ -154,29 +154,29 @@ static int ra_dmac_setup_channel(ra_dmac_ctrl_t *ctrl)
   uint32_t dmint = 0;
 
   /* Setup Transfer Mode Register (DMTMD) */
-  dmtmd |= (config->trigger << RA_DMAC_DMTMD_DCTG_SHIFT) & RA_DMAC_DMTMD_DCTG_MASK;
-  dmtmd |= (config->size << RA_DMAC_DMTMD_SZ_SHIFT) & RA_DMAC_DMTMD_SZ_MASK;
-  dmtmd |= (config->mode << RA_DMAC_DMTMD_DTS_SHIFT) & RA_DMAC_DMTMD_DTS_MASK;
-  dmtmd |= (config->mode << RA_DMAC_DMTMD_MD_SHIFT) & RA_DMAC_DMTMD_MD_MASK;
+  dmtmd |= (config->trigger << R_DMAC_DMTMD_DCTG_SHIFT) & R_DMAC_DMTMD_DCTG_MASK;
+  dmtmd |= (config->size << R_DMAC_DMTMD_SZ_SHIFT) & R_DMAC_DMTMD_SZ_MASK;
+  dmtmd |= (config->mode << R_DMAC_DMTMD_DTS_SHIFT) & R_DMAC_DMTMD_DTS_MASK;
+  dmtmd |= (config->mode << R_DMAC_DMTMD_MD_SHIFT) & R_DMAC_DMTMD_MD_MASK;
 
   /* Setup Address Mode Register (DMAMD) */
-  dmamd |= (config->dest_addr_mode << RA_DMAC_DMAMD_DM_SHIFT) & RA_DMAC_DMAMD_DM_MASK;
-  dmamd |= (config->src_addr_mode << RA_DMAC_DMAMD_SM_SHIFT) & RA_DMAC_DMAMD_SM_MASK;
+  dmamd |= (config->dest_addr_mode << R_DMAC_DMAMD_DM_SHIFT) & R_DMAC_DMAMD_DM_MASK;
+  dmamd |= (config->src_addr_mode << R_DMAC_DMAMD_SM_SHIFT) & R_DMAC_DMAMD_SM_MASK;
 
   /* Setup Interrupt Setting Register (DMINT) */
   if (config->callback != NULL)
     {
-      dmint |= RA_DMAC_DMINT_DTIE;  /* Enable transfer complete interrupt */
+      dmint |= R_DMAC_DMINT_DTIE;  /* Enable transfer complete interrupt */
     }
 
   /* Write registers */
-  putreg32(config->src_addr, RA_DMAC_DMSAR(channel));
-  putreg32(config->dest_addr, RA_DMAC_DMDAR(channel));
-  putreg32(config->transfer_count, RA_DMAC_DMCRA(channel));
-  putreg32(config->block_count, RA_DMAC_DMCRB(channel));
-  putreg32(dmtmd, RA_DMAC_DMTMD(channel));
-  putreg32(dmamd, RA_DMAC_DMAMD(channel));
-  putreg8(dmint, RA_DMAC_DMINT(channel));
+  putreg32(config->src_addr, R_DMAC_DMSAR(channel));
+  putreg32(config->dest_addr, R_DMAC_DMDAR(channel));
+  putreg32(config->transfer_count, R_DMAC_DMCRA(channel));
+  putreg32(config->block_count, R_DMAC_DMCRB(channel));
+  putreg32(dmtmd, R_DMAC_DMTMD(channel));
+  putreg32(dmamd, R_DMAC_DMAMD(channel));
+  putreg8(dmint, R_DMAC_DMINT(channel));
 
   return OK;
 }
@@ -200,12 +200,12 @@ static int ra_dmac_interrupt_handler(int irq, void *context, void *arg)
     }
 
   /* Read and clear status */
-  status = getreg32(RA_DMAC_DMSTS(ctrl->channel));
+  status = getreg32(R_DMAC_DMSTS(ctrl->channel));
 
-  if (status & RA_DMAC_DMSTS_DTIF)
+  if (status & R_DMAC_DMSTS_DTIF)
     {
       /* Clear interrupt flag */
-      putreg32(status | RA_DMAC_DMSTS_DTIF, RA_DMAC_DMSTS(ctrl->channel));
+      putreg32(status | R_DMAC_DMSTS_DTIF, R_DMAC_DMSTS(ctrl->channel));
 
       /* Call user callback */
       if (ctrl->config && ctrl->config->callback)
@@ -230,7 +230,7 @@ static int ra_dmac_find_free_channel(void)
 {
   int i;
 
-  for (i = 0; i < RA_DMAC_NUM_CHANNELS; i++)
+  for (i = 0; i < DMAC_MAX_CHANNELS; i++)
     {
       if (!g_dmac_channels[i].in_use)
         {
@@ -263,7 +263,7 @@ int ra_dmac_initialize(void)
     }
 
   /* Initialize channel control blocks */
-  for (i = 0; i < RA_DMAC_NUM_CHANNELS; i++)
+  for (i = 0; i < DMAC_MAX_CHANNELS; i++)
     {
       memset(&g_dmac_channels[i], 0, sizeof(ra_dmac_ctrl_t));
       g_dmac_channels[i].channel = i;
@@ -408,7 +408,7 @@ int ra_dmac_enable(ra_dmac_handle_t handle)
     }
 
   /* Enable the channel */
-  putreg32(1 << ctrl->channel, RA_DMAC_DMAST);
+  putreg32(1 << ctrl->channel, R_DMA_DMAST);
 
   ctrl->enabled = true;
 
@@ -434,7 +434,7 @@ int ra_dmac_disable(ra_dmac_handle_t handle)
     }
 
   /* Disable the channel first */
-  putreg32(1 << ctrl->channel, RA_DMAC_DMAST);
+  putreg32(1 << ctrl->channel, R_DMA_DMAST);
 
   /* Disable and detach interrupts if assigned */
   if (ctrl->irq_end >= 0)
@@ -477,7 +477,7 @@ int ra_dmac_software_start(ra_dmac_handle_t handle)
     }
 
   /* Software start request */
-  putreg32(RA_DMAC_DMREQ_SWREQ, RA_DMAC_DMREQ(ctrl->channel));
+  putreg32(R_DMAC_DMREQ_SWREQ, R_DMAC_DMREQ(ctrl->channel));
 
   dmainfo("DMAC channel %d software start\n", ctrl->channel);
   return OK;
@@ -509,9 +509,9 @@ int ra_dmac_reset(ra_dmac_handle_t handle, uint32_t src_addr,
     }
 
   /* Update registers */
-  putreg32(src_addr, RA_DMAC_DMSAR(ctrl->channel));
-  putreg32(dest_addr, RA_DMAC_DMDAR(ctrl->channel));
-  putreg32(transfer_count, RA_DMAC_DMCRA(ctrl->channel));
+  putreg32(src_addr, R_DMAC_DMSAR(ctrl->channel));
+  putreg32(dest_addr, R_DMAC_DMDAR(ctrl->channel));
+  putreg32(transfer_count, R_DMAC_DMCRA(ctrl->channel));
 
   dmainfo("DMAC channel %d reset: src=0x%08lx, dest=0x%08lx, count=%ld\n",
          ctrl->channel, src_addr, dest_addr, transfer_count);
@@ -574,5 +574,5 @@ uint32_t ra_dmac_get_remaining_count(ra_dmac_handle_t handle)
       return 0;
     }
 
-  return getreg32(RA_DMAC_DMCRA(ctrl->channel));
+  return getreg32(R_DMAC_DMCRA(ctrl->channel));
 }

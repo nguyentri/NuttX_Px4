@@ -48,8 +48,13 @@
 #define FLASH_TIMEOUT_MS                10000
 #define FLASH_KEY_CODE                  0x0000FFFFU
 
-/* Return codes */
-#define OK                              0
+/* FACI FLASH command codes (placeholders - actual command codes from the
+ * RA device ma5nual should be used. These values are provided to allow
+ * compilation and can be adapted to the correct opcodes.)
+ */
+#define FLASH_CMD_BLOCK_ERASE           0x0080
+#define FLASH_CMD_PROGRAM               0x0010
+#define FLASH_CMD_STATUS_CLEAR          0x0050                          0
 
 /****************************************************************************
  * Private Types
@@ -145,8 +150,8 @@ static int ra_flash_wait_ready(void)
 
   while (timeout > 0)
     {
-      status = getreg32(R_FLASH_FSTATR);
-      if (status & FLASH_FSTATR_FRDY)
+      status = getreg32(R_FACI_FSTATR);
+      if (status & R_FACI_FSTATR_FRDY)
         {
           return OK;
         }
@@ -178,11 +183,11 @@ static int ra_flash_enter_pe_mode(bool data_flash)
 
   /* Set entry bit based on flash type */
 
-  entry_bit = data_flash ? FLASH_FENTRYR_FENTRYD : FLASH_FENTRYR_FENTRYC;
+  entry_bit = data_flash ? R_FACI_FENTRYR_FENTRYD : R_FACI_FENTRYR_FENTRYC;
 
   /* Enter P/E mode */
 
-  putreg32(FLASH_KEY_CODE | entry_bit, R_FLASH_FENTRYR);
+  putreg32(FLASH_KEY_CODE | entry_bit, R_FACI_FENTRYR);
 
   /* Wait for entry to complete */
 
@@ -205,7 +210,7 @@ static int ra_flash_exit_pe_mode(bool data_flash)
 
   /* Exit P/E mode */
 
-  putreg32(FLASH_KEY_CODE, R_FLASH_FENTRYR);
+  putreg32(FLASH_KEY_CODE, R_FACI_FENTRYR);
 
   /* Wait for exit to complete */
 
@@ -236,7 +241,7 @@ static int ra_flash_erase_block(struct ra_flash_dev_s *priv, uint32_t addr)
 
   /* Set erase address */
 
-  putreg32(addr, R_FLASH_FSADDR);
+  putreg32(addr, R_FACI_FSADDR);
 
   /* Issue erase command */
 
@@ -252,8 +257,8 @@ static int ra_flash_erase_block(struct ra_flash_dev_s *priv, uint32_t addr)
 
   /* Check for errors */
 
-  uint32_t status = getreg32(R_FLASH_FSTATR);
-  if (status & (FLASH_FSTATR_ILGLERR | FLASH_FSTATR_ERSERR))
+  uint32_t status = getreg32(R_FACI_FSTATR);
+  if (status & (R_FACI_FSTATR_ILGLERR | R_FACI_FSTATR_ERSERR))
     {
       ferr("Flash erase error: 0x%08" PRIx32 "\n", status);
       ret = -EIO;
@@ -286,7 +291,7 @@ static int ra_flash_program_page(struct ra_flash_dev_s *priv, uint32_t addr,
 
   /* Set program address */
 
-  putreg32(addr, R_FLASH_FSADDR);
+  putreg32(addr, R_FACI_FSADDR);
 
   /* Issue program command */
 
@@ -301,7 +306,7 @@ static int ra_flash_program_page(struct ra_flash_dev_s *priv, uint32_t addr,
 
       /* Wait for buffer to be ready */
 
-      while ((getreg32(R_FLASH_FSTATR) & FLASH_FSTATR_DBFULL) != 0)
+      while ((getreg32(R_FACI_FSTATR) & R_FACI_FSTATR_DBFULL) != 0)
         {
           /* Wait */
         }
@@ -321,8 +326,8 @@ static int ra_flash_program_page(struct ra_flash_dev_s *priv, uint32_t addr,
 
   /* Check for errors */
 
-  uint32_t status = getreg32(R_FLASH_FSTATR);
-  if (status & (FLASH_FSTATR_ILGLERR | FLASH_FSTATR_PRGERR))
+  uint32_t status = getreg32(R_FACI_FSTATR);
+  if (status & (R_FACI_FSTATR_ILGLERR | R_FACI_FSTATR_PRGERR))
     {
       ferr("Flash program error: 0x%08" PRIx32 "\n", status);
       ret = -EIO;
@@ -589,7 +594,7 @@ struct mtd_dev_s *ra_flash_initialize(bool data_flash)
 
   /* Clear any error flags */
 
-  putreg32(FLASH_CMD_STATUS_CLEAR, R_FLASH_FCMDR);
+  putreg32(FLASH_CMD_STATUS_CLEAR, R_FACI_FCMDR);
 
   return (struct mtd_dev_s *)priv;
 }

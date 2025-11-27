@@ -49,6 +49,38 @@
  * Public Types
  ****************************************************************************/
 
+/* DMAC Transfer Mode */
+typedef enum
+{
+  RA_DMAC_MODE_NORMAL = 0,  /* Normal mode */
+  RA_DMAC_MODE_REPEAT,      /* Repeat mode */
+  RA_DMAC_MODE_BLOCK        /* Block mode */
+} ra_dmac_mode_t;
+
+/* DMAC Transfer Size */
+typedef enum
+{
+  RA_DMAC_SIZE_8BIT = 0,    /* 8-bit transfer */
+  RA_DMAC_SIZE_16BIT,       /* 16-bit transfer */
+  RA_DMAC_SIZE_32BIT        /* 32-bit transfer */
+} ra_dmac_size_t;
+
+/* DMAC Address Mode */
+typedef enum
+{
+  RA_DMAC_ADDR_FIXED = 0,   /* Fixed address */
+  RA_DMAC_ADDR_OFFSET,      /* Offset address */
+  RA_DMAC_ADDR_INCR,        /* Increment address */
+  RA_DMAC_ADDR_DECR         /* Decrement address */
+} ra_dmac_addr_mode_t;
+
+/* DMAC Trigger Mode */
+typedef enum
+{
+  RA_DMAC_TRIGGER_SW = 0,   /* Software trigger */
+  RA_DMAC_TRIGGER_HW        /* Hardware trigger */
+} ra_dmac_trigger_t;
+
 /* Forward declaration */
 typedef void *ra_dmac_handle_t;
 

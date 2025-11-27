@@ -51,6 +51,7 @@
 #include "ra_dtc.h"
 #include "ra_mstp.h"
 #include "ra_spi.h"
+#include "ra_icu.h"
 
 #ifdef CONFIG_RA_SPI
 
