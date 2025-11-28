@@ -35,8 +35,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-
-
 /****************************************************************************
  * UART/SCI Pin Definitions
  ****************************************************************************/
@@ -57,23 +55,25 @@
  * SPI Pin Definitions
  ****************************************************************************/
 
-/* SPI0 (Pmod 2): P601=RSPCKB, P600=MISOB (shared), P603=MOSIB, P604=SSLB0 */
+/* SPI0 (Pmod 2): P601=RSPCKB, P602=MISOB, P603=MOSIB, P604=SSLB0 */
+/* Map to RA8P1 pinmap entries: P601..P604 -> PORT6 PIN1..4 where available */
 #define GPIO_SPI0_SCK   GPIO_RSPCKA_B_1        /* P601 - Pmod 2 SCK (pin 4) */
-#define GPIO_SPI0_MISO  GPIO_MISO2_B_1         /* P602 - Pmod 2 MISO (pin 3, shared with RXD0) */
-#define GPIO_SPI0_MOSI  GPIO_MOSI2_B_1         /* P603 - Pmod 2 MOSI (pin 2, shared with TXD0) */
-#define GPIO_SPI0_CS0   GPIO_SSLE2_A_1         /* P604 - Pmod 2 CS (pin 1) */
+#define GPIO_SPI0_MISO  GPIO_MISO0_B_1         /* P602 - Pmod 2 MISO (pin 3, shared with RXD0) */
+#define GPIO_SPI0_MOSI  GPIO_MOSI0_B_2         /* P603 - Pmod 2 MOSI (pin 2, shared with TXD0) */
+#define GPIO_SPI0_CS0   GPIO_SSLB0_A_1         /* P604 - Pmod 2 CS (pin 1) */
 
 /* SPI1 (Pmod 1): P803=SCK2, P802=MISO2, P801=MOSI2, P804=SS2 */
-#define GPIO_SPI1_SCK   GPIO_RSPCKA_C_1      /* P803 - Pmod 1 SCK (pin 4) */
-#define GPIO_SPI1_MISO  GPIO_MISO2_A_1       /* P802 - Pmod 1 MISO (pin 3, shared with RXD2) */
-#define GPIO_SPI1_MOSI  GPIO_MOSI2_A_1       /* P801 - Pmod 1 MOSI (pin 2, shared with TXD2) */
-#define GPIO_SPI1_CS0   GPIO_SSL2_A_1        /* P804 - Pmod 1 CS (pin 1) */
+#define GPIO_SPI1_SCK   GPIO_RSPCKA_C_1        /* P803 - Pmod 1 SCK (pin 4) */
+#define GPIO_SPI1_MISO  GPIO_MISO2_A_1         /* P802 - Pmod 1 MISO (pin 3, shared with RXD2) */
+#define GPIO_SPI1_MOSI  GPIO_MOSI2_A_1         /* P801 - Pmod 1 MOSI (pin 2, shared with TXD2) */
+#define GPIO_SPI1_CS0   GPIO_SSLE2_A_1         /* P804 - Pmod 1 CS (pin 1) */
 
 /* Arduino SPI (P100=MISOB, P101=MOSIB, P102=RSPCKB, P103=SSLB0) */
-#define GPIO_ARDUINO_SPI_SCK   GPIO_RSPCKB_2      /* P102 - Arduino D13 */
-#define GPIO_ARDUINO_SPI_MISO  GPIO_MISOB_2       /* P100 - Arduino D12 */
-#define GPIO_ARDUINO_SPI_MOSI  GPIO_MOSIB_2       /* P101 - Arduino D11 */
-#define GPIO_ARDUINO_SPI_CS0   GPIO_SSLB0_B_1     /* P103 - Arduino D10 */
+#define GPIO_ARDUINO_SPI_SCK   GPIO_RSPCKA_B_1      /* P102 - Arduino D13 */
+#define GPIO_ARDUINO_SPI_MISO  GPIO_MISOB_A_1       /* P100 - Arduino D12 */
+#define GPIO_ARDUINO_SPI_MOSI  GPIO_MOSIB_A_1       /* P101 - Arduino D11 */
+#define GPIO_ARDUINO_SPI_CS0   GPIO_SSLB0_A_1       /* P103 - Arduino D10 */
+#define GPIO_ARDUINO_SPI_CS1   GPIO_P110_OUTPUT_HIGH    /* P110 - repurposed for another CS */
 
 /* mikroBUS SPI (same as Arduino: P100-P103) */
 #define GPIO_MIKROBUS_SPI_SCK   GPIO_ARDUINO_SPI_SCK    /* P102 */
@@ -87,35 +87,35 @@
 
 /* GPT Channel A Output Pin Definitions (GTIOCA) */
 #define GPIO_GPT0_A     GPIO_GTIOC0A_1      /* P211 - GPT0 Channel A */
-#define GPIO_GPT1_A     GPIO_GTIOC10A_1     /* P109 - Arduino D9 / GPT10 */
-#define GPIO_GPT2_A     GPIO_GTIOC11A_1     /* P711 - GPT11 */
-#define GPIO_GPT3_A     GPIO_GTIOC12A_1     /* P708 - GPT12 */
-#define GPIO_GPT4_A     GPIO_GTIOC13A_1     /* P502 - GPT13 */
-#define GPIO_GPT5_A     GPIO_GTIOC14A_1     /* P511 - GPT14 */
-#define GPIO_GPT6_A     GPIO_GTIOC15A_1     /* P715 - GPT15 */
-#define GPIO_GPT7_A     GPIO_GTIOC16A_1     /* P611 - GPT16 */
-#define GPIO_GPT8_A     GPIO_GTIOC17A_1     /* P609 - GPT17 */
-#define GPIO_GPT9_A     GPIO_GTIOC30A_1     /* P112 - GPT30 */
-#define GPIO_GPT10_A    GPIO_GTIOC31A_1     /* P813 - GPT31 */
-#define GPIO_GPT11_A    GPIO_GTIOC32A_1     /* P904 - GPT32 */
-#define GPIO_GPT12_A    GPIO_GTIOC33A_1     /* P905 - GPT33 */
-#define GPIO_GPT13_A    GPIO_GTIOC34A_1     /* P814 - GPT34 */
+#define GPIO_GPT1_A     GPIO_GTIOC1A_1      /* P105 - Arduino D6 / GPT1A */
+#define GPIO_GPT2_A     GPIO_GTIOC2A_1      /* P103 - Arduino D10 / GPT2A */
+#define GPIO_GPT3_A     GPIO_GTIOC3A_1      /* P300 - GPT3 */
+#define GPIO_GPT4_A     GPIO_GTIOC4A_1      /* P205 - GPT4 */
+#define GPIO_GPT5_A     GPIO_GTIOC5A_1      /* P115 - GPT5 */
+#define GPIO_GPT6_A     GPIO_GTIOC6A_1      /* P400 - GPT6 */
+#define GPIO_GPT7_A     GPIO_GTIOC7A_1      /* P304 - GPT7 */
+#define GPIO_GPT8_A     GPIO_GTIOC8A_1      /* P101 - Arduino D11 / GPT8A */
+#define GPIO_GPT9_A     GPIO_GTIOC9A_1      /* P111 - GPT9 */
+#define GPIO_GPT10_A    GPIO_GTIOC10A_2     /* P810 - Arduino D4 / mikroBUS PWM */
+#define GPIO_GPT11_A    GPIO_GTIOC11A_1     /* P711 - GPT11 */
+#define GPIO_GPT12_A    GPIO_GTIOC12A_1     /* P501 - GPT12 */
+#define GPIO_GPT13_A    GPIO_GTIOC13A_1     /* P515 - GPT13 */
 
 /* GPT Channel B Output Pin Definitions (GTIOCB) */
 #define GPIO_GPT0_B     GPIO_GTIOC0B_1      /* P210 - GPT0 Channel B */
-#define GPIO_GPT1_B     GPIO_GTIOC10B_1     /* P108 - GPT10 */
-#define GPIO_GPT2_B     GPIO_GTIOC11B_1     /* P710 - GPT11 */
-#define GPIO_GPT3_B     GPIO_GTIOC12B_1     /* P709 - GPT12 */
-#define GPIO_GPT4_B     GPIO_GTIOC13B_1     /* P501 - GPT13 */
-#define GPIO_GPT5_B     GPIO_GTIOC14B_1     /* P510 - GPT14 */
-#define GPIO_GPT6_B     GPIO_GTIOC15B_1     /* P714 - GPT15 */
-#define GPIO_GPT7_B     GPIO_GTIOC16B_1     /* P610 - GPT16 */
-#define GPIO_GPT8_B     GPIO_GTIOC17B_1     /* P608 - GPT17 */
-#define GPIO_GPT9_B     GPIO_GTIOC30B_1     /* P111 - GPT30 */
-#define GPIO_GPT10_B    GPIO_GTIOC31B_1     /* P812 - GPT31 */
-#define GPIO_GPT11_B    GPIO_GTIOC32B_1     /* P906 - GPT32 */
-#define GPIO_GPT12_B    GPIO_GTIOC33B_1     /* P907 - GPT33 */
-#define GPIO_GPT13_B    GPIO_GTIOC34B_1     /* P815 - GPT34 */
+#define GPIO_GPT1_B     GPIO_GTIOC1B_1      /* P104 - Arduino D5 / GPT1B */
+#define GPIO_GPT2_B     GPIO_GTIOC2B_1      /* P102 - Arduino D13 / GPT2B */
+#define GPIO_GPT3_B     GPIO_GTIOC3B_1      /* P112 - GPT3 */
+#define GPIO_GPT4_B     GPIO_GTIOC4B_1      /* P301 - GPT4 */
+#define GPIO_GPT5_B     GPIO_GTIOC5B_1      /* P609 - GPT5 */
+#define GPIO_GPT6_B     GPIO_GTIOC6B_1      /* P401 - GPT6 */
+#define GPIO_GPT7_B     GPIO_GTIOC7B_1      /* P303 - GPT7 */
+#define GPIO_GPT8_B     GPIO_GTIOC8B_1      /* P100 - Arduino D12 / GPT8B */
+#define GPIO_GPT9_B     GPIO_GTIOC9B_1      /* P110 - Arduino D9 / GPT9B */
+#define GPIO_GPT10_B    GPIO_GTIOC10B_2     /* P811 - Arduino D3 / GPT10B */
+#define GPIO_GPT11_B    GPIO_GTIOC11B_1     /* P710 - GPT11 */
+#define GPIO_GPT12_B    GPIO_GTIOC12B_1     /* P502 - GPT12 */
+#define GPIO_GPT13_B    GPIO_GTIOC13B_2     /* P514 - GPT13 */
 
 /* Arduino PWM pins (GPT-based) */
 #define GPIO_ARDUINO_D3_PWM   GPIO_GTIOC10B_2   /* P811 - Arduino D3 / GPT10B */
@@ -199,7 +199,6 @@
 /* User Switches (from board.csv) */
 #define GPIO_USER_SW1         GPIO_IRQ13_P009_DS       /* SW1 (Blue) - P009 (IRQ13-DS) */
 #define GPIO_USER_SW2         GPIO_P008_INPUT_PULLUP   /* SW2 (Blue) - P008 (IRQ12-DS, no pinmap macro) */
-#define GPIO_USER_SW_CFG_INT  GPIO_P000_INPUT          /* USER_SW_CFG_INT - P000 (no IRQ) */
 
 /* Button aliases for compatibility */
 #define GPIO_SW1              GPIO_USER_SW1            /* User Button SW1 */
@@ -213,7 +212,7 @@
 /* Camera interrupt pin */
 #define GPIO_CAMERA_INT       GPIO_IRQ14_P010          /* Camera INT - P010 (IRQ14) */
 
-/* Pmod interrupt pins (P006 and P012 have no IRQ macros in pinmap, use GPIO input) */
+/* Pmod interrupt pins */
 #define GPIO_PMOD1_IRQ        GPIO_P006_INPUT_PULLUP   /* Pmod 1 IRQ - P006 (IRQ11-DS, no pinmap macro) */
 #define GPIO_PMOD2_IRQ        GPIO_IRQ15_P012          /* Pmod 2 IRQ - P012 (IRQ15) */
 
@@ -280,8 +279,7 @@
 #define GPIO_ETH_MDC          GPIO_ET0_MDC_1         /* P415 - Ethernet PHY MDC */
 #define GPIO_ETH_MDIO         GPIO_ET0_MDIO_1        /* P414 - Ethernet PHY MDIO */
 #define GPIO_ETH_RSTN         GPIO_P708_OUTPUT_HIGH  /* P708 - Ethernet PHY Reset */
-#define GPIO_ETH_INT          GPIO_P107_INPUT_PULLUP /* P107 - Ethernet PHY Interrupt */
-#define GPIO_ETH_LINKSTA      GPIO_ET0_LINKSTA_1     /* P710 - Ethernet Link Status */
+#define GPIO_ETH_INT          GPIO_P107_INPUT_PULLUP /* P107 - Ethernet PHY Interrupt (MDINT) */
 
 /* Ethernet RGMII Transmit Interface */
 #define GPIO_ETH_TXD0         GPIO_ET0_TXD0_1        /* P307 - Ethernet TX Data 0 */
@@ -290,22 +288,18 @@
 #define GPIO_ETH_TXD3         GPIO_ET0_TXD3_1        /* P304 - Ethernet TX Data 3 */
 #define GPIO_ETH_TX_CTL       GPIO_ET0_TX_EN_1       /* P310 - Ethernet TX Control/Enable */
 #define GPIO_ETH_TX_CLK       GPIO_ET0_TX_CLK_1      /* P309 - Ethernet TX Clock */
-#define GPIO_ETH_GTX_CLK      GPIO_ET0_GTX_CLK_1     /* P706 - Ethernet GTX Clock (Gig mode) */
 
 /* Ethernet RGMII Receive Interface */
 #define GPIO_ETH_RXD0         GPIO_ET0_RXD0_1        /* P906 - Ethernet RX Data 0 */
 #define GPIO_ETH_RXD1         GPIO_ET0_RXD1_1        /* P907 - Ethernet RX Data 1 */
 #define GPIO_ETH_RXD2         GPIO_ET0_RXD2_1        /* P908 - Ethernet RX Data 2 */
 #define GPIO_ETH_RXD3         GPIO_ET0_RXD3_1        /* P909 - Ethernet RX Data 3 */
-#define GPIO_ETH_RX_CTL       GPIO_P206_INPUT        /* P206 - Ethernet RX Control (use generic GPIO, check HW) */
+#define GPIO_ETH_RX_CTL       GPIO_P206_INPUT        /* P206 - Ethernet RX Control */
 #define GPIO_ETH_RX_CLK       GPIO_P905_INPUT        /* P905 - Ethernet RX Clock */
 
-/* Note: The board.csv shows these pins are connected to the Ethernet PHY.
- * The RGMII interface requires proper electrical configuration and timing.
- * Verify pinmux settings match your hardware design.
- */
-
-/* SDRAM Interface (32-bit data bus) - External Memory */
+/****************************************************************************
+ * SDRAM Interface Pin Definitions (32-bit data bus)
+ ****************************************************************************/
 
 /* SDRAM Address Lines (13-bit address A0-A12) */
 #define GPIO_SDRAM_A0         GPIO_PA03              /* PA03 - SDRAM Address 0 */
@@ -515,34 +509,31 @@
 
 /* GPIO initialization list pattern */
 #define RA8_GPIO_INIT_LIST  { \
-  GPIO_RXD2_B,                  /* Console RX - P802 */ \
-  GPIO_TXD2_B,                  /* Console TX - P801 */ \
-  GPIO_RXD0_B,                  /* Pmod 2 UART RX - P602 */ \
-  GPIO_TXD0_B,                  /* Pmod 2 UART TX - P603 */ \
-  GPIO_RXD7_A,                  /* Arduino/mikroBUS UART RX - P808 */ \
-  GPIO_TXD7_A,                  /* Arduino/mikroBUS UART TX - P809 */ \
-  GPIO_RSPCKA_B_1,              /* SPI0 Clock - P601 */ \
-  GPIO_MISO2_B_1,               /* SPI0 MISO - P602 */ \
-  GPIO_MOSI2_B_1,               /* SPI0 MOSI - P603 */ \
-  GPIO_SSLE2_A_1,               /* SPI0 CS0 - P604 */ \
-  GPIO_RSPCKA_C_1,              /* SPI1 Clock - P803 */ \
-  GPIO_MISO2_A_1,               /* SPI1 MISO - P802 */ \
-  GPIO_MOSI2_A_1,               /* SPI1 MOSI - P801 */ \
-  GPIO_SSLE2_A_1,               /* SPI1 CS0 - P804 */ \
-  GPIO_SCL0_B_1,                /* I2C0 Clock - P400 */ \
-  GPIO_SDA0_B_1,                /* I2C0 Data - P401 */ \
-  GPIO_SCL1_A_2,                /* I2C1 Clock - P512 */ \
-  GPIO_SDA1_B_1,                /* I2C1 Data - P511 */ \
-  GPIO_GTIOC0A_1,               /* GPT0 Channel A - P211 */ \
-  GPIO_GTIOC10A_1,              /* GPT1 Channel A - P109 */ \
-  GPIO_GTIOC11A_1,              /* GPT2 Channel A - P711 */ \
-  GPIO_GTIOC12A_1,              /* GPT3 Channel A - P708 */ \
-  GPIO_GTIOC13A_1,              /* GPT4 Channel A - P502 */ \
-  GPIO_P600_OUTPUT_HIGH,        /* Blue LED - P600 */ \
-  GPIO_P303_OUTPUT_HIGH,        /* Green LED - P303 */ \
-  GPIO_PA07_OUTPUT_HIGH,        /* Red LED - PA07 */ \
-  GPIO_IRQ13_P009_DS,           /* User Button SW1 - P009 */ \
-  GPIO_P408_INPUT_PULLUP        /* User Button SW2 - P008 */ \
+  GPIO_SCI2_RX,                 /* Console RX - P802 */ \
+  GPIO_SCI2_TX,                 /* Console TX - P801 */ \
+  GPIO_SCI0_RX,                 /* Pmod 2 UART RX - P602 */ \
+  GPIO_SCI0_TX,                 /* Pmod 2 UART TX - P603 */ \
+  GPIO_SCI7_RX,                 /* Arduino/mikroBUS UART RX - P808 */ \
+  GPIO_SCI7_TX,                 /* Arduino/mikroBUS UART TX - P809 */ \
+  GPIO_ARDUINO_SPI_SCK,         /* P102 - Arduino D13 */ \
+  GPIO_ARDUINO_SPI_MISO,        /* P100 - Arduino D12 */ \
+  GPIO_ARDUINO_SPI_MOSI,        /* P101 - Arduino D11 */ \
+  GPIO_ARDUINO_SPI_CS0,         /* P103 - Arduino D10 */ \
+  GPIO_ARDUINO_SPI_CS1,         /* P110 - repurposed for another CS */ \
+  GPIO_I2C0_SCL,                /* I2C0 Clock - P400 */ \
+  GPIO_I2C0_SDA,                /* I2C0 Data - P401 */ \
+  GPIO_I2C1_SCL,                /* I2C1 Clock - P512 */ \
+  GPIO_I2C1_SDA,                /* I2C1 Data - P511 */ \
+  GPIO_GPT0_A,                  /* GPT0 Channel A - P211 */ \
+  GPIO_GPT1_A,                  /* GPT1 Channel A - P109 */ \
+  GPIO_GPT11_A,                 /* GPT11 Channel A - P711 */ \
+  GPIO_GPT12_A,                 /* GPT12 Channel A - P708 */ \
+  GPIO_GPT13_A,                 /* GPT13 Channel A - P502 */ \
+  GPIO_USER_LED_BLUE,           /* Blue LED - P600 */ \
+  GPIO_USER_LED_GREEN,          /* Green LED - P303 */ \
+  GPIO_USER_LED_RED,            /* Red LED - PA07 */ \
+  GPIO_USER_SW1,                /* User Button SW1 - P009 */ \
+  GPIO_USER_SW2                 /* User Button SW2 - P008 */ \
 }
 
 
