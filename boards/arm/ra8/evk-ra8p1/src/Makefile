@@ -64,6 +64,11 @@ ifeq ($(CONFIG_RA_CANFD),y)
 CSRCS += ra8p1_canfd.c
 endif
 
+# Ethernet support
+ifeq ($(CONFIG_RA_ETHERNET),y)
+CSRCS += ra8p1_ether.c
+endif
+
 # SPI loopback example support
 ifeq ($(CONFIG_RA8P1_SPI_LOOPBACK_EXAMPLE),y)
 CSRCS += ra8p1_spi_loopback.c

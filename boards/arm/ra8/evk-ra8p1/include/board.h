@@ -282,20 +282,20 @@
 #define GPIO_ETH_INT          GPIO_P107_INPUT_PULLUP /* P107 - Ethernet PHY Interrupt (MDINT) */
 
 /* Ethernet RGMII Transmit Interface */
-#define GPIO_ETH_TXD0         GPIO_ET0_TXD0_1        /* P307 - Ethernet TX Data 0 */
-#define GPIO_ETH_TXD1         GPIO_ET0_TXD1_1        /* P306 - Ethernet TX Data 1 */
-#define GPIO_ETH_TXD2         GPIO_ET0_TXD2_1        /* P305 - Ethernet TX Data 2 */
-#define GPIO_ETH_TXD3         GPIO_ET0_TXD3_1        /* P304 - Ethernet TX Data 3 */
-#define GPIO_ETH_TX_CTL       GPIO_ET0_TX_EN_1       /* P310 - Ethernet TX Control/Enable */
-#define GPIO_ETH_TX_CLK       GPIO_ET0_TX_CLK_1      /* P309 - Ethernet TX Clock */
+#define GPIO_ETH_TXD0         GPIO_RGMII1_TXD0_1     /* P307 - Ethernet TX Data 0 */
+#define GPIO_ETH_TXD1         GPIO_RGMII1_TXD1_1     /* P306 - Ethernet TX Data 1 */
+#define GPIO_ETH_TXD2         GPIO_RGMII1_TXD2_1     /* P305 - Ethernet TX Data 2 */
+#define GPIO_ETH_TXD3         GPIO_RGMII1_TXD3_1     /* P304 - Ethernet TX Data 3 */
+#define GPIO_ETH_TX_CTL       GPIO_RGMII1_TX_CTL_1   /* P310 - Ethernet TX Control/Enable */
+#define GPIO_ETH_TX_CLK       GPIO_RGMII1_TXC_1      /* P308 - Ethernet TX Clock */
 
 /* Ethernet RGMII Receive Interface */
-#define GPIO_ETH_RXD0         GPIO_ET0_RXD0_1        /* P906 - Ethernet RX Data 0 */
-#define GPIO_ETH_RXD1         GPIO_ET0_RXD1_1        /* P907 - Ethernet RX Data 1 */
-#define GPIO_ETH_RXD2         GPIO_ET0_RXD2_1        /* P908 - Ethernet RX Data 2 */
-#define GPIO_ETH_RXD3         GPIO_ET0_RXD3_1        /* P909 - Ethernet RX Data 3 */
-#define GPIO_ETH_RX_CTL       GPIO_P206_INPUT        /* P206 - Ethernet RX Control */
-#define GPIO_ETH_RX_CLK       GPIO_P905_INPUT        /* P905 - Ethernet RX Clock */
+#define GPIO_ETH_RXD0         GPIO_RGMII1_RXD0_1     /* P906 - Ethernet RX Data 0 */
+#define GPIO_ETH_RXD1         GPIO_RGMII1_RXD1_1     /* P907 - Ethernet RX Data 1 */
+#define GPIO_ETH_RXD2         GPIO_RGMII1_RXD2_1     /* P908 - Ethernet RX Data 2 */
+#define GPIO_ETH_RXD3         GPIO_RGMII1_RXD3_1     /* P909 - Ethernet RX Data 3 */
+#define GPIO_ETH_RX_CTL       GPIO_RGMII1_RX_CTL_1   /* P905 - Ethernet RX Control */
+#define GPIO_ETH_RX_CLK       GPIO_RGMII1_RXC_1      /* P904 - Ethernet RX Clock */
 
 /****************************************************************************
  * CAN-FD Pin Definitions

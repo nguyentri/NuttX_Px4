@@ -50,6 +50,10 @@ if(CONFIG_RA_CANFD)
   list(APPEND SRCS ra8p1_canfd.c)
 endif()
 
+if(CONFIG_RA_ETHERNET)
+  list(APPEND SRCS ra8p1_ether.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 set_property(GLOBAL PROPERTY LD_SCRIPT

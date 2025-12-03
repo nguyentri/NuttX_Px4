@@ -84,4 +84,9 @@ if(CONFIG_RA_CANFD)
   list(APPEND SRCS ra_canfd.c)
 endif()
 
+# Ethernet driver
+if(CONFIG_RA_ETHERNET)
+  list(APPEND SRCS ra_ether.c)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})

@@ -2128,6 +2128,10 @@ config RA_HAVE_ETHERC_RMII
    bool
    default n
 
+config RA_HAVE_ETHERC_RGMII
+   bool
+   default n
+
 config RA_HAVE_ETHERCAT
    bool
    default n
@@ -2149,6 +2153,11 @@ config RA_ETHERC_RMII
    bool "Ethernet RMII"
    default n
    depends on RA_HAVE_ETHERC_RMII
+
+config RA_ETHERC_RGMII
+   bool "Ethernet RGMII"
+   default n
+   depends on RA_HAVE_ETHERC_RGMII
 
 config RA_ETHERCAT
    bool "EtherCAT Slave Controller"
@@ -2763,6 +2772,40 @@ config RA_MSTP
    help
      Enable Module Stop Control for power management.
      Required for proper peripheral initialization and power control.
+
+config RA_ETHERNET
+   bool "RA8 Ethernet Driver"
+   default n
+   select NETDEVICES
+   select ARCH_HAVE_NETDEV_STATISTICS
+   select NET
+   depends on RA_HAVE_ETHERC_MII || RA_HAVE_ETHERC_RMII
+   help
+     Enable support for the RA8 Ethernet Controller (ETHERC) and
+     Ethernet DMA Controller (EDMAC).
+
+if RA_ETHERNET
+
+config RA_ETHERNET_NINTERFACES
+   int "Number of Ethernet Interfaces"
+   default 1
+   range 1 2
+   help
+     Number of physical Ethernet interfaces to support.
+
+config RA_ETHERNET_NTXDESC
+   int "Number of TX Descriptors"
+   default 8
+   help
+     Number of transmit descriptors per interface.
+
+config RA_ETHERNET_NRXDESC
+   int "Number of RX Descriptors"
+   default 8
+   help
+     Number of receive descriptors per interface.
+
+endif # RA_ETHERNET
 
 config RA_FLASH_LEGACY
    bool "Flash Memory Driver"

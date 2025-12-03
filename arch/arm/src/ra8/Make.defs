@@ -99,6 +99,11 @@ ifeq ($(CONFIG_RA_CANFD),y)
 CHIP_CSRCS += ra_canfd.c
 endif
 
+# Ethernet driver
+ifeq ($(CONFIG_RA_ETHERNET),y)
+CHIP_CSRCS += ra_ether.c
+endif
+
 # IDLE task custom
 ifeq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += ra_idle.c

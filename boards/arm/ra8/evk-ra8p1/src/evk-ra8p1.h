@@ -285,5 +285,17 @@ int gy912_register_sensors(FAR struct spi_dev_s *spi);
 int board_canfd_initialize(void);
 #endif
 
+/****************************************************************************
+ * Name: board_ether_initialize
+ *
+ * Description:
+ *   Initialize the Ethernet driver for the board.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RA_ETHERNET
+int board_ether_initialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_RA8_EVK_RA8P1_SRC_H */
