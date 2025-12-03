@@ -2788,6 +2788,85 @@ config RA_FLASH_DATA_LEGACY
 
 endif # RA_FLASH_LEGACY
 
+config RA_MRAM
+   bool "MRAM (Magnetoresistive RAM) Driver"
+   default n
+   select MTD
+   depends on ARCH_CHIP_RA8P1
+   help
+     Enable MRAM driver for RA8P1 devices. MRAM provides non-volatile
+     storage with fast read/write times and unlimited write endurance.
+     Unlike traditional flash, MRAM does not require erase before write.
+
+if RA_MRAM
+
+config RA_MRAM_CODE
+   bool "Code MRAM Partition"
+   default y
+   help
+     Enable code MRAM partition for firmware storage.
+     This partition is used for OTA updates and bootloader.
+     Base: 0x02000000, Size: ~2MB (minus data partition)
+
+config RA_MRAM_DATA
+   bool "Data MRAM Partition"
+   default y
+   help
+     Enable data MRAM partition for parameter storage.
+     This partition is reserved at the end of MRAM.
+     Base: 0x021F0000, Size: 64KB
+
+config RA_MRAM_DATA_SIZE
+   int "Data MRAM Partition Size (bytes)"
+   default 65536
+   depends on RA_MRAM_DATA
+   help
+     Size of the data MRAM partition reserved for parameter storage.
+     Default is 64KB (65536 bytes).
+
+config RA_MRAM_PROGMEM
+   bool "Enable progmem interface"
+   default n
+   depends on RA_MRAM_CODE
+   help
+     Enable up_progmem_* API for code MRAM access.
+     This provides compatibility with bootloader and OTA components
+     that use the standard NuttX progmem interface.
+
+config RA_MRAM_DATA_NXFFS
+   bool "Mount data partition with NXFFS"
+   default n
+   depends on RA_MRAM_DATA && FS_NXFFS
+   help
+     Mount the data MRAM partition with NXFFS file system
+     for wear-leveled parameter storage.
+
+config RA_MRAM_DATA_LITTLEFS
+   bool "Mount data partition with LittleFS"
+   default n
+   depends on RA_MRAM_DATA && FS_LITTLEFS
+   help
+     Mount the data MRAM partition with LittleFS file system
+     for reliable parameter storage with power-loss resilience.
+
+config RA_MRAM_DATA_SMARTFS
+   bool "Mount data partition with SmartFS"
+   default n
+   depends on RA_MRAM_DATA && FS_SMARTFS
+   help
+     Mount the data MRAM partition with SmartFS file system
+     for wear-leveled parameter storage.
+
+config RA_MRAM_DEBUG
+   bool "MRAM debug output"
+   default n
+   depends on DEBUG_FEATURES
+   help
+     Enable debug output for MRAM driver operations.
+     This enables verbose logging of MRAM read/write/erase operations.
+
+endif # RA_MRAM
+
 endmenu
 
 menu "RA8 TrustZone Configuration"

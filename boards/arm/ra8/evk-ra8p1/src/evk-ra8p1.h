@@ -165,6 +165,44 @@ int ra8p1_data_flash_test(void);
 int ra8p1_data_flash_main(int argc, char *argv[]);
 #endif
 
+/****************************************************************************
+ * MRAM Driver Interface
+ ****************************************************************************/
+
+#ifdef CONFIG_RA_MRAM
+/****************************************************************************
+ * Name: board_mram_initialize
+ *
+ * Description:
+ *   Initialize MRAM storage for code (OTA/bootloader) and data (parameters).
+ *
+ * Returned Value:
+ *   OK on success, negative errno on failure.
+ *
+ ****************************************************************************/
+
+int board_mram_initialize(void);
+
+/****************************************************************************
+ * Name: board_get_code_mram / board_get_data_mram
+ *
+ * Description:
+ *   Get MTD device pointers for direct MRAM access.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RA_MRAM_CODE
+struct mtd_dev_s *board_get_code_mram(void);
+#endif
+
+#ifdef CONFIG_RA_MRAM_DATA
+struct mtd_dev_s *board_get_data_mram(void);
+ssize_t board_mram_read_param(off_t offset, void *buffer, size_t len);
+ssize_t board_mram_write_param(off_t offset, const void *buffer, size_t len);
+int board_mram_erase_params(void);
+#endif
+#endif /* CONFIG_RA_MRAM */
+
 #ifdef CONFIG_RA8P1_GPT_PWM_EXAMPLE
 int ra8p1_gpt_pwm_initialize(void);
 int ra8p1_gpt_pwm_main(int argc, char *argv[]);

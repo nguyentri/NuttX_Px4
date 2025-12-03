@@ -178,6 +178,20 @@ int ra8p1_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_RA_MRAM
+  /* Initialize MRAM storage for OTA/bootloader and parameter storage */
+
+  ret = board_mram_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize MRAM: %d\n", ret);
+    }
+  else
+    {
+      syslog(LOG_INFO, "MRAM storage initialized successfully\n");
+    }
+#endif
+
   ra8p1_app_examples();
 
   return ret;

@@ -536,6 +536,40 @@
   GPIO_USER_SW2                 /* User Button SW2 - P008 */ \
 }
 
+/****************************************************************************
+ * MRAM Storage Configuration
+ ****************************************************************************/
+
+/* MRAM Base Addresses for RA8P1
+ * The RA8P1 has 2MB of MRAM starting at 0x02000000.
+ * We reserve the last 64KB for data/parameter storage.
+ */
+
+#define BOARD_MRAM_CODE_BASE        0x02000000  /* Code MRAM start */
+#define BOARD_MRAM_CODE_SIZE        0x001F0000  /* Code MRAM size (2MB - 64KB) */
+#define BOARD_MRAM_DATA_BASE        0x021F0000  /* Data MRAM start (last 64KB) */
+#define BOARD_MRAM_DATA_SIZE        0x00010000  /* Data MRAM size (64KB) */
+
+/* MRAM Programming Unit - 32 bytes per write operation */
+
+#define BOARD_MRAM_WRITE_SIZE       32
+
+/* MRAM Block Size for erase operations
+ * Note: MRAM doesn't require erase, but we simulate 8KB blocks
+ * for MTD compatibility with file systems
+ */
+
+#define BOARD_MRAM_BLOCK_SIZE       8192
+
+/* Mount points for MRAM partitions */
+
+#define BOARD_MRAM_CODE_MOUNT       "/mnt/code"
+#define BOARD_MRAM_DATA_MOUNT       "/mnt/params"
+
+/* Parameter storage file path (within data partition) */
+
+#define BOARD_PARAM_FILE            "/mnt/params/parameters"
+
 
 /****************************************************************************
  * Public Function Prototypes

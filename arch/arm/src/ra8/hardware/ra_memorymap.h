@@ -108,7 +108,6 @@
 #  include "hardware/ra8p1/ra_elc.h"
 #  include "hardware/ra8p1/ra_eswm.h"
 #  include "hardware/ra8p1/ra_etha.h"
-#  include "hardware/ra8p1/ra_faci.h"
 #  include "hardware/ra8p1/ra_fcache.h"
 #  include "hardware/ra8p1/ra_glcdc.h"
 #  include "hardware/ra8p1/ra_gpt32.h"

@@ -83,6 +83,11 @@ ifeq ($(CONFIG_RA_FLASH),y)
 CHIP_CSRCS += ra_flash.c
 endif
 
+# MRAM driver (for RA8P1)
+ifeq ($(CONFIG_RA_MRAM),y)
+CHIP_CSRCS += ra_mram.c
+endif
+
 # RTC driver
 ifeq ($(CONFIG_RA_RTC),y)
 CHIP_CSRCS += ra_rtc.c

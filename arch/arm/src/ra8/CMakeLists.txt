@@ -74,9 +74,10 @@ if(CONFIG_RA_GPT)
   list(APPEND SRCS ra_gpt.c)
 endif()
 
-# Flash memory driver
+# MRAM driver, RA8 internal flash as MRAM
 if(CONFIG_RA_FLASH)
-  list(APPEND SRCS ra_flash.c)
+  list(APPEND SRCS ra_mram.c)
 endif()
+
 
 target_sources(arch PRIVATE ${SRCS})

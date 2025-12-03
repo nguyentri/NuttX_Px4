@@ -43,6 +43,10 @@
 /* SPI Bus numbers */
 #define RA_SPI_BUS_0             0
 #define RA_SPI_BUS_1             1
+#define RA_SPI_BUS_2             2
+#define RA_SPI_BUS_3             3
+#define RA_SPI_BUS_4             4
+#define RA_SPI_BUS_5             5
 
 /****************************************************************************
  * Public Types
