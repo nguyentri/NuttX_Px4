@@ -270,5 +270,20 @@ struct spi_dev_s;
 int gy912_register_sensors(FAR struct spi_dev_s *spi);
 #endif
 
+/****************************************************************************
+ * Name: board_canfd_initialize
+ *
+ * Description:
+ *   Initialize CAN-FD interfaces for the EVK-RA8P1 board
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RA_CANFD
+int board_canfd_initialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_RA8_EVK_RA8P1_SRC_H */

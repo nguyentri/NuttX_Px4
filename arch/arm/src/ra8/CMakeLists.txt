@@ -79,5 +79,9 @@ if(CONFIG_RA_FLASH)
   list(APPEND SRCS ra_mram.c)
 endif()
 
+# CANFD driver
+if(CONFIG_RA_CANFD)
+  list(APPEND SRCS ra_canfd.c)
+endif()
 
 target_sources(arch PRIVATE ${SRCS})

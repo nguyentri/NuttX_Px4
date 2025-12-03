@@ -298,6 +298,15 @@
 #define GPIO_ETH_RX_CLK       GPIO_P905_INPUT        /* P905 - Ethernet RX Clock */
 
 /****************************************************************************
+ * CAN-FD Pin Definitions
+ ****************************************************************************/
+#define GPIO_CANFD1_TX       GPIO_CTX1_5            /* P909 - CAN-FD1 TX */
+#define GPIO_CANFD1_RX       GPIO_CRX1_4            /* P908 - CAN-FD1 RX */
+
+#define GPIO_CANFD0_TX       GPIO_CTX0_3            /* P312 - CAN-FD0 TX */
+#define GPIO_CANFD0_RX       GPIO_CRX0_3            /* P311 - CAN-FD0 RX */
+
+/****************************************************************************
  * SDRAM Interface Pin Definitions (32-bit data bus)
  ****************************************************************************/
 

@@ -28,9 +28,9 @@ config ARCH_CHIP_R7FA8E1AFDCFB
    # SPI - 2 channels only (removed incorrect SPI2)
    select RA_HAVE_SPI0
    select RA_HAVE_SPI1
-   # CAN - 2 channels
-   select RA_HAVE_CAN0
-   select RA_HAVE_CAN1
+   # CANFD - 2 channels
+   select RA_HAVE_CANFD0
+   select RA_HAVE_CANFD1
    # Ethernet
    select RA_HAVE_ETHERC_MII
    select RA_HAVE_ETHERC_RMII
@@ -164,9 +164,9 @@ config ARCH_CHIP_R7KA8P1KFLCAC
    select RA_HAVE_SPI0
    select RA_HAVE_SPI1
    select RA_HAVE_SPI2
-   # CAN - 2 channels
-   select RA_HAVE_CAN0
-   select RA_HAVE_CAN1
+   # CANFD - 2 channels
+   select RA_HAVE_CANFD0
+   select RA_HAVE_CANFD1
    # Ethernet
    select RA_HAVE_ETHERC_MII
    select RA_HAVE_ETHERC_RMII
@@ -2093,30 +2093,30 @@ config RA_SPI_DMA
 endmenu
 
 menu "CAN"
-config RA_HAVE_CAN0
+config RA_HAVE_CANFD0
    bool
    default n
 
-config RA_HAVE_CAN1
+config RA_HAVE_CANFD1
    bool
    default n
 
-config RA_CAN
+config RA_CANFD
    bool
    default n
    select CAN
 
-config RA_CAN0
+config RA_CANFD0
    bool "CAN0"
    default n
-   depends on RA_HAVE_CAN0
-   select RA_CAN
+   depends on RA_HAVE_CANFD0
+   select RA_CANFD
 
-config RA_CAN1
+config RA_CANFD1
    bool "CAN1"
    default n
-   depends on RA_HAVE_CAN1
-   select RA_CAN
+   depends on RA_HAVE_CANFD1
+   select RA_CANFD
 endmenu
 
 menu "Ethernet"

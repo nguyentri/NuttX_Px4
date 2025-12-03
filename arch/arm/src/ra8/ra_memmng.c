@@ -259,6 +259,48 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
 }
 
 /****************************************************************************
+ * Name: arm_addregion
+ *
+ * Description:
+ *   Memory may be added in non-contiguous chunks. Additional chunks are
+ *   added by calling this function.
+ *
+ *   For RA8 devices:
+ *   - Region 1: Main SRAM (used as primary heap in up_allocate_heap)
+ *   - Region 2: DTCM (0x20000000, 16KB) - optional additional memory
+ *
+ ****************************************************************************/
+
+#if CONFIG_MM_REGIONS > 1
+void arm_addregion(void)
+{
+#ifndef CONFIG_RA_DTCM_HEAP
+  /* Add DTCM as a secondary heap region if not already used as primary heap */
+
+  kumm_addregion((void *)CONFIG_RA_DTCM_BASE, CONFIG_RA_DTCM_SIZE);
+
+#ifdef CONFIG_RA_HEAP_DEBUG
+  syslog(LOG_INFO, "Added DTCM region: start=0x%08lx size=%d bytes\n",
+         (unsigned long)CONFIG_RA_DTCM_BASE, CONFIG_RA_DTCM_SIZE);
+#endif
+#endif /* !CONFIG_RA_DTCM_HEAP */
+
+#if CONFIG_MM_REGIONS > 2
+#ifndef CONFIG_RA_ITCM_HEAP
+  /* Add ITCM as third heap region if not already used and more regions requested */
+
+  kumm_addregion((void *)CONFIG_RA_ITCM_BASE, CONFIG_RA_ITCM_SIZE);
+
+#ifdef CONFIG_RA_HEAP_DEBUG
+  syslog(LOG_INFO, "Added ITCM region: start=0x%08lx size=%d bytes\n",
+         (unsigned long)CONFIG_RA_ITCM_BASE, CONFIG_RA_ITCM_SIZE);
+#endif
+#endif /* !CONFIG_RA_ITCM_HEAP */
+#endif /* CONFIG_MM_REGIONS > 2 */
+}
+#endif /* CONFIG_MM_REGIONS > 1 */
+
+/****************************************************************************
  * Name: ra_mem_validate
  *
  * Description:

@@ -94,6 +94,11 @@ CHIP_CSRCS += ra_rtc.c
 CHIP_CSRCS += ra_rtc_lowerhalf.c
 endif
 
+# CANFD driver
+ifeq ($(CONFIG_RA_CANFD),y)
+CHIP_CSRCS += ra_canfd.c
+endif
+
 # IDLE task custom
 ifeq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += ra_idle.c

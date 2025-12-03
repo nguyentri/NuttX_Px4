@@ -617,6 +617,25 @@
 #define R_CANFD_CFDRPGACC_RDTA_SHIFT              (0)  /* RAM Data Test Access */
 #define R_CANFD_CFDRPGACC_RDTA_MASK               0xffffffff
 
+/* CFDTM (TX Message Buffer) ID Register bit definitions */
+#define R_CANFD_CFDTM_ID_TMID                 (0)   /* TX Message Buffer ID */
+#define R_CANFD_CFDTM_ID_TMID_MASK                 (0x1FFFFFFF)
+#define R_CANFD_CFDTM_ID_TMRTR                    (1 << 30)  /* TX Message Buffer RTR */
+#define R_CANFD_CFDTM_ID_TMIDE                    (1 << 31)  /* TX Message Buffer IDE */
+
+/* CFDTM (TX Message Buffer) PTR Register bit definitions */
+#define R_CANFD_CFDTM_PTR_TMDLC               (28)  /* TX Message Buffer DLC */
+#define R_CANFD_CFDTM_PTR_TMDLC_MASK               (0xF0000000)
+
+/* CFDRM (RX Message Buffer/FIFO) ID Register bit definitions */
+#define R_CANFD_CFDRM_ID_RMID                 (0)   /* RX Message Buffer ID */
+#define R_CANFD_CFDRM_ID_RMID_MASK                 (0x1FFFFFFF)
+#define R_CANFD_CFDRM_ID_RMRTR                    (1 << 30)  /* RX Message Buffer RTR */
+#define R_CANFD_CFDRM_ID_RMIDE                    (1 << 31)  /* RX Message Buffer IDE */
+
+/* CFDRM (RX Message Buffer/FIFO) PTR Register bit definitions */
+#define R_CANFD_CFDRM_PTR_RMDLC               (28)  /* RX Message Buffer DLC */
+#define R_CANFD_CFDRM_PTR_RMDLC_MASK               (0xF0000000)
 
 /* Maximum number of channels */
 

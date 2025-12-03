@@ -192,6 +192,20 @@ int ra8p1_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_RA_CANFD
+  /* Initialize CAN-FD interfaces */
+
+  ret = board_canfd_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize CAN-FD: %d\n", ret);
+    }
+  else
+    {
+      syslog(LOG_INFO, "CAN-FD initialized successfully\n");
+    }
+#endif
+
   ra8p1_app_examples();
 
   return ret;

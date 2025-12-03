@@ -35,6 +35,7 @@
 #include <arch/irq.h>
 #include "arch/board/board.h"
 #include "arm_internal.h"
+#include "ram_vectors.h"
 #include "nvic.h"
 #include "chip.h"
 #include "ra_clock.h"

@@ -46,6 +46,10 @@ if(CONFIG_RA_ADC_B)
   list(APPEND SRCS ra8p1_adc_b.c)
 endif()
 
+if(CONFIG_RA_CANFD)
+  list(APPEND SRCS ra8p1_canfd.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 set_property(GLOBAL PROPERTY LD_SCRIPT
