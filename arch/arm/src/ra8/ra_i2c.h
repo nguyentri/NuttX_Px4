@@ -37,6 +37,10 @@
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/i2c/i2c_slave.h>
 
+#ifdef CONFIG_RA_DTC
+#include "ra_dtc.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -45,6 +49,10 @@
 
 /* I2C interrupts */
 #define RA_I2C_NEVENTS           8        /* Number of I2C events */
+
+/* DTC/DMA threshold - use DTC/DMA for transfers larger than this */
+#define RA_I2C_DTC_THRESHOLD     8        /* Minimum bytes for DTC */
+#define RA_I2C_DMA_THRESHOLD     16       /* Minimum bytes for DMA */
 
 /****************************************************************************
  * Public Types
@@ -114,8 +122,23 @@ struct ra_i2c_priv_s
 
   uint32_t status;        /* End of transfer SR2|SR1 status */
 
+#ifdef CONFIG_RA_DTC
   /* DTC support */
   bool     use_dtc;       /* DTC enable flag */
+  bool     dtc_active;    /* DTC transfer in progress */
+  ra_dtc_info_t dtc_tx_info; /* TX DTC transfer info */
+  ra_dtc_info_t dtc_rx_info; /* RX DTC transfer info */
+#endif
+
+#ifdef CONFIG_RA_DMA
+  /* DMA support */
+  bool     use_dma;       /* DMA enable flag */
+  bool     dma_active;    /* DMA transfer in progress */
+  void    *dma_tx;        /* TX DMA handle */
+  void    *dma_rx;        /* RX DMA handle */
+  volatile bool dma_tx_done; /* TX DMA completion flag */
+  volatile bool dma_rx_done; /* RX DMA completion flag */
+#endif
 };
 
 /* I2C State Machine States */

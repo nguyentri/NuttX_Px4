@@ -51,6 +51,16 @@
 #include "ra_i2c.h"
 #include "ra_clock.h"
 
+#ifdef CONFIG_RA_DTC
+#include "ra_dtc.h"
+#include <nuttx/cache.h>
+#endif
+
+#ifdef CONFIG_RA_DMA
+#include "ra_dmac.h"
+#include <nuttx/cache.h>
+#endif
+
 #ifdef CONFIG_RA_I2C
 
 /****************************************************************************
@@ -114,11 +124,23 @@ static int ra_i2c_init(struct ra_i2c_priv_s *priv);
 static int ra_i2c_deinit(struct ra_i2c_priv_s *priv);
 
 /* DTC functions */
-#ifdef CONFIG_RA_I2C_DTC
+#ifdef CONFIG_RA_DTC
+static bool g_i2c_dtc_initialized = false;
 static int ra_i2c_dtc_setup(struct ra_i2c_priv_s *priv);
 static int ra_i2c_dtc_start_rx(struct ra_i2c_priv_s *priv, uint8_t *buffer, uint32_t len);
 static int ra_i2c_dtc_start_tx(struct ra_i2c_priv_s *priv, const uint8_t *buffer, uint32_t len);
+static void ra_i2c_dtc_stop(struct ra_i2c_priv_s *priv);
 static void ra_i2c_dtc_cleanup(struct ra_i2c_priv_s *priv);
+#endif
+
+/* DMA functions */
+#ifdef CONFIG_RA_DMA
+static int ra_i2c_dma_setup(struct ra_i2c_priv_s *priv);
+static int ra_i2c_dma_start_rx(struct ra_i2c_priv_s *priv, uint8_t *buffer, uint32_t len);
+static int ra_i2c_dma_start_tx(struct ra_i2c_priv_s *priv, const uint8_t *buffer, uint32_t len);
+static void ra_i2c_dma_stop(struct ra_i2c_priv_s *priv);
+static void ra_i2c_dma_tx_callback(void *handle, int event, void *arg);
+static void ra_i2c_dma_rx_callback(void *handle, int event, void *arg);
 #endif
 
 /****************************************************************************
@@ -704,7 +726,7 @@ static int ra_i2c_wait_event(struct ra_i2c_priv_s *priv, uint32_t timeout_us)
  * Name: ra_i2c_transfer
  *
  * Description:
- *   Generic I2C transfer function
+ *   Generic I2C transfer function with optional DTC/DMA support
  *
  ****************************************************************************/
 
@@ -713,10 +735,14 @@ static int ra_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgs, int
   struct ra_i2c_priv_s *priv = (struct ra_i2c_priv_s *)dev;
   int ret = OK;
   int i;
+#if defined(CONFIG_RA_DTC) || defined(CONFIG_RA_DMA)
+  bool use_dma_transfer = false;
+#endif
 
   DEBUGASSERT(priv != NULL && msgs != NULL && count > 0);
 
   /* Get exclusive access to the I2C bus */
+
   ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
@@ -724,12 +750,14 @@ static int ra_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgs, int
     }
 
   /* Set the frequency if it has changed */
+
   if (msgs[0].frequency != priv->frequency)
     {
       ra_i2c_setfrequency(dev, msgs[0].frequency);
     }
 
   /* Process each message */
+
   for (i = 0; i < count && ret == OK; i++)
     {
       priv->msgs = &msgs[i];
@@ -739,7 +767,30 @@ static int ra_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgs, int
       priv->flags = msgs[i].flags;
       priv->addr = msgs[i].addr;
 
+#if defined(CONFIG_RA_DTC) || defined(CONFIG_RA_DMA)
+      /* Determine if we should use DTC/DMA for this transfer
+       * Use DMA for larger transfers to reduce CPU overhead
+       */
+
+      use_dma_transfer = false;
+
+#ifdef CONFIG_RA_DMA
+      if (priv->use_dma && msgs[i].length >= RA_I2C_DMA_THRESHOLD)
+        {
+          use_dma_transfer = true;
+        }
+#endif
+#ifdef CONFIG_RA_DTC
+      if (!use_dma_transfer && priv->use_dtc &&
+          msgs[i].length >= RA_I2C_DTC_THRESHOLD)
+        {
+          use_dma_transfer = true;
+        }
+#endif
+#endif /* CONFIG_RA_DTC || CONFIG_RA_DMA */
+
       /* Generate start condition (or repeated start) */
+
       ret = ra_i2c_start(priv);
       if (ret != OK)
         {
@@ -747,6 +798,7 @@ static int ra_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgs, int
         }
 
       /* Wait for start condition */
+
       ret = ra_i2c_wait_event(priv, I2C_STATE_TIMEOUT_US);
       if (ret != OK)
         {
@@ -754,13 +806,16 @@ static int ra_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgs, int
         }
 
       /* Send address */
-      ret = ra_i2c_sendaddr(priv, msgs[i].addr, (msgs[i].flags & I2C_M_READ) != 0);
+
+      ret = ra_i2c_sendaddr(priv, msgs[i].addr,
+                            (msgs[i].flags & I2C_M_READ) != 0);
       if (ret != OK)
         {
           break;
         }
 
       /* Wait for address ACK */
+
       ret = ra_i2c_wait_event(priv, I2C_STATE_TIMEOUT_US);
       if (ret != OK)
         {
@@ -768,38 +823,160 @@ static int ra_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgs, int
         }
 
       /* Transfer data */
+
       if (msgs[i].flags & I2C_M_READ)
         {
           /* Reading - switch to receive mode after address */
+
           ra_i2c_modifyreg(priv, R_IIC_ICCR2_OFFSET, R_IIC_ICCR2_TRS, 0);
 
           /* Dummy read to start reception */
+
           (void)ra_i2c_getreg(priv, R_IIC_ICDRR_OFFSET);
 
-          /* Read all bytes */
-          while (priv->dcnt > 0 && ret == OK)
+#if defined(CONFIG_RA_DMA) || defined(CONFIG_RA_DTC)
+          if (use_dma_transfer)
             {
-              ret = ra_i2c_wait_event(priv, I2C_STATE_TIMEOUT_US);
-              if (ret == OK)
+              /* Use DMA/DTC for bulk read */
+
+#ifdef CONFIG_RA_DMA
+              if (priv->use_dma)
                 {
-                  ret = ra_i2c_readdata(priv);
+                  ret = ra_i2c_dma_start_rx(priv, msgs[i].buffer,
+                                            msgs[i].length);
+                  if (ret == OK)
+                    {
+                      /* Wait for DMA completion */
+
+                      ret = ra_i2c_wait_event(priv,
+                              I2C_STATE_TIMEOUT_US * msgs[i].length);
+                      ra_i2c_dma_stop(priv);
+
+                      /* Invalidate cache for RX buffer */
+
+                      up_invalidate_dcache((uintptr_t)msgs[i].buffer,
+                          (uintptr_t)msgs[i].buffer + msgs[i].length);
+
+                      priv->dcnt = 0;
+                    }
+                }
+              else
+#endif
+#ifdef CONFIG_RA_DTC
+              if (priv->use_dtc)
+                {
+                  ret = ra_i2c_dtc_start_rx(priv, msgs[i].buffer,
+                                            msgs[i].length);
+                  if (ret == OK)
+                    {
+                      /* Wait for DTC completion */
+
+                      ret = ra_i2c_wait_event(priv,
+                              I2C_STATE_TIMEOUT_US * msgs[i].length);
+                      ra_i2c_dtc_stop(priv);
+
+                      /* Invalidate cache for RX buffer */
+
+                      up_invalidate_dcache((uintptr_t)msgs[i].buffer,
+                          (uintptr_t)msgs[i].buffer + msgs[i].length);
+
+                      priv->dcnt = 0;
+                    }
+                }
+              else
+#endif
+                {
+                  /* Fall through to polled transfer */
+
+                  use_dma_transfer = false;
+                }
+            }
+
+          if (!use_dma_transfer)
+#endif /* CONFIG_RA_DMA || CONFIG_RA_DTC */
+            {
+              /* Read all bytes using polled/interrupt method */
+
+              while (priv->dcnt > 0 && ret == OK)
+                {
+                  ret = ra_i2c_wait_event(priv, I2C_STATE_TIMEOUT_US);
+                  if (ret == OK)
+                    {
+                      ret = ra_i2c_readdata(priv);
+                    }
                 }
             }
         }
       else
         {
-          /* Writing - send all bytes */
-          while (priv->dcnt > 0 && ret == OK)
+          /* Writing */
+
+#if defined(CONFIG_RA_DMA) || defined(CONFIG_RA_DTC)
+          if (use_dma_transfer)
             {
-              ret = ra_i2c_wait_event(priv, I2C_STATE_TIMEOUT_US);
-              if (ret == OK)
+              /* Use DMA/DTC for bulk write */
+
+#ifdef CONFIG_RA_DMA
+              if (priv->use_dma)
                 {
-                  ret = ra_i2c_senddata(priv);
+                  ret = ra_i2c_dma_start_tx(priv, msgs[i].buffer,
+                                            msgs[i].length);
+                  if (ret == OK)
+                    {
+                      /* Wait for DMA completion */
+
+                      ret = ra_i2c_wait_event(priv,
+                              I2C_STATE_TIMEOUT_US * msgs[i].length);
+                      ra_i2c_dma_stop(priv);
+                      priv->dcnt = 0;
+                    }
+                }
+              else
+#endif
+#ifdef CONFIG_RA_DTC
+              if (priv->use_dtc)
+                {
+                  ret = ra_i2c_dtc_start_tx(priv, msgs[i].buffer,
+                                            msgs[i].length);
+                  if (ret == OK)
+                    {
+                      /* Wait for DTC completion */
+
+                      ret = ra_i2c_wait_event(priv,
+                              I2C_STATE_TIMEOUT_US * msgs[i].length);
+                      ra_i2c_dtc_stop(priv);
+                      priv->dcnt = 0;
+                    }
+                }
+              else
+#endif
+                {
+                  /* Fall through to polled transfer */
+
+                  use_dma_transfer = false;
+                }
+            }
+
+          if (!use_dma_transfer)
+#endif /* CONFIG_RA_DMA || CONFIG_RA_DTC */
+            {
+              /* Writing - send all bytes using polled/interrupt method */
+
+              while (priv->dcnt > 0 && ret == OK)
+                {
+                  ret = ra_i2c_wait_event(priv, I2C_STATE_TIMEOUT_US);
+                  if (ret == OK)
+                    {
+                      ret = ra_i2c_senddata(priv);
+                    }
                 }
             }
         }
 
-      /* Generate stop condition for last message or if I2C_M_NOSTOP is not set */
+      /* Generate stop condition for last message or if I2C_M_NOSTOP
+       * is not set
+       */
+
       if (ret == OK && (i == count - 1 || !(msgs[i].flags & I2C_M_NOSTOP)))
         {
           ret = ra_i2c_stop(priv);
@@ -807,10 +984,29 @@ static int ra_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgs, int
     }
 
   /* Generate stop condition if transfer failed */
+
   if (ret != OK && priv->state != I2CSTATE_IDLE)
     {
       ra_i2c_stop(priv);
     }
+
+#ifdef CONFIG_RA_DTC
+  /* Ensure DTC is stopped on error */
+
+  if (priv->dtc_active)
+    {
+      ra_i2c_dtc_stop(priv);
+    }
+#endif
+
+#ifdef CONFIG_RA_DMA
+  /* Ensure DMA is stopped on error */
+
+  if (priv->dma_active)
+    {
+      ra_i2c_dma_stop(priv);
+    }
+#endif
 
   nxmutex_unlock(&priv->lock);
 
@@ -866,24 +1062,31 @@ static int ra_i2c_init(struct ra_i2c_priv_s *priv)
   const struct ra_i2c_config_s *config = priv->config;
 
   /* Enable I2C module clock */
+
   ra_mstp_start(config->mstp);
 
   /* Reset I2C peripheral */
+
   ra_i2c_modifyreg(priv, R_IIC_ICCR1_OFFSET, 0, R_IIC_ICCR1_IICRST);
   up_udelay(10);
   ra_i2c_modifyreg(priv, R_IIC_ICCR1_OFFSET, R_IIC_ICCR1_IICRST, 0);
 
   /* Configure I2C mode registers */
+
   /* ICMR1: Set internal reference clock select and bit counter */
+
   ra_i2c_putreg(priv, R_IIC_ICMR1_OFFSET, 0);
 
   /* ICMR2: Configure delays and timeout */
+
   ra_i2c_putreg(priv, R_IIC_ICMR2_OFFSET, 0);
 
   /* ICMR3: Configure SMBus/I2C selection and noise filter */
+
   ra_i2c_putreg(priv, R_IIC_ICMR3_OFFSET, R_IIC_ICMR3_NF_MASK); /* Enable noise filter */
 
   /* ICFER: Configure function enables */
+
   ra_i2c_putreg(priv, R_IIC_ICFER_OFFSET,
                 R_IIC_ICFER_TMOE |    /* Enable timeout */
                 R_IIC_ICFER_MALE |    /* Enable master arbitration-lost detection */
@@ -894,10 +1097,21 @@ static int ra_i2c_init(struct ra_i2c_priv_s *priv)
                 R_IIC_ICFER_SCLE);    /* Enable SCL synchronous circuit */
 
   /* ICSER: Disable slave address detection */
+
   ra_i2c_putreg(priv, R_IIC_ICSER_OFFSET, 0);
 
+  /* Enable I2C peripheral */
+
+  ra_i2c_modifyreg(priv, R_IIC_ICCR1_OFFSET, 0, R_IIC_ICCR1_ICE);
+
+  /* Set default frequency */
+
+  priv->frequency = 0;  /* Force frequency setting */
+  ra_i2c_setfrequency((struct i2c_master_s *)priv, I2C_SPEED_STANDARD);
+
 #ifndef CONFIG_I2C_POLLED
-  /* Configure and enable interrupts */
+  /* Configure and enable interrupts AFTER peripheral is configured */
+
   ra_i2c_putreg(priv, R_IIC_ICIER_OFFSET,
                 R_IIC_ICIER_TIE |     /* Transmit data empty interrupt */
                 R_IIC_ICIER_TEIE |    /* Transmit end interrupt */
@@ -909,23 +1123,23 @@ static int ra_i2c_init(struct ra_i2c_priv_s *priv)
                 R_IIC_ICIER_TMOIE);   /* Timeout detection interrupt */
 
   /* Attach interrupt handlers */
+
   priv->rxi_irq = ra_icu_attach(config->rxi_elc, ra_i2c_isr_rxi, priv, true);
   priv->txi_irq = ra_icu_attach(config->txi_elc, ra_i2c_isr_txi, priv, true);
   priv->tei_irq = ra_icu_attach(config->tei_elc, ra_i2c_isr_tei, priv, true);
   priv->eri_irq = ra_icu_attach(config->eri_elc, ra_i2c_isr_eri, priv, true);
 #endif
 
-  /* Enable I2C peripheral */
-  ra_i2c_modifyreg(priv, R_IIC_ICCR1_OFFSET, 0, R_IIC_ICCR1_ICE);
-
-  /* Set default frequency */
-  priv->frequency = 0;  /* Force frequency setting */
-  ra_i2c_setfrequency((struct i2c_master_s *)priv, I2C_SPEED_STANDARD);
-
-#ifdef CONFIG_RA_I2C_DTC
+#ifdef CONFIG_RA_DTC
   /* Setup DTC if enabled */
-  priv->use_dtc = true;
+
   ra_i2c_dtc_setup(priv);
+#endif
+
+#ifdef CONFIG_RA_DMA
+  /* Setup DMA if enabled */
+
+  ra_i2c_dma_setup(priv);
 #endif
 
   return OK;
@@ -944,22 +1158,33 @@ static int ra_i2c_deinit(struct ra_i2c_priv_s *priv)
   const struct ra_i2c_config_s *config = priv->config;
 
   /* Disable I2C peripheral */
+
   ra_i2c_modifyreg(priv, R_IIC_ICCR1_OFFSET, R_IIC_ICCR1_ICE, 0);
 
 #ifndef CONFIG_I2C_POLLED
   /* Disable interrupts */
+
   ra_icu_detach(priv->rxi_irq);
   ra_icu_detach(priv->txi_irq);
   ra_icu_detach(priv->tei_irq);
   ra_icu_detach(priv->eri_irq);
 #endif
 
-#ifdef CONFIG_RA_I2C_DTC
+#ifdef CONFIG_RA_DTC
   /* Cleanup DTC */
+
   ra_i2c_dtc_cleanup(priv);
 #endif
 
+#ifdef CONFIG_RA_DMA
+  /* Cleanup DMA */
+
+  ra_i2c_dma_stop(priv);
+  priv->use_dma = false;
+#endif
+
   /* Disable I2C module clock */
+
   ra_mstp_stop(config->mstp);
 
   return OK;
@@ -1057,7 +1282,7 @@ static int ra_i2c_isr_eri(int irq, void *context, void *arg)
 
 #endif /* !CONFIG_I2C_POLLED */
 
-#ifdef CONFIG_RA_I2C_DTC
+#ifdef CONFIG_RA_DTC
 /****************************************************************************
  * Name: ra_i2c_dtc_setup
  *
@@ -1068,11 +1293,43 @@ static int ra_i2c_isr_eri(int irq, void *context, void *arg)
 
 static int ra_i2c_dtc_setup(struct ra_i2c_priv_s *priv)
 {
-  /* TODO: Implement DTC setup for I2C */
   i2cinfo("DTC setup for I2C%d\n", priv->config->bus);
 
-  /* For now, disable DTC until full implementation */
-  priv->use_dtc = false;
+  /* Initialize DTC module once (global initialization) */
+
+  if (!g_i2c_dtc_initialized)
+    {
+      irqstate_t flags = enter_critical_section();
+
+      if (!g_i2c_dtc_initialized)
+        {
+          /* Enable DTC module clock */
+
+          ra_mstp_start(RA_MSTP_DMAC_DTC);
+
+          /* Initialize DTC module - this will set up the vector table */
+
+          ra_dtc_initialize();
+
+          g_i2c_dtc_initialized = true;
+
+          i2cinfo("DTC module initialized\n");
+        }
+
+      leave_critical_section(flags);
+    }
+
+  /* DTC active state is per-transfer, initialize to false */
+
+  priv->dtc_active = false;
+  priv->use_dtc = true;
+
+  /* Clear DTC transfer info structures */
+
+  memset(&priv->dtc_tx_info, 0, sizeof(priv->dtc_tx_info));
+  memset(&priv->dtc_rx_info, 0, sizeof(priv->dtc_rx_info));
+
+  i2cinfo("DTC setup completed for I2C%d\n", priv->config->bus);
 
   return OK;
 }
@@ -1085,14 +1342,53 @@ static int ra_i2c_dtc_setup(struct ra_i2c_priv_s *priv)
  *
  ****************************************************************************/
 
-static int ra_i2c_dtc_start_rx(struct ra_i2c_priv_s *priv, uint8_t *buffer, uint32_t len)
+static int ra_i2c_dtc_start_rx(struct ra_i2c_priv_s *priv,
+                               uint8_t *buffer, uint32_t len)
 {
-  /* TODO: Implement DTC RX transfer setup */
-  UNUSED(priv);
-  UNUSED(buffer);
-  UNUSED(len);
+  int slot;
 
-  return -ENOSYS;
+  i2cinfo("DTC RX start: buffer=%p len=%lu\n", buffer, (unsigned long)len);
+
+  if (buffer == NULL || len == 0)
+    {
+      return -EINVAL;
+    }
+
+  /* Configure RX DTC: source fixed (ICDRR), dest increment, normal mode */
+
+  priv->dtc_rx_info.mra = RA_DTC_MRA_MD_NORMAL |
+                          RA_DTC_MRA_SZ_BYTE |
+                          RA_DTC_MRA_SM_FIXED;
+  priv->dtc_rx_info.mrb = RA_DTC_MRB_DM_INCREMENT |
+                          RA_DTC_MRB_DISEL;  /* IRQ at end */
+  priv->dtc_rx_info.sar = priv->config->base + R_IIC_ICDRR_OFFSET;
+  priv->dtc_rx_info.dar = (uint32_t)buffer;
+  priv->dtc_rx_info.cra = (uint16_t)len;
+  priv->dtc_rx_info.crb = 0;
+
+  /* Flush DTC transfer info to memory */
+
+  up_clean_dcache((uintptr_t)&priv->dtc_rx_info,
+                  (uintptr_t)&priv->dtc_rx_info + sizeof(priv->dtc_rx_info));
+
+  /* Configure DTC vector table entry using ICU-assigned slot */
+
+  slot = priv->rxi_irq - RA_IRQ_FIRST;
+  ra_icu_disable_dtc(priv->rxi_irq);
+  ra_dtc_set_vector(slot, &priv->dtc_rx_info);
+
+  /* Enable DTC trigger in ICU */
+
+  ra_icu_enable_dtc(priv->rxi_irq);
+
+  priv->dtc_active = true;
+
+  i2cinfo("RX DTC configured: SAR=0x%08lx DAR=0x%08lx CRA=%d slot=%d\n",
+          (unsigned long)priv->dtc_rx_info.sar,
+          (unsigned long)priv->dtc_rx_info.dar,
+          priv->dtc_rx_info.cra, slot);
+
+  return OK;
 }
 
 /****************************************************************************
@@ -1103,14 +1399,84 @@ static int ra_i2c_dtc_start_rx(struct ra_i2c_priv_s *priv, uint8_t *buffer, uint
  *
  ****************************************************************************/
 
-static int ra_i2c_dtc_start_tx(struct ra_i2c_priv_s *priv, const uint8_t *buffer, uint32_t len)
+static int ra_i2c_dtc_start_tx(struct ra_i2c_priv_s *priv,
+                               const uint8_t *buffer, uint32_t len)
 {
-  /* TODO: Implement DTC TX transfer setup */
-  UNUSED(priv);
-  UNUSED(buffer);
-  UNUSED(len);
+  int slot;
 
-  return -ENOSYS;
+  i2cinfo("DTC TX start: buffer=%p len=%lu\n", buffer, (unsigned long)len);
+
+  if (buffer == NULL || len == 0)
+    {
+      return -EINVAL;
+    }
+
+  /* Clean D-cache for TX buffer before DTC reads it */
+
+  up_clean_dcache((uintptr_t)buffer, (uintptr_t)buffer + len);
+
+  /* Configure TX DTC: source increment, dest fixed (ICDRT), normal mode */
+
+  priv->dtc_tx_info.mra = RA_DTC_MRA_MD_NORMAL |
+                          RA_DTC_MRA_SZ_BYTE |
+                          RA_DTC_MRA_SM_INCREMENT;
+  priv->dtc_tx_info.mrb = RA_DTC_MRB_DM_FIXED |
+                          RA_DTC_MRB_DISEL;  /* IRQ at end */
+  priv->dtc_tx_info.sar = (uint32_t)buffer;
+  priv->dtc_tx_info.dar = priv->config->base + R_IIC_ICDRT_OFFSET;
+  priv->dtc_tx_info.cra = (uint16_t)len;
+  priv->dtc_tx_info.crb = 0;
+
+  /* Flush DTC transfer info to memory */
+
+  up_clean_dcache((uintptr_t)&priv->dtc_tx_info,
+                  (uintptr_t)&priv->dtc_tx_info + sizeof(priv->dtc_tx_info));
+
+  /* Configure DTC vector table entry using ICU-assigned slot */
+
+  slot = priv->txi_irq - RA_IRQ_FIRST;
+  ra_icu_disable_dtc(priv->txi_irq);
+  ra_dtc_set_vector(slot, &priv->dtc_tx_info);
+
+  /* Enable DTC trigger in ICU */
+
+  ra_icu_enable_dtc(priv->txi_irq);
+
+  priv->dtc_active = true;
+
+  i2cinfo("TX DTC configured: SAR=0x%08lx DAR=0x%08lx CRA=%d slot=%d\n",
+          (unsigned long)priv->dtc_tx_info.sar,
+          (unsigned long)priv->dtc_tx_info.dar,
+          priv->dtc_tx_info.cra, slot);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: ra_i2c_dtc_stop
+ *
+ * Description:
+ *   Stop DTC transfer
+ *
+ ****************************************************************************/
+
+static void ra_i2c_dtc_stop(struct ra_i2c_priv_s *priv)
+{
+  i2cinfo("DTC stop for I2C%d\n", priv->config->bus);
+
+  /* Disable DTC triggers */
+
+  if (priv->txi_irq >= 0)
+    {
+      ra_icu_disable_dtc(priv->txi_irq);
+    }
+
+  if (priv->rxi_irq >= 0)
+    {
+      ra_icu_disable_dtc(priv->rxi_irq);
+    }
+
+  priv->dtc_active = false;
 }
 
 /****************************************************************************
@@ -1123,10 +1489,298 @@ static int ra_i2c_dtc_start_tx(struct ra_i2c_priv_s *priv, const uint8_t *buffer
 
 static void ra_i2c_dtc_cleanup(struct ra_i2c_priv_s *priv)
 {
-  /* TODO: Implement DTC cleanup */
   i2cinfo("DTC cleanup for I2C%d\n", priv->config->bus);
+
+  ra_i2c_dtc_stop(priv);
+  priv->use_dtc = false;
 }
-#endif /* CONFIG_RA_I2C_DTC */
+#endif /* CONFIG_RA_DTC */
+
+#ifdef CONFIG_RA_DMA
+/****************************************************************************
+ * Name: ra_i2c_dma_tx_callback
+ *
+ * Description:
+ *   DMA TX completion callback
+ *
+ ****************************************************************************/
+
+static void ra_i2c_dma_tx_callback(void *handle, int event, void *arg)
+{
+  struct ra_i2c_priv_s *priv = (struct ra_i2c_priv_s *)arg;
+
+  DEBUGASSERT(priv != NULL);
+
+  if (event == RA_DMAC_EVENT_COMPLETE)
+    {
+      priv->dma_tx_done = true;
+      i2cinfo("I2C%d DMA TX complete\n", priv->config->bus);
+    }
+  else
+    {
+      i2cerr("I2C%d DMA TX error: event=%d\n", priv->config->bus, event);
+      priv->state = I2CSTATE_ERROR;
+    }
+
+#ifndef CONFIG_I2C_POLLED
+  /* Signal completion */
+
+  nxsem_post(&priv->sem_isr);
+#endif
+}
+
+/****************************************************************************
+ * Name: ra_i2c_dma_rx_callback
+ *
+ * Description:
+ *   DMA RX completion callback
+ *
+ ****************************************************************************/
+
+static void ra_i2c_dma_rx_callback(void *handle, int event, void *arg)
+{
+  struct ra_i2c_priv_s *priv = (struct ra_i2c_priv_s *)arg;
+
+  DEBUGASSERT(priv != NULL);
+
+  if (event == RA_DMAC_EVENT_COMPLETE)
+    {
+      priv->dma_rx_done = true;
+      i2cinfo("I2C%d DMA RX complete\n", priv->config->bus);
+
+      /* Invalidate D-cache for RX buffer after DMA writes it */
+
+      if (priv->ptr != NULL && priv->dcnt > 0)
+        {
+          up_invalidate_dcache((uintptr_t)priv->ptr,
+                               (uintptr_t)priv->ptr + priv->dcnt);
+        }
+    }
+  else
+    {
+      i2cerr("I2C%d DMA RX error: event=%d\n", priv->config->bus, event);
+      priv->state = I2CSTATE_ERROR;
+    }
+
+#ifndef CONFIG_I2C_POLLED
+  /* Signal completion */
+
+  nxsem_post(&priv->sem_isr);
+#endif
+}
+
+/****************************************************************************
+ * Name: ra_i2c_dma_setup
+ *
+ * Description:
+ *   Setup DMA for I2C transfers
+ *
+ ****************************************************************************/
+
+static int ra_i2c_dma_setup(struct ra_i2c_priv_s *priv)
+{
+  int ret;
+
+  i2cinfo("DMA setup for I2C%d\n", priv->config->bus);
+
+  /* Initialize DMAC module */
+
+  ret = ra_dmac_initialize();
+  if (ret < 0)
+    {
+      i2cerr("Failed to initialize DMAC: %d\n", ret);
+      return ret;
+    }
+
+  /* DMA active state is per-transfer, initialize to false */
+
+  priv->dma_active = false;
+  priv->dma_tx = NULL;
+  priv->dma_rx = NULL;
+  priv->dma_tx_done = false;
+  priv->dma_rx_done = false;
+  priv->use_dma = true;
+
+  i2cinfo("DMA setup completed for I2C%d\n", priv->config->bus);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: ra_i2c_dma_start_tx
+ *
+ * Description:
+ *   Start DMA for I2C TX transfer
+ *
+ ****************************************************************************/
+
+static int ra_i2c_dma_start_tx(struct ra_i2c_priv_s *priv,
+                               const uint8_t *buffer, uint32_t len)
+{
+  ra_dmac_config_t config;
+  int ret;
+
+  i2cinfo("DMA TX start: buffer=%p len=%lu\n", buffer, (unsigned long)len);
+
+  if (buffer == NULL || len == 0)
+    {
+      return -EINVAL;
+    }
+
+  /* Clean D-cache for TX buffer before DMA reads it */
+
+  up_clean_dcache((uintptr_t)buffer, (uintptr_t)buffer + len);
+
+  /* Configure TX DMA */
+
+  memset(&config, 0, sizeof(config));
+  config.mode = RA_DMAC_MODE_NORMAL;
+  config.repeat_area = RA_DMAC_REPEAT_AREA_NONE;
+  config.size = RA_DMAC_SIZE_8BIT;
+  config.src_addr_mode = RA_DMAC_ADDR_INCR;    /* Source increments */
+  config.dest_addr_mode = RA_DMAC_ADDR_FIXED;  /* Dest fixed (ICDRT) */
+  config.trigger = RA_DMAC_TRIGGER_HW;         /* Hardware trigger */
+  config.src_addr = (uint32_t)buffer;
+  config.dest_addr = priv->config->base + R_IIC_ICDRT_OFFSET;
+  config.transfer_count = len;
+  config.block_count = 0;
+  config.elc_src = priv->config->txi_elc;      /* I2C TXI event */
+  config.elc_end = -1;
+  config.elc_err = -1;
+  config.callback = ra_i2c_dma_tx_callback;
+  config.user_data = priv;
+
+  ret = ra_dmac_open(&priv->dma_tx, &config);
+  if (ret < 0)
+    {
+      i2cerr("Failed to open TX DMA: %d\n", ret);
+      return ret;
+    }
+
+  ret = ra_dmac_enable(priv->dma_tx);
+  if (ret < 0)
+    {
+      i2cerr("Failed to enable TX DMA: %d\n", ret);
+      ra_dmac_close(priv->dma_tx);
+      priv->dma_tx = NULL;
+      return ret;
+    }
+
+  priv->dma_tx_done = false;
+  priv->dma_active = true;
+
+  i2cinfo("TX DMA configured: src=0x%08lx dst=0x%08lx count=%lu\n",
+          (unsigned long)buffer,
+          (unsigned long)(priv->config->base + R_IIC_ICDRT_OFFSET),
+          (unsigned long)len);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: ra_i2c_dma_start_rx
+ *
+ * Description:
+ *   Start DMA for I2C RX transfer
+ *
+ ****************************************************************************/
+
+static int ra_i2c_dma_start_rx(struct ra_i2c_priv_s *priv,
+                               uint8_t *buffer, uint32_t len)
+{
+  ra_dmac_config_t config;
+  int ret;
+
+  i2cinfo("DMA RX start: buffer=%p len=%lu\n", buffer, (unsigned long)len);
+
+  if (buffer == NULL || len == 0)
+    {
+      return -EINVAL;
+    }
+
+  /* Configure RX DMA */
+
+  memset(&config, 0, sizeof(config));
+  config.mode = RA_DMAC_MODE_NORMAL;
+  config.repeat_area = RA_DMAC_REPEAT_AREA_NONE;
+  config.size = RA_DMAC_SIZE_8BIT;
+  config.src_addr_mode = RA_DMAC_ADDR_FIXED;   /* Source fixed (ICDRR) */
+  config.dest_addr_mode = RA_DMAC_ADDR_INCR;   /* Dest increments */
+  config.trigger = RA_DMAC_TRIGGER_HW;         /* Hardware trigger */
+  config.src_addr = priv->config->base + R_IIC_ICDRR_OFFSET;
+  config.dest_addr = (uint32_t)buffer;
+  config.transfer_count = len;
+  config.block_count = 0;
+  config.elc_src = priv->config->rxi_elc;      /* I2C RXI event */
+  config.elc_end = -1;
+  config.elc_err = -1;
+  config.callback = ra_i2c_dma_rx_callback;
+  config.user_data = priv;
+
+  ret = ra_dmac_open(&priv->dma_rx, &config);
+  if (ret < 0)
+    {
+      i2cerr("Failed to open RX DMA: %d\n", ret);
+      return ret;
+    }
+
+  ret = ra_dmac_enable(priv->dma_rx);
+  if (ret < 0)
+    {
+      i2cerr("Failed to enable RX DMA: %d\n", ret);
+      ra_dmac_close(priv->dma_rx);
+      priv->dma_rx = NULL;
+      return ret;
+    }
+
+  priv->dma_rx_done = false;
+  priv->dma_active = true;
+
+  i2cinfo("RX DMA configured: src=0x%08lx dst=0x%08lx count=%lu\n",
+          (unsigned long)(priv->config->base + R_IIC_ICDRR_OFFSET),
+          (unsigned long)buffer,
+          (unsigned long)len);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: ra_i2c_dma_stop
+ *
+ * Description:
+ *   Stop DMA transfer and release resources
+ *
+ ****************************************************************************/
+
+static void ra_i2c_dma_stop(struct ra_i2c_priv_s *priv)
+{
+  i2cinfo("DMA stop for I2C%d\n", priv->config->bus);
+
+  /* Disable and close TX DMA */
+
+  if (priv->dma_tx != NULL)
+    {
+      ra_dmac_disable(priv->dma_tx);
+      ra_dmac_close(priv->dma_tx);
+      priv->dma_tx = NULL;
+      i2cinfo("TX DMA stopped\n");
+    }
+
+  /* Disable and close RX DMA */
+
+  if (priv->dma_rx != NULL)
+    {
+      ra_dmac_disable(priv->dma_rx);
+      ra_dmac_close(priv->dma_rx);
+      priv->dma_rx = NULL;
+      i2cinfo("RX DMA stopped\n");
+    }
+
+  priv->dma_active = false;
+  priv->dma_tx_done = false;
+  priv->dma_rx_done = false;
+}
+#endif /* CONFIG_RA_DMA */
 
 /****************************************************************************
  * Name: ra_i2cbus_initialize

@@ -45,6 +45,8 @@
 #include "chip.h"
 #include "hardware/ra_memorymap.h"
 #include "ra_i2c.h"
+#include "ra_icu.h"
+#include "ra_mstp.h"
 
 #ifdef CONFIG_RA_I2C_SLAVE
 
@@ -78,6 +80,8 @@ struct ra_i2c_slave_priv_s
 
 #ifndef CONFIG_I2C_POLLED
   sem_t    sem_isr;       /* Interrupt wait semaphore */
+  sem_t    sem_tx;        /* TX completion semaphore */
+  sem_t    sem_rx;        /* RX completion semaphore */
 #endif
 
   /* I2C slave state */
@@ -87,13 +91,23 @@ struct ra_i2c_slave_priv_s
   uint16_t slave_addr;    /* Own slave address */
 
   /* I2C transfer state */
-  uint8_t *buffer;        /* Current transfer buffer */
-  uint32_t buflen;        /* Buffer length */
-  uint32_t nbytes;        /* Number of bytes transferred */
+  uint8_t *rx_buffer;     /* RX transfer buffer */
+  uint32_t rx_buflen;     /* RX buffer length */
+  uint32_t rx_nbytes;     /* Number of bytes received */
+
+  const uint8_t *tx_buffer; /* TX transfer buffer */
+  uint32_t tx_buflen;     /* TX buffer length */
+  uint32_t tx_nbytes;     /* Number of bytes transmitted */
 
   /* Callback function */
   i2c_slave_callback_t callback;
   void *callback_arg;
+
+  /* Interrupt numbers assigned at runtime */
+  int      rxi_irq;       /* RX interrupt number */
+  int      txi_irq;       /* TX interrupt number */
+  int      tei_irq;       /* TE interrupt number */
+  int      eri_irq;       /* ER interrupt number */
 
   uint32_t status;        /* End of transfer status */
 };
@@ -141,14 +155,14 @@ static const struct i2c_slave_ops_s ra_i2c_slave_ops =
 #ifdef CONFIG_RA_I2C0_SLAVE
 static const struct ra_i2c_config_s ra_i2c0_slave_config =
 {
-  .base         = R_IIC0_BASE,
-  .clk_freq     = BOARD_PCLKB_FREQUENCY,
+  .base         = R_IIC_CH_BASE(0),
+  .mstp         = RA_MSTP_IIC0,
+  .clk_freq     = RA_PCLKB_FREQUENCY,
   .bus          = 0,
-  .rxi_irq      = 0x35,  /* EVENT_IIC0_RXI */
-  .txi_irq      = 0x36,  /* EVENT_IIC0_TXI */
-  .tei_irq      = 0x37,  /* EVENT_IIC0_TEI */
-  .eri_irq      = 0x38,  /* EVENT_IIC0_ERI */
-  .mstpcrb_bit  = 1 << 24,   /* MSTPCRB bit for IIC0 */
+  .rxi_elc      = RA_ELC_IIC0_RXI,  /* EVENT_IIC0_RXI */
+  .txi_elc      = RA_ELC_IIC0_TXI,  /* EVENT_IIC0_TXI */
+  .tei_elc      = RA_ELC_IIC0_TEI,  /* EVENT_IIC0_TEI */
+  .eri_elc      = RA_ELC_IIC0_ERI,  /* EVENT_IIC0_ERI */
 };
 
 static struct ra_i2c_slave_priv_s ra_i2c0_slave_priv =
@@ -159,6 +173,8 @@ static struct ra_i2c_slave_priv_s ra_i2c0_slave_priv =
   .lock         = NXMUTEX_INITIALIZER,
 #ifndef CONFIG_I2C_POLLED
   .sem_isr      = SEM_INITIALIZER(0),
+  .sem_tx       = SEM_INITIALIZER(0),
+  .sem_rx       = SEM_INITIALIZER(0),
 #endif
   .state        = I2CSTATE_IDLE,
 };
@@ -167,14 +183,14 @@ static struct ra_i2c_slave_priv_s ra_i2c0_slave_priv =
 #ifdef CONFIG_RA_I2C1_SLAVE
 static const struct ra_i2c_config_s ra_i2c1_slave_config =
 {
-  .base         = R_IIC1_BASE,
-  .clk_freq     = BOARD_PCLKB_FREQUENCY,
+  .base         = R_IIC_CH_BASE(1),
+  .mstp         = RA_MSTP_IIC1,
+  .clk_freq     = RA_PCLKB_FREQUENCY,
   .bus          = 1,
-  .rxi_irq      = 0x3A,  /* EVENT_IIC1_RXI */
-  .txi_irq      = 0x3B,  /* EVENT_IIC1_TXI */
-  .tei_irq      = 0x3C,  /* EVENT_IIC1_TEI */
-  .eri_irq      = 0x3D,  /* EVENT_IIC1_ERI */
-  .mstpcrb_bit  = 1 << 23,   /* MSTPCRB bit for IIC1 */
+  .rxi_elc      = RA_ELC_IIC1_RXI,  /* EVENT_IIC1_RXI */
+  .txi_elc      = RA_ELC_IIC1_TXI,  /* EVENT_IIC1_TXI */
+  .tei_elc      = RA_ELC_IIC1_TEI,  /* EVENT_IIC1_TEI */
+  .eri_elc      = RA_ELC_IIC1_ERI,  /* EVENT_IIC1_ERI */
 };
 
 static struct ra_i2c_slave_priv_s ra_i2c1_slave_priv =
@@ -185,6 +201,8 @@ static struct ra_i2c_slave_priv_s ra_i2c1_slave_priv =
   .lock         = NXMUTEX_INITIALIZER,
 #ifndef CONFIG_I2C_POLLED
   .sem_isr      = SEM_INITIALIZER(0),
+  .sem_tx       = SEM_INITIALIZER(0),
+  .sem_rx       = SEM_INITIALIZER(0),
 #endif
   .state        = I2CSTATE_IDLE,
 };
@@ -245,23 +263,35 @@ static inline void ra_i2c_slave_modifyreg(struct ra_i2c_slave_priv_s *priv, uint
 static int ra_i2c_slave_setaddress(struct i2c_slave_s *dev, int addr)
 {
   struct ra_i2c_slave_priv_s *priv = (struct ra_i2c_slave_priv_s *)dev;
-  uint8_t regval;
+  uint8_t sar_low;
+  uint8_t sar_high;
 
   DEBUGASSERT(priv != NULL);
   DEBUGASSERT(addr >= 0 && addr <= 0x7F);
 
   priv->slave_addr = addr;
 
-  /* Set slave address in SARL0/SARU0 registers */
-  ra_i2c_slave_putreg(priv, R_IIC_SARL_OFFSET(0), (addr << 1) & 0xFE);
+  /* SAR register structure (per hardware manual):
+   * SAR is a 16-bit register accessed as two 8-bit registers
+   * SAR[0] offset 0x0A: Lower byte
+   *   Bits [7:1]: SVA[6:0] - Slave Address bits 6-0 (7-bit mode)
+   *   Bit [0]: FS - Format Select (0 = 7-bit mode, 1 = 10-bit mode)
+   * SAR[0] offset 0x0B: Upper byte
+   *   Bits [2:0]: SVA[9:7] - Upper slave address bits (10-bit mode only)
+   *
+   * For 7-bit address: address goes in bits [7:1] of lower byte, FS=0
+   */
 
-  regval = ra_i2c_slave_getreg(priv, R_IIC_SARU_OFFSET(0));
-  regval &= ~(R_IIC_SARU_SVA_MASK | R_IIC_SARU_FS);
-  regval |= ((addr >> 7) & 0x03) << R_IIC_SARU_SVA_SHIFT;  /* Upper 2 bits */
-  /* FS bit = 0 for 7-bit address format */
-  ra_i2c_slave_putreg(priv, R_IIC_SARU_OFFSET(0), regval);
+  sar_low = (uint8_t)((addr << 1) & 0xFE);  /* SVA[6:0] in bits [7:1], FS=0 */
+  sar_high = 0;  /* Not used for 7-bit addressing */
+
+  /* Write to SAR0 register (using offset macro) */
+
+  ra_i2c_slave_putreg(priv, R_IIC_SAR_OFFSET(0), sar_low);
+  ra_i2c_slave_putreg(priv, R_IIC_SAR_OFFSET(0) + 1, sar_high);
 
   /* Enable slave address 0 detection */
+
   ra_i2c_slave_modifyreg(priv, R_IIC_ICSER_OFFSET, 0, R_IIC_ICSER_SAR0E);
 
   i2cinfo("I2C%d slave address set to 0x%02X\n", priv->config->bus, addr);
@@ -274,10 +304,13 @@ static int ra_i2c_slave_setaddress(struct i2c_slave_s *dev, int addr)
  *
  * Description:
  *   Send data to I2C master (slave transmit mode)
+ *   This function prepares the TX buffer. Actual transmission happens
+ *   when master requests data via TXI interrupt.
  *
  ****************************************************************************/
 
-static int ra_i2c_slave_write(struct i2c_slave_s *dev, const uint8_t *buffer, int buflen)
+static int ra_i2c_slave_write(struct i2c_slave_s *dev,
+                              const uint8_t *buffer, int buflen)
 {
   struct ra_i2c_slave_priv_s *priv = (struct ra_i2c_slave_priv_s *)dev;
   int ret = OK;
@@ -285,23 +318,39 @@ static int ra_i2c_slave_write(struct i2c_slave_s *dev, const uint8_t *buffer, in
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
 
   /* Get exclusive access */
+
   ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
     }
 
-  /* Setup transfer */
-  priv->buffer = (uint8_t *)buffer;
-  priv->buflen = buflen;
-  priv->nbytes = 0;
+  /* Setup TX transfer buffer */
 
-  /* TODO: Implement slave write functionality */
-  /* This would typically involve:
-   * 1. Waiting for master to request data
-   * 2. Sending data bytes when requested
-   * 3. Handling NACK from master
-   */
+  priv->tx_buffer = buffer;
+  priv->tx_buflen = buflen;
+  priv->tx_nbytes = 0;
+
+  /* Enable TX interrupt to respond when master requests data */
+
+  ra_i2c_slave_modifyreg(priv, R_IIC_ICIER_OFFSET, 0, R_IIC_ICIER_TIE);
+
+#ifndef CONFIG_I2C_POLLED
+  /* Wait for transmission to complete or master to issue stop */
+
+  ret = nxsem_wait(&priv->sem_tx);
+  if (ret < 0)
+    {
+      i2cerr("I2C%d slave TX wait failed: %d\n", priv->config->bus, ret);
+    }
+#endif
+
+  /* Return number of bytes transmitted */
+
+  if (ret == OK)
+    {
+      ret = priv->tx_nbytes;
+    }
 
   nxmutex_unlock(&priv->lock);
 
@@ -313,6 +362,8 @@ static int ra_i2c_slave_write(struct i2c_slave_s *dev, const uint8_t *buffer, in
  *
  * Description:
  *   Receive data from I2C master (slave receive mode)
+ *   This function prepares the RX buffer. Actual reception happens
+ *   via RXI interrupt when master sends data.
  *
  ****************************************************************************/
 
@@ -324,23 +375,39 @@ static int ra_i2c_slave_read(struct i2c_slave_s *dev, uint8_t *buffer, int bufle
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
 
   /* Get exclusive access */
+
   ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
     }
 
-  /* Setup transfer */
-  priv->buffer = buffer;
-  priv->buflen = buflen;
-  priv->nbytes = 0;
+  /* Setup RX transfer buffer */
 
-  /* TODO: Implement slave read functionality */
-  /* This would typically involve:
-   * 1. Waiting for master to send data
-   * 2. Receiving data bytes
-   * 3. Sending ACK/NACK as appropriate
-   */
+  priv->rx_buffer = buffer;
+  priv->rx_buflen = buflen;
+  priv->rx_nbytes = 0;
+
+  /* Enable RX interrupt to receive data from master */
+
+  ra_i2c_slave_modifyreg(priv, R_IIC_ICIER_OFFSET, 0, R_IIC_ICIER_RIE);
+
+#ifndef CONFIG_I2C_POLLED
+  /* Wait for reception to complete or master to issue stop */
+
+  ret = nxsem_wait(&priv->sem_rx);
+  if (ret < 0)
+    {
+      i2cerr("I2C%d slave RX wait failed: %d\n", priv->config->bus, ret);
+    }
+#endif
+
+  /* Return number of bytes received */
+
+  if (ret == OK)
+    {
+      ret = priv->rx_nbytes;
+    }
 
   nxmutex_unlock(&priv->lock);
 
@@ -379,27 +446,33 @@ static int ra_i2c_slave_registercallback(struct i2c_slave_s *dev,
 static int ra_i2c_slave_init(struct ra_i2c_slave_priv_s *priv)
 {
   const struct ra_i2c_config_s *config = priv->config;
-  uint32_t regval;
+  int ret;
 
   /* Enable I2C module clock */
+
   ra_mstp_start(config->mstp);
 
   /* Reset I2C peripheral */
+
   ra_i2c_slave_modifyreg(priv, R_IIC_ICCR1_OFFSET, 0, R_IIC_ICCR1_IICRST);
   up_udelay(10);
   ra_i2c_slave_modifyreg(priv, R_IIC_ICCR1_OFFSET, R_IIC_ICCR1_IICRST, 0);
 
   /* Configure I2C mode registers for slave mode */
   /* ICMR1: Set internal reference clock select and bit counter */
+
   ra_i2c_slave_putreg(priv, R_IIC_ICMR1_OFFSET, 0);
 
   /* ICMR2: Configure delays and timeout */
+
   ra_i2c_slave_putreg(priv, R_IIC_ICMR2_OFFSET, 0);
 
   /* ICMR3: Configure SMBus/I2C selection and noise filter */
+
   ra_i2c_slave_putreg(priv, R_IIC_ICMR3_OFFSET, R_IIC_ICMR3_NF_MASK); /* Enable noise filter */
 
   /* ICFER: Configure function enables */
+
   ra_i2c_slave_putreg(priv, R_IIC_ICFER_OFFSET,
                       R_IIC_ICFER_TMOE |    /* Enable timeout */
                       R_IIC_ICFER_SALE |    /* Enable slave arbitration-lost detection */
@@ -407,10 +480,44 @@ static int ra_i2c_slave_init(struct ra_i2c_slave_priv_s *priv)
                       R_IIC_ICFER_SCLE);    /* Enable SCL synchronous circuit */
 
   /* ICSER: Configure slave address detection - will be set by setaddress */
+
   ra_i2c_slave_putreg(priv, R_IIC_ICSER_OFFSET, 0);
 
 #ifndef CONFIG_I2C_POLLED
+  /* Attach interrupt handlers via ICU using ELC events
+   * ra_icu_attach returns the IRQ number assigned to the ELC event
+   */
+
+  priv->rxi_irq = ra_icu_attach(config->rxi_elc, ra_i2c_slave_isr_rxi, priv, true);
+  if (priv->rxi_irq < 0)
+    {
+      i2cerr("I2C%d: Failed to attach RXI interrupt\n", config->bus);
+      goto errout;
+    }
+
+  priv->txi_irq = ra_icu_attach(config->txi_elc, ra_i2c_slave_isr_txi, priv, true);
+  if (priv->txi_irq < 0)
+    {
+      i2cerr("I2C%d: Failed to attach TXI interrupt\n", config->bus);
+      goto errout_rxi;
+    }
+
+  priv->tei_irq = ra_icu_attach(config->tei_elc, ra_i2c_slave_isr_tei, priv, true);
+  if (priv->tei_irq < 0)
+    {
+      i2cerr("I2C%d: Failed to attach TEI interrupt\n", config->bus);
+      goto errout_txi;
+    }
+
+  priv->eri_irq = ra_icu_attach(config->eri_elc, ra_i2c_slave_isr_eri, priv, true);
+  if (priv->eri_irq < 0)
+    {
+      i2cerr("I2C%d: Failed to attach ERI interrupt\n", config->bus);
+      goto errout_tei;
+    }
+
   /* Configure and enable interrupts for slave mode */
+
   ra_i2c_slave_putreg(priv, R_IIC_ICIER_OFFSET,
                       R_IIC_ICIER_TIE |     /* Transmit data empty interrupt */
                       R_IIC_ICIER_TEIE |    /* Transmit end interrupt */
@@ -420,27 +527,29 @@ static int ra_i2c_slave_init(struct ra_i2c_slave_priv_s *priv)
                       R_IIC_ICIER_STIE |    /* Start condition detection interrupt */
                       R_IIC_ICIER_ALIE |    /* Arbitration-lost detection interrupt */
                       R_IIC_ICIER_TMOIE);   /* Timeout detection interrupt */
-
-  /* Attach interrupt handlers */
-  irq_attach(config->rxi_irq, ra_i2c_slave_isr_rxi, priv);
-  irq_attach(config->txi_irq, ra_i2c_slave_isr_txi, priv);
-  irq_attach(config->tei_irq, ra_i2c_slave_isr_tei, priv);
-  irq_attach(config->eri_irq, ra_i2c_slave_isr_eri, priv);
-
-  /* Enable interrupts */
-  up_enable_irq(config->rxi_irq);
-  up_enable_irq(config->txi_irq);
-  up_enable_irq(config->tei_irq);
-  up_enable_irq(config->eri_irq);
 #endif
 
   /* Enable I2C peripheral in slave mode */
+
   ra_i2c_slave_modifyreg(priv, R_IIC_ICCR1_OFFSET, 0, R_IIC_ICCR1_ICE);
 
   /* Clear master mode bit to ensure slave mode */
+
   ra_i2c_slave_modifyreg(priv, R_IIC_ICCR2_OFFSET, R_IIC_ICCR2_MST, 0);
 
   return OK;
+
+#ifndef CONFIG_I2C_POLLED
+errout_tei:
+  ra_icu_detach(config->tei_elc);
+errout_txi:
+  ra_icu_detach(config->txi_elc);
+errout_rxi:
+  ra_icu_detach(config->rxi_elc);
+errout:
+  ra_mstp_stop(config->mstp);
+  return -EIO;
+#endif
 }
 
 /****************************************************************************
@@ -454,29 +563,34 @@ static int ra_i2c_slave_init(struct ra_i2c_slave_priv_s *priv)
 static int ra_i2c_slave_deinit(struct ra_i2c_slave_priv_s *priv)
 {
   const struct ra_i2c_config_s *config = priv->config;
-  uint32_t regval;
 
   /* Disable I2C peripheral */
+
   ra_i2c_slave_modifyreg(priv, R_IIC_ICCR1_OFFSET, R_IIC_ICCR1_ICE, 0);
 
-#ifndef CONFIG_I2C_POLLED
-  /* Disable interrupts */
-  up_disable_irq(config->rxi_irq);
-  up_disable_irq(config->txi_irq);
-  up_disable_irq(config->tei_irq);
-  up_disable_irq(config->eri_irq);
+  /* Disable all interrupts */
 
-  /* Detach interrupt handlers */
-  irq_detach(config->rxi_irq);
-  irq_detach(config->txi_irq);
-  irq_detach(config->tei_irq);
-  irq_detach(config->eri_irq);
+  ra_i2c_slave_putreg(priv, R_IIC_ICIER_OFFSET, 0);
+
+#ifndef CONFIG_I2C_POLLED
+  /* Detach interrupt handlers via ICU using ELC events */
+
+  ra_icu_detach(config->eri_elc);
+  ra_icu_detach(config->tei_elc);
+  ra_icu_detach(config->txi_elc);
+  ra_icu_detach(config->rxi_elc);
+
+  /* Clear runtime IRQ numbers */
+
+  priv->rxi_irq = 0;
+  priv->txi_irq = 0;
+  priv->tei_irq = 0;
+  priv->eri_irq = 0;
 #endif
 
   /* Disable I2C module clock */
-  regval = getreg32(0x40036038);  /* MSTPCRB register */
-  regval |= config->mstpcrb_bit;
-  putreg32(regval, 0x40036038);
+
+  ra_mstp_stop(config->mstp);
 
   return OK;
 }
@@ -487,29 +601,34 @@ static int ra_i2c_slave_deinit(struct ra_i2c_slave_priv_s *priv)
  *
  * Description:
  *   I2C slave RX interrupt service routine
+ *   Called when master sends data to slave (slave receive mode)
  *
  ****************************************************************************/
 
 static int ra_i2c_slave_isr_rxi(int irq, void *context, void *arg)
 {
   struct ra_i2c_slave_priv_s *priv = (struct ra_i2c_slave_priv_s *)arg;
+  uint8_t data;
 
   DEBUGASSERT(priv != NULL);
 
-  /* Handle received data */
-  if (priv->buffer && priv->nbytes < priv->buflen)
+  /* Read received data from ICDRR register */
+
+  data = ra_i2c_slave_getreg(priv, R_IIC_ICDRR_OFFSET);
+
+  /* Store in RX buffer if available */
+
+  if (priv->rx_buffer != NULL && priv->rx_nbytes < priv->rx_buflen)
     {
-  priv->buffer[priv->nbytes++] = ra_i2c_slave_getreg(priv, R_IIC_ICDRR_OFFSET);
+      priv->rx_buffer[priv->rx_nbytes++] = data;
     }
 
   /* Call callback if registered */
-  if (priv->callback)
+
+  if (priv->callback != NULL)
     {
       priv->callback(priv->callback_arg, I2C_SLAVE_READ);
     }
-
-  /* Signal semaphore to wake up waiting thread */
-  nxsem_post(&priv->sem_isr);
 
   return OK;
 }
@@ -519,6 +638,7 @@ static int ra_i2c_slave_isr_rxi(int irq, void *context, void *arg)
  *
  * Description:
  *   I2C slave TX interrupt service routine
+ *   Called when master requests data from slave (slave transmit mode)
  *
  ****************************************************************************/
 
@@ -528,20 +648,26 @@ static int ra_i2c_slave_isr_txi(int irq, void *context, void *arg)
 
   DEBUGASSERT(priv != NULL);
 
-  /* Send data if available */
-  if (priv->buffer && priv->nbytes < priv->buflen)
+  /* Send data from TX buffer if available */
+
+  if (priv->tx_buffer != NULL && priv->tx_nbytes < priv->tx_buflen)
     {
-  ra_i2c_slave_putreg(priv, R_IIC_ICDRT_OFFSET, priv->buffer[priv->nbytes++]);
+      ra_i2c_slave_putreg(priv, R_IIC_ICDRT_OFFSET,
+                          priv->tx_buffer[priv->tx_nbytes++]);
+    }
+  else
+    {
+      /* No more data - send dummy byte (0xFF is common for no data) */
+
+      ra_i2c_slave_putreg(priv, R_IIC_ICDRT_OFFSET, 0xff);
     }
 
   /* Call callback if registered */
-  if (priv->callback)
+
+  if (priv->callback != NULL)
     {
       priv->callback(priv->callback_arg, I2C_SLAVE_WRITE);
     }
-
-  /* Signal semaphore to wake up waiting thread */
-  nxsem_post(&priv->sem_isr);
 
   return OK;
 }
@@ -551,6 +677,7 @@ static int ra_i2c_slave_isr_txi(int irq, void *context, void *arg)
  *
  * Description:
  *   I2C slave transfer end interrupt service routine
+ *   Called when transmit data has been sent (TEND flag set)
  *
  ****************************************************************************/
 
@@ -560,14 +687,16 @@ static int ra_i2c_slave_isr_tei(int irq, void *context, void *arg)
 
   DEBUGASSERT(priv != NULL);
 
+  /* Wake up TX waiting thread - transmission complete */
+
+  nxsem_post(&priv->sem_tx);
+
   /* Call callback if registered */
-  if (priv->callback)
+
+  if (priv->callback != NULL)
     {
       priv->callback(priv->callback_arg, I2C_SLAVE_STOP);
     }
-
-  /* Signal semaphore to wake up waiting thread */
-  nxsem_post(&priv->sem_isr);
 
   return OK;
 }
@@ -577,6 +706,7 @@ static int ra_i2c_slave_isr_tei(int irq, void *context, void *arg)
  *
  * Description:
  *   I2C slave error interrupt service routine
+ *   Handles: Stop condition (SP), NACK, Arbitration Lost (AL), Timeout
  *
  ****************************************************************************/
 
@@ -587,22 +717,86 @@ static int ra_i2c_slave_isr_eri(int irq, void *context, void *arg)
 
   DEBUGASSERT(priv != NULL);
 
-  /* Read status to determine error type */
+  /* Read status to determine event/error type */
+
   sr2 = ra_i2c_slave_getreg(priv, R_IIC_ICSR2_OFFSET);
   priv->status = sr2;
 
-  /* Clear error flags */
-  ra_i2c_slave_modifyreg(priv, R_IIC_ICSR2_OFFSET,
-                        R_IIC_ICSR2_AL | R_IIC_ICSR2_TMOF | R_IIC_ICSR2_NACKF, 0);
+  /* Check for stop condition - this is normal end of transfer */
 
-  /* Call callback if registered */
-  if (priv->callback)
+  if (sr2 & R_IIC_ICSR2_STOP)
     {
-      priv->callback(priv->callback_arg, I2C_SLAVE_ERROR);
+      /* Clear stop flag */
+
+      ra_i2c_slave_modifyreg(priv, R_IIC_ICSR2_OFFSET, R_IIC_ICSR2_STOP, 0);
+
+      /* Wake up RX and TX waiting threads */
+
+      nxsem_post(&priv->sem_rx);
+      nxsem_post(&priv->sem_tx);
+
+      /* Call callback if registered */
+
+      if (priv->callback != NULL)
+        {
+          priv->callback(priv->callback_arg, I2C_SLAVE_STOP);
+        }
     }
 
-  /* Signal semaphore to wake up waiting thread */
-  nxsem_post(&priv->sem_isr);
+  /* Check for NACK from master (normal for last byte in read) */
+
+  if (sr2 & R_IIC_ICSR2_NACKF)
+    {
+      /* Clear NACK flag */
+
+      ra_i2c_slave_modifyreg(priv, R_IIC_ICSR2_OFFSET, R_IIC_ICSR2_NACKF, 0);
+
+      /* This is typically the end of a slave transmit transfer */
+
+      nxsem_post(&priv->sem_tx);
+    }
+
+  /* Check for arbitration lost */
+
+  if (sr2 & R_IIC_ICSR2_AL)
+    {
+      /* Clear AL flag */
+
+      ra_i2c_slave_modifyreg(priv, R_IIC_ICSR2_OFFSET, R_IIC_ICSR2_AL, 0);
+
+      /* Wake up waiting threads with error */
+
+      nxsem_post(&priv->sem_rx);
+      nxsem_post(&priv->sem_tx);
+
+      /* Call callback if registered */
+
+      if (priv->callback != NULL)
+        {
+          priv->callback(priv->callback_arg, I2C_SLAVE_ERROR);
+        }
+    }
+
+  /* Check for timeout */
+
+  if (sr2 & R_IIC_ICSR2_TMOF)
+    {
+      /* Clear timeout flag */
+
+      ra_i2c_slave_modifyreg(priv, R_IIC_ICSR2_OFFSET, R_IIC_ICSR2_TMOF, 0);
+
+      /* Wake up waiting threads with error */
+
+      nxsem_post(&priv->sem_rx);
+      nxsem_post(&priv->sem_tx);
+
+      /* Call callback if registered */
+
+      if (priv->callback != NULL)
+        {
+          priv->callback(priv->callback_arg, I2C_SLAVE_ERROR);
+        }
+    }
 
   return OK;
 }
@@ -611,7 +805,9 @@ static int ra_i2c_slave_isr_eri(int irq, void *context, void *arg)
  * Name: ra_i2c_slave_isr_start
  *
  * Description:
- *   I2C slave start condition interrupt service routine
+ *   I2C slave start condition detection handler
+ *   Note: This is called from ERI handler when start condition is detected.
+ *   Not a separate interrupt on RA8 IIC peripheral.
  *
  ****************************************************************************/
 
@@ -622,19 +818,20 @@ static int ra_i2c_slave_isr_start(int irq, void *context, void *arg)
   DEBUGASSERT(priv != NULL);
 
   /* Clear start flag */
+
   ra_i2c_slave_modifyreg(priv, R_IIC_ICSR2_OFFSET, R_IIC_ICSR2_START, 0);
 
-  /* Reset transfer state */
-  priv->nbytes = 0;
+  /* Reset transfer counters for new transfer */
+
+  priv->rx_nbytes = 0;
+  priv->tx_nbytes = 0;
 
   /* Call callback if registered */
-  if (priv->callback)
+
+  if (priv->callback != NULL)
     {
       priv->callback(priv->callback_arg, I2C_SLAVE_START);
     }
-
-  /* Signal semaphore to wake up waiting thread */
-  nxsem_post(&priv->sem_isr);
 
   return OK;
 }
@@ -643,7 +840,9 @@ static int ra_i2c_slave_isr_start(int irq, void *context, void *arg)
  * Name: ra_i2c_slave_isr_stop
  *
  * Description:
- *   I2C slave stop condition interrupt service routine
+ *   I2C slave stop condition detection handler
+ *   Note: This is called from ERI handler when stop condition is detected.
+ *   Not a separate interrupt on RA8 IIC peripheral.
  *
  ****************************************************************************/
 
@@ -654,16 +853,15 @@ static int ra_i2c_slave_isr_stop(int irq, void *context, void *arg)
   DEBUGASSERT(priv != NULL);
 
   /* Clear stop flag */
+
   ra_i2c_slave_modifyreg(priv, R_IIC_ICSR2_OFFSET, R_IIC_ICSR2_STOP, 0);
 
   /* Call callback if registered */
-  if (priv->callback)
+
+  if (priv->callback != NULL)
     {
       priv->callback(priv->callback_arg, I2C_SLAVE_STOP);
     }
-
-  /* Signal semaphore to wake up waiting thread */
-  nxsem_post(&priv->sem_isr);
 
   return OK;
 }
@@ -672,7 +870,8 @@ static int ra_i2c_slave_isr_stop(int irq, void *context, void *arg)
  * Name: ra_i2c_slave_isr_address
  *
  * Description:
- *   I2C slave address match interrupt service routine
+ *   I2C slave address match handler
+ *   Note: Called when slave address is matched (AAS flag).
  *
  ****************************************************************************/
 
@@ -684,20 +883,25 @@ static int ra_i2c_slave_isr_address(int irq, void *context, void *arg)
   DEBUGASSERT(priv != NULL);
 
   /* Read status to determine which address matched */
+
   sr1 = ra_i2c_slave_getreg(priv, R_IIC_ICSR1_OFFSET);
 
   /* Clear address match flags */
+
   ra_i2c_slave_modifyreg(priv, R_IIC_ICSR1_OFFSET,
                         R_IIC_ICSR1_AAS0 | R_IIC_ICSR1_AAS1 | R_IIC_ICSR1_AAS2, 0);
 
+  /* Reset transfer counters for new transfer */
+
+  priv->rx_nbytes = 0;
+  priv->tx_nbytes = 0;
+
   /* Call callback if registered */
-  if (priv->callback)
+
+  if (priv->callback != NULL)
     {
       priv->callback(priv->callback_arg, I2C_SLAVE_ADDRESS);
     }
-
-  /* Signal semaphore to wake up waiting thread */
-  nxsem_post(&priv->sem_isr);
 
   return OK;
 }
