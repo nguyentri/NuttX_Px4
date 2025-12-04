@@ -78,6 +78,11 @@ uint16_t ra_icu_get_nmi_status(void);
 void ra_icu_enable_dtc(int icu_irq);
 void ra_icu_disable_dtc(int icu_irq);
 
+/* DMAC control functions */
+void ra_icu_enable_dmac(int elc_event, int dmac_ch);
+void ra_icu_disable_dmac(int elc_event, int dmac_ch);
+void ra_icu_clear_dmac_status(int dmac_ch);
+
 #ifdef __cplusplus
 }
 #endif

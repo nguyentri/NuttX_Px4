@@ -50,12 +50,22 @@
  ****************************************************************************/
 
 /* DMAC Transfer Mode */
+
 typedef enum
 {
   RA_DMAC_MODE_NORMAL = 0,  /* Normal mode */
   RA_DMAC_MODE_REPEAT,      /* Repeat mode */
   RA_DMAC_MODE_BLOCK        /* Block mode */
 } ra_dmac_mode_t;
+
+/* DMAC Repeat/Block Area Select (DTS field) */
+
+typedef enum
+{
+  RA_DMAC_REPEAT_AREA_DEST = 0,   /* Destination is repeat/block area */
+  RA_DMAC_REPEAT_AREA_SRC,        /* Source is repeat/block area */
+  RA_DMAC_REPEAT_AREA_NONE        /* No repeat/block area specified */
+} ra_dmac_repeat_area_t;
 
 /* DMAC Transfer Size */
 typedef enum
@@ -88,9 +98,11 @@ typedef void *ra_dmac_handle_t;
 typedef void (*ra_dmac_callback_t)(void *handle, int event, void *user_data);
 
 /* DMAC configuration structure */
+
 typedef struct ra_dmac_config_s
 {
-  ra_dmac_mode_t       mode;             /* Transfer mode */
+  ra_dmac_mode_t       mode;             /* Transfer mode (MD field) */
+  ra_dmac_repeat_area_t repeat_area;     /* Repeat/block area select (DTS field) */
   ra_dmac_size_t       size;             /* Transfer data size */
   ra_dmac_addr_mode_t  src_addr_mode;    /* Source address mode */
   ra_dmac_addr_mode_t  dest_addr_mode;   /* Destination address mode */
@@ -101,9 +113,9 @@ typedef struct ra_dmac_config_s
   uint32_t             transfer_count;   /* Number of transfers */
   uint32_t             block_count;      /* Number of blocks (block mode) */
 
-  int                  elc_end;           /* DMA End of transfer event link */
-  int                  elc_err;           /* DMA Error event link */
-  int                  elc_src;           /* Even link of activation source */
+  int                  elc_end;          /* DMA End of transfer event link */
+  int                  elc_err;          /* DMA Error event link */
+  int                  elc_src;          /* Event link of activation source */
 
   ra_dmac_callback_t   callback;         /* Transfer callback */
   void                *user_data;        /* User data for callback */
@@ -131,7 +143,73 @@ int ra_dmac_reset(ra_dmac_handle_t handle, uint32_t src_addr,
                   uint32_t dest_addr, uint32_t transfer_count);
 
 /* DMAC status functions */
+
 uint32_t ra_dmac_get_remaining_count(ra_dmac_handle_t handle);
+
+/****************************************************************************
+ * Debug Interface
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_DMA_INFO
+
+/* DMAC debug register snapshot structure */
+
+struct ra_dmaregs_s
+{
+  /* Channel identification */
+
+  uint8_t  chan;          /* DMAC channel number */
+
+  /* Global DMA registers */
+
+  uint32_t dmast;         /* DMA Module Activation Register */
+  uint32_t dmctl;         /* DMA Control Register */
+  uint32_t dmechr;        /* DMA Error Channel Register */
+  uint32_t delsr;         /* DMA Event Link Setting Register */
+
+  /* Per-channel registers */
+
+  uint32_t dmsar;         /* DMA Source Address Register */
+  uint32_t dmdar;         /* DMA Destination Address Register */
+  uint32_t dmcra;         /* DMA Transfer Count Register */
+  uint32_t dmcrb;         /* DMA Block Transfer Count Register */
+  uint32_t dmtmd;         /* DMA Transfer Mode Register */
+  uint32_t dmamd;         /* DMA Address Mode Register */
+  uint8_t  dmint;         /* DMA Interrupt Setting Register */
+  uint8_t  dmcnt;         /* DMA Transfer Enable Register */
+  uint8_t  dmreq;         /* DMA Software Start Register */
+  uint8_t  dmsts;         /* DMA Status Register */
+};
+
+/****************************************************************************
+ * Name: ra_dmasample
+ *
+ * Description:
+ *   Sample DMA register contents for debugging
+ *
+ * Input Parameters:
+ *   handle - DMA channel handle created by ra_dmac_open()
+ *   regs   - Pointer to structure to receive register snapshot
+ *
+ ****************************************************************************/
+
+void ra_dmasample(ra_dmac_handle_t handle, struct ra_dmaregs_s *regs);
+
+/****************************************************************************
+ * Name: ra_dmadump
+ *
+ * Description:
+ *   Dump previously sampled DMA register contents
+ *
+ * Input Parameters:
+ *   regs - Pointer to sampled register structure
+ *   msg  - Message to print with dump
+ *
+ ****************************************************************************/
+
+void ra_dmadump(const struct ra_dmaregs_s *regs, const char *msg);
+
+#endif /* CONFIG_DEBUG_DMA_INFO */
 
 #ifdef __cplusplus
 }

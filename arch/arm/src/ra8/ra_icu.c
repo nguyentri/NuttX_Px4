@@ -43,6 +43,7 @@
 #include "chip.h"
 #include "hardware/ra_memorymap.h"
 #include "ra_icu.h"
+#include "ra_dmac.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -470,4 +471,89 @@ void ra_icu_disable_dtc(int icu_irq)
   regval = getreg32(R_ICU_IELSR(slot));
   regval &= ~R_ICU_IELSR_DTCE;  /* Clear DTCE bit */
   putreg32(regval, R_ICU_IELSR(slot));
+}
+
+/****************************************************************************
+ * Name: ra_icu_enable_dmac
+ *
+ * Description:
+ *   Configure DELSR register to enable DMAC activation by ELC event.
+ *   This maps an ELC event number directly to a DMAC channel's activation
+ *   source. The ELC event number specifies which peripheral event will
+ *   trigger DMA transfers on the specified channel.
+ *
+ * Inputs:
+ *   elc_event - ELC event number (from ELC event table, e.g., SCI0_TXI, etc.)
+ *   dmac_ch   - DMAC channel number (0-7) to configure activation for
+ *
+ ****************************************************************************/
+
+void ra_icu_enable_dmac(int elc_event, int dmac_ch)
+{
+  uint32_t regval;
+
+  /* Validate DMAC channel range (0-7) */
+
+  if (dmac_ch < 0 || dmac_ch >= DMAC_MAX_CHANNELS)
+    {
+      return;
+    }
+
+  /* Validate ELC event range */
+
+  if (elc_event < 0)
+    {
+      return;
+    }
+
+  /* Program DELSR[dmac_ch].DELS = ELC event number
+   * This configures which ELC event activates this DMAC channel
+   */
+
+  regval = getreg32(R_ICU_DELSR(dmac_ch));
+  regval &= ~R_ICU_DELSR_DELS_MASK;
+  regval |= (elc_event & R_ICU_DELSR_DELS_MASK);
+  putreg32(regval, R_ICU_DELSR(dmac_ch));
+}
+
+/****************************************************************************
+ * Name: ra_icu_disable_dmac
+ *
+ * Description:
+ *   Disable DMAC event trigger by clearing the DELSR register.
+ *   Sets DELSR[dmac_ch].DELS = 0 to disable DMA activation.
+ *
+ * Inputs:
+ *   elc_event - ELC event number (unused, kept for API symmetry)
+ *   dmac_ch   - DMAC channel number (0-7) to disable
+ *
+ ****************************************************************************/
+
+void ra_icu_disable_dmac(int elc_event, int dmac_ch)
+{
+  uint32_t regval;
+
+  UNUSED(elc_event);
+
+  /* Validate DMAC channel */
+
+  if (dmac_ch < 0 || dmac_ch >= DMAC_MAX_CHANNELS)
+    {
+      return;
+    }
+
+  /* Clear DELSR[dmac_ch].DELS = 0 (disable DMA activation) */
+
+  regval = getreg32(R_ICU_DELSR(dmac_ch));
+  regval &= ~R_ICU_DELSR_DELS_MASK;
+  putreg32(regval, R_ICU_DELSR(dmac_ch));
+}
+
+
+void ra_icu_clear_dmac_status(int dmac_ch)
+{
+  uint32_t regval = getreg32(R_ICU_DELSR(dmac_ch));
+
+  regval &= ~R_ICU_DELSR_IR;   /* Write 0 to clear */
+  putreg32(regval, R_ICU_DELSR(dmac_ch));
 }

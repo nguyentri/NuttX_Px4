@@ -1850,8 +1850,27 @@ config RA_DMAC_CHANNELS
    int "Number of DMAC channels"
    default 8
    depends on RA_DMAC
+   range 1 8
    ---help---
       Number of DMAC channels to support (1-8).
+      RA8 MCUs support up to 8 DMAC channels.
+
+config RA_DMAC_PRIORITY
+   bool "Enable DMAC priority control"
+   default n
+   depends on RA_DMAC
+   help
+     Enable channel priority control for DMAC.
+     When enabled, lower numbered channels have higher priority.
+     When disabled, round-robin arbitration is used.
+
+config RA_DMAC_HALT_ON_ERROR
+   bool "Halt DMAC on error"
+   default y
+   depends on RA_DMAC
+   help
+     Halt all DMAC operations when a bus error occurs.
+     Recommended for debugging; may be disabled for production.
 
 config RA_DTC
    bool "DTC (Data Transfer Controller)"
@@ -1859,6 +1878,36 @@ config RA_DTC
    help
      Enable Data Transfer Controller for simple data transfers.
      DTC provides lower overhead than DMAC for simple transfers.
+
+if RA_DMAC
+
+menu "DMAC Debug Options"
+
+config DEBUG_DMA_ERROR
+   bool "DMAC error output"
+   default n
+   depends on DEBUG_ERROR
+   help
+     Enable DMAC error output (dmaerr).
+
+config DEBUG_DMA_WARN
+   bool "DMAC warnings output"
+   default n
+   depends on DEBUG_WARN
+   help
+     Enable DMAC warning output (dmawarn).
+
+config DEBUG_DMA_INFO
+   bool "DMAC informational output"
+   default n
+   depends on DEBUG_INFO
+   help
+     Enable DMAC informational output (dmainfo).
+     Also enables ra_dmasample() and ra_dmadump() debug functions.
+
+endmenu
+
+endif # RA_DMAC
 
 endmenu
 
@@ -1906,7 +1955,7 @@ config RA_ADC_B
 config RA_ADC_DTC
    bool "Use DTC for ADC transfers"
    default n
-   depends on RA_ADC && RA_DMAC
+   depends on RA_ADC && RA_DTC
    help
      Use Data Transfer Controller (DTC) for ADC conversions to reduce CPU usage.
 
