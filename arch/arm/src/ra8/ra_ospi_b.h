@@ -29,6 +29,17 @@
 #include <nuttx/spi/qspi.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Protocol mode values for ra_ospi_set_protocol() */
+
+#define RA_OSPI_PROTO_SPI         0    /* 1S-1S-1S (Standard SPI) */
+#define RA_OSPI_PROTO_QSPI_IO     1    /* 1S-4S-4S (Quad I/O) */
+#define RA_OSPI_PROTO_QSPI        4    /* 4S-4S-4S (Quad mode) */
+#define RA_OSPI_PROTO_OPI         8    /* 8D-8D-8D (Octal DDR) */
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
@@ -36,10 +47,18 @@
  * Name: ra_ospi_initialize
  *
  * Description:
- *   Initialize the OSPI driver and return the QSPI device interface.
+ *   Initialize the OSPI_B driver and return the QSPI device interface.
+ *
+ *   This function performs the complete initialization sequence:
+ *   1. Enable module clock (MSTP)
+ *   2. Configure wrapper timing (WRAPCFG)
+ *   3. Configure protocol mode (LIOCFGCS) - starts in SPI mode
+ *   4. Configure command mapping (CMCFG0/1/2)
+ *   5. Configure bridge mapping (BMCTL0, BMCFGCH)
+ *   6. Issue flash reset sequence
  *
  * Input Parameters:
- *   port - The OSPI port number (0 for OSPI_B)
+ *   port - The OSPI port number (0 or 1)
  *
  * Returned Value:
  *   A valid QSPI device structure reference on success; NULL on failure
@@ -47,5 +66,47 @@
  ****************************************************************************/
 
 struct qspi_dev_s *ra_ospi_initialize(int port);
+
+/****************************************************************************
+ * Name: ra_ospi_set_protocol
+ *
+ * Description:
+ *   Change the OSPI protocol mode. This is used to switch between SPI
+ *   and OPI modes after initial communication with the flash device.
+ *
+ * Input Parameters:
+ *   dev   - QSPI device structure from ra_ospi_initialize()
+ *   proto - Protocol mode:
+ *           RA_OSPI_PROTO_SPI (0)     - 1S-1S-1S Standard SPI
+ *           RA_OSPI_PROTO_QSPI_IO (1) - 1S-4S-4S Quad I/O
+ *           RA_OSPI_PROTO_QSPI (4)    - 4S-4S-4S Quad mode
+ *           RA_OSPI_PROTO_OPI (8)     - 8D-8D-8D Octal DDR
+ *
+ * Returned Value:
+ *   OK on success; negative errno on failure
+ *
+ ****************************************************************************/
+
+int ra_ospi_set_protocol(struct qspi_dev_s *dev, int proto);
+
+/****************************************************************************
+ * Name: ra_ospi_set_latency
+ *
+ * Description:
+ *   Set the read and write latency (dummy) cycles. This must match the
+ *   flash device configuration.
+ *
+ * Input Parameters:
+ *   dev           - QSPI device structure from ra_ospi_initialize()
+ *   read_latency  - Read latency cycles (typically 0-20)
+ *   write_latency - Write latency cycles (typically 0-4)
+ *
+ * Returned Value:
+ *   OK on success; negative errno on failure
+ *
+ ****************************************************************************/
+
+int ra_ospi_set_latency(struct qspi_dev_s *dev,
+                        uint8_t read_latency, uint8_t write_latency);
 
 #endif /* __ARCH_ARM_SRC_RA_RA8_OSPI_B_H */

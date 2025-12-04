@@ -29,12 +29,17 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#if defined(CONFIG_RA8E1_GROUP)
+#  include "hardware/ra8e1/ra_mstp.h"
+#elif defined(CONFIG_RA8P1_GROUP)
+#  include "hardware/ra8p1/ra_mstp.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-
-/* Compatibility aliases */
+/* MSTPCRB - Module Stop Control Register B */
 #define R_MSTP_MSTPCRB_SCI0            R_MSTP_MSTPCRB_MSTPB31
 #define R_MSTP_MSTPCRB_SCI1            R_MSTP_MSTPCRB_MSTPB30
 #define R_MSTP_MSTPCRB_SCI2            R_MSTP_MSTPCRB_MSTPB29
@@ -43,67 +48,49 @@
 #define R_MSTP_MSTPCRB_SCI9            R_MSTP_MSTPCRB_MSTPB22
 #define R_MSTP_MSTPCRB_SPI0            R_MSTP_MSTPCRB_MSTPB19
 #define R_MSTP_MSTPCRB_SPI1            R_MSTP_MSTPCRB_MSTPB18
+#define R_MSTP_MSTPCRB_OSPI0           R_MSTP_MSTPCRB_MSTPB16 /* 00010000: Octal Serial Peripheral Interface 0 Module Stop */
+#define R_MSTP_MSTPCRB_OSPI1           R_MSTP_MSTPCRB_MSTPB17 /* 00020000: Octal Serial Peripheral Interface 1 Module Stop */
+#define R_MSTP_MSTPCRB_USBHS           R_MSTP_MSTPCRB_MSTPB12 /* 00001000: USB High Speed Module Stop */
 #define R_MSTP_MSTPCRB_USBFS           R_MSTP_MSTPCRB_MSTPB11
-#define R_MSTP_MSTPCRB_OSPI            R_MSTP_MSTPCRB_MSTPB12
 #define R_MSTP_MSTPCRB_IIC0            R_MSTP_MSTPCRB_MSTPB9
 #define R_MSTP_MSTPCRB_IIC1            R_MSTP_MSTPCRB_MSTPB8
-
-/* MSTPCRC - Module Stop Control Register C */
-
-#define R_MSTP_MSTPCRC_MSTPC31         (1 << 31) /* 80000000: Renesas Secure IP Module Stop */
-#define R_MSTP_MSTPCRC_MSTPC27         (1 << 27) /* 08000000: Controller Area Network with Flexible Data-Rate 0 Module Stop */
-#define R_MSTP_MSTPCRC_MSTPC26         (1 << 26) /* 04000000: Controller Area Network with Flexible Data-Rate 1 Module Stop */
-#define R_MSTP_MSTPCRC_MSTPC16         (1 << 16) /* 00010000: Capture Engine Unit Module Stop */
-#define R_MSTP_MSTPCRC_MSTPC14         (1 << 14) /* 00004000: Event Link Controller Module Stop */
-#define R_MSTP_MSTPCRC_MSTPC13         (1 << 13) /* 00002000: Data Operation Circuit Module Stop */
-#define R_MSTP_MSTPCRC_MSTPC8          (1 <<  8) /* 00000100: Serial Sound Interface Enhanced 0 Module Stop */
-#define R_MSTP_MSTPCRC_MSTPC7          (1 <<  7) /* 00000080: Serial Sound Interface Enhanced 1 Module Stop */
-#define R_MSTP_MSTPCRC_MSTPC1          (1 <<  1) /* 00000002: Cyclic Redundancy Check Calculator Module Stop */
-#define R_MSTP_MSTPCRC_MSTPC0          (1 <<  0) /* 00000001: Clock Frequency Accuracy Measurement Circuit Module Stop */
+#define R_MSTP_MSTPCRB_I3C             R_MSTP_MSTPCRB_MSTPB4  /* 00000010: I3C Bus Interface Module Stop */
 
 /* Compatibility aliases */
 #define R_MSTP_MSTPCRC_SCE5            R_MSTP_MSTPCRC_MSTPC31
 #define R_MSTP_MSTPCRC_CANFD0          R_MSTP_MSTPCRC_MSTPC27
 #define R_MSTP_MSTPCRC_CANFD1          R_MSTP_MSTPCRC_MSTPC26
 #define R_MSTP_MSTPCRC_CEU             R_MSTP_MSTPCRC_MSTPC16
-#define R_MSTP_MSTPCRC_VIN             R_MSTP_MSTPCRC_MSTPC16  /* VIN uses same bit as CEU */
-#define R_MSTP_MSTPCRC_MIPI_CSI        R_MSTP_MSTPCRC_MSTPC17  /* MIPI-CSI: MSTPC17 */
-#define R_MSTP_MSTPCRC_MSTPC17         (1 << 17)               /* MIPI-CSI Module Stop */
+#define R_MSTP_MSTPCRC_VIN             R_MSTP_MSTPCRC_MSTPC16
+#define R_MSTP_MSTPCRC_MIPI_CSI        R_MSTP_MSTPCRC_MSTPC17
 #define R_MSTP_MSTPCRC_ELC             R_MSTP_MSTPCRC_MSTPC14
 #define R_MSTP_MSTPCRC_DOC             R_MSTP_MSTPCRC_MSTPC13
+#define R_MSTP_MSTPCRC_SDHI            R_MSTP_MSTPCRC_MSTPC12
+#define R_MSTP_MSTPCRC_SRC             R_MSTP_MSTPCRC_MSTPC9
 #define R_MSTP_MSTPCRC_SSIE0           R_MSTP_MSTPCRC_MSTPC8
 #define R_MSTP_MSTPCRC_SSI0            R_MSTP_MSTPCRC_MSTPC8
 #define R_MSTP_MSTPCRC_SSIE1           R_MSTP_MSTPCRC_MSTPC7
 #define R_MSTP_MSTPCRC_SSI1            R_MSTP_MSTPCRC_MSTPC7
+#define R_MSTP_MSTPCRC_DRW             R_MSTP_MSTPCRC_MSTPC6
+#define R_MSTP_MSTPCRC_JPEG            R_MSTP_MSTPCRC_MSTPC5
+#define R_MSTP_MSTPCRC_GLCDC           R_MSTP_MSTPCRC_MSTPC4
+#define R_MSTP_MSTPCRC_CTSU            R_MSTP_MSTPCRC_MSTPC3
+#define R_MSTP_MSTPCRC_PDC             R_MSTP_MSTPCRC_MSTPC2
 #define R_MSTP_MSTPCRC_CRC             R_MSTP_MSTPCRC_MSTPC1
 #define R_MSTP_MSTPCRC_CAC             R_MSTP_MSTPCRC_MSTPC0
 
 /* MSTPCRD - Module Stop Control Register D */
-
-#define R_MSTP_MSTPCRD_MSTPD28         (1 << 28) /* 10000000: High-Speed Analog Comparator 0 Module Stop */
-#define R_MSTP_MSTPCRD_MSTPD27         (1 << 27) /* 08000000: High-Speed Analog Comparator 1 Module Stop */
-#define R_MSTP_MSTPCRD_MSTPD23         (1 << 23) /* 00800000: Real-Time Clock Module Stop */
-#define R_MSTP_MSTPCRD_MSTPD22         (1 << 22) /* 00400000: Temperature Sensor Module Stop */
-#define R_MSTP_MSTPCRD_MSTPD20         (1 << 20) /* 00100000: 12-bit D/A Converter Module Stop */
-#define R_MSTP_MSTPCRD_MSTPD16         (1 << 16) /* 00010000: 12-bit A/D Converter 0 Module Stop */
-#define R_MSTP_MSTPCRD_MSTPD15         (1 << 15) /* 00008000: 12-bit A/D Converter 1 Module Stop */
-#define R_MSTP_MSTPCRD_MSTPD14         (1 << 14) /* 00004000: Port Output Enable for GPT Group A Module Stop */
-#define R_MSTP_MSTPCRD_MSTPD13         (1 << 13) /* 00002000: Port Output Enable for GPT Group B Module Stop */
-#define R_MSTP_MSTPCRD_MSTPD12         (1 << 12) /* 00001000: Port Output Enable for GPT Group C Module Stop */
-#define R_MSTP_MSTPCRD_MSTPD11         (1 << 11) /* 00000800: Port Output Enable for GPT Group D Module Stop */
-#define R_MSTP_MSTPCRD_MSTPD5          (1 <<  5) /* 00000020: Low Power Asynchronous General Purpose Timer 0 Module Stop */
-#define R_MSTP_MSTPCRD_MSTPD4          (1 <<  4) /* 00000010: Low Power Asynchronous General Purpose Timer 1 Module Stop */
-
-/* Compatibility aliases */
+#define R_MSTP_MSTPCRD_OPAMP           R_MSTP_MSTPCRD_MSTPD31
+#define R_MSTP_MSTPCRD_ACMPLP          R_MSTP_MSTPCRD_MSTPD29
 #define R_MSTP_MSTPCRD_ACMPHS0         R_MSTP_MSTPCRD_MSTPD28
 #define R_MSTP_MSTPCRD_ACMPHS1         R_MSTP_MSTPCRD_MSTPD27
 #define R_MSTP_MSTPCRD_ACMPHS          R_MSTP_MSTPCRD_MSTPD28  /* Default to ACMPHS0 */
 #define R_MSTP_MSTPCRD_RTC             R_MSTP_MSTPCRD_MSTPD23
 #define R_MSTP_MSTPCRD_TSN             R_MSTP_MSTPCRD_MSTPD22
-#define R_MSTP_MSTPCRD_DAC12           R_MSTP_MSTPCRD_MSTPD20
-#define R_MSTP_MSTPCRD_DAC             R_MSTP_MSTPCRD_MSTPD20
-#define R_MSTP_MSTPCRD_ADC0            R_MSTP_MSTPCRD_MSTPD16
-#define R_MSTP_MSTPCRD_ADC1            R_MSTP_MSTPCRD_MSTPD15
+#define R_MSTP_MSTPCRD_ADC0            R_MSTP_MSTPCRD_MSTPD21
+#define R_MSTP_MSTPCRD_ADC1            R_MSTP_MSTPCRD_MSTPD20
+#define R_MSTP_MSTPCRD_DAC0            R_MSTP_MSTPCRD_MSTPD20
+#define R_MSTP_MSTPCRD_DAC1            R_MSTP_MSTPCRD_MSTPD19
 #define R_MSTP_MSTPCRD_POEG0           R_MSTP_MSTPCRD_MSTPD14
 #define R_MSTP_MSTPCRD_POEG1           R_MSTP_MSTPCRD_MSTPD13
 #define R_MSTP_MSTPCRD_POEG2           R_MSTP_MSTPCRD_MSTPD12
@@ -113,21 +100,6 @@
 #define R_MSTP_MSTPCRD_AGT1            R_MSTP_MSTPCRD_MSTPD4
 
 /* MSTPCRE - Module Stop Control Register E */
-
-#define R_MSTP_MSTPCRE_MSTPE31         (1 << 31) /* 80000000: General PWM Timer 0 Module Stop */
-#define R_MSTP_MSTPCRE_MSTPE30         (1 << 30) /* 40000000: General PWM Timer 1 Module Stop */
-#define R_MSTP_MSTPCRE_MSTPE29         (1 << 29) /* 20000000: General PWM Timer 2 Module Stop */
-#define R_MSTP_MSTPCRE_MSTPE28         (1 << 28) /* 10000000: General PWM Timer 3 Module Stop */
-#define R_MSTP_MSTPCRE_MSTPE27         (1 << 27) /* 08000000: General PWM Timer 4 Module Stop */
-#define R_MSTP_MSTPCRE_MSTPE26         (1 << 26) /* 04000000: General PWM Timer 5 Module Stop */
-#define R_MSTP_MSTPCRE_MSTPE21         (1 << 21) /* 00200000: General PWM Timer 10 Module Stop */
-#define R_MSTP_MSTPCRE_MSTPE20         (1 << 20) /* 00100000: General PWM Timer 11 Module Stop */
-#define R_MSTP_MSTPCRE_MSTPE19         (1 << 19) /* 00080000: General PWM Timer 12 Module Stop */
-#define R_MSTP_MSTPCRE_MSTPE18         (1 << 18) /* 00040000: General PWM Timer 13 Module Stop */
-#define R_MSTP_MSTPCRE_MSTPE9          (1 <<  9) /* 00000200: Ultra-Low Power Timer 0 Module Stop */
-#define R_MSTP_MSTPCRE_MSTPE8          (1 <<  8) /* 00000100: Ultra-Low Power Timer 1 Module Stop */
-
-/* Compatibility aliases */
 #define R_MSTP_MSTPCRE_GPT0            R_MSTP_MSTPCRE_MSTPE31
 #define R_MSTP_MSTPCRE_GPT1            R_MSTP_MSTPCRE_MSTPE30
 #define R_MSTP_MSTPCRE_GPT2            R_MSTP_MSTPCRE_MSTPE29
@@ -162,10 +134,13 @@ typedef enum
   RA_MSTP_SPI1,             /* MSTPB18: Serial Peripheral Interface 1 */
   RA_MSTP_SCI10,            /* MSTPB16: SCI Communication Interface 10 */
   RA_MSTP_ETHERCAT,         /* MSTPB15: EtherCAT */
-  RA_MSTP_OSPI,             /* MSTPB12: Octal Serial Peripheral Interface */
+  RA_MSTP_OSPI0,            /* MSTPB16: Octal Serial Peripheral Interface 0 */
+  RA_MSTP_OSPI1,            /* MSTPB17: Octal Serial Peripheral Interface 1 */
+  RA_MSTP_USBHS,            /* MSTPB12: USB High Speed */
   RA_MSTP_USBFS,            /* MSTPB11: Universal Serial Bus 2.0 FS Interface */
   RA_MSTP_IIC0,             /* MSTPB9: I2C Bus Interface 0 */
   RA_MSTP_IIC1,             /* MSTPB8: I2C Bus Interface 1 */
+  RA_MSTP_I3C,              /* MSTPB4: I3C */
 
   /* MSTPCRC register modules */
   RA_MSTP_SCE5,             /* MSTPC31: Renesas Secure IP */
@@ -176,19 +151,29 @@ typedef enum
   RA_MSTP_MIPI_CSI,         /* MSTPC17: MIPI-CSI */
   RA_MSTP_ELC,              /* MSTPC14: Event Link Controller */
   RA_MSTP_DOC,              /* MSTPC13: Data Operation Circuit */
+  RA_MSTP_SDHI,             /* MSTPC12: SD/MMC Host Interface */
+  RA_MSTP_SRC,              /* MSTPC9: Sampling Rate Converter */
   RA_MSTP_SSIE0,            /* MSTPC8: Serial Sound Interface Enhanced 0 */
   RA_MSTP_SSIE1,            /* MSTPC7: Serial Sound Interface Enhanced 1 */
+  RA_MSTP_DRW,              /* MSTPC6: 2D Drawing Engine */
+  RA_MSTP_JPEG,             /* MSTPC5: JPEG Codec */
+  RA_MSTP_GLCDC,            /* MSTPC4: Graphics LCD Controller */
+  RA_MSTP_CTSU,             /* MSTPC3: Capacitive Touch Sensing Unit */
+  RA_MSTP_PDC,              /* MSTPC2: Parallel Data Capture */
   RA_MSTP_CRC,              /* MSTPC1: Cyclic Redundancy Check Calculator */
   RA_MSTP_CAC,              /* MSTPC0: Clock Frequency Accuracy Measurement Circuit */
 
   /* MSTPCRD register modules */
+  RA_MSTP_OPAMP,            /* MSTPD31: Operational Amplifier */
+  RA_MSTP_ACMPLP,           /* MSTPD29: Low-Power Analog Comparator */
   RA_MSTP_ACMPHS0,          /* MSTPD28: High-Speed Analog Comparator 0 */
   RA_MSTP_ACMPHS1,          /* MSTPD27: High-Speed Analog Comparator 1 */
   RA_MSTP_RTC,              /* MSTPD23: Real Time Clock */
   RA_MSTP_TSN,              /* MSTPD22: Temperature Sensor */
-  RA_MSTP_DAC12,            /* MSTPD20: 12-bit D/A Converter */
-  RA_MSTP_ADC0,             /* MSTPD16: 12-bit A/D Converter 0 */
-  RA_MSTP_ADC1,             /* MSTPD15: 12-bit A/D Converter 1 */
+  RA_MSTP_ADC0,             /* MSTPD21: 12-bit A/D Converter 0 */
+  RA_MSTP_ADC1,             /* MSTPD20: 12-bit A/D Converter 1 */
+  RA_MSTP_DAC0,             /* MSTPD20: 12-bit D/A Converter 0 */
+  RA_MSTP_DAC1,             /* MSTPD19: 12-bit D/A Converter 1 */
   RA_MSTP_POEG0,            /* MSTPD14: Port Output Enable for GPT Group A */
   RA_MSTP_POEG1,            /* MSTPD13: Port Output Enable for GPT Group B */
   RA_MSTP_POEG2,            /* MSTPD12: Port Output Enable for GPT Group C */

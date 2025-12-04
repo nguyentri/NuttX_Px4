@@ -66,7 +66,7 @@ static uint32_t ra_mstp_get_regaddr(ra_mstp_module_t module)
     {
       return R_MSTP_MSTPCRA;
     }
-  else if (module >= RA_MSTP_SCI0 && module <= RA_MSTP_IIC1)
+  else if (module >= RA_MSTP_SCI0 && module <= RA_MSTP_I3C)
     {
       return R_MSTP_MSTPCRB;
     }
@@ -78,7 +78,7 @@ static uint32_t ra_mstp_get_regaddr(ra_mstp_module_t module)
     {
       return R_MSTP_MSTPCRC;
     }
-  else if (module >= RA_MSTP_ACMPHS0 && module <= RA_MSTP_AGT1)
+  else if (module >= RA_MSTP_OPAMP && module <= RA_MSTP_AGT1)
     {
       return R_MSTP_MSTPCRD;
     }
@@ -105,68 +105,82 @@ static uint32_t ra_mstp_get_bitmask(ra_mstp_module_t module)
   switch (module)
     {
       /* MSTPCRA register modules */
-      case RA_MSTP_UNNECESSARY:   return (1 <<  0);  /* MSTPA0 */
-      case RA_MSTP_SRAM1:         return (1 <<  1);  /* MSTPA1 */
-      case RA_MSTP_STANDBY_SRAM:  return (1 << 15);  /* MSTPA15 */
-      case RA_MSTP_DMAC_DTC:      return (1 << 22);  /* MSTPA22 */
+      case RA_MSTP_UNNECESSARY:   return R_MSTP_MSTPCRA_MSTPA0;
+      case RA_MSTP_SRAM1:         return R_MSTP_MSTPCRA_MSTPA1;
+      case RA_MSTP_STANDBY_SRAM:  return R_MSTP_MSTPCRA_MSTPA15;
+      case RA_MSTP_DMAC_DTC:      return R_MSTP_MSTPCRA_MSTPA22;
 
       /* MSTPCRB register modules */
-      case RA_MSTP_SCI0:          return (1 << 31);  /* MSTPB31 */
-      case RA_MSTP_SCI1:          return (1 << 30);  /* MSTPB30 */
-      case RA_MSTP_SCI2:          return (1 << 29);  /* MSTPB29 */
-      case RA_MSTP_SCI3:          return (1 << 28);  /* MSTPB28 */
-      case RA_MSTP_SCI4:          return (1 << 27);  /* MSTPB27 */
-      case RA_MSTP_SCI9:          return (1 << 22);  /* MSTPB22 */
-      case RA_MSTP_SPI0:          return (1 << 19);  /* MSTPB19 */
-      case RA_MSTP_SPI1:          return (1 << 18);  /* MSTPB18 */
-      case RA_MSTP_SCI10:         return (1 << 16);  /* MSTPB16 */
-      case RA_MSTP_ETHERCAT:      return (1 << 15);  /* MSTPB15 */
-      case RA_MSTP_USBFS:         return (1 << 11);  /* MSTPB11 */
-      case RA_MSTP_IIC0:          return (1 <<  9);  /* MSTPB9 */
-      case RA_MSTP_IIC1:          return (1 <<  8);  /* MSTPB8 */
+      case RA_MSTP_SCI0:          return R_MSTP_MSTPCRB_MSTPB31;
+      case RA_MSTP_SCI1:          return R_MSTP_MSTPCRB_MSTPB30;
+      case RA_MSTP_SCI2:          return R_MSTP_MSTPCRB_MSTPB29;
+      case RA_MSTP_SCI3:          return R_MSTP_MSTPCRB_MSTPB28;
+      case RA_MSTP_SCI4:          return R_MSTP_MSTPCRB_MSTPB27;
+      case RA_MSTP_SCI9:          return R_MSTP_MSTPCRB_MSTPB22;
+      case RA_MSTP_SPI0:          return R_MSTP_MSTPCRB_MSTPB19;
+      case RA_MSTP_SPI1:          return R_MSTP_MSTPCRB_MSTPB18;
+      case RA_MSTP_SCI10:         return R_MSTP_MSTPCRB_MSTPB16;
+      case RA_MSTP_ETHERCAT:      return R_MSTP_MSTPCRB_MSTPB15;
+      case RA_MSTP_OSPI0:         return R_MSTP_MSTPCRB_MSTPB16;
+      case RA_MSTP_OSPI1:         return R_MSTP_MSTPCRB_MSTPB17;
+      case RA_MSTP_USBHS:         return R_MSTP_MSTPCRB_MSTPB12;
+      case RA_MSTP_USBFS:         return R_MSTP_MSTPCRB_MSTPB11;
+      case RA_MSTP_IIC0:          return R_MSTP_MSTPCRB_MSTPB9;
+      case RA_MSTP_IIC1:          return R_MSTP_MSTPCRB_MSTPB8;
+      case RA_MSTP_I3C:           return R_MSTP_MSTPCRB_MSTPB4;
 
       /* MSTPCRC register modules */
-      case RA_MSTP_SCE5:          return (1 << 31);  /* MSTPC31 */
-      case RA_MSTP_CANFD0:        return (1 << 27);  /* MSTPC27 */
-      case RA_MSTP_CANFD1:        return (1 << 26);  /* MSTPC26 */
-      case RA_MSTP_CEU:           return (1 << 16);  /* MSTPC16 */
-      case RA_MSTP_VIN:           return (1 << 16);  /* MSTPC16 - VIN uses same bit as CEU */
-      case RA_MSTP_MIPI_CSI:      return (1 << 17);  /* MSTPC17 */
-      case RA_MSTP_ELC:           return (1 << 14);  /* MSTPC14 */
-      case RA_MSTP_DOC:           return (1 << 13);  /* MSTPC13 */
-      case RA_MSTP_SSIE0:         return (1 <<  8);  /* MSTPC8 */
-      case RA_MSTP_SSIE1:         return (1 <<  7);  /* MSTPC7 */
-      case RA_MSTP_CRC:           return (1 <<  1);  /* MSTPC1 */
-      case RA_MSTP_CAC:           return (1 <<  0);  /* MSTPC0 */
+      case RA_MSTP_SCE5:          return R_MSTP_MSTPCRC_MSTPC31;
+      case RA_MSTP_CANFD0:        return R_MSTP_MSTPCRC_MSTPC27;
+      case RA_MSTP_CANFD1:        return R_MSTP_MSTPCRC_MSTPC26;
+      case RA_MSTP_CEU:           return R_MSTP_MSTPCRC_MSTPC16;
+      case RA_MSTP_VIN:           return R_MSTP_MSTPCRC_MSTPC16;
+      case RA_MSTP_MIPI_CSI:      return R_MSTP_MSTPCRC_MSTPC17;
+      case RA_MSTP_ELC:           return R_MSTP_MSTPCRC_MSTPC14;
+      case RA_MSTP_DOC:           return R_MSTP_MSTPCRC_MSTPC13;
+      case RA_MSTP_SDHI:          return R_MSTP_MSTPCRC_MSTPC12;
+      case RA_MSTP_SRC:           return R_MSTP_MSTPCRC_MSTPC9;
+      case RA_MSTP_SSIE0:         return R_MSTP_MSTPCRC_MSTPC8;
+      case RA_MSTP_SSIE1:         return R_MSTP_MSTPCRC_MSTPC7;
+      case RA_MSTP_DRW:           return R_MSTP_MSTPCRC_MSTPC6;
+      case RA_MSTP_JPEG:          return R_MSTP_MSTPCRC_MSTPC5;
+      case RA_MSTP_GLCDC:         return R_MSTP_MSTPCRC_MSTPC4;
+      case RA_MSTP_CTSU:          return R_MSTP_MSTPCRC_MSTPC3;
+      case RA_MSTP_PDC:           return R_MSTP_MSTPCRC_MSTPC2;
+      case RA_MSTP_CRC:           return R_MSTP_MSTPCRC_MSTPC1;
+      case RA_MSTP_CAC:           return R_MSTP_MSTPCRC_MSTPC0;
 
       /* MSTPCRD register modules */
-      case RA_MSTP_ACMPHS0:       return (1 << 28);  /* MSTPD28 */
-      case RA_MSTP_ACMPHS1:       return (1 << 27);  /* MSTPD27 */
-      case RA_MSTP_RTC:           return (1 << 23);  /* MSTPD23 */
-      case RA_MSTP_TSN:           return (1 << 22);  /* MSTPD22 */
-      case RA_MSTP_DAC12:         return (1 << 20);  /* MSTPD20 */
-      case RA_MSTP_ADC0:          return (1 << 16);  /* MSTPD16 */
-      case RA_MSTP_ADC1:          return (1 << 15);  /* MSTPD15 */
-      case RA_MSTP_POEG0:         return (1 << 14);  /* MSTPD14 */
-      case RA_MSTP_POEG1:         return (1 << 13);  /* MSTPD13 */
-      case RA_MSTP_POEG2:         return (1 << 12);  /* MSTPD12 */
-      case RA_MSTP_POEG3:         return (1 << 11);  /* MSTPD11 */
-      case RA_MSTP_AGT0:          return (1 <<  5);  /* MSTPD5 */
-      case RA_MSTP_AGT1:          return (1 <<  4);  /* MSTPD4 */
+      case RA_MSTP_OPAMP:         return R_MSTP_MSTPCRD_MSTPD31;
+      case RA_MSTP_ACMPLP:        return R_MSTP_MSTPCRD_MSTPD29;
+      case RA_MSTP_ACMPHS0:       return R_MSTP_MSTPCRD_MSTPD28;
+      case RA_MSTP_ACMPHS1:       return R_MSTP_MSTPCRD_MSTPD27;
+      case RA_MSTP_RTC:           return R_MSTP_MSTPCRD_MSTPD23;
+      case RA_MSTP_TSN:           return R_MSTP_MSTPCRD_MSTPD22;
+      case RA_MSTP_ADC0:          return R_MSTP_MSTPCRD_MSTPD21;
+      case RA_MSTP_ADC1:          return R_MSTP_MSTPCRD_MSTPD20;
+      case RA_MSTP_DAC0:          return R_MSTP_MSTPCRD_MSTPD20;
+      case RA_MSTP_DAC1:          return R_MSTP_MSTPCRD_MSTPD19;
+      case RA_MSTP_POEG0:         return R_MSTP_MSTPCRD_MSTPD14;
+      case RA_MSTP_POEG1:         return R_MSTP_MSTPCRD_MSTPD13;
+      case RA_MSTP_POEG2:         return R_MSTP_MSTPCRD_MSTPD12;
+      case RA_MSTP_POEG3:         return R_MSTP_MSTPCRD_MSTPD11;
+      case RA_MSTP_AGT0:          return R_MSTP_MSTPCRD_MSTPD5;
+      case RA_MSTP_AGT1:          return R_MSTP_MSTPCRD_MSTPD4;
 
       /* MSTPCRE register modules */
-      case RA_MSTP_GPT0:          return (1 << 31);  /* MSTPE31 */
-      case RA_MSTP_GPT1:          return (1 << 30);  /* MSTPE30 */
-      case RA_MSTP_GPT2:          return (1 << 29);  /* MSTPE29 */
-      case RA_MSTP_GPT3:          return (1 << 28);  /* MSTPE28 */
-      case RA_MSTP_GPT4:          return (1 << 27);  /* MSTPE27 */
-      case RA_MSTP_GPT5:          return (1 << 26);  /* MSTPE26 */
-      case RA_MSTP_GPT10:         return (1 << 21);  /* MSTPE21 */
-      case RA_MSTP_GPT11:         return (1 << 20);  /* MSTPE20 */
-      case RA_MSTP_GPT12:         return (1 << 19);  /* MSTPE19 */
-      case RA_MSTP_GPT13:         return (1 << 18);  /* MSTPE18 */
-      case RA_MSTP_ULPT0:         return (1 <<  9);  /* MSTPE9 */
-      case RA_MSTP_ULPT1:         return (1 <<  8);  /* MSTPE8 */
+      case RA_MSTP_GPT0:          return R_MSTP_MSTPCRE_MSTPE31;
+      case RA_MSTP_GPT1:          return R_MSTP_MSTPCRE_MSTPE30;
+      case RA_MSTP_GPT2:          return R_MSTP_MSTPCRE_MSTPE29;
+      case RA_MSTP_GPT3:          return R_MSTP_MSTPCRE_MSTPE28;
+      case RA_MSTP_GPT4:          return R_MSTP_MSTPCRE_MSTPE27;
+      case RA_MSTP_GPT5:          return R_MSTP_MSTPCRE_MSTPE26;
+      case RA_MSTP_GPT10:         return R_MSTP_MSTPCRE_MSTPE21;
+      case RA_MSTP_GPT11:         return R_MSTP_MSTPCRE_MSTPE20;
+      case RA_MSTP_GPT12:         return R_MSTP_MSTPCRE_MSTPE19;
+      case RA_MSTP_GPT13:         return R_MSTP_MSTPCRE_MSTPE18;
+      case RA_MSTP_ULPT0:         return R_MSTP_MSTPCRE_MSTPE9;
+      case RA_MSTP_ULPT1:         return R_MSTP_MSTPCRE_MSTPE8;
 
       default:
         return 0;
