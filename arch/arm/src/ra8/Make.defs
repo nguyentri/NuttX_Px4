@@ -70,6 +70,7 @@ endif
 # MIPI-CSI driver
 ifeq ($(CONFIG_RA_MIPI_CSI),y)
 CHIP_CSRCS += ra_mipi_csi.c
+CHIP_CSRCS += ra_ov5640.c
 endif
 
 # SPI driver
