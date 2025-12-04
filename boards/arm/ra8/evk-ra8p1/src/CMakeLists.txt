@@ -34,6 +34,10 @@ if(CONFIG_RA_I2C)
   list(APPEND SRCS ra8p1_i2c.c)
 endif()
 
+if(CONFIG_RA_MIPI_CSI)
+  list(APPEND SRCS ra8p1_mipi_csi.c)
+endif()
+
 if(CONFIG_RA8P1_SPI_LOOPBACK_EXAMPLE)
   list(APPEND SRCS ra8p1_spi_loopback.c)
 endif()

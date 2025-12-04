@@ -1754,6 +1754,77 @@ config RA_I2C2_SLAVE
 
 endmenu
 
+menu "MIPI-CSI and VIN"
+config RA_MIPI_CSI
+   bool "MIPI-CSI Camera Support"
+   default n
+   depends on RA_HAVE_MIPI_CSI && RA_HAVE_VIN
+   select I2C
+   help
+     Enable support for MIPI-CSI camera interface using VIN and MIPI-CSI peripherals.
+
+if RA_MIPI_CSI
+
+config RA_MIPI_CSI_DEFAULT_WIDTH
+   int "Default Capture Width"
+   default 640
+   help
+     Default width for camera capture.
+
+config RA_MIPI_CSI_DEFAULT_HEIGHT
+   int "Default Capture Height"
+   default 480
+   help
+     Default height for camera capture.
+
+config RA_MIPI_CSI_MAX_WIDTH
+   int "Maximum Capture Width"
+   default 1024
+   help
+     Maximum supported width for camera capture.
+
+config RA_MIPI_CSI_MAX_HEIGHT
+   int "Maximum Capture Height"
+   default 600
+   help
+     Maximum supported height for camera capture.
+
+config RA_MIPI_CSI_FB_BASE
+   hex "Framebuffer Base Address"
+   default 0x60000000
+   help
+     Physical address for the camera framebuffer (in SDRAM).
+
+config RA_MIPI_CSI_I2C_BUS
+   int "Camera I2C Bus"
+   default 0
+   help
+     I2C bus number where the camera sensor is connected.
+
+config RA_MIPI_CSI_DATA_LANES
+   int "MIPI-CSI Data Lanes"
+   default 2
+   range 1 2
+   help
+     Number of MIPI-CSI data lanes to use (1 or 2).
+
+config RA_MIPI_CSI_VIRTUAL_CHANNEL
+   int "Virtual Channel"
+   default 0
+   range 0 3
+   help
+     MIPI-CSI Virtual Channel ID.
+
+config RA_MIPI_CSI_POLLWAITERS
+   int "Poll Waiters"
+   default 4
+   help
+     Number of poll waiters supported.
+
+endif # RA_MIPI_CSI
+
+endmenu
+
 menu "DMAC"
 config RA_HAVE_DMAC
    bool

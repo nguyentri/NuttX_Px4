@@ -220,6 +220,20 @@ int ra8p1_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_RA_MIPI_CSI
+  /* Initialize MIPI-CSI Camera */
+  extern int board_mipi_csi_initialize(void);
+  ret = board_mipi_csi_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize MIPI-CSI: %d\n", ret);
+    }
+  else
+    {
+      syslog(LOG_INFO, "MIPI-CSI initialized successfully\n");
+    }
+#endif
+
   ra8p1_app_examples();
 
   return ret;

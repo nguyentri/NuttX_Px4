@@ -74,6 +74,10 @@ static uint32_t ra_mstp_get_regaddr(ra_mstp_module_t module)
     {
       return R_MSTP_MSTPCRC;
     }
+  else if (module == RA_MSTP_VIN || module == RA_MSTP_MIPI_CSI)
+    {
+      return R_MSTP_MSTPCRC;
+    }
   else if (module >= RA_MSTP_ACMPHS0 && module <= RA_MSTP_AGT1)
     {
       return R_MSTP_MSTPCRD;
@@ -126,6 +130,8 @@ static uint32_t ra_mstp_get_bitmask(ra_mstp_module_t module)
       case RA_MSTP_CANFD0:        return (1 << 27);  /* MSTPC27 */
       case RA_MSTP_CANFD1:        return (1 << 26);  /* MSTPC26 */
       case RA_MSTP_CEU:           return (1 << 16);  /* MSTPC16 */
+      case RA_MSTP_VIN:           return (1 << 16);  /* MSTPC16 - VIN uses same bit as CEU */
+      case RA_MSTP_MIPI_CSI:      return (1 << 17);  /* MSTPC17 */
       case RA_MSTP_ELC:           return (1 << 14);  /* MSTPC14 */
       case RA_MSTP_DOC:           return (1 << 13);  /* MSTPC13 */
       case RA_MSTP_SSIE0:         return (1 <<  8);  /* MSTPC8 */

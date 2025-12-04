@@ -64,6 +64,11 @@ if(CONFIG_RA_DMAC)
   list(APPEND SRCS ra_dmac.c)
 endif()
 
+# MIPI-CSI driver
+if(CONFIG_RA_MIPI_CSI)
+  list(APPEND SRCS ra_mipi_csi.c)
+endif()
+
 # SPI driver
 if(CONFIG_RA_SPI)
   list(APPEND SRCS ra_spi.c ra_dtc.c)

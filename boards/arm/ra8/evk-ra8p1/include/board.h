@@ -269,6 +269,7 @@
 
 /* Camera GPIO pins */
 #define GPIO_CAMERA_RST       GPIO_P709_OUTPUT_HIGH   /* Camera RESET - P709 */
+#define GPIO_CAMERA_PWDN      GPIO_P705_OUTPUT_LOW    /* Camera PWDN - P705 */
 #define GPIO_CAMERA_XCLK      GPIO_P501_OUTPUT_HIGH   /* Camera XCLK - P501 */
 
 /****************************************************************************

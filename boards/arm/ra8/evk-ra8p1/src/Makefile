@@ -44,6 +44,11 @@ ifeq ($(CONFIG_RA_I2C),y)
 CSRCS += ra8p1_i2c.c
 endif
 
+# MIPI-CSI support
+ifeq ($(CONFIG_RA_MIPI_CSI),y)
+CSRCS += ra8p1_mipi_csi.c
+endif
+
 # ADC B support
 ifeq ($(CONFIG_RA_ADC_B),y)
 CSRCS += ra8p1_adc_b.c

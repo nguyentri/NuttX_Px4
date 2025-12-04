@@ -67,6 +67,11 @@ ifeq ($(CONFIG_RA_DMAC),y)
 CHIP_CSRCS += ra_dmac.c
 endif
 
+# MIPI-CSI driver
+ifeq ($(CONFIG_RA_MIPI_CSI),y)
+CHIP_CSRCS += ra_mipi_csi.c
+endif
+
 # SPI driver
 ifeq ($(CONFIG_RA_SPI),y)
 CHIP_CSRCS += ra_spi.c

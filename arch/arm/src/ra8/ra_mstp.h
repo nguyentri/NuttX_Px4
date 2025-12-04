@@ -66,6 +66,9 @@
 #define R_MSTP_MSTPCRC_CANFD0          R_MSTP_MSTPCRC_MSTPC27
 #define R_MSTP_MSTPCRC_CANFD1          R_MSTP_MSTPCRC_MSTPC26
 #define R_MSTP_MSTPCRC_CEU             R_MSTP_MSTPCRC_MSTPC16
+#define R_MSTP_MSTPCRC_VIN             R_MSTP_MSTPCRC_MSTPC16  /* VIN uses same bit as CEU */
+#define R_MSTP_MSTPCRC_MIPI_CSI        R_MSTP_MSTPCRC_MSTPC17  /* MIPI-CSI: MSTPC17 */
+#define R_MSTP_MSTPCRC_MSTPC17         (1 << 17)               /* MIPI-CSI Module Stop */
 #define R_MSTP_MSTPCRC_ELC             R_MSTP_MSTPCRC_MSTPC14
 #define R_MSTP_MSTPCRC_DOC             R_MSTP_MSTPCRC_MSTPC13
 #define R_MSTP_MSTPCRC_SSIE0           R_MSTP_MSTPCRC_MSTPC8
@@ -169,6 +172,8 @@ typedef enum
   RA_MSTP_CANFD0,           /* MSTPC27: Controller Area Network with Flexible Data-Rate 0 */
   RA_MSTP_CANFD1,           /* MSTPC26: Controller Area Network with Flexible Data-Rate 1 */
   RA_MSTP_CEU,              /* MSTPC16: Capture Engine Unit */
+  RA_MSTP_VIN,              /* MSTPC16: Video Input (same as CEU) */
+  RA_MSTP_MIPI_CSI,         /* MSTPC17: MIPI-CSI */
   RA_MSTP_ELC,              /* MSTPC14: Event Link Controller */
   RA_MSTP_DOC,              /* MSTPC13: Data Operation Circuit */
   RA_MSTP_SSIE0,            /* MSTPC8: Serial Sound Interface Enhanced 0 */
