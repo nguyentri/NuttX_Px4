@@ -160,7 +160,7 @@ static bool g_adc_initialized = false;
 
 /* DTC buffer for batch ADC operations */
 
-#ifdef CONFIG_RA_ADC_DTC
+#ifdef CONFIG_RA_DTC
 static uint32_t g_adc_buffer[ADC_DTC_BUFFER_SIZE];
 static uint8_t g_channel_buffer[ADC_DTC_BUFFER_SIZE];
 #endif
@@ -515,7 +515,7 @@ static int ra8e1_adc_read_battery_data(void)
   return OK;
 }
 
-#ifdef CONFIG_RA_ADC_DTC
+#ifdef CONFIG_RA_DTC
 /****************************************************************************
  * Name: ra8e1_adc_read_batch_dtc
  *
@@ -637,7 +637,7 @@ static int ra8e1_adc_read_battery_data_dtc(void)
 
   return OK;
 }
-#endif /* CONFIG_RA_ADC_DTC */
+#endif /* CONFIG_RA_DTC */
 
 /****************************************************************************
  * Public Functions
@@ -684,7 +684,7 @@ void ra8e1_adc_initialize(void)
 
   /* Perform initial battery reading */
 
-#ifdef CONFIG_RA_ADC_DTC
+#ifdef CONFIG_RA_DTC
   ret = ra8e1_adc_read_battery_data_dtc();
 #else
   ret = ra8e1_adc_read_battery_data();
@@ -810,7 +810,7 @@ int ra8e1_get_battery_status(struct battery_status_s *status)
 
   /* Update battery data */
 
-#ifdef CONFIG_RA_ADC_DTC
+#ifdef CONFIG_RA_DTC
   ret = ra8e1_adc_read_battery_data_dtc();
 #else
   ret = ra8e1_adc_read_battery_data();

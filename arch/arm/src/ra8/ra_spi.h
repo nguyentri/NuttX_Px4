@@ -91,6 +91,8 @@ struct ra_spi_ext_dev_config_s
   uint8_t  negation_delay;  /* CS negation delay */
   bool     active_low;      /* CS active low */
   const char *name;         /* Device name for debugging */
+  int use_dma;
+  int use_dtc;
 };
 
 /****************************************************************************

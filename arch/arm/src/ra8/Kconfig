@@ -1721,14 +1721,6 @@ config RA_I2C2
    depends on RA_HAVE_I2C2
    select RA_I2C
 
-config RA_I2C_DTC
-   bool "Use DTC for I2C transfers"
-   default n
-   depends on RA_I2C && RA_DMAC
-   ---help---
-      Use Data Transfer Controller (DTC) for I2C transfers to improve
-      performance and reduce CPU usage.
-
 config RA_I2C_SLAVE
    bool "I2C Slave support"
    default n
@@ -1951,13 +1943,6 @@ config RA_ADC_B
    help
      Enable ADC-B (Advanced Analog-to-Digital Converter with FIFO support).
      Provides multi-group scan capability, averaging, and FIFO buffering.
-
-config RA_ADC_DTC
-   bool "Use DTC for ADC transfers"
-   default n
-   depends on RA_ADC && RA_DTC
-   help
-     Use Data Transfer Controller (DTC) for ADC conversions to reduce CPU usage.
 
 config RA_ADC_BATTERY_MONITOR
    bool "Enable ADC battery monitoring"
@@ -2204,12 +2189,6 @@ config RA_SPI2
    depends on RA_HAVE_SPI2
    select RA_SPI
 
-config RA_SPI_DMA
-   bool "Use DMA for SPI transfers"
-   default n
-   depends on RA_SPI && RA_DMA
-   help
-     Use DMA for improved SPI performance and reduced CPU usage.
 endmenu
 
 menu "CAN"
@@ -2542,14 +2521,6 @@ config RA_ADC
    select ADC
    help
      Enable RA8 ADC driver with DTC support.
-
-config RA_ADC_DTC
-   bool "Use DTC for ADC transfers"
-   default y
-   depends on RA_ADC
-   help
-     Use Data Transfer Controller (DTC) for efficient multi-channel
-     ADC data transfers.
 
 config RA_ADC_BATTERY_MONITOR
    bool "Battery monitoring support"

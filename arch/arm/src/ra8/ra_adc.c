@@ -95,7 +95,7 @@ struct ra8_adc_priv_s
   uint32_t chanlist;                  /* Configured channel list */
   uint8_t nchannels;                  /* Number of configured channels */
 
-#ifdef CONFIG_RA_ADC_DTC
+#ifdef CONFIG_RA_DTC
   /* DTC related fields */
   bool dtc_enable;                    /* DTC transfer enabled */
   uint32_t *dma_buffer;               /* DMA buffer for multi-channel data */
@@ -144,7 +144,7 @@ static void ra8_adc_modifyreg(FAR struct ra8_adc_priv_s *priv,
 static int  ra8_adc_configure(FAR struct ra8_adc_priv_s *priv);
 static void ra8_adc_enable_channels(FAR struct ra8_adc_priv_s *priv);
 
-#ifdef CONFIG_RA_ADC_DTC
+#ifdef CONFIG_RA_DTC
 /* DTC functions */
 
 static int  ra8_adc_setup_dtc(FAR struct ra8_adc_priv_s *priv);
@@ -205,7 +205,7 @@ static struct ra8_adc_priv_s g_adc0_priv =
   .mode       = RA_ADC_MODE_SINGLE_SCAN,
   .trigger    = RA_ADC_TRIGGER_SOFTWARE,
   .alignment  = RA_ADC_ALIGNMENT_RIGHT,
-#ifdef CONFIG_RA_ADC_DTC
+#ifdef CONFIG_RA_DTC
   .dtc_enable = true,
 #endif
 };
@@ -231,7 +231,7 @@ static struct ra8_adc_priv_s g_adc1_priv =
   .mode       = RA_ADC_MODE_SINGLE_SCAN,
   .trigger    = RA_ADC_TRIGGER_SOFTWARE,
   .alignment  = RA_ADC_ALIGNMENT_RIGHT,
-#ifdef CONFIG_RA_ADC_DTC
+#ifdef CONFIG_RA_DTC
   .dtc_enable = true,
 #endif
 };
@@ -383,7 +383,7 @@ static int ra8_adc_configure(FAR struct ra8_adc_priv_s *priv)
   return OK;
 }
 
-#ifdef CONFIG_RA_ADC_DTC
+#ifdef CONFIG_RA_DTC
 /****************************************************************************
  * Name: ra8_adc_setup_dtc
  *
@@ -468,7 +468,7 @@ static void ra8_adc_cleanup_dtc(FAR struct ra8_adc_priv_s *priv)
 
   priv->buffer_size = 0;
 }
-#endif /* CONFIG_RA_ADC_DTC */
+#endif /* CONFIG_RA_DTC */
 
 /****************************************************************************
  * Name: ra8_adc_interrupt
@@ -493,7 +493,7 @@ static int ra8_adc_interrupt(int irq, FAR void *context, FAR void *arg)
     {
       /* Scan has completed */
 
-#ifdef CONFIG_RA_ADC_DTC
+#ifdef CONFIG_RA_DTC
       if (priv->dtc_enable && priv->cb->au_receive_batch != NULL)
         {
           /* Handle batch transfer with DTC */
@@ -614,7 +614,7 @@ static int ra8_adc_setup(FAR struct adc_dev_s *dev)
       return ret;
     }
 
-#ifdef CONFIG_RA_ADC_DTC
+#ifdef CONFIG_RA_DTC
   /* Setup DTC if enabled */
 
   ret = ra8_adc_setup_dtc(priv);
@@ -631,7 +631,7 @@ static int ra8_adc_setup(FAR struct adc_dev_s *dev)
   if (ret < 0)
     {
       aerr("ERROR: Failed to attach interrupt for ADC%d: %d\n", priv->intf, ret);
-#ifdef CONFIG_RA_ADC_DTC
+#ifdef CONFIG_RA_DTC
       ra8_adc_cleanup_dtc(priv);
 #endif
       return ret;
@@ -661,7 +661,7 @@ static void ra8_adc_shutdown(FAR struct adc_dev_s *dev)
 
   ra8_adc_putreg(priv, R_ADC12_ADCSR_OFFSET, 0);
 
-#ifdef CONFIG_RA_ADC_DTC
+#ifdef CONFIG_RA_DTC
   /* Cleanup DTC resources */
 
   ra8_adc_cleanup_dtc(priv);

@@ -59,6 +59,18 @@
 
 #define RA_DTC_SET_VECTOR_RETRIES 3
 
+/* TrustZone-conditional register selection:
+ * Non-secure code must use the _SEC (secure region) registers.
+ * Secure code uses the base registers.
+ */
+#ifdef CONFIG_RA_TZ_NONSECURE_BUILD
+#  define RA_DTC_DTCVBR   R_DTC_DTCVBR_SEC
+#  define RA_DTC_DTCCR    R_DTC_DTCCR_SEC
+#else
+#  define RA_DTC_DTCVBR   R_DTC_DTCVBR
+#  define RA_DTC_DTCCR    R_DTC_DTCCR
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -370,7 +382,7 @@ int ra_dtc_initialize(void)
   memset(g_dtc_vector_table, 0, sizeof(g_dtc_vector_table));
 
   /* Set vector table base address */
-  putreg32((uint32_t)g_dtc_vector_table, R_DTC_DTCVBR_SEC);
+  putreg32((uint32_t)g_dtc_vector_table, RA_DTC_DTCVBR);
 
   /* Start the DTC module by setting DTCST.DTCST = 1 */
   putreg8(1, R_DTC_DTCST);
@@ -495,9 +507,9 @@ int ra_dtc_open(ra_dtc_handle_t *handle, const ra_dtc_config_t *config)
         }
 
       /* Update vector table safely: disable read-skip before update and re-enable */
-      putreg8(DTC_DTCCR_RRS_DISABLE, R_DTC_DTCCR_SEC);
+      putreg8(DTC_DTCCR_RRS_DISABLE, RA_DTC_DTCCR);
       g_dtc_vector_table[vec_index] = &ctrl->info;
-      putreg8(DTC_DTCCR_RRS_ENABLE, R_DTC_DTCCR_SEC);
+      putreg8(DTC_DTCCR_RRS_ENABLE, RA_DTC_DTCCR);
 
       /* If completion callback is needed, attach DTC completion interrupt */
       if (config->callback)
@@ -548,14 +560,22 @@ int ra_dtc_close(ra_dtc_handle_t handle)
       return -EINVAL;
     }
 
-  /* Wait for any ongoing transfer to complete */
-  {
-    int wret = ra_dtc_wait_for_completion(ctrl->irq - RA_IRQ_FIRST);
-    if (wret != OK)
-      {
-        return wret;
-      }
-  }
+  /* Wait for any ongoing transfer to complete.
+   * Use trigger_irq (the slot used for vector table indexing) if available,
+   * otherwise skip the wait if no valid IRQ is assigned.
+   */
+  if (ctrl->trigger_irq >= 0)
+    {
+      int slot = ctrl->trigger_irq - RA_IRQ_FIRST;
+      if (slot >= 0 && slot < RA_DTC_VECTOR_TABLE_ENTRIES)
+        {
+          int wret = ra_dtc_wait_for_completion(slot);
+          if (wret != OK)
+            {
+              return wret;
+            }
+        }
+    }
 
   /* Disable transfer */
   ra_dtc_disable(handle);
@@ -586,9 +606,9 @@ int ra_dtc_close(ra_dtc_handle_t handle)
       if (vec_index >= 0 && vec_index < RA_DTC_VECTOR_TABLE_ENTRIES)
         {
           /* Protect with read-skip disable/enable in case DTC is active */
-          putreg8(DTC_DTCCR_RRS_DISABLE, R_DTC_DTCCR_SEC);
+          putreg8(DTC_DTCCR_RRS_DISABLE, RA_DTC_DTCCR);
           g_dtc_vector_table[vec_index] = NULL;
-          putreg8(DTC_DTCCR_RRS_ENABLE, R_DTC_DTCCR_SEC);
+          putreg8(DTC_DTCCR_RRS_ENABLE, RA_DTC_DTCCR);
         }
 
       /* If we allocated the slot for this context, detach it now */
@@ -736,17 +756,22 @@ int ra_dtc_reset(ra_dtc_handle_t handle, uint32_t src_addr,
       return -EINVAL;
     }
 
-  /* Wait for current transfer to complete */
-  {
-    int wret = ra_dtc_wait_for_completion(ctrl->irq - RA_IRQ_FIRST);
-    if (wret != OK)
-      {
-        return wret;
-      }
-  }
+  /* Wait for current transfer to complete using trigger_irq for the slot */
+  if (ctrl->trigger_irq >= 0)
+    {
+      int slot = ctrl->trigger_irq - RA_IRQ_FIRST;
+      if (slot >= 0 && slot < RA_DTC_VECTOR_TABLE_ENTRIES)
+        {
+          int wret = ra_dtc_wait_for_completion(slot);
+          if (wret != OK)
+            {
+              return wret;
+            }
+        }
+    }
 
   /* Disable read skip for register updates */
-  putreg8(DTC_DTCCR_RRS_DISABLE, R_DTC_DTCCR_SEC);
+  putreg8(DTC_DTCCR_RRS_DISABLE, RA_DTC_DTCCR);
 
   /* Update transfer information */
   ctrl->info.sar = src_addr;
@@ -771,7 +796,7 @@ int ra_dtc_reset(ra_dtc_handle_t handle, uint32_t src_addr,
   ctrl->config.transfer_count = transfer_count;
 
   /* Re-enable read skip */
-  putreg8(DTC_DTCCR_RRS_ENABLE, R_DTC_DTCCR_SEC);
+  putreg8(DTC_DTCCR_RRS_ENABLE, RA_DTC_DTCCR);
 
   return OK;
 }
