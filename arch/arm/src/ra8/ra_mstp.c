@@ -131,6 +131,8 @@ static uint32_t ra_mstp_get_bitmask(ra_mstp_module_t module)
 
       /* MSTPCRC register modules */
       case RA_MSTP_SCE5:          return R_MSTP_MSTPCRC_MSTPC31;
+      case RA_MSTP_LAYER3_SWITCH: return R_MSTP_MSTPCRC_MSTPC30;
+      case RA_MSTP_ETHER_PHY_CLK: return R_MSTP_MSTPCRC_MSTPC28;
       case RA_MSTP_CANFD0:        return R_MSTP_MSTPCRC_MSTPC27;
       case RA_MSTP_CANFD1:        return R_MSTP_MSTPCRC_MSTPC26;
       case RA_MSTP_CEU:           return R_MSTP_MSTPCRC_MSTPC16;

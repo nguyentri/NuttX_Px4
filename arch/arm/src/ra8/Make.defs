@@ -113,6 +113,29 @@ endif
 # Ethernet driver
 ifeq ($(CONFIG_RA_ETHERNET),y)
 CHIP_CSRCS += ra_ether.c
+CHIP_CSRCS += ra_ether_phy.c
+CHIP_CSRCS += ra_ether_rmac.c
+
+# PHY target drivers - select based on board configuration
+ifeq ($(CONFIG_RA_ETHERNET_PHY_GPY111),y)
+CHIP_CSRCS += ra_ether_phy_gpy111.c
+endif
+
+ifeq ($(CONFIG_RA_ETHERNET_PHY_KSZ8091RNB),y)
+CHIP_CSRCS += ra_ether_phy_ksz8091rnb.c
+endif
+
+ifeq ($(CONFIG_RA_ETHERNET_PHY_KSZ8041),y)
+CHIP_CSRCS += ra_ether_phy_ksz8041.c
+endif
+
+ifeq ($(CONFIG_RA_ETHERNET_PHY_DP83620),y)
+CHIP_CSRCS += ra_ether_phy_dp83620.c
+endif
+
+ifeq ($(CONFIG_RA_ETHERNET_PHY_ICS1894),y)
+CHIP_CSRCS += ra_ether_phy_ics1894.c
+endif
 endif
 
 # IDLE task custom

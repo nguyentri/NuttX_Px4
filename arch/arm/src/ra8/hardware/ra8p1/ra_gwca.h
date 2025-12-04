@@ -3260,6 +3260,32 @@
 
 #define R_GWCA_GWEID5_RXDNEIOD                    (1 << 16)  /*  */
 
+/* =========================================================================
+ * Array-indexed register access macros
+ * These provide computed register addresses for queue-based registers
+ * ========================================================================= */
+
+/* GWDCC - Descriptor Chain Configuration (64 queues, 4-byte stride from 0x400) */
+#define R_GWCA_GWDCC(i)       (R_GWCA_BASE + 0x00000400 + ((i) * 4))
+
+/* GWDCBAC - Descriptor Chain Base Address Configuration
+ * For RA8P1, descriptors share a global base address configuration.
+ * Individual queues use GWDCC for configuration.
+ * Use GWDCBAC0/1 for upper/lower 64-bit base address.
+ */
+
+/* Common GWDCC bit definitions (same for all queues) */
+#define R_GWCA_GWDCC_SM_MASK            0x3
+#define R_GWCA_GWDCC_SM_SHIFT           (0)
+#define R_GWCA_GWDCC_EDE                (1 << 8)   /* Entry Data Enable */
+#define R_GWCA_GWDCC_ETS                (1 << 9)   /* Enable Timestamp */
+#define R_GWCA_GWDCC_SL                 (1 << 10)  /* Security Level */
+#define R_GWCA_GWDCC_DQT                (1 << 11)  /* Descriptor Queue Type: 0=TX, 1=RX */
+#define R_GWCA_GWDCC_DCP_SHIFT          (16)
+#define R_GWCA_GWDCC_DCP_MASK           0x70000
+#define R_GWCA_GWDCC_BALR               (1 << 24)  /* Base Address Low Register valid */
+#define R_GWCA_GWDCC_OSID_SHIFT         (28)
+#define R_GWCA_GWDCC_OSID_MASK          0x70000000
 
 /* Maximum number of channels */
 

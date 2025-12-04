@@ -58,6 +58,8 @@
 
 /* Compatibility aliases */
 #define R_MSTP_MSTPCRC_SCE5            R_MSTP_MSTPCRC_MSTPC31
+#define R_MSTP_MSTPCRC_LAYER3_SWITCH   R_MSTP_MSTPCRC_MSTPC30  /* Layer 3 Ethernet Switch Module Stop */
+#define R_MSTP_MSTPCRC_ETHER_PHY_CLK   R_MSTP_MSTPCRC_MSTPC28  /* Ether-PHY Clock Module Stop */
 #define R_MSTP_MSTPCRC_CANFD0          R_MSTP_MSTPCRC_MSTPC27
 #define R_MSTP_MSTPCRC_CANFD1          R_MSTP_MSTPCRC_MSTPC26
 #define R_MSTP_MSTPCRC_CEU             R_MSTP_MSTPCRC_MSTPC16
@@ -144,6 +146,8 @@ typedef enum
 
   /* MSTPCRC register modules */
   RA_MSTP_SCE5,             /* MSTPC31: Renesas Secure IP */
+  RA_MSTP_LAYER3_SWITCH,    /* MSTPC30: Layer 3 Ethernet Switch (ESWM) */
+  RA_MSTP_ETHER_PHY_CLK,    /* MSTPC28: Ether-PHY Clock */
   RA_MSTP_CANFD0,           /* MSTPC27: Controller Area Network with Flexible Data-Rate 0 */
   RA_MSTP_CANFD1,           /* MSTPC26: Controller Area Network with Flexible Data-Rate 1 */
   RA_MSTP_CEU,              /* MSTPC16: Capture Engine Unit */

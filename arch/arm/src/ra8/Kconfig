@@ -2896,6 +2896,127 @@ config RA_ETHERNET_NRXDESC
    help
      Number of receive descriptors per interface.
 
+menu "Ethernet PHY Selection"
+
+choice
+   prompt "Primary PHY Target"
+   default RA_ETHERNET_PHY_GPY111 if RA8P1_GROUP
+   default RA_ETHERNET_PHY_KSZ8091RNB if RA8E1_GROUP
+   help
+     Select the Ethernet PHY target driver for your board.
+
+config RA_ETHERNET_PHY_GPY111
+   bool "Microchip GPY111 Gigabit PHY"
+   help
+     Enable support for Microchip GPY111 Gigabit Ethernet PHY.
+     This PHY supports 10/100/1000 Mbps with RGMII interface.
+     Used on RA8P1 EVK board (EK-RA8P1).
+
+config RA_ETHERNET_PHY_KSZ8091RNB
+   bool "Micrel KSZ8091RNB 10/100 PHY"
+   help
+     Enable support for Micrel KSZ8091RNB 10/100 Mbps PHY.
+     Supports RMII interface with integrated 25MHz oscillator.
+
+config RA_ETHERNET_PHY_KSZ8041
+   bool "Micrel KSZ8041NL 10/100 PHY"
+   help
+     Enable support for Micrel KSZ8041NL 10/100 Mbps PHY.
+     Standard MII/RMII interface with LED configuration.
+
+config RA_ETHERNET_PHY_DP83620
+   bool "TI DP83620 10/100 PHY"
+   help
+     Enable support for Texas Instruments DP83620 10/100 Mbps PHY.
+     Supports RMII interface with 50MHz clock output option.
+
+config RA_ETHERNET_PHY_ICS1894
+   bool "ICS ICS1894NL 10/100 PHY"
+   help
+     Enable support for ICS ICS1894NL 10/100 Mbps PHY.
+     Note: This PHY supports full duplex only.
+
+endchoice
+
+config RA_ETHERNET_PHY_ADDRESS
+   int "PHY Address"
+   default 0
+   range 0 31
+   help
+     The MDIO address of the Ethernet PHY.
+     Default is 0 which is typical for most evaluation boards.
+
+config RA_ETHERNET_PHY_AUTONEG
+   bool "Enable Auto-Negotiation"
+   default y
+   help
+     Enable auto-negotiation for link speed and duplex mode.
+     When disabled, use the fixed speed and duplex settings below.
+
+config RA_ETHERNET_PHY_SPEED_100
+   bool "Force 100 Mbps"
+   default y
+   depends on !RA_ETHERNET_PHY_AUTONEG
+   help
+     Force 100 Mbps link speed when auto-negotiation is disabled.
+     When disabled, uses 10 Mbps.
+
+config RA_ETHERNET_PHY_FULLDUPLEX
+   bool "Force Full Duplex"
+   default y
+   depends on !RA_ETHERNET_PHY_AUTONEG
+   help
+     Force full duplex mode when auto-negotiation is disabled.
+     When disabled, uses half duplex.
+
+config RA_ETHERNET_PHY_TIMEOUT
+   int "PHY Initialization Timeout (ms)"
+   default 5000
+   help
+     Timeout in milliseconds for PHY initialization and
+     auto-negotiation to complete.
+
+endmenu
+
+menu "Ethernet Debug Options"
+
+config RA_ETHERNET_DEBUG
+   bool "Enable Ethernet Debug"
+   default n
+   depends on DEBUG_NET
+   help
+     Enable detailed Ethernet driver debug output.
+
+config RA_ETHERNET_DEBUG_TX
+   bool "Debug TX Path"
+   default n
+   depends on RA_ETHERNET_DEBUG
+   help
+     Enable transmit path debug output.
+
+config RA_ETHERNET_DEBUG_RX
+   bool "Debug RX Path"
+   default n
+   depends on RA_ETHERNET_DEBUG
+   help
+     Enable receive path debug output.
+
+config RA_ETHERNET_DEBUG_PHY
+   bool "Debug PHY"
+   default n
+   depends on RA_ETHERNET_DEBUG
+   help
+     Enable PHY communication debug output.
+
+config RA_ETHERNET_DEBUG_REGS
+   bool "Debug Registers"
+   default n
+   depends on RA_ETHERNET_DEBUG
+   help
+     Enable register access debug output.
+
+endmenu
+
 endif # RA_ETHERNET
 
 config RA_FLASH_LEGACY
