@@ -44,6 +44,7 @@
 #define R_MSTP_MSTPCRB_SPI0            R_MSTP_MSTPCRB_MSTPB19
 #define R_MSTP_MSTPCRB_SPI1            R_MSTP_MSTPCRB_MSTPB18
 #define R_MSTP_MSTPCRB_USBFS           R_MSTP_MSTPCRB_MSTPB11
+#define R_MSTP_MSTPCRB_OSPI            R_MSTP_MSTPCRB_MSTPB12
 #define R_MSTP_MSTPCRB_IIC0            R_MSTP_MSTPCRB_MSTPB9
 #define R_MSTP_MSTPCRB_IIC1            R_MSTP_MSTPCRB_MSTPB8
 
@@ -158,6 +159,7 @@ typedef enum
   RA_MSTP_SPI1,             /* MSTPB18: Serial Peripheral Interface 1 */
   RA_MSTP_SCI10,            /* MSTPB16: SCI Communication Interface 10 */
   RA_MSTP_ETHERCAT,         /* MSTPB15: EtherCAT */
+  RA_MSTP_OSPI,             /* MSTPB12: Octal Serial Peripheral Interface */
   RA_MSTP_USBFS,            /* MSTPB11: Universal Serial Bus 2.0 FS Interface */
   RA_MSTP_IIC0,             /* MSTPB9: I2C Bus Interface 0 */
   RA_MSTP_IIC1,             /* MSTPB8: I2C Bus Interface 1 */

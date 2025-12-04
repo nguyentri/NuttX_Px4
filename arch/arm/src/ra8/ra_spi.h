@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_RA_SPI_H
-#define __ARCH_ARM_SRC_RA8_RA_SPI_H
+#ifndef __ARCH_ARM_SRC_RA_RA8_SPI_H
+#define __ARCH_ARM_SRC_RA_RA8_SPI_H
 
 /****************************************************************************
  * Included Files
@@ -190,4 +190,4 @@ void ra_spi_setbitorder(struct spi_dev_s *dev, bool lsbfirst);
 int ra_spi_set_loopback(FAR struct spi_dev_s *dev, bool loopback2,
                         bool moifv, bool moife);
 
-#endif /* __ARCH_ARM_SRC_RA8_RA_SPI_H */
+#endif /* __ARCH_ARM_SRC_RA_RA8_SPI_H */

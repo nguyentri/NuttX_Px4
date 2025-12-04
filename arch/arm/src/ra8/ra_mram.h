@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_RA_MRAM_H
-#define __ARCH_ARM_SRC_RA8_RA_MRAM_H
+#ifndef __ARCH_ARM_SRC_RA_RA8_MRAM_H
+#define __ARCH_ARM_SRC_RA_RA8_MRAM_H
 
 /****************************************************************************
  * Included Files
@@ -273,4 +273,4 @@ uint8_t ra_mram_erasestate(void);
 }
 #endif
 
-#endif /* __ARCH_ARM_SRC_RA8_RA_MRAM_H */
+#endif /* __ARCH_ARM_SRC_RA_RA8_MRAM_H */

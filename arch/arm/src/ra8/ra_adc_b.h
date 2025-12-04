@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_RA_ADC_H
-#define __ARCH_ARM_SRC_RA8_RA_ADC_H
+#ifndef __ARCH_ARM_SRC_RA_RA8_ADC_H
+#define __ARCH_ARM_SRC_RA_RA8_ADC_H
 
 /****************************************************************************
  * Included Files
@@ -118,4 +118,4 @@ FAR struct adc_dev_s *ra8_adc_initialize(uint32_t chanlist,
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_RA8_RA_ADC_H */
+#endif /* __ARCH_ARM_SRC_RA_RA8_ADC_H */

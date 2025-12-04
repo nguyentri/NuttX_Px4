@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_RA_CANFD_H
-#define __ARCH_ARM_SRC_RA8_RA_CANFD_H
+#ifndef __ARCH_ARM_SRC_RA_RA8_CANFD_H
+#define __ARCH_ARM_SRC_RA_RA8_CANFD_H
 
 /****************************************************************************
  * Included Files
@@ -222,4 +222,4 @@ void ra_canfd_uninitialize(int channel);
 
 #endif /* CONFIG_RA_CANFD */
 
-#endif /* __ARCH_ARM_SRC_RA8_RA_CANFD_H */
+#endif /* __ARCH_ARM_SRC_RA_RA8_CANFD_H */

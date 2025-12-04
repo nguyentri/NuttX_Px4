@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RA8_RA_ETHER_H
-#define __ARCH_ARM_SRC_RA8_RA_ETHER_H
+#ifndef __ARCH_ARM_SRC_RA_RA8_ETHER_H
+#define __ARCH_ARM_SRC_RA_RA8_ETHER_H
 
 /****************************************************************************
  * Included Files
@@ -90,4 +90,4 @@ struct ra_eth_desc_s
 
 int ra_ether_initialize(int intf);
 
-#endif /* __ARCH_ARM_SRC_RA8_RA_ETHER_H */
+#endif /* __ARCH_ARM_SRC_RA_RA8_ETHER_H */

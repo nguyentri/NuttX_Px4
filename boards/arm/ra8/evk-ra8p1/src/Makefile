@@ -64,6 +64,16 @@ ifeq ($(CONFIG_RA_CANFD),y)
 CSRCS += ra8p1_canfd.c
 endif
 
+# OSPI support
+ifeq ($(CONFIG_RA_OSPI),y)
+CSRCS += ra8p1_ospi_b.c
+endif
+
+# OSPI Example
+ifeq ($(CONFIG_RA8P1_OSPI_EXAMPLE),y)
+CSRCS += ra8p1_ospi_test.c
+endif
+
 # Ethernet support
 ifeq ($(CONFIG_RA_ETHERNET),y)
 CSRCS += ra8p1_ether.c

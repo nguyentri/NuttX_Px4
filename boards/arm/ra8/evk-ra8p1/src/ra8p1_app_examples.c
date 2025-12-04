@@ -167,6 +167,20 @@ int ra8p1_rust_example(void)
 }
 #endif
 
+#ifdef CONFIG_RA8P1_OSPI_EXAMPLE
+int ra8p1_ospi_example(void)
+{
+  int ret = ra8p1_ospi_test_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "OSPI test init failed: %d\n", ret);
+      return ret;
+    }
+
+  return ra8p1_ospi_test_main(0, NULL);
+}
+#endif
+
 #ifdef CONFIG_RA8P1_GPT_PWM_EXAMPLE
 int ra8p1_gpt_pwm_example(void)
 {
@@ -303,6 +317,15 @@ int ra8p1_app_examples(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Rust example failed: %d\n", ret);
+      last_err = ret;
+    }
+#endif
+
+#ifdef CONFIG_RA8P1_OSPI_EXAMPLE
+  ret = ra8p1_ospi_example();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "OSPI example failed: %d\n", ret);
       last_err = ret;
     }
 #endif

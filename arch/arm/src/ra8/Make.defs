@@ -73,6 +73,11 @@ CHIP_CSRCS += ra_spi.c
 CHIP_CSRCS += ra_dtc.c
 endif
 
+# OSPI driver
+ifeq ($(CONFIG_RA_OSPI),y)
+CHIP_CSRCS += ra_ospi_b.c
+endif
+
 # PWM driver
 ifeq ($(CONFIG_RA_GPT),y)
 CHIP_CSRCS += ra_gpt.c

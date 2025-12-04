@@ -53,3 +53,11 @@ config RA8P1_SPI_LOOPBACK_EXAMPLE
 	---help---
 		Enable SPI internal loopback test example for verifying
 		SPI driver functionality on EVK-RA8P1 board.
+
+config RA8P1_OSPI_EXAMPLE
+	bool "OSPI test example"
+	default n
+	depends on RA_OSPI
+	---help---
+		Enable OSPI test example for verifying OSPI driver functionality
+		on EVK-RA8P1 board.

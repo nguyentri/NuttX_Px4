@@ -270,6 +270,26 @@ struct spi_dev_s;
 int gy912_register_sensors(FAR struct spi_dev_s *spi);
 #endif
 
+#ifdef CONFIG_RA8P1_OSPI_EXAMPLE
+int ra8p1_ospi_test_init(void);
+int ra8p1_ospi_test_main(int argc, char *argv[]);
+#endif
+
+/****************************************************************************
+ * Name: board_canfd_initialize
+ *
+ * Description:
+ *   Initialize the OSPI driver and register the MTD device.
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RA_OSPI
+int board_ospi_initialize(void);
+#endif
+
 /****************************************************************************
  * Name: board_canfd_initialize
  *

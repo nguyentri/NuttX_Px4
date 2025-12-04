@@ -206,6 +206,20 @@ int ra8p1_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_RA_OSPI
+  /* Initialize OSPI interface */
+
+  ret = board_ospi_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize OSPI: %d\n", ret);
+    }
+  else
+    {
+      syslog(LOG_INFO, "OSPI initialized successfully\n");
+    }
+#endif
+
   ra8p1_app_examples();
 
   return ret;
