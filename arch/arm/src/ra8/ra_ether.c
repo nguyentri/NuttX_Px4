@@ -201,9 +201,9 @@ struct ra_ether_s
   uint8_t               *rxbuffer;
   uint16_t              rxhead;         /* Next RX descriptor with data */
 
-  /* Link descriptor for descriptor chain linking */
-  struct ra_eth_desc_s  txlink;         /* TX chain link back to start */
-  struct ra_eth_desc_s  rxlink;         /* RX chain link back to start */
+  /* Link descriptor pointers (point to DTCM-located link descriptors) */
+  struct ra_eth_desc_s  *txlink;        /* TX chain link back to start */
+  struct ra_eth_desc_s  *rxlink;        /* RX chain link back to start */
 };
 
 /****************************************************************************
@@ -215,19 +215,43 @@ static struct ra_ether_s g_ra_ether[CONFIG_RA_ETHERNET_NINTERFACES];
 /* Static flag to track if shared resources (COMA, GWCA) are initialized */
 static bool g_l3switch_initialized = false;
 
-/* Aligned descriptors and buffers
- * Note: These should be placed in non-cacheable memory or properly
- * cache-managed. For Cortex-M85, consider using MPU to mark as
- * Device memory or use cache maintenance operations.
+/* Aligned descriptors and buffers (per-interface for multi-port support)
+ *
+ * These are placed in DTCM (Data Tightly Coupled Memory) which is
+ * non-cacheable on Cortex-M85. This avoids cache coherency issues
+ * between CPU and DMA without requiring cache maintenance operations.
+ *
+ * The .dtcm_noinit section is defined in the linker script as a NOLOAD
+ * section in DTCM memory region, meaning these buffers won't be initialized
+ * at startup (which is fine for DMA buffers).
+ *
+ * Memory layout in DTCM (per interface, multiply by NINTERFACES for total):
+ *   g_txdesc:   8 * 16 =   128 bytes per interface
+ *   g_rxdesc:   8 * 16 =   128 bytes per interface
+ *   g_txlink:   1 * 16 =    16 bytes per interface
+ *   g_rxlink:   1 * 16 =    16 bytes per interface
+ *   g_txbuffer: 8 * 1536 = 12,288 bytes per interface
+ *   g_rxbuffer: 8 * 1536 = 12,288 bytes per interface
+ *   Total: ~24KB per interface in DTCM
  */
-static struct ra_eth_desc_s g_txdesc[CONFIG_RA_ETHERNET_NTXDESC]
-  __attribute__((aligned(RA_DESC_ALIGN)));
-static struct ra_eth_desc_s g_rxdesc[CONFIG_RA_ETHERNET_NRXDESC]
-  __attribute__((aligned(RA_DESC_ALIGN)));
-static uint8_t g_txbuffer[CONFIG_RA_ETHERNET_NTXDESC * RA_MAX_PACKET_SIZE]
-  __attribute__((aligned(RA_BUF_ALIGN)));
-static uint8_t g_rxbuffer[CONFIG_RA_ETHERNET_NRXDESC * RA_MAX_PACKET_SIZE]
-  __attribute__((aligned(RA_BUF_ALIGN)));
+static struct ra_eth_desc_s
+  g_txdesc[CONFIG_RA_ETHERNET_NINTERFACES][CONFIG_RA_ETHERNET_NTXDESC]
+  __attribute__((section(".dtcm_noinit"), aligned(RA_DESC_ALIGN)));
+static struct ra_eth_desc_s
+  g_rxdesc[CONFIG_RA_ETHERNET_NINTERFACES][CONFIG_RA_ETHERNET_NRXDESC]
+  __attribute__((section(".dtcm_noinit"), aligned(RA_DESC_ALIGN)));
+static struct ra_eth_desc_s g_txlink[CONFIG_RA_ETHERNET_NINTERFACES]
+  __attribute__((section(".dtcm_noinit"), aligned(RA_DESC_ALIGN)));
+static struct ra_eth_desc_s g_rxlink[CONFIG_RA_ETHERNET_NINTERFACES]
+  __attribute__((section(".dtcm_noinit"), aligned(RA_DESC_ALIGN)));
+static uint8_t
+  g_txbuffer[CONFIG_RA_ETHERNET_NINTERFACES]
+            [CONFIG_RA_ETHERNET_NTXDESC * RA_MAX_PACKET_SIZE]
+  __attribute__((section(".dtcm_noinit"), aligned(RA_BUF_ALIGN)));
+static uint8_t
+  g_rxbuffer[CONFIG_RA_ETHERNET_NINTERFACES]
+            [CONFIG_RA_ETHERNET_NRXDESC * RA_MAX_PACKET_SIZE]
+  __attribute__((section(".dtcm_noinit"), aligned(RA_BUF_ALIGN)));
 
 /****************************************************************************
  * Private Function Prototypes
@@ -660,10 +684,10 @@ static void ra_init_descriptors(struct ra_ether_s *priv)
 
   /* Set up TX link descriptor to create circular chain */
 
-  priv->txlink.info = RA_DESC_DT_LINKFIX;
-  priv->txlink.ctrl = 0;
-  priv->txlink.buf_lo = (uint32_t)(uintptr_t)priv->txdesc;
-  priv->txlink.buf_hi = 0;
+  priv->txlink->info = RA_DESC_DT_LINKFIX;
+  priv->txlink->ctrl = 0;
+  priv->txlink->buf_lo = (uint32_t)(uintptr_t)priv->txdesc;
+  priv->txlink->buf_hi = 0;
 
   /* Initialize RX descriptors as FEMPTY (ready for RX) */
 
@@ -680,10 +704,10 @@ static void ra_init_descriptors(struct ra_ether_s *priv)
 
   /* Set up RX link descriptor to create circular chain */
 
-  priv->rxlink.info = RA_DESC_DT_LINKFIX;
-  priv->rxlink.ctrl = 0;
-  priv->rxlink.buf_lo = (uint32_t)(uintptr_t)priv->rxdesc;
-  priv->rxlink.buf_hi = 0;
+  priv->rxlink->info = RA_DESC_DT_LINKFIX;
+  priv->rxlink->ctrl = 0;
+  priv->rxlink->buf_lo = (uint32_t)(uintptr_t)priv->rxdesc;
+  priv->rxlink->buf_hi = 0;
 
   priv->txhead = 0;
   priv->txtail = 0;
@@ -1449,12 +1473,14 @@ int ra_ether_initialize(int port)
 #endif
   priv->dev.d_private = priv;
 
-  /* Assign descriptor and buffer pointers */
+  /* Assign descriptor and buffer pointers (per-interface) */
 
-  priv->txdesc   = g_txdesc;
-  priv->rxdesc   = g_rxdesc;
-  priv->txbuffer = g_txbuffer;
-  priv->rxbuffer = g_rxbuffer;
+  priv->txdesc   = g_txdesc[port];
+  priv->rxdesc   = g_rxdesc[port];
+  priv->txlink   = &g_txlink[port];  /* DTCM-located link descriptor */
+  priv->rxlink   = &g_rxlink[port];  /* DTCM-located link descriptor */
+  priv->txbuffer = g_txbuffer[port];
+  priv->rxbuffer = g_rxbuffer[port];
 
   /* Set default configuration */
 
