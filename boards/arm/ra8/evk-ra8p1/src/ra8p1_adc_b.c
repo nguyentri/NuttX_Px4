@@ -45,17 +45,26 @@
  *
  * Battery Monitoring:
  *  - GPIO_BATT_VOLT   (AN000) - Battery Voltage 5.7:1 divider on Port P004
- *  - GPIO_BATT_CURR   (AN104) - Battery Current ACS712 on Port P005
+ *  - GPIO_BATT_CURR   (AN004) - Battery Current ACS712 on Port P000
  *
  * Expansion Pins:
- *  - GPIO_ARDUINO_AN0 (AN001) - Arduino AN0 on Port P001
+ *  - GPIO_ARDUINO_AN0 (AN001) - Arduino AN0 on Port P003
  *  - GPIO_GROVE2_AN0  (AN002) - Grove2 AN0 on Port P002 (if available as analog)
+ *
+ * Note: ADC-B supports virtual channels 0-32 for ADC Unit 0 (AN000-AN022)
+ *       For ADC Unit 1 channels (AN100+), use separate driver instance
  */
 
-/* ADC channel configuration */
-#define ADC_BATTERY_VOLTAGE_CHANNEL    0   /* AN000 - Battery Voltage */
-#define ADC_BATTERY_CURRENT_CHANNEL    104 /* AN104 - Battery Current */
-#define ADC_ARDUINO_AN0_CHANNEL        1   /* AN001 - Arduino Expansion */
+/* ADC channel configuration - physical channel numbers */
+
+#define ADC_BATTERY_VOLTAGE_CHANNEL    RA_ADC_CHANNEL_AN000  /* AN000 - Battery Voltage */
+#define ADC_BATTERY_CURRENT_CHANNEL    RA_ADC_CHANNEL_AN004  /* AN004 - Battery Current */
+#define ADC_ARDUINO_AN0_CHANNEL        RA_ADC_CHANNEL_AN001  /* AN001 - Arduino Expansion */
+#define ADC_ARDUINO_AN1_CHANNEL        RA_ADC_CHANNEL_AN002  /* AN002 - Arduino Expansion */
+
+/* Maximum channels supported by 32-bit channel mask */
+
+#define ADC_MAX_CHANNELS_MASK          32
 
 /****************************************************************************
  * Private Types
@@ -98,22 +107,35 @@ int ra8_adc_setup(void)
 
   ainfo("Setting up ADC-B for evk-ra8p1\n");
 
-  /* Configure the ADC channel list for enabled features */
+  /* Configure the ADC channel list for enabled features.
+   * The chanlist bitmask supports channels 0-31 (ADC Unit 0: AN000-AN022)
+   */
+
   chanlist = 0;
 
 #ifdef CONFIG_EXAMPLES_ADC
   /* Enable battery monitoring channels if ADC examples are configured */
-  chanlist |= (1 << ADC_BATTERY_VOLTAGE_CHANNEL);
-  nchannels++;
+
+  if (ADC_BATTERY_VOLTAGE_CHANNEL < ADC_MAX_CHANNELS_MASK)
+    {
+      chanlist |= (1U << ADC_BATTERY_VOLTAGE_CHANNEL);
+      nchannels++;
+    }
 
 #ifdef CONFIG_RA_ADC_BATTERY_CURRENT
-  chanlist |= (1 << ADC_BATTERY_CURRENT_CHANNEL);
-  nchannels++;
+  if (ADC_BATTERY_CURRENT_CHANNEL < ADC_MAX_CHANNELS_MASK)
+    {
+      chanlist |= (1U << ADC_BATTERY_CURRENT_CHANNEL);
+      nchannels++;
+    }
 #endif
 
 #ifdef CONFIG_RA_ADC_ARDUINO
-  chanlist |= (1 << ADC_ARDUINO_AN0_CHANNEL);
-  nchannels++;
+  if (ADC_ARDUINO_AN0_CHANNEL < ADC_MAX_CHANNELS_MASK)
+    {
+      chanlist |= (1U << ADC_ARDUINO_AN0_CHANNEL);
+      nchannels++;
+    }
 #endif
 #endif
 

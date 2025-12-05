@@ -79,6 +79,11 @@ if(CONFIG_RA_GPT)
   list(APPEND SRCS ra_gpt.c)
 endif()
 
+# ELC driver
+if(CONFIG_RA_ELC)
+  list(APPEND SRCS ra_elc.c)
+endif()
+
 # MRAM driver, RA8 internal flash as MRAM
 if(CONFIG_RA_FLASH)
   list(APPEND SRCS ra_mram.c)

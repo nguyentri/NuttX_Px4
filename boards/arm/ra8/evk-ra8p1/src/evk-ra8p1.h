@@ -119,6 +119,23 @@ int board_adc_initialize(void);
 #endif
 
 /****************************************************************************
+ * Name: board_elc_initialize
+ *
+ * Description:
+ *   Initialize the Event Link Controller on the EVK-RA8P1 board.
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RA_ELC
+int board_elc_initialize(void);
+int board_elc_gpt_trigger_adc(int gpt_channel, int adc_trigger,
+                               int event_type);
+#endif
+
+/****************************************************************************
  * Name: board_rtc_initialize
  *
  * Description:

@@ -46,6 +46,10 @@ if(CONFIG_PWM)
   list(APPEND SRCS ra8p1_gpt_pwm.c)
 endif()
 
+if(CONFIG_RA_ELC)
+  list(APPEND SRCS ra8p1_elc.c)
+endif()
+
 if(CONFIG_RA_ADC_B)
   list(APPEND SRCS ra8p1_adc_b.c)
 endif()

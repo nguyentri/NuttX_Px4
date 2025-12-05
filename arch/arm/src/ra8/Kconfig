@@ -3056,6 +3056,27 @@ config RA_ELC
    depends on RA_HAVE_ELC
    help
      Enable hardware event routing without CPU intervention.
+     The Event Link Controller (ELC) allows peripheral-to-peripheral
+     event signals to be routed directly, enabling triggers such as
+     GPT timer overflow to start ADC conversions without CPU involvement.
+
+if RA_ELC
+
+config DEBUG_ELC_INFO
+   bool "ELC informational debug output"
+   default n
+   depends on DEBUG_FEATURES
+   help
+     Enable informational debug output for the ELC driver.
+
+config DEBUG_ELC_ERROR
+   bool "ELC error debug output"
+   default y
+   depends on DEBUG_FEATURES
+   help
+     Enable error debug output for the ELC driver.
+
+endif # RA_ELC
 
 config RA_PDG
    bool "PWM Delay Generation"

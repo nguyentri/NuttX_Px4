@@ -59,6 +59,11 @@ ifeq ($(CONFIG_PWM),y)
 CSRCS += ra8p1_gpt_pwm.c
 endif
 
+# ELC support
+ifeq ($(CONFIG_RA_ELC),y)
+CSRCS += ra8p1_elc.c
+endif
+
 # MRAM support
 ifeq ($(CONFIG_RA_MRAM),y)
 CSRCS += ra8p1_mram.c

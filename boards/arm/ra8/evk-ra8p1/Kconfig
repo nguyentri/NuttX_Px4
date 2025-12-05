@@ -12,40 +12,6 @@ config BOARD_EVK_RA8P1
 
 endif
 
-# Sensor module support (internal to board)
-config SENSORS_IMU_MODULE
-	bool "IMU sensor module support"
-	default n
-	depends on RA8_SPI
-	---help---
-		Enable support for IMU sensor module containing
-		9DOF IMU and barometric pressure sensor.
-
-if SENSORS_IMU_MODULE
-
-config IMU_MODULE_SPI_FREQUENCY
-	int "IMU module SPI frequency"
-	default 1000000
-	range 100000 8000000
-	---help---
-		SPI frequency for IMU sensor communication (Hz)
-
-config IMU_MODULE_USE_DMA
-	bool "Use DMA for IMU transfers"
-	default y
-	depends on RA8_SPI0_DMA
-	---help---
-		Use DMA for IMU sensor data transfers for better performance
-
-config IMU_MODULE_DEBUG
-	bool "IMU module debug output"
-	default n
-	depends on DEBUG_SENSORS
-	---help---
-		Enable debug output for IMU sensor module
-
-endif # SENSORS_IMU_MODULE
-
 config RA8P1_SPI_LOOPBACK_EXAMPLE
 	bool "SPI loopback test example"
 	default n
@@ -61,3 +27,14 @@ config RA8P1_OSPI_EXAMPLE
 	---help---
 		Enable OSPI test example for verifying OSPI driver functionality
 		on EVK-RA8P1 board.
+
+config RA8P1_ELC_GPT_ADC_EXAMPLE
+	bool "ELC GPT-triggered ADC example"
+	default n
+	depends on RA_ELC && RA_GPT && RA_ADC
+	---help---
+		Enable ELC example that demonstrates GPT timer triggering ADC
+		conversions without CPU intervention. This configures:
+		- GPT0 counter overflow -> ADC0 scan trigger
+		- Software event 0 -> GPT A start trigger
+		- GPT0 overflow -> GPT B stop trigger

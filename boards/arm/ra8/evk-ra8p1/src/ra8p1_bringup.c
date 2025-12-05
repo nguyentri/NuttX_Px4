@@ -194,6 +194,23 @@ int ra8p1_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_RA_ELC
+  /* Initialize Event Link Controller
+   * Note: ELC should be initialized after GPT and ADC modules
+   * so that event links can be established properly
+   */
+
+  ret = board_elc_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize ELC: %d\n", ret);
+    }
+  else
+    {
+      syslog(LOG_INFO, "ELC initialized successfully\n");
+    }
+#endif
+
 #ifdef CONFIG_RA_MRAM
   /* Initialize MRAM storage for OTA/bootloader and parameter storage */
 

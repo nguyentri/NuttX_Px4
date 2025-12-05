@@ -183,6 +183,64 @@
 
 #define R_ELC_ELCPARB_ELSR30                      (1 << 30)  /* Event Link Setting Register 30 Privilege Attribution */
 
+/* ELSEGR Register bit definitions - Software Event Generation */
+
+#define R_ELC_ELSEGR_BY_WI                        (1 << 7)  /* Write Ignore bit */
+#define R_ELC_ELSEGR_BY_WE                        (1 << 6)  /* Write Enable bit */
+#define R_ELC_ELSEGR_BY_SEG                       (1 << 0)  /* Software Event Generation bit */
+
+/* Steps necessary to unlock and write software event generation bits */
+
+#define ELC_ELSEGRN_STEP1                         (0x00)  /* WI = 0, WE = 0, SEG = 0 */
+#define ELC_ELSEGRN_STEP2                         (0x40)  /* WI = 0, WE = 1, SEG = 0 */
+#define ELC_ELSEGRN_STEP3                         (0x41)  /* WI = 0, WE = 1, SEG = 1 */
+
+/* ELC enable/disable control values */
+
+#define ELC_ELCR_ELCON_DISABLE                    (0x00)  /* ELC operation disabled */
+#define ELC_ELCR_ELCON_ENABLE                     (0x80)  /* ELC operation enabled */
+
+/* Maximum number of peripherals/ELSR registers */
+
+#define ELC_MAX_PERIPHERALS                       18      /* Number of ELC peripheral slots (RA8E1) */
+#define ELC_MAX_SOFTWARE_EVENTS                   2       /* Number of software event generators (RA8E1) */
+
+/* ELC Peripheral definitions - these map to ELSR register indices */
+
+#define ELC_PERIPHERAL_GPT_A                      0       /* GPT A event input */
+#define ELC_PERIPHERAL_GPT_B                      1       /* GPT B event input */
+#define ELC_PERIPHERAL_GPT_C                      2       /* GPT C event input */
+#define ELC_PERIPHERAL_GPT_D                      3       /* GPT D event input */
+#define ELC_PERIPHERAL_GPT_E                      4       /* GPT E event input */
+#define ELC_PERIPHERAL_GPT_F                      5       /* GPT F event input */
+#define ELC_PERIPHERAL_GPT_G                      6       /* GPT G event input */
+#define ELC_PERIPHERAL_GPT_H                      7       /* GPT H event input */
+#define ELC_PERIPHERAL_ADC0                       8       /* ADC0 scan trigger */
+#define ELC_PERIPHERAL_ADC0_B                     9       /* ADC0 scan trigger B */
+#define ELC_PERIPHERAL_ADC1                       10      /* ADC1 scan trigger */
+#define ELC_PERIPHERAL_ADC1_B                     11      /* ADC1 scan trigger B */
+#define ELC_PERIPHERAL_DAC0                       12      /* DAC0 event input */
+#define ELC_PERIPHERAL_DAC1                       13      /* DAC1 event input */
+#define ELC_PERIPHERAL_IOPORT1                    14      /* IOPORT1 event input */
+#define ELC_PERIPHERAL_IOPORT2                    15      /* IOPORT2 event input */
+#define ELC_PERIPHERAL_IOPORT3                    16      /* IOPORT3 event input */
+#define ELC_PERIPHERAL_IOPORT4                    17      /* IOPORT4 event input */
+#define ELC_PERIPHERAL_NONE                       18      /* No peripheral linked */
+
+/* Dummy definitions for compatibility with RA8P1 */
+
+#define ELC_PERIPHERAL_ADC0_C                     ELC_PERIPHERAL_NONE
+#define ELC_PERIPHERAL_ADC1_C                     ELC_PERIPHERAL_NONE
+#define ELC_PERIPHERAL_ADC2                       ELC_PERIPHERAL_NONE
+#define ELC_PERIPHERAL_ADC2_B                     ELC_PERIPHERAL_NONE
+#define ELC_PERIPHERAL_ADC2_C                     ELC_PERIPHERAL_NONE
+#define ELC_PERIPHERAL_I3C                        ELC_PERIPHERAL_NONE
+#define ELC_PERIPHERAL_GPTP0                      ELC_PERIPHERAL_NONE
+#define ELC_PERIPHERAL_GPTP1                      ELC_PERIPHERAL_NONE
+
+/* ELC Event None - used to disable a link */
+
+#define ELC_EVENT_NONE                            0x000   /* No event linked */
 
 /* Maximum number of channels */
 

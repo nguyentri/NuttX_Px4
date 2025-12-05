@@ -89,6 +89,11 @@ ifeq ($(CONFIG_RA_GPT),y)
 CHIP_CSRCS += ra_gpt.c
 endif
 
+# ELC driver
+ifeq ($(CONFIG_RA_ELC),y)
+CHIP_CSRCS += ra_elc.c
+endif
+
 # Flash memory driver
 ifeq ($(CONFIG_RA_FLASH),y)
 CHIP_CSRCS += ra_flash.c
