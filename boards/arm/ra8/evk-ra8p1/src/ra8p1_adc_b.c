@@ -101,39 +101,53 @@
 int ra8_adc_setup(void)
 {
   FAR struct adc_dev_s *adc_dev;
-  uint32_t chanlist;
+  struct ra_adc_b_chan_cfg_s channels[RA_ADC_B_MAX_CHANNELS];
   int nchannels = 0;
   int ret = OK;
 
   ainfo("Setting up ADC-B for evk-ra8p1\n");
 
-  /* Configure the ADC channel list for enabled features.
-   * The chanlist bitmask supports channels 0-31 (ADC Unit 0: AN000-AN022)
-   */
-
-  chanlist = 0;
+  /* Configure the ADC channel list for enabled features. */
 
 #ifdef CONFIG_EXAMPLES_ADC
   /* Enable battery monitoring channels if ADC examples are configured */
 
-  if (ADC_BATTERY_VOLTAGE_CHANNEL < ADC_MAX_CHANNELS_MASK)
+  if (nchannels < ADC_B_MAX_CHANNELS)
     {
-      chanlist |= (1U << ADC_BATTERY_VOLTAGE_CHANNEL);
+      channels[nchannels].vchannel = 0;
+      channels[nchannels].pchannel = ADC_BATTERY_VOLTAGE_CHANNEL;
+      channels[nchannels].scan_group_id = 0;
+      channels[nchannels].sampling_table = 0;
+      channels[nchannels].resolution = RA_ADC_RESOLUTION_12BIT; /* Use default */
+      channels[nchannels].differential = false;
+      channels[nchannels].sample_hold = false;
       nchannels++;
     }
 
 #ifdef CONFIG_RA_ADC_BATTERY_CURRENT
-  if (ADC_BATTERY_CURRENT_CHANNEL < ADC_MAX_CHANNELS_MASK)
+  if (nchannels < ADC_B_MAX_CHANNELS)
     {
-      chanlist |= (1U << ADC_BATTERY_CURRENT_CHANNEL);
+      channels[nchannels].vchannel = 1;
+      channels[nchannels].pchannel = ADC_BATTERY_CURRENT_CHANNEL;
+      channels[nchannels].scan_group_id = 0;
+      channels[nchannels].sampling_table = 0;
+      channels[nchannels].resolution = RA_ADC_RESOLUTION_12BIT;
+      channels[nchannels].differential = false;
+      channels[nchannels].sample_hold = false;
       nchannels++;
     }
 #endif
 
 #ifdef CONFIG_RA_ADC_ARDUINO
-  if (ADC_ARDUINO_AN0_CHANNEL < ADC_MAX_CHANNELS_MASK)
+  if (nchannels < ADC_B_MAX_CHANNELS)
     {
-      chanlist |= (1U << ADC_ARDUINO_AN0_CHANNEL);
+      channels[nchannels].vchannel = 2;
+      channels[nchannels].pchannel = ADC_ARDUINO_AN0_CHANNEL;
+      channels[nchannels].scan_group_id = 0;
+      channels[nchannels].sampling_table = 0;
+      channels[nchannels].resolution = RA_ADC_RESOLUTION_12BIT;
+      channels[nchannels].differential = false;
+      channels[nchannels].sample_hold = false;
       nchannels++;
     }
 #endif
@@ -146,7 +160,7 @@ int ra8_adc_setup(void)
     }
 
   /* Initialize the ADC-B module */
-  adc_dev = ra8_adc_initialize(chanlist, nchannels);
+  adc_dev = ra8_adc_initialize(channels, nchannels);
   if (adc_dev == NULL)
     {
       aerr("ERROR: Failed to initialize ADC-B\n");

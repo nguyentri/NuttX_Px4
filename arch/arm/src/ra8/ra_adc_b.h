@@ -192,7 +192,7 @@ extern "C"
  *   Initialize the ADC-B subsystem for RA8P1
  *
  * Input Parameters:
- *   chanlist  - Bit mask of channels to enable (channels 0-31)
+ *   channels  - Array of channel configuration structures
  *   nchannels - Number of configured channels
  *
  * Returned Value:
@@ -200,7 +200,165 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct adc_dev_s *ra8_adc_initialize(uint32_t chanlist, int nchannels);
+FAR struct adc_dev_s *ra8_adc_initialize(
+    FAR const struct ra_adc_b_chan_cfg_s *channels, int nchannels);
+
+/****************************************************************************
+ * Name: ra8_adc_set_resolution
+ *
+ * Description:
+ *   Set the ADC resolution
+ *
+ * Input Parameters:
+ *   dev        - ADC device structure
+ *   resolution - Resolution setting (RA_ADC_RESOLUTION_*)
+ *
+ * Returned Value:
+ *   OK on success; negative errno on failure
+ *
+ ****************************************************************************/
+
+int ra8_adc_set_resolution(FAR struct adc_dev_s *dev, uint8_t resolution);
+
+/****************************************************************************
+ * Name: ra8_adc_set_scan_mode
+ *
+ * Description:
+ *   Set the ADC scan mode
+ *
+ * Input Parameters:
+ *   dev  - ADC device structure
+ *   mode - Scan mode (RA_ADC_MODE_*)
+ *
+ * Returned Value:
+ *   OK on success; negative errno on failure
+ *
+ ****************************************************************************/
+
+int ra8_adc_set_scan_mode(FAR struct adc_dev_s *dev, uint8_t mode);
+
+/****************************************************************************
+ * Name: ra8_adc_set_averaging
+ *
+ * Description:
+ *   Set the number of samples to average
+ *
+ * Input Parameters:
+ *   dev   - ADC device structure
+ *   count - Number of samples to average (1, 2, 4, 8, 16, 32, 64, etc.)
+ *
+ * Returned Value:
+ *   OK on success; negative errno on failure
+ *
+ ****************************************************************************/
+
+int ra8_adc_set_averaging(FAR struct adc_dev_s *dev, uint16_t count);
+
+/****************************************************************************
+ * Name: ra8_adc_enable_fifo
+ *
+ * Description:
+ *   Enable FIFO mode for burst sampling
+ *
+ * Input Parameters:
+ *   dev    - ADC device structure
+ *   enable - true to enable, false to disable
+ *
+ * Returned Value:
+ *   OK on success; negative errno on failure
+ *
+ ****************************************************************************/
+
+int ra8_adc_enable_fifo(FAR struct adc_dev_s *dev, bool enable);
+
+/****************************************************************************
+ * Name: ra8_adc_configure_gpt_trigger
+ *
+ * Description:
+ *   Configure GPT (timer) hardware trigger for PWM-synchronized sampling
+ *
+ * Input Parameters:
+ *   dev         - ADC device structure
+ *   gpt_channel - GPT channel number (0-13)
+ *   use_cmpb    - Use Compare Match B instead of A
+ *
+ * Returned Value:
+ *   OK on success; negative errno on failure
+ *
+ ****************************************************************************/
+
+int ra8_adc_configure_gpt_trigger(FAR struct adc_dev_s *dev,
+                                  uint8_t gpt_channel, bool use_cmpb);
+
+/****************************************************************************
+ * Name: ra8_adc_configure_elc_trigger
+ *
+ * Description:
+ *   Configure ELC (Event Link Controller) hardware trigger
+ *
+ * Input Parameters:
+ *   dev       - ADC device structure
+ *   elc_event - ELC event number to trigger on
+ *
+ * Returned Value:
+ *   OK on success; negative errno on failure
+ *
+ ****************************************************************************/
+
+int ra8_adc_configure_elc_trigger(FAR struct adc_dev_s *dev,
+                                  uint16_t elc_event);
+
+/****************************************************************************
+ * Name: ra8_adc_enable_hw_trigger
+ *
+ * Description:
+ *   Enable hardware triggering (must configure trigger source first)
+ *
+ * Input Parameters:
+ *   dev    - ADC device structure
+ *   enable - true to enable, false to disable
+ *
+ * Returned Value:
+ *   OK on success; negative errno on failure
+ *
+ ****************************************************************************/
+
+int ra8_adc_enable_hw_trigger(FAR struct adc_dev_s *dev, bool enable);
+
+/****************************************************************************
+ * Name: ra8_adc_read_sync
+ *
+ * Description:
+ *   Perform a synchronous (blocking) ADC read
+ *
+ * Input Parameters:
+ *   dev     - ADC device structure
+ *   channel - Physical channel to read
+ *   value   - Pointer to store the result
+ *
+ * Returned Value:
+ *   OK on success; negative errno on failure
+ *
+ ****************************************************************************/
+
+int ra8_adc_read_sync(FAR struct adc_dev_s *dev, uint8_t channel,
+                      FAR int32_t *value);
+
+/****************************************************************************
+ * Name: ra8_adc_get_fullcount
+ *
+ * Description:
+ *   Get the full-scale count for the configured resolution
+ *
+ * Input Parameters:
+ *   dev - ADC device structure
+ *
+ * Returned Value:
+ *   Full-scale count value
+ *
+ ****************************************************************************/
+
+uint32_t ra8_adc_get_fullcount(FAR struct adc_dev_s *dev);
 
 #ifdef __cplusplus
 }

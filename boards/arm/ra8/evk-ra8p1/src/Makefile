@@ -61,7 +61,7 @@ endif
 
 # ELC support
 ifeq ($(CONFIG_RA_ELC),y)
-CSRCS += ra8p1_elc.c
+CSRCS += ra8p1_adc_b_elc.c
 endif
 
 # MRAM support

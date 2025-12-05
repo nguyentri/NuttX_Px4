@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/ra8/evk-ra8p1/src/ra8p1_elc.c
+ * boards/arm/ra8/evk-ra8p1/src/ra8p1_adc_b_elc.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -40,6 +40,9 @@
 /* Include IRQ definitions for ELC event macros */
 
 #include <arch/ra8/ra8p1_irq.h>
+
+#include <nuttx/analog/adc.h>
+#include "ra_adc_b.h"
 
 #ifdef CONFIG_RA_ELC
 
@@ -301,5 +304,69 @@ int board_elc_gpt_trigger_adc(int gpt_channel, int adc_trigger,
 
   return OK;
 }
+
+#ifdef CONFIG_RA8P1_ELC_GPT_ADC_EXAMPLE
+/****************************************************************************
+ * Name: board_adc_initialize
+ *
+ * Description:
+ *   Initialize ADC for ELC trigger example.
+ *   Overrides the default weak implementation.
+ *
+ ****************************************************************************/
+
+int board_adc_initialize(void)
+{
+  FAR struct adc_dev_s *adc_dev;
+  struct ra_adc_b_chan_cfg_s channels[1];
+  int ret;
+
+  syslog(LOG_INFO, "ADC: Initializing for ELC trigger example\n");
+
+  /* Configure Channel 0 (AN000) for the example */
+  channels[0].vchannel = 0;
+  channels[0].pchannel = RA_ADC_CHANNEL_AN000;
+  channels[0].scan_group_id = 0;
+  channels[0].sampling_table = 0;
+  channels[0].resolution = RA_ADC_RESOLUTION_12BIT;
+  channels[0].differential = false;
+  channels[0].sample_hold = false;
+
+  /* Initialize ADC driver */
+  adc_dev = ra8_adc_initialize(channels, 1);
+  if (adc_dev == NULL)
+    {
+      syslog(LOG_ERR, "ADC: Failed to initialize driver\n");
+      return -ENODEV;
+    }
+
+  /* Configure ELC trigger (Synchronous ELC) */
+  ret = ra8_adc_configure_elc_trigger(adc_dev, RA_ELC_GPT0_COUNTER_OVERFLOW);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ADC: Failed to configure ELC trigger: %d\n", ret);
+      return ret;
+    }
+
+  /* Enable hardware trigger */
+  ret = ra8_adc_enable_hw_trigger(adc_dev, true);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ADC: Failed to enable hardware trigger: %d\n", ret);
+      return ret;
+    }
+
+  /* Register the ADC driver */
+  ret = adc_register("/dev/adc0", adc_dev);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ADC: Failed to register driver: %d\n", ret);
+      return ret;
+    }
+
+  syslog(LOG_INFO, "ADC: Initialized /dev/adc0 with ELC trigger\n");
+  return OK;
+}
+#endif /* CONFIG_RA8P1_ELC_GPT_ADC_EXAMPLE */
 
 #endif /* CONFIG_RA_ELC */
