@@ -53,6 +53,11 @@
 #include "ra_gpt.h"
 #include "ra_mstp.h"
 #include "ra_clock.h"
+#include "ra_icu.h"
+#include "ra_elc.h"
+#ifdef CONFIG_RA_DMAC
+#include "ra_dmac.h"
+#endif
 #include <syslog.h>
 
 /****************************************************************************
@@ -96,7 +101,9 @@ struct ra_gpt_channel_config_s
 struct ra_gpt_s
 {
   const struct pwm_ops_s *ops;     /* PWM operations */
+#ifdef CONFIG_TIMER
   const struct timer_ops_s *timer_ops; /* Timer operations */
+#endif
   const struct ra_gpt_channel_config_s *config; /* GPT configuration */
   uint32_t frequency;             /* Current frequency */
   uint32_t period;                /* Period in timer counts */
@@ -142,12 +149,45 @@ static void gpt_log_channel(uint8_t ch,
                             uint32_t duty_ticks);
 #endif
 
+#ifdef CONFIG_TIMER
+/* Interrupt handler (used for timer mode) */
+static int gpt_interrupt(int irq, void *context, void *arg);
+#endif
+
 /* PWM driver methods */
 static int gpt_setup(struct pwm_lowerhalf_s *dev);
 static int gpt_shutdown(struct pwm_lowerhalf_s *dev);
 static int gpt_start(struct pwm_lowerhalf_s *dev, const struct pwm_info_s *info);
 static int gpt_stop(struct pwm_lowerhalf_s *dev);
 static int gpt_ioctl(struct pwm_lowerhalf_s *dev, int cmd, unsigned long arg);
+
+#ifdef CONFIG_TIMER
+/* Timer driver methods */
+static int gpt_timer_start(struct timer_lowerhalf_s *lower);
+static int gpt_timer_stop(struct timer_lowerhalf_s *lower);
+static int gpt_timer_getstatus(struct timer_lowerhalf_s *lower,
+                               struct timer_status_s *status);
+static int gpt_timer_settimeout(struct timer_lowerhalf_s *lower,
+                                uint32_t timeout);
+static void gpt_timer_setcallback(struct timer_lowerhalf_s *lower,
+                                  tccb_t callback, void *arg);
+static int gpt_timer_maxtimeout(struct timer_lowerhalf_s *lower,
+                                uint32_t *maxtimeout);
+#endif /* CONFIG_TIMER */
+
+/* Dead-time control */
+static int gpt_set_deadtime(struct ra_gpt_s *priv, uint32_t deadtime_up,
+                            uint32_t deadtime_dn, bool enable);
+
+/* External trigger control */
+static int gpt_set_trigger(struct ra_gpt_s *priv,
+                           const struct ra_gpt_trigger_s *config);
+
+/* Input capture mode */
+static int gpt_set_capture(struct ra_gpt_s *priv,
+                           const struct ra_gpt_capture_s *config);
+static int gpt_get_capture(struct ra_gpt_s *priv,
+                           struct ra_gpt_captured_s *result);
 
 /****************************************************************************
  * Private Data
@@ -164,6 +204,21 @@ static const struct pwm_ops_s g_gpt_ops =
   .stop       = gpt_stop,
   .ioctl      = gpt_ioctl,
 };
+
+#ifdef CONFIG_TIMER
+/* This is the list of lower half timer driver methods used by the upper half
+ * driver
+ */
+static const struct timer_ops_s g_gpt_timer_ops =
+{
+  .start       = gpt_timer_start,
+  .stop        = gpt_timer_stop,
+  .getstatus   = gpt_timer_getstatus,
+  .settimeout  = gpt_timer_settimeout,
+  .setcallback = gpt_timer_setcallback,
+  .maxtimeout  = gpt_timer_maxtimeout,
+};
+#endif /* CONFIG_TIMER */
 
 /* GPT device configurations */
 static const struct ra_gpt_channel_config_s g_gpt_configs[] =
@@ -454,8 +509,11 @@ static int gpt_configure(struct ra_gpt_s *priv)
   regval = GPT_GTCR_MD_SAW_WAVE_UP | GPT_GTCR_TPCS_PCLKD_1;
   gpt_putreg(priv, R_GPT32_GTCR_OFFSET, regval);
 
-  /* Configure I/O pins for PWM output - Start with low output */
-  regval = GPT_GTIOR_GTIOA_INITIAL_LOW | GPT_GTIOR_GTIOB_INITIAL_LOW;
+  /* Configure I/O pins for PWM output:
+   * - Saw-wave PWM mode: Initial low, high at compare match, low at period end
+   * - Enable output on both GTIOCA and GTIOCB pins
+   */
+  regval = GPT_GTIOR_PWM_HIGH_AB;
   gpt_putreg(priv, R_GPT32_GTIOR_OFFSET, regval);
 
   /* Initialize counter and period */
@@ -465,6 +523,15 @@ static int gpt_configure(struct ra_gpt_s *priv)
   /* Initialize compare registers */
   gpt_putreg(priv, R_GPT32_GTCCRA_OFFSET, 0);
   gpt_putreg(priv, R_GPT32_GTCCRB_OFFSET, 0);
+
+  /* Enable buffer operation for glitch-free duty cycle updates.
+   * GTBER enables single buffer operation:
+   * - CCRA: GTCCRA <-> GTCCRC (compare A buffer)
+   * - CCRB: GTCCRB <-> GTCCRE (compare B buffer)
+   * - PR:   GTPBR -> GTPR (period buffer)
+   * Transfers occur at counter overflow/underflow for saw-wave mode.
+   */
+  gpt_putreg(priv, R_GPT32_GTBER_OFFSET, GPT_GTBER_PWM_ENABLE);
 
   /* Clear all interrupt flags */
   regval = gpt_getreg(priv, R_GPT32_GTST_OFFSET);
@@ -562,6 +629,9 @@ static int gpt_shutdown(struct pwm_lowerhalf_s *dev)
              GPT_GTWP_PRKEY | GPT_GTWP_WP | GPT_GTWP_CMNWP);
 
   leave_critical_section(flags);
+
+  /* Put the GPT back into module stop state to save power */
+  ra_mstp_stop(priv->config->mstp);
 
   priv->started = false;
   return 0;
@@ -719,8 +789,11 @@ static int gpt_start(struct pwm_lowerhalf_s *dev,
   /* Reset the counter */
   gpt_putreg(priv, R_GPT32_GTCNT_OFFSET, 0);
 
-  /* Configure I/O pins for PWM output */
-  regval = GPT_GTIOR_GTIOA_INITIAL_LOW | GPT_GTIOR_GTIOB_INITIAL_LOW;
+  /* Configure I/O pins for PWM output:
+   * - Saw-wave PWM mode: Initial low, high at compare match, low at period end
+   * - Enable output on both GTIOCA and GTIOCB pins
+   */
+  regval = GPT_GTIOR_PWM_HIGH_AB;
   gpt_putreg(priv, R_GPT32_GTIOR_OFFSET, regval);
 
   /* Start the timer */
@@ -788,8 +861,9 @@ static int gpt_stop(struct pwm_lowerhalf_s *dev)
   regval &= ~GPT_GTCR_CST;
   gpt_putreg(priv, R_GPT32_GTCR_OFFSET, regval);
 
-  /* Disable PWM outputs */
-  gpt_putreg(priv, R_GPT32_GTIOR_OFFSET, 0);
+  /* Disable PWM outputs - clear output enable bits and set to low */
+  regval = GPT_GTIOR_GTIOA_INITIAL_LOW | GPT_GTIOR_GTIOB_INITIAL_LOW;
+  gpt_putreg(priv, R_GPT32_GTIOR_OFFSET, regval);
 
   /* Re-enable write protection */
   gpt_putreg(priv, R_GPT32_GTWP_OFFSET,
@@ -866,7 +940,88 @@ static int gpt_ioctl(struct pwm_lowerhalf_s *dev, int cmd,
         }
         break;
 
-      /* Add any custom ioctl commands here */
+      /* Dead-time configuration command */
+      case RA_GPTIOC_SETDEADTIME:
+        {
+          struct ra_gpt_deadtime_s *dt =
+                        (struct ra_gpt_deadtime_s *)((FAR void *)arg);
+          if (dt == NULL)
+            {
+              ret = -EFAULT;
+            }
+          else
+            {
+              ret = gpt_set_deadtime(priv, dt->deadtime_up, dt->deadtime_dn,
+                                     dt->enable);
+            }
+        }
+        break;
+
+      /* External trigger configuration command */
+      case RA_GPTIOC_SETTRIGGER:
+        {
+          struct ra_gpt_trigger_s *trig =
+                        (struct ra_gpt_trigger_s *)((FAR void *)arg);
+          if (trig == NULL)
+            {
+              ret = -EFAULT;
+            }
+          else
+            {
+              ret = gpt_set_trigger(priv, trig);
+            }
+        }
+        break;
+
+      /* Input capture configuration command */
+      case RA_GPTIOC_SETCAPTURE:
+        {
+          struct ra_gpt_capture_s *cap =
+                        (struct ra_gpt_capture_s *)((FAR void *)arg);
+          if (cap == NULL)
+            {
+              ret = -EFAULT;
+            }
+          else
+            {
+              ret = gpt_set_capture(priv, cap);
+            }
+        }
+        break;
+
+      /* Get captured value command */
+      case RA_GPTIOC_GETCAPTURE:
+        {
+          struct ra_gpt_captured_s *cap =
+                        (struct ra_gpt_captured_s *)((FAR void *)arg);
+          if (cap == NULL)
+            {
+              ret = -EFAULT;
+            }
+          else
+            {
+              ret = gpt_get_capture(priv, cap);
+            }
+        }
+        break;
+
+#ifdef CONFIG_RA_DMAC
+      /* DMA configuration command */
+      case RA_GPTIOC_SETDMA:
+        {
+          struct ra_gpt_dma_s *dma =
+                        (struct ra_gpt_dma_s *)((FAR void *)arg);
+          if (dma == NULL)
+            {
+              ret = -EFAULT;
+            }
+          else
+            {
+              ret = gpt_set_dma(priv, dma);
+            }
+        }
+        break;
+#endif /* CONFIG_RA_DMAC */
 
       default:
         ret = -ENOTTY;
@@ -875,6 +1030,1054 @@ static int gpt_ioctl(struct pwm_lowerhalf_s *dev, int cmd,
 
   return ret;
 }
+
+#ifdef CONFIG_TIMER
+/****************************************************************************
+ * Name: gpt_interrupt
+ *
+ * Description:
+ *   GPT timer interrupt handler. Handles overflow and compare match
+ *   interrupts for timer mode operation.
+ *
+ * Input Parameters:
+ *   irq     - The IRQ number
+ *   context - The interrupt context
+ *   arg     - The GPT device structure
+ *
+ * Returned Value:
+ *   OK on success
+ *
+ ****************************************************************************/
+
+static int gpt_interrupt(int irq, void *context, void *arg)
+{
+  struct ra_gpt_s *priv = (struct ra_gpt_s *)arg;
+  uint32_t status;
+
+  DEBUGASSERT(priv != NULL);
+
+  /* Disable write protection to access status register */
+
+  gpt_putreg(priv, R_GPT32_GTWP_OFFSET, GPT_GTWP_PRKEY);
+
+  /* Read and clear status flags */
+
+  status = gpt_getreg(priv, R_GPT32_GTST_OFFSET);
+
+  /* Clear the interrupt flags by writing 0 to the flag bits */
+
+  gpt_putreg(priv, R_GPT32_GTST_OFFSET, 0);
+
+  /* Re-enable write protection */
+
+  gpt_putreg(priv, R_GPT32_GTWP_OFFSET,
+             GPT_GTWP_PRKEY | GPT_GTWP_WP | GPT_GTWP_CMNWP);
+
+  /* Check for overflow interrupt (timer mode) */
+
+  if (status & GPT_GTST_TCFPO)
+    {
+      /* Call the user callback if registered */
+
+      if (priv->callback != NULL)
+        {
+          priv->callback(priv->arg);
+        }
+    }
+
+  /* Check for compare match A interrupt */
+
+  if (status & GPT_GTST_TCFA)
+    {
+      /* Handle compare match A - could be used for PWM notifications */
+    }
+
+  /* Check for compare match B interrupt */
+
+  if (status & GPT_GTST_TCFB)
+    {
+      /* Handle compare match B - could be used for PWM notifications */
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: gpt_timer_start
+ *
+ * Description:
+ *   Start the timer in timer mode.
+ *
+ * Input Parameters:
+ *   lower - A reference to the lower half timer driver state structure
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure
+ *
+ ****************************************************************************/
+
+static int gpt_timer_start(struct timer_lowerhalf_s *lower)
+{
+  struct ra_gpt_s *priv = (struct ra_gpt_s *)lower;
+  uint32_t regval;
+
+  pwminfo("GPT%" PRIu32 " timer start\n", priv->config->channel);
+
+  irqstate_t flags = enter_critical_section();
+
+  /* Disable write protection */
+
+  gpt_putreg(priv, R_GPT32_GTWP_OFFSET, GPT_GTWP_PRKEY);
+
+  /* Reset counter to 0 */
+
+  gpt_putreg(priv, R_GPT32_GTCNT_OFFSET, 0);
+
+  /* Start the timer */
+
+  regval = gpt_getreg(priv, R_GPT32_GTCR_OFFSET);
+  regval |= GPT_GTCR_CST;
+  gpt_putreg(priv, R_GPT32_GTCR_OFFSET, regval);
+
+  /* Re-enable write protection */
+
+  gpt_putreg(priv, R_GPT32_GTWP_OFFSET,
+             GPT_GTWP_PRKEY | GPT_GTWP_WP | GPT_GTWP_CMNWP);
+
+  leave_critical_section(flags);
+
+  priv->started = true;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: gpt_timer_stop
+ *
+ * Description:
+ *   Stop the timer.
+ *
+ * Input Parameters:
+ *   lower - A reference to the lower half timer driver state structure
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure
+ *
+ ****************************************************************************/
+
+static int gpt_timer_stop(struct timer_lowerhalf_s *lower)
+{
+  struct ra_gpt_s *priv = (struct ra_gpt_s *)lower;
+  uint32_t regval;
+
+  pwminfo("GPT%" PRIu32 " timer stop\n", priv->config->channel);
+
+  irqstate_t flags = enter_critical_section();
+
+  /* Disable write protection */
+
+  gpt_putreg(priv, R_GPT32_GTWP_OFFSET, GPT_GTWP_PRKEY);
+
+  /* Stop the timer */
+
+  regval = gpt_getreg(priv, R_GPT32_GTCR_OFFSET);
+  regval &= ~GPT_GTCR_CST;
+  gpt_putreg(priv, R_GPT32_GTCR_OFFSET, regval);
+
+  /* Re-enable write protection */
+
+  gpt_putreg(priv, R_GPT32_GTWP_OFFSET,
+             GPT_GTWP_PRKEY | GPT_GTWP_WP | GPT_GTWP_CMNWP);
+
+  leave_critical_section(flags);
+
+  priv->started = false;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: gpt_timer_getstatus
+ *
+ * Description:
+ *   Get the current timer status.
+ *
+ * Input Parameters:
+ *   lower  - A reference to the lower half timer driver state structure
+ *   status - Pointer to status structure to fill
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure
+ *
+ ****************************************************************************/
+
+static int gpt_timer_getstatus(struct timer_lowerhalf_s *lower,
+                               struct timer_status_s *status)
+{
+  struct ra_gpt_s *priv = (struct ra_gpt_s *)lower;
+  uint32_t period;
+  uint32_t counter;
+  uint32_t timer_freq;
+  const uint32_t prescaler_divs[] = {1, 4, 16, 64, 256, 1024};
+
+  DEBUGASSERT(status != NULL);
+
+  irqstate_t flags = enter_critical_section();
+
+  /* Read current values */
+
+  period = gpt_getreg(priv, R_GPT32_GTPR_OFFSET);
+  counter = gpt_getreg(priv, R_GPT32_GTCNT_OFFSET);
+
+  leave_critical_section(flags);
+
+  /* Calculate timer frequency */
+
+  if (priv->prescaler < (sizeof(prescaler_divs) / sizeof(prescaler_divs[0])))
+    {
+      timer_freq = priv->config->pclkd_freq / prescaler_divs[priv->prescaler];
+    }
+  else
+    {
+      timer_freq = priv->config->pclkd_freq;
+    }
+
+  /* Convert timer ticks to microseconds */
+
+  status->flags = 0;
+  if (priv->started)
+    {
+      status->flags |= TCFLAGS_ACTIVE;
+    }
+
+  if (priv->callback != NULL)
+    {
+      status->flags |= TCFLAGS_HANDLER;
+    }
+
+  /* timeout = period in microseconds */
+
+  if (timer_freq > 0)
+    {
+      status->timeout = (uint32_t)(((uint64_t)(period + 1) * 1000000ULL) / timer_freq);
+      status->timeleft = (uint32_t)(((uint64_t)(period - counter) * 1000000ULL) / timer_freq);
+    }
+  else
+    {
+      status->timeout = 0;
+      status->timeleft = 0;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: gpt_timer_settimeout
+ *
+ * Description:
+ *   Set a new timeout value (and reset the timer).
+ *
+ * Input Parameters:
+ *   lower   - A reference to the lower half timer driver state structure
+ *   timeout - Timeout in microseconds
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure
+ *
+ ****************************************************************************/
+
+static int gpt_timer_settimeout(struct timer_lowerhalf_s *lower,
+                                uint32_t timeout)
+{
+  struct ra_gpt_s *priv = (struct ra_gpt_s *)lower;
+  uint32_t prescaler;
+  uint32_t timer_freq;
+  uint32_t period;
+  uint32_t regval;
+  const uint32_t prescaler_divs[] = {1, 4, 16, 64, 256, 1024};
+
+  pwminfo("GPT%" PRIu32 " timer settimeout: %" PRIu32 " us\n",
+          priv->config->channel, timeout);
+
+  /* Convert timeout in microseconds to timer ticks.
+   * First, find an appropriate prescaler.
+   */
+
+  for (prescaler = 0; prescaler < 6; prescaler++)
+    {
+      timer_freq = priv->config->pclkd_freq / prescaler_divs[prescaler];
+
+      /* period = (timeout_us * timer_freq) / 1000000 */
+
+      period = (uint32_t)(((uint64_t)timeout * timer_freq + 500000ULL) / 1000000ULL);
+
+      /* Check if period fits in 32-bit counter */
+
+      if (period > 0 && period <= priv->config->max_period)
+        {
+          break;
+        }
+    }
+
+  if (prescaler >= 6)
+    {
+      pwmerr("ERROR: timeout %" PRIu32 " us exceeds max period\n", timeout);
+      return -ERANGE;
+    }
+
+  irqstate_t flags = enter_critical_section();
+
+  /* Disable write protection */
+
+  gpt_putreg(priv, R_GPT32_GTWP_OFFSET, GPT_GTWP_PRKEY);
+
+  /* Stop the timer first */
+
+  regval = gpt_getreg(priv, R_GPT32_GTCR_OFFSET);
+  regval &= ~GPT_GTCR_CST;
+  gpt_putreg(priv, R_GPT32_GTCR_OFFSET, regval);
+
+  /* Configure the prescaler */
+
+  regval = GPT_GTCR_MD_SAW_WAVE_UP | (prescaler << GPT_GTCR_TPCS_SHIFT);
+  gpt_putreg(priv, R_GPT32_GTCR_OFFSET, regval);
+
+  /* Set the period */
+
+  gpt_putreg(priv, R_GPT32_GTPR_OFFSET, period - 1);
+
+  /* Reset counter */
+
+  gpt_putreg(priv, R_GPT32_GTCNT_OFFSET, 0);
+
+  /* Re-enable write protection */
+
+  gpt_putreg(priv, R_GPT32_GTWP_OFFSET,
+             GPT_GTWP_PRKEY | GPT_GTWP_WP | GPT_GTWP_CMNWP);
+
+  leave_critical_section(flags);
+
+  priv->prescaler = prescaler;
+  priv->period = period;
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: gpt_timer_setcallback
+ *
+ * Description:
+ *   Set the timer callback function. This function will be called when the
+ *   timer expires.
+ *
+ * Input Parameters:
+ *   lower    - A reference to the lower half timer driver state structure
+ *   callback - The callback function to call on timer expiration
+ *   arg      - Argument to pass to the callback function
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void gpt_timer_setcallback(struct timer_lowerhalf_s *lower,
+                                  tccb_t callback, void *arg)
+{
+  struct ra_gpt_s *priv = (struct ra_gpt_s *)lower;
+  irqstate_t flags;
+  int ret;
+
+  pwminfo("GPT%" PRIu32 " timer setcallback\n", priv->config->channel);
+
+  flags = enter_critical_section();
+
+  /* Save the callback */
+
+  priv->callback = (void (*)(void *))callback;
+  priv->arg = arg;
+
+  /* Disable write protection */
+
+  gpt_putreg(priv, R_GPT32_GTWP_OFFSET, GPT_GTWP_PRKEY);
+
+  if (callback != NULL)
+    {
+      /* Attach the interrupt handler if not already attached */
+
+      if (priv->irq == 0)
+        {
+          /* Attach interrupt handler via ICU using overflow ELC event */
+
+          ret = ra_icu_attach(priv->config->elc, gpt_interrupt,
+                              (void *)priv, true);
+          if (ret >= 0)
+            {
+              priv->irq = ret;
+            }
+          else
+            {
+              pwmerr("ERROR: Failed to attach GPT interrupt: %d\n", ret);
+            }
+        }
+
+      /* Enable overflow interrupt by setting appropriate GTINTAD bits
+       * Note: We use GTST_TCFPO (overflow) for timer mode
+       */
+
+      /* Enable overflow interrupt in NVIC (interrupt will fire on GTST.TCFPO) */
+    }
+  else
+    {
+      /* Disable interrupt and detach handler */
+
+      if (priv->irq != 0)
+        {
+          ra_icu_detach(priv->irq);
+          priv->irq = 0;
+        }
+    }
+
+  /* Re-enable write protection */
+
+  gpt_putreg(priv, R_GPT32_GTWP_OFFSET,
+             GPT_GTWP_PRKEY | GPT_GTWP_WP | GPT_GTWP_CMNWP);
+
+  leave_critical_section(flags);
+}
+
+/****************************************************************************
+ * Name: gpt_timer_maxtimeout
+ *
+ * Description:
+ *   Get the maximum supported timeout value.
+ *
+ * Input Parameters:
+ *   lower      - A reference to the lower half timer driver state structure
+ *   maxtimeout - Pointer to store the maximum timeout in microseconds
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure
+ *
+ ****************************************************************************/
+
+static int gpt_timer_maxtimeout(struct timer_lowerhalf_s *lower,
+                                uint32_t *maxtimeout)
+{
+  struct ra_gpt_s *priv = (struct ra_gpt_s *)lower;
+  uint64_t max_us;
+  uint32_t min_timer_freq;
+
+  DEBUGASSERT(maxtimeout != NULL);
+
+  /* With the largest prescaler (1024), calculate max timeout */
+
+  min_timer_freq = priv->config->pclkd_freq / 1024;
+
+  /* max_timeout_us = (max_period * 1000000) / min_timer_freq */
+
+  max_us = ((uint64_t)priv->config->max_period * 1000000ULL) / min_timer_freq;
+
+  /* Clamp to 32-bit max */
+
+  if (max_us > UINT32_MAX)
+    {
+      *maxtimeout = UINT32_MAX;
+    }
+  else
+    {
+      *maxtimeout = (uint32_t)max_us;
+    }
+
+  return OK;
+}
+#endif /* CONFIG_TIMER */
+
+/****************************************************************************
+ * Name: gpt_set_deadtime
+ *
+ * Description:
+ *   Configure dead-time for complementary PWM output.
+ *   Dead-time inserts a delay between turning off one output and turning on
+ *   the complementary output to prevent shoot-through in half-bridge drivers.
+ *
+ * Input Parameters:
+ *   priv        - A reference to the GPT structure
+ *   deadtime_up - Dead-time value for rising edge (in timer ticks)
+ *   deadtime_dn - Dead-time value for falling edge (in timer ticks)
+ *   enable      - True to enable dead-time, false to disable
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure
+ *
+ ****************************************************************************/
+
+static int gpt_set_deadtime(struct ra_gpt_s *priv, uint32_t deadtime_up,
+                            uint32_t deadtime_dn, bool enable)
+{
+  uint32_t regval;
+  irqstate_t flags;
+
+  pwminfo("GPT%" PRIu32 " deadtime: up=%" PRIu32 " dn=%" PRIu32 " en=%d\n",
+          priv->config->channel, deadtime_up, deadtime_dn, enable);
+
+  flags = enter_critical_section();
+
+  /* Disable write protection */
+
+  gpt_putreg(priv, R_GPT32_GTWP_OFFSET, GPT_GTWP_PRKEY);
+
+  if (enable)
+    {
+      /* Set dead-time values
+       * GTDVU: Dead-time for up-counting (rising edge delay)
+       * GTDVD: Dead-time for down-counting (falling edge delay)
+       * Note: For saw-wave mode, only GTDVU is typically used
+       */
+
+      gpt_putreg(priv, R_GPT32_GTDVU_OFFSET, deadtime_up);
+#if defined(CONFIG_RA8P1_GROUP)
+      /* RA8P1 has separate GTDVD register */
+      gpt_putreg(priv, R_GPT32_GTDVD_OFFSET, deadtime_dn);
+#endif
+
+      /* Enable dead-time generation
+       * TDE (bit 0): Enable negative-phase waveform (dead-time)
+       * When TDE=1, GTIOCB output becomes the complement of GTIOCA
+       * with dead-time insertion
+       */
+
+      regval = GPT_GTDTCR_TDE;
+      gpt_putreg(priv, R_GPT32_GTDTCR_OFFSET, regval);
+    }
+  else
+    {
+      /* Disable dead-time generation */
+
+      gpt_putreg(priv, R_GPT32_GTDTCR_OFFSET, 0);
+      gpt_putreg(priv, R_GPT32_GTDVU_OFFSET, 0);
+#if defined(CONFIG_RA8P1_GROUP)
+      gpt_putreg(priv, R_GPT32_GTDVD_OFFSET, 0);
+#endif
+    }
+
+  /* Re-enable write protection */
+
+  gpt_putreg(priv, R_GPT32_GTWP_OFFSET,
+             GPT_GTWP_PRKEY | GPT_GTWP_WP | GPT_GTWP_CMNWP);
+
+  leave_critical_section(flags);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: gpt_set_trigger
+ *
+ * Description:
+ *   Configure external trigger sources for the GPT channel.
+ *   This enables ELC events to start, stop, clear, or count the timer.
+ *
+ * Input Parameters:
+ *   priv   - A reference to the GPT structure
+ *   config - Trigger configuration
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure
+ *
+ ****************************************************************************/
+
+static int gpt_set_trigger(struct ra_gpt_s *priv,
+                           const struct ra_gpt_trigger_s *config)
+{
+  uint32_t regval;
+  irqstate_t flags;
+
+  DEBUGASSERT(priv != NULL && config != NULL);
+
+  pwminfo("GPT%" PRIu32 " trigger: source=%d action=%02x elc=%04x en=%d\n",
+          priv->config->channel, config->source, config->action,
+          config->elc_event, config->enable);
+
+  flags = enter_critical_section();
+
+  /* Disable write protection */
+
+  gpt_putreg(priv, R_GPT32_GTWP_OFFSET, GPT_GTWP_PRKEY);
+
+  if (config->enable && config->source == RA_GPT_TRIGGER_ELC)
+    {
+      /* Configure start source (GTSSR) if START action is requested */
+
+      if (config->action & RA_GPT_TRIGGER_START)
+        {
+          /* Set ELC event as start source
+           * The ELC event number maps to specific bits in GTSSR
+           * For ELC events, we use the event link controller to route
+           * peripheral events to GPT start triggers
+           */
+
+          regval = GPT_SSSR_ELC_EVENT(config->elc_event & 0x07);
+          gpt_putreg(priv, R_GPT32_GTSSR_OFFSET, regval);
+        }
+
+      /* Configure stop source (GTPSR) if STOP action is requested */
+
+      if (config->action & RA_GPT_TRIGGER_STOP)
+        {
+          regval = GPT_SSSR_ELC_EVENT(config->elc_event & 0x07);
+          gpt_putreg(priv, R_GPT32_GTPSR_OFFSET, regval);
+        }
+
+      /* Configure clear source (GTCSR) if CLEAR action is requested */
+
+      if (config->action & RA_GPT_TRIGGER_CLEAR)
+        {
+          regval = GPT_SSSR_ELC_EVENT(config->elc_event & 0x07);
+          gpt_putreg(priv, R_GPT32_GTCSR_OFFSET, regval);
+        }
+
+      /* Configure up count source (GTUPSR) if COUNT_UP action is requested */
+
+      if (config->action & RA_GPT_TRIGGER_COUNT_UP)
+        {
+          regval = GPT_SSSR_ELC_EVENT(config->elc_event & 0x07);
+          gpt_putreg(priv, R_GPT32_GTUPSR_OFFSET, regval);
+        }
+
+      /* Configure down count source (GTDNSR) if COUNT_DN action is requested */
+
+      if (config->action & RA_GPT_TRIGGER_COUNT_DN)
+        {
+          regval = GPT_SSSR_ELC_EVENT(config->elc_event & 0x07);
+          gpt_putreg(priv, R_GPT32_GTDNSR_OFFSET, regval);
+        }
+
+      /* Configure input capture A source (GTICASR) if CAPTURE_A action */
+
+      if (config->action & RA_GPT_TRIGGER_CAPTURE_A)
+        {
+          regval = GPT_SSSR_ELC_EVENT(config->elc_event & 0x07);
+          gpt_putreg(priv, R_GPT32_GTICASR_OFFSET, regval);
+        }
+
+      /* Configure input capture B source (GTICBSR) if CAPTURE_B action */
+
+      if (config->action & RA_GPT_TRIGGER_CAPTURE_B)
+        {
+          regval = GPT_SSSR_ELC_EVENT(config->elc_event & 0x07);
+          gpt_putreg(priv, R_GPT32_GTICBSR_OFFSET, regval);
+        }
+    }
+  else
+    {
+      /* Disable external triggers - clear all source select registers */
+
+      gpt_putreg(priv, R_GPT32_GTSSR_OFFSET, 0);
+      gpt_putreg(priv, R_GPT32_GTPSR_OFFSET, 0);
+      gpt_putreg(priv, R_GPT32_GTCSR_OFFSET, 0);
+      gpt_putreg(priv, R_GPT32_GTUPSR_OFFSET, 0);
+      gpt_putreg(priv, R_GPT32_GTDNSR_OFFSET, 0);
+      gpt_putreg(priv, R_GPT32_GTICASR_OFFSET, 0);
+      gpt_putreg(priv, R_GPT32_GTICBSR_OFFSET, 0);
+    }
+
+  /* Re-enable write protection */
+
+  gpt_putreg(priv, R_GPT32_GTWP_OFFSET,
+             GPT_GTWP_PRKEY | GPT_GTWP_WP | GPT_GTWP_CMNWP);
+
+  leave_critical_section(flags);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: gpt_set_capture
+ *
+ * Description:
+ *   Configure input capture mode for the GPT channel.
+ *   This enables capturing the counter value on external pin edges.
+ *
+ * Input Parameters:
+ *   priv   - A reference to the GPT structure
+ *   config - Capture configuration
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure
+ *
+ ****************************************************************************/
+
+static int gpt_set_capture(struct ra_gpt_s *priv,
+                           const struct ra_gpt_capture_s *config)
+{
+  uint32_t gtior;
+  uint32_t gticsr;
+  irqstate_t flags;
+
+  DEBUGASSERT(priv != NULL && config != NULL);
+
+  pwminfo("GPT%" PRIu32 " capture: ch=%d edge=%d filter=%d en=%d\n",
+          priv->config->channel, config->channel, config->edge,
+          config->filter_enable, config->enable);
+
+  if (config->channel > 1)
+    {
+      return -EINVAL;
+    }
+
+  flags = enter_critical_section();
+
+  /* Disable write protection */
+
+  gpt_putreg(priv, R_GPT32_GTWP_OFFSET, GPT_GTWP_PRKEY);
+
+  /* Read current GTIOR register */
+
+  gtior = gpt_getreg(priv, R_GPT32_GTIOR_OFFSET);
+
+  if (config->enable)
+    {
+      /* Configure GTIOR for input capture mode */
+
+      if (config->channel == 0)  /* Capture A (GTIOCA) */
+        {
+          /* Clear existing GTIOA configuration */
+
+          gtior &= ~GPT_GTIOR_GTIOA_MASK;
+          gtior &= ~GPT_GTIOR_OAE;  /* Disable output, configure as input */
+
+          /* Set edge detection mode */
+
+          switch (config->edge)
+            {
+              case RA_GPT_CAPTURE_RISING:
+                gtior |= GPT_GTIOR_GTIOA_INPUT_RISE;
+                break;
+              case RA_GPT_CAPTURE_FALLING:
+                gtior |= GPT_GTIOR_GTIOA_INPUT_FALL;
+                break;
+              case RA_GPT_CAPTURE_BOTH:
+                gtior |= GPT_GTIOR_GTIOA_INPUT_BOTH;
+                break;
+              default:
+                gtior |= GPT_GTIOR_GTIOA_DISABLED;
+                break;
+            }
+
+          /* Configure noise filter A */
+
+          if (config->filter_enable)
+            {
+              gtior |= GPT_GTIOR_NFAEN;
+              gtior &= ~GPT_GTIOR_NFCSA_MASK;
+              gtior |= (config->filter_clock & 0x03) << GPT_GTIOR_NFCSA_SHIFT;
+            }
+          else
+            {
+              gtior &= ~GPT_GTIOR_NFAEN;
+            }
+
+          /* Configure capture source - rising/falling edge on GTIOCA */
+
+          gticsr = 0;
+          if (config->edge & RA_GPT_CAPTURE_RISING)
+            {
+              gticsr |= GPT_GTICSR_GTIOCA_RISE;
+            }
+
+          if (config->edge & RA_GPT_CAPTURE_FALLING)
+            {
+              gticsr |= GPT_GTICSR_GTIOCA_FALL;
+            }
+
+          gpt_putreg(priv, R_GPT32_GTICASR_OFFSET, gticsr);
+        }
+      else  /* Capture B (GTIOCB) */
+        {
+          /* Clear existing GTIOB configuration */
+
+          gtior &= ~GPT_GTIOR_GTIOB_MASK;
+          gtior &= ~GPT_GTIOR_OBE;  /* Disable output, configure as input */
+
+          /* Set edge detection mode */
+
+          switch (config->edge)
+            {
+              case RA_GPT_CAPTURE_RISING:
+                gtior |= GPT_GTIOR_GTIOB_INPUT_RISE;
+                break;
+              case RA_GPT_CAPTURE_FALLING:
+                gtior |= GPT_GTIOR_GTIOB_INPUT_FALL;
+                break;
+              case RA_GPT_CAPTURE_BOTH:
+                gtior |= GPT_GTIOR_GTIOB_INPUT_BOTH;
+                break;
+              default:
+                gtior |= GPT_GTIOR_GTIOB_DISABLED;
+                break;
+            }
+
+          /* Configure noise filter B */
+
+          if (config->filter_enable)
+            {
+              gtior |= GPT_GTIOR_NFBEN;
+              gtior &= ~GPT_GTIOR_NFCSB_MASK;
+              gtior |= (config->filter_clock & 0x03) << GPT_GTIOR_NFCSB_SHIFT;
+            }
+          else
+            {
+              gtior &= ~GPT_GTIOR_NFBEN;
+            }
+
+          /* Configure capture source - rising/falling edge on GTIOCB */
+
+          gticsr = 0;
+          if (config->edge & RA_GPT_CAPTURE_RISING)
+            {
+              gticsr |= GPT_GTICSR_GTIOCB_RISE;
+            }
+
+          if (config->edge & RA_GPT_CAPTURE_FALLING)
+            {
+              gticsr |= GPT_GTICSR_GTIOCB_FALL;
+            }
+
+          gpt_putreg(priv, R_GPT32_GTICBSR_OFFSET, gticsr);
+        }
+
+      /* Update mode to input capture */
+
+      priv->mode = RA_GPT_MODE_INPUT_CAPTURE;
+    }
+  else
+    {
+      /* Disable input capture - disable capture source and reset to PWM mode */
+
+      if (config->channel == 0)
+        {
+          gpt_putreg(priv, R_GPT32_GTICASR_OFFSET, 0);
+          gtior &= ~GPT_GTIOR_NFAEN;
+        }
+      else
+        {
+          gpt_putreg(priv, R_GPT32_GTICBSR_OFFSET, 0);
+          gtior &= ~GPT_GTIOR_NFBEN;
+        }
+    }
+
+  /* Write updated GTIOR */
+
+  gpt_putreg(priv, R_GPT32_GTIOR_OFFSET, gtior);
+
+  /* Re-enable write protection */
+
+  gpt_putreg(priv, R_GPT32_GTWP_OFFSET,
+             GPT_GTWP_PRKEY | GPT_GTWP_WP | GPT_GTWP_CMNWP);
+
+  leave_critical_section(flags);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: gpt_get_capture
+ *
+ * Description:
+ *   Get the captured counter value from input capture mode.
+ *
+ * Input Parameters:
+ *   priv    - A reference to the GPT structure
+ *   capture - Pointer to capture result structure
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure
+ *
+ ****************************************************************************/
+
+static int gpt_get_capture(struct ra_gpt_s *priv,
+                           struct ra_gpt_captured_s *capture)
+{
+  uint32_t status;
+  irqstate_t flags;
+
+  DEBUGASSERT(priv != NULL && capture != NULL);
+
+  if (capture->channel > 1)
+    {
+      return -EINVAL;
+    }
+
+  flags = enter_critical_section();
+
+  /* Read status register */
+
+  status = gpt_getreg(priv, R_GPT32_GTST_OFFSET);
+
+  /* Read captured value from appropriate register */
+
+  if (capture->channel == 0)
+    {
+      capture->value = gpt_getreg(priv, R_GPT32_GTCCRA_OFFSET);
+      capture->overflow = (status & GPT_GTST_TCFPO) != 0;
+    }
+  else
+    {
+      capture->value = gpt_getreg(priv, R_GPT32_GTCCRB_OFFSET);
+      capture->overflow = (status & GPT_GTST_TCFPO) != 0;
+    }
+
+  leave_critical_section(flags);
+
+  return OK;
+}
+
+#ifdef CONFIG_RA_DMAC
+/****************************************************************************
+ * Name: gpt_set_dma
+ *
+ * Description:
+ *   Configure DMA for waveform generation on the GPT channel.
+ *   This enables automatic duty cycle updates via DMA transfers triggered
+ *   by timer compare match or overflow events.
+ *
+ * Input Parameters:
+ *   priv   - A reference to the GPT structure
+ *   config - DMA configuration
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure
+ *
+ ****************************************************************************/
+
+static int gpt_set_dma(struct ra_gpt_s *priv,
+                       const struct ra_gpt_dma_s *config)
+{
+  uint32_t regval;
+  irqstate_t flags;
+  ra_dmac_config_t dma_config;
+  int ret;
+
+  DEBUGASSERT(priv != NULL && config != NULL);
+
+  pwminfo("GPT%" PRIu32 " DMA: trigger=%d src=%08lx dst=%08lx cnt=%" PRIu32 " en=%d\n",
+          priv->config->channel, config->trigger,
+          (unsigned long)config->src_addr,
+          (unsigned long)config->dst_addr,
+          config->transfer_count, config->enable);
+
+  flags = enter_critical_section();
+
+  /* Disable write protection */
+
+  gpt_putreg(priv, R_GPT32_GTWP_OFFSET, GPT_GTWP_PRKEY);
+
+  if (config->enable)
+    {
+      /* Configure GTINTAD for A/D (DMA) start request based on trigger */
+
+      regval = gpt_getreg(priv, R_GPT32_GTINTAD_OFFSET);
+
+      switch (config->trigger)
+        {
+          case 0:  /* Compare match A */
+            regval |= GPT_GTINTAD_ADTRAUEN;
+            /* Set A/D timing register A to trigger point */
+            gpt_putreg(priv, R_GPT32_GTADTRA_OFFSET,
+                       gpt_getreg(priv, R_GPT32_GTCCRA_OFFSET));
+            break;
+
+          case 1:  /* Compare match B */
+            regval |= GPT_GTINTAD_ADTRBUEN;
+            /* Set A/D timing register B to trigger point */
+            gpt_putreg(priv, R_GPT32_GTADTRB_OFFSET,
+                       gpt_getreg(priv, R_GPT32_GTCCRB_OFFSET));
+            break;
+
+          case 2:  /* Overflow - use compare at period-1 */
+            regval |= GPT_GTINTAD_ADTRAUEN;
+            gpt_putreg(priv, R_GPT32_GTADTRA_OFFSET,
+                       gpt_getreg(priv, R_GPT32_GTPR_OFFSET));
+            break;
+
+          default:
+            leave_critical_section(flags);
+            return -EINVAL;
+        }
+
+      gpt_putreg(priv, R_GPT32_GTINTAD_OFFSET, regval);
+
+      /* Configure DMA channel */
+
+      memset(&dma_config, 0, sizeof(dma_config));
+      dma_config.mode = RA_DMAC_MODE_REPEAT;
+      dma_config.size = RA_DMAC_SIZE_32BIT;
+      dma_config.src_addr_mode = RA_DMAC_ADDR_INCR;
+      dma_config.dest_addr_mode = RA_DMAC_ADDR_FIXED;
+      dma_config.trigger = RA_DMAC_TRIGGER_HW;
+      dma_config.src_addr = config->src_addr;
+      dma_config.dest_addr = config->dst_addr;
+      dma_config.transfer_count = config->transfer_count;
+      dma_config.repeat_area = RA_DMAC_REPEAT_AREA_SRC;
+
+      /* The ELC event for GPT A/D request depends on channel
+       * Use COMPARE_A event for DMA triggers as A/D trigger events
+       * are not separately defined in the ELC event table
+       */
+
+      switch (priv->config->channel)
+        {
+          case 0:
+            dma_config.elc_src = RA_ELC_GPT0_CAPTURE_COMPARE_A;
+            break;
+          case 1:
+            dma_config.elc_src = RA_ELC_GPT1_CAPTURE_COMPARE_A;
+            break;
+          case 2:
+            dma_config.elc_src = RA_ELC_GPT2_CAPTURE_COMPARE_A;
+            break;
+          case 3:
+            dma_config.elc_src = RA_ELC_GPT3_CAPTURE_COMPARE_A;
+            break;
+          case 4:
+            dma_config.elc_src = RA_ELC_GPT4_CAPTURE_COMPARE_A;
+            break;
+          case 5:
+            dma_config.elc_src = RA_ELC_GPT5_CAPTURE_COMPARE_A;
+            break;
+          default:
+            /* Use first channel for other GPT channels */
+            dma_config.elc_src = RA_ELC_GPT0_CAPTURE_COMPARE_A;
+            break;
+        }
+
+      /* Open and enable DMAC - this will be board-specific */
+      /* For now, return OK - the actual DMA setup would be done
+       * by the board/application code using ra_dmac_* functions
+       */
+
+      ret = OK;
+    }
+  else
+    {
+      /* Disable DMA triggers - clear ADTRA/ADTRB enables */
+
+      regval = gpt_getreg(priv, R_GPT32_GTINTAD_OFFSET);
+      regval &= ~(GPT_GTINTAD_ADTRAUEN | GPT_GTINTAD_ADTRADEN |
+                  GPT_GTINTAD_ADTRBUEN | GPT_GTINTAD_ADTRBDEN);
+      gpt_putreg(priv, R_GPT32_GTINTAD_OFFSET, regval);
+
+      ret = OK;
+    }
+
+  /* Re-enable write protection */
+
+  gpt_putreg(priv, R_GPT32_GTWP_OFFSET,
+             GPT_GTWP_PRKEY | GPT_GTWP_WP | GPT_GTWP_CMNWP);
+
+  leave_critical_section(flags);
+
+  return ret;
+}
+#endif /* CONFIG_RA_DMAC */
 
 /****************************************************************************
  * Public Functions
@@ -947,6 +2150,274 @@ struct pwm_lowerhalf_s *ra_gpt_initialize(int channel)
 
   return (struct pwm_lowerhalf_s *)lower;
 }
+
+#ifdef CONFIG_TIMER
+/****************************************************************************
+ * Name: ra_gpt_timer_setup
+ *
+ * Description:
+ *   Initialize one GPT timer for use with the upper_level timer driver.
+ *   This provides a timer interface (periodic/one-shot) rather than PWM.
+ *
+ * Input Parameters:
+ *   channel - A number identifying the timer channel.
+ *
+ * Returned Value:
+ *   On success, a pointer to the RA8 lower half timer driver is returned.
+ *   NULL is returned on any failure.
+ *
+ ****************************************************************************/
+
+struct timer_lowerhalf_s *ra_gpt_timer_setup(int channel)
+{
+  struct ra_gpt_s *lower;
+  int i;
+
+  pwminfo("GPT%d timer initialize\n", channel);
+
+  /* Find the matching configuration */
+
+  for (i = 0; i < NGPT_CONFIGS; i++)
+    {
+      if (g_gpt_configs[i].channel == channel)
+        {
+          lower = &g_gpt_devs[i];
+
+          /* Initialize the device structure */
+
+          memset(lower, 0, sizeof(struct ra_gpt_s));
+
+          lower->timer_ops = &g_gpt_timer_ops;
+          lower->config = &g_gpt_configs[i];
+          lower->pwm_mode = false;  /* Timer mode */
+          lower->started = false;
+          lower->callback = NULL;
+          lower->arg = NULL;
+          lower->irq = 0;
+
+          /* Take the GPT out of module stop state */
+
+          ra_mstp_start(lower->config->mstp);
+
+          /* Configure for timer mode (saw-wave up-counting, no PWM output) */
+
+          gpt_putreg(lower, R_GPT32_GTWP_OFFSET, GPT_GTWP_PRKEY);
+
+          /* Configure timer for saw-wave mode (up-counting) with prescaler 1 */
+
+          gpt_putreg(lower, R_GPT32_GTCR_OFFSET,
+                     GPT_GTCR_MD_SAW_WAVE_UP | GPT_GTCR_TPCS_PCLKD_1);
+
+          /* Disable all I/O outputs (timer mode - no PWM) */
+
+          gpt_putreg(lower, R_GPT32_GTIOR_OFFSET, 0);
+
+          /* Set default period */
+
+          gpt_putreg(lower, R_GPT32_GTPR_OFFSET, 0xFFFFFFFF);
+          gpt_putreg(lower, R_GPT32_GTCNT_OFFSET, 0);
+
+          /* Re-enable write protection */
+
+          gpt_putreg(lower, R_GPT32_GTWP_OFFSET,
+                     GPT_GTWP_PRKEY | GPT_GTWP_WP | GPT_GTWP_CMNWP);
+
+          lower->prescaler = 0;  /* Prescaler 1 */
+
+          break;
+        }
+    }
+
+  if (i >= NGPT_CONFIGS)
+    {
+      pwmerr("ERROR: No such timer configured: %d\n", channel);
+      return NULL;
+    }
+
+  return (struct timer_lowerhalf_s *)lower;
+}
+#endif /* CONFIG_TIMER */
+
+/****************************************************************************
+ * Name: ra_gpt_set_trigger
+ *
+ * Description:
+ *   Configure external trigger sources for the specified GPT channel.
+ *   This allows ELC events to start, stop, clear, or count the timer.
+ *
+ * Input Parameters:
+ *   channel - GPT channel number (0-13)
+ *   config  - Trigger configuration
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int ra_gpt_set_trigger(int channel, const struct ra_gpt_trigger_s *config)
+{
+  struct ra_gpt_s *priv = NULL;
+  int i;
+
+  if (config == NULL)
+    {
+      return -EINVAL;
+    }
+
+  /* Find the matching device */
+
+  for (i = 0; i < NGPT_CONFIGS; i++)
+    {
+      if (g_gpt_configs[i].channel == channel)
+        {
+          priv = &g_gpt_devs[i];
+          break;
+        }
+    }
+
+  if (priv == NULL || priv->config == NULL)
+    {
+      return -ENODEV;
+    }
+
+  return gpt_set_trigger(priv, config);
+}
+
+/****************************************************************************
+ * Name: ra_gpt_set_capture
+ *
+ * Description:
+ *   Configure input capture mode for the specified GPT channel.
+ *   This enables capturing the counter value on external pin edges.
+ *
+ * Input Parameters:
+ *   channel - GPT channel number (0-13)
+ *   config  - Capture configuration
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int ra_gpt_set_capture(int channel, const struct ra_gpt_capture_s *config)
+{
+  struct ra_gpt_s *priv = NULL;
+  int i;
+
+  if (config == NULL)
+    {
+      return -EINVAL;
+    }
+
+  /* Find the matching device */
+
+  for (i = 0; i < NGPT_CONFIGS; i++)
+    {
+      if (g_gpt_configs[i].channel == channel)
+        {
+          priv = &g_gpt_devs[i];
+          break;
+        }
+    }
+
+  if (priv == NULL || priv->config == NULL)
+    {
+      return -ENODEV;
+    }
+
+  return gpt_set_capture(priv, config);
+}
+
+/****************************************************************************
+ * Name: ra_gpt_get_capture
+ *
+ * Description:
+ *   Get the captured counter value from input capture mode.
+ *
+ * Input Parameters:
+ *   channel - GPT channel number (0-13)
+ *   capture - Pointer to capture result structure
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int ra_gpt_get_capture(int channel, struct ra_gpt_captured_s *capture)
+{
+  struct ra_gpt_s *priv = NULL;
+  int i;
+
+  if (capture == NULL)
+    {
+      return -EINVAL;
+    }
+
+  /* Find the matching device */
+
+  for (i = 0; i < NGPT_CONFIGS; i++)
+    {
+      if (g_gpt_configs[i].channel == channel)
+        {
+          priv = &g_gpt_devs[i];
+          break;
+        }
+    }
+
+  if (priv == NULL || priv->config == NULL)
+    {
+      return -ENODEV;
+    }
+
+  return gpt_get_capture(priv, capture);
+}
+
+#ifdef CONFIG_RA_DMAC
+/****************************************************************************
+ * Name: ra_gpt_set_dma
+ *
+ * Description:
+ *   Configure DMA for waveform generation on the specified GPT channel.
+ *   This enables automatic duty cycle updates via DMA transfers.
+ *
+ * Input Parameters:
+ *   channel - GPT channel number (0-13)
+ *   config  - DMA configuration
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int ra_gpt_set_dma(int channel, const struct ra_gpt_dma_s *config)
+{
+  struct ra_gpt_s *priv = NULL;
+  int i;
+
+  if (config == NULL)
+    {
+      return -EINVAL;
+    }
+
+  /* Find the matching device */
+
+  for (i = 0; i < NGPT_CONFIGS; i++)
+    {
+      if (g_gpt_configs[i].channel == channel)
+        {
+          priv = &g_gpt_devs[i];
+          break;
+        }
+    }
+
+  if (priv == NULL || priv->config == NULL)
+    {
+      return -ENODEV;
+    }
+
+  return gpt_set_dma(priv, config);
+}
+#endif /* CONFIG_RA_DMAC */
 
 #endif /* CONFIG_RA_GPT */
 

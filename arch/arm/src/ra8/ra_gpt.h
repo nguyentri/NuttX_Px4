@@ -60,6 +60,83 @@
 #define RA_GPT_INT_COMPARE_C           (1 << 4)
 #define RA_GPT_INT_COMPARE_D           (1 << 5)
 
+/* Custom ioctl commands for GPT driver */
+#define RA_GPT_IOCTL_BASE              0x8000
+#define RA_GPTIOC_SETDEADTIME          (RA_GPT_IOCTL_BASE + 0)  /* Set dead-time config */
+#define RA_GPTIOC_GETDEADTIME          (RA_GPT_IOCTL_BASE + 1)  /* Get dead-time config */
+#define RA_GPTIOC_SETTRIGGER           (RA_GPT_IOCTL_BASE + 2)  /* Set external trigger config */
+#define RA_GPTIOC_GETTRIGGER           (RA_GPT_IOCTL_BASE + 3)  /* Get external trigger config */
+#define RA_GPTIOC_SETCAPTURE           (RA_GPT_IOCTL_BASE + 4)  /* Set input capture config */
+#define RA_GPTIOC_GETCAPTURE           (RA_GPT_IOCTL_BASE + 5)  /* Get captured value */
+#define RA_GPTIOC_SETDMA               (RA_GPT_IOCTL_BASE + 6)  /* Set DMA config */
+#define RA_GPTIOC_GETDMA               (RA_GPT_IOCTL_BASE + 7)  /* Get DMA config */
+
+/* GPT input capture edge detection */
+#define RA_GPT_CAPTURE_NONE            0   /* Capture disabled */
+#define RA_GPT_CAPTURE_RISING          1   /* Capture on rising edge */
+#define RA_GPT_CAPTURE_FALLING         2   /* Capture on falling edge */
+#define RA_GPT_CAPTURE_BOTH            3   /* Capture on both edges */
+
+/* GPT external trigger sources */
+#define RA_GPT_TRIGGER_NONE            0   /* No external trigger */
+#define RA_GPT_TRIGGER_ELC             1   /* ELC event trigger */
+#define RA_GPT_TRIGGER_GTIOCA          2   /* GTIOCA pin trigger */
+#define RA_GPT_TRIGGER_GTIOCB          3   /* GTIOCB pin trigger */
+
+/* GPT trigger actions */
+#define RA_GPT_TRIGGER_START           (1 << 0)  /* Trigger starts timer */
+#define RA_GPT_TRIGGER_STOP            (1 << 1)  /* Trigger stops timer */
+#define RA_GPT_TRIGGER_CLEAR           (1 << 2)  /* Trigger clears counter */
+#define RA_GPT_TRIGGER_COUNT_UP        (1 << 3)  /* Trigger counts up */
+#define RA_GPT_TRIGGER_COUNT_DN        (1 << 4)  /* Trigger counts down */
+#define RA_GPT_TRIGGER_CAPTURE_A       (1 << 5)  /* Trigger captures to GTCCRA */
+#define RA_GPT_TRIGGER_CAPTURE_B       (1 << 6)  /* Trigger captures to GTCCRB */
+
+/* Dead-time configuration structure for ioctl */
+struct ra_gpt_deadtime_s
+{
+  uint32_t deadtime_up;    /* Dead-time for rising edge (timer ticks) */
+  uint32_t deadtime_dn;    /* Dead-time for falling edge (timer ticks) */
+  bool     enable;         /* True to enable dead-time, false to disable */
+};
+
+/* External trigger configuration structure for ioctl */
+struct ra_gpt_trigger_s
+{
+  uint8_t  source;         /* Trigger source (RA_GPT_TRIGGER_*) */
+  uint8_t  action;         /* Trigger action flags (RA_GPT_TRIGGER_START/STOP/CLEAR...) */
+  uint16_t elc_event;      /* ELC event number (when source is RA_GPT_TRIGGER_ELC) */
+  bool     enable;         /* True to enable trigger, false to disable */
+};
+
+/* Input capture configuration structure for ioctl */
+struct ra_gpt_capture_s
+{
+  uint8_t  channel;        /* Capture channel (0=A, 1=B) */
+  uint8_t  edge;           /* Edge detection (RA_GPT_CAPTURE_*) */
+  bool     filter_enable;  /* Enable noise filter */
+  uint8_t  filter_clock;   /* Noise filter clock divisor (0-3) */
+  bool     enable;         /* True to enable capture, false to disable */
+};
+
+/* Captured value structure */
+struct ra_gpt_captured_s
+{
+  uint8_t  channel;        /* Capture channel (0=A, 1=B) */
+  uint32_t value;          /* Captured counter value */
+  bool     overflow;       /* True if overflow occurred before capture */
+};
+
+/* DMA configuration structure for ioctl */
+struct ra_gpt_dma_s
+{
+  uint8_t  trigger;        /* DMA trigger source (0=compare A, 1=compare B, 2=overflow) */
+  uint32_t src_addr;       /* Source address for DMA transfer */
+  uint32_t dst_addr;       /* Destination address (typically GTCCRA/B) */
+  uint32_t transfer_count; /* Number of transfers */
+  bool     enable;         /* True to enable DMA, false to disable */
+};
+
 /**********************************************************************/
 
 /* GTWP Register bit definitions */
@@ -85,30 +162,166 @@
 #define GPT_GTCR_TPCS_PCLKD_1024                  (5 << GPT_GTCR_TPCS_SHIFT) /* Prescaler = 1024 */
 
 /* GTIOR Register bit definitions */
+/* GTIOA function select bits [4:0] */
 #define GPT_GTIOR_GTIOA_SHIFT                     (0)
-#define GPT_GTIOR_GTIOA_MASK                      (0xf << GPT_GTIOR_GTIOA_SHIFT)
-#define GPT_GTIOR_GTIOA_INITIAL_LOW               (0 << GPT_GTIOR_GTIOA_SHIFT) /* Initial low, no change */
-#define GPT_GTIOR_GTIOA_INITIAL_HIGH              (1 << GPT_GTIOR_GTIOA_SHIFT) /* Initial high, no change */
-#define GPT_GTIOR_GTIOA_LOW_ON_CMP                (4 << GPT_GTIOR_GTIOA_SHIFT) /* Low on match, high on period */
-#define GPT_GTIOR_GTIOA_HIGH_ON_CMP               (5 << GPT_GTIOR_GTIOA_SHIFT) /* High on match, low on period */
+#define GPT_GTIOR_GTIOA_MASK                      (0x1f << GPT_GTIOR_GTIOA_SHIFT)
+#define GPT_GTIOR_GTIOA_DISABLED                  (0x00 << GPT_GTIOR_GTIOA_SHIFT) /* Pin function disabled */
+#define GPT_GTIOR_GTIOA_INITIAL_LOW               (0x00 << GPT_GTIOR_GTIOA_SHIFT) /* Initial low, no toggle */
+#define GPT_GTIOR_GTIOA_INITIAL_HIGH              (0x10 << GPT_GTIOR_GTIOA_SHIFT) /* Initial high, no toggle */
+#define GPT_GTIOR_GTIOA_LOW_CMP_HIGH_END          (0x06 << GPT_GTIOR_GTIOA_SHIFT) /* Initial low, high@cmp, low@end */
+#define GPT_GTIOR_GTIOA_HIGH_CMP_LOW_END          (0x09 << GPT_GTIOR_GTIOA_SHIFT) /* Initial high, low@cmp, high@end */
+#define GPT_GTIOR_GTIOA_TOGGLE_CMP                (0x03 << GPT_GTIOR_GTIOA_SHIFT) /* Toggle on compare match */
 
-#define GPT_GTIOR_GTIOB_SHIFT                     (8)
-#define GPT_GTIOR_GTIOB_MASK                      (0xf << GPT_GTIOR_GTIOB_SHIFT)
-#define GPT_GTIOR_GTIOB_INITIAL_LOW               (0 << GPT_GTIOR_GTIOB_SHIFT) /* Initial low, no change */
-#define GPT_GTIOR_GTIOB_INITIAL_HIGH              (1 << GPT_GTIOR_GTIOB_SHIFT) /* Initial high, no change */
-#define GPT_GTIOR_GTIOB_LOW_ON_CMP                (4 << GPT_GTIOR_GTIOB_SHIFT) /* Low on match, high on period */
-#define GPT_GTIOR_GTIOB_HIGH_ON_CMP               (5 << GPT_GTIOR_GTIOB_SHIFT) /* High on match, low on period */
+/* GTIOA output default value at stop [6] */
+#define GPT_GTIOR_OADFLT                          (1 << 6)  /* Output value at count stop: 0=low, 1=high */
+
+/* GTIOA output hold at start/stop [7] - not commonly used */
+#define GPT_GTIOR_OAHLD                           (1 << 7)  /* Output hold at start/stop */
+
+/* GTIOA output enable [8] - CRITICAL for PWM output! */
+#define GPT_GTIOR_OAE                             (1 << 8)  /* GTIOCA pin output enable */
+
+/* GTIOA output disable setting [10:9] */
+#define GPT_GTIOR_OADF_SHIFT                      (9)
+#define GPT_GTIOR_OADF_MASK                       (0x3 << GPT_GTIOR_OADF_SHIFT)
+#define GPT_GTIOR_OADF_HIGHZ                      (0 << GPT_GTIOR_OADF_SHIFT)  /* Hi-Z on disable */
+#define GPT_GTIOR_OADF_LOW                        (2 << GPT_GTIOR_OADF_SHIFT)  /* Low on disable */
+#define GPT_GTIOR_OADF_HIGH                       (3 << GPT_GTIOR_OADF_SHIFT)  /* High on disable */
+
+/* Noise filter A enable [13] and clock select [15:14] */
+#define GPT_GTIOR_NFAEN                           (1 << 13) /* Noise filter A enable */
+#define GPT_GTIOR_NFCSA_SHIFT                     (14)
+#define GPT_GTIOR_NFCSA_MASK                      (0x3 << GPT_GTIOR_NFCSA_SHIFT)
+
+/* GTIOCB function select bits [20:16] */
+#define GPT_GTIOR_GTIOB_SHIFT                     (16)
+#define GPT_GTIOR_GTIOB_MASK                      (0x1f << GPT_GTIOR_GTIOB_SHIFT)
+#define GPT_GTIOR_GTIOB_DISABLED                  (0x00 << GPT_GTIOR_GTIOB_SHIFT) /* Pin function disabled */
+#define GPT_GTIOR_GTIOB_INITIAL_LOW               (0x00 << GPT_GTIOR_GTIOB_SHIFT) /* Initial low, no toggle */
+#define GPT_GTIOR_GTIOB_INITIAL_HIGH              (0x10 << GPT_GTIOR_GTIOB_SHIFT) /* Initial high, no toggle */
+#define GPT_GTIOR_GTIOB_LOW_CMP_HIGH_END          (0x06 << GPT_GTIOR_GTIOB_SHIFT) /* Initial low, high@cmp, low@end */
+#define GPT_GTIOR_GTIOB_HIGH_CMP_LOW_END          (0x09 << GPT_GTIOR_GTIOB_SHIFT) /* Initial high, low@cmp, high@end */
+#define GPT_GTIOR_GTIOB_TOGGLE_CMP                (0x03 << GPT_GTIOR_GTIOB_SHIFT) /* Toggle on compare match */
+
+/* GTIOCB output default value at stop [22] */
+#define GPT_GTIOR_OBDFLT                          (1 << 22) /* Output value at count stop: 0=low, 1=high */
+
+/* GTIOCB output hold at start/stop [23] */
+#define GPT_GTIOR_OBHLD                           (1 << 23) /* Output hold at start/stop */
+
+/* GTIOCB output enable [24] - CRITICAL for PWM output! */
+#define GPT_GTIOR_OBE                             (1 << 24) /* GTIOCB pin output enable */
+
+/* GTIOCB output disable setting [26:25] */
+#define GPT_GTIOR_OBDF_SHIFT                      (25)
+#define GPT_GTIOR_OBDF_MASK                       (0x3 << GPT_GTIOR_OBDF_SHIFT)
+#define GPT_GTIOR_OBDF_HIGHZ                      (0 << GPT_GTIOR_OBDF_SHIFT)  /* Hi-Z on disable */
+#define GPT_GTIOR_OBDF_LOW                        (2 << GPT_GTIOR_OBDF_SHIFT)  /* Low on disable */
+#define GPT_GTIOR_OBDF_HIGH                       (3 << GPT_GTIOR_OBDF_SHIFT)  /* High on disable */
+
+/* Noise filter B enable [29] and clock select [31:30] */
+#define GPT_GTIOR_NFBEN                           (1 << 29) /* Noise filter B enable */
+#define GPT_GTIOR_NFCSB_SHIFT                     (30)
+#define GPT_GTIOR_NFCSB_MASK                      (0x3 << GPT_GTIOR_NFCSB_SHIFT)
+
+/* Convenience macros for common PWM output configurations */
+/* Saw-wave PWM: Initial low, go high at compare match, go low at period end */
+#define GPT_GTIOR_PWM_HIGH_A   (GPT_GTIOR_GTIOA_LOW_CMP_HIGH_END | GPT_GTIOR_OAE)
+#define GPT_GTIOR_PWM_HIGH_B   (GPT_GTIOR_GTIOB_LOW_CMP_HIGH_END | GPT_GTIOR_OBE)
+#define GPT_GTIOR_PWM_HIGH_AB  (GPT_GTIOR_PWM_HIGH_A | GPT_GTIOR_PWM_HIGH_B)
+
+/* Saw-wave PWM: Initial high, go low at compare match, go high at period end */
+#define GPT_GTIOR_PWM_LOW_A    (GPT_GTIOR_GTIOA_HIGH_CMP_LOW_END | GPT_GTIOR_OAE)
+#define GPT_GTIOR_PWM_LOW_B    (GPT_GTIOR_GTIOB_HIGH_CMP_LOW_END | GPT_GTIOR_OBE)
+#define GPT_GTIOR_PWM_LOW_AB   (GPT_GTIOR_PWM_LOW_A | GPT_GTIOR_PWM_LOW_B)
 
 /* GTBER Register bit definitions (Buffer Enable Register) */
 #define GPT_GTBER_CCRA                            (1 << 16)
 #define GPT_GTBER_CCRB                            (1 << 17)
 #define GPT_GTBER_PR                              (1 << 18)
 
+/* GTINTAD Register bit definitions (Interrupt Output Setting Register) */
+#define GPT_GTINTAD_GTINTA                        (1 << 0)  /* Compare match A interrupt enable */
+#define GPT_GTINTAD_GTINTB                        (1 << 1)  /* Compare match B interrupt enable */
+#define GPT_GTINTAD_GTINTC                        (1 << 2)  /* Compare match C interrupt enable */
+#define GPT_GTINTAD_GTINTD                        (1 << 3)  /* Compare match D interrupt enable */
+#define GPT_GTINTAD_GTINTE                        (1 << 4)  /* Compare match E interrupt enable */
+#define GPT_GTINTAD_GTINTF                        (1 << 5)  /* Compare match F interrupt enable */
+#define GPT_GTINTAD_GTINTPR_SHIFT                 (6)       /* Overflow/Underflow interrupt skip setting */
+#define GPT_GTINTAD_GTINTPR_MASK                  (0x3 << GPT_GTINTAD_GTINTPR_SHIFT)
+#define GPT_GTINTAD_GTINTPR_NONE                  (0 << GPT_GTINTAD_GTINTPR_SHIFT)
+#define GPT_GTINTAD_GTINTPR_SKIP1                 (1 << GPT_GTINTAD_GTINTPR_SHIFT)
+#define GPT_GTINTAD_GTINTPR_SKIP2                 (2 << GPT_GTINTAD_GTINTPR_SHIFT)
+#define GPT_GTINTAD_GTINTPR_SKIP3                 (3 << GPT_GTINTAD_GTINTPR_SHIFT)
+#define GPT_GTINTAD_EINT                          (1 << 8)  /* Dead time error interrupt enable */
+#define GPT_GTINTAD_OINT                          (1 << 9)  /* Same time output level detection interrupt enable */
+#define GPT_GTINTAD_ADTRAUEN                      (1 << 16) /* GTADTRA compare match (up) A/D start request enable */
+#define GPT_GTINTAD_ADTRADEN                      (1 << 17) /* GTADTRA compare match (down) A/D start request enable */
+#define GPT_GTINTAD_ADTRBUEN                      (1 << 18) /* GTADTRB compare match (up) A/D start request enable */
+#define GPT_GTINTAD_ADTRBDEN                      (1 << 19) /* GTADTRB compare match (down) A/D start request enable */
+
 /* GTST Register bit definitions (Status Register) */
+#define GPT_GTST_TCFA                             (1 << 0)  /* Compare match flag A */
+#define GPT_GTST_TCFB                             (1 << 1)  /* Compare match flag B */
+#define GPT_GTST_TCFC                             (1 << 2)  /* Compare match flag C */
+#define GPT_GTST_TCFD                             (1 << 3)  /* Compare match flag D */
+#define GPT_GTST_TCFE                             (1 << 4)  /* Compare match flag E */
+#define GPT_GTST_TCFF                             (1 << 5)  /* Compare match flag F */
+#define GPT_GTST_TCFPO                            (1 << 6)  /* Overflow flag */
+#define GPT_GTST_TCFPU                            (1 << 7)  /* Underflow flag */
+#define GPT_GTST_TUCF                             (1 << 15) /* Count direction flag (1=up, 0=down) */
 #define GPT_GTST_ADTRAUEN                         (1 << 16) /* A/D Start Request Active */
 #define GPT_GTST_ADTRBUEN                         (1 << 17) /* A/D Start Request Active */
 #define GPT_GTST_ADTRADEN                         (1 << 20) /* A/D Start Request Active */
 #define GPT_GTST_ADTRBDEN                         (1 << 21) /* A/D Start Request Active */
+
+/* GTDTCR Register bit definitions (Dead Time Control Register) */
+#define GPT_GTDTCR_TDE                            (1 << 0)  /* Negative-phase waveform enable (dead-time) */
+#define GPT_GTDTCR_TDBUE                          (1 << 4)  /* GTDVU buffer enable */
+#define GPT_GTDTCR_TDBDE                          (1 << 5)  /* GTDVD buffer enable */
+#define GPT_GTDTCR_TDFER                          (1 << 8)  /* Dead time error flag */
+
+/* GTSSR/GTPSR/GTCSR Register bit definitions (Start/Stop/Clear Source Select) */
+/* These registers control external trigger sources via ELC events */
+#define GPT_GTSSR_CSTRT_SHIFT                     (0)
+#define GPT_GTSSR_SSELC                           (1 << 8)   /* Software source select for start */
+#define GPT_GTSSR_SSELCH                          (1 << 9)   /* Clear on read after software start */
+
+#define GPT_GTPSR_CSTOP_SHIFT                     (0)
+#define GPT_GTPSR_PSEC                            (1 << 8)   /* Software source select for stop */
+#define GPT_GTPSR_PSELCH                          (1 << 9)   /* Clear on read after software stop */
+
+#define GPT_GTCSR_CCLR_SHIFT                      (0)
+#define GPT_GTCSR_CSELC                           (1 << 8)   /* Software source select for clear */
+#define GPT_GTCSR_CSELCH                          (1 << 9)   /* Clear on read after software clear */
+
+/* GTUPSR/GTDNSR Register bit definitions (Up/Down Count Source Select) */
+#define GPT_GTUPSR_USELC                          (1 << 8)   /* Software source select for up count */
+#define GPT_GTDNSR_DSELC                          (1 << 8)   /* Software source select for down count */
+
+/* GTICASR/GTICBSR Register bit definitions (Input Capture Source Select) */
+/* Common bit definitions for input capture source select */
+#define GPT_GTICSR_ASELC                          (1 << 8)   /* Software capture A trigger */
+#define GPT_GTICSR_BSELC                          (1 << 8)   /* Software capture B trigger */
+
+/* ELC event input source bits (GTSSR, GTPSR, GTCSR, GTICASR, GTICBSR) */
+/* Bit 0: ELCTRGA event, Bit 1: ELCTRGB event, etc. */
+#define GPT_SSSR_ELC_EVENT(n)                     (1 << (n)) /* ELC event n (0-7) */
+
+/* GTIOCA/GTIOCB input for capture */
+#define GPT_GTICSR_GTIOCA_RISE                    (1 << 0)   /* GTIOCA rising edge */
+#define GPT_GTICSR_GTIOCA_FALL                    (1 << 1)   /* GTIOCA falling edge */
+#define GPT_GTICSR_GTIOCB_RISE                    (1 << 2)   /* GTIOCB rising edge */
+#define GPT_GTICSR_GTIOCB_FALL                    (1 << 3)   /* GTIOCB falling edge */
+
+/* Input capture mode configuration for GTIOR */
+/* For input capture: configure GTIOA/GTIOB as input */
+#define GPT_GTIOR_GTIOA_INPUT_RISE                (0x01 << GPT_GTIOR_GTIOA_SHIFT)  /* Input, capture on rising */
+#define GPT_GTIOR_GTIOA_INPUT_FALL                (0x02 << GPT_GTIOR_GTIOA_SHIFT)  /* Input, capture on falling */
+#define GPT_GTIOR_GTIOA_INPUT_BOTH                (0x03 << GPT_GTIOR_GTIOA_SHIFT)  /* Input, capture on both */
+#define GPT_GTIOR_GTIOB_INPUT_RISE                (0x01 << GPT_GTIOR_GTIOB_SHIFT)  /* Input, capture on rising */
+#define GPT_GTIOR_GTIOB_INPUT_FALL                (0x02 << GPT_GTIOR_GTIOB_SHIFT)  /* Input, capture on falling */
+#define GPT_GTIOR_GTIOB_INPUT_BOTH                (0x03 << GPT_GTIOR_GTIOB_SHIFT)  /* Input, capture on both */
 
 /****************************************************************************
  * Public Types
@@ -364,6 +577,77 @@ int ra_gpt_set_period(int channel, uint32_t period);
  ****************************************************************************/
 
 int ra_gpt_set_compare(int channel, int compare, uint32_t value);
+
+/****************************************************************************
+ * Name: ra_gpt_set_trigger
+ *
+ * Description:
+ *   Configure external trigger sources for the specified GPT channel.
+ *   This allows ELC events to start, stop, clear, or count the timer.
+ *
+ * Input Parameters:
+ *   channel - GPT channel number (0-13)
+ *   config  - Trigger configuration
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int ra_gpt_set_trigger(int channel, const struct ra_gpt_trigger_s *config);
+
+/****************************************************************************
+ * Name: ra_gpt_set_capture
+ *
+ * Description:
+ *   Configure input capture mode for the specified GPT channel.
+ *   This enables capturing the counter value on external pin edges.
+ *
+ * Input Parameters:
+ *   channel - GPT channel number (0-13)
+ *   config  - Capture configuration
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int ra_gpt_set_capture(int channel, const struct ra_gpt_capture_s *config);
+
+/****************************************************************************
+ * Name: ra_gpt_get_capture
+ *
+ * Description:
+ *   Get the captured counter value from input capture mode.
+ *
+ * Input Parameters:
+ *   channel - GPT channel number (0-13)
+ *   capture - Pointer to capture result structure
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int ra_gpt_get_capture(int channel, struct ra_gpt_captured_s *capture);
+
+/****************************************************************************
+ * Name: ra_gpt_set_dma
+ *
+ * Description:
+ *   Configure DMA for waveform generation on the specified GPT channel.
+ *   This enables automatic duty cycle updates via DMA transfers.
+ *
+ * Input Parameters:
+ *   channel - GPT channel number (0-13)
+ *   config  - DMA configuration
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int ra_gpt_set_dma(int channel, const struct ra_gpt_dma_s *config);
 
 #undef EXTERN
 #ifdef __cplusplus
