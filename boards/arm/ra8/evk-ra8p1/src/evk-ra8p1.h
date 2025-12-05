@@ -317,5 +317,46 @@ int board_canfd_initialize(void);
 int board_ether_initialize(void);
 #endif
 
+/****************************************************************************
+ * SDRAM Driver Interface
+ ****************************************************************************/
+
+#ifdef CONFIG_RA_SDRAM
+/****************************************************************************
+ * Name: board_sdram_initialize
+ *
+ * Description:
+ *   Initialize external SDRAM on the EVK-RA8P1 board.
+ *
+ * Returned Value:
+ *   OK on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int board_sdram_initialize(void);
+
+/****************************************************************************
+ * Name: board_sdram_selfrefresh_enter / board_sdram_selfrefresh_exit
+ *
+ * Description:
+ *   Enter/exit SDRAM self-refresh mode for low-power states.
+ *
+ ****************************************************************************/
+
+int board_sdram_selfrefresh_enter(void);
+int board_sdram_selfrefresh_exit(void);
+
+/****************************************************************************
+ * Name: board_get_sdram_base / board_get_sdram_size
+ *
+ * Description:
+ *   Get SDRAM base address and size.
+ *
+ ****************************************************************************/
+
+uintptr_t board_get_sdram_base(void);
+size_t board_get_sdram_size(void);
+#endif /* CONFIG_RA_SDRAM */
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_RA8_EVK_RA8P1_SRC_H */

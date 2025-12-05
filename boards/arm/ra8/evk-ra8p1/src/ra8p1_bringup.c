@@ -94,6 +94,22 @@ int ra8p1_bringup(void)
   /* Configure all GPIO pins */
   ra8p1_gpio_initialize();
 
+#ifdef CONFIG_RA_SDRAM
+  /* Initialize external SDRAM
+   * Note: SDRAM should be initialized early as it may be used for heap
+   */
+
+  ret = board_sdram_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SDRAM: %d\n", ret);
+    }
+  else
+    {
+      syslog(LOG_INFO, "SDRAM initialized successfully\n");
+    }
+#endif
+
 #ifdef HAVE_LEDS
   /* Initialize LED support */
   board_userled_initialize();

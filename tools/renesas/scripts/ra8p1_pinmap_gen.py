@@ -15,66 +15,222 @@ from collections import defaultdict
 from pathlib import Path
 
 # Define PSEL mappings based on current pinmap header
-PSEL_MAPPINGS = {
-    'AGT': 'PFS_PSEL_AGT',
-    'AGTIO': 'PFS_PSEL_AGT',
-    'AGTO': 'PFS_PSEL_AGT',
-    'AGTOB': 'PFS_PSEL_AGT',
-    'AGTOA': 'PFS_PSEL_AGT',
-    'AGTEE': 'PFS_PSEL_AGT',
-    'GPT': 'PFS_PSEL_GPT',
-    'GTIOC': 'PFS_PSEL_GPT',
-    'GTETRG': 'PFS_PSEL_GPT',
-    'GTADSM': 'PFS_PSEL_GPT',
-    'SCI': 'PFS_PSEL_SCI',
-    'RXD': 'PFS_PSEL_SCI',
-    'TXD': 'PFS_PSEL_SCI',
-    'SCK': 'PFS_PSEL_SCI',
-    'CTS': 'PFS_PSEL_SCI',
-    'DE': 'PFS_PSEL_SCI',
-    'SPI': 'PFS_PSEL_SPI',
-    'MISO': 'PFS_PSEL_SPI',
-    'MOSI': 'PFS_PSEL_SPI',
-    'RSPCK': 'PFS_PSEL_SPI',
-    'SSL': 'PFS_PSEL_SPI',
-    'I2C': 'PFS_PSEL_IIC',
-    'SDA': 'PFS_PSEL_IIC',
-    'SCL': 'PFS_PSEL_IIC',
-    'CAN': 'PFS_PSEL_CAN',
-    'CRX': 'PFS_PSEL_CAN',
-    'CTX': 'PFS_PSEL_CAN',
-    'USB': 'PFS_PSEL_USBFS',
-    'ETHERNET': 'PFS_PSEL_ETHERNET',
-    'ET0': 'PFS_PSEL_ETHERNET',
-    'RMII': 'PFS_PSEL_ETHERNET',
-    'REF50CK': 'PFS_PSEL_ETHERNET',
-    'SSI': 'PFS_PSEL_SSIE',
-    'AUDIO_CLK': 'PFS_PSEL_CLKOUT_ACMPLP_RTC',
-    'RTC': 'PFS_PSEL_CLKOUT_ACMPLP_RTC',
-    'DAC': 'PFS_PSEL_DAC',
-    'DA': 'PFS_PSEL_DAC',
-    'OPAMP': 'PFS_PSEL_OPAMP',
-    'IVCMP': 'PFS_PSEL_OPAMP',
-    'IVREF': 'PFS_PSEL_OPAMP',
-    'VCOUT': 'PFS_PSEL_OPAMP',
-    'XSPI': 'PFS_PSEL_XSPI',
-    'OM': 'PFS_PSEL_XSPI',
-    'ULPT': 'PFS_PSEL_ULPT',
-    'CEU': 'PFS_PSEL_CEU',
-    'VIO': 'PFS_PSEL_CEU',
-    'ADTRG': 'PFS_PSEL_CAC_ADC14'
-}
+# IMPORTANT: Order matters! More specific patterns must come before generic ones
+# to avoid mismatches (e.g., ET0_RXD0 should match ETHERNET, not SCI)
+PSEL_MAPPINGS_ORDERED = [
+    # Ethernet variants - must be checked BEFORE SCI patterns (RXD, TXD, etc.)
+    ('ET0_', 'PFS_PSEL_ETHER_MII'),        # Ethernet 0
+    ('ET1_', 'PFS_PSEL_ETHER_MII'),        # Ethernet 1
+    ('RGMII0_', 'PFS_PSEL_ETHER_RGMII'),   # RGMII 0
+    ('RGMII1_', 'PFS_PSEL_ETHER_RGMII'),   # RGMII 1
+    ('RMII0_', 'PFS_PSEL_ETHER_RMII'),     # RMII 0
+    ('RMII1_', 'PFS_PSEL_ETHER_RMII'),     # RMII 1
+    ('ETHPHYCLK', 'PFS_PSEL_ETHER_MII'),   # Ethernet PHY clock
+
+    # USB - check before generic patterns
+    ('USB_', 'PFS_PSEL_USB_FS'),           # USB Full Speed
+    ('USBHS_', 'PFS_PSEL_USB_HS'),         # USB High Speed
+
+    # SD/MMC
+    ('SD0', 'PFS_PSEL_SDHI_MMC'),          # SD0
+    ('SD1', 'PFS_PSEL_SDHI_MMC'),          # SD1
+
+    # OSPI
+    ('OM_0_', 'PFS_PSEL_OSPI'),            # OSPI 0
+    ('OM_1_', 'PFS_PSEL_OSPI'),            # OSPI 1
+
+    # SSI (I2S audio)
+    ('SSI', 'PFS_PSEL_SSI'),               # SSI audio
+    ('SSILRCK', 'PFS_PSEL_SSI'),
+    ('SSIBCK', 'PFS_PSEL_SSI'),
+    ('SSIDATA', 'PFS_PSEL_SSI'),
+    ('SSIFS', 'PFS_PSEL_SSI'),
+    ('SSIRXD', 'PFS_PSEL_SSI'),
+    ('SSITXD', 'PFS_PSEL_SSI'),
+
+    # PDM
+    ('PDMCLK', 'PFS_PSEL_PDM'),
+    ('PDMDAT', 'PFS_PSEL_PDM'),
+
+    # CAN - check before generic patterns
+    ('CRX0', 'PFS_PSEL_CAN'),
+    ('CRX1', 'PFS_PSEL_CAN'),
+    ('CTX0', 'PFS_PSEL_CAN'),
+    ('CTX1', 'PFS_PSEL_CAN'),
+
+    # I3C
+    ('I3C_', 'PFS_PSEL_IIC'),
+
+    # AGT family
+    ('AGT', 'PFS_PSEL_AGT'),
+    ('AGTIO', 'PFS_PSEL_AGT'),
+    ('AGTO', 'PFS_PSEL_AGT'),
+    ('AGTOB', 'PFS_PSEL_AGT'),
+    ('AGTOA', 'PFS_PSEL_AGT'),
+    ('AGTEE', 'PFS_PSEL_AGT'),
+    ('AGTI', 'PFS_PSEL_AGT'),
+
+    # GPT groupings
+    ('GTIOC', 'PFS_PSEL_GPT0'),            # GPT I/O control
+    ('GTETRG', 'PFS_PSEL_GPT0'),           # GPT external trigger
+    ('GTADSM', 'PFS_PSEL_GPT0'),           # GPT A/D start
+    ('GTCPPO', 'PFS_PSEL_GPT0'),           # GPT compare/PWM output
+    ('GTIU', 'PFS_PSEL_GPT0'),
+    ('GTIV', 'PFS_PSEL_GPT0'),
+    ('GTIW', 'PFS_PSEL_GPT0'),
+    ('GTOUUP', 'PFS_PSEL_GPT0'),
+    ('GTOULO', 'PFS_PSEL_GPT0'),
+    ('GTOVUP', 'PFS_PSEL_GPT0'),
+    ('GTOVLO', 'PFS_PSEL_GPT0'),
+    ('GTOWUP', 'PFS_PSEL_GPT0'),
+    ('GTOWLO', 'PFS_PSEL_GPT0'),
+
+    # SCI split groups (even: 0,2,4,6,8; odd: 1,3,5,7,9)
+    ('RXD0', 'PFS_PSEL_SCI0_2_4_6_8'),
+    ('RXD2', 'PFS_PSEL_SCI0_2_4_6_8'),
+    ('RXD4', 'PFS_PSEL_SCI0_2_4_6_8'),
+    ('RXD6', 'PFS_PSEL_SCI0_2_4_6_8'),
+    ('RXD8', 'PFS_PSEL_SCI0_2_4_6_8'),
+    ('TXD0', 'PFS_PSEL_SCI0_2_4_6_8'),
+    ('TXD2', 'PFS_PSEL_SCI0_2_4_6_8'),
+    ('TXD4', 'PFS_PSEL_SCI0_2_4_6_8'),
+    ('TXD6', 'PFS_PSEL_SCI0_2_4_6_8'),
+    ('TXD8', 'PFS_PSEL_SCI0_2_4_6_8'),
+    ('SCK0', 'PFS_PSEL_SCI0_2_4_6_8'),
+    ('SCK2', 'PFS_PSEL_SCI0_2_4_6_8'),
+    ('SCK4', 'PFS_PSEL_SCI0_2_4_6_8'),
+    ('SCK6', 'PFS_PSEL_SCI0_2_4_6_8'),
+    ('SCK8', 'PFS_PSEL_SCI0_2_4_6_8'),
+    ('CTS0', 'PFS_PSEL_SCI0_2_4_6_8'),
+    ('CTS2', 'PFS_PSEL_SCI0_2_4_6_8'),
+    ('CTS4', 'PFS_PSEL_SCI0_2_4_6_8'),
+    ('CTS6', 'PFS_PSEL_SCI0_2_4_6_8'),
+    ('CTS8', 'PFS_PSEL_SCI0_2_4_6_8'),
+    ('CTS_RTS0', 'PFS_PSEL_SCI0_2_4_6_8'),
+    ('CTS_RTS2', 'PFS_PSEL_SCI0_2_4_6_8'),
+    ('CTS_RTS4', 'PFS_PSEL_SCI0_2_4_6_8'),
+    ('CTS_RTS6', 'PFS_PSEL_SCI0_2_4_6_8'),
+    ('CTS_RTS8', 'PFS_PSEL_SCI0_2_4_6_8'),
+    ('SS0', 'PFS_PSEL_SCI0_2_4_6_8'),
+    ('SS2', 'PFS_PSEL_SCI0_2_4_6_8'),
+    ('SS4', 'PFS_PSEL_SCI0_2_4_6_8'),
+    ('SS6', 'PFS_PSEL_SCI0_2_4_6_8'),
+    ('SS8', 'PFS_PSEL_SCI0_2_4_6_8'),
+    ('DE0', 'PFS_PSEL_SCI0_2_4_6_8'),
+    ('DE2', 'PFS_PSEL_SCI0_2_4_6_8'),
+    ('DE4', 'PFS_PSEL_SCI0_2_4_6_8'),
+    ('DE6', 'PFS_PSEL_SCI0_2_4_6_8'),
+    ('DE8', 'PFS_PSEL_SCI0_2_4_6_8'),
+    ('RXD1', 'PFS_PSEL_SCI1_3_5_7_9'),
+    ('RXD3', 'PFS_PSEL_SCI1_3_5_7_9'),
+    ('RXD5', 'PFS_PSEL_SCI1_3_5_7_9'),
+    ('RXD7', 'PFS_PSEL_SCI1_3_5_7_9'),
+    ('RXD9', 'PFS_PSEL_SCI1_3_5_7_9'),
+    ('TXD1', 'PFS_PSEL_SCI1_3_5_7_9'),
+    ('TXD3', 'PFS_PSEL_SCI1_3_5_7_9'),
+    ('TXD5', 'PFS_PSEL_SCI1_3_5_7_9'),
+    ('TXD7', 'PFS_PSEL_SCI1_3_5_7_9'),
+    ('TXD9', 'PFS_PSEL_SCI1_3_5_7_9'),
+    ('SCK1', 'PFS_PSEL_SCI1_3_5_7_9'),
+    ('SCK3', 'PFS_PSEL_SCI1_3_5_7_9'),
+    ('SCK5', 'PFS_PSEL_SCI1_3_5_7_9'),
+    ('SCK7', 'PFS_PSEL_SCI1_3_5_7_9'),
+    ('SCK9', 'PFS_PSEL_SCI1_3_5_7_9'),
+    ('CTS1', 'PFS_PSEL_SCI1_3_5_7_9'),
+    ('CTS3', 'PFS_PSEL_SCI1_3_5_7_9'),
+    ('CTS5', 'PFS_PSEL_SCI1_3_5_7_9'),
+    ('CTS7', 'PFS_PSEL_SCI1_3_5_7_9'),
+    ('CTS9', 'PFS_PSEL_SCI1_3_5_7_9'),
+    ('CTS_RTS1', 'PFS_PSEL_SCI1_3_5_7_9'),
+    ('CTS_RTS3', 'PFS_PSEL_SCI1_3_5_7_9'),
+    ('CTS_RTS5', 'PFS_PSEL_SCI1_3_5_7_9'),
+    ('CTS_RTS7', 'PFS_PSEL_SCI1_3_5_7_9'),
+    ('CTS_RTS9', 'PFS_PSEL_SCI1_3_5_7_9'),
+    ('SS1', 'PFS_PSEL_SCI1_3_5_7_9'),
+    ('SS3', 'PFS_PSEL_SCI1_3_5_7_9'),
+    ('SS5', 'PFS_PSEL_SCI1_3_5_7_9'),
+    ('SS7', 'PFS_PSEL_SCI1_3_5_7_9'),
+    ('SS9', 'PFS_PSEL_SCI1_3_5_7_9'),
+    ('DE1', 'PFS_PSEL_SCI1_3_5_7_9'),
+    ('DE3', 'PFS_PSEL_SCI1_3_5_7_9'),
+    ('DE5', 'PFS_PSEL_SCI1_3_5_7_9'),
+    ('DE7', 'PFS_PSEL_SCI1_3_5_7_9'),
+    ('DE9', 'PFS_PSEL_SCI1_3_5_7_9'),
+
+    # SPI
+    ('MISO', 'PFS_PSEL_SPI'),
+    ('MOSI', 'PFS_PSEL_SPI'),
+    ('RSPCK', 'PFS_PSEL_SPI'),
+    ('SSLA', 'PFS_PSEL_SPI'),
+    ('SSLB', 'PFS_PSEL_SPI'),
+    ('SSLE', 'PFS_PSEL_SPI'),
+
+    # IIC
+    ('SDA', 'PFS_PSEL_IIC'),
+    ('SCL', 'PFS_PSEL_IIC'),
+
+    # ULPT
+    ('ULPT', 'PFS_PSEL_ULPT'),
+
+    # Clock/RTC
+    ('AUDIO_CLK', 'PFS_PSEL_CLKOUT_COMP_RTC'),
+    ('RTCOUT', 'PFS_PSEL_CLKOUT_COMP_RTC'),
+    ('RTCIC', 'PFS_PSEL_CLKOUT_COMP_RTC'),
+
+    # CAC/ADC
+    ('ADTRG', 'PFS_PSEL_CAC_AD'),
+    ('ADST', 'PFS_PSEL_CAC_AD'),
+    ('ADSYNC', 'PFS_PSEL_CAC_AD'),
+    ('AD0FLAG', 'PFS_PSEL_CAC_AD'),
+    ('AD1FLAG', 'PFS_PSEL_CAC_AD'),
+
+    # LCD Graphics
+    ('LCD_', 'PFS_PSEL_LCD_GRAPHICS'),
+    ('DSI_', 'PFS_PSEL_MIPI'),
+
+    # CEU/VIO
+    ('VIO_', 'PFS_PSEL_CEU'),
+
+    # GPTP (Precision Time Protocol)
+    ('GPTP', 'PFS_PSEL_ETHER_MII'),
+
+    # Comparator output
+    ('VCOUT', 'PFS_PSEL_CLKOUT_COMP_RTC'),
+]
+
+# Keep the old dict for backward compatibility but it's not used for matching
+PSEL_MAPPINGS = {pattern: psel for pattern, psel in PSEL_MAPPINGS_ORDERED}
 
 def get_psel_value(function_name):
-    """Get the appropriate PSEL value for a function"""
+    """Get the appropriate PSEL value for a function.
+
+    Uses ordered list to ensure more specific patterns match first.
+    This prevents issues like ET0_RXD0 matching 'RXD' (SCI) instead of 'ET0_' (Ethernet).
+    """
     function_upper = function_name.upper()
 
-    # Check for exact matches first
-    for key, value in PSEL_MAPPINGS.items():
-        if key in function_upper:
-            return value
+    # Check patterns in order - first match wins
+    for pattern, psel in PSEL_MAPPINGS_ORDERED:
+        if pattern in function_upper:
+            return psel
 
     return None
+
+def parse_exbus_sdram(exbus_str):
+    """Parse ExBus/SDRAM column and return list of function names.
+
+    Examples:
+        'D7/DQ7' -> ['D7', 'DQ7']
+        'A0/BC0/DQM1' -> ['A0', 'BC0', 'DQM1']
+        'EBCLK/SDCLK' -> ['EBCLK', 'SDCLK']
+        'CS1/CKE' -> ['CS1', 'CKE']
+    """
+    if not exbus_str or exbus_str == '—':
+        return []
+
+    # Split on '/' and clean each part
+    parts = [p.strip() for p in exbus_str.split('/')]
+    return [p for p in parts if p]
 
 def clean_function_name(func_name):
     """Clean function name to make it a valid C identifier with proper formatting"""
@@ -154,7 +310,16 @@ def parse_csv_data(csv_path):
 
     Handles two CSV formats:
     1. Tab-delimited (RA8E1): Pin\tFunctions
-    2. Comma-delimited (RA8P1): Pin,Col1,IRQ,Functions...
+    2. Comma-delimited (RA8P1): Pin,ExBus/SDRAM,IRQ,Functions...
+
+    For RA8P1 format, column indices are:
+    0: Pin (e.g., P609)
+    1: ExBus/SDRAM (e.g., D7/DQ7)
+    2: Ex.Interrupt (e.g., IRQ29)
+    3: SCI/IIC/I3C/SPI/CANFD/USBFS/USBHS/OSPI/SSIE/SDHI/MMC/ESWM/PDMIF
+    4: GPT/AGT/ULPT/RTC
+    5: ADC16H/DAC12/ACMPHS
+    6: MIPI/GLCDC/CEU
     """
     pins_data = {}
 
@@ -178,25 +343,34 @@ def parse_csv_data(csv_path):
                 pin_name = row[0].strip()
 
                 # Skip header row, port headers, and empty pins
-                if pin_name in ("I/O ports", "", "—") or not pin_name.startswith('P'):
+                if pin_name in ("Pin", "I/O ports", "", "—") or not pin_name.startswith('P'):
                     continue
 
                 # Handle both P609 and PA12 formats
-                if pin_name[1].isalpha():
+                if len(pin_name) >= 2 and pin_name[1].isalpha():
                     # Format like PA12 - map letters to port numbers (A=10, B=11, etc.)
                     port_num = ord(pin_name[1]) - ord('A') + 10
-                    pin_num = int(pin_name[2:4])
+                    pin_num = int(pin_name[2:])
                 else:
-                    # Format like P609
+                    # Format like P609 or P111
+                    # P609 = Port 6, Pin 09
+                    # P111 = Port 1, Pin 11
+                    # The format is P<port><pin> where pin is always 2 digits
                     match = re.match(r"P(\d)(\d{2})", pin_name)
                     if not match:
                         continue
                     port_num = int(match.group(1))
                     pin_num = int(match.group(2))
 
-                # Parse functions from columns 1 onwards
+                # Parse ExBus/SDRAM column (column 1) separately
+                exbus_funcs = []
+                if len(row) > 1:
+                    exbus_str = row[1].strip()
+                    exbus_funcs = parse_exbus_sdram(exbus_str)
+
+                # Parse functions from columns 2 onwards (skip ExBus/SDRAM)
                 func_list = []
-                for col_idx in range(1, len(row)):
+                for col_idx in range(2, len(row)):
                     func = row[col_idx].strip()
                     if func and func != "—":
                         # Split on '/' to get individual functions
@@ -206,7 +380,8 @@ def parse_csv_data(csv_path):
                 pins_data[pin_name] = {
                     'port': port_num,
                     'pin': pin_num,
-                    'functions': func_list
+                    'functions': func_list,
+                    'exbus': exbus_funcs  # Store ExBus/SDRAM functions separately
                 }
         else:
             # RA8E1 format: tab-delimited
@@ -245,7 +420,8 @@ def parse_csv_data(csv_path):
                 pins_data[pin_name] = {
                     'port': port_num,
                     'pin': pin_num,
-                    'functions': func_list
+                    'functions': func_list,
+                    'exbus': []  # No ExBus/SDRAM column in this format
                 }
 
     return pins_data
@@ -272,6 +448,7 @@ def generate_header(csv_path, mcu_override=None):
     alt_func_defs = []
     irq_defs = []
     analog_defs = []
+    exbus_defs = []  # ExBus/SDRAM definitions
     func_counts = defaultdict(int)  # For numbering non-SCI functions
 
     HEADER_GUARD = f"__ARCH_ARM_SRC_RA_HARDWARE_{mcu_name}_PINMAP_H"
@@ -280,6 +457,15 @@ def generate_header(csv_path, mcu_override=None):
     for pin_name, data in sorted(pins_data.items()):
         port = data['port']
         pin = data['pin']
+
+        # Generate ExBus/SDRAM Definitions
+        for exbus_func in data.get('exbus', []):
+            # Generate definitions like GPIO_SDRAM_D7, GPIO_SDRAM_DQ7, GPIO_SDRAM_A0, etc.
+            # Include pin name suffix to avoid duplicates (e.g., ALE on PB01 and P902)
+            clean_exbus = clean_function_name(exbus_func)
+            exbus_def = f"#define GPIO_SDRAM_{clean_exbus}_{pin_name}                       (gpio_pinset_t)(PORT{port} | PIN{pin} | PFS_PSEL_BUS)"
+            if exbus_def not in exbus_defs:
+                exbus_defs.append(exbus_def)
 
         for func in data['functions']:
             # Generate IRQ Definitions - match exact format from manual file
@@ -405,33 +591,110 @@ def generate_header(csv_path, mcu_override=None):
 #define IRQ15                                  (15)
 #define MAX_GPIO_IRQS                          (16)
 
-/* PSEL configuration Bit Fields for cfg field in gpio_pinset_t struct */
-#define R_PFS_PSEL_SHIFT_CFG                    (16)   /* PSEL position in gpio_pinset_t.cfg (bits 20-16) */
-#define PFS_PSEL_HIZ                            (0x00 << R_PFS_PSEL_SHIFT_CFG)
-#define PFS_PSEL_AGT                            (0x01 << R_PFS_PSEL_SHIFT_CFG)
-#define PFS_PSEL_GPT                            (0x02 << R_PFS_PSEL_SHIFT_CFG)
-#define PFS_PSEL_AGT1                           (0x03 << R_PFS_PSEL_SHIFT_CFG)
-#define PFS_PSEL_SCI                            (0x04 << R_PFS_PSEL_SHIFT_CFG)
-#define PFS_PSEL_SCI1                           (0x05 << R_PFS_PSEL_SHIFT_CFG)
-#define PFS_PSEL_SPI                            (0x06 << R_PFS_PSEL_SHIFT_CFG)
-#define PFS_PSEL_IIC                            (0x07 << R_PFS_PSEL_SHIFT_CFG)
-#define PFS_PSEL_KINT                           (0x08 << R_PFS_PSEL_SHIFT_CFG)
-#define PFS_PSEL_CLKOUT_ACMPLP_RTC              (0x09 << R_PFS_PSEL_SHIFT_CFG)
-#define PFS_PSEL_CAC_ADC14                      (0x0a << R_PFS_PSEL_SHIFT_CFG)
-#define PFS_PSEL_CTSU                           (0x0c << R_PFS_PSEL_SHIFT_CFG)
-#define PFS_PSEL_SLCDC                          (0x0d << R_PFS_PSEL_SHIFT_CFG)
-#define PFS_PSEL_CAN                            (0x10 << R_PFS_PSEL_SHIFT_CFG)
-#define PFS_PSEL_SSIE                           (0x12 << R_PFS_PSEL_SHIFT_CFG)
-#define PFS_PSEL_USBFS                          (0x13 << R_PFS_PSEL_SHIFT_CFG)
-#define PFS_PSEL_DAC                            (0x14 << R_PFS_PSEL_SHIFT_CFG)
-#define PFS_PSEL_TRACE                          (0x15 << R_PFS_PSEL_SHIFT_CFG)
-#define PFS_PSEL_DEBUG                          (0x16 << R_PFS_PSEL_SHIFT_CFG)
-#define PFS_PSEL_OPAMP                          (0x17 << R_PFS_PSEL_SHIFT_CFG)
-#define PFS_PSEL_XSPI                           (0x18 << R_PFS_PSEL_SHIFT_CFG)
-#define PFS_PSEL_ETHERNET                       (0x19 << R_PFS_PSEL_SHIFT_CFG)
-#define PFS_PSEL_CEU                            (0x1A << R_PFS_PSEL_SHIFT_CFG)
-#define PFS_PSEL_OSPI                           (0x1B << R_PFS_PSEL_SHIFT_CFG)
-#define PFS_PSEL_ULPT                           (0x1C << R_PFS_PSEL_SHIFT_CFG)
+/* PSEL configuration Bit Field position in gpio_pinset_t.cfg */
+#define R_PFS_PSEL_SHIFT_CFG                    (16U)  /* PSEL in bits 20-16 */
+
+/* General IO / DEBUG (per your enum these both use 0x00) */
+#define PFS_PSEL_HIZ                            (0x00U << R_PFS_PSEL_SHIFT_CFG)
+#define PFS_PSEL_IO                             (0x00U << R_PFS_PSEL_SHIFT_CFG)
+#define PFS_PSEL_DEBUG                          (0x00U << R_PFS_PSEL_SHIFT_CFG)
+
+/* AGT family */
+#define PFS_PSEL_AGT                            (0x01U << R_PFS_PSEL_SHIFT_CFG)
+#define PFS_PSEL_AGTW                           (0x01U << R_PFS_PSEL_SHIFT_CFG)
+/* Note: Your enum maps AGT1 to 0x18 */
+#define PFS_PSEL_AGT1                           (0x18U << R_PFS_PSEL_SHIFT_CFG)
+
+/* GPT groupings */
+#define PFS_PSEL_GPT0                           (0x02U << R_PFS_PSEL_SHIFT_CFG)
+#define PFS_PSEL_GPT1                           (0x03U << R_PFS_PSEL_SHIFT_CFG)
+#define PFS_PSEL_GPT2                           (0x14U << R_PFS_PSEL_SHIFT_CFG)
+#define PFS_PSEL_GPT3                           (0x15U << R_PFS_PSEL_SHIFT_CFG)
+#define PFS_PSEL_GPT4                           (0x16U << R_PFS_PSEL_SHIFT_CFG)
+
+/* SCI split groups */
+#define PFS_PSEL_SCI0_2_4_6_8                   (0x04U << R_PFS_PSEL_SHIFT_CFG)
+#define PFS_PSEL_SCI1_3_5_7_9                   (0x05U << R_PFS_PSEL_SHIFT_CFG)
+
+/* SPI / IIC */
+#define PFS_PSEL_SPI                            (0x06U << R_PFS_PSEL_SHIFT_CFG)
+#define PFS_PSEL_IIC                            (0x07U << R_PFS_PSEL_SHIFT_CFG)
+
+/* KEY / CLKOUT+COMP+RTC / CAC+AD / BUS */
+#define PFS_PSEL_KEY                            (0x08U << R_PFS_PSEL_SHIFT_CFG)
+#define PFS_PSEL_CLKOUT_COMP_RTC                (0x09U << R_PFS_PSEL_SHIFT_CFG)
+#define PFS_PSEL_CAC_AD                         (0x0AU << R_PFS_PSEL_SHIFT_CFG)
+#define PFS_PSEL_BUS                            (0x0BU << R_PFS_PSEL_SHIFT_CFG)
+
+/* CTSU / ACMPHS (both 0x0C) */
+#define PFS_PSEL_CTSU                           (0x0CU << R_PFS_PSEL_SHIFT_CFG)
+#define PFS_PSEL_ACMPHS                         (0x0CU << R_PFS_PSEL_SHIFT_CFG)
+
+/* LCDC (segment LCD) */
+#define PFS_PSEL_LCDC                           (0x0DU << R_PFS_PSEL_SHIFT_CFG)
+
+/* SCI DE (DEn) - follow BSP inversion flag exactly like your enum block */
+#ifdef CONFIG_SCI_UART_DE_IS_INVERTED
+#define PFS_PSEL_DE_SCI1_3_5_7_9                (0x0DU << R_PFS_PSEL_SHIFT_CFG)
+#define PFS_PSEL_DE_SCI0_2_4_6_8                (0x0EU << R_PFS_PSEL_SHIFT_CFG)
+#else
+#define PFS_PSEL_DE_SCI0_2_4_6_8                (0x0DU << R_PFS_PSEL_SHIFT_CFG)
+#define PFS_PSEL_DE_SCI1_3_5_7_9                (0x0EU << R_PFS_PSEL_SHIFT_CFG)
+#endif
+
+/* DALI */
+#define PFS_PSEL_DALI                           (0x0EU << R_PFS_PSEL_SHIFT_CFG)
+
+/* CEU */
+#define PFS_PSEL_CEU                            (0x0FU << R_PFS_PSEL_SHIFT_CFG)
+
+/* CAN / QSPI / SSI */
+#define PFS_PSEL_CAN                            (0x10U << R_PFS_PSEL_SHIFT_CFG)
+#define PFS_PSEL_QSPI                           (0x11U << R_PFS_PSEL_SHIFT_CFG)
+#define PFS_PSEL_SSI                            (0x12U << R_PFS_PSEL_SHIFT_CFG)
+
+/* USB */
+#define PFS_PSEL_USB_FS                         (0x13U << R_PFS_PSEL_SHIFT_CFG)
+#define PFS_PSEL_USB_HS                         (0x14U << R_PFS_PSEL_SHIFT_CFG)
+
+/* SD/MMC */
+#define PFS_PSEL_SDHI_MMC                       (0x15U << R_PFS_PSEL_SHIFT_CFG)
+
+/* Ethernet variants */
+#define PFS_PSEL_ETHER_MII                      (0x16U << R_PFS_PSEL_SHIFT_CFG)
+#define PFS_PSEL_ETHER_RMII                     (0x17U << R_PFS_PSEL_SHIFT_CFG)
+/* RGMII (shares 0x18 with other features on some parts) */
+#define PFS_PSEL_ETHER_RGMII                    (0x18U << R_PFS_PSEL_SHIFT_CFG)
+
+/* PDC (also 0x18 per your enum - gate by device if needed) */
+#define PFS_PSEL_PDC                            (0x18U << R_PFS_PSEL_SHIFT_CFG)
+
+/* Graphics LCD + CAC (both 0x19 in your enum - alias as needed) */
+#define PFS_PSEL_LCD_GRAPHICS                   (0x19U << R_PFS_PSEL_SHIFT_CFG)
+#define PFS_PSEL_CAC                            (0x19U << R_PFS_PSEL_SHIFT_CFG)
+
+/* TRACE */
+#define PFS_PSEL_TRACE                          (0x1AU << R_PFS_PSEL_SHIFT_CFG)
+
+/* OSPI */
+#define PFS_PSEL_OSPI                           (0x1CU << R_PFS_PSEL_SHIFT_CFG)
+
+/* CEC / PGAOUT0 / PGAOUT1 */
+#define PFS_PSEL_CEC                            (0x1DU << R_PFS_PSEL_SHIFT_CFG)
+#define PFS_PSEL_PGAOUT0                        (0x1DU << R_PFS_PSEL_SHIFT_CFG)
+#define PFS_PSEL_PGAOUT1                        (0x1EU << R_PFS_PSEL_SHIFT_CFG)
+
+/* ULPT (note: differs from your older PFS block; here it matches the enum 0x1E) */
+#define PFS_PSEL_ULPT                           (0x1EU << R_PFS_PSEL_SHIFT_CFG)
+
+/* MIPI DSI */
+#define PFS_PSEL_MIPI                           (0x1FU << R_PFS_PSEL_SHIFT_CFG)
+
+/* EtherCAT Slave Controller (ESC) */
+#define PFS_PSEL_ESC                            (0x1AU << R_PFS_PSEL_SHIFT_CFG)
+
+/* PDM */
+#define PFS_PSEL_PDM                            (0x1BU << R_PFS_PSEL_SHIFT_CFG)
 
 /* GPIO Configuration for gpio_pinset_t.cfg field */
 #define GPIO_OUTPUT                   		(R_PFS_PDR)           /* Output direction */
@@ -446,6 +709,9 @@ def generate_header(csv_path, mcu_override=None):
 #define GPIO_PERIPHERAL               		(R_PFS_PMR)           /* Peripheral mode (PMR) */
 #define GPIO_OUTPUT_HIGH              		(R_PFS_PODR)          /* Output high */
 #define GPIO_OUTPUT_LOW               		(0)                   /* Output low (default) */
+
+/* ExBus/SDRAM Pin Definitions */
+{chr(10).join(sorted(exbus_defs))}
 
 /* Alternative Function Pin Definitions */
 {chr(10).join(sorted(alt_func_defs))}
@@ -487,11 +753,8 @@ if __name__ == "__main__":
     import sys
 
     # Default paths
-    csv_path = '/home/a5094159/projects/nuttx_ra_px4/ra8p1_pinmap.csv'
+    csv_path = './ra8p1_pinmap_v2.csv'
     mcu_override = "RA8P1"  # Override MCU name if needed
-
-    # csv_path = '/home/a5094159/projects/nuttx_ra_px4/ra8e1_pinmap.csv'
-    # mcu_override = "RA8E1"  # Override MCU name if needed
 
     # Allow command line override
     if len(sys.argv) > 1:

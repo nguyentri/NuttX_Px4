@@ -155,4 +155,85 @@
 
 #define SRAM_MAX_CHANNELS    4
 
+/* SDRAM Controller Registers (Mapped to BUS peripheral) */
+/* These definitions are added here as requested, but physically belong to the BUS peripheral */
+
+#define R_BUS_SDRAM_SDCCR_OFFSET                  0x00000000
+#define R_BUS_SDRAM_SDCMOD_OFFSET                 0x00000001
+#define R_BUS_SDRAM_SDAMOD_OFFSET                 0x00000002
+#define R_BUS_SDRAM_SDSELF_OFFSET                 0x00000010
+#define R_BUS_SDRAM_SDRFCR_OFFSET                 0x00000014
+#define R_BUS_SDRAM_SDRFEN_OFFSET                 0x00000016
+#define R_BUS_SDRAM_SDICR_OFFSET                  0x00000020
+#define R_BUS_SDRAM_SDIR_OFFSET                   0x00000024
+#define R_BUS_SDRAM_SDADR_OFFSET                  0x00000040
+#define R_BUS_SDRAM_SDTR_OFFSET                   0x00000044
+#define R_BUS_SDRAM_SDMOD_OFFSET                  0x00000048
+#define R_BUS_SDRAM_SDSR_OFFSET                   0x00000050
+
+/* SDCCR - SDC Control Register */
+#define R_BUS_SDRAM_SDCCR_EXENB                   (1 << 0)  /* Operation Enable */
+#define R_BUS_SDRAM_SDCCR_BSIZE_SHIFT             (4)       /* SDRAM Bus Width Select */
+#define R_BUS_SDRAM_SDCCR_BSIZE_MASK              (3 << 4)
+#define R_BUS_SDRAM_SDCCR_BSIZE_16BIT             (0 << 4)
+#define R_BUS_SDRAM_SDCCR_BSIZE_32BIT             (1 << 4)
+#define R_BUS_SDRAM_SDCCR_BSIZE_8BIT              (2 << 4)
+
+/* SDCMOD - SDC Mode Register */
+#define R_BUS_SDRAM_SDCMOD_EMODE                  (1 << 0)  /* Endian Mode (0: Little, 1: Big) */
+
+/* SDAMOD - SDRAM Access Mode Register */
+#define R_BUS_SDRAM_SDAMOD_BE                     (1 << 0)  /* Continuous Access Enable */
+
+/* SDSELF - SDRAM Self-Refresh Control Register */
+#define R_BUS_SDRAM_SDSELF_SFEN                   (1 << 0)  /* SDRAM Self-Refresh Enable */
+
+/* SDRFCR - SDRAM Refresh Control Register */
+#define R_BUS_SDRAM_SDRFCR_RFC_SHIFT              (0)       /* Auto-Refresh Request Interval Setting */
+#define R_BUS_SDRAM_SDRFCR_RFC_MASK               (0xfff << 0)
+#define R_BUS_SDRAM_SDRFCR_REFW_SHIFT             (12)      /* Auto-Refresh Cycle/ Self-Refresh Clearing Cycle Count Setting */
+#define R_BUS_SDRAM_SDRFCR_REFW_MASK              (0xf << 12)
+
+/* SDRFEN - SDRAM Auto-Refresh Control Register */
+#define R_BUS_SDRAM_SDRFEN_RFEN                   (1 << 0)  /* Auto-Refresh Operation Enable */
+
+/* SDICR - SDRAM Initialization Sequence Control Register */
+#define R_BUS_SDRAM_SDICR_INIRQ                   (1 << 0)  /* Initialization Sequence Start */
+
+/* SDIR - SDRAM Initialization Register */
+#define R_BUS_SDRAM_SDIR_ARFI_SHIFT               (0)       /* Initialization Auto-Refresh Interval */
+#define R_BUS_SDRAM_SDIR_ARFI_MASK                (0xf << 0)
+#define R_BUS_SDRAM_SDIR_ARFC_SHIFT               (4)       /* Initialization Auto-Refresh Count */
+#define R_BUS_SDRAM_SDIR_ARFC_MASK                (0xf << 4)
+#define R_BUS_SDRAM_SDIR_PRC_SHIFT                (8)       /* Initialization Precharge Cycle Count */
+#define R_BUS_SDRAM_SDIR_PRC_MASK                 (0x7 << 8)
+
+/* SDADR - SDRAM Address Register */
+#define R_BUS_SDRAM_SDADR_MXC_SHIFT               (0)       /* Address Multiplex Select */
+#define R_BUS_SDRAM_SDADR_MXC_MASK                (0x3 << 0)
+#define R_BUS_SDRAM_SDADR_MXC_8BIT_SHIFT          (0)       /* 8-bit shift */
+#define R_BUS_SDRAM_SDADR_MXC_9BIT_SHIFT          (1)       /* 9-bit shift */
+#define R_BUS_SDRAM_SDADR_MXC_10BIT_SHIFT         (2)       /* 10-bit shift */
+#define R_BUS_SDRAM_SDADR_MXC_11BIT_SHIFT         (3)       /* 11-bit shift */
+
+/* SDTR - SDRAM Timing Register */
+#define R_BUS_SDRAM_SDTR_CL_SHIFT                 (0)       /* SDRAMC Column Latency */
+#define R_BUS_SDRAM_SDTR_CL_MASK                  (0x7 << 0)
+#define R_BUS_SDRAM_SDTR_WR                       (1 << 8)  /* Write Recovery Interval */
+#define R_BUS_SDRAM_SDTR_RP_SHIFT                 (9)       /* Row Precharge Interval */
+#define R_BUS_SDRAM_SDTR_RP_MASK                  (0x7 << 9)
+#define R_BUS_SDRAM_SDTR_RCD_SHIFT                (12)      /* Row Column Latency */
+#define R_BUS_SDRAM_SDTR_RCD_MASK                 (0x3 << 12)
+#define R_BUS_SDRAM_SDTR_RAS_SHIFT                (16)      /* Row Active Interval */
+#define R_BUS_SDRAM_SDTR_RAS_MASK                 (0x7 << 16)
+
+/* SDMOD - SDRAM Mode Register */
+#define R_BUS_SDRAM_SDMOD_MR_SHIFT                (0)       /* Mode Register Setting */
+#define R_BUS_SDRAM_SDMOD_MR_MASK                 (0x7fff << 0)
+
+/* SDSR - SDRAM Status Register */
+#define R_BUS_SDRAM_SDSR_MRSST                    (1 << 0)  /* Mode Register Setting Status */
+#define R_BUS_SDRAM_SDSR_INIST                    (1 << 3)  /* Initialization Status */
+#define R_BUS_SDRAM_SDSR_SRFST                    (1 << 4)  /* Self-Refresh Transition/Recovery Status */
+
 #endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_SRAM_H */

@@ -58,6 +58,10 @@ if(CONFIG_RA_ETHERNET)
   list(APPEND SRCS ra8p1_ether.c)
 endif()
 
+if(CONFIG_RA_SDRAM)
+  list(APPEND SRCS ra8p1_sdram.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 set_property(GLOBAL PROPERTY LD_SCRIPT

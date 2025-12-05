@@ -138,6 +138,11 @@ CHIP_CSRCS += ra_ether_phy_ics1894.c
 endif
 endif
 
+# SDRAM driver
+ifeq ($(CONFIG_RA_SDRAM),y)
+CHIP_CSRCS += ra_sdram.c
+endif
+
 # IDLE task custom
 ifeq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += ra_idle.c

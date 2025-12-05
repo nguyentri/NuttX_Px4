@@ -244,6 +244,8 @@ config ARCH_CHIP_R7KA8P1KFLCAC
    select RA_HAVE_POEG
    # Inter-Processor Communication
    select RA_HAVE_IPC
+   # External Bus - SDRAM Controller
+   select RA_HAVE_SDRAM
 
 endchoice
 
@@ -1432,6 +1434,144 @@ config RA_SRAM_BASE
    help
      Base address of the main SRAM memory region.
 
+comment "SDRAM Controller"
+
+config RA_SDRAM
+   bool "SDRAM Controller Support"
+   default n
+   depends on RA_HAVE_SDRAM
+   help
+     Enable support for external SDRAM memory via the Bus Controller.
+     The RA8P1 supports SDRAM at CS6 space (0x68000000).
+     This driver provides initialization, self-refresh control, and
+     memory testing capabilities.
+
+if RA_SDRAM
+
+config RA_SDRAM_BASE
+   hex "SDRAM Base Address"
+   default 0x68000000
+   help
+     Base address of the external SDRAM memory region.
+     For RA8P1, SDRAM is mapped to CS6 space at 0x68000000.
+
+config RA_SDRAM_SIZE
+   hex "SDRAM Size (bytes)"
+   default 0x02000000
+   help
+     Size of the external SDRAM memory in bytes.
+     Default is 32MB (0x02000000) for IS42S32800J SDRAM.
+
+config RA_SDRAM_BUS_WIDTH
+   int "SDRAM Bus Width"
+   default 32
+   range 16 32
+   help
+     SDRAM data bus width in bits.
+     Supported values: 16 or 32 bits.
+
+config RA_SDRAM_HEAP
+   bool "Use SDRAM for heap"
+   default n
+   help
+     Use external SDRAM for heap allocation.
+     This enables adding SDRAM memory region to the system heap.
+     Useful for applications requiring large amounts of RAM.
+
+config RA_SDRAM_TEST
+   bool "Enable SDRAM test function"
+   default y
+   help
+     Enable ra_sdram_test() function for SDRAM validation.
+     The test performs pattern write/read verification.
+
+menu "SDRAM Timing Configuration"
+
+comment "Timing values are in BCLK cycles unless specified"
+
+config RA_SDRAM_TRAS
+   int "tRAS - Row Active Time (cycles)"
+   default 5
+   range 1 16
+   help
+     Active to precharge command delay in BCLK cycles.
+     Minimum active row time. Typical: 42ns.
+
+config RA_SDRAM_TRCD
+   int "tRCD - RAS to CAS Delay (cycles)"
+   default 3
+   range 1 8
+   help
+     Row address to column address delay in BCLK cycles.
+     RAS to CAS latency. Typical: 18ns.
+
+config RA_SDRAM_TRP
+   int "tRP - Row Precharge Time (cycles)"
+   default 3
+   range 1 8
+   help
+     Precharge to active command delay in BCLK cycles.
+     Row precharge time. Typical: 18ns.
+
+config RA_SDRAM_TWR
+   int "tWR - Write Recovery Time (cycles)"
+   default 2
+   range 1 8
+   help
+     Write recovery time in BCLK cycles.
+     Last data to precharge delay. Typical: 12ns.
+
+config RA_SDRAM_TCL
+   int "CAS Latency (cycles)"
+   default 3
+   range 2 3
+   help
+     CAS latency in BCLK cycles.
+     Column address strobe latency. Typical: 2 or 3 cycles.
+
+config RA_SDRAM_TRFC
+   int "tRFC - Refresh to Active Time (cycles)"
+   default 8
+   range 1 16
+   help
+     Auto-refresh to active command delay in BCLK cycles.
+     Refresh cycle time. Typical: 60ns.
+
+config RA_SDRAM_TREFW
+   int "tREFW - Refresh Period (cycles)"
+   default 1170
+   range 1 4096
+   help
+     Auto-refresh period in BCLK cycles.
+     Time between auto-refresh commands.
+     For 64ms/8192 rows at 125MHz: ~976 cycles.
+     Default 1170 provides margin.
+
+endmenu
+
+menu "SDRAM Debug Options"
+
+config RA_SDRAM_DEBUG
+   bool "Enable SDRAM debug output"
+   default n
+   depends on DEBUG_FEATURES
+   help
+     Enable debug output for SDRAM driver operations.
+     Shows initialization sequence, timing configuration,
+     and error conditions.
+
+config RA_SDRAM_DEBUG_INFO
+   bool "Enable SDRAM info output"
+   default n
+   depends on RA_SDRAM_DEBUG
+   help
+     Enable informational output for SDRAM operations.
+     More verbose than error-only debug output.
+
+endmenu
+
+endif # RA_SDRAM
+
 endmenu
 
 menu "RA8 Flash Configuration"
@@ -2363,6 +2503,14 @@ config RA_SDHI1
    select RA_SDHI
    help
      Enable SD Host Interface 1 for SD/SDIO/MMC card support.
+
+comment "External Bus Controller - SDRAM"
+
+config RA_HAVE_SDRAM
+   bool
+   default n
+   help
+     Hidden option indicating the chip has SDRAM controller capability.
 
 endmenu
 

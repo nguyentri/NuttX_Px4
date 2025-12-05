@@ -309,74 +309,91 @@
 
 /****************************************************************************
  * SDRAM Interface Pin Definitions (32-bit data bus)
+ * Uses GPIO_SDRAM_*_Pxxx macros from ra_pinmap.h with PFS_PSEL_BUS
  ****************************************************************************/
 
-/* SDRAM Address Lines (13-bit address A0-A12) */
-#define GPIO_SDRAM_A0         GPIO_PA03              /* PA03 - SDRAM Address 0 */
-#define GPIO_SDRAM_A1         GPIO_PA02              /* PA02 - SDRAM Address 1 */
-#define GPIO_SDRAM_A2         GPIO_PA01              /* PA01 - SDRAM Address 2 */
-#define GPIO_SDRAM_A3         GPIO_PA00              /* PA00 - SDRAM Address 3 */
-#define GPIO_SDRAM_A4         GPIO_P503              /* P503 - SDRAM Address 4 */
-#define GPIO_SDRAM_A5         GPIO_P504              /* P504 - SDRAM Address 5 */
-#define GPIO_SDRAM_A6         GPIO_P505              /* P505 - SDRAM Address 6 */
-#define GPIO_SDRAM_A7         GPIO_P506              /* P506 - SDRAM Address 7 */
-#define GPIO_SDRAM_A8         GPIO_P507              /* P507 - SDRAM Address 8 */
-#define GPIO_SDRAM_A9         GPIO_P508              /* P508 - SDRAM Address 9 */
-#define GPIO_SDRAM_A10        GPIO_P509              /* P509 - SDRAM Address 10 */
-#define GPIO_SDRAM_A11        GPIO_P510              /* P510 - SDRAM Address 11 */
-#define GPIO_SDRAM_A12        GPIO_P608              /* P608 - SDRAM Address 12 */
-
-/* SDRAM Bank Address Lines */
-#define GPIO_SDRAM_BA0        GPIO_PD00              /* PD00 - SDRAM Bank Address 0 */
-#define GPIO_SDRAM_BA1        GPIO_PC15              /* PC15 - SDRAM Bank Address 1 */
+/* SDRAM Address Lines (directly from pinmap with BUS function) */
+#define BOARD_SDRAM_A0        GPIO_SDRAM_A0_PA05     /* PA05 - SDRAM Address 0 (A0/BC0/DQM1) */
+#define BOARD_SDRAM_A1        GPIO_SDRAM_A1_PA04     /* PA04 - SDRAM Address 1 (A1/DQM3) */
+#define BOARD_SDRAM_A2        GPIO_SDRAM_A2_PA03     /* PA03 - SDRAM Address 2 (A2) */
+#define BOARD_SDRAM_A3        GPIO_SDRAM_A3_PA02     /* PA02 - SDRAM Address 3 (A3) */
+#define BOARD_SDRAM_A4        GPIO_SDRAM_A4_PA01     /* PA01 - SDRAM Address 4 (A4) */
+#define BOARD_SDRAM_A5        GPIO_SDRAM_A5_PA00     /* PA00 - SDRAM Address 5 (A5) */
+#define BOARD_SDRAM_A6        GPIO_SDRAM_A6_P503     /* P503 - SDRAM Address 6 (A6) */
+#define BOARD_SDRAM_A7        GPIO_SDRAM_A7_P504     /* P504 - SDRAM Address 7 (A7) */
+#define BOARD_SDRAM_A8        GPIO_SDRAM_A8_P505     /* P505 - SDRAM Address 8 (A8) */
+#define BOARD_SDRAM_A9        GPIO_SDRAM_A9_P506     /* P506 - SDRAM Address 9 (A9) */
+#define BOARD_SDRAM_A10       GPIO_SDRAM_A10_P507    /* P507 - SDRAM Address 10 (A10) */
+#define BOARD_SDRAM_A11       GPIO_SDRAM_A11_P508    /* P508 - SDRAM Address 11 (A11) */
+#define BOARD_SDRAM_A12       GPIO_SDRAM_A12_P509    /* P509 - SDRAM Address 12 (A12) */
+#define BOARD_SDRAM_A13       GPIO_SDRAM_A13_P510    /* P510 - SDRAM Address 13 (A13) */
+#define BOARD_SDRAM_A14       GPIO_SDRAM_A14_P608    /* P608 - SDRAM Address 14 (A14) */
+#define BOARD_SDRAM_A15       GPIO_SDRAM_A15_PD00    /* PD00 - SDRAM Address 15 (A15) */
+#define BOARD_SDRAM_A16       GPIO_SDRAM_A16_PC15    /* PC15 - SDRAM Address 16 (A16) */
+#define BOARD_SDRAM_A17       GPIO_SDRAM_A17_P408    /* P408 - SDRAM Address 17 (A17) */
+#define BOARD_SDRAM_A18       GPIO_SDRAM_A18_P409    /* P409 - SDRAM Address 18 (A18) */
+#define BOARD_SDRAM_A19       GPIO_SDRAM_A19_P410    /* P410 - SDRAM Address 19 (A19) */
+#define BOARD_SDRAM_A20       GPIO_SDRAM_A20_P411    /* P411 - SDRAM Address 20 (A20) */
+#define BOARD_SDRAM_A21       GPIO_SDRAM_A21_P412    /* P412 - SDRAM Address 21 (A21) */
+#define BOARD_SDRAM_A22       GPIO_SDRAM_A22_P413    /* P413 - SDRAM Address 22 (A22) */
+#define BOARD_SDRAM_A23       GPIO_SDRAM_A23_P414    /* P414 - SDRAM Address 23 (A23) */
 
 /* SDRAM Data Lines (32-bit data bus DQ0-DQ31) */
-#define GPIO_SDRAM_DQ0        GPIO_P302              /* P302 - SDRAM Data 0 */
-#define GPIO_SDRAM_DQ1        GPIO_P301              /* P301 - SDRAM Data 1 */
-#define GPIO_SDRAM_DQ2        GPIO_P300              /* P300 - SDRAM Data 2 */
-#define GPIO_SDRAM_DQ3        GPIO_P112              /* P112 - SDRAM Data 3 */
-#define GPIO_SDRAM_DQ4        GPIO_P113              /* P113 - SDRAM Data 4 */
-#define GPIO_SDRAM_DQ5        GPIO_P114              /* P114 - SDRAM Data 5 */
-#define GPIO_SDRAM_DQ6        GPIO_P115              /* P115 - SDRAM Data 6 */
-#define GPIO_SDRAM_DQ7        GPIO_P609              /* P609 - SDRAM Data 7 */
-#define GPIO_SDRAM_DQ8        GPIO_PA11              /* PA11 - SDRAM Data 8 */
-#define GPIO_SDRAM_DQ9        GPIO_PA12              /* PA12 - SDRAM Data 9 */
-#define GPIO_SDRAM_DQ10       GPIO_PA13              /* PA13 - SDRAM Data 10 */
-#define GPIO_SDRAM_DQ11       GPIO_PA14              /* PA14 - SDRAM Data 11 */
-#define GPIO_SDRAM_DQ12       GPIO_P610              /* P610 - SDRAM Data 12 */
-#define GPIO_SDRAM_DQ13       GPIO_P611              /* P611 - SDRAM Data 13 */
-#define GPIO_SDRAM_DQ14       GPIO_P612              /* P612 - SDRAM Data 14 */
-#define GPIO_SDRAM_DQ15       GPIO_P613              /* P613 - SDRAM Data 15 */
-#define GPIO_SDRAM_DQ16       GPIO_PC14              /* PC14 - SDRAM Data 16 */
-#define GPIO_SDRAM_DQ17       GPIO_PC13              /* PC13 - SDRAM Data 17 */
-#define GPIO_SDRAM_DQ18       GPIO_PC12              /* PC12 - SDRAM Data 18 */
-#define GPIO_SDRAM_DQ19       GPIO_PC11              /* PC11 - SDRAM Data 19 */
-#define GPIO_SDRAM_DQ20       GPIO_PC10              /* PC10 - SDRAM Data 20 */
-#define GPIO_SDRAM_DQ21       GPIO_PC09              /* PC09 - SDRAM Data 21 */
-#define GPIO_SDRAM_DQ22       GPIO_PC08              /* PC08 - SDRAM Data 22 */
-#define GPIO_SDRAM_DQ23       GPIO_PC07              /* PC07 - SDRAM Data 23 */
-#define GPIO_SDRAM_DQ24       GPIO_PC06              /* PC06 - SDRAM Data 24 */
-#define GPIO_SDRAM_DQ25       GPIO_PC05              /* PC05 - SDRAM Data 25 */
-#define GPIO_SDRAM_DQ26       GPIO_PC04              /* PC04 - SDRAM Data 26 */
-#define GPIO_SDRAM_DQ27       GPIO_PC03              /* PC03 - SDRAM Data 27 */
-#define GPIO_SDRAM_DQ28       GPIO_PC02              /* PC02 - SDRAM Data 28 */
-#define GPIO_SDRAM_DQ29       GPIO_PC01              /* PC01 - SDRAM Data 29 */
-#define GPIO_SDRAM_DQ30       GPIO_PC00              /* PC00 - SDRAM Data 30 */
-#define GPIO_SDRAM_DQ31       GPIO_P607              /* P607 - SDRAM Data 31 */
+#define BOARD_SDRAM_DQ0       GPIO_SDRAM_DQ0_P302    /* P302 - SDRAM Data 0 (D0/DQ0) */
+#define BOARD_SDRAM_DQ1       GPIO_SDRAM_DQ1_P301    /* P301 - SDRAM Data 1 (D1/DQ1) */
+#define BOARD_SDRAM_DQ2       GPIO_SDRAM_DQ2_P300    /* P300 - SDRAM Data 2 (D2/DQ2) */
+#define BOARD_SDRAM_DQ3       GPIO_SDRAM_DQ3_P112    /* P112 - SDRAM Data 3 (D3/DQ3) */
+#define BOARD_SDRAM_DQ4       GPIO_SDRAM_DQ4_P113    /* P113 - SDRAM Data 4 (D4/DQ4) */
+#define BOARD_SDRAM_DQ5       GPIO_SDRAM_DQ5_P114    /* P114 - SDRAM Data 5 (D5/DQ5) */
+#define BOARD_SDRAM_DQ6       GPIO_SDRAM_DQ6_P115    /* P115 - SDRAM Data 6 (D6/DQ6) */
+#define BOARD_SDRAM_DQ7       GPIO_SDRAM_DQ7_P609    /* P609 - SDRAM Data 7 (D7/DQ7) */
+#define BOARD_SDRAM_DQ8       GPIO_SDRAM_DQ8_PA11    /* PA11 - SDRAM Data 8 (D8/DQ8) */
+#define BOARD_SDRAM_DQ9       GPIO_SDRAM_DQ9_PA12    /* PA12 - SDRAM Data 9 (D9/DQ9) */
+#define BOARD_SDRAM_DQ10      GPIO_SDRAM_DQ10_PA13   /* PA13 - SDRAM Data 10 (D10/DQ10) */
+#define BOARD_SDRAM_DQ11      GPIO_SDRAM_DQ11_PA14   /* PA14 - SDRAM Data 11 (D11/DQ11) */
+#define BOARD_SDRAM_DQ12      GPIO_SDRAM_DQ12_P610   /* P610 - SDRAM Data 12 (D12/DQ12) */
+#define BOARD_SDRAM_DQ13      GPIO_SDRAM_DQ13_P611   /* P611 - SDRAM Data 13 (D13/DQ13) */
+#define BOARD_SDRAM_DQ14      GPIO_SDRAM_DQ14_P612   /* P612 - SDRAM Data 14 (D14/DQ14) */
+#define BOARD_SDRAM_DQ15      GPIO_SDRAM_DQ15_P613   /* P613 - SDRAM Data 15 (D15/DQ15) */
+#define BOARD_SDRAM_DQ16      GPIO_SDRAM_DQ16_PC14   /* PC14 - SDRAM Data 16 (D16/DQ16) */
+#define BOARD_SDRAM_DQ17      GPIO_SDRAM_DQ17_PC13   /* PC13 - SDRAM Data 17 (D17/DQ17) */
+#define BOARD_SDRAM_DQ18      GPIO_SDRAM_DQ18_PC12   /* PC12 - SDRAM Data 18 (D18/DQ18) */
+#define BOARD_SDRAM_DQ19      GPIO_SDRAM_DQ19_PC11   /* PC11 - SDRAM Data 19 (D19/DQ19) */
+#define BOARD_SDRAM_DQ20      GPIO_SDRAM_DQ20_PC10   /* PC10 - SDRAM Data 20 (D20/DQ20) */
+#define BOARD_SDRAM_DQ21      GPIO_SDRAM_DQ21_PC09   /* PC09 - SDRAM Data 21 (D21/DQ21) */
+#define BOARD_SDRAM_DQ22      GPIO_SDRAM_DQ22_PC08   /* PC08 - SDRAM Data 22 (D22/DQ22) */
+#define BOARD_SDRAM_DQ23      GPIO_SDRAM_DQ23_PC07   /* PC07 - SDRAM Data 23 (D23/DQ23) */
+#define BOARD_SDRAM_DQ24      GPIO_SDRAM_DQ24_PC06   /* PC06 - SDRAM Data 24 (D24/DQ24) */
+#define BOARD_SDRAM_DQ25      GPIO_SDRAM_DQ25_PC05   /* PC05 - SDRAM Data 25 (D25/DQ25) */
+#define BOARD_SDRAM_DQ26      GPIO_SDRAM_DQ26_PC04   /* PC04 - SDRAM Data 26 (D26/DQ26) */
+#define BOARD_SDRAM_DQ27      GPIO_SDRAM_DQ27_PC03   /* PC03 - SDRAM Data 27 (D27/DQ27) */
+#define BOARD_SDRAM_DQ28      GPIO_SDRAM_DQ28_PC02   /* PC02 - SDRAM Data 28 (D28/DQ28) */
+#define BOARD_SDRAM_DQ29      GPIO_SDRAM_DQ29_PC01   /* PC01 - SDRAM Data 29 (D29/DQ29) */
+#define BOARD_SDRAM_DQ30      GPIO_SDRAM_DQ30_PC00   /* PC00 - SDRAM Data 30 (D30/DQ30) */
+#define BOARD_SDRAM_DQ31      GPIO_SDRAM_DQ31_P607   /* P607 - SDRAM Data 31 (D31/DQ31) */
 
-/* SDRAM Data Mask (byte enables) */
-#define GPIO_SDRAM_DQM0       GPIO_P614              /* P614 - SDRAM Data Mask 0 (byte 0) */
-#define GPIO_SDRAM_DQM1       GPIO_PA05              /* PA05 - SDRAM Data Mask 1 (byte 1) */
-#define GPIO_SDRAM_DQM2       GPIO_P615              /* P615 - SDRAM Data Mask 2 (byte 2) */
-#define GPIO_SDRAM_DQM3       GPIO_PA04              /* PA04 - SDRAM Data Mask 3 (byte 3) */
+/* SDRAM Data Mask / Byte Enables */
+#define BOARD_SDRAM_DQM0      GPIO_SDRAM_DQM0_P614   /* P614 - SDRAM Data Mask 0 (WR/WR0/DQM0) */
+#define BOARD_SDRAM_DQM1      GPIO_SDRAM_DQM1_PA05   /* PA05 - SDRAM Data Mask 1 (A0/BC0/DQM1) */
+#define BOARD_SDRAM_DQM2      GPIO_SDRAM_DQM2_P615   /* P615 - SDRAM Data Mask 2 (WR2/BC2/DQM2) */
+#define BOARD_SDRAM_DQM3      GPIO_SDRAM_DQM3_PA04   /* PA04 - SDRAM Data Mask 3 (A1/DQM3) */
 
 /* SDRAM Control Signals */
-#define GPIO_SDRAM_CKE        GPIO_PA06              /* PA06 - SDRAM Clock Enable */
-#define GPIO_SDRAM_CLK        GPIO_PA15              /* PA15 - SDRAM Clock */
-#define GPIO_SDRAM_CS         GPIO_P813              /* P813 - SDRAM Chip Select */
-#define GPIO_SDRAM_WE         GPIO_PA08              /* PA08 - SDRAM Write Enable */
-#define GPIO_SDRAM_CAS        GPIO_PA09              /* PA09 - SDRAM Column Address Strobe */
-#define GPIO_SDRAM_RAS        GPIO_PA10              /* PA10 - SDRAM Row Address Strobe */
+#define BOARD_SDRAM_CKE       GPIO_SDRAM_CKE_PA06    /* PA06 - SDRAM Clock Enable (CS1/CKE) */
+#define BOARD_SDRAM_CLK       GPIO_SDRAM_SDCLK_PA15  /* PA15 - SDRAM Clock (EBCLK/SDCLK) */
+#define BOARD_SDRAM_CS        GPIO_SDRAM_SDCS_P813   /* P813 - SDRAM Chip Select (SDCS) */
+#define BOARD_SDRAM_WE        GPIO_SDRAM_WE_PA08     /* PA08 - SDRAM Write Enable (CS0/WE) */
+#define BOARD_SDRAM_CAS       GPIO_SDRAM_CAS_PA09    /* PA09 - SDRAM Column Address Strobe (CS3/CAS) */
+#define BOARD_SDRAM_RAS       GPIO_SDRAM_RAS_PA10    /* PA10 - SDRAM Row Address Strobe (CS2/RAS) */
+
+/* Note: All address lines A0-A23 are now defined. The actual lines used depend
+ * on the SDRAM density configuration. For IS42S32800J (32MB):
+ * - Row Address: A0-A12 (13 bits = 8192 rows)
+ * - Column Address: A0-A8 (9 bits = 512 columns)
+ * - Bank Address: BA0-BA1 (use A15-A16 for BA0-BA1)
+ * SDRAM interface requires proper BSC (Bus State Controller) configuration
+ * including timing parameters and refresh rate.
+ */
 
 /* Note: SDRAM interface requires proper BSC (Bus State Controller) configuration
  * including timing parameters, refresh rate, and bus width settings.

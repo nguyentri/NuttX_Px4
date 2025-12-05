@@ -94,4 +94,9 @@ if(CONFIG_RA_ETHERNET)
   list(APPEND SRCS ra_ether.c)
 endif()
 
+# SDRAM driver
+if(CONFIG_RA_SDRAM)
+  list(APPEND SRCS ra_sdram.c)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})
