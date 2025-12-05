@@ -2648,6 +2648,84 @@ config RA_RTC
    bool "Real Time Clock"
    default n
    depends on RA_HAVE_RTC
+   help
+     Enable the RA8 Real Time Clock peripheral.
+
+choice
+   prompt "RTC Clock Source"
+   default RA_RTC_CLOCK_SUBCLK
+   depends on RA_RTC
+
+config RA_RTC_CLOCK_SUBCLK
+   bool "Sub-clock (SOSC)"
+   help
+     Use the 32.768kHz sub-clock oscillator as the RTC count source.
+     This is the recommended option for accurate timekeeping.
+
+config RA_RTC_CLOCK_LOCO
+   bool "LOCO"
+   help
+     Use the Low-speed On-chip Oscillator (LOCO) as the RTC count source.
+     This is less accurate but does not require an external crystal.
+
+endchoice
+
+config RA_RTC_CLOCK_SOURCE
+   int
+   default 0 if RA_RTC_CLOCK_SUBCLK
+   default 1 if RA_RTC_CLOCK_LOCO
+
+config RA_RTC_LOCO_FREQ_COMPARE
+   int "LOCO Frequency Compare Value"
+   default 255
+   depends on RA_RTC_CLOCK_LOCO
+   help
+     Frequency comparison value for the LOCO when used as RTC clock source.
+     The value is written to RFRL register. Default is 255 for ~32.768kHz.
+
+config RA_RTC_ERROR_ADJUSTMENT
+   bool "RTC Error Adjustment Support"
+   default n
+   depends on RA_RTC
+   help
+     Enable support for the RTC automatic error adjustment feature using
+     the RADJ register. This allows compensation for clock drift.
+
+if RA_RTC_ERROR_ADJUSTMENT
+
+config RA_RTC_ERROR_PERIOD
+   int "Error Adjustment Period (in 1-minute units)"
+   default 10
+   range 1 255
+   help
+     Period for automatic error adjustment in 1-minute units.
+
+config RA_RTC_ERROR_VALUE
+   int "Error Adjustment Value"
+   default 0
+   range 0 63
+   help
+     Error adjustment value (0-63). The time is adjusted by
+     adding or subtracting this many clock cycles.
+
+choice
+   prompt "Error Adjustment Direction"
+   default RA_RTC_ERROR_ADD
+
+config RA_RTC_ERROR_ADD
+   bool "Add (speed up clock)"
+   help
+     Add clock cycles to speed up the RTC.
+
+config RA_RTC_ERROR_SUB
+   bool "Subtract (slow down clock)"
+   help
+     Subtract clock cycles to slow down the RTC.
+
+endchoice
+
+endif # RA_RTC_ERROR_ADJUSTMENT
+
 endmenu
 
 menu "ADC"

@@ -89,6 +89,11 @@ ifeq ($(CONFIG_RA_SDRAM),y)
 CSRCS += ra8p1_sdram.c
 endif
 
+# RTC driver support
+ifeq ($(CONFIG_RTC_DRIVER),y)
+CSRCS += ra8p1_rtc.c
+endif
+
 # SPI loopback example support
 ifeq ($(CONFIG_RA8P1_SPI_LOOPBACK_EXAMPLE),y)
 CSRCS += ra8p1_spi_loopback.c

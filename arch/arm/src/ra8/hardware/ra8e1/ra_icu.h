@@ -172,6 +172,12 @@
 
 #define R_ICU_WUPEN1_I3CWUPEN                     (1 << 11)  /* I3C Wakeup Condition Detection Interrupt Deep Sleep/Software Standby Returns Enable bit */
 
+/* DELSR Register bit definitions */
+#define R_ICU_DELSR_DELS_SHIFT                    (0)  /* DMAC Event Link Select */
+#define R_ICU_DELSR_DELS_MASK                     0x3ff
+
+#define R_ICU_DELSR_IR                            (1 << 16)  /* DMAC Activation Request Status Flag */
+
 /* IELSR Register bit definitions */
 #define R_ICU_IELSR_IELS_SHIFT                    (0)  /* ICU Event selection to NVICSet the number for the event signal to be linked . */
 #define R_ICU_IELSR_IELS_MASK                     0x1ff

@@ -119,6 +119,21 @@ int board_adc_initialize(void);
 #endif
 
 /****************************************************************************
+ * Name: board_rtc_initialize
+ *
+ * Description:
+ *   Initialize and register the RTC driver.
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RTC_DRIVER
+int board_rtc_initialize(void);
+#endif
+
+/****************************************************************************
  * RA8P1 driver interfaces for use by applications on the evk-ra8p1 board
  ****************************************************************************/
 
