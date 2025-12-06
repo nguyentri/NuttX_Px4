@@ -264,6 +264,7 @@
 
 /* RSTCTL Register bit definitions */
 #define R_I3C_RSTCTL_RI3CRST                      (1 << 0)  /* I3C Software Reset */
+#define R_I3C_RSTCTL_PDRST                        R_I3C_RSTCTL_RI3CRST  /* Peripheral Device Reset (alias) */
 
 #define R_I3C_RSTCTL_CMDQRST                      (1 << 1)  /* Command Queue Software Reset */
 
@@ -759,6 +760,11 @@ Interrupt is issued when IBI Data Buffer is completely empty.
 #define R_I3C_NTIE_TEIE                           (1 << 9)  /* Normal Transfer Error Interrupt Enable */
 
 #define R_I3C_NTIE_RSQFIE                         (1 << 20)  /* Normal Receive Status Queue Full Interrupt Enable */
+
+#define R_I3C_NTIE_MASK                           (R_I3C_NTIE_TDBEIE0 | R_I3C_NTIE_RDBFIE0 | \
+                                                   R_I3C_NTIE_IBIQEFIE | R_I3C_NTIE_CMDQEIE | \
+                                                   R_I3C_NTIE_RSPQFIE | R_I3C_NTIE_TABTIE | \
+                                                   R_I3C_NTIE_TEIE | R_I3C_NTIE_RSQFIE)
 
 /* NTSTFC Register bit definitions */
 #define R_I3C_NTSTFC_TDBEFC0                      (1 << 0)  /* Normal Transmit Data Buffer Empty Force 0 */

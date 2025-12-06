@@ -44,6 +44,11 @@ ifeq ($(CONFIG_RA_I2C),y)
 CSRCS += ra8p1_i2c.c
 endif
 
+# I3C support
+ifeq ($(CONFIG_RA_I3C),y)
+CSRCS += ra8p1_i3c.c
+endif
+
 # SDHI support
 ifeq ($(CONFIG_RA_SDHI),y)
 CSRCS += ra8p1_sdhi.c

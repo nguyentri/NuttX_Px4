@@ -2008,6 +2008,7 @@ config RA_FLASH_WRITE_PROTECTION
     bool "Enable write protection features"
     default n
     depends on RA_FLASH
+
     help
       Enable flash write protection and security features.
       Prevents accidental flash corruption.

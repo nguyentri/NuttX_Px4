@@ -34,6 +34,10 @@ if(CONFIG_RA_I2C)
   list(APPEND SRCS ra8p1_i2c.c)
 endif()
 
+if(CONFIG_RA_I3C)
+  list(APPEND SRCS ra8p1_i3c.c)
+endif()
+
 if(CONFIG_RA_SDHI)
   list(APPEND SRCS ra8p1_sdhi.c)
 endif()

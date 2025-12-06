@@ -173,6 +173,16 @@ int board_i2c_uninitialize(int bus);
 #endif
 
 /****************************************************************************
+ * Name: board_i3c_initialize
+ *
+ * Description:
+ *   Initialize and register the I3C driver.
+ *
+ ****************************************************************************/
+
+int board_i3c_initialize(void);
+
+/****************************************************************************
  * Name: board_canfd_initialize
  *
  * Description:

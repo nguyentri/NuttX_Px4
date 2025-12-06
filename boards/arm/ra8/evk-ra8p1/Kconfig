@@ -46,3 +46,11 @@ config RA8P1_ADC_HW_TRIGGER_EXAMPLE
 		- GPT0 counter overflow -> ADC0 scan trigger
 		- Software event 0 -> GPT A start trigger
 		- GPT0 overflow -> GPT B stop trigger
+
+config RA8P1_I3C_EXAMPLE
+	bool "I3C test example"
+	default n
+	depends on RA_I3C && RA8P1_EXAMPLE_SUPPORT
+	---help---
+		Enable I3C test example for verifying I3C driver functionality
+		on EVK-RA8P1 board.

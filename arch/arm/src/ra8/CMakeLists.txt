@@ -64,6 +64,11 @@ if(CONFIG_RA_I2C_SLAVE)
   list(APPEND SRCS ra_i2c_slave.c)
 endif()
 
+# I3C driver
+if(CONFIG_RA_I3C)
+  list(APPEND SRCS ra_i3c.c)
+endif()
+
 # DMAC driver
 if(CONFIG_RA_DMAC)
   list(APPEND SRCS ra_dmac.c)

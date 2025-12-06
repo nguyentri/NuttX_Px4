@@ -67,6 +67,11 @@ ifeq ($(CONFIG_RA_I2C_SLAVE),y)
 CHIP_CSRCS += ra_i2c_slave.c
 endif
 
+# I3C driver
+ifeq ($(CONFIG_RA_I3C),y)
+CHIP_CSRCS += ra_i3c.c
+endif
+
 # DMAC driver
 ifeq ($(CONFIG_RA_DMAC),y)
 CHIP_CSRCS += ra_dmac.c

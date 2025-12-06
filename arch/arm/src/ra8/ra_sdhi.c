@@ -96,6 +96,17 @@
 /* Error recovery retry count */
 #define RA_SDHI_ERROR_RETRY_MAX 3
 
+/* Timing constraints (from RA8 BSP) */
+#define RA_SDHI_RESET_WAIT_US       10      /* Reset wait time in microseconds */
+#define RA_SDHI_CLOCK_STABLE_US     100     /* Clock stabilization time */
+#define RA_SDHI_CBSY_TIMEOUT_MS     1000    /* CBSY timeout in milliseconds */
+#define RA_SDHI_MIN_BLOCK_SIZE      1       /* Minimum block size */
+#define RA_SDHI_MAX_BLOCK_SIZE      512     /* Maximum block size */
+
+/* CMD12 automatic issuing modes */
+#define RA_SDHI_CMD12_AUTO_ENABLE   0       /* Automatic CMD12 enabled */
+#define RA_SDHI_CMD12_AUTO_DISABLE  1       /* Automatic CMD12 disabled */
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -153,6 +164,12 @@ struct ra_sdhi_dev_s
   uint32_t           err_sts2;      /* Last SD_ERR_STS2 value */
   uint8_t            error_retry;   /* Error retry counter */
 
+  /* Multi-block transfer state */
+  bool               multiblock;    /* Multi-block transfer in progress */
+  uint32_t           blocksize;     /* Current block size */
+  uint32_t           nblocks;       /* Number of blocks in transfer */
+  bool               autocmd12;     /* Automatic CMD12 enabled */
+
 #ifdef CONFIG_PM
   /* Power management */
   struct pm_callback_s pmcb;        /* PM callbacks */
@@ -190,6 +207,11 @@ static void ra_sdhi_dma_cleanup(struct ra_sdhi_dev_s *priv);
 /* Error Handling */
 static void ra_sdhi_parse_errors(struct ra_sdhi_dev_s *priv);
 static int  ra_sdhi_error_recovery(struct ra_sdhi_dev_s *priv);
+static int  ra_sdhi_wait_cbsy_clear(struct ra_sdhi_dev_s *priv, uint32_t timeout_ms);
+
+/* Multi-block transfer support */
+static void ra_sdhi_setup_cmd12_auto(struct ra_sdhi_dev_s *priv, bool enable);
+static int  ra_sdhi_check_transfer_status(struct ra_sdhi_dev_s *priv);
 
 /* Power Management */
 #ifdef CONFIG_PM
@@ -680,6 +702,114 @@ static void ra_sdhi_dma_cleanup(struct ra_sdhi_dev_s *priv)
 #endif /* CONFIG_RA_DMA */
 
 /****************************************************************************
+ * Name: ra_sdhi_wait_cbsy_clear
+ *
+ * Description:
+ *   Wait for CBSY (Command Type Register Busy) to clear with timeout
+ *   Following RA8 BSP timing constraints
+ *
+ ****************************************************************************/
+
+static int ra_sdhi_wait_cbsy_clear(struct ra_sdhi_dev_s *priv,
+                                   uint32_t timeout_ms)
+{
+  uint32_t start = clock_systime_ticks();
+  uint32_t timeout_ticks = MSEC2TICK(timeout_ms);
+
+  while (ra_getreg32(R_SDHI_SD_INFO2(priv->channel)) & R_SDHI_SD_INFO2_CBSY)
+    {
+      if ((clock_systime_ticks() - start) > timeout_ticks)
+        {
+          mcerr("SDHI%d: CBSY timeout\n", priv->channel);
+          return -ETIMEDOUT;
+        }
+
+      /* Small delay to avoid bus contention */
+      up_udelay(1);
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: ra_sdhi_setup_cmd12_auto
+ *
+ * Description:
+ *   Configure automatic CMD12 issuing for multi-block transfers
+ *   Following RA8 BSP patterns for proper multi-block handling
+ *
+ ****************************************************************************/
+
+static void ra_sdhi_setup_cmd12_auto(struct ra_sdhi_dev_s *priv,
+                                     bool enable)
+{
+  /* CMD12 automatic issuing is controlled by SD_CMD[15:14] bits
+   * 00b: CMD12 automatically issued
+   * 01b: CMD12 not automatically issued
+   * The actual bits are set per-command in sendcmd
+   */
+
+  if (enable)
+    {
+      priv->autocmd12 = true;
+      /* Automatic CMD12 will be set per-command in sendcmd */
+    }
+  else
+    {
+      priv->autocmd12 = false;
+    }
+}/****************************************************************************
+ * Name: ra_sdhi_check_transfer_status
+ *
+ * Description:
+ *   Check transfer status with enhanced error detection
+ *   Examines both INFO2 and ERR_STS registers
+ *
+ ****************************************************************************/
+
+static int ra_sdhi_check_transfer_status(struct ra_sdhi_dev_s *priv)
+  __attribute__((unused));
+static int ra_sdhi_check_transfer_status(struct ra_sdhi_dev_s *priv)
+{
+  uint32_t info2;
+  uint32_t err_sts1;
+  uint32_t err_sts2;
+
+  info2 = ra_getreg32(R_SDHI_SD_INFO2(priv->channel));
+
+  /* Check for errors in INFO2 */
+  if (info2 & RA_SDHI_INFO2_ERR_INTS)
+    {
+      /* Read detailed error status */
+      err_sts1 = ra_getreg32(R_SDHI_SD_ERR_STS1(priv->channel));
+      err_sts2 = ra_getreg32(R_SDHI_SD_ERR_STS2(priv->channel));
+
+      priv->err_sts1 = err_sts1;
+      priv->err_sts2 = err_sts2;
+
+      /* Parse and log errors */
+      ra_sdhi_parse_errors(priv);
+
+      if (info2 & R_SDHI_SD_INFO2_RSPTO)
+        {
+          return -ETIMEDOUT;
+        }
+      else if (info2 & R_SDHI_SD_INFO2_CRCE)
+        {
+          return -EILSEQ;  /* CRC error */
+        }
+      else if (info2 & R_SDHI_SD_INFO2_DTO)
+        {
+          return -ETIMEDOUT;  /* Data timeout */
+        }
+
+      return -EIO;  /* Generic error */
+    }
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: ra_sdhi_parse_errors
  *
  * Description:
@@ -762,22 +892,35 @@ static int ra_sdhi_error_recovery(struct ra_sdhi_dev_s *priv)
   mcinfo("SDHI%d: Attempting error recovery (retry %d/%d)\n",
          priv->channel, priv->error_retry, RA_SDHI_ERROR_RETRY_MAX);
 
-  /* Clear error flags */
+  /* Clear error flags following RA8 BSP pattern */
   ra_putreg32(0, R_SDHI_SD_INFO1(priv->channel));
   ra_putreg32(0, R_SDHI_SD_INFO2(priv->channel));
 
-  /* Perform soft reset */
+  /* Perform soft reset with proper timing constraints */
   ra_putreg32(0, R_SDHI_SOFT_RST(priv->channel));
-  up_udelay(10);
+  up_udelay(RA_SDHI_RESET_WAIT_US);  /* Wait per RA8 BSP timing */
   ra_putreg32(R_SDHI_SOFT_RST_SDRST, R_SDHI_SOFT_RST(priv->channel));
 
-  /* Wait for reset to complete */
-  while (ra_getreg32(R_SDHI_SOFT_RST(priv->channel)) & R_SDHI_SOFT_RST_SDRST)
+  /* Wait for reset to complete with timeout */
+  uint32_t timeout = 1000;  /* 1ms timeout */
+  while ((ra_getreg32(R_SDHI_SOFT_RST(priv->channel)) & R_SDHI_SOFT_RST_SDRST) &&
+         timeout > 0)
     {
+      up_udelay(1);
+      timeout--;
+    }
+
+  if (timeout == 0)
+    {
+      mcerr("SDHI%d: Reset timeout during recovery\n", priv->channel);
+      return -ETIMEDOUT;
     }
 
   /* Restore configuration */
   ra_putreg32(0x40E0, R_SDHI_SD_OPTION(priv->channel));
+
+  /* Wait for configuration to stabilize */
+  up_udelay(RA_SDHI_CLOCK_STABLE_US);
 
   /* Re-enable interrupts */
   ra_sdhi_enableints(priv);
@@ -873,24 +1016,54 @@ static void ra_sdhi_pm_notify(struct pm_callback_s *cb, int domain,
 static void ra_sdhi_reset(struct sdio_dev_s *dev)
 {
   struct ra_sdhi_dev_s *priv = (struct ra_sdhi_dev_s *)dev;
+  uint32_t timeout;
 
-  /* Soft reset */
+  /* Soft reset following RA8 BSP sequence with proper timing */
   ra_putreg32(0, R_SDHI_SOFT_RST(priv->channel));
+
+  /* Wait before asserting reset per RA8 BSP timing constraints */
+  up_udelay(RA_SDHI_RESET_WAIT_US);
+
   ra_putreg32(R_SDHI_SOFT_RST_SDRST, R_SDHI_SOFT_RST(priv->channel));
 
-  /* Wait for reset to complete (SDRST clears to 0) */
-  while (ra_getreg32(R_SDHI_SOFT_RST(priv->channel)) & R_SDHI_SOFT_RST_SDRST)
+  /* Wait for reset to complete with timeout (SDRST clears to 0) */
+  timeout = 1000;  /* 1ms timeout */
+  while ((ra_getreg32(R_SDHI_SOFT_RST(priv->channel)) & R_SDHI_SOFT_RST_SDRST) &&
+         timeout > 0)
     {
+      up_udelay(1);
+      timeout--;
     }
 
-  /* Set default options */
+  if (timeout == 0)
+    {
+      mcerr("SDHI%d: Reset timeout\n", priv->channel);
+    }
+
+  /* Set default options following RA8 BSP pattern
+   * Bit 15 (WIDTH): 0 = 4-bit bus width default
+   * Bit 14: Reserved
+   * Bit 13 (WIDTH8): 0 = not 8-bit mode
+   * Bits 7-4 (TOP): Timeout counter setting
+   * Default: 0x40E0 provides proper timeout configuration
+   */
   ra_putreg32(0x40E0, R_SDHI_SD_OPTION(priv->channel));
 
-  /* Clear interrupts */
+  /* Wait for configuration to stabilize per RA8 BSP timing */
+  up_udelay(RA_SDHI_CLOCK_STABLE_US);
+
+  /* Clear all interrupt status flags */
   ra_putreg32(0, R_SDHI_SD_INFO1(priv->channel));
   ra_putreg32(0, R_SDHI_SD_INFO2(priv->channel));
 
+  /* Mask all interrupts initially */
   ra_sdhi_disableints(priv);
+
+  /* Reset multi-block state */
+  priv->multiblock = false;
+  priv->autocmd12 = false;
+  priv->blocksize = 512;
+  priv->nblocks = 1;
 }
 
 static sdio_capset_t ra_sdhi_capabilities(FAR struct sdio_dev_s *dev)
@@ -1099,10 +1272,15 @@ static int ra_sdhi_sendcmd(struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
   uint32_t cmd_reg = 0;
   uint32_t waitmask1 = 0;
   uint32_t waitmask2 = 0;
+  int ret;
+  uint8_t cmdidx;
 
-  /* Wait for CBSY to be 0 */
-  while (ra_getreg32(R_SDHI_SD_INFO2(priv->channel)) & R_SDHI_SD_INFO2_CBSY)
+  /* Wait for CBSY to clear with timeout (RA8 BSP pattern) */
+  ret = ra_sdhi_wait_cbsy_clear(priv, RA_SDHI_CBSY_TIMEOUT_MS);
+  if (ret < 0)
     {
+      mcerr("SDHI%d: CBSY timeout before command\n", priv->channel);
+      return ret;
     }
 
   /* Write argument */
@@ -1138,6 +1316,9 @@ static int ra_sdhi_sendcmd(struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
       cmd_reg |= R_SDHI_SD_CMD_RSPTP_000;
     }
 
+  /* Get command index for CMD12 detection */
+  cmdidx = (cmd & MMCSD_CMDIDX_MASK) >> MMCSD_CMDIDX_SHIFT;
+
   /* Data transfer */
   if (cmd & MMCSD_DATAXFR_MASK)
     {
@@ -1145,11 +1326,50 @@ static int ra_sdhi_sendcmd(struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
 
       if (cmd & MMCSD_WRXFR)
         {
-          /* Write */
+          /* Write transfer */
         }
       else
         {
-          cmd_reg |= R_SDHI_SD_CMD_CMDRW; /* Read */
+          cmd_reg |= R_SDHI_SD_CMD_CMDRW; /* Read transfer */
+        }
+
+      /* Configure CMD12 automatic issuing for multi-block transfers
+       * Following RA8 BSP pattern:
+       * - CMD18 (READ_MULTIPLE_BLOCK) and CMD25 (WRITE_MULTIPLE_BLOCK)
+       *   can use automatic CMD12
+       * - CMD53 (IO_RW_EXTENDED) may need manual CMD12
+       */
+      if (priv->multiblock && priv->autocmd12)
+        {
+          if (cmdidx == 18 || cmdidx == 25)  /* CMD18 or CMD25 */
+            {
+              /* Enable automatic CMD12 issuing
+               * SD_CMD[15:14] = 00b for automatic CMD12
+               */
+              cmd_reg |= R_SDHI_SD_CMD_CMD12AT_00;
+
+              mcinfo("SDHI%d: CMD%d with auto-CMD12\n", priv->channel, cmdidx);
+            }
+          else
+            {
+              /* Disable automatic CMD12 for other commands
+               * SD_CMD[15:14] = 01b to disable automatic CMD12
+               */
+              cmd_reg |= R_SDHI_SD_CMD_CMD12AT_01;
+            }
+        }
+      else if (priv->multiblock)
+        {
+          /* Multi-block without auto-CMD12 */
+          cmd_reg |= R_SDHI_SD_CMD_CMD12AT_01;
+        }
+
+      /* Set TRSTP bit for single/multiple block transfer indication
+       * This bit is set for multiple block transfers
+       */
+      if (priv->multiblock)
+        {
+          cmd_reg |= R_SDHI_SD_CMD_TRSTP;
         }
     }
 
@@ -1173,19 +1393,48 @@ static void ra_sdhi_blocksetup(struct sdio_dev_s *dev, unsigned int blocklen,
 {
   struct ra_sdhi_dev_s *priv = (struct ra_sdhi_dev_s *)dev;
 
+  /* Validate block size per RA8 BSP constraints */
+  if (blocklen < RA_SDHI_MIN_BLOCK_SIZE || blocklen > RA_SDHI_MAX_BLOCK_SIZE)
+    {
+      mcerr("SDHI%d: Invalid block size %u\n", priv->channel, blocklen);
+      return;
+    }
+
+  /* Store multi-block transfer state */
+  priv->blocksize = blocklen;
+  priv->nblocks = nblocks;
+  priv->multiblock = (nblocks > 1);
+
+  /* Set transfer data size */
   ra_putreg32(blocklen, R_SDHI_SD_SIZE(priv->channel));
 
   if (nblocks > 1)
     {
+      /* Multi-block transfer setup following RA8 BSP pattern */
+
+      /* Set block count */
       ra_putreg32(nblocks, R_SDHI_SD_SECCNT(priv->channel));
-      /* Enable block count in SD_STOP */
+
+      /* Enable block count and automatic CMD12 in SD_STOP register
+       * SEC bit enables block count feature
+       * Automatic CMD12 issuing will be configured per command
+       */
       ra_putreg32(R_SDHI_SD_STOP_SEC, R_SDHI_SD_STOP(priv->channel));
+
+      /* Enable automatic CMD12 for standard multi-block read/write */
+      ra_sdhi_setup_cmd12_auto(priv, true);
+
+      mcinfo("SDHI%d: Multi-block setup - %u blocks x %u bytes, auto-CMD12\n",
+             priv->channel, nblocks, blocklen);
     }
   else
     {
-      ra_putreg32(R_SDHI_SD_STOP_SEC, R_SDHI_SD_STOP(priv->channel)); /* Still set SEC? FSP says yes for single block too? No, usually 0. */
-      /* FSP: R_SDHI_SD_STOP_SEC is set at multiple block transfer. */
+      /* Single block transfer - no automatic CMD12 needed */
       ra_putreg32(0, R_SDHI_SD_STOP(priv->channel));
+      ra_sdhi_setup_cmd12_auto(priv, false);
+
+      mcinfo("SDHI%d: Single block setup - %u bytes\n",
+             priv->channel, blocklen);
     }
 }
 
@@ -1193,7 +1442,6 @@ static int ra_sdhi_recvsetup(struct sdio_dev_s *dev, uint8_t *buffer,
                              size_t nbytes)
 {
   struct ra_sdhi_dev_s *priv = (struct ra_sdhi_dev_s *)dev;
-  int ret;
 
   priv->buffer = (uint32_t*)buffer;
   priv->remaining = nbytes;
@@ -1204,7 +1452,7 @@ static int ra_sdhi_recvsetup(struct sdio_dev_s *dev, uint8_t *buffer,
       (nbytes % RA_SDHI_DMA_BLOCK_SIZE) == 0 &&
       ((uintptr_t)buffer % 4) == 0)
     {
-      ret = ra_sdhi_dma_transfer(priv, NULL, buffer, nbytes);
+      int ret = ra_sdhi_dma_transfer(priv, NULL, buffer, nbytes);
       if (ret == OK)
         {
           /* DMA setup successful - configure for DMA transfer */
@@ -1217,9 +1465,7 @@ static int ra_sdhi_recvsetup(struct sdio_dev_s *dev, uint8_t *buffer,
       /* DMA setup failed - fall through to PIO mode */
       mcerr("SDHI%d: DMA setup failed, using PIO: %d\n", priv->channel, ret);
     }
-#endif
-
-  /* Enable BRE interrupt for PIO */
+#endif  /* Enable BRE interrupt for PIO */
   ra_sdhi_configwaitints(priv, RA_SDHI_INFO1_ACCESS_INTS, RA_SDHI_INFO2_ERR_INTS | R_SDHI_SD_INFO2_BRE,
                          SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR);
 
@@ -1230,7 +1476,6 @@ static int ra_sdhi_sendsetup(struct sdio_dev_s *dev, const uint8_t *buffer,
                              size_t nbytes)
 {
   struct ra_sdhi_dev_s *priv = (struct ra_sdhi_dev_s *)dev;
-  int ret;
 
   priv->buffer = (uint32_t*)buffer;
   priv->remaining = nbytes;
@@ -1241,7 +1486,7 @@ static int ra_sdhi_sendsetup(struct sdio_dev_s *dev, const uint8_t *buffer,
       (nbytes % RA_SDHI_DMA_BLOCK_SIZE) == 0 &&
       ((uintptr_t)buffer % 4) == 0)
     {
-      ret = ra_sdhi_dma_transfer(priv, buffer, NULL, nbytes);
+      int ret = ra_sdhi_dma_transfer(priv, buffer, NULL, nbytes);
       if (ret == OK)
         {
           /* DMA setup successful - configure for DMA transfer */
@@ -1254,9 +1499,7 @@ static int ra_sdhi_sendsetup(struct sdio_dev_s *dev, const uint8_t *buffer,
       /* DMA setup failed - fall through to PIO mode */
       mcerr("SDHI%d: DMA setup failed, using PIO: %d\n", priv->channel, ret);
     }
-#endif
-
-  /* Enable BWE interrupt for PIO */
+#endif  /* Enable BWE interrupt for PIO */
   ra_sdhi_configwaitints(priv, RA_SDHI_INFO1_ACCESS_INTS, RA_SDHI_INFO2_ERR_INTS | R_SDHI_SD_INFO2_BWE,
                          SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR);
 
@@ -1428,7 +1671,13 @@ struct sdio_dev_s *ra_sdhi_initialize(int channel)
   /* Enable module clock */
   ra_mstp_start(RA_MSTP_SDHI);
 
-  /* Initialize hardware */
+  /* Initialize multi-block state */
+  priv->multiblock = false;
+  priv->blocksize = 512;
+  priv->nblocks = 1;
+  priv->autocmd12 = false;
+
+  /* Initialize hardware following RA8 BSP sequence */
   ra_sdhi_reset(&priv->dev);
 
   /* Register interrupts with proper event routing and priority */

@@ -94,6 +94,14 @@ int ra8p1_bringup(void)
   /* Configure all GPIO pins */
   ra8p1_gpio_initialize();
 
+#ifdef CONFIG_RA_I3C
+  ret = board_i3c_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize I3C\n");
+    }
+#endif
+
 #ifdef CONFIG_RA_SDRAM
   /* Initialize external SDRAM
    * Note: SDRAM should be initialized early as it may be used for heap
