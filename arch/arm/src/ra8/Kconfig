@@ -160,16 +160,17 @@ config ARCH_CHIP_R7KA8P1KFLCAC
    select RA_HAVE_I3C
    # DMA
    select RA_HAVE_DMAC
-   # SPI
+   # SPI - 2 channels only
    select RA_HAVE_SPI0
    select RA_HAVE_SPI1
-   select RA_HAVE_SPI2
    # CANFD - 2 channels
    select RA_HAVE_CANFD0
    select RA_HAVE_CANFD1
-   # Ethernet
+   # Ethernet - MII, RMII, GMII, RGMII support
    select RA_HAVE_ETHERC_MII
    select RA_HAVE_ETHERC_RMII
+   select RA_HAVE_ETHERC_GMII
+   select RA_HAVE_ETHERC_RGMII
    select RA_HAVE_ETHERCAT
    select RA_HAVE_ETHSW
    select RA_HAVE_GPTP
@@ -240,7 +241,12 @@ config ARCH_CHIP_R7KA8P1KFLCAC
    select RA_HAVE_CAC
    select RA_HAVE_DOC
    select RA_HAVE_ELC
+   # PDG - 4 channels
    select RA_HAVE_PDG
+   select RA_HAVE_PDG0
+   select RA_HAVE_PDG1
+   select RA_HAVE_PDG2
+   select RA_HAVE_PDG3
    select RA_HAVE_POEG
    # Inter-Processor Communication
    select RA_HAVE_IPC
@@ -2259,6 +2265,14 @@ config RA_I2C2_SLAVE
    default n
    depends on RA_I2C2 && RA_I2C_SLAVE
 
+config RA_I3C
+   bool "I3C Interface"
+   default n
+   depends on RA_HAVE_I3C
+   help
+     Enable I3C (Improved Inter-Integrated Circuit) interface support.
+     I3C combines I2C compatibility with higher speeds and advanced features.
+
 endmenu
 
 menu "MIPI-CSI and VIN"
@@ -2793,6 +2807,24 @@ config RA_GPTP
    depends on RA_HAVE_GPTP
    help
      Enable IEEE 1588 Precision Time Protocol (PTP) support.
+
+config RA_ESWPHY
+   bool
+   default y if RA_ETHSW
+   help
+     Ethernet Switch PHY clock automatically enabled when Ethernet Switch is enabled.
+
+config RA_ETHPHY
+   bool
+   default y if RA_ETHERC_MII || RA_ETHERC_RMII || RA_ETHERC_RGMII
+   help
+     Ethernet PHY clock automatically enabled when Ethernet controller is enabled.
+
+config RA_ESWM
+   bool
+   default y if RA_ETHSW
+   help
+     Ethernet Switch Management automatically enabled when Ethernet Switch is enabled.
 endmenu
 
 menu "USB"
@@ -2821,6 +2853,12 @@ config RA_USBHS
    select RA_USB
    help
      Enable USB 2.0 High-Speed support.
+
+config RA_USB60
+   bool
+   default y if RA_USBHS
+   help
+     USB 60MHz clock automatically enabled when USB High-Speed is enabled.
 endmenu
 
 menu "Storage Interfaces"

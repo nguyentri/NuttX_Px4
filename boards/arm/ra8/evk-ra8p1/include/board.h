@@ -142,7 +142,7 @@
  * PWM4:   GPIO_GPT5_B     (P914) - GPT5B  ✓
  * PWM5:   GPIO_GPT10_A    (P810) - GPT10A ✓ Arduino D4
  * PWM6:   GPIO_GPT10_B    (P811) - GPT10B ✓ Arduino D3
- * PWM7:   GPIO_GPT11_A_2  (P903) - GPT11A ✓
+ * PWM7:   GPIO_GPT11_A    (P903) - GPT11A ✓
  * PWM8:   GPIO_GPT11_B    (P904) - GPT11B ✓
  * PWM9:   GPIO_GPT12_A    (P715) - GPT12A ✓
  * PWM10:  GPIO_GPT12_B    (P714) - GPT12B ✓
@@ -160,37 +160,37 @@
  ****************************************************************************/
 
 /* GPT Channel A Output Pins */
-#define GPIO_GPT1_A     GPIO_GTIOC1A_1      /* P105 ⚠️ Arduino D6, OSPI_ECS */
-#define GPIO_GPT2_A_1   GPIO_GTIOC2A_1      /* P103 ⚠️ Arduino D10, OSPI_SIO2, SPI CS */
-#define GPIO_GPT2_A_2   GPIO_GTIOC2A_3      /* P713 ✓ From parallel graphics */
-#define GPIO_GPT3_A     GPIO_GTIOC3A_1      /* P912 ✓ From parallel graphics */
-#define GPIO_GPT4_A     GPIO_GTIOC4A_1      /* P205 ✓ SAFE */
-#define GPIO_GPT5_A     GPIO_GTIOC5A_1      /* P915 ✓ From parallel graphics */
-#define GPIO_GPT6_A     GPIO_GTIOC6A_1      /* P400 ⚠️ I2C0_SCL, CAM_D2 */
-#define GPIO_GPT7_A     GPIO_GTIOC7A_1      /* P304 ⚠️ Ethernet TXD3 */
-#define GPIO_GPT8_A     GPIO_GTIOC8A_1      /* P101 ⚠️ Arduino D11, OSPI_SIO3, SPI MOSI */
-#define GPIO_GPT9_A     GPIO_GTIOC9A_1      /* PB06 ✓ From parallel graphics */
-#define GPIO_GPT10_A    GPIO_GTIOC10A_2     /* P810 ✓ Arduino D4, mikroBUS PWM */
-#define GPIO_GPT11_A_1  GPIO_GTIOC11A_1     /* P711 ✓ From parallel graphics (legacy) */
-#define GPIO_GPT11_A_2  GPIO_GTIOC11A_3     /* P903 ✓ From parallel graphics */
-#define GPIO_GPT12_A    GPIO_GTIOC12A_1     /* P715 ✓ From parallel graphics */
-#define GPIO_GPT13_A    GPIO_GTIOC13A_1     /* P515 ✓ NO CONFLICTS */
+#define GPIO_PWM_GPT1_A_1     GPIO_GTIOC1A_1      /* P105 ⚠️ Arduino D6, OSPI_ECS */
+#define GPIO_PWM_GPT2_A_1     GPIO_GTIOC2A_1      /* P103 ⚠️ Arduino D10, OSPI_SIO2, SPI CS */
+#define GPIO_PWM_GPT2_A_3     GPIO_GTIOC2A_3      /* P713 ✓ From parallel graphics */
+#define GPIO_PWM_GPT3_A_2     GPIO_GTIOC3A_2      /* P912 ✓ From parallel graphics */
+#define GPIO_PWM_GPT4_A_1     GPIO_GTIOC4A_1      /* P205 ✓ SAFE */
+#define GPIO_PWM_GPT5_A_3     GPIO_GTIOC5A_4      /* P915 ✓ From parallel graphics */
+#define GPIO_PWM_GPT6_A_1     GPIO_GTIOC6A_1      /* P400 ⚠️ I2C0_SCL, CAM_D2 */
+#define GPIO_PWM_GPT7_A_1     GPIO_GTIOC7A_1      /* P304 ⚠️ Ethernet TXD3 */
+#define GPIO_PWM_GPT8_A_1     GPIO_GTIOC8A_1      /* P101 ⚠️ Arduino D11, OSPI_SIO3, SPI MOSI */
+#define GPIO_PWM_GPT9_A_1     GPIO_GTIOC9A_1      /* PB06 ✓ From parallel graphics */
+#define GPIO_PWM_GPT10_A_2    GPIO_GTIOC10A_2     /* P810 ✓ Arduino D4, mikroBUS PWM */
+#define GPIO_PWM_GPT11_A_1    GPIO_GTIOC11A_1     /* P711 ✓ From parallel graphics (legacy) */
+#define GPIO_PWM_GPT11_A_4    GPIO_GTIOC11A_4     /* P903 ✓ From parallel graphics */
+#define GPIO_PWM_GPT12_A_1    GPIO_GTIOC12A_1     /* P715 ✓ From parallel graphics */
+#define GPIO_PWM_GPT13_A_1    GPIO_GTIOC13A_1     /* P515 ✓ NO CONFLICTS */
 
 /* GPT Channel B Output Pins */
-#define GPIO_GPT1_B     GPIO_GTIOC1B_1      /* P104 ⚠️ Arduino D5, OSPI_CS0 */
-#define GPIO_GPT2_B_1   GPIO_GTIOC2B_1      /* P102 ⚠️ Arduino D13, OSPI_SIO4, SPI SCK */
-#define GPIO_GPT2_B_2   GPIO_GTIOC2B_3      /* P712 ✓ From parallel graphics */
-#define GPIO_GPT3_B     GPIO_GTIOC3B_1      /* P911 ✓ From parallel graphics */
-#define GPIO_GPT4_B     GPIO_GTIOC4B_1      /* P301 ⚠️ SDRAM_DQ1 */
-#define GPIO_GPT5_B     GPIO_GTIOC5B_1      /* P914 ✓ From parallel graphics */
-#define GPIO_GPT6_B     GPIO_GTIOC6B_1      /* P401 ⚠️ I2C0_SDA */
-#define GPIO_GPT7_B     GPIO_GTIOC7B_1      /* P303 ⚠️ Green LED */
-#define GPIO_GPT8_B     GPIO_GTIOC8B_1      /* P100 ⚠️ Arduino D12, OSPI_SIO0, SPI MISO */
-#define GPIO_GPT9_B     GPIO_GTIOC9B_1      /* PB07 ✓ From parallel graphics */
-#define GPIO_GPT10_B    GPIO_GTIOC10B_2     /* P811 ✓ Arduino D3 */
-#define GPIO_GPT11_B    GPIO_GTIOC11B_1     /* P904 ✓ From parallel graphics */
-#define GPIO_GPT12_B    GPIO_GTIOC12B_1     /* P714 ✓ From parallel graphics */
-#define GPIO_GPT13_B    GPIO_GTIOC13B_2     /* P514 ✓ NO CONFLICTS */
+#define GPIO_PWM_GPT1_B_1     GPIO_GTIOC1B_1      /* P104 ⚠️ Arduino D5, OSPI_CS0 */
+#define GPIO_PWM_GPT2_B_1     GPIO_GTIOC2B_1      /* P102 ⚠️ Arduino D13, OSPI_SIO4, SPI SCK */
+#define GPIO_PWM_GPT2_B_2     GPIO_GTIOC2B_3      /* P712 ✓ From parallel graphics */
+#define GPIO_PWM_GPT3_B_3     GPIO_GTIOC3B_3      /* P911 ✓ From parallel graphics */
+#define GPIO_PWM_GPT4_B_1     GPIO_GTIOC4B_1      /* P301 ⚠️ SDRAM_DQ1 */
+#define GPIO_PWM_GPT5_B_4     GPIO_GTIOC5B_4      /* P914 ✓ From parallel graphics */
+#define GPIO_PWM_GPT6_B_1     GPIO_GTIOC6B_1      /* P401 ⚠️ I2C0_SDA */
+#define GPIO_PWM_GPT7_B_1     GPIO_GTIOC7B_1      /* P303 ⚠️ Green LED */
+#define GPIO_PWM_GPT8_B_1     GPIO_GTIOC8B_1      /* P100 ⚠️ Arduino D12, OSPI_SIO0, SPI MISO */
+#define GPIO_PWM_GPT9_B_1     GPIO_GTIOC9B_1      /* PB07 ✓ From parallel graphics */
+#define GPIO_PWM_GPT10_B_2    GPIO_GTIOC10B_2     /* P811 ✓ Arduino D3 */
+#define GPIO_PWM_GPT11_B_4    GPIO_GTIOC11B_4     /* P904 ✓ From parallel graphics */
+#define GPIO_PWM_GPT12_B_1    GPIO_GTIOC12B_1     /* P714 ✓ From parallel graphics */
+#define GPIO_PWM_GPT13_B_2    GPIO_GTIOC13B_2     /* P514 ✓ NO CONFLICTS */
 
 /* Arduino PWM Pins (for Arduino shield compatibility) */
 #define GPIO_ARDUINO_D3_PWM   GPIO_GTIOC10B_2   /* P811 ✓ SAFE */
@@ -204,6 +204,19 @@
 
 /* mikroBUS PWM Pin */
 #define GPIO_MIKROBUS_PWM     GPIO_GTIOC10A_2   /* P810 ✓ SAFE */
+
+/* Motor PWM Configuration using GPT channels
+ * Motor 1: P912 (GPT3A)
+ * Motor 2: P915 (GPT5A)
+ * Motor 3: P903 (GPT11A
+ * Motor 4: P515 (GPT13A
+ *
+ * Note: Pin assignments verified from RA8P1 pinmap for ESC control
+ */
+#define GPIO_TIM3_CH1OUT     GPIO_PWM_GPT3_A_2     /* P912 - GPT3A - Motor 1 */
+#define GPIO_TIM5_CH1OUT     GPIO_PWM_GPT5_A_3     /* P915 - GPT5A - Motor 2 */
+#define GPIO_TIM11_CH1OUT    GPIO_PWM_GPT11_A_4    /* P903 - GPT11A - Motor 3 */
+#define GPIO_TIM13_CH1OUT    GPIO_PWM_GPT13_A_1    /* P515 - GPT13A - Motor 4 */
 
 /****************************************************************************
  * I2C Pin Definitions

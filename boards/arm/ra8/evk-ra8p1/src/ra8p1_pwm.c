@@ -45,16 +45,16 @@
 /* Configuration ************************************************************/
 
 /* PWM Channels for ESC control:
- * - Motor 1: GPT3 Channel A (P300)
- * - Motor 2: GPT0 Channel A (P415)
- * - Motor 3: GPT2 Channel A (P113)
- * - Motor 4: GPT4 Channel A (P302)
+ * - Motor 1: GPT3 Channel A (P912)
+ * - Motor 2: GPT5 Channel A (P915)
+ * - Motor 3: GPT11 Channel A (P903)
+ * - Motor 4: GPT13 Channel A (P515)
  */
 
 #define PWM_MOTOR1_CHANNEL  3
-#define PWM_MOTOR2_CHANNEL  0
-#define PWM_MOTOR3_CHANNEL  2
-#define PWM_MOTOR4_CHANNEL  4
+#define PWM_MOTOR2_CHANNEL  5
+#define PWM_MOTOR3_CHANNEL  11
+#define PWM_MOTOR4_CHANNEL  13
 
 /****************************************************************************
  * Public Functions
@@ -84,23 +84,23 @@ int board_pwm_initialize(void)
       /* Configure GPIO pins for GPT output */
 
 #ifdef CONFIG_RA_GPT3
-      /* Motor 1: P300 - GPT3 Channel A */
-      ra_gpioconfig(GPIO_GTIOC3A_1);
+      /* Motor 1: P912 - GPT3 Channel A */
+      ra_gpioconfig(GPIO_TIM3_CH1OUT);
 #endif
 
-#ifdef CONFIG_RA_GPT0
-      /* Motor 2: P415 - GPT0 Channel A */
-      ra_gpioconfig(GPIO_GTIOC0A_2);
+#ifdef CONFIG_RA_GPT5
+      /* Motor 2: P915 - GPT5 Channel A */
+      ra_gpioconfig(GPIO_TIM5_CH1OUT);
 #endif
 
-#ifdef CONFIG_RA_GPT2
-      /* Motor 3: P113 - GPT2 Channel A */
-      ra_gpioconfig(GPIO_GTIOC2A_2);
+#ifdef CONFIG_RA_GPT11
+      /* Motor 3: P903 - GPT11 Channel A */
+      ra_gpioconfig(GPIO_TIM11_CH1OUT);
 #endif
 
-#ifdef CONFIG_RA_GPT4
-      /* Motor 4: P302 - GPT4 Channel A */
-      ra_gpioconfig(GPIO_GTIOC4A_2);
+#ifdef CONFIG_RA_GPT13
+      /* Motor 4: P515 - GPT13 Channel A */
+      ra_gpioconfig(GPIO_TIM13_CH1OUT);
 #endif
 
       /* Initialize Motor 1 - GPT3 */
@@ -120,16 +120,16 @@ int board_pwm_initialize(void)
           return ret;
         }
 
-      pwminfo("Registered /dev/pwm0 (Motor 1 - GPT3A/P300)\n");
+      pwminfo("Registered /dev/pwm0 (Motor 1 - GPT3A/P912)\n");
 #endif
 
-      /* Initialize Motor 2 - GPT0 */
+      /* Initialize Motor 2 - GPT5 */
 
-#ifdef CONFIG_RA_GPT0
+#ifdef CONFIG_RA_GPT5
       pwm = ra_gpt_initialize(PWM_MOTOR2_CHANNEL);
       if (!pwm)
         {
-          pwmerr("ERROR: Failed to get GPT0 interface\n");
+          pwmerr("ERROR: Failed to get GPT5 interface\n");
           return -ENODEV;
         }
 
@@ -140,16 +140,16 @@ int board_pwm_initialize(void)
           return ret;
         }
 
-      pwminfo("Registered /dev/pwm1 (Motor 2 - GPT0A/P415)\n");
+      pwminfo("Registered /dev/pwm1 (Motor 2 - GPT5A/P915)\n");
 #endif
 
-      /* Initialize Motor 3 - GPT2 */
+      /* Initialize Motor 3 - GPT11 */
 
-#ifdef CONFIG_RA_GPT2
+#ifdef CONFIG_RA_GPT11
       pwm = ra_gpt_initialize(PWM_MOTOR3_CHANNEL);
       if (!pwm)
         {
-          pwmerr("ERROR: Failed to get GPT2 interface\n");
+          pwmerr("ERROR: Failed to get GPT11 interface\n");
           return -ENODEV;
         }
 
@@ -160,16 +160,16 @@ int board_pwm_initialize(void)
           return ret;
         }
 
-      pwminfo("Registered /dev/pwm2 (Motor 3 - GPT2A/P113)\n");
+      pwminfo("Registered /dev/pwm2 (Motor 3 - GPT11A/P903)\n");
 #endif
 
-      /* Initialize Motor 4 - GPT4 */
+      /* Initialize Motor 4 - GPT13 */
 
-#ifdef CONFIG_RA_GPT4
+#ifdef CONFIG_RA_GPT13
       pwm = ra_gpt_initialize(PWM_MOTOR4_CHANNEL);
       if (!pwm)
         {
-          pwmerr("ERROR: Failed to get GPT4 interface\n");
+          pwmerr("ERROR: Failed to get GPT13 interface\n");
           return -ENODEV;
         }
 
@@ -180,7 +180,7 @@ int board_pwm_initialize(void)
           return ret;
         }
 
-      pwminfo("Registered /dev/pwm3 (Motor 4 - GPT4A/P302)\n");
+      pwminfo("Registered /dev/pwm3 (Motor 4 - GPT13A/P515)\n");
 #endif
 
       /* Now we are initialized */
