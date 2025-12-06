@@ -284,6 +284,18 @@ size_t board_get_sdram_size(void);
 #endif /* CONFIG_RA_SDRAM */
 
 /****************************************************************************
+ * Name: ra_sdhi_init
+ *
+ * Description:
+ *   Initialize SDHI-based SD Card support
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RA_SDHI
+int board_sdhi_init(void);
+#endif
+
+/****************************************************************************
  * Example application interfaces
  ****************************************************************************/
 #ifdef RA8P1_EXAMPLE_SUPPORT

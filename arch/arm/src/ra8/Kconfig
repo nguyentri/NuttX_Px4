@@ -379,6 +379,12 @@ config ARCH_HAVE_SRAM
    help
      544 KB SRAM including 32 KB TCM.
 
+config ARCH_HAVE_SDIO
+   bool
+   default y
+   help
+     SDIO (Secure Digital Input Output) interface present.
+
 endmenu
 
 menu "MCU Clocks Configuration"
@@ -2897,9 +2903,16 @@ config RA_HAVE_SDHI1
    default n
 
 config RA_SDHI
-   bool
+   bool "SD Host Interface"
    default n
+   depends on RA_HAVE_SDHI
    select SDIO
+   select MMCSD
+   select MMCSD_SDIO
+   help
+     Enable SD Host Interface (SDHI) support for SD/SDIO/MMC card access.
+     This enables the lower-half SDHI driver that interfaces with NuttX MMC/SD
+     upper-half driver.
 
 config RA_SDHI0
    bool "SDHI0 - SD/MMC Host Controller 0"

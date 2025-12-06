@@ -239,6 +239,20 @@ int ra8p1_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_RA_SDHI
+  /* Initialize SDHI interface */
+
+  ret = board_sdhi_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SDHI: %d\n", ret);
+    }
+  else
+    {
+      syslog(LOG_INFO, "SDHI initialized successfully\n");
+    }
+#endif
+
 #ifdef CONFIG_RA_OSPI
   /* Initialize OSPI interface */
 

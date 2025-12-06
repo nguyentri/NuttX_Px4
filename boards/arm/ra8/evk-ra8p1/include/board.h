@@ -60,7 +60,23 @@
 #define BOARD_OSPI_FLASH_SECTOR_SIZE    4096        /* 4KB sectors */
 
 /* Mass Storage Configuration */
-#define BOARD_HAS_NO_SDCARD             1  /* No SD card slot */
+/* #define BOARD_HAS_NO_SDCARD             1 */ /* No SD card slot */
+
+/****************************************************************************
+ * Clock Configuration - Based on BSP configuration
+ ****************************************************************************/
+
+/* Clock frequencies based on FSP BSP configuration:
+ * - PLL1P: 1000MHz (primary system clock source)
+ * - PCLKA: PLL1P/8 = 125MHz (peripheral clock A)
+ * - PCLKB: PLL1P/16 = 62.5MHz (peripheral clock B)
+ * - PCLKC: PLL1P/8 = 125MHz (peripheral clock C)
+ * - PCLKD: PLL1P/4 = 250MHz (peripheral clock D)
+ */
+#define BOARD_PCLKA_FREQUENCY           125000000  /* 125MHz - SDHI clock source */
+#define BOARD_PCLKB_FREQUENCY           62500000   /* 62.5MHz */
+#define BOARD_PCLKC_FREQUENCY           125000000  /* 125MHz */
+#define BOARD_PCLKD_FREQUENCY           250000000  /* 250MHz */
 
 /****************************************************************************
  * UART/SCI Pin Definitions

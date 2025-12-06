@@ -49,6 +49,11 @@ if(CONFIG_RA_ADC)
   list(APPEND SRCS ra_adc_b.c)
 endif()
 
+# SDHI driver
+if(CONFIG_RA_SDHI)
+  list(APPEND SRCS ra_sdhi.c)
+endif()
+
 # I2C driver
 if(CONFIG_RA_I2C)
   list(APPEND SRCS ra_i2c.c)

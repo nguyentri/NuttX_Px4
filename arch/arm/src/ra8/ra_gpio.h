@@ -40,9 +40,9 @@
 #define GPIO_CFG_INPUT                 (0)                 /* Input (default) */
 #define GPIO_CFG_PULLUP                GPIO_INPUT          /* Enable pull-up */
 #define GPIO_CFG_OPENDRAIN             GPIO_OPENDRAIN      /* Open-drain output */
-#define GPIO_CFG_DRIVE_LOW             GPIO_DRIVE_LOW      /* Low drive strength */
-#define GPIO_CFG_DRIVE_MID             GPIO_DRIVE_MID      /* Mid drive strength */
-#define GPIO_CFG_DRIVE_HIGH            GPIO_DRIVE_HIGH     /* High drive strength */
+#define GPIO_CFG_DRIVE_LOW             GPIO_LOW_DRIVE      /* Low drive strength */
+#define GPIO_CFG_DRIVE_MID             GPIO_MIDDLE_DRIVE   /* Mid drive strength */
+#define GPIO_CFG_DRIVE_HIGH            GPIO_HIGH_DRIVE     /* High drive strength */
 #define GPIO_CFG_ANALOG                GPIO_ANALOG         /* Analog mode */
 #define GPIO_CFG_IRQ                   GPIO_IRQ            /* IRQ input enable */
 #define GPIO_CFG_PERIPHERAL            GPIO_PERIPHERAL     /* Peripheral mode (PMR) */

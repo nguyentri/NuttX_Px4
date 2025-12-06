@@ -42,6 +42,11 @@ CHIP_CSRCS += ra_memmng.c
 CHIP_CSRCS += ra_timerisr.c
 CHIP_CSRCS += ra_serial.c
 
+# SDHI driver
+ifeq ($(CONFIG_RA_SDHI),y)
+CHIP_CSRCS += ra_sdhi.c
+endif
+
 # ADC driver
 ifeq ($(CONFIG_RA_ADC),y)
 ifeq ($(CONFIG_RA8E1_GROUP), y)
