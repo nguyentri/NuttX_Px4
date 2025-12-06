@@ -613,7 +613,7 @@ extern "C"
 #endif
 
 /**
- * Name: board_gpt_initialize
+ * Name: board_pwm_initialize
  *
  * Description:
  *   Initialize GPT (General Purpose Timer) PWM devices.
@@ -625,7 +625,7 @@ extern "C"
  *   Zero (OK) on success; a negated errno value on any failure.
  */
 #ifdef CONFIG_PWM
-int board_gpt_initialize(void);
+int board_pwm_initialize(void);
 #endif
 
 #undef EXTERN

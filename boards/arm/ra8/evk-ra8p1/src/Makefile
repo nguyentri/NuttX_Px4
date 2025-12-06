@@ -56,7 +56,7 @@ endif
 
 # GPT PWM support
 ifeq ($(CONFIG_PWM),y)
-CSRCS += ra8p1_gpt_pwm.c
+CSRCS += ra8p1_pwm.c
 endif
 
 # ELC support

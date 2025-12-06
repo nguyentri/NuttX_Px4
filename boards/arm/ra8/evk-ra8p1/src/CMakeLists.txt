@@ -43,7 +43,7 @@ if(CONFIG_RA8P1_SPI_LOOPBACK_EXAMPLE)
 endif()
 
 if(CONFIG_PWM)
-  list(APPEND SRCS ra8p1_gpt_pwm.c)
+  list(APPEND SRCS ra8p1_pwm.c)
 endif()
 
 if(CONFIG_RA_ELC)

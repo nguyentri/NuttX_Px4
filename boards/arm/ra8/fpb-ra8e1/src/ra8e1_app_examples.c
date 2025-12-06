@@ -167,7 +167,7 @@ int ra8e1_rust_example(void)
 }
 #endif
 
-#ifdef CONFIG_RA8E1_GPT_PWM_EXAMPLE
+#ifdef CONFIG_RA8E1_PWM_EXAMPLE
 int ra8e1_gpt_pwm_example(void)
 {
   int ret = ra8e1_gpt_pwm_initialize();
@@ -204,7 +204,7 @@ int ra8e1_app_examples(void)
   int ret = 0;
   int last_err = ret;
 
-#ifdef CONFIG_RA8E1_GPT_PWM_EXAMPLE
+#ifdef CONFIG_RA8E1_PWM_EXAMPLE
   ret = ra8e1_gpt_pwm_example();
   if (ret < 0)
     {

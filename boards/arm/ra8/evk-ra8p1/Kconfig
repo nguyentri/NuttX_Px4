@@ -12,10 +12,18 @@ config BOARD_EVK_RA8P1
 
 endif
 
+config RA8P1_EXAMPLE_SUPPORT
+    bool "EVK-RA8P1 Example Support"
+    default y
+    depends on BOARD_EVK_RA8P1
+    help
+      Enable support for various application examples for the EVK-RA8P1 board.
+      Disable when building with PX4 firmware.
+
 config RA8P1_SPI_LOOPBACK_EXAMPLE
 	bool "SPI loopback test example"
 	default n
-	depends on RA_SPI
+	depends on RA_SPI && RA8P1_EXAMPLE_SUPPORT
 	---help---
 		Enable SPI internal loopback test example for verifying
 		SPI driver functionality on EVK-RA8P1 board.
@@ -23,7 +31,7 @@ config RA8P1_SPI_LOOPBACK_EXAMPLE
 config RA8P1_OSPI_EXAMPLE
 	bool "OSPI test example"
 	default n
-	depends on RA_OSPI
+	depends on RA_OSPI && RA8P1_EXAMPLE_SUPPORT
 	---help---
 		Enable OSPI test example for verifying OSPI driver functionality
 		on EVK-RA8P1 board.
@@ -31,7 +39,7 @@ config RA8P1_OSPI_EXAMPLE
 config RA8P1_ELC_GPT_ADC_EXAMPLE
 	bool "ELC GPT-triggered ADC example"
 	default n
-	depends on RA_ELC && RA_GPT && RA_ADC
+	depends on RA_ELC && RA_GPT && RA_ADC && RA8P1_EXAMPLE_SUPPORT
 	---help---
 		Enable ELC example that demonstrates GPT timer triggering ADC
 		conversions without CPU intervention. This configures:

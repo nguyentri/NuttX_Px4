@@ -89,7 +89,7 @@ ifeq ($(CONFIG_RA8E1_I2C_ACCEL_EXAMPLE),y)
 CSRCS += ra8e1_i2c_acc.c
 endif
 
-ifeq ($(CONFIG_RA8E1_GPT_PWM_EXAMPLE),y)
+ifeq ($(CONFIG_RA8E1_PWM_EXAMPLE),y)
 CSRCS += pwm_status.c
 CSRCS += ra8e1_gpt_pwm.c
 endif

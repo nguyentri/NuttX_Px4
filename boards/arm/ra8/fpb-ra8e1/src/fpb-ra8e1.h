@@ -160,7 +160,7 @@ int ra8e1_data_flash_test(void);
 int ra8e1_data_flash_main(int argc, char *argv[]);
 #endif
 
-#ifdef CONFIG_RA8E1_GPT_PWM_EXAMPLE
+#ifdef CONFIG_RA8E1_PWM_EXAMPLE
 int ra8e1_gpt_pwm_initialize(void);
 int ra8e1_gpt_pwm_main(int argc, char *argv[]);
 #endif

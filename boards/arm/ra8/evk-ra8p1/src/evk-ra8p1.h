@@ -70,9 +70,6 @@ struct spi_dev_s;
 
 int ra8p1_bringup(void);
 
-/* Run all enabled application examples (used by ra8p1_bringup()) */
-int ra8p1_app_examples(void);
-
 /****************************************************************************
  * Name: ra8p1_gpio_initialize
  *
@@ -82,19 +79,6 @@ int ra8p1_app_examples(void);
  ****************************************************************************/
 
 int ra8p1_gpio_initialize(void);
-
-/****************************************************************************
- * Name: board_ra8p1_initialize
- *
- * Description:
- *   All RA8P1 architectures must provide the following entry point.  This
- *   entry point is called early in the initialization -- after all memory
- *   has been configured and mapped but before any devices have been
- *   initialized.
- *
- ****************************************************************************/
-
-void board_ra8p1_initialize(void);
 
 /****************************************************************************
  * Name: board_autoled_initialize
@@ -159,43 +143,67 @@ int board_gpio_initialize(void);
 #endif
 
 /****************************************************************************
- * Example application interfaces
+ * Name: board_pwm_initialize
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
  ****************************************************************************/
 
-#ifdef CONFIG_RA8P1_SPI_LOOPBACK_EXAMPLE
-int ra8p1_spi_loopback_init(void);
-int ra8p1_spi_loopback_test(void);
-int ra8p1_spi_loopback_main(int argc, char *argv[]);
- #endif
-
-#ifdef CONFIG_RA8P1_SPI_MASTERSLAVE_EXAMPLE
-int ra8p1_spi_masterslave_init(void);
-int ra8p1_spi_masterslave_test(void);
-int ra8p1_spi_masterslave_main(int argc, char *argv[]);
+#if defined(CONFIG_PWM)
+int board_pwm_initialize(void);
 #endif
 
-#ifdef CONFIG_RA8P1_ADC_BMS_EXAMPLE
-int ra8p1_adc_bms_init(void);
-int ra8p1_adc_bms_main(int argc, FAR char *argv[]);
+/****************************************************************************
+ * Name: board_i2c_initialize
+ *
+ * Description:
+ *   Initialize I2C bus for EVK-RA8P1 board
+ *
+ * Input Parameters:
+ *   bus - I2C bus number (0 or 1)
+ *
+ * Returned Value:
+ *   Pointer to I2C device structure on success; NULL on failure
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_RA_I2C)
+struct i2c_master_s;
+struct i2c_master_s *board_i2c_initialize(int bus);
+int board_i2c_uninitialize(int bus);
 #endif
 
-#ifdef CONFIG_RA8P1_ADC_EXAMPLE
-/* Board-level ADC initialization */
-int ra8p1_adc_driver_initialize(void);
+/****************************************************************************
+ * Name: board_canfd_initialize
+ *
+ * Description:
+ *   Initialize the OSPI driver and register the MTD device.
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RA_OSPI
+int board_ospi_initialize(void);
 #endif
 
-#ifdef CONFIG_RA8P1_CODE_FLASH_EXAMPLE
-int ra8p1_code_flash_init(void);
-int ra8p1_code_flash_test(void);
-int ra8p1_code_flash_info(void);
-int ra8p1_code_flash_main(int argc, char *argv[]);
+/****************************************************************************
+ * Name: board_canfd_initialize
+ *
+ * Description:
+ *   Initialize CAN-FD interfaces for the EVK-RA8P1 board
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RA_CANFD
+int board_canfd_initialize(void);
 #endif
 
-#ifdef CONFIG_RA8P1_DATA_FLASH_EXAMPLE
-int ra8p1_data_flash_init(void);
-int ra8p1_data_flash_test(void);
-int ra8p1_data_flash_main(int argc, char *argv[]);
-#endif
 
 /****************************************************************************
  * MRAM Driver Interface
@@ -234,120 +242,6 @@ ssize_t board_mram_write_param(off_t offset, const void *buffer, size_t len);
 int board_mram_erase_params(void);
 #endif
 #endif /* CONFIG_RA_MRAM */
-
-#ifdef CONFIG_RA8P1_GPT_PWM_EXAMPLE
-int ra8p1_gpt_pwm_initialize(void);
-int ra8p1_gpt_pwm_main(int argc, char *argv[]);
-#endif
-
-#ifdef CONFIG_RA8P1_PWM_ESCS_EXAMPLE
-int ra8p1_gpt_escs_init(void);
-int ra8p1_gpt_escs_main(int argc, char *argv[]);
-#endif
-
-#ifdef CONFIG_RA8P1_GPS_EXAMPLE
-int ra8p1_gps_init(void);
-int ra8p1_gps_main(int argc, char *argv[]);
-#endif
-
-#ifdef CONFIG_RA8P1_SBUS_EXAMPLE
-int ra8p1_sbus_init(void);
-int ra8p1_sbus_main(int argc, char *argv[]);
-#endif
-
-#ifdef CONFIG_RA8P1_I2C_ACC_EXAMPLE
-int ra8p1_i2c_acc_init(void);
-int ra8p1_i2c_acc_main(int argc, char *argv[]);
-#endif
-
-#ifdef CONFIG_RA8P1_I2C_GY912_EXAMPLE
-int ra8p1_i2c_gy912_init(void);
-int ra8p1_i2c_gy912_main(int argc, FAR char *argv[]);
-#endif
-
-#ifdef CONFIG_RA8P1_RUST_EXAMPLE
-int ra8p1_rust_sample_init(void);
-#endif
-
-/****************************************************************************
- * Name: board_i2c_initialize
- *
- * Description:
- *   Initialize I2C bus for EVK-RA8P1 board
- *
- * Input Parameters:
- *   bus - I2C bus number (0 or 1)
- *
- * Returned Value:
- *   Pointer to I2C device structure on success; NULL on failure
- *
- ****************************************************************************/
-
-#if defined(CONFIG_RA_I2C)
-struct i2c_master_s;
-struct i2c_master_s *board_i2c_initialize(int bus);
-int board_i2c_uninitialize(int bus);
-#endif
-
-/****************************************************************************
- * Name: gy912_register_sensors
- *
- * Description:
- *   Register GY-912 sensors with the sensor framework
- *
- ****************************************************************************/
-
-#ifdef CONFIG_RA8P1_SPI_GY912_EXAMPLE
-struct spi_dev_s;
-int gy912_register_sensors(FAR struct spi_dev_s *spi);
-#endif
-
-#ifdef CONFIG_RA8P1_OSPI_EXAMPLE
-int ra8p1_ospi_test_init(void);
-int ra8p1_ospi_test_main(int argc, char *argv[]);
-#endif
-
-/****************************************************************************
- * Name: board_canfd_initialize
- *
- * Description:
- *   Initialize the OSPI driver and register the MTD device.
- *
- * Returned Value:
- *   OK on success; a negated errno on failure
- *
- ****************************************************************************/
-
-#ifdef CONFIG_RA_OSPI
-int board_ospi_initialize(void);
-#endif
-
-/****************************************************************************
- * Name: board_canfd_initialize
- *
- * Description:
- *   Initialize CAN-FD interfaces for the EVK-RA8P1 board
- *
- * Returned Value:
- *   OK on success; a negated errno on failure
- *
- ****************************************************************************/
-
-#ifdef CONFIG_RA_CANFD
-int board_canfd_initialize(void);
-#endif
-
-/****************************************************************************
- * Name: board_ether_initialize
- *
- * Description:
- *   Initialize the Ethernet driver for the board.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_RA_ETHERNET
-int board_ether_initialize(void);
-#endif
 
 /****************************************************************************
  * SDRAM Driver Interface
@@ -388,7 +282,96 @@ int board_sdram_selfrefresh_exit(void);
 
 uintptr_t board_get_sdram_base(void);
 size_t board_get_sdram_size(void);
+
 #endif /* CONFIG_RA_SDRAM */
+
+/****************************************************************************
+ * Example application interfaces
+ ****************************************************************************/
+#ifdef RA8P1_EXAMPLE_SUPPORT
+/* Run all enabled application examples (used by ra8p1_bringup()) */
+int ra8p1_app_examples(void);
+#endif
+
+#ifdef CONFIG_RA8P1_SPI_LOOPBACK_EXAMPLE
+int ra8p1_spi_loopback_init(void);
+int ra8p1_spi_loopback_test(void);
+int ra8p1_spi_loopback_main(int argc, char *argv[]);
+ #endif
+
+#ifdef CONFIG_RA8P1_SPI_MASTERSLAVE_EXAMPLE
+int ra8p1_spi_masterslave_init(void);
+int ra8p1_spi_masterslave_test(void);
+int ra8p1_spi_masterslave_main(int argc, char *argv[]);
+#endif
+
+#ifdef CONFIG_RA8P1_ADC_BMS_EXAMPLE
+int ra8p1_adc_bms_init(void);
+int ra8p1_adc_bms_main(int argc, FAR char *argv[]);
+#endif
+
+#ifdef CONFIG_RA8P1_ADC_EXAMPLE
+/* Board-level ADC initialization */
+int ra8p1_adc_driver_initialize(void);
+#endif
+
+#ifdef CONFIG_RA8P1_CODE_FLASH_EXAMPLE
+int ra8p1_code_flash_init(void);
+int ra8p1_code_flash_test(void);
+int ra8p1_code_flash_info(void);
+int ra8p1_code_flash_main(int argc, char *argv[]);
+#endif
+
+#ifdef CONFIG_RA8P1_DATA_FLASH_EXAMPLE
+int ra8p1_data_flash_init(void);
+int ra8p1_data_flash_test(void);
+int ra8p1_data_flash_main(int argc, char *argv[]);
+#endif
+
+#ifdef CONFIG_RA8P1_PWM_EXAMPLE
+int ra8p1_pwm_initialize(void);
+int ra8p1_pwm_main(int argc, char *argv[]);
+#endif
+
+#ifdef CONFIG_RA8P1_PWM_ESCS_EXAMPLE
+int ra8p1_gpt_escs_init(void);
+int ra8p1_gpt_escs_main(int argc, char *argv[]);
+#endif
+
+
+#ifdef CONFIG_RA8P1_GPS_EXAMPLE
+int ra8p1_gps_init(void);
+int ra8p1_gps_main(int argc, char *argv[]);
+#endif
+
+#ifdef CONFIG_RA8P1_SBUS_EXAMPLE
+int ra8p1_sbus_init(void);
+int ra8p1_sbus_main(int argc, char *argv[]);
+#endif
+
+#ifdef CONFIG_RA8P1_I2C_ACC_EXAMPLE
+int ra8p1_i2c_acc_init(void);
+int ra8p1_i2c_acc_main(int argc, char *argv[]);
+#endif
+
+#ifdef CONFIG_RA8P1_I2C_GY912_EXAMPLE
+int ra8p1_i2c_gy912_init(void);
+int ra8p1_i2c_gy912_main(int argc, FAR char *argv[]);
+#endif
+
+#ifdef CONFIG_RA8P1_RUST_EXAMPLE
+int ra8p1_rust_sample_init(void);
+#endif
+
+#ifdef CONFIG_RA8P1_SPI_GY912_EXAMPLE
+struct spi_dev_s;
+int gy912_register_sensors(FAR struct spi_dev_s *spi);
+#endif
+
+#ifdef CONFIG_RA8P1_OSPI_EXAMPLE
+int ra8p1_ospi_test_init(void);
+int ra8p1_ospi_test_main(int argc, char *argv[]);
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_RA8_EVK_RA8P1_SRC_H */

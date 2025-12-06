@@ -181,17 +181,17 @@ int ra8p1_ospi_example(void)
 }
 #endif
 
-#ifdef CONFIG_RA8P1_GPT_PWM_EXAMPLE
-int ra8p1_gpt_pwm_example(void)
+#ifdef CONFIG_RA8P1_PWM_EXAMPLE
+int ra8p1_pwm_example(void)
 {
-  int ret = ra8p1_gpt_pwm_initialize();
+  int ret = ra8p1_pwm_initialize();
   if (ret < 0)
     {
       syslog(LOG_ERR, "GPT PWM initialization failed: %d\n", ret);
       return ret;
     }
 
-  return ra8p1_gpt_pwm_main(0, NULL);
+  return ra8p1_pwm_main(0, NULL);
 }
 #endif
 
@@ -204,8 +204,8 @@ int ra8p1_app_examples(void)
   int ret = 0;
   int last_err = ret;
 
-#ifdef CONFIG_RA8P1_GPT_PWM_EXAMPLE
-  ret = ra8p1_gpt_pwm_example();
+#ifdef CONFIG_RA8P1_PWM_EXAMPLE
+  ret = ra8p1_pwm_example();
   if (ret < 0)
     {
       syslog(LOG_ERR, "GPT PWM example failed: %d\n", ret);

@@ -183,7 +183,7 @@ int ra8p1_bringup(void)
 
 #ifdef CONFIG_PWM
   /* Initialize GPT PWM devices */
-  ret = board_gpt_initialize();
+  ret = board_pwm_initialize();
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize GPT PWM: %d\n", ret);
@@ -267,7 +267,10 @@ int ra8p1_bringup(void)
     }
 #endif
 
+#ifdef RA8P1_EXAMPLE_SUPPORT
+    /* Run application examples */
   ra8p1_app_examples();
+#endif
 
   return ret;
 }

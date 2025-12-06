@@ -167,31 +167,21 @@ config RA8E1_PWM_ESCS_EXAMPLE
 	select RA_GPT2
 	select RA_GPT3
 	select RA_GPT4
-	select RA_PWM
-	select RA_PWM0
-	select RA_PWM2
-	select RA_PWM3
-	select RA_PWM4
 	---help---
 		Enable PWM ESCs demo application for FPB-RA8E1.
 		Demonstrates PWM control for electronic speed controllers.
 		Self-contained demo with no external app dependencies.
 		Automatically enables required GPT driver with PWM functionality.
 
-config RA8E1_GPT_PWM_EXAMPLE
-	bool "PWM GPT Example Application"
+config RA8E1_PWM_EXAMPLE
+	bool "PWM Example Application"
 	default n
 	select RA_GPT0
 	select RA_GPT2
 	select RA_GPT3
 	select RA_GPT4
-	select RA_PWM
-	select RA_PWM0
-	select RA_PWM2
-	select RA_PWM3
-	select RA_PWM4
 	---help---
-		Enable PWM GPT demo application for FPB-RA8E1.
+		Enable PWM demo application for FPB-RA8E1.
 		Demonstrates PWM control for general-purpose timers.
 		Self-contained demo with no external app dependencies.
 		Automatically enables required GPT driver with PWM functionality.
