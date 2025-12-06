@@ -51,6 +51,11 @@
 #include "ra_mstp.h"
 #include "ra_gpio.h"
 #include "ra_clock.h"
+#include "ra_dmac.h"
+
+#ifdef CONFIG_PM
+#include <nuttx/power/pm.h>
+#endif
 
 #ifdef CONFIG_RA_SDHI
 
@@ -82,6 +87,15 @@
 #define RA_SDHI_WAITALL_INTS    (RA_SDHI_INFO1_RESP_INTS | RA_SDHI_INFO1_ACCESS_INTS | \
                                  RA_SDHI_INFO2_ERR_INTS | RA_SDHI_INFO2_XFR_INTS)
 
+/* DMA transfer block size */
+#define RA_SDHI_DMA_BLOCK_SIZE  512
+
+/* Maximum DMA transfer blocks */
+#define RA_SDHI_DMA_MAX_BLOCKS  256
+
+/* Error recovery retry count */
+#define RA_SDHI_ERROR_RETRY_MAX 3
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -94,10 +108,10 @@ struct ra_sdhi_dev_s
   int                channel;         /* SDHI channel number */
 
   /* Interrupts */
-  int                irq_accs;
-  int                irq_sdio;
-  int                irq_card;
-  int                irq_dma;
+  int                elc_accs;
+  int                elc_sdio;
+  int                elc_card;
+  int                elc_dma;
 
   /* Events */
   sem_t              waitsem;         /* Semaphore for event waiting */
@@ -122,6 +136,28 @@ struct ra_sdhi_dev_s
 
   /* Card status */
   bool               inserted;
+  uint8_t            bus_width;     /* Current bus width: 1, 4, or 8 */
+  uint8_t            max_bus_width; /* Maximum supported bus width */
+
+  /* DMA support */
+#ifdef CONFIG_RA_DMA
+  bool               dma_enabled;   /* DMA is enabled for transfers */
+  ra_dmac_handle_t   dma_tx;        /* TX DMA handle */
+  ra_dmac_handle_t   dma_rx;        /* RX DMA handle */
+  volatile bool      dma_tx_done;   /* TX DMA completion flag */
+  volatile bool      dma_rx_done;   /* RX DMA completion flag */
+#endif
+
+  /* Error handling */
+  uint32_t           err_sts1;      /* Last SD_ERR_STS1 value */
+  uint32_t           err_sts2;      /* Last SD_ERR_STS2 value */
+  uint8_t            error_retry;   /* Error retry counter */
+
+#ifdef CONFIG_PM
+  /* Power management */
+  struct pm_callback_s pmcb;        /* PM callbacks */
+  bool               suspended;     /* Suspended state */
+#endif
 };
 
 /****************************************************************************
@@ -140,6 +176,28 @@ static int  ra_sdhi_card_isr(int irq, void *context, void *arg);
 static int  ra_sdhi_sdio_isr(int irq, void *context, void *arg);
 static int  ra_sdhi_dma_req_isr(int irq, void *context, void *arg);
 static void ra_sdhi_callback(void *arg);
+
+/* DMA Support */
+#ifdef CONFIG_RA_DMA
+static int  ra_sdhi_dma_setup(struct ra_sdhi_dev_s *priv);
+static int  ra_sdhi_dma_transfer(struct ra_sdhi_dev_s *priv, const void *txbuffer,
+                                 void *rxbuffer, size_t nbytes);
+static void ra_sdhi_dma_tx_callback(void *handle, int event, void *arg);
+static void ra_sdhi_dma_rx_callback(void *handle, int event, void *arg);
+static void ra_sdhi_dma_cleanup(struct ra_sdhi_dev_s *priv);
+#endif
+
+/* Error Handling */
+static void ra_sdhi_parse_errors(struct ra_sdhi_dev_s *priv);
+static int  ra_sdhi_error_recovery(struct ra_sdhi_dev_s *priv);
+
+/* Power Management */
+#ifdef CONFIG_PM
+static int  ra_sdhi_pm_prepare(struct pm_callback_s *cb, int domain,
+                               enum pm_state_e pmstate);
+static void ra_sdhi_pm_notify(struct pm_callback_s *cb, int domain,
+                              enum pm_state_e pmstate);
+#endif
 
 /* SDIO interface methods */
 static void ra_sdhi_reset(struct sdio_dev_s *dev);
@@ -206,6 +264,8 @@ static void ra_sdhi_disableints(struct ra_sdhi_dev_s *priv)
 }
 
 static void ra_sdhi_enableints(struct ra_sdhi_dev_s *priv)
+  __attribute__((unused));
+static void ra_sdhi_enableints(struct ra_sdhi_dev_s *priv)
 {
   /* Enable default interrupts */
   ra_putreg32(0x00000000, R_SDHI_SD_INFO1_MASK(priv->channel));
@@ -237,6 +297,9 @@ static int ra_sdhi_access_isr(int irq, void *context, void *arg)
   /* Check for errors */
   if (info2 & RA_SDHI_INFO2_ERR_INTS)
     {
+      /* Parse detailed error information */
+      ra_sdhi_parse_errors(priv);
+
       if (info2 & R_SDHI_SD_INFO2_RSPTO)
         {
           events |= SDIOWAIT_TIMEOUT;
@@ -245,6 +308,14 @@ static int ra_sdhi_access_isr(int irq, void *context, void *arg)
         {
           events |= SDIOWAIT_ERROR;
         }
+
+      /* Attempt error recovery */
+      ra_sdhi_error_recovery(priv);
+    }
+  else
+    {
+      /* Successful operation - reset error retry counter */
+      priv->error_retry = 0;
     }
 
   /* Check for response end */
@@ -257,11 +328,22 @@ static int ra_sdhi_access_isr(int irq, void *context, void *arg)
   if (info2 & R_SDHI_SD_INFO2_BRE)
     {
       /* Buffer Read Enable - PIO Read */
+      /* Read data with bounds checking to prevent buffer overflow */
       while ((ra_getreg32(R_SDHI_SD_INFO2(priv->channel)) & R_SDHI_SD_INFO2_BRE) &&
-             priv->remaining > 0)
+             priv->remaining >= 4)  /* Ensure at least 4 bytes remain */
         {
-          *priv->buffer++ = ra_getreg32(R_SDHI_SD_BUF0(priv->channel));
-          priv->remaining -= 4;
+          if (priv->buffer != NULL)
+            {
+              *priv->buffer++ = ra_getreg32(R_SDHI_SD_BUF0(priv->channel));
+              priv->remaining -= 4;
+            }
+          else
+            {
+              /* Buffer is NULL, discard data and log error */
+              (void)ra_getreg32(R_SDHI_SD_BUF0(priv->channel));
+              events |= SDIOWAIT_ERROR;
+              break;
+            }
         }
 
       /* Clear BRE */
@@ -271,11 +353,22 @@ static int ra_sdhi_access_isr(int irq, void *context, void *arg)
   if (info2 & R_SDHI_SD_INFO2_BWE)
     {
       /* Buffer Write Enable - PIO Write */
+      /* Write data with bounds checking to prevent buffer overflow */
       while ((ra_getreg32(R_SDHI_SD_INFO2(priv->channel)) & R_SDHI_SD_INFO2_BWE) &&
-             priv->remaining > 0)
+             priv->remaining >= 4)  /* Ensure at least 4 bytes remain */
         {
-          ra_putreg32(*priv->buffer++, R_SDHI_SD_BUF0(priv->channel));
-          priv->remaining -= 4;
+          if (priv->buffer != NULL)
+            {
+              ra_putreg32(*priv->buffer++, R_SDHI_SD_BUF0(priv->channel));
+              priv->remaining -= 4;
+            }
+          else
+            {
+              /* Buffer is NULL, write zeros and log error */
+              ra_putreg32(0, R_SDHI_SD_BUF0(priv->channel));
+              events |= SDIOWAIT_ERROR;
+              break;
+            }
         }
 
       /* Clear BWE */
@@ -328,16 +421,452 @@ static int ra_sdhi_card_isr(int irq, void *context, void *arg)
 }
 
 static int ra_sdhi_sdio_isr(int irq, void *context, void *arg)
+  __attribute__((unused));
+static int ra_sdhi_sdio_isr(int irq, void *context, void *arg)
 {
   /* Not implemented yet */
   return OK;
 }
 
 static int ra_sdhi_dma_req_isr(int irq, void *context, void *arg)
+  __attribute__((unused));
+static int ra_sdhi_dma_req_isr(int irq, void *context, void *arg)
 {
   /* Not implemented yet */
   return OK;
 }
+
+/****************************************************************************
+ * Name: ra_sdhi_dma_tx_callback
+ *
+ * Description:
+ *   TX DMA completion callback
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RA_DMA
+static void ra_sdhi_dma_tx_callback(void *handle, int event, void *arg)
+{
+  struct ra_sdhi_dev_s *priv = (struct ra_sdhi_dev_s *)arg;
+
+  if (event == RA_DMAC_EVENT_COMPLETE)
+    {
+      priv->dma_tx_done = true;
+
+      /* Check if both TX and RX are done */
+      if (priv->dma_rx_done || priv->dma_rx == NULL)
+        {
+          /* Signal transfer completion */
+          priv->wkupevent = SDIOWAIT_TRANSFERDONE;
+          nxsem_post(&priv->waitsem);
+        }
+    }
+  else if (event == RA_DMAC_EVENT_ERROR)
+    {
+      priv->dma_tx_done = true;
+      priv->wkupevent = SDIOWAIT_ERROR;
+      nxsem_post(&priv->waitsem);
+    }
+}
+
+/****************************************************************************
+ * Name: ra_sdhi_dma_rx_callback
+ *
+ * Description:
+ *   RX DMA completion callback
+ *
+ ****************************************************************************/
+
+static void ra_sdhi_dma_rx_callback(void *handle, int event, void *arg)
+{
+  struct ra_sdhi_dev_s *priv = (struct ra_sdhi_dev_s *)arg;
+
+  if (event == RA_DMAC_EVENT_COMPLETE)
+    {
+      priv->dma_rx_done = true;
+
+      /* Check if both TX and RX are done */
+      if (priv->dma_tx_done || priv->dma_tx == NULL)
+        {
+          /* Signal transfer completion */
+          priv->wkupevent = SDIOWAIT_TRANSFERDONE;
+          nxsem_post(&priv->waitsem);
+        }
+    }
+  else if (event == RA_DMAC_EVENT_ERROR)
+    {
+      priv->dma_rx_done = true;
+      priv->wkupevent = SDIOWAIT_ERROR;
+      nxsem_post(&priv->waitsem);
+    }
+}
+
+/****************************************************************************
+ * Name: ra_sdhi_dma_setup
+ *
+ * Description:
+ *   Setup DMA channels for SDHI transfers
+ *
+ ****************************************************************************/
+
+static int ra_sdhi_dma_setup(struct ra_sdhi_dev_s *priv)
+{
+  int ret;
+
+  /* Initialize DMAC module */
+  ret = ra_dmac_initialize();
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  priv->dma_enabled = true;
+  priv->dma_tx = NULL;
+  priv->dma_rx = NULL;
+  priv->dma_tx_done = false;
+  priv->dma_rx_done = false;
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: ra_sdhi_dma_transfer
+ *
+ * Description:
+ *   Perform DMA transfer for SDHI
+ *
+ ****************************************************************************/
+
+static int ra_sdhi_dma_transfer(struct ra_sdhi_dev_s *priv,
+                                const void *txbuffer, void *rxbuffer,
+                                size_t nbytes)
+{
+  ra_dmac_config_t config;
+  int ret;
+  uint32_t nblocks;
+
+  /* Calculate number of blocks */
+  nblocks = (nbytes + RA_SDHI_DMA_BLOCK_SIZE - 1) / RA_SDHI_DMA_BLOCK_SIZE;
+
+  if (nblocks > RA_SDHI_DMA_MAX_BLOCKS)
+    {
+      return -E2BIG;
+    }
+
+  /* Reset completion flags */
+  priv->dma_tx_done = (txbuffer == NULL);
+  priv->dma_rx_done = (rxbuffer == NULL);
+
+  /* Configure TX DMA if transmit buffer provided */
+  if (txbuffer != NULL)
+    {
+      memset(&config, 0, sizeof(config));
+      config.mode = (nblocks > 1) ? RA_DMAC_MODE_BLOCK : RA_DMAC_MODE_NORMAL;
+      config.repeat_area = RA_DMAC_REPEAT_AREA_NONE;
+      config.size = RA_DMAC_SIZE_32BIT;
+      config.src_addr_mode = RA_DMAC_ADDR_INCR;
+      config.dest_addr_mode = RA_DMAC_ADDR_FIXED;
+      config.trigger = RA_DMAC_TRIGGER_HW;
+      config.src_addr = (uint32_t)txbuffer;
+      config.dest_addr = R_SDHI_SD_BUF0(priv->channel);
+      config.transfer_count = RA_SDHI_DMA_BLOCK_SIZE / 4; /* Words per block */
+      config.block_count = nblocks;
+      config.elc_end = -1; /* Not using end event link */
+      config.elc_err = -1; /* Not using error event link */
+      config.elc_src = priv->elc_dma; /* Use DMA request event */
+      config.callback = ra_sdhi_dma_tx_callback;
+      config.user_data = priv;
+
+      ret = ra_dmac_open(&priv->dma_tx, &config);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      ret = ra_dmac_enable(priv->dma_tx);
+      if (ret < 0)
+        {
+          ra_dmac_close(priv->dma_tx);
+          priv->dma_tx = NULL;
+          return ret;
+        }
+    }
+
+  /* Configure RX DMA if receive buffer provided */
+  if (rxbuffer != NULL)
+    {
+      memset(&config, 0, sizeof(config));
+      config.mode = (nblocks > 1) ? RA_DMAC_MODE_BLOCK : RA_DMAC_MODE_NORMAL;
+      config.repeat_area = RA_DMAC_REPEAT_AREA_NONE;
+      config.size = RA_DMAC_SIZE_32BIT;
+      config.src_addr_mode = RA_DMAC_ADDR_FIXED;
+      config.dest_addr_mode = RA_DMAC_ADDR_INCR;
+      config.trigger = RA_DMAC_TRIGGER_HW;
+      config.src_addr = R_SDHI_SD_BUF0(priv->channel);
+      config.dest_addr = (uint32_t)rxbuffer;
+      config.transfer_count = RA_SDHI_DMA_BLOCK_SIZE / 4; /* Words per block */
+      config.block_count = nblocks;
+      config.elc_end = -1; /* Not using end event link */
+      config.elc_err = -1; /* Not using error event link */
+      config.elc_src = priv->elc_dma; /* Use DMA request event */
+      config.callback = ra_sdhi_dma_rx_callback;
+      config.user_data = priv;
+
+      ret = ra_dmac_open(&priv->dma_rx, &config);
+      if (ret < 0)
+        {
+          if (priv->dma_tx)
+            {
+              ra_dmac_disable(priv->dma_tx);
+              ra_dmac_close(priv->dma_tx);
+              priv->dma_tx = NULL;
+            }
+          return ret;
+        }
+
+      ret = ra_dmac_enable(priv->dma_rx);
+      if (ret < 0)
+        {
+          ra_dmac_close(priv->dma_rx);
+          priv->dma_rx = NULL;
+          if (priv->dma_tx)
+            {
+              ra_dmac_disable(priv->dma_tx);
+              ra_dmac_close(priv->dma_tx);
+              priv->dma_tx = NULL;
+            }
+          return ret;
+        }
+    }
+
+  /* Enable DMA in SDHI controller */
+  ra_putreg32(R_SDHI_SD_DMAEN_DMAEN, R_SDHI_SD_DMAEN(priv->channel));
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: ra_sdhi_dma_cleanup
+ *
+ * Description:
+ *   Cleanup DMA resources after transfer
+ *
+ ****************************************************************************/
+
+static void ra_sdhi_dma_cleanup(struct ra_sdhi_dev_s *priv)
+{
+  /* Disable DMA in SDHI controller */
+  ra_putreg32(0, R_SDHI_SD_DMAEN(priv->channel));
+
+  /* Clean up TX DMA */
+  if (priv->dma_tx != NULL)
+    {
+      ra_dmac_disable(priv->dma_tx);
+      ra_dmac_close(priv->dma_tx);
+      priv->dma_tx = NULL;
+    }
+
+  /* Clean up RX DMA */
+  if (priv->dma_rx != NULL)
+    {
+      ra_dmac_disable(priv->dma_rx);
+      ra_dmac_close(priv->dma_rx);
+      priv->dma_rx = NULL;
+    }
+
+  priv->dma_tx_done = false;
+  priv->dma_rx_done = false;
+}
+#endif /* CONFIG_RA_DMA */
+
+/****************************************************************************
+ * Name: ra_sdhi_parse_errors
+ *
+ * Description:
+ *   Parse SD_ERR_STS1/2 registers for detailed error information
+ *
+ ****************************************************************************/
+
+static void ra_sdhi_parse_errors(struct ra_sdhi_dev_s *priv)
+{
+  /* Read error status registers */
+  priv->err_sts1 = ra_getreg32(R_SDHI_SD_ERR_STS1(priv->channel));
+  priv->err_sts2 = ra_getreg32(R_SDHI_SD_ERR_STS2(priv->channel));
+
+  /* Log detailed error information */
+  if (priv->err_sts1 != 0)
+    {
+      mcerr("SDHI%d ERR_STS1: 0x%08" PRIx32 "\n", priv->channel, priv->err_sts1);
+
+      /* Parse SD_ERR_STS1 bits (see hardware manual) */
+      if (priv->err_sts1 & (1 << 0))
+        {
+          mcerr("  Command error\n");
+        }
+      if (priv->err_sts1 & (1 << 1))
+        {
+          mcerr("  CRC error\n");
+        }
+      if (priv->err_sts1 & (1 << 2))
+        {
+          mcerr("  End bit error\n");
+        }
+      if (priv->err_sts1 & (1 << 3))
+        {
+          mcerr("  Data timeout\n");
+        }
+      if (priv->err_sts1 & (1 << 6))
+        {
+          mcerr("  Response timeout\n");
+        }
+    }
+
+  if (priv->err_sts2 != 0)
+    {
+      mcerr("SDHI%d ERR_STS2: 0x%08" PRIx32 "\n", priv->channel, priv->err_sts2);
+
+      /* Parse SD_ERR_STS2 bits (see hardware manual) */
+      if (priv->err_sts2 & (1 << 0))
+        {
+          mcerr("  Buffer read error\n");
+        }
+      if (priv->err_sts2 & (1 << 1))
+        {
+          mcerr("  Buffer write error\n");
+        }
+    }
+}
+
+/****************************************************************************
+ * Name: ra_sdhi_error_recovery
+ *
+ * Description:
+ *   Attempt error recovery for SDHI
+ *
+ ****************************************************************************/
+
+static int ra_sdhi_error_recovery(struct ra_sdhi_dev_s *priv)
+{
+  int ret;
+
+  /* Increment retry counter */
+  priv->error_retry++;
+
+  if (priv->error_retry > RA_SDHI_ERROR_RETRY_MAX)
+    {
+      mcerr("SDHI%d: Max error retries exceeded\n", priv->channel);
+      priv->error_retry = 0;
+      return -EIO;
+    }
+
+  mcinfo("SDHI%d: Attempting error recovery (retry %d/%d)\n",
+         priv->channel, priv->error_retry, RA_SDHI_ERROR_RETRY_MAX);
+
+  /* Clear error flags */
+  ra_putreg32(0, R_SDHI_SD_INFO1(priv->channel));
+  ra_putreg32(0, R_SDHI_SD_INFO2(priv->channel));
+
+  /* Perform soft reset */
+  ra_putreg32(0, R_SDHI_SOFT_RST(priv->channel));
+  up_udelay(10);
+  ra_putreg32(R_SDHI_SOFT_RST_SDRST, R_SDHI_SOFT_RST(priv->channel));
+
+  /* Wait for reset to complete */
+  while (ra_getreg32(R_SDHI_SOFT_RST(priv->channel)) & R_SDHI_SOFT_RST_SDRST)
+    {
+    }
+
+  /* Restore configuration */
+  ra_putreg32(0x40E0, R_SDHI_SD_OPTION(priv->channel));
+
+  /* Re-enable interrupts */
+  ra_sdhi_enableints(priv);
+
+  ret = OK;
+  return ret;
+}
+
+/****************************************************************************
+ * Name: ra_sdhi_pm_prepare
+ *
+ * Description:
+ *   PM prepare callback - called before state transition
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PM
+static int ra_sdhi_pm_prepare(struct pm_callback_s *cb, int domain,
+                              enum pm_state_e pmstate)
+{
+  struct ra_sdhi_dev_s *priv = (struct ra_sdhi_dev_s *)
+    ((char *)cb - offsetof(struct ra_sdhi_dev_s, pmcb));
+
+  /* Only handle PM_STANDBY and deeper sleep states */
+  if (pmstate >= PM_STANDBY)
+    {
+      /* Check if we can suspend - don't suspend during active transfers */
+      uint32_t info2 = ra_getreg32(R_SDHI_SD_INFO2(priv->channel));
+      if (info2 & R_SDHI_SD_INFO2_CBSY)
+        {
+          /* Transfer in progress, deny suspend */
+          return -EBUSY;
+        }
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: ra_sdhi_pm_notify
+ *
+ * Description:
+ *   PM notify callback - called after state transition
+ *
+ ****************************************************************************/
+
+static void ra_sdhi_pm_notify(struct pm_callback_s *cb, int domain,
+                              enum pm_state_e pmstate)
+{
+  struct ra_sdhi_dev_s *priv = (struct ra_sdhi_dev_s *)
+    ((char *)cb - offsetof(struct ra_sdhi_dev_s, pmcb));
+
+  switch (pmstate)
+    {
+      case PM_NORMAL:
+      case PM_IDLE:
+        /* Resume from suspend */
+        if (priv->suspended)
+          {
+            /* Enable module clock */
+            ra_mstp_start(priv->channel == 0 ? RA_MSTP_SDHI0 : RA_MSTP_SDHI1);
+
+            /* Re-initialize controller */
+            ra_sdhi_reset((struct sdio_dev_s *)priv);
+
+            priv->suspended = false;
+          }
+        break;
+
+      case PM_STANDBY:
+      case PM_SLEEP:
+        /* Enter suspend */
+        if (!priv->suspended)
+          {
+            /* Disable interrupts */
+            ra_sdhi_disableints(priv);
+
+            /* Disable module clock */
+            ra_mstp_stop(priv->channel == 0 ? RA_MSTP_SDHI0 : RA_MSTP_SDHI1);
+
+            priv->suspended = true;
+          }
+        break;
+
+      default:
+        break;
+    }
+}
+#endif /* CONFIG_PM */
 
 /* SDIO Interface Methods */
 
@@ -366,6 +895,11 @@ static void ra_sdhi_reset(struct sdio_dev_s *dev)
 
 static sdio_capset_t ra_sdhi_capabilities(FAR struct sdio_dev_s *dev)
 {
+  /* RA8P1 SDHI supports up to 4-bit SD cards
+   * 8-bit mode is only available for eMMC on some channels
+   * NuttX SDIO interface assumes 1-bit support is always present
+   * We explicitly report 4-bit capability
+   */
   return SDIO_CAPS_4BIT;
 }
 
@@ -413,32 +947,28 @@ static void ra_sdhi_widebus(struct sdio_dev_s *dev, bool enable)
   priv->widebus = enable;
 
   option = ra_getreg32(R_SDHI_SD_OPTION(priv->channel));
+
+  /* Per FSP specification:
+   * 1-bit mode: WIDTH=1 (bit 15), WIDTH8=0 (bit 13)
+   * 4-bit mode: WIDTH=0 (bit 15), WIDTH8=0 (bit 13)
+   * 8-bit mode: WIDTH=0 (bit 15), WIDTH8=1 (bit 13) - eMMC only
+   */
   if (enable)
     {
-      /* 4-bit width */
-      option &= ~R_SDHI_SD_OPTION_WIDTH8;
-      option &= ~R_SDHI_SD_OPTION_WIDTH; /* 0 = 4-bit if WIDTH8 is 0? No, check manual */
-      /* FSP: 1-bit = 1 (WIDTH=1, WIDTH8=0), 4-bit = 0 (WIDTH=0, WIDTH8=0), 8-bit = (WIDTH=0, WIDTH8=1) */
-      /* Wait, FSP says:
-         SDHI_PRV_SD_OPTION_WIDTH8_BIT = 13
-         SDHI_PRV_BUS_WIDTH_1_BIT = 4
-
-         If 1-bit: Set WIDTH (bit 15) to 1.
-         If 4-bit: Set WIDTH (bit 15) to 0.
-         If 8-bit: Set WIDTH8 (bit 13) to 1.
-      */
+      /* 4-bit width: Clear both WIDTH and WIDTH8 */
       option &= ~R_SDHI_SD_OPTION_WIDTH;
       option &= ~R_SDHI_SD_OPTION_WIDTH8;
     }
   else
     {
-      /* 1-bit width */
+      /* 1-bit width: Set WIDTH, clear WIDTH8 */
       option |= R_SDHI_SD_OPTION_WIDTH;
       option &= ~R_SDHI_SD_OPTION_WIDTH8;
     }
+
   ra_putreg32(option, R_SDHI_SD_OPTION(priv->channel));
 
-  /* Wait for bus width change? FSP has a delay. */
+  /* Wait for bus width change to take effect */
   up_mdelay(1);
 }
 
@@ -637,6 +1167,9 @@ static int ra_sdhi_sendcmd(struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
 
 static void ra_sdhi_blocksetup(struct sdio_dev_s *dev, unsigned int blocklen,
                                unsigned int nblocks)
+  __attribute__((unused));
+static void ra_sdhi_blocksetup(struct sdio_dev_s *dev, unsigned int blocklen,
+                               unsigned int nblocks)
 {
   struct ra_sdhi_dev_s *priv = (struct ra_sdhi_dev_s *)dev;
 
@@ -660,9 +1193,31 @@ static int ra_sdhi_recvsetup(struct sdio_dev_s *dev, uint8_t *buffer,
                              size_t nbytes)
 {
   struct ra_sdhi_dev_s *priv = (struct ra_sdhi_dev_s *)dev;
+  int ret;
 
   priv->buffer = (uint32_t*)buffer;
   priv->remaining = nbytes;
+
+#ifdef CONFIG_RA_DMA
+  /* Use DMA for multi-block transfers if enabled and aligned */
+  if (priv->dma_enabled && nbytes >= RA_SDHI_DMA_BLOCK_SIZE &&
+      (nbytes % RA_SDHI_DMA_BLOCK_SIZE) == 0 &&
+      ((uintptr_t)buffer % 4) == 0)
+    {
+      ret = ra_sdhi_dma_transfer(priv, NULL, buffer, nbytes);
+      if (ret == OK)
+        {
+          /* DMA setup successful - configure for DMA transfer */
+          ra_sdhi_configwaitints(priv, RA_SDHI_INFO1_ACCESS_INTS,
+                                RA_SDHI_INFO2_ERR_INTS,
+                                SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR);
+          return OK;
+        }
+
+      /* DMA setup failed - fall through to PIO mode */
+      mcerr("SDHI%d: DMA setup failed, using PIO: %d\n", priv->channel, ret);
+    }
+#endif
 
   /* Enable BRE interrupt for PIO */
   ra_sdhi_configwaitints(priv, RA_SDHI_INFO1_ACCESS_INTS, RA_SDHI_INFO2_ERR_INTS | R_SDHI_SD_INFO2_BRE,
@@ -675,9 +1230,31 @@ static int ra_sdhi_sendsetup(struct sdio_dev_s *dev, const uint8_t *buffer,
                              size_t nbytes)
 {
   struct ra_sdhi_dev_s *priv = (struct ra_sdhi_dev_s *)dev;
+  int ret;
 
   priv->buffer = (uint32_t*)buffer;
   priv->remaining = nbytes;
+
+#ifdef CONFIG_RA_DMA
+  /* Use DMA for multi-block transfers if enabled and aligned */
+  if (priv->dma_enabled && nbytes >= RA_SDHI_DMA_BLOCK_SIZE &&
+      (nbytes % RA_SDHI_DMA_BLOCK_SIZE) == 0 &&
+      ((uintptr_t)buffer % 4) == 0)
+    {
+      ret = ra_sdhi_dma_transfer(priv, buffer, NULL, nbytes);
+      if (ret == OK)
+        {
+          /* DMA setup successful - configure for DMA transfer */
+          ra_sdhi_configwaitints(priv, RA_SDHI_INFO1_ACCESS_INTS,
+                                RA_SDHI_INFO2_ERR_INTS,
+                                SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR);
+          return OK;
+        }
+
+      /* DMA setup failed - fall through to PIO mode */
+      mcerr("SDHI%d: DMA setup failed, using PIO: %d\n", priv->channel, ret);
+    }
+#endif
 
   /* Enable BWE interrupt for PIO */
   ra_sdhi_configwaitints(priv, RA_SDHI_INFO1_ACCESS_INTS, RA_SDHI_INFO2_ERR_INTS | R_SDHI_SD_INFO2_BWE,
@@ -689,6 +1266,14 @@ static int ra_sdhi_sendsetup(struct sdio_dev_s *dev, const uint8_t *buffer,
 static int ra_sdhi_cancel(struct sdio_dev_s *dev)
 {
   struct ra_sdhi_dev_s *priv = (struct ra_sdhi_dev_s *)dev;
+
+#ifdef CONFIG_RA_DMA
+  /* Cleanup DMA if active */
+  if (priv->dma_enabled && (priv->dma_tx != NULL || priv->dma_rx != NULL))
+    {
+      ra_sdhi_dma_cleanup(priv);
+    }
+#endif
 
   /* Stop transfer */
   ra_putreg32(R_SDHI_SD_STOP_STP, R_SDHI_SD_STOP(priv->channel));
@@ -822,6 +1407,7 @@ static void ra_sdhi_callback(void *arg)
 struct sdio_dev_s *ra_sdhi_initialize(int channel)
 {
   struct ra_sdhi_dev_s *priv;
+  int ret;
 
   if (channel < 0 || channel > 1)
     {
@@ -829,7 +1415,12 @@ struct sdio_dev_s *ra_sdhi_initialize(int channel)
     }
 
   priv = &g_sdhidev[channel];
+  memset(priv, 0, sizeof(struct ra_sdhi_dev_s));
   priv->channel = channel;
+
+  /* Initialize bus width tracking */
+  priv->bus_width = 1;      /* Start with 1-bit mode */
+  priv->max_bus_width = 4;  /* SD cards support up to 4-bit */
 
   /* Initialize semaphore */
   nxsem_init(&priv->waitsem, 0, 0);
@@ -840,26 +1431,83 @@ struct sdio_dev_s *ra_sdhi_initialize(int channel)
   /* Initialize hardware */
   ra_sdhi_reset(&priv->dev);
 
-  /* Register interrupts */
-  /* Map channel to IRQs */
+  /* Register interrupts with proper event routing and priority */
+  /* Map channel to IRQs and configure IELSR event sources */
   if (channel == 0)
     {
-      priv->irq_accs = RA_ELC_SDHIMMC0_ACCS;
-      priv->irq_sdio = RA_ELC_SDHIMMC0_SDIO;
-      priv->irq_card = RA_ELC_SDHIMMC0_CARD;
-      priv->irq_dma  = RA_ELC_SDHIMMC0_DMA_REQ;
+      priv->elc_accs = RA_ELC_SDHIMMC0_ACCS;
+      priv->elc_sdio = RA_ELC_SDHIMMC0_SDIO;
+      priv->elc_card = RA_ELC_SDHIMMC0_CARD;
+      priv->elc_dma  = RA_ELC_SDHIMMC0_DMA_REQ;
     }
   else
     {
-      priv->irq_accs = RA_ELC_SDHIMMC1_ACCS;
-      priv->irq_sdio = RA_ELC_SDHIMMC1_SDIO;
-      priv->irq_card = RA_ELC_SDHIMMC1_CARD;
-      priv->irq_dma  = RA_ELC_SDHIMMC1_DMA_REQ;
+      priv->elc_accs = RA_ELC_SDHIMMC1_ACCS;
+      priv->elc_sdio = RA_ELC_SDHIMMC1_SDIO;
+      priv->elc_card = RA_ELC_SDHIMMC1_CARD;
+      priv->elc_dma  = RA_ELC_SDHIMMC1_DMA_REQ;
     }
 
-  ra_icu_attach(priv->irq_accs, ra_sdhi_access_isr, priv, true);
-  ra_icu_attach(priv->irq_card, ra_sdhi_card_isr, priv, true);
-  /* SDIO and DMA IRQs not used in PIO mode yet */
+  /* Configure interrupts with proper event routing and priority
+   * Priority levels: 0 (highest) to 15 (lowest)
+   * Storage operations typically use priority 3-5 for good responsiveness
+   */
+  const int sdhi_priority = 3;
+
+  /* Configure access interrupt with proper event routing */
+  ra_icu_set_event(priv->elc_accs, priv->elc_accs);
+  ret = ra_icu_attach(priv->elc_accs, ra_sdhi_access_isr, priv, false);
+  if (ret >= 0)
+    {
+      ra_icu_set_priority(ret, sdhi_priority);
+      up_enable_irq(ret);
+    }
+
+  /* Configure card detect interrupt with proper event routing */
+  ra_icu_set_event(priv->elc_card, priv->elc_card);
+  ret = ra_icu_attach(priv->elc_card, ra_sdhi_card_isr, priv, false);
+  if (ret >= 0)
+    {
+      ra_icu_set_priority(ret, sdhi_priority);
+      up_enable_irq(ret);
+    }
+
+  /* SDIO and DMA IRQs configured but not enabled in PIO mode
+   * They are available for future DMA implementation
+   */
+  ra_icu_set_event(priv->elc_sdio, priv->elc_sdio);
+  ra_icu_set_event(priv->elc_dma, priv->elc_dma);
+  /* These IRQs will be attached and prioritized when DMA mode is implemented */
+
+#ifdef CONFIG_RA_DMA
+  /* Setup DMA if enabled */
+  ret = ra_sdhi_dma_setup(priv);
+  if (ret < 0)
+    {
+      mcerr("SDHI%d: Failed to setup DMA: %d\n", channel, ret);
+      /* Continue without DMA */
+      priv->dma_enabled = false;
+    }
+#endif
+
+#ifdef CONFIG_PM
+  /* Register power management callbacks */
+  priv->pmcb.prepare = ra_sdhi_pm_prepare;
+  priv->pmcb.notify = ra_sdhi_pm_notify;
+  priv->suspended = false;
+
+  ret = pm_register(&priv->pmcb);
+  if (ret < 0)
+    {
+      mcerr("SDHI%d: Failed to register PM callbacks: %d\n", channel, ret);
+      /* Continue without PM support */
+    }
+#endif
+
+  /* Initialize error tracking */
+  priv->error_retry = 0;
+  priv->err_sts1 = 0;
+  priv->err_sts2 = 0;
 
   /* Initialize dev structure */
   priv->dev.reset            = ra_sdhi_reset;

@@ -291,6 +291,9 @@ config RA8_FAMILY
    select ARCH_HAVE_CODE_FLASH
    select ARCH_HAVE_DATA_FLASH
    select ARCH_HAVE_SRAM
+   select ARCH_HAVE_SDIO
+   select ARCH_HAVE_IRQPRIO
+   select ARCH_IRQPRIO
    help
      Enables all core features for the RA8E1 Cortex-M85 family.
 

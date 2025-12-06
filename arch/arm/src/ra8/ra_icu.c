@@ -293,6 +293,59 @@ int ra_icu_set_event(int icu_slot, int event)
   return OK;
 }
 
+/****************************************************************************
+ * Name: ra_icu_set_priority
+ *
+ * Description:
+ *   Set interrupt priority for a dynamically allocated ICU IRQ.
+ *   This function wraps the architecture-specific up_prioritize_irq()
+ *   to provide a consistent ICU-level API.
+ *
+ * Input Parameters:
+ *   icu_irq  - ICU IRQ number (RA_IRQ_FIRST + slot)
+ *   priority - Priority level (0 = highest, 15 = lowest for Cortex-M)
+ *              Typical values: 0-3 (high), 4-7 (medium), 8-15 (low)
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ * Notes:
+ *   - Priority must be set before enabling the interrupt
+ *   - Lower numerical values = higher priority
+ *   - Priority 0 is reserved for critical system interrupts
+ *   - Recommended: Use 3-5 for storage, 6-8 for communication
+ *
+ ****************************************************************************/
+
+int ra_icu_set_priority(int icu_irq, int priority)
+{
+  /* Validate IRQ range */
+  if (icu_irq < RA_IRQ_FIRST || icu_irq >= (RA_IRQ_FIRST + RA_IRQ_IELSR_SIZE))
+    {
+      return -EINVAL;
+    }
+
+  /* Validate priority range (0-15 for Cortex-M, per NVIC spec)
+   * NVIC_SYSH_PRIORITY_MIN is typically 0xFF (lowest priority)
+   * We shift right by 4 to get 0-15 range
+   */
+  if (priority < 0 || priority > 15)
+    {
+      return -EINVAL;
+    }
+
+#ifdef CONFIG_ARCH_IRQPRIO
+  /* Use the architecture-specific priority function
+   * up_prioritize_irq expects priority in the format used by NVIC
+   * For Cortex-M, priority is in bits [7:4] of the priority byte,
+   * so we need to shift left by 4
+   */
+  return up_prioritize_irq(icu_irq, priority << 4);
+#else
+  /* Priority control not enabled in configuration */
+  return -ENOSYS;
+#endif
+}
 
 /****************************************************************************
  * Name: ra_icu_filter_config
