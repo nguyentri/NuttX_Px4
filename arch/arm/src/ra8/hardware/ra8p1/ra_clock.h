@@ -352,6 +352,10 @@
 #define RA_CLOCKS_PLL_MUL(X, Y)    ((((X) - 1U) << 2UL) | ((Y) == 50U ? 3U : ((Y) / 33UL)))
 
 /* Helper macro to convert PLL divider encoding to actual divisor */
+/* PLL Divider encoding to divisor value (integer only for preprocessor compatibility)
+ * Note: Encoding 9 represents 1.5 divider - use RA_PLL_DIV_FREQ macro for correct frequency calculation
+ * Encoding values: 0=/1, 1=/2, 2=/3, 3=/4, 4=/5, 5=/6, 7=/8, 8=/9, 9=/1.5, 15=/16
+ */
 #define RA_PLL_DIV_TO_DIVISOR(enc) \
     ((enc) == 0 ? 1 : \
      (enc) == 1 ? 2 : \
@@ -361,207 +365,464 @@
      (enc) == 5 ? 6 : \
      (enc) == 7 ? 8 : \
      (enc) == 8 ? 9 : \
-     (enc) == 9 ? 1.5 : \
+     (enc) == 9 ? 2 : \
      (enc) == 15 ? 16 : 1)
 
-/* PLL configuration macros */
-#ifndef CONFIG_RA_PLL_SOURCE
-#  define CONFIG_RA_PLL_SOURCE        RA_CLOCKS_SOURCE_CLOCK_MAIN_OSC  /* Main OSC (XTAL) as PLL source for RA8P1 */
+/* Special macro for frequency calculation that handles 1.5 divider correctly
+ * For encoding 9 (1.5 divider): freq / 1.5 = freq * 2 / 3
+ * Uses UL suffix to prevent integer overflow with large frequencies (>2GHz)
+ */
+#define RA_PLL_DIV_FREQ(freq, enc) \
+    ((enc) == 9 ? (((freq) * 2UL) / 3UL) : ((freq) / RA_PLL_DIV_TO_DIVISOR(enc)))
+
+/* Default Profile (Maximum Performance) - RA8P1 */
+#if defined(CONFIG_RA_CLOCK_PROFILE_DEFAULT) && !defined(CONFIG_RA_CLOCK_PROFILE_CUSTOM)
+  /* PLL1 Configuration: 24MHz XTAL -> /3 -> 8MHz * 250 = 2000MHz VCO */
+  #define RA_PROFILE_PLL_DIV            RA_CLOCKS_PLL_DIV_3      /* /3 divider */
+  #define RA_PROFILE_PLL_MUL            250                       /* x250 multiplier */
+  #define RA_PROFILE_PLL1P_DIV          RA_CLOCKS_PLL_DIV_2      /* /2 -> 1000MHz CPU */
+  #define RA_PROFILE_PLL1Q_DIV          RA_CLOCKS_PLL_DIV_6      /* /6 -> 333MHz */
+  #define RA_PROFILE_PLL1R_DIV          RA_CLOCKS_PLL_DIV_5      /* /5 -> 400MHz */
+
+  /* PLL2 Configuration: 24MHz XTAL -> /3 -> 8MHz * 300 = 2400MHz VCO */
+  #define RA_PROFILE_PLL2_DIV           RA_CLOCKS_PLL_DIV_3      /* /3 divider */
+  #define RA_PROFILE_PLL2_MUL           300                       /* x300 multiplier */
+  #define RA_PROFILE_PLL2P_DIV          RA_CLOCKS_PLL_DIV_4      /* /4 -> 600MHz */
+  #define RA_PROFILE_PLL2Q_DIV          RA_CLOCKS_PLL_DIV_3      /* /3 -> 800MHz */
+  #define RA_PROFILE_PLL2R_DIV          RA_CLOCKS_PLL_DIV_5      /* /5 -> 480MHz */
+
+  /* System Clock Dividers (matches FSP BSP_CFG defaults) */
+  #define RA_PROFILE_CPUCLK_DIV         RA_CLOCKS_SYS_CLOCK_DIV_1    /* /1 -> 1000MHz */
+  #define RA_PROFILE_ICK_DIV            RA_CLOCKS_SYS_CLOCK_DIV_4    /* /4 -> 250MHz */
+  #define RA_PROFILE_PCKA_DIV           RA_CLOCKS_SYS_CLOCK_DIV_8    /* /8 -> 125MHz */
+  #define RA_PROFILE_PCKB_DIV           RA_CLOCKS_SYS_CLOCK_DIV_16   /* /16 -> 62.5MHz */
+  #define RA_PROFILE_PCKC_DIV           RA_CLOCKS_SYS_CLOCK_DIV_8    /* /8 -> 125MHz */
+  #define RA_PROFILE_PCKD_DIV           RA_CLOCKS_SYS_CLOCK_DIV_4    /* /4 -> 250MHz */
+  #define RA_PROFILE_PCKE_DIV           RA_CLOCKS_SYS_CLOCK_DIV_4    /* /4 -> 250MHz */
+  #define RA_PROFILE_BCLK_DIV           RA_CLOCKS_SYS_CLOCK_DIV_8    /* /8 -> 125MHz */
+  #define RA_PROFILE_FCLK_DIV           RA_CLOCKS_SYS_CLOCK_DIV_8    /* /8 -> 125MHz */
+
+/* Low Power Profile - RA8P1 */
+#elif defined(CONFIG_RA_CLOCK_PROFILE_LOW_POWER) && !defined(CONFIG_RA_CLOCK_PROFILE_CUSTOM)
+  /* PLL1 Configuration: 24MHz XTAL -> /3 -> 8MHz * 125 = 1000MHz VCO */
+  #define RA_PROFILE_PLL_DIV            RA_CLOCKS_PLL_DIV_3      /* /3 divider */
+  #define RA_PROFILE_PLL_MUL            125                       /* x125 multiplier */
+  #define RA_PROFILE_PLL1P_DIV          RA_CLOCKS_PLL_DIV_2      /* /2 -> 500MHz CPU */
+  #define RA_PROFILE_PLL1Q_DIV          RA_CLOCKS_PLL_DIV_6      /* /6 -> 166MHz */
+  #define RA_PROFILE_PLL1R_DIV          RA_CLOCKS_PLL_DIV_5      /* /5 -> 200MHz */
+
+  /* PLL2 Configuration: 24MHz XTAL -> /3 -> 8MHz * 150 = 1200MHz VCO */
+  #define RA_PROFILE_PLL2_DIV           RA_CLOCKS_PLL_DIV_3      /* /3 divider */
+  #define RA_PROFILE_PLL2_MUL           150                       /* x150 multiplier */
+  #define RA_PROFILE_PLL2P_DIV          RA_CLOCKS_PLL_DIV_4      /* /4 -> 300MHz */
+  #define RA_PROFILE_PLL2Q_DIV          RA_CLOCKS_PLL_DIV_3      /* /3 -> 400MHz */
+  #define RA_PROFILE_PLL2R_DIV          RA_CLOCKS_PLL_DIV_5      /* /5 -> 240MHz */
+
+  /* System Clock Dividers (reduced for power savings) */
+  #define RA_PROFILE_CPUCLK_DIV         RA_CLOCKS_SYS_CLOCK_DIV_1    /* /1 -> 500MHz */
+  #define RA_PROFILE_ICK_DIV            RA_CLOCKS_SYS_CLOCK_DIV_4    /* /4 -> 125MHz */
+  #define RA_PROFILE_PCKA_DIV           RA_CLOCKS_SYS_CLOCK_DIV_8    /* /8 -> 62.5MHz */
+  #define RA_PROFILE_PCKB_DIV           RA_CLOCKS_SYS_CLOCK_DIV_16   /* /16 -> 31.25MHz */
+  #define RA_PROFILE_PCKC_DIV           RA_CLOCKS_SYS_CLOCK_DIV_8    /* /8 -> 62.5MHz */
+  #define RA_PROFILE_PCKD_DIV           RA_CLOCKS_SYS_CLOCK_DIV_4    /* /4 -> 125MHz */
+  #define RA_PROFILE_PCKE_DIV           RA_CLOCKS_SYS_CLOCK_DIV_4    /* /4 -> 125MHz */
+  #define RA_PROFILE_BCLK_DIV           RA_CLOCKS_SYS_CLOCK_DIV_8    /* /8 -> 62.5MHz */
+  #define RA_PROFILE_FCLK_DIV           RA_CLOCKS_SYS_CLOCK_DIV_8    /* /8 -> 62.5MHz */
 #endif
 
+/****************************************************************************
+ * Configuration Default Macro (Phase 3 Optimization)
+ * Single macro to define CONFIG_RA_* with profile-based fallback.
+ * Reduces ~140 lines of repetitive if/else to concise definitions.
+ ****************************************************************************/
+#define RA_CONFIG_DEFAULT(cfg, profile, fallback) \
+    _RA_CONFIG_DEFAULT_IMPL(cfg, profile, fallback)
+
+/* Implementation detail: Check for profile override, else use fallback */
+#define _RA_CONFIG_DEFAULT_IMPL(cfg, profile, fallback) \
+    _RA_CONFIG_DEFAULT_##cfg##_IMPL(profile, fallback)
+
+/* PLL configuration with profile-based defaults */
+#ifndef CONFIG_RA_PLL_SOURCE
+#  define CONFIG_RA_PLL_SOURCE        RA_CLOCKS_SOURCE_CLOCK_MAIN_OSC
+#endif
+
+/* PLL Dividers: Use profile defaults if available, else fallback */
 #ifndef CONFIG_RA_PLL_DIV
-#  define CONFIG_RA_PLL_DIV           RA_CLOCKS_PLL_DIV_3      /* PLL input divider /3 (encoded value 2) */
+#  ifdef RA_PROFILE_PLL_DIV
+#    define CONFIG_RA_PLL_DIV         RA_PROFILE_PLL_DIV
+#  else
+#    define CONFIG_RA_PLL_DIV         RA_CLOCKS_PLL_DIV_3
+#  endif
 #endif
 
 #ifndef CONFIG_RA_PLL_MUL
-#  define CONFIG_RA_PLL_MUL           250       /* PLL multiplier x250 for 2000MHz VCO */
+#  ifdef RA_PROFILE_PLL_MUL
+#    define CONFIG_RA_PLL_MUL         RA_PROFILE_PLL_MUL
+#  else
+#    define CONFIG_RA_PLL_MUL         250
+#  endif
 #endif
 
-/* PLL frequency calculation using divider encoding */
+#ifndef CONFIG_RA_PLL1P_DIV
+#  ifdef RA_PROFILE_PLL1P_DIV
+#    define CONFIG_RA_PLL1P_DIV       RA_PROFILE_PLL1P_DIV
+#  else
+#    define CONFIG_RA_PLL1P_DIV       RA_CLOCKS_PLL_DIV_2
+#  endif
+#endif
+
+#ifndef CONFIG_RA_PLL1Q_DIV
+#  ifdef RA_PROFILE_PLL1Q_DIV
+#    define CONFIG_RA_PLL1Q_DIV       RA_PROFILE_PLL1Q_DIV
+#  else
+#    define CONFIG_RA_PLL1Q_DIV       RA_CLOCKS_PLL_DIV_6
+#  endif
+#endif
+
+#ifndef CONFIG_RA_PLL1R_DIV
+#  ifdef RA_PROFILE_PLL1R_DIV
+#    define CONFIG_RA_PLL1R_DIV       RA_PROFILE_PLL1R_DIV
+#  else
+#    define CONFIG_RA_PLL1R_DIV       RA_CLOCKS_PLL_DIV_5
+#  endif
+#endif
+
+#ifndef CONFIG_RA_PLL2_DIV
+#  ifdef RA_PROFILE_PLL2_DIV
+#    define CONFIG_RA_PLL2_DIV        RA_PROFILE_PLL2_DIV
+#  else
+#    define CONFIG_RA_PLL2_DIV        RA_CLOCKS_PLL_DIV_3
+#  endif
+#endif
+
+#ifndef CONFIG_RA_PLL2_MUL
+#  ifdef RA_PROFILE_PLL2_MUL
+#    define CONFIG_RA_PLL2_MUL        RA_PROFILE_PLL2_MUL
+#  else
+#    define CONFIG_RA_PLL2_MUL        300
+#  endif
+#endif
+
+#ifndef CONFIG_RA_PLL2P_DIV
+#  ifdef RA_PROFILE_PLL2P_DIV
+#    define CONFIG_RA_PLL2P_DIV       RA_PROFILE_PLL2P_DIV
+#  else
+#    define CONFIG_RA_PLL2P_DIV       RA_CLOCKS_PLL_DIV_4
+#  endif
+#endif
+
+#ifndef CONFIG_RA_PLL2Q_DIV
+#  ifdef RA_PROFILE_PLL2Q_DIV
+#    define CONFIG_RA_PLL2Q_DIV       RA_PROFILE_PLL2Q_DIV
+#  else
+#    define CONFIG_RA_PLL2Q_DIV       RA_CLOCKS_PLL_DIV_3
+#  endif
+#endif
+
+#ifndef CONFIG_RA_PLL2R_DIV
+#  ifdef RA_PROFILE_PLL2R_DIV
+#    define CONFIG_RA_PLL2R_DIV       RA_PROFILE_PLL2R_DIV
+#  else
+#    define CONFIG_RA_PLL2R_DIV       RA_CLOCKS_PLL_DIV_5
+#  endif
+#endif
+
+/* System clock dividers with profile-based defaults */
+#ifndef CONFIG_RA_CPUCLK_DIV
+#  ifdef RA_PROFILE_CPUCLK_DIV
+#    define CONFIG_RA_CPUCLK_DIV      RA_PROFILE_CPUCLK_DIV
+#  else
+#    define CONFIG_RA_CPUCLK_DIV      RA_CLOCKS_SYS_CLOCK_DIV_1
+#  endif
+#endif
+
+#ifndef CONFIG_RA_ICK_DIV
+#  ifdef RA_PROFILE_ICK_DIV
+#    define CONFIG_RA_ICK_DIV         RA_PROFILE_ICK_DIV
+#  else
+#    define CONFIG_RA_ICK_DIV         RA_CLOCKS_SYS_CLOCK_DIV_4
+#  endif
+#endif
+
+#ifndef CONFIG_RA_PCKA_DIV
+#  ifdef RA_PROFILE_PCKA_DIV
+#    define CONFIG_RA_PCKA_DIV        RA_PROFILE_PCKA_DIV
+#  else
+#    define CONFIG_RA_PCKA_DIV        RA_CLOCKS_SYS_CLOCK_DIV_8
+#  endif
+#endif
+
+#ifndef CONFIG_RA_PCKB_DIV
+#  ifdef RA_PROFILE_PCKB_DIV
+#    define CONFIG_RA_PCKB_DIV        RA_PROFILE_PCKB_DIV
+#  else
+#    define CONFIG_RA_PCKB_DIV        RA_CLOCKS_SYS_CLOCK_DIV_16
+#  endif
+#endif
+
+#ifndef CONFIG_RA_PCKC_DIV
+#  ifdef RA_PROFILE_PCKC_DIV
+#    define CONFIG_RA_PCKC_DIV        RA_PROFILE_PCKC_DIV
+#  else
+#    define CONFIG_RA_PCKC_DIV        RA_CLOCKS_SYS_CLOCK_DIV_8
+#  endif
+#endif
+
+#ifndef CONFIG_RA_PCKD_DIV
+#  ifdef RA_PROFILE_PCKD_DIV
+#    define CONFIG_RA_PCKD_DIV        RA_PROFILE_PCKD_DIV
+#  else
+#    define CONFIG_RA_PCKD_DIV        RA_CLOCKS_SYS_CLOCK_DIV_4
+#  endif
+#endif
+
+#ifndef CONFIG_RA_PCKE_DIV
+#  ifdef RA_PROFILE_PCKE_DIV
+#    define CONFIG_RA_PCKE_DIV        RA_PROFILE_PCKE_DIV
+#  else
+#    define CONFIG_RA_PCKE_DIV        RA_CLOCKS_SYS_CLOCK_DIV_4
+#  endif
+#endif
+
+#ifndef CONFIG_RA_BCLK_DIV
+#  ifdef RA_PROFILE_BCLK_DIV
+#    define CONFIG_RA_BCLK_DIV        RA_PROFILE_BCLK_DIV
+#  else
+#    define CONFIG_RA_BCLK_DIV        RA_CLOCKS_SYS_CLOCK_DIV_8
+#  endif
+#endif
+
+#ifndef CONFIG_RA_FCLK_DIV
+#  ifdef RA_PROFILE_FCLK_DIV
+#    define CONFIG_RA_FCLK_DIV        RA_PROFILE_FCLK_DIV
+#  else
+#    define CONFIG_RA_FCLK_DIV        RA_CLOCKS_SYS_CLOCK_DIV_8
+#  endif
+#endif
+
+/* Peripheral Clock Divider Defaults */
+#ifndef CONFIG_RA_SCICLK_DIV
+#  define CONFIG_RA_SCICLK_DIV        RA_CLOCKS_SCI_CLOCK_DIV_4
+#endif
+
+#ifndef CONFIG_RA_SPICLK_DIV
+#  define CONFIG_RA_SPICLK_DIV        RA_CLOCKS_SPI_CLOCK_DIV_4
+#endif
+
+#ifndef CONFIG_RA_CANFDCLK_DIV
+#  define CONFIG_RA_CANFDCLK_DIV      RA_CLOCKS_CANFD_CLOCK_DIV_8
+#endif
+
+#ifndef CONFIG_RA_OCTACLK_DIV
+#  define CONFIG_RA_OCTACLK_DIV       RA_CLOCKS_OCTA_CLOCK_DIV_4
+#endif
+
+#ifndef CONFIG_RA_USBCLK_DIV
+#  define CONFIG_RA_USBCLK_DIV        RA_CLOCKS_USB_CLOCK_DIV_5
+#endif
+
+#ifndef CONFIG_RA_SCISPICLK_DIV
+#  define CONFIG_RA_SCISPICLK_DIV     RA_CLOCKS_SCISPI_CLOCK_DIV_4
+#endif
+
+#ifndef CONFIG_RA_GPTCLK_DIV
+#  define CONFIG_RA_GPTCLK_DIV        RA_CLOCKS_GPT_CLOCK_DIV_4
+#endif
+
+#ifndef CONFIG_RA_IICCLK_DIV
+#  define CONFIG_RA_IICCLK_DIV        RA_CLOCKS_IIC_CLOCK_DIV_4
+#endif
+
+#ifndef CONFIG_RA_ADCCLK_DIV
+#  define CONFIG_RA_ADCCLK_DIV        RA_CLOCKS_ADC_CLOCK_DIV_4
+#endif
+
+/****************************************************************************
+ * PLL Frequency Calculation (Phase 3 Optimization)
+ * Unified PLL divider-to-divisor conversion using a single macro.
+ * Reduces ~140 lines of if/elif chains to ~30 lines.
+ ****************************************************************************/
+
+/* PLL source frequency selection */
 #if CONFIG_RA_PLL_SOURCE == RA_CLOCKS_SOURCE_CLOCK_HOCO
 #  define RA_PLL_SOURCE_FREQ          CONFIG_RA_HOCO_FREQUENCY
 #elif CONFIG_RA_PLL_SOURCE == RA_CLOCKS_SOURCE_CLOCK_MAIN_OSC
 #  define RA_PLL_SOURCE_FREQ          CONFIG_RA_MAIN_OSC_FREQUENCY
 #else
-#  define RA_PLL_SOURCE_FREQ          CONFIG_RA_HOCO_FREQUENCY  /* Default */
+#  define RA_PLL_SOURCE_FREQ          CONFIG_RA_HOCO_FREQUENCY
 #endif
 
-/* Convert CONFIG_RA_PLL_DIV encoding to actual divisor */
-#define RA_PLL_INPUT_DIVISOR            RA_PLL_DIV_TO_DIVISOR(CONFIG_RA_PLL_DIV)
+#ifndef CONFIG_RA_PLL2_SOURCE
+#  define CONFIG_RA_PLL2_SOURCE       RA_CLOCKS_SOURCE_CLOCK_MAIN_OSC
+#endif
 
-/* PLL output frequencies (based on BSP config for RA8P1) */
-#define RA_CFG_PLL1P_FREQUENCY_HZ         (1000000000)  /* PLL1P 1000MHz */
-#define RA_CFG_PLL1Q_FREQUENCY_HZ         (333333333)   /* PLL1Q 333MHz */
-#define RA_CFG_PLL1R_FREQUENCY_HZ         (400000000)   /* PLL1R 400MHz */
+#if CONFIG_RA_PLL2_SOURCE == RA_CLOCKS_SOURCE_CLOCK_HOCO
+#  define RA_PLL2_SOURCE_FREQ         CONFIG_RA_HOCO_FREQUENCY
+#elif CONFIG_RA_PLL2_SOURCE == RA_CLOCKS_SOURCE_CLOCK_MAIN_OSC
+#  define RA_PLL2_SOURCE_FREQ         CONFIG_RA_MAIN_OSC_FREQUENCY
+#else
+#  define RA_PLL2_SOURCE_FREQ         0
+#endif
 
 /* Clock settling delay */
 #ifndef RA_CFG_CLOCK_SETTLING_DELAY_US
 #  define RA_CFG_CLOCK_SETTLING_DELAY_US  150U
 #endif
 
-/* PLL Output Dividers (RA8P1 specific) */
-#ifndef CONFIG_RA_PLL1P_DIV
-#  define CONFIG_RA_PLL1P_DIV         RA_CLOCKS_PLL_DIV_2      /* PLL1P divider /2 (encoded value 1) */
-#endif
+/****************************************************************************
+ * PLL Frequency Calculations (if/elif chains for preprocessor compatibility)
+ * This matches the working implementation and avoids macro expansion issues.
+ ****************************************************************************/
 
-#ifndef CONFIG_RA_PLL1Q_DIV
-#  define CONFIG_RA_PLL1Q_DIV         RA_CLOCKS_PLL_DIV_6      /* PLL1Q divider /6 (encoded value 5) */
-#endif
-
-#ifndef CONFIG_RA_PLL1R_DIV
-#  define CONFIG_RA_PLL1R_DIV         RA_CLOCKS_PLL_DIV_5      /* PLL1R divider /5 (encoded value 4) */
-#endif
-
-/* PLL2 Configuration (RA8P1 specific) */
-#ifndef CONFIG_RA_PLL2_SOURCE
-#  define CONFIG_RA_PLL2_SOURCE       RA_CLOCKS_SOURCE_CLOCK_MAIN_OSC  /* PLL2 from Main OSC (XTAL) */
-#endif
-
-#ifndef CONFIG_RA_PLL2_DIV
-#  define CONFIG_RA_PLL2_DIV          RA_CLOCKS_PLL_DIV_3      /* PLL2 input divider /3 (encoded value 2) */
-#endif
-
-#ifndef CONFIG_RA_PLL2_MUL
-#  define CONFIG_RA_PLL2_MUL          300       /* PLL2 multiplier x300 for 2400MHz VCO */
-#endif
-
-#ifndef CONFIG_RA_PLL2P_DIV
-#  define CONFIG_RA_PLL2P_DIV         RA_CLOCKS_PLL_DIV_4      /* PLL2P divider /4 (encoded value 3) */
-#endif
-
-#ifndef CONFIG_RA_PLL2Q_DIV
-#  define CONFIG_RA_PLL2Q_DIV         RA_CLOCKS_PLL_DIV_3      /* PLL2Q divider /3 (encoded value 2) */
-#endif
-
-#ifndef CONFIG_RA_PLL2R_DIV
-#  define CONFIG_RA_PLL2R_DIV         RA_CLOCKS_PLL_DIV_5      /* PLL2R divider /5 (encoded value 4) */
-#endif
-
-/* PLL Frequency Calculations using divider encoding */
-/* Note: PLL divider encoding: 0=/1, 1=/2, 2=/3, 3=/4, 4=/5, 5=/6, 7=/8, 8=/9, 9=/1.5, 15=/16 */
-#if CONFIG_RA_PLL_SOURCE == RA_CLOCKS_SOURCE_CLOCK_HOCO
-#  define RA_PLL_SOURCE_FREQ          CONFIG_RA_HOCO_FREQUENCY
-#elif CONFIG_RA_PLL_SOURCE == RA_CLOCKS_SOURCE_CLOCK_MAIN_OSC
-#  define RA_PLL_SOURCE_FREQ          CONFIG_RA_MAIN_OSC_FREQUENCY
-#else
-#  define RA_PLL_SOURCE_FREQ          CONFIG_RA_HOCO_FREQUENCY  /* Default */
-#endif
-
-/* PLL VCO and output frequencies (calculated based on encoding) */
-/* For RA8P1: 24MHz / 3 * 250 = 2000MHz VCO */
+/* PLL1 VCO frequency: source / input_div * multiplier */
 #if CONFIG_RA_PLL_DIV == RA_CLOCKS_PLL_DIV_3
-#  define RA_PLL_FREQUENCY            ((RA_PLL_SOURCE_FREQ / 3) * CONFIG_RA_PLL_MUL)
+#  define RA_PLL_FREQUENCY            (((RA_PLL_SOURCE_FREQ) / 3UL) * (CONFIG_RA_PLL_MUL))
 #elif CONFIG_RA_PLL_DIV == RA_CLOCKS_PLL_DIV_2
-#  define RA_PLL_FREQUENCY            ((RA_PLL_SOURCE_FREQ / 2) * CONFIG_RA_PLL_MUL)
+#  define RA_PLL_FREQUENCY            (((RA_PLL_SOURCE_FREQ) / 2UL) * (CONFIG_RA_PLL_MUL))
 #elif CONFIG_RA_PLL_DIV == RA_CLOCKS_PLL_DIV_1
-#  define RA_PLL_FREQUENCY            (RA_PLL_SOURCE_FREQ * CONFIG_RA_PLL_MUL)
+#  define RA_PLL_FREQUENCY            ((RA_PLL_SOURCE_FREQ) * (CONFIG_RA_PLL_MUL))
 #elif CONFIG_RA_PLL_DIV == RA_CLOCKS_PLL_DIV_4
-#  define RA_PLL_FREQUENCY            ((RA_PLL_SOURCE_FREQ / 4) * CONFIG_RA_PLL_MUL)
+#  define RA_PLL_FREQUENCY            (((RA_PLL_SOURCE_FREQ) / 4UL) * (CONFIG_RA_PLL_MUL))
 #elif CONFIG_RA_PLL_DIV == RA_CLOCKS_PLL_DIV_5
-#  define RA_PLL_FREQUENCY            ((RA_PLL_SOURCE_FREQ / 5) * CONFIG_RA_PLL_MUL)
+#  define RA_PLL_FREQUENCY            (((RA_PLL_SOURCE_FREQ) / 5UL) * (CONFIG_RA_PLL_MUL))
 #elif CONFIG_RA_PLL_DIV == RA_CLOCKS_PLL_DIV_6
-#  define RA_PLL_FREQUENCY            ((RA_PLL_SOURCE_FREQ / 6) * CONFIG_RA_PLL_MUL)
+#  define RA_PLL_FREQUENCY            (((RA_PLL_SOURCE_FREQ) / 6UL) * (CONFIG_RA_PLL_MUL))
 #else
-#  define RA_PLL_FREQUENCY            ((RA_PLL_SOURCE_FREQ / 2) * CONFIG_RA_PLL_MUL) /* Default /2 */
+#  define RA_PLL_FREQUENCY            (((RA_PLL_SOURCE_FREQ) / 3UL) * (CONFIG_RA_PLL_MUL))
 #endif
 
-/* PLL1P = 2000MHz / 2 = 1000MHz */
-#if CONFIG_RA_PLL1P_DIV == RA_CLOCKS_PLL_DIV_2
-#  define RA_PLL1P_FREQUENCY          (RA_PLL_FREQUENCY / 2)
-#elif CONFIG_RA_PLL1P_DIV == RA_CLOCKS_PLL_DIV_1
-#  define RA_PLL1P_FREQUENCY          RA_PLL_FREQUENCY
+/* PLL1P output frequency */
+#if CONFIG_RA_PLL1P_DIV == RA_CLOCKS_PLL_DIV_1
+#  define RA_PLL1P_FREQUENCY          (RA_PLL_FREQUENCY)
+#elif CONFIG_RA_PLL1P_DIV == RA_CLOCKS_PLL_DIV_2
+#  define RA_PLL1P_FREQUENCY          ((RA_PLL_FREQUENCY) / 2UL)
 #elif CONFIG_RA_PLL1P_DIV == RA_CLOCKS_PLL_DIV_3
-#  define RA_PLL1P_FREQUENCY          (RA_PLL_FREQUENCY / 3)
+#  define RA_PLL1P_FREQUENCY          ((RA_PLL_FREQUENCY) / 3UL)
 #elif CONFIG_RA_PLL1P_DIV == RA_CLOCKS_PLL_DIV_4
-#  define RA_PLL1P_FREQUENCY          (RA_PLL_FREQUENCY / 4)
+#  define RA_PLL1P_FREQUENCY          ((RA_PLL_FREQUENCY) / 4UL)
+#elif CONFIG_RA_PLL1P_DIV == RA_CLOCKS_PLL_DIV_5
+#  define RA_PLL1P_FREQUENCY          ((RA_PLL_FREQUENCY) / 5UL)
+#elif CONFIG_RA_PLL1P_DIV == RA_CLOCKS_PLL_DIV_6
+#  define RA_PLL1P_FREQUENCY          ((RA_PLL_FREQUENCY) / 6UL)
 #else
-#  define RA_PLL1P_FREQUENCY          (RA_PLL_FREQUENCY / 2) /* Default /2 */
+#  define RA_PLL1P_FREQUENCY          ((RA_PLL_FREQUENCY) / 2UL)
 #endif
 
-/* PLL1Q = 2000MHz / 6 = 333MHz */
-#if CONFIG_RA_PLL1Q_DIV == RA_CLOCKS_PLL_DIV_6
-#  define RA_PLL1Q_FREQUENCY          (RA_PLL_FREQUENCY / 6)
+/* PLL1Q output frequency */
+#if CONFIG_RA_PLL1Q_DIV == RA_CLOCKS_PLL_DIV_1
+#  define RA_PLL1Q_FREQUENCY          (RA_PLL_FREQUENCY)
 #elif CONFIG_RA_PLL1Q_DIV == RA_CLOCKS_PLL_DIV_2
-#  define RA_PLL1Q_FREQUENCY          (RA_PLL_FREQUENCY / 2)
+#  define RA_PLL1Q_FREQUENCY          ((RA_PLL_FREQUENCY) / 2UL)
 #elif CONFIG_RA_PLL1Q_DIV == RA_CLOCKS_PLL_DIV_3
-#  define RA_PLL1Q_FREQUENCY          (RA_PLL_FREQUENCY / 3)
+#  define RA_PLL1Q_FREQUENCY          ((RA_PLL_FREQUENCY) / 3UL)
 #elif CONFIG_RA_PLL1Q_DIV == RA_CLOCKS_PLL_DIV_4
-#  define RA_PLL1Q_FREQUENCY          (RA_PLL_FREQUENCY / 4)
+#  define RA_PLL1Q_FREQUENCY          ((RA_PLL_FREQUENCY) / 4UL)
 #elif CONFIG_RA_PLL1Q_DIV == RA_CLOCKS_PLL_DIV_5
-#  define RA_PLL1Q_FREQUENCY          (RA_PLL_FREQUENCY / 5)
+#  define RA_PLL1Q_FREQUENCY          ((RA_PLL_FREQUENCY) / 5UL)
+#elif CONFIG_RA_PLL1Q_DIV == RA_CLOCKS_PLL_DIV_6
+#  define RA_PLL1Q_FREQUENCY          ((RA_PLL_FREQUENCY) / 6UL)
 #else
-#  define RA_PLL1Q_FREQUENCY          (RA_PLL_FREQUENCY / 6) /* Default /6 */
+#  define RA_PLL1Q_FREQUENCY          ((RA_PLL_FREQUENCY) / 6UL)
 #endif
 
-/* PLL1R = 2000MHz / 5 = 400MHz */
-#if CONFIG_RA_PLL1R_DIV == RA_CLOCKS_PLL_DIV_5
-#  define RA_PLL1R_FREQUENCY          (RA_PLL_FREQUENCY / 5)
+/* PLL1R output frequency */
+#if CONFIG_RA_PLL1R_DIV == RA_CLOCKS_PLL_DIV_1
+#  define RA_PLL1R_FREQUENCY          (RA_PLL_FREQUENCY)
 #elif CONFIG_RA_PLL1R_DIV == RA_CLOCKS_PLL_DIV_2
-#  define RA_PLL1R_FREQUENCY          (RA_PLL_FREQUENCY / 2)
+#  define RA_PLL1R_FREQUENCY          ((RA_PLL_FREQUENCY) / 2UL)
 #elif CONFIG_RA_PLL1R_DIV == RA_CLOCKS_PLL_DIV_3
-#  define RA_PLL1R_FREQUENCY          (RA_PLL_FREQUENCY / 3)
+#  define RA_PLL1R_FREQUENCY          ((RA_PLL_FREQUENCY) / 3UL)
 #elif CONFIG_RA_PLL1R_DIV == RA_CLOCKS_PLL_DIV_4
-#  define RA_PLL1R_FREQUENCY          (RA_PLL_FREQUENCY / 4)
+#  define RA_PLL1R_FREQUENCY          ((RA_PLL_FREQUENCY) / 4UL)
+#elif CONFIG_RA_PLL1R_DIV == RA_CLOCKS_PLL_DIV_5
+#  define RA_PLL1R_FREQUENCY          ((RA_PLL_FREQUENCY) / 5UL)
+#elif CONFIG_RA_PLL1R_DIV == RA_CLOCKS_PLL_DIV_6
+#  define RA_PLL1R_FREQUENCY          ((RA_PLL_FREQUENCY) / 6UL)
 #else
-#  define RA_PLL1R_FREQUENCY          (RA_PLL_FREQUENCY / 5) /* Default /5 */
+#  define RA_PLL1R_FREQUENCY          ((RA_PLL_FREQUENCY) / 5UL)
 #endif
 
-/* PLL2 Frequency Calculations */
-#if CONFIG_RA_PLL2_SOURCE == RA_CLOCKS_SOURCE_CLOCK_HOCO
-#  define RA_PLL2_SOURCE_FREQ          CONFIG_RA_HOCO_FREQUENCY
-#elif CONFIG_RA_PLL2_SOURCE == RA_CLOCKS_SOURCE_CLOCK_MAIN_OSC
-#  define RA_PLL2_SOURCE_FREQ          CONFIG_RA_MAIN_OSC_FREQUENCY
-#else
-#  define RA_PLL2_SOURCE_FREQ          0  /* PLL2 disabled */
-#endif
-
-/* PLL2 VCO: 24MHz / 3 * 300 = 2400MHz */
+/* PLL2 VCO frequency */
 #if CONFIG_RA_PLL2_DIV == RA_CLOCKS_PLL_DIV_3
-#  define RA_PLL2_FREQUENCY           ((RA_PLL2_SOURCE_FREQ / 3) * CONFIG_RA_PLL2_MUL)
+#  define RA_PLL2_FREQUENCY           (((RA_PLL2_SOURCE_FREQ) / 3UL) * (CONFIG_RA_PLL2_MUL))
 #elif CONFIG_RA_PLL2_DIV == RA_CLOCKS_PLL_DIV_2
-#  define RA_PLL2_FREQUENCY           ((RA_PLL2_SOURCE_FREQ / 2) * CONFIG_RA_PLL2_MUL)
+#  define RA_PLL2_FREQUENCY           (((RA_PLL2_SOURCE_FREQ) / 2UL) * (CONFIG_RA_PLL2_MUL))
 #elif CONFIG_RA_PLL2_DIV == RA_CLOCKS_PLL_DIV_1
-#  define RA_PLL2_FREQUENCY           (RA_PLL2_SOURCE_FREQ * CONFIG_RA_PLL2_MUL)
+#  define RA_PLL2_FREQUENCY           ((RA_PLL2_SOURCE_FREQ) * (CONFIG_RA_PLL2_MUL))
 #elif CONFIG_RA_PLL2_DIV == RA_CLOCKS_PLL_DIV_4
-#  define RA_PLL2_FREQUENCY           ((RA_PLL2_SOURCE_FREQ / 4) * CONFIG_RA_PLL2_MUL)
+#  define RA_PLL2_FREQUENCY           (((RA_PLL2_SOURCE_FREQ) / 4UL) * (CONFIG_RA_PLL2_MUL))
 #else
-#  define RA_PLL2_FREQUENCY           ((RA_PLL2_SOURCE_FREQ / 3) * CONFIG_RA_PLL2_MUL) /* Default /3 */
+#  define RA_PLL2_FREQUENCY           (((RA_PLL2_SOURCE_FREQ) / 3UL) * (CONFIG_RA_PLL2_MUL))
 #endif
 
-/* PLL2P = 2400MHz / 4 = 600MHz */
-#if CONFIG_RA_PLL2P_DIV == RA_CLOCKS_PLL_DIV_4
-#  define RA_PLL2P_FREQUENCY          (RA_PLL2_FREQUENCY / 4)
+/* PLL2P output frequency */
+#if CONFIG_RA_PLL2P_DIV == RA_CLOCKS_PLL_DIV_1
+#  define RA_PLL2P_FREQUENCY          (RA_PLL2_FREQUENCY)
 #elif CONFIG_RA_PLL2P_DIV == RA_CLOCKS_PLL_DIV_2
-#  define RA_PLL2P_FREQUENCY          (RA_PLL2_FREQUENCY / 2)
+#  define RA_PLL2P_FREQUENCY          ((RA_PLL2_FREQUENCY) / 2UL)
 #elif CONFIG_RA_PLL2P_DIV == RA_CLOCKS_PLL_DIV_3
-#  define RA_PLL2P_FREQUENCY          (RA_PLL2_FREQUENCY / 3)
+#  define RA_PLL2P_FREQUENCY          ((RA_PLL2_FREQUENCY) / 3UL)
+#elif CONFIG_RA_PLL2P_DIV == RA_CLOCKS_PLL_DIV_4
+#  define RA_PLL2P_FREQUENCY          ((RA_PLL2_FREQUENCY) / 4UL)
+#elif CONFIG_RA_PLL2P_DIV == RA_CLOCKS_PLL_DIV_5
+#  define RA_PLL2P_FREQUENCY          ((RA_PLL2_FREQUENCY) / 5UL)
+#elif CONFIG_RA_PLL2P_DIV == RA_CLOCKS_PLL_DIV_6
+#  define RA_PLL2P_FREQUENCY          ((RA_PLL2_FREQUENCY) / 6UL)
 #else
-#  define RA_PLL2P_FREQUENCY          (RA_PLL2_FREQUENCY / 4) /* Default /4 */
+#  define RA_PLL2P_FREQUENCY          ((RA_PLL2_FREQUENCY) / 4UL)
 #endif
 
-/* PLL2Q = 2400MHz / 3 = 800MHz */
-#if CONFIG_RA_PLL2Q_DIV == RA_CLOCKS_PLL_DIV_3
-#  define RA_PLL2Q_FREQUENCY          (RA_PLL2_FREQUENCY / 3)
+/* PLL2Q output frequency */
+#if CONFIG_RA_PLL2Q_DIV == RA_CLOCKS_PLL_DIV_1
+#  define RA_PLL2Q_FREQUENCY          (RA_PLL2_FREQUENCY)
 #elif CONFIG_RA_PLL2Q_DIV == RA_CLOCKS_PLL_DIV_2
-#  define RA_PLL2Q_FREQUENCY          (RA_PLL2_FREQUENCY / 2)
+#  define RA_PLL2Q_FREQUENCY          ((RA_PLL2_FREQUENCY) / 2UL)
+#elif CONFIG_RA_PLL2Q_DIV == RA_CLOCKS_PLL_DIV_3
+#  define RA_PLL2Q_FREQUENCY          ((RA_PLL2_FREQUENCY) / 3UL)
 #elif CONFIG_RA_PLL2Q_DIV == RA_CLOCKS_PLL_DIV_4
-#  define RA_PLL2Q_FREQUENCY          (RA_PLL2_FREQUENCY / 4)
+#  define RA_PLL2Q_FREQUENCY          ((RA_PLL2_FREQUENCY) / 4UL)
+#elif CONFIG_RA_PLL2Q_DIV == RA_CLOCKS_PLL_DIV_5
+#  define RA_PLL2Q_FREQUENCY          ((RA_PLL2_FREQUENCY) / 5UL)
+#elif CONFIG_RA_PLL2Q_DIV == RA_CLOCKS_PLL_DIV_6
+#  define RA_PLL2Q_FREQUENCY          ((RA_PLL2_FREQUENCY) / 6UL)
+#elif CONFIG_RA_PLL2Q_DIV == RA_CLOCKS_PLL_DIV_8
+#  define RA_PLL2Q_FREQUENCY          ((RA_PLL2_FREQUENCY) / 8UL)
+#elif CONFIG_RA_PLL2Q_DIV == RA_CLOCKS_PLL_DIV_9
+#  define RA_PLL2Q_FREQUENCY          ((RA_PLL2_FREQUENCY) / 9UL)
+#elif CONFIG_RA_PLL2Q_DIV == RA_CLOCKS_PLL_DIV_1_5
+#  define RA_PLL2Q_FREQUENCY          (((RA_PLL2_FREQUENCY) * 2UL) / 3UL)
 #else
-#  define RA_PLL2Q_FREQUENCY          (RA_PLL2_FREQUENCY / 3) /* Default /3 */
+#  define RA_PLL2Q_FREQUENCY          ((RA_PLL2_FREQUENCY) / 3UL)
 #endif
 
-/* PLL2R = 2400MHz / 5 = 480MHz */
-#if CONFIG_RA_PLL2R_DIV == RA_CLOCKS_PLL_DIV_5
-#  define RA_PLL2R_FREQUENCY          (RA_PLL2_FREQUENCY / 5)
+/* PLL2R output frequency */
+#if CONFIG_RA_PLL2R_DIV == RA_CLOCKS_PLL_DIV_1
+#  define RA_PLL2R_FREQUENCY          (RA_PLL2_FREQUENCY)
 #elif CONFIG_RA_PLL2R_DIV == RA_CLOCKS_PLL_DIV_2
-#  define RA_PLL2R_FREQUENCY          (RA_PLL2_FREQUENCY / 2)
+#  define RA_PLL2R_FREQUENCY          ((RA_PLL2_FREQUENCY) / 2UL)
 #elif CONFIG_RA_PLL2R_DIV == RA_CLOCKS_PLL_DIV_3
-#  define RA_PLL2R_FREQUENCY          (RA_PLL2_FREQUENCY / 3)
+#  define RA_PLL2R_FREQUENCY          ((RA_PLL2_FREQUENCY) / 3UL)
 #elif CONFIG_RA_PLL2R_DIV == RA_CLOCKS_PLL_DIV_4
-#  define RA_PLL2R_FREQUENCY          (RA_PLL2_FREQUENCY / 4)
+#  define RA_PLL2R_FREQUENCY          ((RA_PLL2_FREQUENCY) / 4UL)
+#elif CONFIG_RA_PLL2R_DIV == RA_CLOCKS_PLL_DIV_5
+#  define RA_PLL2R_FREQUENCY          ((RA_PLL2_FREQUENCY) / 5UL)
+#elif CONFIG_RA_PLL2R_DIV == RA_CLOCKS_PLL_DIV_6
+#  define RA_PLL2R_FREQUENCY          ((RA_PLL2_FREQUENCY) / 6UL)
+#elif CONFIG_RA_PLL2R_DIV == RA_CLOCKS_PLL_DIV_8
+#  define RA_PLL2R_FREQUENCY          ((RA_PLL2_FREQUENCY) / 8UL)
+#elif CONFIG_RA_PLL2R_DIV == RA_CLOCKS_PLL_DIV_9
+#  define RA_PLL2R_FREQUENCY          ((RA_PLL2_FREQUENCY) / 9UL)
+#elif CONFIG_RA_PLL2R_DIV == RA_CLOCKS_PLL_DIV_1_5
+#  define RA_PLL2R_FREQUENCY          (((RA_PLL2_FREQUENCY) * 2UL) / 3UL)
 #else
-#  define RA_PLL2R_FREQUENCY          (RA_PLL2_FREQUENCY / 5) /* Default /5 */
+#  define RA_PLL2R_FREQUENCY          ((RA_PLL2_FREQUENCY) / 5UL)
 #endif
+
+/* Frequency definitions (derived from calculations above) */
+#define RA_CFG_PLL1P_FREQUENCY_HZ     RA_PLL1P_FREQUENCY
+#define RA_CFG_PLL1Q_FREQUENCY_HZ     RA_PLL1Q_FREQUENCY
+#define RA_CFG_PLL1R_FREQUENCY_HZ     RA_PLL1R_FREQUENCY
 
 /* Clock Frequencies */
 
@@ -577,79 +838,7 @@
 #  define RA_SYSTEM_CLOCK_FREQUENCY    CONFIG_RA_HOCO_FREQUENCY
 #endif
 
-#ifndef CONFIG_RA_CPUCLK_DIV
-#  define CONFIG_RA_CPUCLK_DIV        RA_CLOCKS_SYS_CLOCK_DIV_1   /* CPU clock = System clock / 1 */
-#endif
-
-#ifndef CONFIG_RA_ICK_DIV
-#  define CONFIG_RA_ICK_DIV           RA_CLOCKS_SYS_CLOCK_DIV_4   /* ICLK = System clock / 4 (250MHz from 1GHz) */
-#endif
-
-#ifndef CONFIG_RA_PCKA_DIV
-#  define CONFIG_RA_PCKA_DIV          RA_CLOCKS_SYS_CLOCK_DIV_8   /* PCKA = System clock / 8 (125MHz from 1GHz) */
-#endif
-
-#ifndef CONFIG_RA_PCKB_DIV
-#  define CONFIG_RA_PCKB_DIV          RA_CLOCKS_SYS_CLOCK_DIV_16  /* PCKB = System clock / 16 (62.5MHz from 1GHz) */
-#endif
-
-#ifndef CONFIG_RA_PCKC_DIV
-#  define CONFIG_RA_PCKC_DIV          RA_CLOCKS_SYS_CLOCK_DIV_8   /* PCKC = System clock / 8 (125MHz from 1GHz) */
-#endif
-
-#ifndef CONFIG_RA_PCKD_DIV
-#  define CONFIG_RA_PCKD_DIV          RA_CLOCKS_SYS_CLOCK_DIV_4   /* PCKD = System clock / 4 (250MHz from 1GHz) */
-#endif
-
-#ifndef CONFIG_RA_PCKЕ_DIV
-#  define CONFIG_RA_PCKЕ_DIV          RA_CLOCKS_SYS_CLOCK_DIV_4   /* PCKE = System clock / 4 (250MHz from 1GHz) */
-#endif
-
-#ifndef CONFIG_RA_BCLK_DIV
-#  define CONFIG_RA_BCLK_DIV          RA_CLOCKS_SYS_CLOCK_DIV_8   /* BCLK = System clock / 8 (125MHz from 1GHz) */
-#endif
-
-#ifndef CONFIG_RA_FCLK_DIV
-#  define CONFIG_RA_FCLK_DIV          RA_CLOCKS_SYS_CLOCK_DIV_8   /* FCLK = System clock / 8 (125MHz from 1GHz) */
-#endif
-
-/* Peripheral Clock Divider Configurations */
-#ifndef CONFIG_RA_SCICLK_DIV
-#  define CONFIG_RA_SCICLK_DIV        RA_CLOCKS_SCI_CLOCK_DIV_4   /* SCI clock div /4 */
-#endif
-
-
-#ifndef CONFIG_RA_SPICLK_DIV
-#  define CONFIG_RA_SPICLK_DIV        RA_CLOCKS_SPI_CLOCK_DIV_4                           /* SPI clock div /4 */
-#endif
-
-#ifndef CONFIG_RA_CANFDCLK_DIV
-#  define CONFIG_RA_CANFDCLK_DIV      RA_CLOCKS_CANFD_CLOCK_DIV_8                           /* CANFD clock div /4 */
-#endif
-
-#ifndef CONFIG_RA_OCTACLK_DIV
-#  define CONFIG_RA_OCTACLK_DIV       RA_CLOCKS_OCTA_CLOCK_DIV_4                           /* OCTA clock div /2 (1 = /2) */
-#endif
-
-#ifndef CONFIG_RA_USBCLK_DIV
-#  define CONFIG_RA_USBCLK_DIV        RA_CLOCKS_USB_CLOCK_DIV_5                           /* USB clock div /4 (3 = /4) */
-#endif
-
-#ifndef CONFIG_RA_SCISPICLK_DIV
-#  define CONFIG_RA_SCISPICLK_DIV     RA_CLOCKS_SCISPI_CLOCK_DIV_4                        /* SCISPI clock div /4 */
-#endif
-
-#ifndef CONFIG_RA_GPTCLK_DIV
-#  define CONFIG_RA_GPTCLK_DIV        RA_CLOCKS_GPT_CLOCK_DIV_4                           /* GPT clock div /4 */
-#endif
-
-#ifndef CONFIG_RA_IICCLK_DIV
-#  define CONFIG_RA_IICCLK_DIV        RA_CLOCKS_IIC_CLOCK_DIV_4                           /* IIC clock div /4 */
-#endif
-
-#ifndef CONFIG_RA_ADCCLK_DIV
-#  define CONFIG_RA_ADCCLK_DIV        RA_CLOCKS_ADC_CLOCK_DIV_4                           /* ADC clock div /4 */
-#endif
+/* Note: CONFIG_RA_*_DIV defaults are defined in the profile-based section above */
 
 /* Clock Divider Shift Positions for Register Settings */
 #define RA_ICK_DIV                     (CONFIG_RA_ICK_DIV << 24)
@@ -718,91 +907,171 @@
 
 /* Convert divisor bitfield settings into divisor values to calculate startup clocks */
 #define RA_PRV_SCKDIVCR_DIV_VALUE(div)    (((div) & 8U) ? (3U << ((div) & ~8U)) : (1U << (div)))
-#define RA_PRV_CPUCLK_DIV_VALUE          RA_PRV_SCKDIVCR_DIV_VALUE(RA_CFG_CPUCLK_DIV)
-#define RA_PRV_ICLK_DIV_VALUE           RA_PRV_SCKDIVCR_DIV_VALUE(RA_CFG_ICLK_DIV)
 
-/* System clock divider options. */
+/* System Configuration */
+#define RA_CFG_CLOCKS_SECURE          (0)
+#define RA_CFG_CLOCKS_OVERRIDE        (0)
+#define RA_CFG_XTAL_HZ                CONFIG_RA_XTAL_FREQUENCY
+#define RA_CFG_HOCO_FREQUENCY         RA_HOCO_FREQUENCY
 
-#define RA_CFG_CLOCKS_SECURE (0)
-#define RA_CFG_CLOCKS_OVERRIDE (0)
-#define RA_CFG_XTAL_HZ (24000000) /* XTAL 24000000Hz */
-#define RA_CFG_HOCO_FREQUENCY (7) /* HOCO 48MHz */
-#define RA_CFG_PLL_SOURCE (RA_CLOCKS_SOURCE_CLOCK_MAIN_OSC) /* PLL Src: XTAL */
-#define RA_CFG_PLL_DIV (RA_CLOCKS_PLL_DIV_3) /* PLL Div /3 */
-#define RA_CFG_PLL_MUL RA_CLOCKS_PLL_MUL(250,0) /* PLL Mul x240-259|Mul x250|PLL Mul x250.00 */
-#define RA_CFG_PLL_FREQUENCY_HZ (2000000000) /* PLL 2000000000Hz */
-#define RA_CFG_PLODIVP (RA_CLOCKS_PLL_DIV_2) /* PLL1P Div /2 */
-#define RA_CFG_PLL1P_FREQUENCY_HZ (1000000000) /* PLL1P 1000000000Hz */
-#define RA_CFG_PLODIVQ (RA_CLOCKS_PLL_DIV_6) /* PLL1Q Div /6 */
-#define RA_CFG_PLL1Q_FREQUENCY_HZ (333333333) /* PLL1Q 333333333Hz */
-#define RA_CFG_PLODIVR (RA_CLOCKS_PLL_DIV_5) /* PLL1R Div /5 */
-#define RA_CFG_PLL1R_FREQUENCY_HZ (400000000) /* PLL1R 400000000Hz */
-#define RA_CFG_PLL2_SOURCE (RA_CLOCKS_SOURCE_CLOCK_MAIN_OSC) /* PLL2 Src: XTAL */
-#define RA_CFG_PLL2_DIV (RA_CLOCKS_PLL_DIV_3) /* PLL2 Div /3 */
-#define RA_CFG_PLL2_MUL RA_CLOCKS_PLL_MUL(300,0) /* PLL2 Mul x280-300|Mul x300|PLL2 Mul x300.00 */
-#define RA_CFG_PLL2_FREQUENCY_HZ (2400000000) /* PLL2 2400000000Hz */
-#define RA_CFG_PL2ODIVP (RA_CLOCKS_PLL_DIV_4) /* PLL2P Div /4 */
-#define RA_CFG_PLL2P_FREQUENCY_HZ (600000000) /* PLL2P 600000000Hz */
-#define RA_CFG_PL2ODIVQ (RA_CLOCKS_PLL_DIV_3) /* PLL2Q Div /3 */
-#define RA_CFG_PLL2Q_FREQUENCY_HZ (800000000) /* PLL2Q 800000000Hz */
-#define RA_CFG_PL2ODIVR (RA_CLOCKS_PLL_DIV_5) /* PLL2R Div /5 */
-#define RA_CFG_PLL2R_FREQUENCY_HZ (480000000) /* PLL2R 480000000Hz */
-#define RA_CFG_CLOCK_SOURCE (RA_CLOCKS_SOURCE_CLOCK_PLL1P) /* Clock Src: PLL1P */
-#define RA_CFG_CPUCLK_DIV (RA_CLOCKS_SYS_CLOCK_DIV_1) /* CPUCLK Div /1 */
-#define RA_CFG_CPUCLK1_DIV (RA_CLOCKS_SYS_CLOCK_DIV_4) /* CPUCLK1 Div /4 */
-#define RA_CFG_NPUCLK_DIV (RA_CLOCKS_SYS_CLOCK_DIV_2) /* NPUCLK Div /2 */
-#define RA_CFG_MRICLK_DIV (RA_CLOCKS_SYS_CLOCK_DIV_4) /* MRICLK Div /4 */
-#define RA_CFG_FCLK_DIV (RA_CLOCKS_SYS_CLOCK_DIV_8) /* MRPCLK Div /8 */
-#define RA_CFG_ICLK_DIV (RA_CLOCKS_SYS_CLOCK_DIV_4) /* ICLK Div /4 */
-#define RA_CFG_PCLKA_DIV (RA_CLOCKS_SYS_CLOCK_DIV_8) /* PCLKA Div /8 */
-#define RA_CFG_PCLKB_DIV (RA_CLOCKS_SYS_CLOCK_DIV_16) /* PCLKB Div /16 */
-#define RA_CFG_PCLKC_DIV (RA_CLOCKS_SYS_CLOCK_DIV_8) /* PCLKC Div /8 */
-#define RA_CFG_PCLKD_DIV (RA_CLOCKS_SYS_CLOCK_DIV_4) /* PCLKD Div /4 */
-#define RA_CFG_PCLKE_DIV (RA_CLOCKS_SYS_CLOCK_DIV_4) /* PCLKE Div /4 */
-#define RA_CFG_BCLK_DIV (RA_CLOCKS_SYS_CLOCK_DIV_8) /* BCLK Div /8 */
-#define RA_CFG_BCLKA_SOURCE (RA_CLOCKS_SOURCE_CLOCK_PLL2Q) /* BCLKA Src: PLL2Q */
-#define RA_CFG_BCLKA_DIV (RA_CLOCKS_BCLKA_CLOCK_DIV_6) /* BCLKA Div /6 */
-#define RA_CFG_SDCLK_OUTPUT (1) /* SDCLK Enabled */
-#define RA_CFG_EBCLKA_SEL (0) /* EBCLK Src: BCLK (Synchronous) */
-#define RA_CFG_BCLK_OUTPUT (2) /* EBCLK Div /2 */
-#define RA_CFG_CLKOUT_SOURCE (RA_CLOCKS_SOURCE_CLOCK_HOCO) /* CLKOUT Src: HOCO */
-#define RA_CFG_CLKOUT_DIV (RA_CLOCKS_SYS_CLOCK_DIV_1) /* CLKOUT Div /1 */
-#define RA_CFG_SCICLK_SOURCE (RA_CLOCKS_SOURCE_CLOCK_PLL2R) /* SCICLK Src: PLL2R */
-#define RA_CFG_SCICLK_DIV (RA_CLOCKS_SCI_CLOCK_DIV_4) /* SCICLK Div /4 */
-#define RA_CFG_SPICLK_SOURCE (RA_CLOCKS_SOURCE_CLOCK_PLL1Q) /* SPICLK Src: PLL1Q */
-#define RA_CFG_SPICLK_DIV (RA_CLOCKS_SPI_CLOCK_DIV_1) /* SPICLK Div /1 */
-#define RA_CFG_CANFDCLK_SOURCE (RA_CLOCKS_SOURCE_CLOCK_PLL2R) /* CANFDCLK Src: PLL2R */
-#define RA_CFG_CANFDCLK_DIV (RA_CLOCKS_CANFD_CLOCK_DIV_6) /* CANFDCLK Div /6 */
-#define RA_CFG_GPTCLK_SOURCE (RA_CLOCKS_SOURCE_CLOCK_PLL2P) /* GPTCLK Src: PLL2P */
-#define RA_CFG_GPTCLK_DIV (RA_CLOCKS_GPT_CLOCK_DIV_2) /* GPTCLK Div /2 */
-#define RA_CFG_GPT_COUNT_CLOCK_SOURCE (1) /* GPT Src: PCLKD */
-#define RA_CFG_LCDCLK_SOURCE (RA_CLOCKS_SOURCE_CLOCK_PLL2R) /* LCDCLK Src: PLL2R */
-#define RA_CFG_LCDCLK_DIV (RA_CLOCKS_LCD_CLOCK_DIV_2) /* LCDCLK Div /2 */
-#define RA_CFG_I3CCLK_SOURCE (RA_CLOCKS_SOURCE_CLOCK_PLL2Q) /* I3CCLK Src: PLL2Q */
-#define RA_CFG_I3CCLK_DIV (RA_CLOCKS_I3C_CLOCK_DIV_4) /* I3CCLK Div /4 */
-#define RA_CFG_UCLK_SOURCE (RA_CLOCKS_SOURCE_CLOCK_PLL2R) /* USBCLK Src: PLL2R */
-#define RA_CFG_UCLK_DIV (RA_CLOCKS_USB_CLOCK_DIV_10) /* USBCLK Div /10 */
-#define RA_CFG_USB60CLK_SOURCE (RA_CLOCKS_SOURCE_CLOCK_PLL2R) /* USB60CLK Src: PLL2R */
-#define RA_CFG_USB60CLK_DIV (RA_CLOCKS_USB60_CLOCK_DIV_8) /* USB60CLK Div /8 */
-#define RA_CFG_OCTACLK_SOURCE (RA_CLOCKS_SOURCE_CLOCK_PLL1Q) /* OCTACLK Src: PLL1Q */
-#define RA_CFG_OCTACLK_DIV (RA_CLOCKS_OCTA_CLOCK_DIV_1) /* OCTACLK Div /1 */
-#define RA_CFG_ADCCLK_SOURCE (RA_CLOCKS_SOURCE_CLOCK_PLL2R) /* ADCCLK Src: PLL2R */
-#define RA_CFG_ADCCLK_DIV (RA_CLOCKS_ADC_CLOCK_DIV_4) /* ADCCLK Div /4 */
-#define RA_CFG_ESWCLK_SOURCE (RA_CLOCKS_SOURCE_CLOCK_PLL1P) /* ESWCLK Src: PLL1P */
-#define RA_CFG_ESWCLK_DIV (RA_CLOCKS_ESW_CLOCK_DIV_4) /* ESWCLK Div /4 */
-#define RA_CFG_ESWPHYCLK_SOURCE (RA_CLOCKS_SOURCE_CLOCK_PLL1P) /* ESWPHYCLK Src: PLL1P */
-#define RA_CFG_ESWPHYCLK_DIV (RA_CLOCKS_ESWPHY_CLOCK_DIV_2) /* ESWPHYCLK Div /2 */
-#define RA_CFG_ETHPHYCLK_SOURCE (RA_CLOCKS_SOURCE_CLOCK_PLL2Q) /* ETHPHYCLK Src: PLL2Q */
-#define RA_CFG_ETHPHYCLK_DIV (RA_CLOCKS_ETHPHY_CLOCK_DIV_32) /* ETHPHYCLK Div /32 */
+/* PLL1 Configuration - derived from CONFIG_RA_* */
+#define RA_CFG_PLL_SOURCE             CONFIG_RA_PLL_SOURCE
+#define RA_CFG_PLL_DIV                CONFIG_RA_PLL_DIV
+#define RA_CFG_PLL_MUL                RA_CLOCKS_PLL_MUL(CONFIG_RA_PLL_MUL, 0)
+#define RA_CFG_PLL_FREQUENCY_HZ       RA_PLL_FREQUENCY
+#define RA_CFG_PLODIVP                CONFIG_RA_PLL1P_DIV
+#define RA_CFG_PLODIVQ                CONFIG_RA_PLL1Q_DIV
+#define RA_CFG_PLODIVR                CONFIG_RA_PLL1R_DIV
 
-#define RA_PRV_PCLKA_DIV_VALUE           RA_PRV_SCKDIVCR_DIV_VALUE(RA_CFG_PCLKA_DIV)
-#define RA_PRV_PCLKB_DIV_VALUE           RA_PRV_SCKDIVCR_DIV_VALUE(RA_CFG_PCLKB_DIV)
-#define RA_PRV_PCLKC_DIV_VALUE           RA_PRV_SCKDIVCR_DIV_VALUE(RA_CFG_PCLKC_DIV)
-#define RA_PRV_PCLKD_DIV_VALUE           RA_PRV_SCKDIVCR_DIV_VALUE(RA_CFG_PCLKD_DIV)
-#define RA_PRV_PCLKE_DIV_VALUE           RA_PRV_SCKDIVCR_DIV_VALUE(RA_CFG_PCLKE_DIV)
-#define RA_PRV_BCLK_DIV_VALUE            RA_PRV_SCKDIVCR_DIV_VALUE(RA_CFG_BCLK_DIV)
-#define RA_PRV_FCLK_DIV_VALUE            RA_PRV_SCKDIVCR_DIV_VALUE(RA_CFG_FCLK_DIV)
-#define RA_PRV_MRICLK_DIV_VALUE          RA_PRV_SCKDIVCR_DIV_VALUE(RA_CFG_MRICLK_DIV)
+/* PLL2 Configuration - derived from CONFIG_RA_* */
+#define RA_CFG_PLL2_SOURCE            CONFIG_RA_PLL2_SOURCE
+#define RA_CFG_PLL2_DIV               CONFIG_RA_PLL2_DIV
+#define RA_CFG_PLL2_MUL               RA_CLOCKS_PLL_MUL(CONFIG_RA_PLL2_MUL, 0)
+#define RA_CFG_PLL2_FREQUENCY_HZ      RA_PLL2_FREQUENCY
+#define RA_CFG_PL2ODIVP               CONFIG_RA_PLL2P_DIV
+#define RA_CFG_PLL2P_FREQUENCY_HZ     RA_PLL2P_FREQUENCY
+#define RA_CFG_PL2ODIVQ               CONFIG_RA_PLL2Q_DIV
+#define RA_CFG_PLL2Q_FREQUENCY_HZ     RA_PLL2Q_FREQUENCY
+#define RA_CFG_PL2ODIVR               CONFIG_RA_PLL2R_DIV
+#define RA_CFG_PLL2R_FREQUENCY_HZ     RA_PLL2R_FREQUENCY
+
+/* System Clock Configuration - derived from CONFIG_RA_* */
+#define RA_CFG_CLOCK_SOURCE           RA_CLOCKS_SOURCE_CLOCK_PLL1P
+#define RA_CFG_CPUCLK_DIV             CONFIG_RA_CPUCLK_DIV
+#define RA_CFG_ICLK_DIV               CONFIG_RA_ICK_DIV
+#define RA_CFG_PCLKA_DIV              CONFIG_RA_PCKA_DIV
+#define RA_CFG_PCLKB_DIV              CONFIG_RA_PCKB_DIV
+#define RA_CFG_PCLKC_DIV              CONFIG_RA_PCKC_DIV
+#define RA_CFG_PCLKD_DIV              CONFIG_RA_PCKD_DIV
+#define RA_CFG_PCLKE_DIV              CONFIG_RA_PCKE_DIV
+#define RA_CFG_BCLK_DIV               CONFIG_RA_BCLK_DIV
+#define RA_CFG_FCLK_DIV               CONFIG_RA_FCLK_DIV
+
+/* RA8P1-specific clocks */
+#ifndef CONFIG_RA_CPUCLK1_DIV
+#  define CONFIG_RA_CPUCLK1_DIV       RA_CLOCKS_SYS_CLOCK_DIV_4
+#endif
+#ifndef CONFIG_RA_NPUCLK_DIV
+#  define CONFIG_RA_NPUCLK_DIV        RA_CLOCKS_SYS_CLOCK_DIV_2
+#endif
+#ifndef CONFIG_RA_MRICLK_DIV
+#  define CONFIG_RA_MRICLK_DIV        RA_CLOCKS_SYS_CLOCK_DIV_4
+#endif
+
+#define RA_CFG_CPUCLK1_DIV            CONFIG_RA_CPUCLK1_DIV
+#define RA_CFG_NPUCLK_DIV             CONFIG_RA_NPUCLK_DIV
+#define RA_CFG_MRICLK_DIV             CONFIG_RA_MRICLK_DIV
+
+/* External Bus Configuration */
+#define RA_CFG_BCLKA_SOURCE           RA_CLOCKS_SOURCE_CLOCK_PLL2Q
+#define RA_CFG_BCLKA_DIV              RA_CLOCKS_BCLKA_CLOCK_DIV_6
+#define RA_CFG_SDCLK_OUTPUT           (1)
+#define RA_CFG_EBCLKA_SEL             (0)
+#define RA_CFG_BCLK_OUTPUT            (2)
+
+/* Clock Output Configuration */
+#define RA_CFG_CLKOUT_SOURCE          RA_CLOCKS_SOURCE_CLOCK_HOCO
+#define RA_CFG_CLKOUT_DIV             RA_CLOCKS_SYS_CLOCK_DIV_1
+
+/* Peripheral Clock Configuration - derived from CONFIG_RA_* where available */
+#ifndef CONFIG_RA_SCICLK_SOURCE
+#  define CONFIG_RA_SCICLK_SOURCE     RA_CLOCKS_SOURCE_CLOCK_PLL2R
+#endif
+#ifndef CONFIG_RA_SPICLK_SOURCE
+#  define CONFIG_RA_SPICLK_SOURCE     RA_CLOCKS_SOURCE_CLOCK_PLL1Q
+#endif
+#ifndef CONFIG_RA_CANFDCLK_SOURCE
+#  define CONFIG_RA_CANFDCLK_SOURCE   RA_CLOCKS_SOURCE_CLOCK_PLL2R
+#endif
+#ifndef CONFIG_RA_GPTCLK_SOURCE
+#  define CONFIG_RA_GPTCLK_SOURCE     RA_CLOCKS_SOURCE_CLOCK_PLL2P
+#endif
+#ifndef CONFIG_RA_LCDCLK_SOURCE
+#  define CONFIG_RA_LCDCLK_SOURCE     RA_CLOCKS_SOURCE_CLOCK_PLL2R
+#endif
+#ifndef CONFIG_RA_LCDCLK_DIV
+#  define CONFIG_RA_LCDCLK_DIV        RA_CLOCKS_LCD_CLOCK_DIV_2
+#endif
+#ifndef CONFIG_RA_I3CCLK_SOURCE
+#  define CONFIG_RA_I3CCLK_SOURCE     RA_CLOCKS_SOURCE_CLOCK_PLL2Q
+#endif
+#ifndef CONFIG_RA_I3CCLK_DIV
+#  define CONFIG_RA_I3CCLK_DIV        RA_CLOCKS_I3C_CLOCK_DIV_4
+#endif
+#ifndef CONFIG_RA_USBCLK_SOURCE
+#  define CONFIG_RA_USBCLK_SOURCE     RA_CLOCKS_SOURCE_CLOCK_PLL2R
+#endif
+#ifndef CONFIG_RA_USB60CLK_SOURCE
+#  define CONFIG_RA_USB60CLK_SOURCE   RA_CLOCKS_SOURCE_CLOCK_PLL2R
+#endif
+#ifndef CONFIG_RA_USB60CLK_DIV
+#  define CONFIG_RA_USB60CLK_DIV      RA_CLOCKS_USB60_CLOCK_DIV_8
+#endif
+#ifndef CONFIG_RA_OCTACLK_SOURCE
+#  define CONFIG_RA_OCTACLK_SOURCE    RA_CLOCKS_SOURCE_CLOCK_PLL1Q
+#endif
+#ifndef CONFIG_RA_ADCCLK_SOURCE
+#  define CONFIG_RA_ADCCLK_SOURCE     RA_CLOCKS_SOURCE_CLOCK_PLL2R
+#endif
+#ifndef CONFIG_RA_ESWCLK_SOURCE
+#  define CONFIG_RA_ESWCLK_SOURCE     RA_CLOCKS_SOURCE_CLOCK_PLL1P
+#endif
+#ifndef CONFIG_RA_ESWCLK_DIV
+#  define CONFIG_RA_ESWCLK_DIV        RA_CLOCKS_ESW_CLOCK_DIV_4
+#endif
+#ifndef CONFIG_RA_ESWPHYCLK_SOURCE
+#  define CONFIG_RA_ESWPHYCLK_SOURCE  RA_CLOCKS_SOURCE_CLOCK_PLL1P
+#endif
+#ifndef CONFIG_RA_ESWPHYCLK_DIV
+#  define CONFIG_RA_ESWPHYCLK_DIV     RA_CLOCKS_ESWPHY_CLOCK_DIV_2
+#endif
+#ifndef CONFIG_RA_ETHPHYCLK_SOURCE
+#  define CONFIG_RA_ETHPHYCLK_SOURCE  RA_CLOCKS_SOURCE_CLOCK_PLL2Q
+#endif
+#ifndef CONFIG_RA_ETHPHYCLK_DIV
+#  define CONFIG_RA_ETHPHYCLK_DIV     RA_CLOCKS_ETHPHY_CLOCK_DIV_32
+#endif
+
+/* Peripheral clock macros */
+#define RA_CFG_SCICLK_SOURCE          CONFIG_RA_SCICLK_SOURCE
+#define RA_CFG_SCICLK_DIV             CONFIG_RA_SCICLK_DIV
+#define RA_CFG_SPICLK_SOURCE          CONFIG_RA_SPICLK_SOURCE
+#define RA_CFG_SPICLK_DIV             CONFIG_RA_SPICLK_DIV
+#define RA_CFG_CANFDCLK_SOURCE        CONFIG_RA_CANFDCLK_SOURCE
+#define RA_CFG_CANFDCLK_DIV           CONFIG_RA_CANFDCLK_DIV
+#define RA_CFG_GPTCLK_SOURCE          CONFIG_RA_GPTCLK_SOURCE
+#define RA_CFG_GPTCLK_DIV             CONFIG_RA_GPTCLK_DIV
+#define RA_CFG_GPT_COUNT_CLOCK_SOURCE (1)
+#define RA_CFG_LCDCLK_SOURCE          CONFIG_RA_LCDCLK_SOURCE
+#define RA_CFG_LCDCLK_DIV             CONFIG_RA_LCDCLK_DIV
+#define RA_CFG_I3CCLK_SOURCE          CONFIG_RA_I3CCLK_SOURCE
+#define RA_CFG_I3CCLK_DIV             CONFIG_RA_I3CCLK_DIV
+#define RA_CFG_UCLK_SOURCE            CONFIG_RA_USBCLK_SOURCE
+#define RA_CFG_UCLK_DIV               CONFIG_RA_USBCLK_DIV
+#define RA_CFG_USB60CLK_SOURCE        CONFIG_RA_USB60CLK_SOURCE
+#define RA_CFG_USB60CLK_DIV           CONFIG_RA_USB60CLK_DIV
+#define RA_CFG_OCTACLK_SOURCE         CONFIG_RA_OCTACLK_SOURCE
+#define RA_CFG_OCTACLK_DIV            CONFIG_RA_OCTACLK_DIV
+#define RA_CFG_ADCCLK_SOURCE          CONFIG_RA_ADCCLK_SOURCE
+#define RA_CFG_ADCCLK_DIV             CONFIG_RA_ADCCLK_DIV
+#define RA_CFG_ESWCLK_SOURCE          CONFIG_RA_ESWCLK_SOURCE
+#define RA_CFG_ESWCLK_DIV             CONFIG_RA_ESWCLK_DIV
+#define RA_CFG_ESWPHYCLK_SOURCE       CONFIG_RA_ESWPHYCLK_SOURCE
+#define RA_CFG_ESWPHYCLK_DIV          CONFIG_RA_ESWPHYCLK_DIV
+#define RA_CFG_ETHPHYCLK_SOURCE       CONFIG_RA_ETHPHYCLK_SOURCE
+#define RA_CFG_ETHPHYCLK_DIV          CONFIG_RA_ETHPHYCLK_DIV
+
+/* Derived Divider Values for Startup Calculations */
+#define RA_PRV_CPUCLK_DIV_VALUE       RA_PRV_SCKDIVCR_DIV_VALUE(RA_CFG_CPUCLK_DIV)
+#define RA_PRV_ICLK_DIV_VALUE         RA_PRV_SCKDIVCR_DIV_VALUE(RA_CFG_ICLK_DIV)
+#define RA_PRV_PCLKA_DIV_VALUE        RA_PRV_SCKDIVCR_DIV_VALUE(RA_CFG_PCLKA_DIV)
+#define RA_PRV_PCLKB_DIV_VALUE        RA_PRV_SCKDIVCR_DIV_VALUE(RA_CFG_PCLKB_DIV)
+#define RA_PRV_PCLKC_DIV_VALUE        RA_PRV_SCKDIVCR_DIV_VALUE(RA_CFG_PCLKC_DIV)
+#define RA_PRV_PCLKD_DIV_VALUE        RA_PRV_SCKDIVCR_DIV_VALUE(RA_CFG_PCLKD_DIV)
+#define RA_PRV_PCLKE_DIV_VALUE        RA_PRV_SCKDIVCR_DIV_VALUE(RA_CFG_PCLKE_DIV)
+#define RA_PRV_BCLK_DIV_VALUE         RA_PRV_SCKDIVCR_DIV_VALUE(RA_CFG_BCLK_DIV)
+#define RA_PRV_FCLK_DIV_VALUE         RA_PRV_SCKDIVCR_DIV_VALUE(RA_CFG_FCLK_DIV)
+#define RA_PRV_MRICLK_DIV_VALUE       RA_PRV_SCKDIVCR_DIV_VALUE(RA_CFG_MRICLK_DIV)
 
 /* Startup clock frequency of each system clock. These macros are only helpful if the system clock and dividers have
  * not changed since startup. These macros are not used in FSP modules except for the clock startup code. */

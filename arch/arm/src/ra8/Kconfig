@@ -421,11 +421,54 @@ config RA_CLOCK_PLL
 
 endchoice
 
+# Clock Profile Configuration (Phase 1 Optimization)
+choice
+   prompt "Clock Configuration Profile"
+   default RA_CLOCK_PROFILE_DEFAULT
+   help
+     Select a validated clock configuration profile that matches FSP defaults.
+     This simplifies clock setup by providing tested configurations.
+
+     - Default: Maximum performance (RA8E1: 360MHz, RA8P1: 1000MHz)
+     - Low Power: Reduced frequency for power-sensitive applications (RA8E1: 120MHz, RA8P1: 500MHz)
+     - Custom: Manual configuration of all clock parameters (for advanced users)
+
+config RA_CLOCK_PROFILE_DEFAULT
+   bool "Default Profile (Maximum Performance)"
+   help
+     Default configuration:
+     RA8E1: HOCO 20MHz -> PLL 720MHz -> PLL1P /2 -> CPU 360MHz
+           ICLK 120MHz, PCLKA 120MHz, PCLKB 60MHz, PCLKD 120MHz, FCLK 60MHz
+     RA8P1: XTAL 24MHz -> PLL 2000MHz -> PLL1P /2 -> CPU 1000MHz
+           PLL2 2400MHz -> peripherals at 600/800/480MHz
+           ICLK 250MHz, PCLKA 125MHz, PCLKB 62.5MHz, PCLKD 250MHz, FCLK 125MHz
+
+config RA_CLOCK_PROFILE_LOW_POWER
+   bool "Low Power Profile"
+   help
+     Reduced frequency for power-sensitive applications:
+     RA8E1: HOCO 20MHz -> PLL 480MHz -> PLL1P /4 -> CPU 120MHz
+           ICLK 60MHz, PCLKA 60MHz, PCLKB 30MHz, PCLKD 60MHz, FCLK 30MHz
+     RA8P1: XTAL 24MHz -> PLL 1000MHz -> PLL1P /2 -> CPU 500MHz
+           PLL2 1200MHz -> peripherals at 300/400/240MHz
+           ICLK 125MHz, PCLKA 62.5MHz, PCLKB 31.25MHz, PCLKD 125MHz, FCLK 62.5MHz
+
+config RA_CLOCK_PROFILE_CUSTOM
+   bool "Custom Profile (Advanced Users)"
+   help
+     Manually configure all clock parameters. This provides full control
+     over PLL settings, dividers, and peripheral clock sources.
+     Use this only if you need specific frequencies not covered by presets.
+
+endchoice
+
 # Automatic clock frequency calculation
 config RA_MCU_CLOCK_FREQUENCY
    int "MCU Core Clock Frequency (Hz)"
-   default 360000000 if RA_CLOCK_PLL1P
-   default 360000000 if RA_CLOCK_PLL
+   default 360000000 if RA_CLOCK_PLL1P && !RA_CLOCK_PROFILE_LOW_POWER
+   default 360000000 if RA_CLOCK_PLL && !RA_CLOCK_PROFILE_LOW_POWER
+   default 120000000 if (RA_CLOCK_PLL1P || RA_CLOCK_PLL) && RA_CLOCK_PROFILE_LOW_POWER && RA8E1_GROUP
+   default 500000000 if (RA_CLOCK_PLL1P || RA_CLOCK_PLL) && RA_CLOCK_PROFILE_LOW_POWER && RA8P1_GROUP
    default 48000000 if RA_CLOCK_HOCO
    default 8000000 if RA_CLOCK_MOCO
    default 32768 if RA_CLOCK_LOCO
@@ -433,6 +476,7 @@ config RA_MCU_CLOCK_FREQUENCY
    help
      Set the MCU core clock frequency in Hertz.
      RA8E1 supports up to 360MHz with PLL1P enabled.
+     RA8P1 supports up to 1000MHz with PLL1P enabled.
 
 config RA_HOCO_FREQUENCY
    int "HOCO Frequency (Hz)"
@@ -456,6 +500,7 @@ config RA_XTAL_FREQUENCY
 if RA_CLOCK_PLL || RA_CLOCK_PLL1P
 
 menu "PLL Configuration"
+   visible if RA_CLOCK_PROFILE_CUSTOM
 
 choice
    prompt "PLL Source Clock"
@@ -604,107 +649,437 @@ endmenu
 endif # RA_CLOCK_PLL || RA_CLOCK_PLL1P
 
 menu "System Clock Dividers"
+   visible if RA_CLOCK_PROFILE_CUSTOM
+
+comment "Phase 2 Optimization: Direct divider value selection (no encoding lookup needed)"
+
+choice
+   prompt "CPU Clock Divider"
+   default RA_CPUCLK_DIV_1
+   help
+     Select CPU clock divider. Shows actual divider value directly.
+
+config RA_CPUCLK_DIV_1
+   bool "Divide by 1 (no division)"
+config RA_CPUCLK_DIV_2
+   bool "Divide by 2"
+config RA_CPUCLK_DIV_4
+   bool "Divide by 4"
+config RA_CPUCLK_DIV_8
+   bool "Divide by 8"
+config RA_CPUCLK_DIV_16
+   bool "Divide by 16"
+config RA_CPUCLK_DIV_32
+   bool "Divide by 32"
+config RA_CPUCLK_DIV_64
+   bool "Divide by 64"
+config RA_CPUCLK_DIV_128
+   bool "Divide by 128"
+config RA_CPUCLK_DIV_3
+   bool "Divide by 3"
+config RA_CPUCLK_DIV_6
+   bool "Divide by 6"
+config RA_CPUCLK_DIV_12
+   bool "Divide by 12"
+config RA_CPUCLK_DIV_24
+   bool "Divide by 24"
+endchoice
 
 config RA_CPUCLK_DIV
-   int "CPU Clock Divider"
-   default 0
-   range 0 11
+   int
+   default 0 if RA_CPUCLK_DIV_1
+   default 1 if RA_CPUCLK_DIV_2
+   default 2 if RA_CPUCLK_DIV_4
+   default 3 if RA_CPUCLK_DIV_8
+   default 4 if RA_CPUCLK_DIV_16
+   default 5 if RA_CPUCLK_DIV_32
+   default 6 if RA_CPUCLK_DIV_64
+   default 7 if RA_CPUCLK_DIV_128
+   default 8 if RA_CPUCLK_DIV_3
+   default 9 if RA_CPUCLK_DIV_6
+   default 10 if RA_CPUCLK_DIV_12
+   default 11 if RA_CPUCLK_DIV_24
+
+choice
+   prompt "ICLK Divider (Internal System Bus Clock)"
+   default RA_ICK_DIV_3 if RA8E1_GROUP
+   default RA_ICK_DIV_4 if RA8P1_GROUP
    help
-     CPU clock divider (encoded value).
-     Encoding: 0=/1, 1=/2, 2=/4, 3=/8, 4=/16, 5=/32, 6=/64, 7=/128, 8=/3, 9=/6, 10=/12, 11=/24
-     Default 0 (/1) uses full system clock speed.
+     Select internal clock (ICLK) divider for system bus.
+     RA8E1: /3 gives 120MHz from 360MHz
+     RA8P1: /4 gives 250MHz from 1000MHz
+
+config RA_ICK_DIV_1
+   bool "Divide by 1"
+config RA_ICK_DIV_2
+   bool "Divide by 2"
+config RA_ICK_DIV_4
+   bool "Divide by 4"
+config RA_ICK_DIV_8
+   bool "Divide by 8"
+config RA_ICK_DIV_16
+   bool "Divide by 16"
+config RA_ICK_DIV_32
+   bool "Divide by 32"
+config RA_ICK_DIV_64
+   bool "Divide by 64"
+config RA_ICK_DIV_3
+   bool "Divide by 3"
+config RA_ICK_DIV_6
+   bool "Divide by 6"
+config RA_ICK_DIV_12
+   bool "Divide by 12"
+config RA_ICK_DIV_24
+   bool "Divide by 24"
+endchoice
 
 config RA_ICK_DIV
-   int "ICLK Divider"
-   default 8 if RA8E1_GROUP
-   default 2 if RA8P1_GROUP
-   range 0 11
+   int
+   default 0 if RA_ICK_DIV_1
+   default 1 if RA_ICK_DIV_2
+   default 2 if RA_ICK_DIV_4
+   default 3 if RA_ICK_DIV_8
+   default 4 if RA_ICK_DIV_16
+   default 5 if RA_ICK_DIV_32
+   default 6 if RA_ICK_DIV_64
+   default 8 if RA_ICK_DIV_3
+   default 9 if RA_ICK_DIV_6
+   default 10 if RA_ICK_DIV_12
+   default 11 if RA_ICK_DIV_24
+
+choice
+   prompt "PCLKA Divider (Peripheral Clock A)"
+   default RA_PCKA_DIV_3 if RA8E1_GROUP
+   default RA_PCKA_DIV_8 if RA8P1_GROUP
    help
-     Internal clock (ICLK) divider for system bus (encoded value).
-     Encoding: 0=/1, 1=/2, 2=/4, 3=/8, 4=/16, 5=/32, 6=/64, 8=/3, 9=/6, 10=/12, 11=/24
-     RA8E1: default 8 (/3) gives 120MHz from 360MHz system clock
-     RA8P1: default 2 (/4) gives 250MHz from 1000MHz system clock
+     Select peripheral clock A divider.
+     RA8E1: /3 gives 120MHz
+     RA8P1: /8 gives 125MHz
+
+config RA_PCKA_DIV_1
+   bool "Divide by 1"
+config RA_PCKA_DIV_2
+   bool "Divide by 2"
+config RA_PCKA_DIV_4
+   bool "Divide by 4"
+config RA_PCKA_DIV_8
+   bool "Divide by 8"
+config RA_PCKA_DIV_16
+   bool "Divide by 16"
+config RA_PCKA_DIV_32
+   bool "Divide by 32"
+config RA_PCKA_DIV_64
+   bool "Divide by 64"
+config RA_PCKA_DIV_3
+   bool "Divide by 3"
+config RA_PCKA_DIV_6
+   bool "Divide by 6"
+config RA_PCKA_DIV_12
+   bool "Divide by 12"
+config RA_PCKA_DIV_24
+   bool "Divide by 24"
+endchoice
 
 config RA_PCKA_DIV
-   int "PCLKA Divider"
-   default 8 if RA8E1_GROUP
-   default 3 if RA8P1_GROUP
-   range 0 11
+   int
+   default 0 if RA_PCKA_DIV_1
+   default 1 if RA_PCKA_DIV_2
+   default 2 if RA_PCKA_DIV_4
+   default 3 if RA_PCKA_DIV_8
+   default 4 if RA_PCKA_DIV_16
+   default 5 if RA_PCKA_DIV_32
+   default 6 if RA_PCKA_DIV_64
+   default 8 if RA_PCKA_DIV_3
+   default 9 if RA_PCKA_DIV_6
+   default 10 if RA_PCKA_DIV_12
+   default 11 if RA_PCKA_DIV_24
+
+choice
+   prompt "PCLKB Divider (Peripheral Clock B)"
+   default RA_PCKB_DIV_6 if RA8E1_GROUP
+   default RA_PCKB_DIV_16 if RA8P1_GROUP
    help
-     Peripheral Clock A divider (encoded value).
-     Encoding: 0=/1, 1=/2, 2=/4, 3=/8, 4=/16, 5=/32, 6=/64, 8=/3, 9=/6, 10=/12, 11=/24
-     RA8E1: default 8 (/3) gives 120MHz
-     RA8P1: default 3 (/8) gives 125MHz
+     Select peripheral clock B divider.
+     RA8E1: /6 gives 60MHz
+     RA8P1: /16 gives 62.5MHz
+
+config RA_PCKB_DIV_1
+   bool "Divide by 1"
+config RA_PCKB_DIV_2
+   bool "Divide by 2"
+config RA_PCKB_DIV_4
+   bool "Divide by 4"
+config RA_PCKB_DIV_8
+   bool "Divide by 8"
+config RA_PCKB_DIV_16
+   bool "Divide by 16"
+config RA_PCKB_DIV_32
+   bool "Divide by 32"
+config RA_PCKB_DIV_64
+   bool "Divide by 64"
+config RA_PCKB_DIV_3
+   bool "Divide by 3"
+config RA_PCKB_DIV_6
+   bool "Divide by 6"
+config RA_PCKB_DIV_12
+   bool "Divide by 12"
+config RA_PCKB_DIV_24
+   bool "Divide by 24"
+endchoice
 
 config RA_PCKB_DIV
-   int "PCLKB Divider"
-   default 9 if RA8E1_GROUP
-   default 4 if RA8P1_GROUP
-   range 0 11
+   int
+   default 0 if RA_PCKB_DIV_1
+   default 1 if RA_PCKB_DIV_2
+   default 2 if RA_PCKB_DIV_4
+   default 3 if RA_PCKB_DIV_8
+   default 4 if RA_PCKB_DIV_16
+   default 5 if RA_PCKB_DIV_32
+   default 6 if RA_PCKB_DIV_64
+   default 8 if RA_PCKB_DIV_3
+   default 9 if RA_PCKB_DIV_6
+   default 10 if RA_PCKB_DIV_12
+   default 11 if RA_PCKB_DIV_24
+
+choice
+   prompt "PCLKC Divider (Peripheral Clock C)"
+   default RA_PCKC_DIV_6 if RA8E1_GROUP
+   default RA_PCKC_DIV_8 if RA8P1_GROUP
    help
-     Peripheral Clock B divider (encoded value).
-     Encoding: 0=/1, 1=/2, 2=/4, 3=/8, 4=/16, 5=/32, 6=/64, 8=/3, 9=/6, 10=/12, 11=/24
-     RA8E1: default 9 (/6) gives 60MHz
-     RA8P1: default 4 (/16) gives 62.5MHz
+     Select peripheral clock C divider.
+     RA8E1: /6 gives 60MHz
+     RA8P1: /8 gives 125MHz
+
+config RA_PCKC_DIV_1
+   bool "Divide by 1"
+config RA_PCKC_DIV_2
+   bool "Divide by 2"
+config RA_PCKC_DIV_4
+   bool "Divide by 4"
+config RA_PCKC_DIV_8
+   bool "Divide by 8"
+config RA_PCKC_DIV_16
+   bool "Divide by 16"
+config RA_PCKC_DIV_32
+   bool "Divide by 32"
+config RA_PCKC_DIV_64
+   bool "Divide by 64"
+config RA_PCKC_DIV_3
+   bool "Divide by 3"
+config RA_PCKC_DIV_6
+   bool "Divide by 6"
+config RA_PCKC_DIV_12
+   bool "Divide by 12"
+config RA_PCKC_DIV_24
+   bool "Divide by 24"
+endchoice
 
 config RA_PCKC_DIV
-   int "PCLKC Divider"
-   default 9 if RA8E1_GROUP
-   default 3 if RA8P1_GROUP
-   range 0 11
+   int
+   default 0 if RA_PCKC_DIV_1
+   default 1 if RA_PCKC_DIV_2
+   default 2 if RA_PCKC_DIV_4
+   default 3 if RA_PCKC_DIV_8
+   default 4 if RA_PCKC_DIV_16
+   default 5 if RA_PCKC_DIV_32
+   default 6 if RA_PCKC_DIV_64
+   default 8 if RA_PCKC_DIV_3
+   default 9 if RA_PCKC_DIV_6
+   default 10 if RA_PCKC_DIV_12
+   default 11 if RA_PCKC_DIV_24
+
+choice
+   prompt "PCLKD Divider (Peripheral Clock D)"
+   default RA_PCKD_DIV_3 if RA8E1_GROUP
+   default RA_PCKD_DIV_4 if RA8P1_GROUP
    help
-     Peripheral Clock C divider (encoded value).
-     Encoding: 0=/1, 1=/2, 2=/4, 3=/8, 4=/16, 5=/32, 6=/64, 8=/3, 9=/6, 10=/12, 11=/24
-     RA8E1: default 9 (/6) gives 60MHz
-     RA8P1: default 3 (/8) gives 125MHz
+     Select peripheral clock D divider.
+     RA8E1: /3 gives 120MHz
+     RA8P1: /4 gives 250MHz
+
+config RA_PCKD_DIV_1
+   bool "Divide by 1"
+config RA_PCKD_DIV_2
+   bool "Divide by 2"
+config RA_PCKD_DIV_4
+   bool "Divide by 4"
+config RA_PCKD_DIV_8
+   bool "Divide by 8"
+config RA_PCKD_DIV_16
+   bool "Divide by 16"
+config RA_PCKD_DIV_32
+   bool "Divide by 32"
+config RA_PCKD_DIV_64
+   bool "Divide by 64"
+config RA_PCKD_DIV_3
+   bool "Divide by 3"
+config RA_PCKD_DIV_6
+   bool "Divide by 6"
+config RA_PCKD_DIV_12
+   bool "Divide by 12"
+config RA_PCKD_DIV_24
+   bool "Divide by 24"
+endchoice
 
 config RA_PCKD_DIV
-   int "PCLKD Divider"
-   default 8 if RA8E1_GROUP
-   default 2 if RA8P1_GROUP
-   range 0 11
+   int
+   default 0 if RA_PCKD_DIV_1
+   default 1 if RA_PCKD_DIV_2
+   default 2 if RA_PCKD_DIV_4
+   default 3 if RA_PCKD_DIV_8
+   default 4 if RA_PCKD_DIV_16
+   default 5 if RA_PCKD_DIV_32
+   default 6 if RA_PCKD_DIV_64
+   default 8 if RA_PCKD_DIV_3
+   default 9 if RA_PCKD_DIV_6
+   default 10 if RA_PCKD_DIV_12
+   default 11 if RA_PCKD_DIV_24
+
+choice
+   prompt "PCLKE Divider (Peripheral Clock E)"
+   default RA_PCKE_DIV_3 if RA8E1_GROUP
+   default RA_PCKE_DIV_4 if RA8P1_GROUP
    help
-     Peripheral Clock D divider (encoded value).
-     Encoding: 0=/1, 1=/2, 2=/4, 3=/8, 4=/16, 5=/32, 6=/64, 8=/3, 9=/6, 10=/12, 11=/24
-     RA8E1: default 8 (/3) gives 120MHz
-     RA8P1: default 2 (/4) gives 250MHz
+     Select peripheral clock E divider.
+     RA8E1: /3 gives 120MHz
+     RA8P1: /4 gives 250MHz
+
+config RA_PCKE_DIV_1
+   bool "Divide by 1"
+config RA_PCKE_DIV_2
+   bool "Divide by 2"
+config RA_PCKE_DIV_4
+   bool "Divide by 4"
+config RA_PCKE_DIV_8
+   bool "Divide by 8"
+config RA_PCKE_DIV_16
+   bool "Divide by 16"
+config RA_PCKE_DIV_32
+   bool "Divide by 32"
+config RA_PCKE_DIV_64
+   bool "Divide by 64"
+config RA_PCKE_DIV_3
+   bool "Divide by 3"
+config RA_PCKE_DIV_6
+   bool "Divide by 6"
+config RA_PCKE_DIV_12
+   bool "Divide by 12"
+config RA_PCKE_DIV_24
+   bool "Divide by 24"
+endchoice
 
 config RA_PCKE_DIV
-   int "PCLKE Divider"
-   default 8 if RA8E1_GROUP
-   default 2 if RA8P1_GROUP
-   range 0 11
+   int
+   default 0 if RA_PCKE_DIV_1
+   default 1 if RA_PCKE_DIV_2
+   default 2 if RA_PCKE_DIV_4
+   default 3 if RA_PCKE_DIV_8
+   default 4 if RA_PCKE_DIV_16
+   default 5 if RA_PCKE_DIV_32
+   default 6 if RA_PCKE_DIV_64
+   default 8 if RA_PCKE_DIV_3
+   default 9 if RA_PCKE_DIV_6
+   default 10 if RA_PCKE_DIV_12
+   default 11 if RA_PCKE_DIV_24
+
+choice
+   prompt "BCLK Divider (Bus Clock)"
+   default RA_BCLK_DIV_12 if RA8E1_GROUP
+   default RA_BCLK_DIV_8 if RA8P1_GROUP
    help
-     Peripheral Clock E divider (encoded value).
-     Encoding: 0=/1, 1=/2, 2=/4, 3=/8, 4=/16, 5=/32, 6=/64, 8=/3, 9=/6, 10=/12, 11=/24
-     RA8E1: default 8 (/3) gives 120MHz
-     RA8P1: default 2 (/4) gives 250MHz
+     Select bus clock divider.
+     RA8E1: /12 gives 30MHz
+     RA8P1: /8 gives 125MHz
+
+config RA_BCLK_DIV_1
+   bool "Divide by 1"
+config RA_BCLK_DIV_2
+   bool "Divide by 2"
+config RA_BCLK_DIV_4
+   bool "Divide by 4"
+config RA_BCLK_DIV_8
+   bool "Divide by 8"
+config RA_BCLK_DIV_16
+   bool "Divide by 16"
+config RA_BCLK_DIV_32
+   bool "Divide by 32"
+config RA_BCLK_DIV_64
+   bool "Divide by 64"
+config RA_BCLK_DIV_3
+   bool "Divide by 3"
+config RA_BCLK_DIV_6
+   bool "Divide by 6"
+config RA_BCLK_DIV_12
+   bool "Divide by 12"
+config RA_BCLK_DIV_24
+   bool "Divide by 24"
+endchoice
 
 config RA_BCLK_DIV
-   int "BCLK Divider"
-   default 10 if RA8E1_GROUP
-   default 3 if RA8P1_GROUP
-   range 0 11
+   int
+   default 0 if RA_BCLK_DIV_1
+   default 1 if RA_BCLK_DIV_2
+   default 2 if RA_BCLK_DIV_4
+   default 3 if RA_BCLK_DIV_8
+   default 4 if RA_BCLK_DIV_16
+   default 5 if RA_BCLK_DIV_32
+   default 6 if RA_BCLK_DIV_64
+   default 8 if RA_BCLK_DIV_3
+   default 9 if RA_BCLK_DIV_6
+   default 10 if RA_BCLK_DIV_12
+   default 11 if RA_BCLK_DIV_24
+
+choice
+   prompt "FCLK Divider (Flash Clock)"
+   default RA_FCLK_DIV_6 if RA8E1_GROUP
+   default RA_FCLK_DIV_8 if RA8P1_GROUP
    help
-     Bus Clock divider (encoded value).
-     Encoding: 0=/1, 1=/2, 2=/4, 3=/8, 4=/16, 5=/32, 6=/64, 8=/3, 9=/6, 10=/12, 11=/24
-     RA8E1: default 10 (/12) gives 30MHz
-     RA8P1: default 3 (/8) gives 125MHz
+     Select flash clock divider.
+     RA8E1: /6 gives 60MHz
+     RA8P1: /8 gives 125MHz
+
+config RA_FCLK_DIV_1
+   bool "Divide by 1"
+config RA_FCLK_DIV_2
+   bool "Divide by 2"
+config RA_FCLK_DIV_4
+   bool "Divide by 4"
+config RA_FCLK_DIV_8
+   bool "Divide by 8"
+config RA_FCLK_DIV_16
+   bool "Divide by 16"
+config RA_FCLK_DIV_32
+   bool "Divide by 32"
+config RA_FCLK_DIV_64
+   bool "Divide by 64"
+config RA_FCLK_DIV_3
+   bool "Divide by 3"
+config RA_FCLK_DIV_6
+   bool "Divide by 6"
+config RA_FCLK_DIV_12
+   bool "Divide by 12"
+config RA_FCLK_DIV_24
+   bool "Divide by 24"
+endchoice
 
 config RA_FCLK_DIV
-   int "FCLK Divider"
-   default 9 if RA8E1_GROUP
-   default 3 if RA8P1_GROUP
-   range 0 11
-   help
-     Flash Clock divider (encoded value).
-     Encoding: 0=/1, 1=/2, 2=/4, 3=/8, 4=/16, 5=/32, 6=/64, 8=/3, 9=/6, 10=/12, 11=/24
-     RA8E1: default 9 (/6) gives 60MHz
-     RA8P1: default 3 (/8) gives 125MHz
+   int
+   default 0 if RA_FCLK_DIV_1
+   default 1 if RA_FCLK_DIV_2
+   default 2 if RA_FCLK_DIV_4
+   default 3 if RA_FCLK_DIV_8
+   default 4 if RA_FCLK_DIV_16
+   default 5 if RA_FCLK_DIV_32
+   default 6 if RA_FCLK_DIV_64
+   default 8 if RA_FCLK_DIV_3
+   default 9 if RA_FCLK_DIV_6
+   default 10 if RA_FCLK_DIV_12
+   default 11 if RA_FCLK_DIV_24
 
 endmenu
 
 menu "Peripheral Clock Sources"
+   visible if RA_CLOCK_PROFILE_CUSTOM
 
 choice
    prompt "SCI Clock Source"

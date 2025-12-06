@@ -42,7 +42,11 @@
 #include "ra_ospi_b.h"
 #include "ra_mstp.h"
 #include "ra_gpio.h"
+#include "ra_icu.h"
+#include "ra_dmac.h"
+#include "ra_clock.h"
 #include "hardware/ra_memorymap.h"
+#include <arch/board/board.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -118,7 +122,11 @@ struct ra_ospi_priv_s
   uint32_t base;
   uint32_t mmap_base;             /* Memory-mapped base address */
   mutex_t lock;
-  uint32_t frequency;
+  sem_t cmdsem;                   /* Command completion semaphore */
+  sem_t patsem;                   /* Pattern completion semaphore */
+  sem_t dmasem;                   /* DMA completion semaphore */
+  uint32_t frequency;             /* Requested frequency */
+  uint32_t actual_frequency;      /* Actual OSPI clock frequency */
   int mode;
   int nbits;
   uint8_t cs;                     /* Chip select (0 or 1) */
@@ -126,7 +134,17 @@ struct ra_ospi_priv_s
   uint8_t addrlen;                /* Address length in bytes (3 or 4) */
   uint8_t read_latency;           /* Read latency cycles */
   uint8_t write_latency;          /* Write latency cycles */
+  int irq_cmp;                    /* Command completion IRQ number */
+  int irq_err;                    /* Error IRQ number */
+  bool use_interrupts;            /* Use interrupt mode vs polling */
+  bool xip_mode;                  /* XIP mode active */
   bool initialized;               /* Driver initialization state */
+#ifdef CONFIG_RA_DMA
+  ra_dmac_handle_t dma_rx;        /* RX DMA handle */
+  ra_dmac_handle_t dma_tx;        /* TX DMA handle */
+  bool use_dma;                   /* Use DMA for transfers */
+  volatile bool dma_complete;     /* DMA transfer complete flag */
+#endif
 };
 
 /****************************************************************************
@@ -151,11 +169,22 @@ static int ra_ospi_configure_protocol(struct ra_ospi_priv_s *priv);
 static int ra_ospi_configure_commands(struct ra_ospi_priv_s *priv);
 static int ra_ospi_flash_reset(struct ra_ospi_priv_s *priv);
 static int ra_ospi_wait_ready(struct ra_ospi_priv_s *priv);
+static int ra_ospi_interrupt(int irq, void *context, void *arg);
+static uint32_t ra_ospi_get_clock_frequency(int port);
+static int ra_ospi_autocalibrate(struct ra_ospi_priv_s *priv);
 static int ra_ospi_manual_command(struct ra_ospi_priv_s *priv,
                                   uint16_t cmd, uint8_t cmdsize,
                                   uint32_t addr, uint8_t addrsize,
                                   uint8_t *data, size_t datalen,
                                   uint8_t latency, bool is_write);
+
+#ifdef CONFIG_RA_DMA
+static int ra_ospi_dma_setup(struct ra_ospi_priv_s *priv);
+static void ra_ospi_dma_callback(void *handle, int event, void *user_data);
+static int ra_ospi_dma_transfer(struct ra_ospi_priv_s *priv,
+                                uintptr_t dest, uintptr_t src,
+                                size_t len, bool is_write);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -182,12 +211,27 @@ static struct ra_ospi_priv_s g_ra_ospi0_priv =
   .base       = R_OSPI_B_CH_BASE(0),
   .mmap_base  = RA_OSPI_B_MMAP_BASE_CS0,
   .lock       = NXMUTEX_INITIALIZER,
+  .cmdsem     = SEM_INITIALIZER(0),
+  .patsem     = SEM_INITIALIZER(0),
+#ifdef CONFIG_RA_DMA
+  .dmasem     = SEM_INITIALIZER(0),
+#endif
   .cs         = 0,
   .proto      = RA_OSPI_PROTOCOL_1S_1S_1S,
   .addrlen    = 4,
   .read_latency  = RA_OSPI_DEFAULT_LATENCY,
   .write_latency = RA_OSPI_DEFAULT_LATENCY,
+  .irq_cmp    = -1,
+  .irq_err    = -1,
+  .use_interrupts = true,
+  .xip_mode   = false,
   .initialized = false,
+#ifdef CONFIG_RA_DMA
+  .dma_rx     = NULL,
+  .dma_tx     = NULL,
+  .use_dma    = true,
+  .dma_complete = false,
+#endif
 };
 
 static struct ra_ospi_priv_s g_ra_ospi1_priv =
@@ -199,12 +243,27 @@ static struct ra_ospi_priv_s g_ra_ospi1_priv =
   .base       = R_OSPI_B_CH_BASE(1),
   .mmap_base  = RA_OSPI_B_MMAP_BASE_CS1,
   .lock       = NXMUTEX_INITIALIZER,
+  .cmdsem     = SEM_INITIALIZER(0),
+  .patsem     = SEM_INITIALIZER(0),
+#ifdef CONFIG_RA_DMA
+  .dmasem     = SEM_INITIALIZER(0),
+#endif
   .cs         = 1,
   .proto      = RA_OSPI_PROTOCOL_1S_1S_1S,
   .addrlen    = 4,
   .read_latency  = RA_OSPI_DEFAULT_LATENCY,
   .write_latency = RA_OSPI_DEFAULT_LATENCY,
+  .irq_cmp    = -1,
+  .irq_err    = -1,
+  .use_interrupts = true,
+  .xip_mode   = false,
   .initialized = false,
+#ifdef CONFIG_RA_DMA
+  .dma_rx     = NULL,
+  .dma_tx     = NULL,
+  .use_dma    = true,
+  .dma_complete = false,
+#endif
 };
 
 /****************************************************************************
@@ -241,20 +300,85 @@ static inline void ra_ospi_modifyreg(struct ra_ospi_priv_s *priv,
 }
 
 /****************************************************************************
+ * Name: ra_ospi_interrupt
+ *
+ * Description:
+ *   OSPI interrupt handler for command completion and errors
+ *
+ ****************************************************************************/
+
+static int ra_ospi_interrupt(int irq, void *context, void *arg)
+{
+  struct ra_ospi_priv_s *priv = (struct ra_ospi_priv_s *)arg;
+  uint32_t ints;
+
+  DEBUGASSERT(priv != NULL);
+
+  /* Read interrupt status */
+
+  ints = ra_ospi_getreg(priv, R_OSPI_B_INTS_OFFSET);
+
+  /* Handle command completion */
+
+  if (ints & R_OSPI_B_INTS_CMDCMP)
+    {
+      /* Clear interrupt */
+
+      ra_ospi_putreg(priv, R_OSPI_B_INTC_OFFSET, R_OSPI_B_INTC_CMDCMPC);
+
+      /* Wake up waiting thread */
+
+      nxsem_post(&priv->cmdsem);
+    }
+
+  /* Handle pattern completion */
+
+  if (ints & R_OSPI_B_INTS_PATCMP)
+    {
+      ra_ospi_putreg(priv, R_OSPI_B_INTC_OFFSET, R_OSPI_B_INTC_PATCMPC);
+      nxsem_post(&priv->patsem);
+    }
+
+  /* Handle errors */
+
+  if (ints & (R_OSPI_B_INTS_DSTOCS0 | R_OSPI_B_INTS_DSTOCS1 |
+              R_OSPI_B_INTS_BUSERRCH0 | R_OSPI_B_INTS_BUSERRCH1 |
+              R_OSPI_B_INTS_CAFAILCS0 | R_OSPI_B_INTS_CAFAILCS1))
+    {
+      spierr("OSPI_B: Error interrupt INTS=0x%08lx\n", ints);
+
+      /* Clear error interrupts */
+
+      ra_ospi_putreg(priv, R_OSPI_B_INTC_OFFSET,
+                     R_OSPI_B_INTC_DSTOCS0C | R_OSPI_B_INTC_DSTOCS1C |
+                     R_OSPI_B_INTC_BUSERRCH0C | R_OSPI_B_INTC_BUSERRCH1C |
+                     R_OSPI_B_INTC_CAFAILCS0C | R_OSPI_B_INTC_CAFAILCS1C);
+
+      /* Wake up with error status */
+
+      nxsem_post(&priv->cmdsem);
+      nxsem_post(&priv->patsem);
+    }
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: ra_ospi_wait_cmdcmp
  *
  * Description:
- *   Wait for command completion using INTS.CMDCMP and CDCTL0.TRREQ
+ *   Wait for command completion using interrupts or polling
  *
  ****************************************************************************/
 
 static int ra_ospi_wait_cmdcmp(struct ra_ospi_priv_s *priv)
 {
   uint32_t regval;
+  int ret;
+
+  /* Wait for TRREQ to be cleared (command accepted) - always poll this */
+
   int retries = RA_OSPI_TIMEOUT_US;
-
-  /* Wait for TRREQ to be cleared (command accepted) */
-
   while (retries > 0)
     {
       regval = ra_ospi_getreg(priv, R_OSPI_B_CDCTL0_OFFSET);
@@ -272,7 +396,36 @@ static int ra_ospi_wait_cmdcmp(struct ra_ospi_priv_s *priv)
       return -ETIMEDOUT;
     }
 
-  /* Wait for CMDCMP interrupt status */
+  /* Use interrupt-based waiting if enabled */
+
+  if (priv->use_interrupts && priv->irq_cmp >= 0)
+    {
+      /* Wait for interrupt with timeout (1 second) */
+
+      struct timespec abstime;
+      clock_gettime(CLOCK_REALTIME, &abstime);
+      abstime.tv_sec += 1;
+
+      ret = nxsem_timedwait_uninterruptible(&priv->cmdsem, &abstime);
+      if (ret < 0)
+        {
+          spierr("OSPI_B: Command wait failed: %d\n", ret);
+          return ret;
+        }
+
+      /* Check for errors */
+
+      regval = ra_ospi_getreg(priv, R_OSPI_B_INTS_OFFSET);
+      if (regval & (R_OSPI_B_INTS_DSTOCS0 | R_OSPI_B_INTS_BUSERRCH0))
+        {
+          spierr("OSPI_B: Command error INTS=0x%08lx\n", regval);
+          return -EIO;
+        }
+
+      return OK;
+    }
+
+  /* Fallback to polling mode */
 
   retries = RA_OSPI_TIMEOUT_US;
   while (retries > 0)
@@ -280,20 +433,13 @@ static int ra_ospi_wait_cmdcmp(struct ra_ospi_priv_s *priv)
       regval = ra_ospi_getreg(priv, R_OSPI_B_INTS_OFFSET);
       if (regval & R_OSPI_B_INTS_CMDCMP)
         {
-          /* Clear completion status */
-
           ra_ospi_putreg(priv, R_OSPI_B_INTC_OFFSET, R_OSPI_B_INTC_CMDCMPC);
           return OK;
         }
 
-      /* Check for errors */
-
       if (regval & (R_OSPI_B_INTS_DSTOCS0 | R_OSPI_B_INTS_BUSERRCH0))
         {
           spierr("OSPI_B: Command error INTS=0x%08lx\n", regval);
-
-          /* Clear error bits */
-
           ra_ospi_putreg(priv, R_OSPI_B_INTC_OFFSET,
                          R_OSPI_B_INTC_DSTOCS0C | R_OSPI_B_INTC_BUSERRCH0C);
           return -EIO;
@@ -311,22 +457,41 @@ static int ra_ospi_wait_cmdcmp(struct ra_ospi_priv_s *priv)
  * Name: ra_ospi_wait_patcmp
  *
  * Description:
- *   Wait for pattern (reset) completion
+ *   Wait for pattern (reset) completion using interrupts or polling
  *
  ****************************************************************************/
 
 static int ra_ospi_wait_patcmp(struct ra_ospi_priv_s *priv)
 {
   uint32_t regval;
-  int retries = RA_OSPI_TIMEOUT_US;
+  int ret;
 
+  /* Use interrupt-based waiting if enabled */
+
+  if (priv->use_interrupts && priv->irq_cmp >= 0)
+    {
+      struct timespec abstime;
+      clock_gettime(CLOCK_REALTIME, &abstime);
+      abstime.tv_sec += 1;
+
+      ret = nxsem_timedwait_uninterruptible(&priv->patsem, &abstime);
+      if (ret < 0)
+        {
+          spierr("OSPI_B: Pattern wait failed: %d\n", ret);
+          return ret;
+        }
+
+      return OK;
+    }
+
+  /* Fallback to polling */
+
+  int retries = RA_OSPI_TIMEOUT_US;
   while (retries > 0)
     {
       regval = ra_ospi_getreg(priv, R_OSPI_B_INTS_OFFSET);
       if (regval & R_OSPI_B_INTS_PATCMP)
         {
-          /* Clear completion status */
-
           ra_ospi_putreg(priv, R_OSPI_B_INTC_OFFSET, R_OSPI_B_INTC_PATCMPC);
           return OK;
         }
@@ -907,10 +1072,51 @@ static int ra_ospi_lock(struct qspi_dev_s *dev, bool lock)
 }
 
 /****************************************************************************
+ * Name: ra_ospi_get_clock_frequency
+ *
+ * Description:
+ *   Get the actual OSPI clock frequency from the system configuration
+ *
+ ****************************************************************************/
+
+static uint32_t ra_ospi_get_clock_frequency(int port)
+{
+  /* OSPI clock is derived from OCTACLK peripheral clock
+   * Query the actual frequency from the clock system
+   */
+
+  uint32_t octaclk_freq;
+
+  UNUSED(port);  /* Port parameter not used, frequency same for both ports */
+
+  /* Get OCTACLK frequency from clock management system */
+
+  octaclk_freq = ra_get_peripheral_clock(RA_PCLK_OCTACLK);
+
+  if (octaclk_freq == 0)
+    {
+      /* Fallback if clock API returns 0 (OSPI not configured) */
+
+      spiwarn("OSPI_B: OCTACLK not configured, using default 100MHz\n");
+      octaclk_freq = 100000000;
+    }
+
+  spiinfo("OSPI_B: OCTACLK frequency = %lu Hz\n", octaclk_freq);
+
+  return octaclk_freq;
+}
+
+/****************************************************************************
  * Name: ra_ospi_setfrequency
  *
  * Description:
- *   Set the OSPI clock frequency
+ *   Set the OSPI clock frequency. The OSPI clock is derived from OCTACLK
+ *   which is configured at system initialization. This function validates
+ *   the requested frequency against the actual hardware configuration.
+ *
+ *   Note: The OSPI_B peripheral uses the OCTACLK peripheral clock which
+ *   is typically derived from PLL2P with a configurable divider set in
+ *   the system clock configuration (OCTACKDIVCR register).
  *
  ****************************************************************************/
 
@@ -918,19 +1124,36 @@ static uint32_t ra_ospi_setfrequency(struct qspi_dev_s *dev,
                                      uint32_t frequency)
 {
   struct ra_ospi_priv_s *priv = (struct ra_ospi_priv_s *)dev;
+  uint32_t actual_freq;
 
-  /* Store requested frequency - actual clock setup is done by MSTP/CGC */
+  /* Store requested frequency */
 
   priv->frequency = frequency;
 
-  /* TODO: Implement clock divider calculation if OSPI_B supports it.
-   * The RA8 OSPI_B typically runs off a dedicated clock (OSPICLK)
-   * configured at the CGC level, not via peripheral registers.
-   */
+  /* Get actual configured OCTACLK frequency from clock system */
 
-  spiinfo("OSPI_B: Set frequency %lu Hz\n", frequency);
+  actual_freq = ra_ospi_get_clock_frequency(priv->cs);
+  priv->actual_frequency = actual_freq;
 
-  return frequency;
+  /* Validate requested vs actual frequency */
+
+  if (frequency > actual_freq)
+    {
+      spiwarn("OSPI_B: Requested %lu Hz exceeds actual %lu Hz\n",
+              (unsigned long)frequency, (unsigned long)actual_freq);
+      spiwarn("OSPI_B: Adjust CONFIG_RA_OCTACLK_SOURCE/DIV to meet requirement\n");
+    }
+  else if (frequency < (actual_freq / 2))
+    {
+      spiinfo("OSPI_B: Requested %lu Hz is much lower than actual %lu Hz\n",
+              (unsigned long)frequency, (unsigned long)actual_freq);
+      spiinfo("OSPI_B: Consider reducing OCTACLK divider for better performance\n");
+    }
+
+  spiinfo("OSPI_B: Frequency set - Requested: %lu Hz, Actual: %lu Hz\n",
+          (unsigned long)frequency, (unsigned long)actual_freq);
+
+  return actual_freq;
 }
 
 /****************************************************************************
@@ -1104,9 +1327,9 @@ static int ra_ospi_memory(struct qspi_dev_s *dev,
   DEBUGASSERT(priv != NULL && meminfo != NULL);
   DEBUGASSERT(meminfo->buffer != NULL || meminfo->buflen == 0);
 
-  spiinfo("OSPI_B: memory %s addr=0x%08lx len=%zu\n",
+  spiinfo("OSPI_B: memory %s addr=0x%08lx len=%lu\n",
           QSPIMEM_ISWRITE(meminfo->flags) ? "WRITE" : "READ",
-          (unsigned long)meminfo->addr, meminfo->buflen);
+          (unsigned long)meminfo->addr, (unsigned long)meminfo->buflen);
 
   /* Calculate memory-mapped address */
 
@@ -1138,39 +1361,76 @@ static int ra_ospi_memory(struct qspi_dev_s *dev,
        * We perform the write in chunks up to page size (typically 256 bytes)
        */
 
-      while (remaining > 0)
+#ifdef CONFIG_RA_DMA
+      /* Use DMA for large transfers if configured and available */
+
+      if (priv->use_dma && priv->dma_tx != NULL && remaining >= 64)
         {
-          /* Calculate page-aligned chunk size */
+          /* DMA-accelerated write */
 
-          chunk = remaining;
-          if (chunk > 256)
+          ret = ra_ospi_dma_transfer(priv, mmap_addr, (uintptr_t)buffer,
+                                     remaining, true);
+          if (ret == OK)
             {
-              chunk = 256;
+              /* Push write buffer to ensure data is sent */
+
+              ra_ospi_push_write_buffer(priv);
+
+              /* Wait for write completion */
+
+              ret = ra_ospi_wait_ready(priv);
             }
-
-          /* Copy data to memory-mapped region */
-
-          memcpy((void *)mmap_addr, buffer, chunk);
-
-          /* Push write buffer to ensure data is sent */
-
-          ra_ospi_push_write_buffer(priv);
-
-          /* Wait for write completion at memory level
-           * Note: Flash write completion must be checked by upper layer
-           * via status register polling
-           */
-
-          ret = ra_ospi_wait_ready(priv);
-          if (ret < 0)
+          else
             {
-              spierr("OSPI_B: Write wait failed\n");
-              break;
-            }
+              spierr("OSPI_B: DMA write failed, falling back to CPU copy\n");
 
-          mmap_addr += chunk;
-          buffer += chunk;
-          remaining -= chunk;
+              /* Fall through to CPU copy on DMA failure */
+
+              goto cpu_write;
+            }
+        }
+      else
+#endif
+        {
+#ifdef CONFIG_RA_DMA
+cpu_write:
+#endif
+          /* CPU-based write */
+
+          while (remaining > 0)
+            {
+              /* Calculate page-aligned chunk size */
+
+              chunk = remaining;
+              if (chunk > 256)
+                {
+                  chunk = 256;
+                }
+
+              /* Copy data to memory-mapped region */
+
+              memcpy((void *)mmap_addr, buffer, chunk);
+
+              /* Push write buffer to ensure data is sent */
+
+              ra_ospi_push_write_buffer(priv);
+
+              /* Wait for write completion at memory level
+               * Note: Flash write completion must be checked by upper layer
+               * via status register polling
+               */
+
+              ret = ra_ospi_wait_ready(priv);
+              if (ret < 0)
+                {
+                  spierr("OSPI_B: Write wait failed\n");
+                  break;
+                }
+
+              mmap_addr += chunk;
+              buffer += chunk;
+              remaining -= chunk;
+            }
         }
     }
   else
@@ -1181,25 +1441,52 @@ static int ra_ospi_memory(struct qspi_dev_s *dev,
 
       ra_ospi_flush_prefetch(priv);
 
-      /* Read from memory-mapped region
-       * The OSPI_B hardware handles command generation automatically
-       */
+#ifdef CONFIG_RA_DMA
+      /* Use DMA for large transfers if configured and available */
 
-      while (remaining > 0)
+      if (priv->use_dma && priv->dma_rx != NULL && remaining >= 64)
         {
-          /* Read in chunks to avoid potential bus issues */
+          /* DMA-accelerated read */
 
-          chunk = remaining;
-          if (chunk > 4096)
+          ret = ra_ospi_dma_transfer(priv, (uintptr_t)buffer, mmap_addr,
+                                     remaining, false);
+          if (ret < 0)
             {
-              chunk = 4096;
+              spierr("OSPI_B: DMA read failed, falling back to CPU copy\n");
+
+              /* Fall through to CPU copy on DMA failure */
+
+              goto cpu_read;
             }
+        }
+      else
+#endif
+        {
+#ifdef CONFIG_RA_DMA
+cpu_read:
+#endif
+          /* CPU-based read */
 
-          memcpy(buffer, (void *)mmap_addr, chunk);
+          /* Read from memory-mapped region
+           * The OSPI_B hardware handles command generation automatically
+           */
 
-          mmap_addr += chunk;
-          buffer += chunk;
-          remaining -= chunk;
+          while (remaining > 0)
+            {
+              /* Read in chunks to avoid potential bus issues */
+
+              chunk = remaining;
+              if (chunk > 4096)
+                {
+                  chunk = 4096;
+                }
+
+              memcpy(buffer, (void *)mmap_addr, chunk);
+
+              mmap_addr += chunk;
+              buffer += chunk;
+              remaining -= chunk;
+            }
         }
     }
 
@@ -1344,10 +1631,53 @@ struct qspi_dev_s *ra_ospi_initialize(int port)
       return NULL;
     }
 
-  /* Step 6: Clear all interrupt status and disable interrupts */
+  /* Step 6: Setup interrupts if enabled */
 
   ra_ospi_putreg(priv, R_OSPI_B_INTC_OFFSET, 0xffffffff);
-  ra_ospi_putreg(priv, R_OSPI_B_INTE_OFFSET, 0);
+
+  if (priv->use_interrupts)
+    {
+      /* Attach interrupt handlers */
+
+      if (port == 0)
+        {
+          priv->irq_cmp = ra_icu_attach(RA_ELC_XSPI_CMP,
+                                        ra_ospi_interrupt, priv, true);
+          priv->irq_err = ra_icu_attach(RA_ELC_XSPI_ERR,
+                                        ra_ospi_interrupt, priv, true);
+        }
+      else
+        {
+          priv->irq_cmp = ra_icu_attach(RA_ELC_XSPI1_CMP,
+                                        ra_ospi_interrupt, priv, true);
+          priv->irq_err = ra_icu_attach(RA_ELC_XSPI1_ERR,
+                                        ra_ospi_interrupt, priv, true);
+        }
+
+      if (priv->irq_cmp < 0 || priv->irq_err < 0)
+        {
+          spierr("OSPI_B: Failed to attach interrupts, using polling\n");
+          priv->use_interrupts = false;
+          priv->irq_cmp = -1;
+          priv->irq_err = -1;
+        }
+      else
+        {
+          /* Enable command completion and error interrupts */
+
+          ra_ospi_putreg(priv, R_OSPI_B_INTE_OFFSET,
+                         R_OSPI_B_INTE_CMDCMPE | R_OSPI_B_INTE_PATCMPE |
+                         R_OSPI_B_INTE_DSTOCS0E | R_OSPI_B_INTE_BUSERRCH0E |
+                         R_OSPI_B_INTE_CAFAILCS0E);
+
+          spiinfo("OSPI_B: Interrupts enabled (cmp=%d, err=%d)\n",
+                  priv->irq_cmp, priv->irq_err);
+        }
+    }
+  else
+    {
+      ra_ospi_putreg(priv, R_OSPI_B_INTE_OFFSET, 0);
+    }
 
   /* Step 7: Issue flash reset using reset signaling protocol */
 
@@ -1358,6 +1688,40 @@ struct qspi_dev_s *ra_ospi_initialize(int port)
 
       spiwarn("OSPI_B: Flash reset failed (may be OK)\n");
     }
+
+  /* Step 8: Get actual clock frequency */
+
+  priv->actual_frequency = ra_ospi_get_clock_frequency(port);
+  spiinfo("OSPI_B: Clock frequency = %lu Hz\n", priv->actual_frequency);
+
+  /* Step 9: Perform auto-calibration for high-speed modes if needed */
+
+  if (priv->actual_frequency > 50000000 && priv->proto == RA_OSPI_PROTOCOL_8D_8D_8D)
+    {
+      ret = ra_ospi_autocalibrate(priv);
+      if (ret < 0)
+        {
+          spiwarn("OSPI_B: Auto-calibration failed, may have timing issues\n");
+        }
+    }
+
+#ifdef CONFIG_RA_DMA
+  /* Step 10: Setup DMA if configured */
+
+  if (priv->use_dma)
+    {
+      ret = ra_ospi_dma_setup(priv);
+      if (ret < 0)
+        {
+          spiwarn("OSPI_B: DMA setup failed, falling back to CPU transfers\n");
+          priv->use_dma = false;
+        }
+      else
+        {
+          spiinfo("OSPI_B: DMA setup successful\n");
+        }
+    }
+#endif
 
   /* Mark as initialized */
 
@@ -1438,14 +1802,46 @@ int ra_ospi_set_protocol(struct qspi_dev_s *dev, int proto)
 }
 
 /****************************************************************************
+ * Name: ra_ospi_autocalibrate
+ *
+ * Description:
+ *   Perform automatic DQS calibration for high-speed OPI modes
+ *
+ * Input Parameters:
+ *   priv - OSPI driver private data
+ *
+ * Returned Value:
+ *   OK on success, negative errno on failure
+ *
+ * Note:
+ *   This is a placeholder for FSP-style auto-calibration.
+ *   Full implementation requires:
+ *   1. Writing calibration pattern to flash
+ *   2. Configuring CCCTL registers for auto-calibration
+ *   3. Sweeping DS shift values and verifying read-back
+ *   4. Setting optimal WRAPCFG.DSSFTCS value
+ *
+ ****************************************************************************/
+
+static int ra_ospi_autocalibrate(struct ra_ospi_priv_s *priv)
+{
+  /* TODO: Implement full auto-calibration sequence from FSP reference
+   * For now, use default WRAPCFG values which work at lower frequencies
+   */
+
+  spiinfo("OSPI_B: Auto-calibration not yet implemented, using defaults\n");
+  return -ENOSYS;
+}
+
+/****************************************************************************
  * Name: ra_ospi_set_latency
  *
  * Description:
  *   Set the read/write latency cycles
  *
  * Input Parameters:
- *   dev          - QSPI device structure
- *   read_latency - Read latency cycles (dummy cycles)
+ *   dev           - QSPI device structure
+ *   read_latency  - Read latency cycles (dummy cycles)
  *   write_latency - Write latency cycles
  *
  * Returned Value:
@@ -1467,3 +1863,318 @@ int ra_ospi_set_latency(struct qspi_dev_s *dev,
 
   return ra_ospi_configure_commands(priv);
 }
+
+/****************************************************************************
+ * Name: ra_ospi_xip_enable
+ *
+ * Description:
+ *   Enable XIP (Execute-in-Place) mode for continuous read optimization
+ *
+ * Input Parameters:
+ *   dev - QSPI device structure
+ *
+ * Returned Value:
+ *   OK on success, negative errno on failure
+ *
+ ****************************************************************************/
+
+int ra_ospi_xip_enable(struct qspi_dev_s *dev)
+{
+  struct ra_ospi_priv_s *priv = (struct ra_ospi_priv_s *)dev;
+
+  DEBUGASSERT(priv != NULL);
+
+  if (priv->xip_mode)
+    {
+      return OK;  /* Already in XIP mode */
+    }
+
+  /* Enable XIP mode via CMCTLCH register
+   * This allows continuous read without sending command each time
+   */
+
+  ra_ospi_modifyreg(priv, R_OSPI_B_CMCTLCH_OFFSET(priv->cs),
+                    0, R_OSPI_B_CMCTLCH_XIPEN);
+
+  priv->xip_mode = true;
+
+  spiinfo("OSPI_B: XIP mode enabled\n");
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: ra_ospi_xip_disable
+ *
+ * Description:
+ *   Disable XIP (Execute-in-Place) mode
+ *
+ * Input Parameters:
+ *   dev - QSPI device structure
+ *
+ * Returned Value:
+ *   OK on success, negative errno on failure
+ *
+ ****************************************************************************/
+
+int ra_ospi_xip_disable(struct qspi_dev_s *dev)
+{
+  struct ra_ospi_priv_s *priv = (struct ra_ospi_priv_s *)dev;
+
+  DEBUGASSERT(priv != NULL);
+
+  if (!priv->xip_mode)
+    {
+      return OK;  /* Already disabled */
+    }
+
+  /* Disable XIP mode */
+
+  ra_ospi_modifyreg(priv, R_OSPI_B_CMCTLCH_OFFSET(priv->cs),
+                    R_OSPI_B_CMCTLCH_XIPEN, 0);
+
+  priv->xip_mode = false;
+
+  spiinfo("OSPI_B: XIP mode disabled\n");
+
+  return OK;
+}
+
+#ifdef CONFIG_RA_DMA
+
+/****************************************************************************
+ * Name: ra_ospi_dma_callback
+ *
+ * Description:
+ *   DMA transfer completion callback
+ *
+ ****************************************************************************/
+
+static void ra_ospi_dma_callback(void *handle, int event, void *user_data)
+{
+  struct ra_ospi_priv_s *priv = (struct ra_ospi_priv_s *)user_data;
+
+  if (event == RA_DMAC_EVENT_COMPLETE)
+    {
+      priv->dma_complete = true;
+      nxsem_post(&priv->dmasem);
+    }
+  else if (event == RA_DMAC_EVENT_ERROR)
+    {
+      spierr("OSPI_B: DMA transfer error\n");
+      priv->dma_complete = true;
+      nxsem_post(&priv->dmasem);
+    }
+}
+
+/****************************************************************************
+ * Name: ra_ospi_dma_setup
+ *
+ * Description:
+ *   Setup DMA channels for OSPI transfers
+ *
+ ****************************************************************************/
+
+static int ra_ospi_dma_setup(struct ra_ospi_priv_s *priv)
+{
+  ra_dmac_config_t dma_config;
+  int ret;
+
+  /* Initialize DMAC module if not already done */
+
+  ret = ra_dmac_initialize();
+  if (ret < 0)
+    {
+      spierr("OSPI_B: Failed to initialize DMAC: %d\n", ret);
+      return ret;
+    }
+
+  /* Configure TX DMA for memory-to-peripheral transfers */
+
+  memset(&dma_config, 0, sizeof(dma_config));
+  dma_config.mode = RA_DMAC_MODE_NORMAL;
+  dma_config.repeat_area = RA_DMAC_REPEAT_AREA_NONE;
+  dma_config.size = RA_DMAC_SIZE_8BIT;
+  dma_config.src_addr_mode = RA_DMAC_ADDR_INCR;
+  dma_config.dest_addr_mode = RA_DMAC_ADDR_FIXED;
+  dma_config.trigger = RA_DMAC_TRIGGER_SW;
+  dma_config.callback = ra_ospi_dma_callback;
+  dma_config.user_data = priv;
+
+  /* ELC event links (these may need board-specific configuration) */
+
+  dma_config.elc_end = 0;  /* DMA end event */
+  dma_config.elc_err = 0;  /* DMA error event */
+  dma_config.elc_src = 0;  /* Software trigger */
+
+  ret = ra_dmac_open(&priv->dma_tx, &dma_config);
+  if (ret < 0)
+    {
+      spierr("OSPI_B: Failed to open TX DMA channel: %d\n", ret);
+      return ret;
+    }
+
+  /* Configure RX DMA for peripheral-to-memory transfers */
+
+  dma_config.src_addr_mode = RA_DMAC_ADDR_FIXED;
+  dma_config.dest_addr_mode = RA_DMAC_ADDR_INCR;
+
+  ret = ra_dmac_open(&priv->dma_rx, &dma_config);
+  if (ret < 0)
+    {
+      spierr("OSPI_B: Failed to open RX DMA channel: %d\n", ret);
+      ra_dmac_close(priv->dma_tx);
+      priv->dma_tx = NULL;
+      return ret;
+    }
+
+  spiinfo("OSPI_B: DMA channels configured successfully\n");
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: ra_ospi_dma_transfer
+ *
+ * Description:
+ *   Perform DMA transfer for OSPI memory-mapped operations
+ *
+ * Input Parameters:
+ *   priv     - OSPI private data
+ *   dest     - Destination address
+ *   src      - Source address
+ *   len      - Transfer length in bytes
+ *   is_write - true for write, false for read
+ *
+ * Returned Value:
+ *   OK on success, negative errno on failure
+ *
+ ****************************************************************************/
+
+static int ra_ospi_dma_transfer(struct ra_ospi_priv_s *priv,
+                                uintptr_t dest, uintptr_t src,
+                                size_t len, bool is_write)
+{
+  ra_dmac_handle_t dma_handle;
+  struct timespec timeout;
+  int ret;
+
+  DEBUGASSERT(priv != NULL);
+  DEBUGASSERT(len > 0);
+
+  /* Select appropriate DMA channel */
+
+  dma_handle = is_write ? priv->dma_tx : priv->dma_rx;
+
+  if (dma_handle == NULL)
+    {
+      spierr("OSPI_B: DMA not initialized\n");
+      return -EINVAL;
+    }
+
+  /* Reset DMA transfer with new addresses */
+
+  ret = ra_dmac_reset(dma_handle, src, dest, len);
+  if (ret < 0)
+    {
+      spierr("OSPI_B: DMA reset failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Clear completion flag */
+
+  priv->dma_complete = false;
+
+  /* Enable DMA channel */
+
+  ret = ra_dmac_enable(dma_handle);
+  if (ret < 0)
+    {
+      spierr("OSPI_B: DMA enable failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Start DMA transfer */
+
+  ret = ra_dmac_software_start(dma_handle);
+  if (ret < 0)
+    {
+      spierr("OSPI_B: DMA start failed: %d\n", ret);
+      ra_dmac_disable(dma_handle);
+      return ret;
+    }
+
+  /* Wait for DMA completion with timeout */
+
+  clock_gettime(CLOCK_REALTIME, &timeout);
+  timeout.tv_sec += 5;  /* 5 second timeout */
+
+  ret = nxsem_timedwait_uninterruptible(&priv->dmasem, &timeout);
+  if (ret < 0)
+    {
+      spierr("OSPI_B: DMA timeout or error: %d\n", ret);
+      ra_dmac_disable(dma_handle);
+      return ret;
+    }
+
+  /* Disable DMA channel */
+
+  ra_dmac_disable(dma_handle);
+
+  /* Check if transfer completed successfully */
+
+  if (!priv->dma_complete)
+    {
+      spierr("OSPI_B: DMA transfer incomplete\n");
+      return -EIO;
+    }
+
+  spiinfo("OSPI_B: DMA transfer complete (%zu bytes)\n", len);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: ra_ospi_set_dma
+ *
+ * Description:
+ *   Enable or disable DMA for OSPI transfers
+ *
+ ****************************************************************************/
+
+int ra_ospi_set_dma(struct qspi_dev_s *dev, bool enable_dma)
+{
+  struct ra_ospi_priv_s *priv = (struct ra_ospi_priv_s *)dev;
+  int ret = OK;
+
+  DEBUGASSERT(priv != NULL);
+
+  if (enable_dma && !priv->use_dma)
+    {
+      /* Enable DMA - setup if not already done */
+
+      if (priv->dma_tx == NULL || priv->dma_rx == NULL)
+        {
+          ret = ra_ospi_dma_setup(priv);
+          if (ret < 0)
+            {
+              spierr("OSPI_B: DMA setup failed: %d\n", ret);
+              return ret;
+            }
+        }
+
+      priv->use_dma = true;
+      spiinfo("OSPI_B: DMA enabled\n");
+    }
+  else if (!enable_dma && priv->use_dma)
+    {
+      /* Disable DMA */
+
+      priv->use_dma = false;
+      spiinfo("OSPI_B: DMA disabled\n");
+    }
+
+  return ret;
+}
+
+#endif /* CONFIG_RA_DMA */

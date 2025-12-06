@@ -109,4 +109,57 @@ int ra_ospi_set_protocol(struct qspi_dev_s *dev, int proto);
 int ra_ospi_set_latency(struct qspi_dev_s *dev,
                         uint8_t read_latency, uint8_t write_latency);
 
+/****************************************************************************
+ * Name: ra_ospi_xip_enable
+ *
+ * Description:
+ *   Enable XIP (Execute-in-Place) mode for continuous read optimization.
+ *
+ * Input Parameters:
+ *   dev - QSPI device structure from ra_ospi_initialize()
+ *
+ * Returned Value:
+ *   OK on success; negative errno on failure
+ *
+ ****************************************************************************/
+
+int ra_ospi_xip_enable(struct qspi_dev_s *dev);
+
+/****************************************************************************
+ * Name: ra_ospi_xip_disable
+ *
+ * Description:
+ *   Disable XIP (Execute-in-Place) mode.
+ *
+ * Input Parameters:
+ *   dev - QSPI device structure from ra_ospi_initialize()
+ *
+ * Returned Value:
+ *   OK on success; negative errno on failure
+ *
+ ****************************************************************************/
+
+int ra_ospi_xip_disable(struct qspi_dev_s *dev);
+
+#ifdef CONFIG_RA_DMA
+
+/****************************************************************************
+ * Name: ra_ospi_set_dma
+ *
+ * Description:
+ *   Enable or disable DMA for OSPI transfers.
+ *
+ * Input Parameters:
+ *   dev        - QSPI device structure from ra_ospi_initialize()
+ *   enable_dma - true to enable DMA, false to use CPU transfers
+ *
+ * Returned Value:
+ *   OK on success; negative errno on failure
+ *
+ ****************************************************************************/
+
+int ra_ospi_set_dma(struct qspi_dev_s *dev, bool enable_dma);
+
+#endif /* CONFIG_RA_DMA */
+
 #endif /* __ARCH_ARM_SRC_RA_RA8_OSPI_B_H */

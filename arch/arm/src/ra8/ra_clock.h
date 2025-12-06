@@ -35,6 +35,30 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Peripheral Clock IDs for ra_get_peripheral_clock() */
+
+#define RA_PCLK_ICLK        0   /* System clock (ICK) */
+#define RA_PCLK_PCLKA       1   /* Peripheral Clock A */
+#define RA_PCLK_PCLKB       2   /* Peripheral Clock B */
+#define RA_PCLK_PCLKC       3   /* Peripheral Clock C */
+#define RA_PCLK_PCLKD       4   /* Peripheral Clock D */
+#define RA_PCLK_PCLKE       5   /* Peripheral Clock E */
+#define RA_PCLK_BCLK        6   /* External bus clock */
+#define RA_PCLK_FCLK        7   /* Flash interface clock */
+#define RA_PCLK_SCICLK      8   /* SCI clock */
+#define RA_PCLK_SPICLK      9   /* SPI clock */
+#define RA_PCLK_CANFDCLK    10  /* CANFD clock */
+#define RA_PCLK_GPTCLK      11  /* GPT clock */
+#define RA_PCLK_IICCLK      12  /* IIC (I2C) clock */
+#define RA_PCLK_ADCCLK      13  /* ADC clock */
+#define RA_PCLK_OCTACLK     14  /* OSPI clock */
+#define RA_PCLK_LCDCLK      15  /* LCD clock */
+#define RA_PCLK_I3CCLK      16  /* I3C clock */
+#define RA_PCLK_USB60CLK    17  /* USB 60MHz clock */
+#define RA_PCLK_ESWCLK      18  /* Ethernet Switch clock */
+#define RA_PCLK_ESWPHYCLK   19  /* Ethernet Switch PHY clock */
+#define RA_PCLK_ETHPHYCLK   20  /* Ethernet PHY clock */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

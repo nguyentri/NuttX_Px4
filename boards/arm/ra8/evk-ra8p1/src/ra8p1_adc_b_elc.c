@@ -33,22 +33,30 @@
 
 #include <nuttx/board.h>
 #include <arch/board/board.h>
+#include <nuttx/analog/adc.h>
 
 #include "ra_elc.h"
+#include "ra_adc_b.h"
 #include "evk-ra8p1.h"
 
 /* Include IRQ definitions for ELC event macros */
 
 #include <arch/ra8/ra8p1_irq.h>
 
-#include <nuttx/analog/adc.h>
-#include "ra_adc_b.h"
-
 #ifdef CONFIG_RA_ELC
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* GPT configuration for ADC triggering example
+ * These values can be adjusted based on the desired sampling rate
+ */
+
+#ifdef CONFIG_RA8P1_ELC_GPT_ADC_EXAMPLE
+#define ADC_TRIGGER_GPT_CHANNEL    0      /* Use GPT0 */
+#define ADC_TRIGGER_GPT_USE_CMPB   false  /* Use Compare Match A */
+#endif
 
 /****************************************************************************
  * Private Types
@@ -57,45 +65,6 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
-#ifdef CONFIG_RA8P1_ELC_GPT_ADC_EXAMPLE
-/* Example: GPT0 overflow triggers ADC scan group 0
- * This configuration links:
- *   - GPT0 counter overflow -> ADC0 scan trigger A
- *   - Software event 0 -> GPT A (to start GPT0)
- */
-
-static const struct ra_elc_link_s g_elc_gpt_adc_links[] =
-{
-  /* Link GPT0 counter overflow event to ADC0 scan trigger A */
-
-  {
-    .peripheral = RA_ELC_PERIPHERAL_ADC0,
-    .event      = RA_ELC_GPT0_COUNTER_OVERFLOW,
-  },
-
-  /* Link software event 0 to GPT A (for starting GPT via software) */
-
-  {
-    .peripheral = RA_ELC_PERIPHERAL_GPT_A,
-    .event      = RA_ELC_ELC_SOFTWARE_EVENT_0,
-  },
-
-  /* Link GPT0 overflow to GPT B (for stopping another timer) */
-
-  {
-    .peripheral = RA_ELC_PERIPHERAL_GPT_B,
-    .event      = RA_ELC_GPT0_COUNTER_OVERFLOW,
-  },
-};
-
-static const struct ra_elc_config_s g_elc_gpt_adc_config =
-{
-  .nlinks = sizeof(g_elc_gpt_adc_links) / sizeof(g_elc_gpt_adc_links[0]),
-  .links  = g_elc_gpt_adc_links,
-};
-#endif /* CONFIG_RA8P1_ELC_GPT_ADC_EXAMPLE */
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -106,6 +75,11 @@ static const struct ra_elc_config_s g_elc_gpt_adc_config =
  * Description:
  *   Initialize the Event Link Controller on the EVK-RA8P1 board.
  *   This function sets up event links between peripherals as configured.
+ *
+ *   Note: For the ADC-ELC example, the ADC driver's built-in functions
+ *   (ra8_adc_configure_gpt_trigger, ra8_adc_configure_elc_trigger) handle
+ *   the ELC link configuration internally, so manual ELC setup is not
+ *   required for ADC triggering.
  *
  * Input Parameters:
  *   None
@@ -130,18 +104,6 @@ int board_elc_initialize(void)
       return ret;
     }
 
-#ifdef CONFIG_RA8P1_ELC_GPT_ADC_EXAMPLE
-  /* Configure ELC links for GPT-triggered ADC */
-
-  ret = ra_elc_configure(&g_elc_gpt_adc_config);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ELC: Failed to configure GPT-ADC links: %d\n", ret);
-      return ret;
-    }
-
-  syslog(LOG_INFO, "ELC: GPT-ADC event links configured\n");
-#endif
 
   /* Enable ELC global operation */
 
@@ -157,160 +119,14 @@ int board_elc_initialize(void)
   return OK;
 }
 
-/****************************************************************************
- * Name: board_elc_gpt_trigger_adc
- *
- * Description:
- *   Configure ELC to trigger ADC conversions from GPT timer events.
- *   This is a convenience function for setting up a common use case.
- *
- * Input Parameters:
- *   gpt_channel - GPT channel number (0-13)
- *   adc_trigger - ADC trigger peripheral (RA_ELC_PERIPHERAL_ADC0/1/2)
- *   event_type  - 0 = overflow, 1 = compare match A, 2 = compare match B
- *
- * Returned Value:
- *   OK on success; a negated errno on failure.
- *
- ****************************************************************************/
-
-int board_elc_gpt_trigger_adc(int gpt_channel, int adc_trigger,
-                               int event_type)
-{
-  ra_elc_event_t event;
-  int ret;
-
-  /* Calculate event number based on GPT channel and event type
-   * GPT events are organized as:
-   *   GPT0: 0x181 (Capture/Compare A), 0x182 (B), ... 0x187 (Overflow)
-   *   GPT1: 0x18A, 0x18B, ... 0x190
-   *   etc.
-   */
-
-  switch (event_type)
-    {
-      case 0:  /* Overflow */
-        switch (gpt_channel)
-          {
-            case 0:
-              event = RA_ELC_GPT0_COUNTER_OVERFLOW;
-              break;
-            case 1:
-              event = RA_ELC_GPT1_COUNTER_OVERFLOW;
-              break;
-            case 2:
-              event = RA_ELC_GPT2_COUNTER_OVERFLOW;
-              break;
-            case 3:
-              event = RA_ELC_GPT3_COUNTER_OVERFLOW;
-              break;
-            case 4:
-              event = RA_ELC_GPT4_COUNTER_OVERFLOW;
-              break;
-            case 5:
-              event = RA_ELC_GPT5_COUNTER_OVERFLOW;
-              break;
-            case 6:
-              event = RA_ELC_GPT6_COUNTER_OVERFLOW;
-              break;
-            case 7:
-              event = RA_ELC_GPT7_COUNTER_OVERFLOW;
-              break;
-            default:
-              return -EINVAL;
-          }
-        break;
-
-      case 1:  /* Compare Match A */
-        switch (gpt_channel)
-          {
-            case 0:
-              event = RA_ELC_GPT0_CAPTURE_COMPARE_A;
-              break;
-            case 1:
-              event = RA_ELC_GPT1_CAPTURE_COMPARE_A;
-              break;
-            case 2:
-              event = RA_ELC_GPT2_CAPTURE_COMPARE_A;
-              break;
-            case 3:
-              event = RA_ELC_GPT3_CAPTURE_COMPARE_A;
-              break;
-            case 4:
-              event = RA_ELC_GPT4_CAPTURE_COMPARE_A;
-              break;
-            case 5:
-              event = RA_ELC_GPT5_CAPTURE_COMPARE_A;
-              break;
-            case 6:
-              event = RA_ELC_GPT6_CAPTURE_COMPARE_A;
-              break;
-            case 7:
-              event = RA_ELC_GPT7_CAPTURE_COMPARE_A;
-              break;
-            default:
-              return -EINVAL;
-          }
-        break;
-
-      case 2:  /* Compare Match B */
-        switch (gpt_channel)
-          {
-            case 0:
-              event = RA_ELC_GPT0_CAPTURE_COMPARE_B;
-              break;
-            case 1:
-              event = RA_ELC_GPT1_CAPTURE_COMPARE_B;
-              break;
-            case 2:
-              event = RA_ELC_GPT2_CAPTURE_COMPARE_B;
-              break;
-            case 3:
-              event = RA_ELC_GPT3_CAPTURE_COMPARE_B;
-              break;
-            case 4:
-              event = RA_ELC_GPT4_CAPTURE_COMPARE_B;
-              break;
-            case 5:
-              event = RA_ELC_GPT5_CAPTURE_COMPARE_B;
-              break;
-            case 6:
-              event = RA_ELC_GPT6_CAPTURE_COMPARE_B;
-              break;
-            case 7:
-              event = RA_ELC_GPT7_CAPTURE_COMPARE_B;
-              break;
-            default:
-              return -EINVAL;
-          }
-        break;
-
-      default:
-        return -EINVAL;
-    }
-
-  /* Set the event link */
-
-  ret = ra_elc_link_set((ra_elc_peripheral_t)adc_trigger, event);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ELC: Failed to set GPT%d -> ADC link: %d\n",
-             gpt_channel, ret);
-      return ret;
-    }
-
-  syslog(LOG_INFO, "ELC: GPT%d event 0x%03x -> ADC trigger %d\n",
-         gpt_channel, event, adc_trigger);
-
-  return OK;
-}
-
 #ifdef CONFIG_RA8P1_ELC_GPT_ADC_EXAMPLE
 /****************************************************************************
  * Name: board_adc_initialize
  *
  * Description:
- *   Initialize ADC for ELC trigger example.
+ *   Initialize ADC for GPT-triggered sampling via ELC.
+ *   This example demonstrates hardware-triggered ADC conversions using
+ *   GPT timer overflow events through the Event Link Controller.
  *   Overrides the default weak implementation.
  *
  ****************************************************************************/
@@ -318,12 +134,17 @@ int board_elc_gpt_trigger_adc(int gpt_channel, int adc_trigger,
 int board_adc_initialize(void)
 {
   FAR struct adc_dev_s *adc_dev;
-  struct ra_adc_b_chan_cfg_s channels[1];
+  struct ra_adc_b_chan_cfg_s channels[4];
   int ret;
 
-  syslog(LOG_INFO, "ADC: Initializing for ELC trigger example\n");
+  syslog(LOG_INFO, "ADC-ELC: Initializing ADC with GPT trigger example\n");
 
-  /* Configure Channel 0 (AN000) for the example */
+  /* Configure multiple channels for the example
+   * This demonstrates sampling multiple analog inputs synchronized
+   * to a GPT timer event (e.g., for motor control applications)
+   */
+
+  /* Channel 0: Battery Voltage (AN000 on P004) */
   channels[0].vchannel = 0;
   channels[0].pchannel = RA_ADC_CHANNEL_AN000;
   channels[0].scan_group_id = 0;
@@ -332,27 +153,69 @@ int board_adc_initialize(void)
   channels[0].differential = false;
   channels[0].sample_hold = false;
 
-  /* Initialize ADC driver */
-  adc_dev = ra8_adc_initialize(channels, 1);
+  /* Channel 1: Battery Current (AN004 on P000) */
+  channels[1].vchannel = 1;
+  channels[1].pchannel = RA_ADC_CHANNEL_AN004;
+  channels[1].scan_group_id = 0;
+  channels[1].sampling_table = 0;
+  channels[1].resolution = RA_ADC_RESOLUTION_12BIT;
+  channels[1].differential = false;
+  channels[1].sample_hold = false;
+
+  /* Channel 2: Arduino AN0 (AN001 on P003) */
+  channels[2].vchannel = 2;
+  channels[2].pchannel = RA_ADC_CHANNEL_AN001;
+  channels[2].scan_group_id = 0;
+  channels[2].sampling_table = 0;
+  channels[2].resolution = RA_ADC_RESOLUTION_12BIT;
+  channels[2].differential = false;
+  channels[2].sample_hold = false;
+
+  /* Channel 3: Arduino AN1 (AN002 on P002) */
+  channels[3].vchannel = 3;
+  channels[3].pchannel = RA_ADC_CHANNEL_AN002;
+  channels[3].scan_group_id = 0;
+  channels[3].sampling_table = 0;
+  channels[3].resolution = RA_ADC_RESOLUTION_12BIT;
+  channels[3].differential = false;
+  channels[3].sample_hold = false;
+
+  /* Initialize ADC driver with all channels in scan group 0 */
+  adc_dev = ra8_adc_initialize(channels, 4);
   if (adc_dev == NULL)
     {
-      syslog(LOG_ERR, "ADC: Failed to initialize driver\n");
+      syslog(LOG_ERR, "ADC-ELC: Failed to initialize ADC driver\n");
       return -ENODEV;
     }
 
-  /* Configure ELC trigger (Synchronous ELC) */
-  ret = ra8_adc_configure_elc_trigger(adc_dev, RA_ELC_GPT0_COUNTER_OVERFLOW);
+  /* Configure GPT0 as trigger source using Compare Match A
+   * This allows ADC conversions to be synchronized with PWM or
+   * periodic timer events for precise sampling timing
+   */
+  ret = ra8_adc_configure_gpt_trigger(adc_dev, 0, false);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ADC: Failed to configure ELC trigger: %d\n", ret);
+      syslog(LOG_ERR, "ADC-ELC: Failed to configure GPT trigger: %d\n", ret);
       return ret;
     }
 
-  /* Enable hardware trigger */
+  /* Enable hardware triggering
+   * Once enabled, ADC conversions will automatically start on each
+   * GPT0 Compare Match A event (no software trigger needed)
+   */
   ret = ra8_adc_enable_hw_trigger(adc_dev, true);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ADC: Failed to enable hardware trigger: %d\n", ret);
+      syslog(LOG_ERR, "ADC-ELC: Failed to enable hardware trigger: %d\n",
+             ret);
+      return ret;
+    }
+
+  /* Set continuous scan mode for automatic re-triggering */
+  ret = ra8_adc_set_scan_mode(adc_dev, RA_ADC_MODE_CONTINUOUS_SCAN);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ADC-ELC: Failed to set scan mode: %d\n", ret);
       return ret;
     }
 
@@ -360,11 +223,17 @@ int board_adc_initialize(void)
   ret = adc_register("/dev/adc0", adc_dev);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ADC: Failed to register driver: %d\n", ret);
+      syslog(LOG_ERR, "ADC-ELC: Failed to register driver: %d\n", ret);
       return ret;
     }
 
-  syslog(LOG_INFO, "ADC: Initialized /dev/adc0 with ELC trigger\n");
+  syslog(LOG_INFO,
+         "ADC-ELC: Initialized /dev/adc0 with GPT0 trigger\n");
+  syslog(LOG_INFO,
+         "ADC-ELC: 4 channels in scan group 0, continuous mode\n");
+  syslog(LOG_INFO,
+         "ADC-ELC: Hardware triggered by GPT0 Compare Match A\n");
+
   return OK;
 }
 #endif /* CONFIG_RA8P1_ELC_GPT_ADC_EXAMPLE */

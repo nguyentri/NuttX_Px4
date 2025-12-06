@@ -76,14 +76,16 @@
 #define RA_PRV_SRAM_LOCK                       (0xA500U)
 #define RA_PRV_SRAM_WAIT_CYCLES                (0U)  /* No wait states for RA8E1 at startup freq */
 
-#if defined (CONFIG_RA_PLL_SOURCE_MAIN_OSC)
-  #define RA_PRV_PLSRCSEL                         (0)
-  #define RA_PRV_PLL_USED                         (1)
-#elif defined (CONFIG_RA_PLL_SOURCE_HOCO)
-  #define RA_PRV_PLSRCSEL                         (1)
-  #define RA_PRV_PLL_USED                         (1)
+/* PLL source select - consolidated definition using CONFIG_RA_PLL_SOURCE */
+#if (CONFIG_RA_PLL_SOURCE == RA_CLOCKS_SOURCE_CLOCK_HOCO)
+#  define RA_PRV_PLSRCSEL                      (0)
+#  define RA_PRV_PLL_USED                      (1)
+#elif (CONFIG_RA_PLL_SOURCE == RA_CLOCKS_SOURCE_CLOCK_MAIN_OSC)
+#  define RA_PRV_PLSRCSEL                      (1)
+#  define RA_PRV_PLL_USED                      (1)
 #else
-  #define RA_PRV_PLL_USED                         (0)
+#  define RA_PRV_PLSRCSEL                      (0)
+#  define RA_PRV_PLL_USED                      (0)
 #endif
 
 /* System clock divider calculations */
@@ -101,26 +103,32 @@
 #define RA_PRV_STARTUP_SCKDIVCR_PCLKB_BITS       ((CONFIG_RA_PCKB_DIV & 0xFU) << 8U)
 #define RA_PRV_STARTUP_SCKDIVCR_PCLKC_BITS       ((CONFIG_RA_PCKC_DIV & 0xFU) << 4U)
 #define RA_PRV_STARTUP_SCKDIVCR_PCLKD_BITS       (CONFIG_RA_PCKD_DIV & 0xFU)
-/*#define RA_PRV_STARTUP_SCKDIVCR                  (RA_PRV_STARTUP_SCKDIVCR_FCLK_BITS | \
+#define RA_PRV_STARTUP_SCKDIVCR                  (RA_PRV_STARTUP_SCKDIVCR_FCLK_BITS | \
                                                   RA_PRV_STARTUP_SCKDIVCR_ICLK_BITS | \
                                                   RA_PRV_STARTUP_SCKDIVCR_PCLKE_BITS | \
                                                   RA_PRV_STARTUP_SCKDIVCR_BCLK_BITS | \
                                                   RA_PRV_STARTUP_SCKDIVCR_PCLKA_BITS | \
                                                   RA_PRV_STARTUP_SCKDIVCR_PCLKB_BITS | \
                                                   RA_PRV_STARTUP_SCKDIVCR_PCLKC_BITS | \
-                                                  RA_PRV_STARTUP_SCKDIVCR_PCLKD_BITS) */
-//#define RA_PRV_STARTUP_SCKDIVCR2                 (CONFIG_RA_CPUCLK_DIV)
-#define RA_PRV_STARTUP_SCKDIVCR                  (0x32233432)
-#define RA_PRV_STARTUP_SCKDIVCR2                  0x2120
+                                                  RA_PRV_STARTUP_SCKDIVCR_PCLKD_BITS)
+
+/* SCKDIVCR2 components for RA8P1 (CPUCLK, CPUCLK1, NPUCLK, MRICLK)
+ * Note: CONFIG_RA_CPUCLK1_DIV, CONFIG_RA_NPUCLK_DIV, CONFIG_RA_MRICLK_DIV
+ * defaults are defined in ra_clock.h to avoid duplication.
+ */
+#define RA_PRV_STARTUP_SCKDIVCR2_CPUCK_BITS      (CONFIG_RA_CPUCLK_DIV & 0xFU)
+#define RA_PRV_STARTUP_SCKDIVCR2_CPUCK1_BITS     ((CONFIG_RA_CPUCLK1_DIV & 0xFU) << 4U)
+#define RA_PRV_STARTUP_SCKDIVCR2_NPUCK_BITS      ((CONFIG_RA_NPUCLK_DIV & 0xFU) << 8U)
+#define RA_PRV_STARTUP_SCKDIVCR2_MRICK_BITS      ((CONFIG_RA_MRICLK_DIV & 0xFU) << 12U)
+#define RA_PRV_STARTUP_SCKDIVCR2                 (RA_PRV_STARTUP_SCKDIVCR2_CPUCK_BITS | \
+                                                  RA_PRV_STARTUP_SCKDIVCR2_CPUCK1_BITS | \
+                                                  RA_PRV_STARTUP_SCKDIVCR2_NPUCK_BITS | \
+                                                  RA_PRV_STARTUP_SCKDIVCR2_MRICK_BITS)
 
 #define RA_PRV_PLL2_MUL_CFG_MACRO_PLLMUL_MASK     (0x3FFU)
 #define RA_PRV_PLL2_MUL_CFG_MACRO_PLLMULNF_MASK    (0x003U)
 #define RA_PRV_PLL2CCR_PLLMULNF_BIT                (6) // PLLMULNF in PLLCCR starts at bit 6
 #define RA_PRV_PLL2CCR_PLSRCSEL_BIT                (4) // PLSRCSEL in PLLCCR starts at bit 4
-#define RA_PRV_PLL2CCR                             ((((CONFIG_RA_PLL2_MUL & RA_PRV_PLL2_MUL_CFG_MACRO_PLLMUL_MASK) << \
-                                                        RA_PRV_PLL2CCR_PLLMULNF_BIT) |                                \
-                                                      (RA_PRV_PL2SRCSEL << RA_PRV_PLL2CCR_PLSRCSEL_BIT)) |          \
-                                                      CONFIG_RA_PLL2_DIV)
 #if CONFIG_RA_PLL2_SOURCE == RA_CLOCKS_SOURCE_CLOCK_HOCO
 #  define RA_PRV_PL2SRCSEL                         (0)
 #elif CONFIG_RA_PLL2_SOURCE == RA_CLOCKS_SOURCE_CLOCK_MAIN_OSC
@@ -128,6 +136,10 @@
 #else
 #  define RA_PRV_PL2SRCSEL                         (0)
 #endif
+#define RA_PRV_PLL2CCR                             ((((CONFIG_RA_PLL2_MUL & RA_PRV_PLL2_MUL_CFG_MACRO_PLLMUL_MASK) << \
+                                                        RA_PRV_PLL2CCR_PLLMULNF_BIT) |                                \
+                                                      (RA_PRV_PL2SRCSEL << RA_PRV_PLL2CCR_PLSRCSEL_BIT)) |          \
+                                                      CONFIG_RA_PLL2_DIV)
 #define RA_PRV_PLL2CCR2_PLL_DIV_MASK               (0x0F) // PLL DIV in PLL2CCR2 is 4 bits wide
 #define RA_PRV_PLL2CCR2_PLL_DIV_Q_BIT              (4)    // PLL DIV Q in PLL2CCR2 starts at bit 4
 #define RA_PRV_PLL2CCR2_PLL_DIV_R_BIT              (8)    // PLL DIV R in PLL2CCR2 starts at bit 8
@@ -144,6 +156,7 @@
 #define RA_PRV_PLL_MUL_CFG_MACRO_PLLMUL_MASK    (0x3FFU)
 #define RA_PRV_PLLCCR_PLLMULNF_BIT               (6) // PLLMULNF in PLLCCR starts at bit 6
 #define RA_PRV_PLLCCR_PLSRCSEL_BIT               (4) // PLSRCSEL in PLLCCR starts at bit 4
+/* Note: RA_PRV_PLSRCSEL is defined above (lines 79-87) based on CONFIG_RA_PLL_SOURCE_* */
 /* Convert PLL multiplier to format: BSP_CLOCKS_PLL_MUL(X,Y) = ((X-1) << 2) | (Y/33) */
 #define RA_PRV_PLL_MUL_FORMAT                   ((((CONFIG_RA_PLL_MUL) - 1U) << 2UL) | 0U)
 #define RA_PRV_PLLCCR                            ((((RA_PRV_PLL_MUL_FORMAT & RA_PRV_PLL_MUL_CFG_MACRO_PLLMUL_MASK) << \
@@ -159,12 +172,12 @@
                                                     RA_PRV_PLLCCR2_PLL_DIV_Q_BIT) |                    \
                                                     (CONFIG_RA_PLL1P_DIV & RA_PRV_PLLCCR2_PLL_DIV_MASK))
 
-                                                    /* Key codes for MRAM registers. */
-#define BSP_PRV_MRCFREQ_KEY                      (0x1E000000)
-#define BSP_PRV_MREFREQ_KEY                      (0xE1000000)
-#define BSP_PRV_HZ_PER_MHZ                        (1000000)
-#define BSP_PRV_MRCPFB_LIMIT                      (0x65)
-#define BSP_PRV_MRFREQ_MIN_HZ                    (32768)
+                                                 /* Key codes for MRAM registers. */
+#define RA_PRV_MRCFREQ_KEY                      (0x1E000000)
+#define RA_PRV_MREFREQ_KEY                      (0xE1000000)
+#define RA_PRV_HZ_PER_MHZ                       (1000000)
+#define RA_PRV_MRCPFB_LIMIT                     (0x65)
+#define RA_PRV_MRFREQ_MIN_HZ                    (32768)
 
 /****************************************************************************
  * Public Data
@@ -372,6 +385,54 @@ static void ra_peripheral_clock_init(void)
                           CONFIG_RA_ADCCLK_DIV,
                           CONFIG_RA_ADCCLK_SOURCE);
 #endif
+
+  /* Set the LCD clock if LCD is enabled */
+#if defined(CONFIG_RA_LCD) && defined(R_SYSC_LCDCKCR)
+  ra_peripheral_clock_set((volatile uint8_t *)R_SYSC_LCDCKCR,
+                          (volatile uint8_t *)R_SYSC_LCDCKDIVCR,
+                          RA_CFG_LCDCLK_DIV,
+                          RA_CFG_LCDCLK_SOURCE);
+#endif
+
+  /* Set the I3C clock if I3C is enabled */
+#if defined(CONFIG_RA_I3C) && defined(R_SYSC_I3CCKCR)
+  ra_peripheral_clock_set((volatile uint8_t *)R_SYSC_I3CCKCR,
+                          (volatile uint8_t *)R_SYSC_I3CCKDIVCR,
+                          RA_CFG_I3CCLK_DIV,
+                          RA_CFG_I3CCLK_SOURCE);
+#endif
+
+  /* Set the USB60 clock if USB60 is enabled */
+#if defined(CONFIG_RA_USB60) && defined(R_SYSC_USB60CKCR)
+  ra_peripheral_clock_set((volatile uint8_t *)R_SYSC_USB60CKCR,
+                          (volatile uint8_t *)R_SYSC_USB60CKDIVCR,
+                          RA_CFG_USB60CLK_DIV,
+                          RA_CFG_USB60CLK_SOURCE);
+#endif
+
+  /* Set the ESW (Ethernet Switch) clock if ESW is enabled */
+#if defined(CONFIG_RA_ESWM) && defined(R_SYSC_ESWCKCR)
+  ra_peripheral_clock_set((volatile uint8_t *)R_SYSC_ESWCKCR,
+                          (volatile uint8_t *)R_SYSC_ESWCKDIVCR,
+                          CONFIG_RA_ESWCLK_DIV,
+                          CONFIG_RA_ESWCLK_SOURCE);
+#endif
+
+  /* Set the ESWPHY clock if ESWPHY is enabled */
+#if defined(CONFIG_RA_ESWPHY) && defined(R_SYSC_ESWPCKCR)
+  ra_peripheral_clock_set((volatile uint8_t *)R_SYSC_ESWPCKCR,
+                          (volatile uint8_t *)R_SYSC_ESWPCKDIVCR,
+                          CONFIG_RA_ESWPHYCLK_DIV,
+                          CONFIG_RA_ESWPHYCLK_SOURCE);
+#endif
+
+  /* Set the ETHPHY clock if ETHPHY is enabled */
+#if defined(CONFIG_RA_ETHPHY) && defined(R_SYSC_ETHPCKCR)
+  ra_peripheral_clock_set((volatile uint8_t *)R_SYSC_ETHPCKCR,
+                          (volatile uint8_t *)R_SYSC_ETHPCKDIVCR,
+                          CONFIG_RA_ETHPHYCLK_DIV,
+                          CONFIG_RA_ETHPHYCLK_SOURCE);
+#endif
 }
 
 /*******************************************************************************************************************//**
@@ -398,7 +459,7 @@ static void ra_prv_set_wait_state_frequency (uint32_t mriclk_frequency_hz, uint3
     uint32_t freq_mhz;
 
     /* Set Code MRAM wait states */
-    if (mriclk_frequency_hz <= BSP_PRV_MRFREQ_MIN_HZ)
+    if (mriclk_frequency_hz <= RA_PRV_MRFREQ_MIN_HZ)
     {
         /* When under the minimum set MRCFREQ to 0 */
         freq_mhz = 0;
@@ -406,17 +467,17 @@ static void ra_prv_set_wait_state_frequency (uint32_t mriclk_frequency_hz, uint3
     else
     {
         /* Round up the result when converting to MHz */
-        freq_mhz = (mriclk_frequency_hz + BSP_PRV_HZ_PER_MHZ - 1) / BSP_PRV_HZ_PER_MHZ;
+        freq_mhz = (mriclk_frequency_hz + RA_PRV_HZ_PER_MHZ - 1) / RA_PRV_HZ_PER_MHZ;
     }
 
     /* Write MRCFREQ */
     while (freq_mhz != getreg32(R_MRAM_BASE + R_MRAM_MRCFREQ_OFFSET))
     {
-        putreg32(BSP_PRV_MRCFREQ_KEY | freq_mhz, R_MRAM_BASE + R_MRAM_MRCFREQ_OFFSET);
+        putreg32(RA_PRV_MRCFREQ_KEY | freq_mhz, R_MRAM_BASE + R_MRAM_MRCFREQ_OFFSET);
     }
 
     /* Set Extra MRAM wait states */
-    if (mrpclk_frequency_hz <= BSP_PRV_MRFREQ_MIN_HZ)
+    if (mrpclk_frequency_hz <= RA_PRV_MRFREQ_MIN_HZ)
     {
         /* When under the minimum set MREFREQ to 0 */
         freq_mhz = 0;
@@ -424,13 +485,13 @@ static void ra_prv_set_wait_state_frequency (uint32_t mriclk_frequency_hz, uint3
     else
     {
         /* Round up the result when converting to MHz */
-        freq_mhz = (mrpclk_frequency_hz + BSP_PRV_HZ_PER_MHZ - 1) / BSP_PRV_HZ_PER_MHZ;
+        freq_mhz = (mrpclk_frequency_hz + RA_PRV_HZ_PER_MHZ - 1) / RA_PRV_HZ_PER_MHZ;
     }
 
     /* Write MREFREQ */
     while (freq_mhz != getreg32(R_MRAM_BASE + R_MRAM_MREFREQ_OFFSET))
     {
-        putreg32(BSP_PRV_MREFREQ_KEY | freq_mhz, R_MRAM_BASE + R_MRAM_MREFREQ_OFFSET);
+        putreg32(RA_PRV_MREFREQ_KEY | freq_mhz, R_MRAM_BASE + R_MRAM_MREFREQ_OFFSET);
     }
 }
 
@@ -780,22 +841,144 @@ void ra_print_clock_info(void)
 uint32_t ra_get_peripheral_clock(int peripheral_id)
 {
   ra_clock_config_t config;
+  uint32_t source_freq;
+  uint8_t divider;
 
   ra_get_clock_config(&config);
 
   switch (peripheral_id)
     {
-      case 0: /* PCLKA - same as ICLK */
+      case RA_PCLK_ICLK:        /* System clock (ICK) */
         return config.iclk_freq;
 
-      case 1: /* PCLKB */
+      case RA_PCLK_PCLKA:       /* Peripheral Clock A */
+        return config.pclka_freq;
+
+      case RA_PCLK_PCLKB:       /* Peripheral Clock B */
         return config.pclkb_freq;
 
-      case 2: /* PCLKC - same as PCLKB */
-        return config.pclkb_freq;
+      case RA_PCLK_PCLKC:       /* Peripheral Clock C */
+        return config.pclkc_freq;
 
-      case 3: /* PCLKD */
+      case RA_PCLK_PCLKD:       /* Peripheral Clock D */
         return config.pclkd_freq;
+
+      case RA_PCLK_PCLKE:       /* Peripheral Clock E */
+        return config.pclke_freq;
+
+      case RA_PCLK_BCLK:        /* External bus clock */
+        return config.bclk_freq;
+
+      case RA_PCLK_FCLK:        /* Flash interface clock */
+        return config.fclk_freq;
+
+      case RA_PCLK_SCICLK:      /* SCI clock */
+        return config.sciclk_freq;
+
+      case RA_PCLK_SPICLK:      /* SPI clock */
+#if defined(R_SYSC_SPICKCR)
+        source_freq = RA_SYSTEM_CLOCK_FREQUENCY;
+        divider = getreg8(R_SYSC_SPICKDIVCR) & 0x0F;
+        return source_freq / RA_DIV_TO_DIVISOR(divider);
+#else
+        return 0;
+#endif
+
+      case RA_PCLK_CANFDCLK:    /* CANFD clock */
+#if defined(R_SYSC_CANFDCKCR)
+        source_freq = RA_SYSTEM_CLOCK_FREQUENCY;
+        divider = getreg8(R_SYSC_CANFDCKDIVCR) & 0x0F;
+        return source_freq / RA_DIV_TO_DIVISOR(divider);
+#else
+        return 0;
+#endif
+
+      case RA_PCLK_GPTCLK:      /* GPT clock */
+#if defined(R_SYSC_GPTCKCR)
+        source_freq = RA_SYSTEM_CLOCK_FREQUENCY;
+        divider = getreg8(R_SYSC_GPTCKDIVCR) & 0x0F;
+        return source_freq / RA_DIV_TO_DIVISOR(divider);
+#else
+        return 0;
+#endif
+
+      case RA_PCLK_IICCLK:      /* IIC (I2C) clock - uses PCLKB on RA8P1 */
+        return config.pclkb_freq;
+
+      case RA_PCLK_ADCCLK:      /* ADC clock */
+#if defined(R_SYSC_ADCCKCR)
+        source_freq = RA_SYSTEM_CLOCK_FREQUENCY;
+        divider = getreg8(R_SYSC_ADCCKDIVCR) & 0x0F;
+        return source_freq / RA_DIV_TO_DIVISOR(divider);
+#else
+        return 0;
+#endif
+
+      case RA_PCLK_OCTACLK:     /* OSPI clock */
+#if defined(R_SYSC_OCTACKCR)
+        source_freq = RA_SYSTEM_CLOCK_FREQUENCY;
+        divider = getreg8(R_SYSC_OCTACKDIVCR) & 0x0F;
+        return source_freq / RA_DIV_TO_DIVISOR(divider);
+#else
+        return 0;
+#endif
+
+      case RA_PCLK_LCDCLK:      /* LCD clock */
+#if defined(R_SYSC_LCDCKCR)
+        /* LCD typically uses PLL2R, need to calculate from configured source */
+        source_freq = RA_CFG_PLL2R_FREQUENCY_HZ;
+        divider = getreg8(R_SYSC_LCDCKDIVCR) & 0x0F;
+        return source_freq / RA_DIV_TO_DIVISOR(divider);
+#else
+        return 0;
+#endif
+
+      case RA_PCLK_I3CCLK:      /* I3C clock */
+#if defined(R_SYSC_I3CCKCR)
+        /* I3C typically uses PLL2Q, need to calculate from configured source */
+        source_freq = RA_CFG_PLL2Q_FREQUENCY_HZ;
+        divider = getreg8(R_SYSC_I3CCKDIVCR) & 0x0F;
+        return source_freq / RA_DIV_TO_DIVISOR(divider);
+#else
+        return 0;
+#endif
+
+      case RA_PCLK_USB60CLK:    /* USB 60MHz clock */
+#if defined(R_SYSC_USB60CKCR)
+        /* USB60 typically uses PLL2R, need to calculate from configured source */
+        source_freq = RA_CFG_PLL2R_FREQUENCY_HZ;
+        divider = getreg8(R_SYSC_USB60CKDIVCR) & 0x0F;
+        return source_freq / RA_DIV_TO_DIVISOR(divider);
+#else
+        return 0;
+#endif
+
+      case RA_PCLK_ESWCLK:      /* Ethernet Switch clock */
+#if defined(R_SYSC_ESWCKCR)
+        source_freq = RA_SYSTEM_CLOCK_FREQUENCY;
+        divider = getreg8(R_SYSC_ESWCKDIVCR) & 0x0F;
+        return source_freq / RA_DIV_TO_DIVISOR(divider);
+#else
+        return 0;
+#endif
+
+      case RA_PCLK_ESWPHYCLK:   /* Ethernet Switch PHY clock */
+#if defined(R_SYSC_ESWPCKCR)
+        source_freq = RA_SYSTEM_CLOCK_FREQUENCY;
+        divider = getreg8(R_SYSC_ESWPCKDIVCR) & 0x0F;
+        return source_freq / RA_DIV_TO_DIVISOR(divider);
+#else
+        return 0;
+#endif
+
+      case RA_PCLK_ETHPHYCLK:   /* Ethernet PHY clock */
+#if defined(R_SYSC_ETHPCKCR)
+        source_freq = RA_SYSTEM_CLOCK_FREQUENCY;
+        divider = getreg8(R_SYSC_ETHPCKDIVCR) & 0x0F;
+        return source_freq / RA_DIV_TO_DIVISOR(divider);
+#else
+        return 0;
+#endif
 
       default:
         return config.system_clock_freq;

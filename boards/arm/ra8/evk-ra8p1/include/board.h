@@ -35,242 +35,317 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/****************************************************************************************************
+ * Memory Configuration
+ ****************************************************************************************************/
+
+/* MRAM (Magnetoresistive RAM) - Non-volatile memory used as code flash */
+#define BOARD_FLASH_SIZE                (1 * 1024 * 1024)  /* 1MB MRAM */
+#define BOARD_FLASH_SECTORS             256                /* 4KB sectors */
+
+/* SRAM */
+#define BOARD_RAM_SIZE                  (2 * 1024 * 1024)  /* 2MB SRAM with ECC */
+
+/* MRAM Configuration */
+#define BOARD_MRAM_CODE_BASE            0x02000000
+#define BOARD_MRAM_CODE_SIZE            0x000F0000  /* 1MB - 64KB (960KB code) */
+#define BOARD_MRAM_DATA_BASE            0x020F0000  /* Last 64KB for params */
+#define BOARD_MRAM_DATA_SIZE            0x00010000  /* 64KB */
+#define BOARD_MRAM_WRITE_SIZE           32          /* 32 bytes per write */
+#define BOARD_MRAM_BLOCK_SIZE           4096        /* 4KB sectors */
+
+/* External Octo-SPI Flash */
+#define BOARD_OSPI_FLASH_BASE           0x80000000  /* Octo-SPI CS0 */
+#define BOARD_OSPI_FLASH_SIZE           (64 * 1024 * 1024)  /* 64MB (512Mb) */
+#define BOARD_OSPI_FLASH_SECTOR_SIZE    4096        /* 4KB sectors */
+
+/* Mass Storage Configuration */
+#define BOARD_HAS_NO_SDCARD             1  /* No SD card slot */
+
 /****************************************************************************
  * UART/SCI Pin Definitions
  ****************************************************************************/
 
-/* SCI2 - NSH Console (Pmod 1 UART: P802=RXD2, P801=TXD2/MOSI2) */
-#define GPIO_SCI2_RX   GPIO_RXD2_B  /* P802 - Console RX (Pmod 1 pin 3) */
-#define GPIO_SCI2_TX   GPIO_TXD2_B  /* P801 - Console TX (Pmod 1 pin 2) - note: shared with MOSI2 */
+/* SCI2 - NSH Console (Pmod 1 UART: P802=RXD2, P801=TXD2/MOSI2)
+ * ⚠️  CONFLICT: Shares pins with Pmod 1 SPI and OSPI DQS/SIO6!
+ * Hardware: Usually hardwired to USB-Serial converter
+ * Resolution: This is the default console. To use Pmod 1 SPI,
+ *             redirect console to SCI0 or SCI7.
+ */
+#define GPIO_SCI2_RX   GPIO_RXD2_B  /* P802 - Console RX ⚠️ Conflicts: MISO2, OSPI_SIO6 */
+#define GPIO_SCI2_TX   GPIO_TXD2_B  /* P801 - Console TX ⚠️ Conflicts: MOSI2, OSPI_DQS */
 
-/* SCI0 - Pmod 2 UART (P602=RXD0/MISOB, P603=TXD0/MOSIB) */
-#define GPIO_SCI0_RX   GPIO_RXD0_B  /* P602 - Pmod 2 RX (pin 3) */
-#define GPIO_SCI0_TX   GPIO_TXD0_B  /* P603 - Pmod 2 TX (pin 2) */
+/* SCI0 - Pmod 2 UART (P602=RXD0/MISOB, P603=TXD0/MOSIB)
+ * ⚠️  CONFLICT: Shares pins with Pmod 2 SPI!
+ * Use Case: Alternate console location when SCI2 is used for Pmod 1 SPI
+ */
+#define GPIO_SCI0_RX   GPIO_RXD0_B  /* P602 - Pmod 2 RX ⚠️ Conflicts: MISO0 */
+#define GPIO_SCI0_TX   GPIO_TXD0_B  /* P603 - Pmod 2 TX ⚠️ Conflicts: MOSI0 */
 
-/* SCI7 - Arduino/mikroBUS UART (P808=RXD7, P809=TXD7) */
-#define GPIO_SCI7_RX   GPIO_RXD7_A  /* P808 - Arduino D0/mikroBUS RX */
-#define GPIO_SCI7_TX   GPIO_TXD7_A  /* P809 - Arduino D1/mikroBUS TX */
+/* SCI7 - Arduino/mikroBUS UART (P808=RXD7, P809=TXD7)
+ * ✓ SAFE: No major conflicts
+ * Use Case: Alternate console location or Arduino/mikroBUS communication
+ */
+#define GPIO_SCI7_RX   GPIO_RXD7_A  /* P808 - Arduino D0/mikroBUS RX ✓ SAFE */
+#define GPIO_SCI7_TX   GPIO_TXD7_A  /* P809 - Arduino D1/mikroBUS TX ✓ SAFE */
 
 /****************************************************************************
  * SPI Pin Definitions
  ****************************************************************************/
 
-/* SPI0 (Pmod 2): P601=RSPCKB, P602=MISOB, P603=MOSIB, P604=SSLB0 */
-/* Map to RA8P1 pinmap entries: P601..P604 -> PORT6 PIN1..4 where available */
-#define GPIO_SPI0_SCK   GPIO_RSPCKA_B_1        /* P601 - Pmod 2 SCK (pin 4) */
-#define GPIO_SPI0_MISO  GPIO_MISO0_B_1         /* P602 - Pmod 2 MISO (pin 3, shared with RXD0) */
-#define GPIO_SPI0_MOSI  GPIO_MOSI0_B_2         /* P603 - Pmod 2 MOSI (pin 2, shared with TXD0) */
-#define GPIO_SPI0_CS0   GPIO_SSLB0_A_1         /* P604 - Pmod 2 CS (pin 1) */
+/* SPI0 (Pmod 2): P601=RSPCKB, P602=MISOB, P603=MOSIB, P604=SSLB0
+ * ⚠️  CONFLICT: P602/P603 shared with SCI0 UART
+ * ⚠️  CONFLICT: P601 can conflict with OSPI_WP1 (write protect)
+ */
+#define GPIO_SPI0_SCK   GPIO_RSPCKA_B_1        /* P601 - Pmod 2 SCK ⚠️ Conflicts: OSPI_WP1 */
+#define GPIO_SPI0_MISO  GPIO_MISO0_B_1         /* P602 - Pmod 2 MISO ⚠️ Conflicts: RXD0 */
+#define GPIO_SPI0_MOSI  GPIO_MOSI0_B_2         /* P603 - Pmod 2 MOSI ⚠️ Conflicts: TXD0 */
+#define GPIO_SPI0_CS0   GPIO_SSLB0_A_1         /* P604 - Pmod 2 CS ✓ SAFE */
 
-/* SPI1 (Pmod 1): P803=SCK2, P802=MISO2, P801=MOSI2, P804=SS2 */
-#define GPIO_SPI1_SCK   GPIO_RSPCKA_C_1        /* P803 - Pmod 1 SCK (pin 4) */
-#define GPIO_SPI1_MISO  GPIO_MISO2_A_1         /* P802 - Pmod 1 MISO (pin 3, shared with RXD2) */
-#define GPIO_SPI1_MOSI  GPIO_MOSI2_A_1         /* P801 - Pmod 1 MOSI (pin 2, shared with TXD2) */
-#define GPIO_SPI1_CS0   GPIO_SSLE2_A_1         /* P804 - Pmod 1 CS (pin 1) */
+/* SPI1 (Pmod 1): P803=SCK2, P802=MISO2, P801=MOSI2, P804=SS2
+ * ⚠️  SEVERE CONFLICT: P801/P802 conflict with SCI2 console UART!
+ * ⚠️  SEVERE CONFLICT: All pins conflict with OSPI flash signals!
+ */
+#define GPIO_SPI1_SCK   GPIO_RSPCKA_C_1        /* P803 - Pmod 1 SCK ⚠️ Conflicts: OSPI_SIO1 */
+#define GPIO_SPI1_MISO  GPIO_MISO2_A_1         /* P802 - Pmod 1 MISO ⚠️ Conflicts: RXD2, OSPI_SIO6 */
+#define GPIO_SPI1_MOSI  GPIO_MOSI2_A_1         /* P801 - Pmod 1 MOSI ⚠️ Conflicts: TXD2, OSPI_DQS */
+#define GPIO_SPI1_CS0   GPIO_SSLE2_A_1         /* P804 - Pmod 1 CS ⚠️ Conflicts: OSPI_SIO7 */
 
-/* Arduino SPI (P100=MISOB, P101=MOSIB, P102=RSPCKB, P103=SSLB0) */
-#define GPIO_ARDUINO_SPI_SCK   GPIO_RSPCKA_B_1      /* P102 - Arduino D13 */
-#define GPIO_ARDUINO_SPI_MISO  GPIO_MISOB_A_1       /* P100 - Arduino D12 */
-#define GPIO_ARDUINO_SPI_MOSI  GPIO_MOSIB_A_1       /* P101 - Arduino D11 */
-#define GPIO_ARDUINO_SPI_CS0   GPIO_SSLB0_A_1       /* P103 - Arduino D10 */
-#define GPIO_ARDUINO_SPI_CS1   GPIO_P110_OUTPUT_HIGH    /* P110 - repurposed for another CS */
+/* Arduino SPI (P100=MISOB, P101=MOSIB, P102=RSPCKB, P103=SSLB0)
+ * ⚠️  SEVERE CONFLICT: These pins conflict with OSPI Flash!
+ * Pin Conflicts (Hardware jumpers may control):
+ *   P100: MISO (D12) ⚡ OSPI_SIO0 ⚡ GPT8B
+ *   P101: MOSI (D11) ⚡ OSPI_SIO3 ⚡ GPT8A
+ *   P102: SCK  (D13) ⚡ OSPI_SIO4 ⚡ GPT2B
+ *   P103: CS0  (D10) ⚡ OSPI_SIO2 ⚡ GPT2A
+ *   P110: CS1  (D9)  ⚡  GPT9B
+ */
+#define GPIO_ARDUINO_SPI_SCK   GPIO_RSPCKA_B_1      /* P102 - Arduino D13 ⚠️ Conflicts: OSPI_SIO4, GPT2B */
+#define GPIO_ARDUINO_SPI_MISO  GPIO_MISOB_A_1       /* P100 - Arduino D12 ⚠️ Conflicts: OSPI_SIO0, GPT8B */
+#define GPIO_ARDUINO_SPI_MOSI  GPIO_MOSIB_A_1       /* P101 - Arduino D11 ⚠️ Conflicts: OSPI_SIO3, GPT8A */
+#define GPIO_ARDUINO_SPI_CS0   GPIO_SSLB0_A_1       /* P103 - Arduino D10 ⚠️ Conflicts: OSPI_SIO2, GPT2A */
+#define GPIO_ARDUINO_SPI_CS1   GPIO_P110_OUTPUT_HIGH    /* P110 - repurposed for another CS   ⚠️ Conflicts: GPT9B */
 
-/* mikroBUS SPI (same as Arduino: P100-P103) */
-#define GPIO_MIKROBUS_SPI_SCK   GPIO_ARDUINO_SPI_SCK    /* P102 */
-#define GPIO_MIKROBUS_SPI_MISO  GPIO_ARDUINO_SPI_MISO   /* P100 */
-#define GPIO_MIKROBUS_SPI_MOSI  GPIO_ARDUINO_SPI_MOSI   /* P101 */
-#define GPIO_MIKROBUS_SPI_CS    GPIO_ARDUINO_SPI_CS0    /* P103 */
 
 /****************************************************************************
- * PWM/GPT Timer Pin Definitions
+ * PWM/GPT Pin Definitions
+ *
+ * This section includes ALL available GPT pins, including those from
+ * parallel graphics connector (not used in NuttX).
+ *
+ * Conflict-Free PWM Pins (✓ SAFE):
+ * ========================================================
+
+ * PWM1:   GPIO_GPT3_A     (P912) - GPT3A  ✓
+ * PWM2:   GPIO_GPT3_B     (P911) - GPT3B  ✓
+ * PWM3:   GPIO_GPT5_A     (P915) - GPT5A  ✓
+ * PWM4:   GPIO_GPT5_B     (P914) - GPT5B  ✓
+ * PWM5:   GPIO_GPT10_A    (P810) - GPT10A ✓ Arduino D4
+ * PWM6:   GPIO_GPT10_B    (P811) - GPT10B ✓ Arduino D3
+ * PWM7:   GPIO_GPT11_A_2  (P903) - GPT11A ✓
+ * PWM8:   GPIO_GPT11_B    (P904) - GPT11B ✓
+ * PWM9:   GPIO_GPT12_A    (P715) - GPT12A ✓
+ * PWM10:  GPIO_GPT12_B    (P714) - GPT12B ✓
+ * PWM11:  GPIO_GPT13_A    (P515) - GPT13A ✓
+ * PWM12:  GPIO_GPT13_B    (P514) - GPT13B ✓
+ *
+ * PWM Pins with Conflicts (use with caution):
+ * ===========================================
+ * ⚠️ GPT1A/B  (P105/P104)   - Conflicts: OSPI_ECS/CS0
+ * ⚠️ GPT2A/B  (P103/P102 or P713/P712) - P103/P102 conflict with Arduino SPI & OSPI
+ * ⚠️ GPT4A/B  (P205/P301)   - P301 conflicts with SDRAM
+ * ⚠️ GPT6A/B  (P400/P401)   - Conflicts with I2C0
+ * ⚠️ GPT7B    (P303)        - Conflicts with Green LED
+ * ⚠️ GPT8A/B  (P101/P100)   - Conflicts with Arduino SPI & OSPI
  ****************************************************************************/
 
-/* GPT Channel A Output Pin Definitions (GTIOCA) */
-#define GPIO_GPT0_A     GPIO_GTIOC0A_1      /* P211 - GPT0 Channel A */
-#define GPIO_GPT1_A     GPIO_GTIOC1A_1      /* P105 - Arduino D6 / GPT1A */
-#define GPIO_GPT2_A     GPIO_GTIOC2A_1      /* P103 - Arduino D10 / GPT2A */
-#define GPIO_GPT3_A     GPIO_GTIOC3A_1      /* P300 - GPT3 */
-#define GPIO_GPT4_A     GPIO_GTIOC4A_1      /* P205 - GPT4 */
-#define GPIO_GPT5_A     GPIO_GTIOC5A_1      /* P115 - GPT5 */
-#define GPIO_GPT6_A     GPIO_GTIOC6A_1      /* P400 - GPT6 */
-#define GPIO_GPT7_A     GPIO_GTIOC7A_1      /* P304 - GPT7 */
-#define GPIO_GPT8_A     GPIO_GTIOC8A_1      /* P101 - Arduino D11 / GPT8A */
-#define GPIO_GPT9_A     GPIO_GTIOC9A_1      /* P111 - GPT9 */
-#define GPIO_GPT10_A    GPIO_GTIOC10A_2     /* P810 - Arduino D4 / mikroBUS PWM */
-#define GPIO_GPT11_A    GPIO_GTIOC11A_1     /* P711 - GPT11 */
-#define GPIO_GPT12_A    GPIO_GTIOC12A_1     /* P501 - GPT12 */
-#define GPIO_GPT13_A    GPIO_GTIOC13A_1     /* P515 - GPT13 */
+/* GPT Channel A Output Pins */
+#define GPIO_GPT1_A     GPIO_GTIOC1A_1      /* P105 ⚠️ Arduino D6, OSPI_ECS */
+#define GPIO_GPT2_A_1   GPIO_GTIOC2A_1      /* P103 ⚠️ Arduino D10, OSPI_SIO2, SPI CS */
+#define GPIO_GPT2_A_2   GPIO_GTIOC2A_3      /* P713 ✓ From parallel graphics */
+#define GPIO_GPT3_A     GPIO_GTIOC3A_1      /* P912 ✓ From parallel graphics */
+#define GPIO_GPT4_A     GPIO_GTIOC4A_1      /* P205 ✓ SAFE */
+#define GPIO_GPT5_A     GPIO_GTIOC5A_1      /* P915 ✓ From parallel graphics */
+#define GPIO_GPT6_A     GPIO_GTIOC6A_1      /* P400 ⚠️ I2C0_SCL, CAM_D2 */
+#define GPIO_GPT7_A     GPIO_GTIOC7A_1      /* P304 ⚠️ Ethernet TXD3 */
+#define GPIO_GPT8_A     GPIO_GTIOC8A_1      /* P101 ⚠️ Arduino D11, OSPI_SIO3, SPI MOSI */
+#define GPIO_GPT9_A     GPIO_GTIOC9A_1      /* PB06 ✓ From parallel graphics */
+#define GPIO_GPT10_A    GPIO_GTIOC10A_2     /* P810 ✓ Arduino D4, mikroBUS PWM */
+#define GPIO_GPT11_A_1  GPIO_GTIOC11A_1     /* P711 ✓ From parallel graphics (legacy) */
+#define GPIO_GPT11_A_2  GPIO_GTIOC11A_3     /* P903 ✓ From parallel graphics */
+#define GPIO_GPT12_A    GPIO_GTIOC12A_1     /* P715 ✓ From parallel graphics */
+#define GPIO_GPT13_A    GPIO_GTIOC13A_1     /* P515 ✓ NO CONFLICTS */
 
-/* GPT Channel B Output Pin Definitions (GTIOCB) */
-#define GPIO_GPT0_B     GPIO_GTIOC0B_1      /* P210 - GPT0 Channel B */
-#define GPIO_GPT1_B     GPIO_GTIOC1B_1      /* P104 - Arduino D5 / GPT1B */
-#define GPIO_GPT2_B     GPIO_GTIOC2B_1      /* P102 - Arduino D13 / GPT2B */
-#define GPIO_GPT3_B     GPIO_GTIOC3B_1      /* P112 - GPT3 */
-#define GPIO_GPT4_B     GPIO_GTIOC4B_1      /* P301 - GPT4 */
-#define GPIO_GPT5_B     GPIO_GTIOC5B_1      /* P609 - GPT5 */
-#define GPIO_GPT6_B     GPIO_GTIOC6B_1      /* P401 - GPT6 */
-#define GPIO_GPT7_B     GPIO_GTIOC7B_1      /* P303 - GPT7 */
-#define GPIO_GPT8_B     GPIO_GTIOC8B_1      /* P100 - Arduino D12 / GPT8B */
-#define GPIO_GPT9_B     GPIO_GTIOC9B_1      /* P110 - Arduino D9 / GPT9B */
-#define GPIO_GPT10_B    GPIO_GTIOC10B_2     /* P811 - Arduino D3 / GPT10B */
-#define GPIO_GPT11_B    GPIO_GTIOC11B_1     /* P710 - GPT11 */
-#define GPIO_GPT12_B    GPIO_GTIOC12B_1     /* P502 - GPT12 */
-#define GPIO_GPT13_B    GPIO_GTIOC13B_2     /* P514 - GPT13 */
+/* GPT Channel B Output Pins */
+#define GPIO_GPT1_B     GPIO_GTIOC1B_1      /* P104 ⚠️ Arduino D5, OSPI_CS0 */
+#define GPIO_GPT2_B_1   GPIO_GTIOC2B_1      /* P102 ⚠️ Arduino D13, OSPI_SIO4, SPI SCK */
+#define GPIO_GPT2_B_2   GPIO_GTIOC2B_3      /* P712 ✓ From parallel graphics */
+#define GPIO_GPT3_B     GPIO_GTIOC3B_1      /* P911 ✓ From parallel graphics */
+#define GPIO_GPT4_B     GPIO_GTIOC4B_1      /* P301 ⚠️ SDRAM_DQ1 */
+#define GPIO_GPT5_B     GPIO_GTIOC5B_1      /* P914 ✓ From parallel graphics */
+#define GPIO_GPT6_B     GPIO_GTIOC6B_1      /* P401 ⚠️ I2C0_SDA */
+#define GPIO_GPT7_B     GPIO_GTIOC7B_1      /* P303 ⚠️ Green LED */
+#define GPIO_GPT8_B     GPIO_GTIOC8B_1      /* P100 ⚠️ Arduino D12, OSPI_SIO0, SPI MISO */
+#define GPIO_GPT9_B     GPIO_GTIOC9B_1      /* PB07 ✓ From parallel graphics */
+#define GPIO_GPT10_B    GPIO_GTIOC10B_2     /* P811 ✓ Arduino D3 */
+#define GPIO_GPT11_B    GPIO_GTIOC11B_1     /* P904 ✓ From parallel graphics */
+#define GPIO_GPT12_B    GPIO_GTIOC12B_1     /* P714 ✓ From parallel graphics */
+#define GPIO_GPT13_B    GPIO_GTIOC13B_2     /* P514 ✓ NO CONFLICTS */
 
-/* Arduino PWM pins (GPT-based) */
-#define GPIO_ARDUINO_D3_PWM   GPIO_GTIOC10B_2   /* P811 - Arduino D3 / GPT10B */
-#define GPIO_ARDUINO_D4_PWM   GPIO_GTIOC10A_2   /* P810 - Arduino D4 / GPT10A */
-#define GPIO_ARDUINO_D5_PWM   GPIO_GTIOC1B_1    /* P104 - Arduino D5 / GPT1B */
-#define GPIO_ARDUINO_D6_PWM   GPIO_GTIOC1A_1    /* P105 - Arduino D6 / GPT1A */
-#define GPIO_ARDUINO_D9_PWM   GPIO_GTIOC9B_1    /* P110 - Arduino D9 / GPT9B */
-#define GPIO_ARDUINO_D10_PWM  GPIO_GTIOC2A_1    /* P103 - Arduino D10 / GPT2A */
-#define GPIO_ARDUINO_D11_PWM  GPIO_GTIOC8A_1    /* P101 - Arduino D11 / GPT8A */
-#define GPIO_ARDUINO_D12_PWM  GPIO_GTIOC8B_1    /* P100 - Arduino D12 / GPT8B */
+/* Arduino PWM Pins (for Arduino shield compatibility) */
+#define GPIO_ARDUINO_D3_PWM   GPIO_GTIOC10B_2   /* P811 ✓ SAFE */
+#define GPIO_ARDUINO_D4_PWM   GPIO_GTIOC10A_2   /* P810 ✓ SAFE */
+#define GPIO_ARDUINO_D5_PWM   GPIO_GTIOC1B_1    /* P104 ⚠️ OSPI_CS0 */
+#define GPIO_ARDUINO_D6_PWM   GPIO_GTIOC1A_1    /* P105 ⚠️ OSPI_ECS */
+#define GPIO_ARDUINO_D9_PWM   GPIO_GTIOC9B_1    /* P110 ⚠️ SPI_CS1 */
+#define GPIO_ARDUINO_D10_PWM  GPIO_GTIOC2A_1    /* P103 ⚠️ SPI_CS0, OSPI_SIO2 */
+#define GPIO_ARDUINO_D11_PWM  GPIO_GTIOC8A_1    /* P101 ⚠️ SPI_MOSI, OSPI_SIO3 */
+#define GPIO_ARDUINO_D12_PWM  GPIO_GTIOC8B_1    /* P100 ⚠️ SPI_MISO, OSPI_SIO0 */
 
-/* mikroBUS PWM pin */
-#define GPIO_MIKROBUS_PWM     GPIO_GTIOC10A_2   /* P810 - mikroBUS PWM */
+/* mikroBUS PWM Pin */
+#define GPIO_MIKROBUS_PWM     GPIO_GTIOC10A_2   /* P810 ✓ SAFE */
 
 /****************************************************************************
  * I2C Pin Definitions
  ****************************************************************************/
 
-/* I2C0/I3C (P400=SCL0, P401=SDA0) - Grove 1, Qwiic, Arduino, mikroBUS */
-#define GPIO_I2C0_SCL        GPIO_SCL0_B_1   /* P400 - I3C_SCL0 / I2C0_SCL */
-#define GPIO_I2C0_SDA        GPIO_SDA0_B_1   /* P401 - I3C_SDA0 / I2C0_SDA */
-#define GPIO_I3C_SCL         GPIO_I3C_SCL0_1 /* P400 - I3C SCL */
-#define GPIO_I3C_SDA         GPIO_SDA0_B_1   /* P401 - I3C SDA (same as I2C0) */
+/* I2C0/I3C (P400=SCL0, P401=SDA0) - Grove 1, Qwiic, Arduino, mikroBUS
+ * ⚠️  CONFLICT: P400/P401 conflict with GPT6A/B and Camera data pins
+ * Resolution: I2C0 takes priority over GPT6
+ */
+#define GPIO_I2C0_SCL        GPIO_SCL0_B_1   /* P400 ⚠️ Conflicts: GPT6A, CAM_D2 */
+#define GPIO_I2C0_SDA        GPIO_SDA0_B_1   /* P401 ⚠️ Conflicts: GPT6B */
+#define GPIO_I3C_SCL         GPIO_I3C_SCL0_1 /* P400 - I3C SCL (same pin as I2C0) */
+#define GPIO_I3C_SDA         GPIO_SDA0_B_1   /* P401 - I3C SDA (same pin as I2C0) */
 
-/* I2C1 (P512=SCL1, P511=SDA1) - Grove 1/2, Camera Port, Qwiic */
-#define GPIO_I2C1_SCL        GPIO_SCL1_A_2   /* P512 - I2C1 SCL */
-#define GPIO_I2C1_SDA        GPIO_SDA1_B_1   /* P511 - I2C1 SDA */
+/* I2C1 (P512=SCL1, P511=SDA1) - Grove 2, Camera Port, Qwiic
+ * ✓ SAFE: Can be shared between multiple devices with unique addresses
+ */
+#define GPIO_I2C1_SCL        GPIO_SCL1_A_2   /* P512 ✓ Shared: Grove2, Camera, Qwiic */
+#define GPIO_I2C1_SDA        GPIO_SDA1_B_1   /* P511 ✓ Shared: Grove2, Camera, Qwiic */
 
-/* Grove 1 I2C (supports both I2C0 and I2C1) */
-#define GPIO_GROVE1_SCL_I2C0  GPIO_I2C0_SCL  /* P400 or P512 */
-#define GPIO_GROVE1_SDA_I2C0  GPIO_I2C0_SDA  /* P401 or P511 */
-#define GPIO_GROVE1_SCL_I2C1  GPIO_I2C1_SCL  /* P512 */
-#define GPIO_GROVE1_SDA_I2C1  GPIO_I2C1_SDA  /* P511 */
+/* Grove Connectors */
+#define GPIO_GROVE1_SCL_I2C0  GPIO_I2C0_SCL  /* P400 - Grove 1 on I2C0 */
+#define GPIO_GROVE1_SDA_I2C0  GPIO_I2C0_SDA  /* P401 - Grove 1 on I2C0 */
+#define GPIO_GROVE1_SCL_I2C1  GPIO_I2C1_SCL  /* P512 - Grove 1 on I2C1 (alternate) */
+#define GPIO_GROVE1_SDA_I2C1  GPIO_I2C1_SDA  /* P511 - Grove 1 on I2C1 (alternate) */
 
-/* Grove 2 (P512=SCL, P511=SDA, can also be analog P002/P005) */
-#define GPIO_GROVE2_SCL      GPIO_I2C1_SCL   /* P512 - Grove 2 SCL */
-#define GPIO_GROVE2_SDA      GPIO_I2C1_SDA   /* P511 - Grove 2 SDA */
-#define GPIO_GROVE2_AN0      GPIO_P002_ANALOG /* P002 - Grove 2 analog (if configured) */
-#define GPIO_GROVE2_AN1      GPIO_P005_ANALOG /* P005 - Grove 2 analog (if configured) */
+#define GPIO_GROVE2_SCL       GPIO_I2C1_SCL  /* P512 - Grove 2 I2C */
+#define GPIO_GROVE2_SDA       GPIO_I2C1_SDA  /* P511 - Grove 2 I2C */
+#define GPIO_GROVE2_AN0       GPIO_P002_ANALOG /* P002 - Grove 2 analog option */
+#define GPIO_GROVE2_AN1       GPIO_P005_ANALOG /* P005 - Grove 2 analog option */
 
-/* Qwiic Connector (P400=SCL, P401=SDA or P512=SCL, P511=SDA) */
-#define GPIO_QWIIC_SCL_I2C0  GPIO_I2C0_SCL   /* P400 / P512 */
-#define GPIO_QWIIC_SDA_I2C0  GPIO_I2C0_SDA   /* P401 / P511 */
-#define GPIO_QWIIC_SCL_I2C1  GPIO_I2C1_SCL   /* P512 */
-#define GPIO_QWIIC_SDA_I2C1  GPIO_I2C1_SDA   /* P511 */
+/* Qwiic Connector (supports both I2C0 and I2C1) */
+#define GPIO_QWIIC_SCL_I2C0   GPIO_I2C0_SCL  /* P400 - Qwiic on I2C0 */
+#define GPIO_QWIIC_SDA_I2C0   GPIO_I2C0_SDA  /* P401 - Qwiic on I2C0 */
+#define GPIO_QWIIC_SCL_I2C1   GPIO_I2C1_SCL  /* P512 - Qwiic on I2C1 */
+#define GPIO_QWIIC_SDA_I2C1   GPIO_I2C1_SDA  /* P511 - Qwiic on I2C1 */
 
-/* Arduino I2C (P400=SCL0, P401=SDA0 or P512=SCL1, P511=SDA1) */
-#define GPIO_ARDUINO_SCL_I2C0  GPIO_I2C0_SCL   /* P400 */
-#define GPIO_ARDUINO_SDA_I2C0  GPIO_I2C0_SDA   /* P401 */
-#define GPIO_ARDUINO_SCL_I2C1  GPIO_I2C1_SCL   /* P512 */
-#define GPIO_ARDUINO_SDA_I2C1  GPIO_I2C1_SDA   /* P511 */
+/* Arduino I2C (supports both I2C0 and I2C1) */
+#define GPIO_ARDUINO_SCL_I2C0 GPIO_I2C0_SCL  /* P400 - Arduino I2C on I2C0 */
+#define GPIO_ARDUINO_SDA_I2C0 GPIO_I2C0_SDA  /* P401 - Arduino I2C on I2C0 */
+#define GPIO_ARDUINO_SCL_I2C1 GPIO_I2C1_SCL  /* P512 - Arduino I2C on I2C1 */
+#define GPIO_ARDUINO_SDA_I2C1 GPIO_I2C1_SDA  /* P511 - Arduino I2C on I2C1 */
 
-/* mikroBUS I2C (same as Arduino: P400/P401 or P512/P511) */
-#define GPIO_MIKROBUS_SCL_I2C0  GPIO_I2C0_SCL   /* P400 / P512 */
-#define GPIO_MIKROBUS_SDA_I2C0  GPIO_I2C0_SDA   /* P401 / P511 */
-#define GPIO_MIKROBUS_SCL_I2C1  GPIO_I2C1_SCL   /* P512 */
-#define GPIO_MIKROBUS_SDA_I2C1  GPIO_I2C1_SDA   /* P511 */
+/* mikroBUS I2C (supports both I2C0 and I2C1) */
+#define GPIO_MIKROBUS_SCL_I2C0 GPIO_I2C0_SCL /* P400 - mikroBUS on I2C0 */
+#define GPIO_MIKROBUS_SDA_I2C0 GPIO_I2C0_SDA /* P401 - mikroBUS on I2C0 */
+#define GPIO_MIKROBUS_SCL_I2C1 GPIO_I2C1_SCL /* P512 - mikroBUS on I2C1 */
+#define GPIO_MIKROBUS_SDA_I2C1 GPIO_I2C1_SDA /* P511 - mikroBUS on I2C1 */
 
-/* Camera Expansion Port I2C (P512=SCL1, P511=SDA1) */
-#define GPIO_CAMERA_SCL      GPIO_I2C1_SCL   /* P512 - Camera I2C SCL */
-#define GPIO_CAMERA_SDA      GPIO_I2C1_SDA   /* P511 - Camera I2C SDA */
+/* Camera I2C */
+#define GPIO_CAMERA_SCL       GPIO_I2C1_SCL  /* P512 - Camera I2C SCL */
+#define GPIO_CAMERA_SDA       GPIO_I2C1_SDA  /* P511 - Camera I2C SDA */
 
 /****************************************************************************
  * LED Pin Definitions
  ****************************************************************************/
 
-/* User LEDs (from board.csv) */
-#define GPIO_USER_LED_BLUE     GPIO_P600_OUTPUT_HIGH  /* LED1 - Blue LED (P600) */
-#define GPIO_USER_LED_GREEN    GPIO_P303_OUTPUT_HIGH  /* LED2 - Green LED (P303) */
-#define GPIO_USER_LED_RED      GPIO_PA07_OUTPUT_HIGH  /* LED3 - Red LED (PA07 = PORT10 PIN7) */
+/* User LEDs */
+#define GPIO_USER_LED_BLUE    GPIO_P600_OUTPUT_HIGH  /* P600 ✓ NO CONFLICTS */
+#define GPIO_USER_LED_GREEN   GPIO_P303_OUTPUT_HIGH  /* P303 ⚠️ Conflicts: GPT7B */
+#define GPIO_USER_LED_RED     GPIO_PA07_OUTPUT_HIGH  /* PA07 ✓ NO CONFLICTS */
 
-/* LED aliases for compatibility */
-#define GPIO_LED1              GPIO_USER_LED_BLUE     /* Blue LED */
-#define GPIO_LED2              GPIO_USER_LED_GREEN    /* Green LED */
-#define GPIO_LED3              GPIO_USER_LED_RED      /* Red LED */
+/* LED Aliases */
+#define GPIO_LED1             GPIO_USER_LED_BLUE
+#define GPIO_LED2             GPIO_USER_LED_GREEN
+#define GPIO_LED3             GPIO_USER_LED_RED
 
 /****************************************************************************
  * Button and Switch Pin Definitions
  ****************************************************************************/
 
-/* User Switches (from board.csv) */
-#define GPIO_USER_SW1         GPIO_IRQ13_P009_DS       /* SW1 (Blue) - P009 (IRQ13-DS) */
-#define GPIO_USER_SW2         GPIO_P008_INPUT_PULLUP   /* SW2 (Blue) - P008 (IRQ12-DS, no pinmap macro) */
+/* User Switches */
+#define GPIO_USER_SW1         GPIO_IRQ13_P009_DS      /* P009 - SW1 (IRQ13-DS) */
+#define GPIO_USER_SW2         GPIO_P008_INPUT_PULLUP  /* P008 - SW2 (IRQ12-DS) */
 
-/* Button aliases for compatibility */
-#define GPIO_SW1              GPIO_USER_SW1            /* User Button SW1 */
-#define GPIO_SW2              GPIO_USER_SW2            /* User Button SW2 */
+/* Button Aliases */
+#define GPIO_SW1              GPIO_USER_SW1
+#define GPIO_SW2              GPIO_USER_SW2
 
-/* Arduino and mikroBUS interrupt pins */
-#define GPIO_ARDUINO_D2_INT   GPIO_IRQ16_P011          /* Arduino D2 - P011 (IRQ16) */
-#define GPIO_ARDUINO_D3_INT   GPIO_IRQ22_P811          /* Arduino D3 - P811 (IRQ22) */
-#define GPIO_MIKROBUS_INT     GPIO_IRQ22_PD01          /* mikroBUS INT - PD01 (IRQ22) */
-
-/* Camera interrupt pin */
-#define GPIO_CAMERA_INT       GPIO_IRQ14_P010          /* Camera INT - P010 (IRQ14) */
-
-/* Pmod interrupt pins */
-#define GPIO_PMOD1_IRQ        GPIO_P006_INPUT_PULLUP   /* Pmod 1 IRQ - P006 (IRQ11-DS, no pinmap macro) */
-#define GPIO_PMOD2_IRQ        GPIO_IRQ15_P012          /* Pmod 2 IRQ - P012 (IRQ15) */
+/* Interrupt Pins */
+#define GPIO_ARDUINO_D2_INT   GPIO_IRQ16_P011   /* P011 - Arduino D2 (IRQ16) */
+#define GPIO_ARDUINO_D3_INT   GPIO_IRQ22_P811   /* P811 - Arduino D3 (IRQ22) */
+#define GPIO_MIKROBUS_INT     GPIO_IRQ22_PD01   /* PD01 - mikroBUS INT (IRQ22) */
+#define GPIO_CAMERA_INT       GPIO_IRQ14_P010   /* P010 - Camera INT (IRQ14) */
+#define GPIO_PMOD1_IRQ        GPIO_P006_INPUT_PULLUP /* P006 - Pmod 1 IRQ (IRQ11-DS) */
+#define GPIO_PMOD2_IRQ        GPIO_IRQ15_P012   /* P012 - Pmod 2 IRQ (IRQ15) */
 
 /****************************************************************************
  * Analog Input Pin Definitions (ADC)
  ****************************************************************************/
 
 /* Arduino Analog Inputs */
-#define GPIO_ARDUINO_A0       GPIO_P001_ANALOG   /* Arduino A0 - P001 (AN001) */
-#define GPIO_ARDUINO_A1       GPIO_P007_ANALOG   /* Arduino A1 - P007 (AN007) */
-#define GPIO_ARDUINO_A2       GPIO_P003_ANALOG   /* Arduino A2 - P003 (AN003) */
-#define GPIO_ARDUINO_A3       GPIO_P004_ANALOG   /* Arduino A3 - P004 (AN004) */
-#define GPIO_ARDUINO_A4       GPIO_P014_ANALOG   /* Arduino A4 - P014 (AN014/DA0) */
-#define GPIO_ARDUINO_A5       GPIO_P015_ANALOG   /* Arduino A5 - P015 (AN015/DA1) */
+#define GPIO_ARDUINO_A0       GPIO_P001_ANALOG  /* P001 (AN001) */
+#define GPIO_ARDUINO_A1       GPIO_P007_ANALOG  /* P007 (AN007) */
+#define GPIO_ARDUINO_A2       GPIO_P003_ANALOG  /* P003 (AN003) */
+#define GPIO_ARDUINO_A3       GPIO_P004_ANALOG  /* P004 (AN004) */
+#define GPIO_ARDUINO_A4       GPIO_P014_ANALOG  /* P014 (AN014/DA0) */
+#define GPIO_ARDUINO_A5       GPIO_P015_ANALOG  /* P015 (AN015/DA1) */
 
 /* mikroBUS Analog Input */
-#define GPIO_MIKROBUS_AN      GPIO_P004_ANALOG   /* mikroBUS AN - P004 (AN004) */
+#define GPIO_MIKROBUS_AN      GPIO_P004_ANALOG  /* P004 (AN004) */
 
-/* Grove 2 Analog Inputs (when configured for analog) */
-#define GPIO_GROVE2_AN0       GPIO_P002_ANALOG   /* Grove 2 AN0 - P002 (AN002) */
-#define GPIO_GROVE2_AN1       GPIO_P005_ANALOG   /* Grove 2 AN1 - P005 (AN005) */
+/* Grove 2 Analog Inputs */
+#define GPIO_GROVE2_AN0       GPIO_P002_ANALOG  /* P002 (AN002) */
+#define GPIO_GROVE2_AN1       GPIO_P005_ANALOG  /* P005 (AN005) */
 
-/* ADC channel definitions */
-#define ADC_ARDUINO_A0_CHANNEL        1    /* AN001 - P001 */
-#define ADC_ARDUINO_A1_CHANNEL        7    /* AN007 - P007 */
-#define ADC_ARDUINO_A2_CHANNEL        3    /* AN003 - P003 */
-#define ADC_ARDUINO_A3_CHANNEL        4    /* AN004 - P004 */
-#define ADC_ARDUINO_A4_CHANNEL        14   /* AN014 - P014 */
-#define ADC_ARDUINO_A5_CHANNEL        15   /* AN015 - P015 */
-#define ADC_MIKROBUS_CHANNEL          4    /* AN004 - P004 */
-#define ADC_GROVE2_AN0_CHANNEL        2    /* AN002 - P002 */
-#define ADC_GROVE2_AN1_CHANNEL        5    /* AN005 - P005 */
+/* ADC Channel Definitions */
+#define ADC_ARDUINO_A0_CHANNEL     1   /* AN001 */
+#define ADC_ARDUINO_A1_CHANNEL     7   /* AN007 */
+#define ADC_ARDUINO_A2_CHANNEL     3   /* AN003 */
+#define ADC_ARDUINO_A3_CHANNEL     4   /* AN004 */
+#define ADC_ARDUINO_A4_CHANNEL     14  /* AN014 */
+#define ADC_ARDUINO_A5_CHANNEL     15  /* AN015 */
+#define ADC_MIKROBUS_CHANNEL       4   /* AN004 */
+#define ADC_GROVE2_AN0_CHANNEL     2   /* AN002 */
+#define ADC_GROVE2_AN1_CHANNEL     5   /* AN005 */
 
 /****************************************************************************
  * GPIO Pin Definitions (General Purpose)
  ****************************************************************************/
 
 /* Arduino Digital Pins */
-#define GPIO_ARDUINO_D2       GPIO_P011_OUTPUT_HIGH   /* Arduino D2 - P011 */
-#define GPIO_ARDUINO_D7       GPIO_P312_OUTPUT_HIGH   /* Arduino D7 - P312 */
-#define GPIO_ARDUINO_D8       GPIO_PD01_OUTPUT_HIGH   /* Arduino D8 - PD01 */
+#define GPIO_ARDUINO_D2       GPIO_P011_OUTPUT_HIGH  /* P011 - Arduino D2 */
+#define GPIO_ARDUINO_D7       GPIO_P312_OUTPUT_HIGH  /* P312 - Arduino D7 */
+#define GPIO_ARDUINO_D8       GPIO_PD01_OUTPUT_HIGH  /* PD01 - Arduino D8 */
 
-/* mikroBUS GPIO pins */
-#define GPIO_MIKROBUS_RST     GPIO_P201_OUTPUT_HIGH   /* mikroBUS RST - P201/MD */
+/* mikroBUS GPIO */
+#define GPIO_MIKROBUS_RST     GPIO_P201_OUTPUT_HIGH  /* P201/MD - mikroBUS RST */
 
 /* Pmod GPIO pins */
-#define GPIO_PMOD1_RST        GPIO_P402_OUTPUT_HIGH   /* Pmod 1 RESET - P402 */
-#define GPIO_PMOD1_GPIO1      GPIO_P412_OUTPUT_HIGH   /* Pmod 1 GPIO - P412 */
-#define GPIO_PMOD1_GPIO2      GPIO_P413_OUTPUT_HIGH   /* Pmod 1 GPIO - P413 */
+#define GPIO_PMOD1_RST        GPIO_P402_OUTPUT_HIGH  /* P402 - Pmod 1 RESET */
+#define GPIO_PMOD1_GPIO1      GPIO_P412_OUTPUT_HIGH  /* P412 - Pmod 1 GPIO */
+#define GPIO_PMOD1_GPIO2      GPIO_P413_OUTPUT_HIGH  /* P413 - Pmod 1 GPIO */
 
-#define GPIO_PMOD2_RST        GPIO_P410_OUTPUT_HIGH   /* Pmod 2 RESET - P410 */
-#define GPIO_PMOD2_GPIO1      GPIO_P409_OUTPUT_HIGH   /* Pmod 2 GPIO - P409 */
-#define GPIO_PMOD2_GPIO2      GPIO_P704_OUTPUT_HIGH   /* Pmod 2 GPIO - P704 */
+#define GPIO_PMOD2_RST        GPIO_P410_OUTPUT_HIGH  /* P410 - Pmod 2 RESET */
+#define GPIO_PMOD2_GPIO1      GPIO_P409_OUTPUT_HIGH  /* P409 - Pmod 2 GPIO */
+#define GPIO_PMOD2_GPIO2      GPIO_P704_OUTPUT_HIGH  /* P704 - Pmod 2 GPIO */
 
-/* Camera GPIO pins */
-#define GPIO_CAMERA_RST       GPIO_P709_OUTPUT_HIGH   /* Camera RESET - P709 */
-#define GPIO_CAMERA_PWDN      GPIO_P705_OUTPUT_LOW    /* Camera PWDN - P705 */
-#define GPIO_CAMERA_XCLK      GPIO_P501_OUTPUT_HIGH   /* Camera XCLK - P501 */
+/* Camera GPIO */
+#define GPIO_CAMERA_RST       GPIO_P709_OUTPUT_HIGH  /* P709 - Camera RESET */
+#define GPIO_CAMERA_PWDN      GPIO_P705_OUTPUT_LOW   /* P705 - Camera PWDN */
+#define GPIO_CAMERA_XCLK      GPIO_P501_OUTPUT_HIGH  /* P501 - Camera XCLK */
 
 /****************************************************************************
  * Ethernet Pin Definitions (RGMII Interface)
@@ -386,19 +461,6 @@
 #define BOARD_SDRAM_CAS       GPIO_SDRAM_CAS_PA09    /* PA09 - SDRAM Column Address Strobe (CS3/CAS) */
 #define BOARD_SDRAM_RAS       GPIO_SDRAM_RAS_PA10    /* PA10 - SDRAM Row Address Strobe (CS2/RAS) */
 
-/* Note: All address lines A0-A23 are now defined. The actual lines used depend
- * on the SDRAM density configuration. For IS42S32800J (32MB):
- * - Row Address: A0-A12 (13 bits = 8192 rows)
- * - Column Address: A0-A8 (9 bits = 512 columns)
- * - Bank Address: BA0-BA1 (use A15-A16 for BA0-BA1)
- * SDRAM interface requires proper BSC (Bus State Controller) configuration
- * including timing parameters and refresh rate.
- */
-
-/* Note: SDRAM interface requires proper BSC (Bus State Controller) configuration
- * including timing parameters, refresh rate, and bus width settings.
- * This board uses 32-bit wide SDRAM with 4 byte enables (DQM0-3).
- */
 
 /****************************************************************************
  * USB High Speed Pin Definitions (Connector J7)
@@ -551,11 +613,6 @@
   GPIO_I2C0_SDA,                /* I2C0 Data - P401 */ \
   GPIO_I2C1_SCL,                /* I2C1 Clock - P512 */ \
   GPIO_I2C1_SDA,                /* I2C1 Data - P511 */ \
-  GPIO_GPT0_A,                  /* GPT0 Channel A - P211 */ \
-  GPIO_GPT1_A,                  /* GPT1 Channel A - P109 */ \
-  GPIO_GPT11_A,                 /* GPT11 Channel A - P711 */ \
-  GPIO_GPT12_A,                 /* GPT12 Channel A - P708 */ \
-  GPIO_GPT13_A,                 /* GPT13 Channel A - P502 */ \
   GPIO_USER_LED_BLUE,           /* Blue LED - P600 */ \
   GPIO_USER_LED_GREEN,          /* Green LED - P303 */ \
   GPIO_USER_LED_RED,            /* Red LED - PA07 */ \
@@ -563,76 +620,5 @@
   GPIO_USER_SW2                 /* User Button SW2 - P008 */ \
 }
 
-/****************************************************************************
- * MRAM Storage Configuration
- ****************************************************************************/
-
-/* MRAM Base Addresses for RA8P1
- * The RA8P1 has 2MB of MRAM starting at 0x02000000.
- * We reserve the last 64KB for data/parameter storage.
- */
-
-#define BOARD_MRAM_CODE_BASE        0x02000000  /* Code MRAM start */
-#define BOARD_MRAM_CODE_SIZE        0x001F0000  /* Code MRAM size (2MB - 64KB) */
-#define BOARD_MRAM_DATA_BASE        0x021F0000  /* Data MRAM start (last 64KB) */
-#define BOARD_MRAM_DATA_SIZE        0x00010000  /* Data MRAM size (64KB) */
-
-/* MRAM Programming Unit - 32 bytes per write operation */
-
-#define BOARD_MRAM_WRITE_SIZE       32
-
-/* MRAM Block Size for erase operations
- * Note: MRAM doesn't require erase, but we simulate 8KB blocks
- * for MTD compatibility with file systems
- */
-
-#define BOARD_MRAM_BLOCK_SIZE       8192
-
-/* Mount points for MRAM partitions */
-
-#define BOARD_MRAM_CODE_MOUNT       "/mnt/code"
-#define BOARD_MRAM_DATA_MOUNT       "/mnt/params"
-
-/* Parameter storage file path (within data partition) */
-
-#define BOARD_PARAM_FILE            "/mnt/params/parameters"
-
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/**
- * Name: board_pwm_initialize
- *
- * Description:
- *   Initialize GPT (General Purpose Timer) PWM devices.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on any failure.
- */
-#ifdef CONFIG_PWM
-int board_pwm_initialize(void);
-#endif
-
-#undef EXTERN
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* __ASSEMBLY__ */
 
 #endif /* __BOARDS_ARM_RA8_EVK_RA8P1_INCLUDE_BOARD_H */

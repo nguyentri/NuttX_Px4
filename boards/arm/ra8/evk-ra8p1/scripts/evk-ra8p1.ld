@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-/* The RA8P1 has 2MB of FLASH beginning at address 0x02000000 and
- * 1MB RAM beginning at address 0x22000000, plus TCM memories.
+/* The RA8P1 has 1MB MRAM (non-volatile) at 0x02000000, 2MB SRAM at 0x22000000,
+ * plus TCM memories. External 64MB Octo-SPI Flash at 0x80000000.
  */
 RAM_START = 0x22000000;
 RAM_LENGTH = 0x001d4000;
