@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/ra8/evk-ra8p1/src/ra8p1_adc_b_elc.c
+ * boards/arm/ra8/evk-ra8p1/src/ra8p1_adc_b_hwtrigger.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -43,7 +43,7 @@
 
 #include <arch/ra8/ra8p1_irq.h>
 
-#ifdef CONFIG_RA_ELC
+#ifdef CONFIG_RA8P1_ADC_HW_TRIGGER_EXAMPLE
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -53,10 +53,8 @@
  * These values can be adjusted based on the desired sampling rate
  */
 
-#ifdef CONFIG_RA8P1_ELC_GPT_ADC_EXAMPLE
 #define ADC_TRIGGER_GPT_CHANNEL    0      /* Use GPT0 */
 #define ADC_TRIGGER_GPT_USE_CMPB   false  /* Use Compare Match A */
-#endif
 
 /****************************************************************************
  * Private Types
@@ -88,7 +86,7 @@
  *   OK on success; a negated errno on failure.
  *
  ****************************************************************************/
-
+#ifdef CONFIG_RA_ELC
 int board_elc_initialize(void)
 {
   int ret;
@@ -118,8 +116,8 @@ int board_elc_initialize(void)
 
   return OK;
 }
+#endif /* CONFIG_RA_ELC */
 
-#ifdef CONFIG_RA8P1_ELC_GPT_ADC_EXAMPLE
 /****************************************************************************
  * Name: board_adc_initialize
  *
@@ -236,6 +234,4 @@ int board_adc_initialize(void)
 
   return OK;
 }
-#endif /* CONFIG_RA8P1_ELC_GPT_ADC_EXAMPLE */
-
-#endif /* CONFIG_RA_ELC */
+#endif /* CONFIG_RA8P1_ADC_HW_TRIGGER_EXAMPLE */

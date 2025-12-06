@@ -82,16 +82,17 @@ CONFIG_RA_ADC_BATTERY_VOLTAGE=y
 CONFIG_RA_ADC_BATTERY_CURRENT=y
 CONFIG_RA_ADC_ARDUINO=y
 
-# Event Link Controller (ELC) Support
+# Event Link Controller Support
 CONFIG_RA_ELC=y
-CONFIG_RA8P1_ELC_GPT_ADC_EXAMPLE=y
 CONFIG_DEBUG_ELC_INFO=y
 CONFIG_DEBUG_ELC_ERROR=y
 
-# GPT Timer Support (for ELC-triggered ADC)
+# GPT Timer Support (for GPT hardware-triggered ADC)
 CONFIG_RA_GPT=y
 CONFIG_RA_GPT0=y
-CONFIG_PWM=y
+
+# ADC B Hardware Trigger Example
+CONFIG_RA8P1_ADC_HW_TRIGGER_EXAMPLE=y
 
 # Debug Features
 CONFIG_DEBUG_FEATURES=y

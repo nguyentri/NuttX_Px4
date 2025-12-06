@@ -61,7 +61,7 @@ endif
 
 # ELC support
 ifeq ($(CONFIG_RA_ELC),y)
-CSRCS += ra8p1_adc_b_elc.c
+CSRCS += ra8p1_elc.c
 endif
 
 # MRAM support
@@ -79,11 +79,6 @@ ifeq ($(CONFIG_RA_OSPI),y)
 CSRCS += ra8p1_ospi_b.c
 endif
 
-# OSPI Example
-ifeq ($(CONFIG_RA8P1_OSPI_EXAMPLE),y)
-CSRCS += ra8p1_ospi_test.c
-endif
-
 # Ethernet support
 ifeq ($(CONFIG_RA_ETHERNET),y)
 CSRCS += ra8p1_ether.c
@@ -97,6 +92,16 @@ endif
 # RTC driver support
 ifeq ($(CONFIG_RTC_DRIVER),y)
 CSRCS += ra8p1_rtc.c
+endif
+
+# ELC support
+ifeq ($(CONFIG_RA8P1_ADC_HW_TRIGGER_EXAMPLE),y)
+CSRCS += ra8p1_adc_b_hwtrigger.c
+endif
+
+# OSPI Example
+ifeq ($(CONFIG_RA8P1_OSPI_EXAMPLE),y)
+CSRCS += ra8p1_ospi_test.c
 endif
 
 # SPI loopback example support

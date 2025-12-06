@@ -36,7 +36,7 @@ config RA8P1_OSPI_EXAMPLE
 		Enable OSPI test example for verifying OSPI driver functionality
 		on EVK-RA8P1 board.
 
-config RA8P1_ELC_GPT_ADC_EXAMPLE
+config RA8P1_ADC_HW_TRIGGER_EXAMPLE
 	bool "ELC GPT-triggered ADC example"
 	default n
 	depends on RA_ELC && RA_GPT && RA_ADC && RA8P1_EXAMPLE_SUPPORT

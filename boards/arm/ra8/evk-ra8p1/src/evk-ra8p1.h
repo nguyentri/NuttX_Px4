@@ -115,8 +115,6 @@ int board_adc_initialize(void);
 
 #ifdef CONFIG_RA_ELC
 int board_elc_initialize(void);
-int board_elc_gpt_trigger_adc(int gpt_channel, int adc_trigger,
-                               int event_type);
 #endif
 
 /****************************************************************************

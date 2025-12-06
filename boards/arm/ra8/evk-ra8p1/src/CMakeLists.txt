@@ -47,7 +47,7 @@ if(CONFIG_PWM)
 endif()
 
 if(CONFIG_RA_ELC)
-  list(APPEND SRCS ra8p1_adc_b_elc.c)
+  list(APPEND SRCS ra8p1_adc_b_hwtrigger.c)
 endif()
 
 if(CONFIG_RA_ADC_B)
