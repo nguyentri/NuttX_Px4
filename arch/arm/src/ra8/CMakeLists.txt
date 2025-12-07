@@ -139,4 +139,14 @@ if(CONFIG_RA_IWDT)
   list(APPEND SRCS ra_iwdt.c)
 endif()
 
+# LPM (Low Power Mode) driver
+if(CONFIG_RA_LPM)
+  list(APPEND SRCS ra_lpm.c)
+endif()
+
+# ULPT (Ultra-Low Power Timer) driver
+if(CONFIG_RA_ULPT)
+  list(APPEND SRCS ra_ulpt.c)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})

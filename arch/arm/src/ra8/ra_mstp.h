@@ -29,11 +29,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#if defined(CONFIG_RA8E1_GROUP)
-#  include "hardware/ra8e1/ra_mstp.h"
-#elif defined(CONFIG_RA8P1_GROUP)
-#  include "hardware/ra8p1/ra_mstp.h"
-#endif
+#include <hardware/ra_memorymap.h>
+#include <ra_mstp.h>
 
 /****************************************************************************
  * Pre-processor Definitions

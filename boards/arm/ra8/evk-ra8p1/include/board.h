@@ -46,6 +46,9 @@
 /* SRAM */
 #define BOARD_RAM_SIZE                  (2 * 1024 * 1024)  /* 2MB SRAM with ECC */
 
+/* CAC (Clock Accuracy Control) Pin Configuration */
+#define GPIO_CACREF                     (PORT1 | PIN00 | MODE_PERIPH | FUNCTION(0))
+
 /* MRAM Configuration */
 #define BOARD_MRAM_CODE_BASE            0x02000000
 #define BOARD_MRAM_CODE_SIZE            0x000F0000  /* 1MB - 64KB (960KB code) */

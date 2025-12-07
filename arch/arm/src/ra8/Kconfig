@@ -3162,12 +3162,146 @@ endif # RA_RTC_ERROR_ADJUSTMENT
 
 endmenu
 
+menu "Low Power Mode (LPM)"
+
+config RA_LPM
+    bool "Low Power Mode Support"
+    default n
+    help
+      Enable the RA8 Low Power Mode (LPM) driver.
+      This driver supports multiple low power modes including:
+      - Sleep mode (CPU halts, peripherals run)
+      - Deep Sleep mode
+      - Software Standby mode
+      - Deep Software Standby mode (with reset on wake)
+
+if RA_LPM
+
+config RA_LPM_PM_INTEGRATION
+    bool "NuttX PM Framework Integration"
+    default n
+    depends on PM
+    help
+      Integrate RA8 LPM driver with NuttX Power Management framework.
+      This allows automatic power state transitions based on system
+      activity and PM governor decisions.
+
+config RA_LPM_DEFAULT_STANDBY_TIMEOUT
+    int "Default Standby Wake-up Timeout (ms)"
+    default 10000
+    range 100 3600000
+    help
+      Default timeout in milliseconds for wake-up from standby modes
+      when using ULPT as wake-up source.
+
+config RA_LPM_DEEP_STANDBY_SUPPORT
+    bool "Deep Software Standby Support"
+    default n
+    help
+      Enable support for Deep Software Standby modes.
+      WARNING: Deep standby causes system reset on wake-up.
+      Application must check for deep standby reset at startup
+      and restore state from standby RAM if needed.
+
+if RA_LPM_DEEP_STANDBY_SUPPORT
+
+choice
+    prompt "Deep Standby Power Supply Mode"
+    default RA_LPM_DEEP_STANDBY_MODE1
+
+config RA_LPM_DEEP_STANDBY_MODE1
+    bool "Mode 1 - Standby RAM, LOCO, PVD0 powered"
+    help
+      Power to standby RAM, LOCO, and PVD0 is supplied.
+
+config RA_LPM_DEEP_STANDBY_MODE2
+    bool "Mode 2 - Standby RAM, LOCO, IWDT disabled"
+    help
+      Power to standby RAM, LOCO, and IWDT is disabled.
+
+config RA_LPM_DEEP_STANDBY_MODE3
+    bool "Mode 3 - Minimum power, PVD0 only"
+    help
+      Power to standby RAM, PVD0, LOCO, and IWDT is disabled.
+
+endchoice
+
+config RA_LPM_DEEP_STANDBY_IO_RETAIN
+    bool "Retain I/O Port State in Deep Standby"
+    default y
+    help
+      Retain I/O port states when entering deep software standby.
+      If disabled, I/O ports are reset when waking from deep standby.
+
+endif # RA_LPM_DEEP_STANDBY_SUPPORT
+
+config RA_LPM_DEBUG
+    bool "LPM Debug Output"
+    default n
+    depends on DEBUG_FEATURES
+    help
+      Enable debug output for LPM driver operations.
+
+endif # RA_LPM
+
+config RA_HAVE_ULPT
+    bool
+    default n
+
+config RA_HAVE_ULPT0
+    bool
+    default n
+
+config RA_HAVE_ULPT1
+    bool
+    default n
+
+config RA_ULPT0
+    bool "Enable ULPT0"
+    default n
+    depends on RA_HAVE_ULPT0
+    help
+      Enable ULPT channel 0.
+
+config RA_ULPT1
+    bool "Enable ULPT1"
+    default n
+    depends on RA_HAVE_ULPT1
+    help
+      Enable ULPT channel 1.
+
+config RA_ULPT
+    bool "Ultra-Low Power Timer (ULPT)"
+    default n
+    depends on RA_HAVE_ULPT
+    depends on RA_ULPT0 || RA_ULPT1
+    help
+      Enable the RA8 Ultra-Low Power Timer (ULPT) driver.
+      ULPT is a 32-bit down counter that can operate during low power
+      modes using LOCO or sub-clock as the count source.
+      ULPT can be used as a wake-up source from sleep, deep sleep,
+      and standby modes.
+
+if RA_ULPT
+
+config RA_ULPT_LOCO_FREQ
+    int "LOCO Frequency (Hz)"
+    default 32768
+    help
+      LOCO oscillator frequency in Hz.
+      Default is 32768 Hz (32.768 kHz).
+
+endif # RA_ULPT
+
+endmenu
+
 menu "Watchdog Timer"
 
 config RA_WDT
     bool "Watchdog Timer (WDT)"
     default n
     select WATCHDOG
+
     help
       Enable the RA8 Watchdog Timer (WDT) driver.
       WDT runs from PCLKB and supports longer timeout periods than IWDT.
@@ -4031,6 +4165,14 @@ config RA_HAVE_CRC
 config RA_HAVE_CAC
    bool
    default n
+
+config RA_CAC
+   bool "CAC support"
+   default n
+   depends on RA_HAVE_CAC
+   ---help---
+     Enable Clock Accuracy Control (CAC) support.
+     CAC monitors clock frequency and can detect clock drift or instability.
 
 config RA_HAVE_DOC
    bool

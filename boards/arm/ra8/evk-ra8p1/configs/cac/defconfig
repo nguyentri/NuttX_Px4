@@ -98,6 +98,9 @@ CONFIG_SEGGER_RTT_PRINTF_BUFFER_SIZE=64
 
 # FPU Configuration (Cortex-M85 has FPU)
 CONFIG_ARCH_FPU=y
+
+# CAC Driver
+CONFIG_RA_CAC=y
 CONFIG_ARCH_DPFPU=y
 
 # Enable idle state logging

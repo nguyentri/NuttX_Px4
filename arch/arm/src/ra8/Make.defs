@@ -42,6 +42,11 @@ CHIP_CSRCS += ra_memmng.c
 CHIP_CSRCS += ra_timerisr.c
 CHIP_CSRCS += ra_serial.c
 
+# CAC driver
+ifeq ($(CONFIG_RA_CAC),y)
+CHIP_CSRCS += ra_cac.c
+endif
+
 # SDHI driver
 ifeq ($(CONFIG_RA_SDHI),y)
 CHIP_CSRCS += ra_sdhi.c
@@ -179,6 +184,16 @@ endif
 # IWDT driver
 ifeq ($(CONFIG_RA_IWDT),y)
 CHIP_CSRCS += ra_iwdt.c
+endif
+
+# LPM (Low Power Mode) driver
+ifeq ($(CONFIG_RA_LPM),y)
+CHIP_CSRCS += ra_lpm.c
+endif
+
+# ULPT (Ultra-Low Power Timer) driver
+ifeq ($(CONFIG_RA_ULPT),y)
+CHIP_CSRCS += ra_ulpt.c
 endif
 
 # IDLE task custom

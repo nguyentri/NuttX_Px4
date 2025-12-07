@@ -90,6 +90,10 @@ if(CONFIG_RA_IWDT)
   list(APPEND SRCS ra8p1_iwdt.c)
 endif()
 
+if(CONFIG_RA_LPM)
+  list(APPEND SRCS ra8p1_lpm.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 set_property(GLOBAL PROPERTY LD_SCRIPT

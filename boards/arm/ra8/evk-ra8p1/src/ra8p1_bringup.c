@@ -94,6 +94,14 @@ int board_bringup(void)
   /* Configure all GPIO pins */
   board_gpio_initialize();
 
+#ifdef CONFIG_RA_WDT
+  board_wdt_initialize();
+#endif
+
+#ifdef CONFIG_RA_IWDT
+  board_iwdt_initialize();
+#endif
+
 #ifdef CONFIG_RA_SCI_SPI
   ret = board_sci_spi_initialize();
   if (ret < 0)
@@ -314,17 +322,35 @@ int board_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_RA_CAC
+  ret = board_cac_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_cac_initialize failed: %d\n", ret);
+    }
+  else
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize CAC: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_RA_LPM
+  /* Initialize Low Power Mode subsystem */
+
+  ret = board_lpm_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize LPM: %d\n", ret);
+    }
+  else
+    {
+      syslog(LOG_INFO, "LPM initialized successfully\n");
+    }
+#endif
+
 #ifdef CONFIG_RA8P1_EXAMPLE_SUPPORT
     /* Run application examples */
   ra8p1_app_examples();
-#endif
-
-#ifdef CONFIG_RA_WDT
-  board_wdt_initialize();
-#endif
-
-#ifdef CONFIG_RA_IWDT
-  board_iwdt_initialize();
 #endif
 
   return ret;

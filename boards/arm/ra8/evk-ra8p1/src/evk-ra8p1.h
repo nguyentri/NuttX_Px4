@@ -97,6 +97,18 @@ int board_sci_spi_initialize(void);
 #endif
 
 /****************************************************************************
+ * Name: board_cac_initialize
+ *
+ * Description:
+ *   Initialize the CAC driver for the board.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RA_CAC
+int board_cac_initialize(void);
+#endif
+
+/****************************************************************************
  * Name: board_autoled_initialize
  *
  * Description:
@@ -420,6 +432,120 @@ void board_iwdt_initialize(void);
 #ifdef CONFIG_RA8P1_WDT_TEST
 int wdg_test_main(int argc, char *argv[]);
 #endif
+
+/****************************************************************************
+ * LPM (Low Power Mode) Interface
+ ****************************************************************************/
+
+#ifdef CONFIG_RA_LPM
+
+/****************************************************************************
+ * Name: board_lpm_initialize
+ *
+ * Description:
+ *   Initialize the Low Power Mode subsystem for this board.
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure.
+ *
+ ****************************************************************************/
+
+int board_lpm_initialize(void);
+
+/****************************************************************************
+ * Name: board_lpm_enter_sleep
+ *
+ * Description:
+ *   Enter Sleep mode. CPU is halted, peripherals continue to run.
+ *
+ * Returned Value:
+ *   OK on wake-up; a negated errno on failure.
+ *
+ ****************************************************************************/
+
+int board_lpm_enter_sleep(void);
+
+/****************************************************************************
+ * Name: board_lpm_enter_deep_sleep
+ *
+ * Description:
+ *   Enter Deep Sleep mode.
+ *
+ * Returned Value:
+ *   OK on wake-up; a negated errno on failure.
+ *
+ ****************************************************************************/
+
+int board_lpm_enter_deep_sleep(void);
+
+/****************************************************************************
+ * Name: board_lpm_enter_standby
+ *
+ * Description:
+ *   Enter Software Standby mode.
+ *
+ * Input Parameters:
+ *   timeout_ms - Wake-up timeout in milliseconds (0 = no timeout)
+ *
+ * Returned Value:
+ *   OK on wake-up; a negated errno on failure.
+ *
+ ****************************************************************************/
+
+int board_lpm_enter_standby(uint32_t timeout_ms);
+
+#ifdef CONFIG_RA_LPM_DEEP_STANDBY_SUPPORT
+/****************************************************************************
+ * Name: board_lpm_enter_deep_standby
+ *
+ * Description:
+ *   Enter Deep Software Standby mode.
+ *   WARNING: System will reset on wake-up!
+ *
+ * Input Parameters:
+ *   timeout_ms - Wake-up timeout in milliseconds (0 = no timeout)
+ *
+ * Returned Value:
+ *   Does not return on success. Returns negated errno on failure.
+ *
+ ****************************************************************************/
+
+int board_lpm_enter_deep_standby(uint32_t timeout_ms);
+
+/****************************************************************************
+ * Name: board_lpm_check_deep_standby_reset
+ *
+ * Description:
+ *   Check if the system woke up from Deep Software Standby.
+ *
+ * Returned Value:
+ *   True if woke from deep standby, false otherwise.
+ *
+ ****************************************************************************/
+
+bool board_lpm_check_deep_standby_reset(void);
+
+/****************************************************************************
+ * Name: board_lpm_get_deep_standby_wakeup_source
+ *
+ * Description:
+ *   Get the source that woke the system from Deep Software Standby.
+ *
+ * Input Parameters:
+ *   source - Pointer to receive the wake-up source flags.
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure.
+ *
+ ****************************************************************************/
+
+int board_lpm_get_deep_standby_wakeup_source(FAR uint64_t *source);
+#endif /* CONFIG_RA_LPM_DEEP_STANDBY_SUPPORT */
+
+struct ra_lpm_status_s;
+int board_lpm_get_status(struct ra_lpm_status_s *status);
+
+#endif /* CONFIG_RA_LPM */
 
 /****************************************************************************
  * POEG (Port Output Enable for GPT) Interface

@@ -39,6 +39,11 @@ else
 CSRCS += ra8p1_user_leds.c
 endif
 
+# CAC support
+ifeq ($(CONFIG_RA_CAC),y)
+CSRCS += ra8p1_cac.c
+endif
+
 # I2C support
 ifeq ($(CONFIG_RA_I2C),y)
 CSRCS += ra8p1_i2c.c
@@ -137,6 +142,11 @@ endif
 # IWDT support
 ifeq ($(CONFIG_RA_IWDT),y)
 CSRCS += ra8p1_iwdt.c
+endif
+
+# LPM (Low Power Mode) support
+ifeq ($(CONFIG_RA_LPM),y)
+CSRCS += ra8p1_lpm.c
 endif
 
 # WDT test application
