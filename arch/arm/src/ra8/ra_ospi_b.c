@@ -139,11 +139,12 @@ struct ra_ospi_priv_s
   bool use_interrupts;            /* Use interrupt mode vs polling */
   bool xip_mode;                  /* XIP mode active */
   bool initialized;               /* Driver initialization state */
-#ifdef CONFIG_RA_DMA
+#ifdef CONFIG_RA_DMAC
   ra_dmac_handle_t dma_rx;        /* RX DMA handle */
   ra_dmac_handle_t dma_tx;        /* TX DMA handle */
   bool use_dma;                   /* Use DMA for transfers */
   volatile bool dma_complete;     /* DMA transfer complete flag */
+  int dma_channel;                /* Assigned DMA channel (-1 = dynamic) */
 #endif
 };
 
@@ -178,7 +179,8 @@ static int ra_ospi_manual_command(struct ra_ospi_priv_s *priv,
                                   uint8_t *data, size_t datalen,
                                   uint8_t latency, bool is_write);
 
-#ifdef CONFIG_RA_DMA
+#ifdef CONFIG_RA_DMAC
+static void ra_ospi_get_dma_channel(struct ra_ospi_priv_s *priv, int *channel);
 static int ra_ospi_dma_setup(struct ra_ospi_priv_s *priv);
 static void ra_ospi_dma_callback(void *handle, int event, void *user_data);
 static int ra_ospi_dma_transfer(struct ra_ospi_priv_s *priv,
@@ -213,7 +215,7 @@ static struct ra_ospi_priv_s g_ra_ospi0_priv =
   .lock       = NXMUTEX_INITIALIZER,
   .cmdsem     = SEM_INITIALIZER(0),
   .patsem     = SEM_INITIALIZER(0),
-#ifdef CONFIG_RA_DMA
+#ifdef CONFIG_RA_DMAC
   .dmasem     = SEM_INITIALIZER(0),
 #endif
   .cs         = 0,
@@ -226,7 +228,7 @@ static struct ra_ospi_priv_s g_ra_ospi0_priv =
   .use_interrupts = true,
   .xip_mode   = false,
   .initialized = false,
-#ifdef CONFIG_RA_DMA
+#ifdef CONFIG_RA_DMAC
   .dma_rx     = NULL,
   .dma_tx     = NULL,
   .use_dma    = true,
@@ -245,7 +247,7 @@ static struct ra_ospi_priv_s g_ra_ospi1_priv =
   .lock       = NXMUTEX_INITIALIZER,
   .cmdsem     = SEM_INITIALIZER(0),
   .patsem     = SEM_INITIALIZER(0),
-#ifdef CONFIG_RA_DMA
+#ifdef CONFIG_RA_DMAC
   .dmasem     = SEM_INITIALIZER(0),
 #endif
   .cs         = 1,
@@ -258,7 +260,7 @@ static struct ra_ospi_priv_s g_ra_ospi1_priv =
   .use_interrupts = true,
   .xip_mode   = false,
   .initialized = false,
-#ifdef CONFIG_RA_DMA
+#ifdef CONFIG_RA_DMAC
   .dma_rx     = NULL,
   .dma_tx     = NULL,
   .use_dma    = true,
@@ -1361,7 +1363,7 @@ static int ra_ospi_memory(struct qspi_dev_s *dev,
        * We perform the write in chunks up to page size (typically 256 bytes)
        */
 
-#ifdef CONFIG_RA_DMA
+#ifdef CONFIG_RA_DMAC
       /* Use DMA for large transfers if configured and available */
 
       if (priv->use_dma && priv->dma_tx != NULL && remaining >= 64)
@@ -1392,7 +1394,7 @@ static int ra_ospi_memory(struct qspi_dev_s *dev,
       else
 #endif
         {
-#ifdef CONFIG_RA_DMA
+#ifdef CONFIG_RA_DMAC
 cpu_write:
 #endif
           /* CPU-based write */
@@ -1441,7 +1443,7 @@ cpu_write:
 
       ra_ospi_flush_prefetch(priv);
 
-#ifdef CONFIG_RA_DMA
+#ifdef CONFIG_RA_DMAC
       /* Use DMA for large transfers if configured and available */
 
       if (priv->use_dma && priv->dma_rx != NULL && remaining >= 64)
@@ -1462,7 +1464,7 @@ cpu_write:
       else
 #endif
         {
-#ifdef CONFIG_RA_DMA
+#ifdef CONFIG_RA_DMAC
 cpu_read:
 #endif
           /* CPU-based read */
@@ -1705,7 +1707,7 @@ struct qspi_dev_s *ra_ospi_initialize(int port)
         }
     }
 
-#ifdef CONFIG_RA_DMA
+#ifdef CONFIG_RA_DMAC
   /* Step 10: Setup DMA if configured */
 
   if (priv->use_dma)
@@ -1940,7 +1942,7 @@ int ra_ospi_xip_disable(struct qspi_dev_s *dev)
   return OK;
 }
 
-#ifdef CONFIG_RA_DMA
+#ifdef CONFIG_RA_DMAC
 
 /****************************************************************************
  * Name: ra_ospi_dma_callback
@@ -1968,6 +1970,36 @@ static void ra_ospi_dma_callback(void *handle, int event, void *user_data)
 }
 
 /****************************************************************************
+ * Name: ra_ospi_get_dma_channel
+ *
+ * Description:
+ *   Get DMA channel assignment from Kconfig for the specified OSPI port
+ *
+ ****************************************************************************/
+
+static void ra_ospi_get_dma_channel(struct ra_ospi_priv_s *priv, int *channel)
+{
+  /* Default to dynamic allocation */
+  *channel = -1;
+
+  /* Determine which OSPI port (0 or 1) based on chip select */
+  if (priv->cs == 0)
+    {
+#ifdef CONFIG_RA_DMAC_QSPI0_CHANNEL
+      *channel = CONFIG_RA_DMAC_QSPI0_CHANNEL;
+#endif
+    }
+  else if (priv->cs == 1)
+    {
+#ifdef CONFIG_RA_DMAC_QSPI1_CHANNEL
+      *channel = CONFIG_RA_DMAC_QSPI1_CHANNEL;
+#endif
+    }
+
+  spiinfo("OSPI_B (CS%d) DMA channel: %d\n", priv->cs, *channel);
+}
+
+/****************************************************************************
  * Name: ra_ospi_dma_setup
  *
  * Description:
@@ -1981,6 +2013,16 @@ static int ra_ospi_dma_setup(struct ra_ospi_priv_s *priv)
   int ret;
 
   /* Initialize DMAC module if not already done */
+
+  ret = ra_dmac_initialize();
+  if (ret < 0)
+    {
+      spierr("OSPI_B: Failed to initialize DMAC: %d\n", ret);
+      return ret;
+    }
+
+  /* Get DMA channel assignment from Kconfig */
+  ra_ospi_get_dma_channel(priv, &priv->dma_channel);
 
   ret = ra_dmac_initialize();
   if (ret < 0)
@@ -2007,7 +2049,18 @@ static int ra_ospi_dma_setup(struct ra_ospi_priv_s *priv)
   dma_config.elc_err = 0;  /* DMA error event */
   dma_config.elc_src = 0;  /* Software trigger */
 
-  ret = ra_dmac_open(&priv->dma_tx, &dma_config);
+  /* Use assigned channel if configured, otherwise use dynamic allocation */
+  if (priv->dma_channel >= 0)
+    {
+      ret = ra_dmac_open_channel(&priv->dma_tx, &dma_config, priv->dma_channel);
+      spiinfo("OSPI_B TX DMA using assigned channel %d\n", priv->dma_channel);
+    }
+  else
+    {
+      ret = ra_dmac_open(&priv->dma_tx, &dma_config);
+      spiinfo("OSPI_B TX DMA using dynamic channel allocation\n");
+    }
+
   if (ret < 0)
     {
       spierr("OSPI_B: Failed to open TX DMA channel: %d\n", ret);
@@ -2019,7 +2072,18 @@ static int ra_ospi_dma_setup(struct ra_ospi_priv_s *priv)
   dma_config.src_addr_mode = RA_DMAC_ADDR_FIXED;
   dma_config.dest_addr_mode = RA_DMAC_ADDR_INCR;
 
-  ret = ra_dmac_open(&priv->dma_rx, &dma_config);
+  /* Use same channel for RX (if assigned) */
+  if (priv->dma_channel >= 0)
+    {
+      ret = ra_dmac_open_channel(&priv->dma_rx, &dma_config, priv->dma_channel);
+      spiinfo("OSPI_B RX DMA using assigned channel %d\n", priv->dma_channel);
+    }
+  else
+    {
+      ret = ra_dmac_open(&priv->dma_rx, &dma_config);
+      spiinfo("OSPI_B RX DMA using dynamic channel allocation\n");
+    }
+
   if (ret < 0)
     {
       spierr("OSPI_B: Failed to open RX DMA channel: %d\n", ret);
@@ -2028,7 +2092,7 @@ static int ra_ospi_dma_setup(struct ra_ospi_priv_s *priv)
       return ret;
     }
 
-  spiinfo("OSPI_B: DMA channels configured successfully\n");
+  spiinfo("OSPI_B: DMA channels configured successfully (channel=%d)\n", priv->dma_channel);
 
   return OK;
 }
@@ -2177,4 +2241,4 @@ int ra_ospi_set_dma(struct qspi_dev_s *dev, bool enable_dma)
   return ret;
 }
 
-#endif /* CONFIG_RA_DMA */
+#endif /* CONFIG_RA_DMAC */

@@ -104,9 +104,17 @@ uint32_t board_button_initialize(void)
 {
   int ret;
 
-  /* Button GPIO is already configured by ra_gpioconfiglist() in board bringup
-   * Just setup the interrupt handler here
+  /* Configure button pin with external interrupt
+   * - Input with pull-up resistor
+   * - Interrupt on falling edge (button press)
+   * - Interrupt handler: button_handler_isr
    */
+  ret = ra_gpioconfig(GPIO_SW1);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to configure button GPIO: %d\n", ret);
+      return ret;
+    }
   ret = ra_gpiosetevent(GPIO_SW1, false, true, false,
                         button_handler_isr, NULL);
   if (ret < 0)

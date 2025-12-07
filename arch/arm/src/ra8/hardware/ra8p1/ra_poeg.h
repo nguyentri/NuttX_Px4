@@ -195,8 +195,17 @@
 #  define R_POEG_POEGGD_NFCS_00                           (0 << R_POEG_POEGGD_NFCS_SHIFT)  /* Sample GTETRGn pin input level three times every PCLKB */
 #  define R_POEG_POEGGD_NFCS_01                           (1 << R_POEG_POEGGD_NFCS_SHIFT)  /* Sample GTETRGn pin input level three times every PCLKB/8 */
 #  define R_POEG_POEGGD_NFCS_10                           (2 << R_POEG_POEGGD_NFCS_SHIFT)  /* Sample GTETRGn pin input level three times every PCLKB/32 */
-#  define R_POEG_POEGGD_NFCS_11                           (3 << R_POEG_POEGGD_NFCS_SHIFT)  /* Sample GTETRGn pin input level three times every PCLKB/128 */
+#define R_POEG_POEGGD_NFCS_11                           (3 << R_POEG_POEGGD_NFCS_SHIFT)  /* Sample GTETRGn pin input level three times every PCLKB/128 */
 
+/* Helper macros to access POEG registers */
+
+#define POEG_POEGG_OFFSET(ch)  ((ch) * 0x100)
+#define POEG_POEGG(ch)         (R_POEG_BASE + POEG_POEGG_OFFSET(ch))
+
+/* Status flag masks */
+
+#define POEG_STATUS_FLAGS  (R_POEG_POEGGA_PIDF | R_POEG_POEGGA_IOCF | \
+                            R_POEG_POEGGA_OSTPF | R_POEG_POEGGA_SSF)
 
 /* Maximum number of channels */
 

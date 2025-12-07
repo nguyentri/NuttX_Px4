@@ -33,6 +33,10 @@
 #include <arch/irq.h>
 #include <nuttx/irq.h>
 
+#ifdef CONFIG_RA_POEG
+#include "ra_poeg.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -55,7 +59,7 @@ struct spi_dev_s;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ra8p1_bringup
+ * Name: board_bringup
  *
  * Description:
  *   Perform architecture-specific initialization
@@ -68,17 +72,29 @@ struct spi_dev_s;
  *
  ****************************************************************************/
 
-int ra8p1_bringup(void);
+int board_bringup(void);
 
 /****************************************************************************
- * Name: ra8p1_gpio_initialize
+ * Name: board_gpio_initialize
  *
  * Description:
  *   Initialize all board GPIO pins using centralized configuration
  *
  ****************************************************************************/
 
-int ra8p1_gpio_initialize(void);
+int board_gpio_initialize(void);
+
+/****************************************************************************
+ * Name: board_sci_spi_initialize
+ *
+ * Description:
+ *   Initialize SCI SPI drivers
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RA_SCI_SPI
+int board_sci_spi_initialize(void);
+#endif
 
 /****************************************************************************
  * Name: board_autoled_initialize
@@ -309,7 +325,7 @@ int board_sdhi_init(void);
  * Example application interfaces
  ****************************************************************************/
 #ifdef RA8P1_EXAMPLE_SUPPORT
-/* Run all enabled application examples (used by ra8p1_bringup()) */
+/* Run all enabled application examples (used by board_bringup()) */
 int ra8p1_app_examples(void);
 #endif
 
@@ -392,6 +408,84 @@ int gy912_register_sensors(FAR struct spi_dev_s *spi);
 int ra8p1_ospi_test_init(void);
 int ra8p1_ospi_test_main(int argc, char *argv[]);
 #endif
+
+#ifdef CONFIG_RA_WDT
+void board_wdt_initialize(void);
+#endif
+
+#ifdef CONFIG_RA_IWDT
+void board_iwdt_initialize(void);
+#endif
+
+#ifdef CONFIG_RA8P1_WDT_TEST
+int wdg_test_main(int argc, char *argv[]);
+#endif
+
+/****************************************************************************
+ * POEG (Port Output Enable for GPT) Interface
+ ****************************************************************************/
+
+#ifdef CONFIG_RA_POEG
+
+/****************************************************************************
+ * Name: board_poeg_initialize
+ *
+ * Description:
+ *   Initialize POEG for emergency PWM shutdown.
+ *   Provides hardware failsafe to disable GPT outputs on fault conditions.
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure.
+ *
+ ****************************************************************************/
+
+int board_poeg_initialize(void);
+
+/****************************************************************************
+ * Name: board_poeg_reset
+ *
+ * Description:
+ *   Reset POEG status and re-enable GPT outputs.
+ *   Should only be called after fault condition is resolved.
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure.
+ *
+ ****************************************************************************/
+
+int board_poeg_reset(void);
+
+/****************************************************************************
+ * Name: board_poeg_get_status
+ *
+ * Description:
+ *   Get current POEG status.
+ *
+ * Input Parameters:
+ *   status - Pointer to status structure to fill
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure.
+ *
+ ****************************************************************************/
+
+struct ra_poeg_status_s;
+int board_poeg_get_status(struct ra_poeg_status_s *status);
+
+/****************************************************************************
+ * Name: board_poeg_software_disable
+ *
+ * Description:
+ *   Trigger software disable of GPT outputs.
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure.
+ *
+ ****************************************************************************/
+
+int board_poeg_software_disable(void);
+
+#endif /* CONFIG_RA_POEG */
 
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_RA8_EVK_RA8P1_SRC_H */

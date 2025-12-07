@@ -126,6 +126,10 @@ struct ra_gpt_s
 #ifdef CONFIG_PWM_MULTICHAN
   uint8_t  nchannels;             /* Number of channels */
 #endif
+#ifdef CONFIG_RA_DMAC
+  ra_dmac_handle_t dma_handle;    /* DMA handle */
+  int dma_channel;                /* Assigned DMA channel (-1 = dynamic) */
+#endif
 };
 
 /****************************************************************************
@@ -188,6 +192,13 @@ static int gpt_set_capture(struct ra_gpt_s *priv,
                            const struct ra_gpt_capture_s *config);
 static int gpt_get_capture(struct ra_gpt_s *priv,
                            struct ra_gpt_captured_s *result);
+
+#ifdef CONFIG_RA_DMAC
+/* DMA support */
+static void gpt_get_dma_channel(struct ra_gpt_s *priv, int *channel);
+static int gpt_set_dma(struct ra_gpt_s *priv,
+                       const struct ra_gpt_dma_s *config);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -283,7 +294,46 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
     .elc        = RA_ELC_GPT5_CAPTURE_COMPARE_A,  /* GPT5 capture/compare A IRQ */
   },
 #endif
-/* Add more channels as needed */
+#ifdef CONFIG_RA_GPT10
+  {
+    .base       = R_GPT32_CH_BASE(10),
+    .mstp       = RA_MSTP_GPT10,
+    .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
+    .max_period = UINT32_MAX, /* 32-bit timer */
+    .channel    = 10,
+    .elc        = RA_ELC_GPT10_CAPTURE_COMPARE_A,  /* GPT10 capture/compare A IRQ */
+  },
+#endif
+#ifdef CONFIG_RA_GPT11
+  {
+    .base       = R_GPT32_CH_BASE(11),
+    .mstp       = RA_MSTP_GPT11,
+    .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
+    .max_period = UINT32_MAX, /* 32-bit timer */
+    .channel    = 11,
+    .elc        = RA_ELC_GPT11_CAPTURE_COMPARE_A,  /* GPT11 capture/compare A IRQ */
+  },
+#endif
+#ifdef CONFIG_RA_GPT12
+  {
+    .base       = R_GPT32_CH_BASE(12),
+    .mstp       = RA_MSTP_GPT12,
+    .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
+    .max_period = UINT32_MAX, /* 32-bit timer */
+    .channel    = 12,
+    .elc        = RA_ELC_GPT12_CAPTURE_COMPARE_A,  /* GPT12 capture/compare A IRQ */
+  },
+#endif
+#ifdef CONFIG_RA_GPT13
+  {
+    .base       = R_GPT32_CH_BASE(13),
+    .mstp       = RA_MSTP_GPT13,
+    .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
+    .max_period = UINT32_MAX, /* 32-bit timer */
+    .channel    = 13,
+    .elc        = RA_ELC_GPT13_CAPTURE_COMPARE_A,  /* GPT13 capture/compare A IRQ */
+  },
+#endif
 };
 
 #define NGPT_CONFIGS (sizeof(g_gpt_configs) / sizeof(struct ra_gpt_channel_config_s))
@@ -1932,6 +1982,112 @@ static int gpt_get_capture(struct ra_gpt_s *priv,
 
 #ifdef CONFIG_RA_DMAC
 /****************************************************************************
+ * Name: gpt_get_dma_channel
+ *
+ * Description:
+ *   Get DMA channel assignment from Kconfig for the specified GPT channel
+ *
+ ****************************************************************************/
+
+static void gpt_get_dma_channel(struct ra_gpt_s *priv, int *channel)
+{
+  /* Default to dynamic allocation */
+  *channel = -1;
+
+#ifdef CONFIG_RA_GPT0
+  if (priv->config->channel == 0)
+    {
+#ifdef CONFIG_RA_DMAC_GPT0_CHANNEL
+      *channel = CONFIG_RA_DMAC_GPT0_CHANNEL;
+#endif
+    }
+#endif
+
+#ifdef CONFIG_RA_GPT1
+  if (priv->config->channel == 1)
+    {
+#ifdef CONFIG_RA_DMAC_GPT1_CHANNEL
+      *channel = CONFIG_RA_DMAC_GPT1_CHANNEL;
+#endif
+    }
+#endif
+
+#ifdef CONFIG_RA_GPT2
+  if (priv->config->channel == 2)
+    {
+#ifdef CONFIG_RA_DMAC_GPT2_CHANNEL
+      *channel = CONFIG_RA_DMAC_GPT2_CHANNEL;
+#endif
+    }
+#endif
+
+#ifdef CONFIG_RA_GPT3
+  if (priv->config->channel == 3)
+    {
+#ifdef CONFIG_RA_DMAC_GPT3_CHANNEL
+      *channel = CONFIG_RA_DMAC_GPT3_CHANNEL;
+#endif
+    }
+#endif
+
+#ifdef CONFIG_RA_GPT4
+  if (priv->config->channel == 4)
+    {
+#ifdef CONFIG_RA_DMAC_GPT4_CHANNEL
+      *channel = CONFIG_RA_DMAC_GPT4_CHANNEL;
+#endif
+    }
+#endif
+
+#ifdef CONFIG_RA_GPT5
+  if (priv->config->channel == 5)
+    {
+#ifdef CONFIG_RA_DMAC_GPT5_CHANNEL
+      *channel = CONFIG_RA_DMAC_GPT5_CHANNEL;
+#endif
+    }
+#endif
+
+#ifdef CONFIG_RA_GPT10
+  if (priv->config->channel == 10)
+    {
+#ifdef CONFIG_RA_DMAC_GPT10_CHANNEL
+      *channel = CONFIG_RA_DMAC_GPT10_CHANNEL;
+#endif
+    }
+#endif
+
+#ifdef CONFIG_RA_GPT11
+  if (priv->config->channel == 11)
+    {
+#ifdef CONFIG_RA_DMAC_GPT11_CHANNEL
+      *channel = CONFIG_RA_DMAC_GPT11_CHANNEL;
+#endif
+    }
+#endif
+
+#ifdef CONFIG_RA_GPT12
+  if (priv->config->channel == 12)
+    {
+#ifdef CONFIG_RA_DMAC_GPT12_CHANNEL
+      *channel = CONFIG_RA_DMAC_GPT12_CHANNEL;
+#endif
+    }
+#endif
+
+#ifdef CONFIG_RA_GPT13
+  if (priv->config->channel == 13)
+    {
+#ifdef CONFIG_RA_DMAC_GPT13_CHANNEL
+      *channel = CONFIG_RA_DMAC_GPT13_CHANNEL;
+#endif
+    }
+#endif
+
+  pwminfo("GPT%" PRIu32 " DMA channel: %d\n", priv->config->channel, *channel);
+}
+
+/****************************************************************************
  * Name: gpt_set_dma
  *
  * Description:
@@ -2049,12 +2205,39 @@ static int gpt_set_dma(struct ra_gpt_s *priv,
             break;
         }
 
-      /* Open and enable DMAC - this will be board-specific */
-      /* For now, return OK - the actual DMA setup would be done
-       * by the board/application code using ra_dmac_* functions
-       */
+      /* Get DMA channel assignment from Kconfig */
+      gpt_get_dma_channel(priv, &priv->dma_channel);
 
-      ret = OK;
+      /* Use assigned channel if configured, otherwise use dynamic allocation */
+      if (priv->dma_channel >= 0)
+        {
+          ret = ra_dmac_open_channel(&priv->dma_handle, &dma_config, priv->dma_channel);
+          pwminfo("GPT DMA using assigned channel %d\n", priv->dma_channel);
+        }
+      else
+        {
+          ret = ra_dmac_open(&priv->dma_handle, &dma_config);
+          pwminfo("GPT DMA using dynamic channel allocation\n");
+        }
+
+      if (ret < 0)
+        {
+          pwmerr("Failed to open DMA: %d\n", ret);
+          leave_critical_section(flags);
+          return ret;
+        }
+
+      ret = ra_dmac_enable(priv->dma_handle);
+      if (ret < 0)
+        {
+          pwmerr("Failed to enable DMA: %d\n", ret);
+          ra_dmac_close(priv->dma_handle);
+          priv->dma_handle = NULL;
+          leave_critical_section(flags);
+          return ret;
+        }
+
+      pwminfo("GPT%" PRIu32 " DMA configured and enabled\n", priv->config->channel);
     }
   else
     {

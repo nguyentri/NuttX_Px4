@@ -56,7 +56,7 @@
 #include <nuttx/cache.h>
 #endif
 
-#ifdef CONFIG_RA_DMA
+#ifdef CONFIG_RA_DMAC
 #include "ra_dmac.h"
 #include <nuttx/cache.h>
 #endif
@@ -134,7 +134,8 @@ static void ra_i2c_dtc_cleanup(struct ra_i2c_priv_s *priv);
 #endif
 
 /* DMA functions */
-#ifdef CONFIG_RA_DMA
+#ifdef CONFIG_RA_DMAC
+static void ra_i2c_get_dma_channel(struct ra_i2c_priv_s *priv, int *channel);
 static int ra_i2c_dma_setup(struct ra_i2c_priv_s *priv);
 static int ra_i2c_dma_start_rx(struct ra_i2c_priv_s *priv, uint8_t *buffer, uint32_t len);
 static int ra_i2c_dma_start_tx(struct ra_i2c_priv_s *priv, const uint8_t *buffer, uint32_t len);
@@ -735,7 +736,7 @@ static int ra_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgs, int
   struct ra_i2c_priv_s *priv = (struct ra_i2c_priv_s *)dev;
   int ret = OK;
   int i;
-#if defined(CONFIG_RA_DTC) || defined(CONFIG_RA_DMA)
+#if defined(CONFIG_RA_DTC) || defined(CONFIG_RA_DMAC)
   bool use_dma_transfer = false;
 #endif
 
@@ -767,14 +768,14 @@ static int ra_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgs, int
       priv->flags = msgs[i].flags;
       priv->addr = msgs[i].addr;
 
-#if defined(CONFIG_RA_DTC) || defined(CONFIG_RA_DMA)
+#if defined(CONFIG_RA_DTC) || defined(CONFIG_RA_DMAC)
       /* Determine if we should use DTC/DMA for this transfer
        * Use DMA for larger transfers to reduce CPU overhead
        */
 
       use_dma_transfer = false;
 
-#ifdef CONFIG_RA_DMA
+#ifdef CONFIG_RA_DMAC
       if (priv->use_dma && msgs[i].length >= RA_I2C_DMA_THRESHOLD)
         {
           use_dma_transfer = true;
@@ -787,7 +788,7 @@ static int ra_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgs, int
           use_dma_transfer = true;
         }
 #endif
-#endif /* CONFIG_RA_DTC || CONFIG_RA_DMA */
+#endif /* CONFIG_RA_DTC || CONFIG_RA_DMAC */
 
       /* Generate start condition (or repeated start) */
 
@@ -834,12 +835,12 @@ static int ra_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgs, int
 
           (void)ra_i2c_getreg(priv, R_IIC_ICDRR_OFFSET);
 
-#if defined(CONFIG_RA_DMA) || defined(CONFIG_RA_DTC)
+#if defined(CONFIG_RA_DMAC) || defined(CONFIG_RA_DTC)
           if (use_dma_transfer)
             {
               /* Use DMA/DTC for bulk read */
 
-#ifdef CONFIG_RA_DMA
+#ifdef CONFIG_RA_DMAC
               if (priv->use_dma)
                 {
                   ret = ra_i2c_dma_start_rx(priv, msgs[i].buffer,
@@ -893,7 +894,7 @@ static int ra_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgs, int
             }
 
           if (!use_dma_transfer)
-#endif /* CONFIG_RA_DMA || CONFIG_RA_DTC */
+#endif /* CONFIG_RA_DMAC || CONFIG_RA_DTC */
             {
               /* Read all bytes using polled/interrupt method */
 
@@ -911,12 +912,12 @@ static int ra_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgs, int
         {
           /* Writing */
 
-#if defined(CONFIG_RA_DMA) || defined(CONFIG_RA_DTC)
+#if defined(CONFIG_RA_DMAC) || defined(CONFIG_RA_DTC)
           if (use_dma_transfer)
             {
               /* Use DMA/DTC for bulk write */
 
-#ifdef CONFIG_RA_DMA
+#ifdef CONFIG_RA_DMAC
               if (priv->use_dma)
                 {
                   ret = ra_i2c_dma_start_tx(priv, msgs[i].buffer,
@@ -958,7 +959,7 @@ static int ra_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgs, int
             }
 
           if (!use_dma_transfer)
-#endif /* CONFIG_RA_DMA || CONFIG_RA_DTC */
+#endif /* CONFIG_RA_DMAC || CONFIG_RA_DTC */
             {
               /* Writing - send all bytes using polled/interrupt method */
 
@@ -999,7 +1000,7 @@ static int ra_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgs, int
     }
 #endif
 
-#ifdef CONFIG_RA_DMA
+#ifdef CONFIG_RA_DMAC
   /* Ensure DMA is stopped on error */
 
   if (priv->dma_active)
@@ -1136,7 +1137,7 @@ static int ra_i2c_init(struct ra_i2c_priv_s *priv)
   ra_i2c_dtc_setup(priv);
 #endif
 
-#ifdef CONFIG_RA_DMA
+#ifdef CONFIG_RA_DMAC
   /* Setup DMA if enabled */
 
   ra_i2c_dma_setup(priv);
@@ -1176,7 +1177,7 @@ static int ra_i2c_deinit(struct ra_i2c_priv_s *priv)
   ra_i2c_dtc_cleanup(priv);
 #endif
 
-#ifdef CONFIG_RA_DMA
+#ifdef CONFIG_RA_DMAC
   /* Cleanup DMA */
 
   ra_i2c_dma_stop(priv);
@@ -1496,7 +1497,50 @@ static void ra_i2c_dtc_cleanup(struct ra_i2c_priv_s *priv)
 }
 #endif /* CONFIG_RA_DTC */
 
-#ifdef CONFIG_RA_DMA
+#ifdef CONFIG_RA_DMAC
+/****************************************************************************
+ * Name: ra_i2c_get_dma_channel
+ *
+ * Description:
+ *   Get DMA channel assignment from Kconfig for the specified I2C bus
+ *
+ ****************************************************************************/
+
+static void ra_i2c_get_dma_channel(struct ra_i2c_priv_s *priv, int *channel)
+{
+  /* Default to dynamic allocation */
+  *channel = -1;
+
+#ifdef CONFIG_RA_I2C0
+  if (priv->config->bus == 0)
+    {
+#ifdef CONFIG_RA_DMAC_I2C0_CHANNEL
+      *channel = CONFIG_RA_DMAC_I2C0_CHANNEL;
+#endif
+    }
+#endif
+
+#ifdef CONFIG_RA_I2C1
+  if (priv->config->bus == 1)
+    {
+#ifdef CONFIG_RA_DMAC_I2C1_CHANNEL
+      *channel = CONFIG_RA_DMAC_I2C1_CHANNEL;
+#endif
+    }
+#endif
+
+#ifdef CONFIG_RA_I2C2
+  if (priv->config->bus == 2)
+    {
+#ifdef CONFIG_RA_DMAC_I2C2_CHANNEL
+      *channel = CONFIG_RA_DMAC_I2C2_CHANNEL;
+#endif
+    }
+#endif
+
+  i2cinfo("I2C%d DMA channel: %d\n", priv->config->bus, *channel);
+}
+
 /****************************************************************************
  * Name: ra_i2c_dma_tx_callback
  *
@@ -1592,6 +1636,10 @@ static int ra_i2c_dma_setup(struct ra_i2c_priv_s *priv)
       return ret;
     }
 
+  /* Get DMA channel assignment from Kconfig */
+
+  ra_i2c_get_dma_channel(priv, &priv->dma_channel);
+
   /* DMA active state is per-transfer, initialize to false */
 
   priv->dma_active = false;
@@ -1601,7 +1649,8 @@ static int ra_i2c_dma_setup(struct ra_i2c_priv_s *priv)
   priv->dma_rx_done = false;
   priv->use_dma = true;
 
-  i2cinfo("DMA setup completed for I2C%d\n", priv->config->bus);
+  i2cinfo("DMA setup completed for I2C%d (channel=%d)\n",
+          priv->config->bus, priv->dma_channel);
 
   return OK;
 }
@@ -1650,7 +1699,18 @@ static int ra_i2c_dma_start_tx(struct ra_i2c_priv_s *priv,
   config.callback = ra_i2c_dma_tx_callback;
   config.user_data = priv;
 
-  ret = ra_dmac_open(&priv->dma_tx, &config);
+  /* Use assigned channel if configured, otherwise use dynamic allocation */
+  if (priv->dma_channel >= 0)
+    {
+      ret = ra_dmac_open_channel(&priv->dma_tx, &config, priv->dma_channel);
+      i2cinfo("TX DMA using assigned channel %d\n", priv->dma_channel);
+    }
+  else
+    {
+      ret = ra_dmac_open(&priv->dma_tx, &config);
+      i2cinfo("TX DMA using dynamic channel allocation\n");
+    }
+
   if (ret < 0)
     {
       i2cerr("Failed to open TX DMA: %d\n", ret);
@@ -1717,7 +1777,18 @@ static int ra_i2c_dma_start_rx(struct ra_i2c_priv_s *priv,
   config.callback = ra_i2c_dma_rx_callback;
   config.user_data = priv;
 
-  ret = ra_dmac_open(&priv->dma_rx, &config);
+  /* Use assigned channel if configured, otherwise use dynamic allocation */
+  if (priv->dma_channel >= 0)
+    {
+      ret = ra_dmac_open_channel(&priv->dma_rx, &config, priv->dma_channel);
+      i2cinfo("RX DMA using assigned channel %d\n", priv->dma_channel);
+    }
+  else
+    {
+      ret = ra_dmac_open(&priv->dma_rx, &config);
+      i2cinfo("RX DMA using dynamic channel allocation\n");
+    }
+
   if (ret < 0)
     {
       i2cerr("Failed to open RX DMA: %d\n", ret);
@@ -1780,7 +1851,7 @@ static void ra_i2c_dma_stop(struct ra_i2c_priv_s *priv)
   priv->dma_tx_done = false;
   priv->dma_rx_done = false;
 }
-#endif /* CONFIG_RA_DMA */
+#endif /* CONFIG_RA_DMAC */
 
 /****************************************************************************
  * Name: ra_i2cbus_initialize

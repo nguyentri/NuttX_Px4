@@ -3,7 +3,7 @@
  *
  * Unified example wrappers that provide a single entry point
  * ra8p1_<app>_example() for each board example to simplify calls
- * from ra8p1_bringup().
+ * from board_bringup().
  ****************************************************************************/
 
 #include <nuttx/config.h>
@@ -195,6 +195,14 @@ int ra8p1_pwm_example(void)
 }
 #endif
 
+#ifdef CONFIG_RA8P1_WDT_TEST
+int ra8p1_wdt_test_example(void)
+{
+  syslog(LOG_INFO, "Starting WDT test application...\n");
+  return wdg_test_main(0, NULL);
+}
+#endif
+
 
 /* Run all enabled application examples. Returns 0 on success or the
  * last non-zero error code from any example.
@@ -326,6 +334,15 @@ int ra8p1_app_examples(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "OSPI example failed: %d\n", ret);
+      last_err = ret;
+    }
+#endif
+
+#ifdef CONFIG_RA8P1_WDT_TEST
+  ret = ra8p1_wdt_test_example();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "WDT test example failed: %d\n", ret);
       last_err = ret;
     }
 #endif

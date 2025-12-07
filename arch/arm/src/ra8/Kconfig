@@ -2356,92 +2356,6 @@ endif # RA_MIPI_CSI
 
 endmenu
 
-menu "DMAC"
-config RA_HAVE_DMAC
-   bool
-   default n
-
-config RA_DMAC
-   bool "DMAC support"
-   default n
-   depends on RA_HAVE_DMAC
-   ---help---
-      Enable Data Transfer Controller (DTC) and Direct Memory Access Controller (DMAC) support.
-
-config RA_DMA
-   bool "DMA support"
-   default n
-   depends on RA_DMAC
-   select DMA
-   ---help---
-      Enable DMA (Direct Memory Access) support using DMAC.
-      This is an alias/wrapper for DMAC functionality.
-
-config RA_DMAC_CHANNELS
-   int "Number of DMAC channels"
-   default 8
-   depends on RA_DMAC
-   range 1 8
-   ---help---
-      Number of DMAC channels to support (1-8).
-      RA8 MCUs support up to 8 DMAC channels.
-
-config RA_DMAC_PRIORITY
-   bool "Enable DMAC priority control"
-   default n
-   depends on RA_DMAC
-   help
-     Enable channel priority control for DMAC.
-     When enabled, lower numbered channels have higher priority.
-     When disabled, round-robin arbitration is used.
-
-config RA_DMAC_HALT_ON_ERROR
-   bool "Halt DMAC on error"
-   default y
-   depends on RA_DMAC
-   help
-     Halt all DMAC operations when a bus error occurs.
-     Recommended for debugging; may be disabled for production.
-
-config RA_DTC
-   bool "DTC (Data Transfer Controller)"
-   default n
-   help
-     Enable Data Transfer Controller for simple data transfers.
-     DTC provides lower overhead than DMAC for simple transfers.
-
-if RA_DMAC
-
-menu "DMAC Debug Options"
-
-config DEBUG_DMA_ERROR
-   bool "DMAC error output"
-   default n
-   depends on DEBUG_ERROR
-   help
-     Enable DMAC error output (dmaerr).
-
-config DEBUG_DMA_WARN
-   bool "DMAC warnings output"
-   default n
-   depends on DEBUG_WARN
-   help
-     Enable DMAC warning output (dmawarn).
-
-config DEBUG_DMA_INFO
-   bool "DMAC informational output"
-   default n
-   depends on DEBUG_INFO
-   help
-     Enable DMAC informational output (dmainfo).
-     Also enables ra_dmasample() and ra_dmadump() debug functions.
-
-endmenu
-
-endif # RA_DMAC
-
-endmenu
-
 menu "ADC"
 config RA_HAVE_ADC0
    bool
@@ -2727,6 +2641,96 @@ config RA_SPI2
    default n
    depends on RA_HAVE_SPI2
    select RA_SPI
+
+endmenu
+
+menu "SCI_SPI (Simple SPI using SCI)"
+
+config RA_SCI_SPI
+   bool
+   default n
+   select SPI
+
+config RA_SCI0_SPI
+   bool "SCI0 Simple SPI"
+   default n
+   depends on RA_HAVE_SCI0_UART
+   select RA_SCI_SPI
+   ---help---
+      Enable SCI0 in Simple SPI mode. Cannot be used simultaneously with SCI0 UART.
+
+config RA_SCI1_SPI
+   bool "SCI1 Simple SPI"
+   default n
+   depends on RA_HAVE_SCI1_UART
+   select RA_SCI_SPI
+   ---help---
+      Enable SCI1 in Simple SPI mode. Cannot be used simultaneously with SCI1 UART.
+
+config RA_SCI2_SPI
+   bool "SCI2 Simple SPI"
+   default n
+   depends on RA_HAVE_SCI2_UART
+   select RA_SCI_SPI
+   ---help---
+      Enable SCI2 in Simple SPI mode. Cannot be used simultaneously with SCI2 UART.
+
+config RA_SCI3_SPI
+   bool "SCI3 Simple SPI"
+   default n
+   depends on RA_HAVE_SCI3_UART
+   select RA_SCI_SPI
+   ---help---
+      Enable SCI3 in Simple SPI mode. Cannot be used simultaneously with SCI3 UART.
+
+config RA_SCI4_SPI
+   bool "SCI4 Simple SPI"
+   default n
+   depends on RA_HAVE_SCI4_UART
+   select RA_SCI_SPI
+   ---help---
+      Enable SCI4 in Simple SPI mode. Cannot be used simultaneously with SCI4 UART.
+
+config RA_SCI5_SPI
+   bool "SCI5 Simple SPI"
+   default n
+   depends on RA_HAVE_SCI5_UART
+   select RA_SCI_SPI
+   ---help---
+      Enable SCI5 in Simple SPI mode. Cannot be used simultaneously with SCI5 UART.
+
+config RA_SCI6_SPI
+   bool "SCI6 Simple SPI"
+   default n
+   depends on RA_HAVE_SCI6_UART
+   select RA_SCI_SPI
+   ---help---
+      Enable SCI6 in Simple SPI mode. Cannot be used simultaneously with SCI6 UART.
+
+config RA_SCI7_SPI
+   bool "SCI7 Simple SPI"
+   default n
+   depends on RA_HAVE_SCI7_UART
+   select RA_SCI_SPI
+   ---help---
+      Enable SCI7 in Simple SPI mode. Cannot be used simultaneously with SCI7 UART.
+
+config RA_SCI8_SPI
+   bool "SCI8 Simple SPI"
+   default n
+   depends on RA_HAVE_SCI8_UART
+   select RA_SCI_SPI
+   ---help---
+      Enable SCI8 in Simple SPI mode. Cannot be used simultaneously with SCI8 UART.
+
+config RA_SCI9_SPI
+   bool "SCI9 Simple SPI"
+   default n
+   depends on RA_HAVE_SCI9_UART
+   select RA_SCI_SPI
+   ---help---
+      Enable SCI9 in Simple SPI mode. Cannot be used simultaneously with SCI9 UART.
+
 
 endmenu
 
@@ -3158,6 +3162,74 @@ endif # RA_RTC_ERROR_ADJUSTMENT
 
 endmenu
 
+menu "Watchdog Timer"
+
+config RA_WDT
+    bool "Watchdog Timer (WDT)"
+    default n
+    select WATCHDOG
+    help
+      Enable the RA8 Watchdog Timer (WDT) driver.
+      WDT runs from PCLKB and supports longer timeout periods than IWDT.
+      Timeout periods: 1024, 4096, 8192, 16384 cycles.
+
+if RA_WDT
+
+config RA_WDT_NMI_MODE
+    bool "Enable NMI Mode (Non-Maskable Interrupt)"
+    default n
+    help
+      Configure WDT to generate NMI interrupt on timeout instead of reset.
+      This allows graceful handling of watchdog events.
+      If disabled, WDT will reset the MCU on timeout (default safe mode).
+      Note: Requires handler registration via watchdog_capture() API.
+
+config RA_WDT_STOP_IN_SLEEP
+    bool "Stop WDT Counter in Sleep Mode"
+    default n
+    help
+      Stop the WDT counter when the MCU enters sleep mode.
+      If enabled: WDT stops during sleep (saves power)
+      If disabled: WDT continues during sleep (higher safety)
+
+endif # RA_WDT
+
+config RA_IWDT
+    bool "Independent Watchdog Timer (IWDT)"
+    default n
+    select WATCHDOG
+    help
+      Enable the RA8 Independent Watchdog Timer (IWDT) driver.
+      The IWDT is a safety watchdog that cannot be stopped once started.
+      It runs from the LOCO clock (32.768 kHz / 15 = 2184.5 Hz) which is
+      independent of the system clock.
+
+if RA_IWDT
+
+config RA_IWDT_NMI_MODE
+    bool "Enable NMI Mode (Non-Maskable Interrupt)"
+    default n
+    help
+      Configure IWDT to generate NMI interrupt on timeout instead of reset.
+      This allows graceful handling of watchdog events (e.g., save flight data).
+      If disabled, IWDT will reset the MCU on timeout (default safe mode).
+      Note: Requires handler registration via watchdog_capture() API.
+
+config RA_IWDT_STOP_IN_SLEEP
+    bool "Stop IWDT Counter in Sleep Mode"
+    default n
+    help
+      Stop the IWDT counter when the MCU enters sleep mode.
+      If enabled: IWDT stops during sleep (saves power)
+      If disabled: IWDT continues during sleep (higher safety)
+
+      For flight controllers, typically disabled to maintain safety even
+      during low-power modes.
+
+endif # RA_IWDT
+
+endmenu
+
 menu "ADC"
 config RA_HAVE_ADC12
    bool
@@ -3255,58 +3327,579 @@ config RA_ACMPHS3
 
 endmenu
 
-menu "DMA"
-config RA_HAVE_DMA
+menu "DMA and Data Transfer"
+
+comment "Direct Memory Access Controller (DMAC)"
+
+config RA_HAVE_DMAC
    bool
    default y if RA8_FAMILY
    help
-     RA8E1 family has DMA controller support.
+     RA8 family has DMA controller support.
 
-config RA_DMA
-   bool "DMA Controller"
+config RA_DMAC
+   bool "DMAC (Direct Memory Access Controller) support"
    default n
-   depends on RA_HAVE_DMA
+   depends on RA_HAVE_DMAC
    help
-     Enable DMA (Direct Memory Access) controller support.
-     The RA8E1 has DMAC with 8 channels supporting various transfer modes.
+     Enable DMAC support for high-performance data transfers.
+     DMAC provides hardware-accelerated memory-to-memory,
+     memory-to-peripheral, and peripheral-to-memory transfers.
+     RA8 MCUs support up to 8 DMAC channels.
 
-if RA_DMA
-
-config RA_DMA_CHANNELS
-   int "Number of DMA channels"
-   default 8
-   range 1 8
-   help
-     Number of available DMA channels (0-7).
-     RA8E1 has 8 DMAC channels that can be used for various peripherals.
+if RA_DMAC
 
 config RA_DMAC_IRQ_PRIORITY
-   int "DMA interrupt priority"
+   int "DMAC interrupt priority"
    default 3
    range 0 15
    help
-     Interrupt priority for DMA completion interrupts (0=highest, 15=lowest).
+     Interrupt priority for DMAC completion interrupts (0=highest, 15=lowest).
      Should typically be lower than the peripheral interrupt priority.
 
-config RA_DMA_PARAM_CHECKING
-   bool "Enable DMA parameter checking"
+config RA_DMAC_PRIORITY
+   bool "Enable DMAC channel priority control"
+   default n
+   help
+     Enable channel priority control for DMAC.
+     When enabled, lower numbered channels have higher priority.
+     When disabled, round-robin arbitration is used.
+
+config RA_DMAC_HALT_ON_ERROR
+   bool "Halt DMAC on error"
+   default y
+   help
+     Halt all DMAC operations when a bus error occurs.
+     Recommended for debugging; may be disabled for production.
+
+config RA_DMAC_PARAM_CHECKING
+   bool "Enable DMAC parameter checking"
    default y if DEBUG_FEATURES
    default n
    help
-     Enable parameter checking in DMA driver functions.
+     Enable parameter checking in DMAC driver functions.
      Adds safety checks but increases code size and execution time.
 
-config RA_DMA_TRANSFER_MODES
-   bool "Support all DMA transfer modes"
+config RA_DMAC_TRANSFER_MODES
+   bool "Support all DMAC transfer modes"
    default y
    help
-     Enable support for all DMA transfer modes:
+     Enable support for all DMAC transfer modes:
      - Normal transfer
      - Repeat transfer
      - Block transfer
-     Based on DMAC implementation.
 
-endif # RA_DMA
+menu "DMAC Channel Assignment"
+
+comment "Assign DMAC channels to peripherals (channels 0-7)"
+
+config RA_DMAC_SPI0_TX_CHANNEL
+   int "SPI0 TX DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_SPI0
+   help
+     DMAC channel for SPI0 transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_SPI0_RX_CHANNEL
+   int "SPI0 RX DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_SPI0
+   help
+     DMAC channel for SPI0 receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_SPI1_TX_CHANNEL
+   int "SPI1 TX DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_SPI1
+   help
+     DMAC channel for SPI1 transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_SPI1_RX_CHANNEL
+   int "SPI1 RX DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_SPI1
+   help
+     DMAC channel for SPI1 receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_I2C0_CHANNEL
+   int "I2C0 DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_I2C0
+   help
+     DMAC channel for I2C0 transfers (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_I2C1_CHANNEL
+   int "I2C1 DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_I2C1
+   help
+     DMAC channel for I2C1 transfers (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_I2C2_CHANNEL
+   int "I2C2 DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_I2C2
+   help
+     DMAC channel for I2C2 transfers (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_ADC_CHANNEL
+   int "ADC DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_ADC
+   help
+     DMAC channel for ADC data transfers (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART0_TX_CHANNEL
+   int "UART0 TX DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_SCI0_UART
+   help
+     DMAC channel for UART0 transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART0_RX_CHANNEL
+   int "UART0 RX DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_SCI0_UART
+   help
+     DMAC channel for UART0 receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART1_TX_CHANNEL
+   int "UART1 TX DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_SCI1_UART
+   help
+     DMAC channel for UART1 transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART1_RX_CHANNEL
+   int "UART1 RX DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_SCI1_UART
+   help
+     DMAC channel for UART1 receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART2_TX_CHANNEL
+   int "UART2 TX DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_SCI2_UART
+   help
+     DMAC channel for UART2 transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART2_RX_CHANNEL
+   int "UART2 RX DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_SCI2_UART
+   help
+     DMAC channel for UART2 receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART3_TX_CHANNEL
+   int "UART3 TX DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_SCI3_UART
+   help
+     DMAC channel for UART3 transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART3_RX_CHANNEL
+   int "UART3 RX DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_SCI3_UART
+   help
+     DMAC channel for UART3 receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART4_TX_CHANNEL
+   int "UART4 TX DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_SCI4_UART
+   help
+     DMAC channel for UART4 transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART4_RX_CHANNEL
+   int "UART4 RX DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_SCI4_UART
+   help
+     DMAC channel for UART4 receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART9_TX_CHANNEL
+   int "UART9 TX DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_SCI9_UART
+   help
+     DMAC channel for UART9 transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART9_RX_CHANNEL
+   int "UART9 RX DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_SCI9_UART
+   help
+     DMAC channel for UART9 receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_SCI0_SPI_TX_CHANNEL
+   int "SCI0_SPI TX DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_SCI0_SPI
+   help
+     DMAC channel for SCI0_SPI transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_SCI0_SPI_RX_CHANNEL
+   int "SCI0_SPI RX DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_SCI0_SPI
+   help
+     DMAC channel for SCI0_SPI receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_SCI1_SPI_TX_CHANNEL
+   int "SCI1_SPI TX DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_SCI1_SPI
+   help
+     DMAC channel for SCI1_SPI transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_SCI1_SPI_RX_CHANNEL
+   int "SCI1_SPI RX DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_SCI1_SPI
+   help
+     DMAC channel for SCI1_SPI receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_SCI2_SPI_TX_CHANNEL
+   int "SCI2_SPI TX DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_SCI2_SPI
+   help
+     DMAC channel for SCI2_SPI transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_SCI2_SPI_RX_CHANNEL
+   int "SCI2_SPI RX DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_SCI2_SPI
+   help
+     DMAC channel for SCI2_SPI receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_SCI3_SPI_TX_CHANNEL
+   int "SCI3_SPI TX DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_SCI3_SPI
+   help
+     DMAC channel for SCI3_SPI transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_SCI3_SPI_RX_CHANNEL
+   int "SCI3_SPI RX DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_SCI3_SPI
+   help
+     DMAC channel for SCI3_SPI receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_SCI4_SPI_TX_CHANNEL
+   int "SCI4_SPI TX DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_SCI4_SPI
+   help
+     DMAC channel for SCI4_SPI transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_SCI4_SPI_RX_CHANNEL
+   int "SCI4_SPI RX DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_SCI4_SPI
+   help
+     DMAC channel for SCI4_SPI receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_SCI9_SPI_TX_CHANNEL
+   int "SCI9_SPI TX DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_SCI9_SPI
+   help
+     DMAC channel for SCI9_SPI transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_SCI9_SPI_RX_CHANNEL
+   int "SCI9_SPI RX DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_SCI9_SPI
+   help
+     DMAC channel for SCI9_SPI receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_GPT0_CHANNEL
+   int "GPT0 DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_GPT0
+   help
+     DMAC channel for GPT0 transfers (-1 = disabled).
+     Used for timer/PWM capture or compare match operations.
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_GPT1_CHANNEL
+   int "GPT1 DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_GPT1
+   help
+     DMAC channel for GPT1 transfers (-1 = disabled).
+     Used for timer/PWM capture or compare match operations.
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_GPT2_CHANNEL
+   int "GPT2 DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_GPT2
+   help
+     DMAC channel for GPT2 transfers (-1 = disabled).
+     Used for timer/PWM capture or compare match operations.
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_GPT3_CHANNEL
+   int "GPT3 DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_GPT3
+   help
+     DMAC channel for GPT3 transfers (-1 = disabled).
+     Used for timer/PWM capture or compare match operations.
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_GPT4_CHANNEL
+   int "GPT4 DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_GPT4
+   help
+     DMAC channel for GPT4 transfers (-1 = disabled).
+     Used for timer/PWM capture or compare match operations.
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_GPT5_CHANNEL
+   int "GPT5 DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_GPT5
+   help
+     DMAC channel for GPT5 transfers (-1 = disabled).
+     Used for timer/PWM capture or compare match operations.
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_GPT10_CHANNEL
+   int "GPT10 DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_GPT10
+   help
+     DMAC channel for GPT10 transfers (-1 = disabled).
+     Used for timer/PWM capture or compare match operations.
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_GPT11_CHANNEL
+   int "GPT11 DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_GPT11
+   help
+     DMAC channel for GPT11 transfers (-1 = disabled).
+     Used for timer/PWM capture or compare match operations.
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_GPT12_CHANNEL
+   int "GPT12 DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_GPT12
+   help
+     DMAC channel for GPT12 transfers (-1 = disabled).
+     Used for timer/PWM capture or compare match operations.
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_GPT13_CHANNEL
+   int "GPT13 DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_GPT13
+   help
+     DMAC channel for GPT13 transfers (-1 = disabled).
+     Used for timer/PWM capture or compare match operations.
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_SDHI_CHANNEL
+   int "SDHI DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_SDHI
+   help
+     DMAC channel for SDHI (SD/MMC Host Interface) transfers (-1 = disabled).
+     Used for high-speed SD card data transfers.
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_SDRAM_CHANNEL
+   int "SDRAM DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_SDRAM
+   help
+     DMAC channel for SDRAM controller transfers (-1 = disabled).
+     Used for high-speed SDRAM data transfers and memory operations.
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_QSPI0_CHANNEL
+   int "QSPI0 DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_OSPI
+   help
+     DMAC channel for QSPI0 (Quad SPI 0) transfers (-1 = disabled).
+     Used for high-speed flash memory access via QSPI interface.
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_QSPI1_CHANNEL
+   int "QSPI1 DMAC channel"
+   default -1
+   range -1 7
+   depends on RA_OSPI
+   help
+     DMAC channel for QSPI1 (Quad SPI 1) transfers (-1 = disabled).
+     Used for high-speed flash memory access via QSPI interface.
+     Must be unique across all peripheral assignments.
+
+endmenu
+
+menu "DMAC Debug Options"
+
+config DEBUG_DMA_ERROR
+   bool "DMAC error output"
+   default n
+   depends on DEBUG_ERROR
+   help
+     Enable DMAC error output (dmaerr).
+
+config DEBUG_DMA_WARN
+   bool "DMAC warnings output"
+   default n
+   depends on DEBUG_WARN
+   help
+     Enable DMAC warning output (dmawarn).
+
+config DEBUG_DMA_INFO
+   bool "DMAC informational output"
+   default n
+   depends on DEBUG_INFO
+   help
+     Enable DMAC informational output (dmainfo).
+     Also enables ra_dmasample() and ra_dmadump() debug functions.
+
+endmenu
+
+endif # RA_DMAC
+
+comment "Data Transfer Controller (DTC)"
+
+config RA_DTC
+   bool "DTC (Data Transfer Controller) support"
+   default n
+   help
+     Enable Data Transfer Controller for simple data transfers.
+     DTC provides lower overhead than DMAC for simple transfers
+     but with reduced capabilities. DTC is independent of DMAC
+     and can be used simultaneously.
+
+if RA_DTC
+
+config RA_DTC_VECTORS
+   int "Number of DTC vectors"
+   default 16
+   range 1 256
+   help
+     Number of DTC transfer vectors to allocate.
+     Each active DTC transfer requires one vector.
+
+config RA_DTC_PARAM_CHECKING
+   bool "Enable DTC parameter checking"
+   default y if DEBUG_FEATURES
+   default n
+   help
+     Enable parameter checking in DTC driver functions.
+     Adds safety checks but increases code size.
+
+menu "DTC Debug Options"
+
+config DEBUG_DTC_ERROR
+   bool "DTC error output"
+   default n
+   depends on DEBUG_ERROR
+   help
+     Enable DTC error output.
+
+config DEBUG_DTC_INFO
+   bool "DTC informational output"
+   default n
+   depends on DEBUG_INFO
+   help
+     Enable DTC informational output.
+
+endmenu
+
+endif # RA_DTC
+
 endmenu
 
 menu "Graphics and Display"

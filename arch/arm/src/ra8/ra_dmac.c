@@ -395,12 +395,70 @@ int ra_dmac_open(ra_dmac_handle_t *handle, const ra_dmac_config_t *config)
 }
 
 /****************************************************************************
+ * Name: ra_dmac_open_channel
+ *
+ * Description:
+ *   Open and configure a DMAC transfer with explicit channel assignment
+ *
+ ****************************************************************************/
+
+int ra_dmac_open_channel(ra_dmac_handle_t *handle, const ra_dmac_config_t *config, int channel)
+{
+  ra_dmac_ctrl_t *ctrl;
+  int ret;
+
+  if (handle == NULL || config == NULL)
+    {
+      return -EINVAL;
+    }
+
+  /* Validate channel number */
+  if (channel < 0 || channel >= DMAC_MAX_CHANNELS)
+    {
+      dmaerr("Invalid channel number: %d\n", channel);
+      return -EINVAL;
+    }
+
+  /* Check if channel is already in use */
+  if (g_dmac_channels[channel].in_use)
+    {
+      dmaerr("Channel %d already in use\n", channel);
+      return -EBUSY;
+    }
+
+  /* Validate configuration */
+  ret = ra_dmac_validate_config(config);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ctrl = &g_dmac_channels[channel];
+
+  /* Allocate and copy configuration */
+  ctrl->config = kmm_zalloc(sizeof(ra_dmac_config_t));
+  if (ctrl->config == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  memcpy(ctrl->config, config, sizeof(ra_dmac_config_t));
+
+  ctrl->open_id = DMAC_OPEN_ID;
+  ctrl->in_use = true;
+  *handle = ctrl;
+
+  dmainfo("DMAC channel %d opened successfully (explicit assignment)\n", channel);
+  return OK;
+}
+
+/****************************************************************************
  * Name: ra_dmac_enable
  *
  * Description:
  *   Enable DMAC transfer
  *
- ****************************************************************************/
+****************************************************************************/
 
 int ra_dmac_enable(ra_dmac_handle_t handle)
 {

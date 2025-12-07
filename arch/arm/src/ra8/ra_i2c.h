@@ -130,7 +130,7 @@ struct ra_i2c_priv_s
   ra_dtc_info_t dtc_rx_info; /* RX DTC transfer info */
 #endif
 
-#ifdef CONFIG_RA_DMA
+#ifdef CONFIG_RA_DMAC
   /* DMA support */
   bool     use_dma;       /* DMA enable flag */
   bool     dma_active;    /* DMA transfer in progress */
@@ -138,6 +138,7 @@ struct ra_i2c_priv_s
   void    *dma_rx;        /* RX DMA handle */
   volatile bool dma_tx_done; /* TX DMA completion flag */
   volatile bool dma_rx_done; /* RX DMA completion flag */
+  int      dma_channel;   /* Assigned DMA channel (-1 = dynamic) */
 #endif
 };
 

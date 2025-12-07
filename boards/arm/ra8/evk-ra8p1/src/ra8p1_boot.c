@@ -69,7 +69,7 @@ void ra_board_initialize(void)
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
 void board_late_initialize(void)
 {
-  ra8p1_bringup();
+  board_bringup();
 }
 #endif
 
@@ -105,6 +105,6 @@ int board_app_initialize(uintptr_t arg)
   return OK;
 #else
   /* Perform board-specific initialization */
-  return ra8p1_bringup();
+  return board_bringup();
 #endif
 }

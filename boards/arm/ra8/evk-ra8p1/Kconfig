@@ -36,6 +36,14 @@ config RA8P1_OSPI_EXAMPLE
 		Enable OSPI test example for verifying OSPI driver functionality
 		on EVK-RA8P1 board.
 
+config RA8P1_SCI_SPI_EXAMPLE
+	bool "SCI SPI test example"
+	default n
+	depends on RA_SCI_SPI && RA8P1_EXAMPLE_SUPPORT
+	---help---
+		Enable SCI SPI test example for verifying SCI SPI driver functionality
+		on EVK-RA8P1 board.
+
 config RA8P1_ADC_HW_TRIGGER_EXAMPLE
 	bool "ELC GPT-triggered ADC example"
 	default n
@@ -48,9 +56,22 @@ config RA8P1_ADC_HW_TRIGGER_EXAMPLE
 		- GPT0 overflow -> GPT B stop trigger
 
 config RA8P1_I3C_EXAMPLE
-	bool "I3C test example"
+	bool "I3C example"
 	default n
 	depends on RA_I3C && RA8P1_EXAMPLE_SUPPORT
 	---help---
 		Enable I3C test example for verifying I3C driver functionality
 		on EVK-RA8P1 board.
+
+config RA8P1_WDT_TEST
+	bool "WDT example "
+	default n
+	depends on RA_WDT && WATCHDOG && RA8P1_EXAMPLE_SUPPORT
+	---help---
+		Enable WDT test application that demonstrates watchdog timer
+		functionality similar to FSP reference example. The application:
+		- Initializes WDT with 2-second timeout
+		- Refreshes WDT every 1 second via periodic timer
+		- Prints refresh status every 3 seconds
+		- Pressing SW1 button stops refresh, triggering WDT reset
+		- LED indicates reset status and activity

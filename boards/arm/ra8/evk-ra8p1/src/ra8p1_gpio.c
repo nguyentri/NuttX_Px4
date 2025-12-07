@@ -32,14 +32,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ra8p1_gpio_initialize
+ * Name: board_gpio_initialize
  *
  * Description:
  *   Initialize all board GPIO pins using centralized configuration
  *
  ****************************************************************************/
 
-int ra8p1_gpio_initialize(void)
+int board_gpio_initialize(void)
 {
   const uint32_t gpio_list[] = RA8_GPIO_INIT_LIST;
   return ra_gpioconfiglist(gpio_list, sizeof(gpio_list) / sizeof(uint32_t));

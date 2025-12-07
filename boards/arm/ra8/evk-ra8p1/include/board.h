@@ -142,6 +142,29 @@
 #define GPIO_ARDUINO_SPI_CS0   GPIO_SSLB0_A_1       /* P103 - Arduino D10 ⚠️ Conflicts: OSPI_SIO2, GPT2A */
 #define GPIO_ARDUINO_SPI_CS1   GPIO_P110_OUTPUT_HIGH    /* P110 - repurposed for another CS   ⚠️ Conflicts: GPT9B */
 
+/****************************************************************************
+ * SCI_SPI Pin Definitions (Simple SPI using SCI)
+ ****************************************************************************/
+
+/* SCI0_SPI (Pmod 2): P601=SCK0, P602=MISO0 (RXD0), P603=MOSI0 (TXD0), P604=CS0
+ * ⚠️  CONFLICT: P602/P603 shared with SCI0 UART - cannot use both!
+ * Note: When using SCI0_SPI, SCI0 UART must be disabled
+ */
+#define GPIO_SCI0_SPI_SCK   GPIO_SCK0_B_1          /* P601 - SCI0 SCK ⚠️ Conflicts: OSPI_WP1 */
+#define GPIO_SCI0_SPI_MISO  GPIO_RXD0_B           /* P602 - SCI0 MISO/RXD ⚠️ Cannot use with SCI0 UART */
+#define GPIO_SCI0_SPI_MOSI  GPIO_TXD0_B           /* P603 - SCI0 MOSI/TXD ⚠️ Cannot use with SCI0 UART */
+#define GPIO_SCI0_SPI_CS    GPIO_P604_OUTPUT_LOW  /* P604 - SCI0 CS (GPIO) ✓ SAFE */
+
+/* SCI2_SPI (Pmod 1): P803=SCK2, P802=MISO2 (RXD2), P801=MOSI2 (TXD2), P804=CS2
+ * ⚠️  SEVERE CONFLICT: P802/P801 shared with SCI2 console UART!
+ * ⚠️  SEVERE CONFLICT: All pins conflict with OSPI flash signals!
+ * Resolution: Redirect console to SCI0 or SCI7 before using SCI2_SPI
+ */
+#define GPIO_SCI2_SPI_SCK   GPIO_SCK2_A_1          /* P803 - SCI2 SCK ⚠️ Conflicts: OSPI_SIO1 */
+#define GPIO_SCI2_SPI_MISO  GPIO_RXD2_A           /* P802 - SCI2 MISO/RXD ⚠️ Conflicts: Console, OSPI_SIO6 */
+#define GPIO_SCI2_SPI_MOSI  GPIO_TXD2_A           /* P801 - SCI2 MOSI/TXD ⚠️ Conflicts: Console, OSPI_DQS */
+#define GPIO_SCI2_SPI_CS    GPIO_P804_OUTPUT_LOW  /* P804 - SCI2 CS (GPIO) ⚠️ Conflicts: OSPI_SIO7 */
+
 
 /****************************************************************************
  * PWM/GPT Pin Definitions
@@ -386,6 +409,22 @@
 #define GPIO_ETH_RSTN         GPIO_P708_OUTPUT_HIGH  /* P708 - Ethernet PHY Reset */
 #define GPIO_ETH_INT          GPIO_P107_INPUT_PULLUP /* P107 - Ethernet PHY Interrupt (MDINT) */
 
+/****************************************************************************
+ * POEG Configuration
+ ****************************************************************************/
+
+/* POEG Channel B - for GPT0, GPT5 outputs
+ * GTETRGB pin: P614 (J14:20)
+ * Configure as active LOW with noise filter
+ */
+
+#define BOARD_POEG_CHANNEL          RA_POEG_CHANNEL_B
+#define BOARD_POEG_TRIGGER          (RA_POEG_TRIGGER_PIN | \
+                                     RA_POEG_TRIGGER_SOFTWARE)
+#define BOARD_POEG_POLARITY         RA_POEG_POLARITY_ACTIVE_LOW
+#define BOARD_POEG_NOISE_FILTER     RA_POEG_FILTER_PCLKB_DIV_32
+#define BOARD_POEG_PRIORITY         2
+
 /* Ethernet RGMII Transmit Interface */
 #define GPIO_ETH_TXD0         GPIO_RGMII1_TXD0_1     /* P307 - Ethernet TX Data 0 */
 #define GPIO_ETH_TXD1         GPIO_RGMII1_TXD1_1     /* P306 - Ethernet TX Data 1 */
@@ -489,7 +528,6 @@
 #define BOARD_SDRAM_WE        GPIO_SDRAM_WE_PA08     /* PA08 - SDRAM Write Enable (CS0/WE) */
 #define BOARD_SDRAM_CAS       GPIO_SDRAM_CAS_PA09    /* PA09 - SDRAM Column Address Strobe (CS3/CAS) */
 #define BOARD_SDRAM_RAS       GPIO_SDRAM_RAS_PA10    /* PA10 - SDRAM Row Address Strobe (CS2/RAS) */
-
 
 /****************************************************************************
  * USB High Speed Pin Definitions (Connector J7)

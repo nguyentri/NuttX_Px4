@@ -141,7 +141,7 @@ int ra_ospi_xip_enable(struct qspi_dev_s *dev);
 
 int ra_ospi_xip_disable(struct qspi_dev_s *dev);
 
-#ifdef CONFIG_RA_DMA
+#ifdef CONFIG_RA_DMAC
 
 /****************************************************************************
  * Name: ra_ospi_set_dma
@@ -160,6 +160,6 @@ int ra_ospi_xip_disable(struct qspi_dev_s *dev);
 
 int ra_ospi_set_dma(struct qspi_dev_s *dev, bool enable_dma);
 
-#endif /* CONFIG_RA_DMA */
+#endif /* CONFIG_RA_DMAC */
 
 #endif /* __ARCH_ARM_SRC_RA_RA8_OSPI_B_H */

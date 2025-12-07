@@ -79,7 +79,7 @@
 #  define R_IWDT_IWDTCR_CKS_0000                          (0 << R_IWDT_IWDTCR_CKS_SHIFT)  /* IWDTCLK */
 #  define R_IWDT_IWDTCR_CKS_0010                          (2 << R_IWDT_IWDTCR_CKS_SHIFT)  /* IWDTCLK/16 */
 #  define R_IWDT_IWDTCR_CKS_0011                          (3 << R_IWDT_IWDTCR_CKS_SHIFT)  /* IWDTCLK/32 */
-#  define R_IWDT_IWDTCR_CKS_0010                          (2 << R_IWDT_IWDTCR_CKS_SHIFT)  /* IWDTCLK/64 */
+#  define R_IWDT_IWDTCR_CKS_0100                          (4 << R_IWDT_IWDTCR_CKS_SHIFT)  /* IWDTCLK/64 */
 #  define R_IWDT_IWDTCR_CKS_1111                          (15 << R_IWDT_IWDTCR_CKS_SHIFT)  /* IWDTCLK/128 */
 #  define R_IWDT_IWDTCR_CKS_0101                          (5 << R_IWDT_IWDTCR_CKS_SHIFT)  /* IWDTCLK/256 */
 

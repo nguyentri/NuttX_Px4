@@ -50,8 +50,16 @@ if(CONFIG_RA8P1_SPI_LOOPBACK_EXAMPLE)
   list(APPEND SRCS ra8p1_spi_loopback.c)
 endif()
 
+if(CONFIG_RA_SCI_SPI)
+  list(APPEND SRCS ra8p1_sci_spi.c)
+endif()
+
 if(CONFIG_PWM)
   list(APPEND SRCS ra8p1_pwm.c)
+endif()
+
+if(CONFIG_RA_POEG)
+  list(APPEND SRCS ra8p1_opeg.c)
 endif()
 
 if(CONFIG_RA_ELC)
@@ -72,6 +80,14 @@ endif()
 
 if(CONFIG_RA_SDRAM)
   list(APPEND SRCS ra8p1_sdram.c)
+endif()
+
+if(CONFIG_RA_WDT)
+  list(APPEND SRCS ra8p1_wdt.c)
+endif()
+
+if(CONFIG_RA_IWDT)
+  list(APPEND SRCS ra8p1_iwdt.c)
 endif()
 
 target_sources(board PRIVATE ${SRCS})

@@ -69,6 +69,11 @@ ifeq ($(CONFIG_PWM),y)
 CSRCS += ra8p1_pwm.c
 endif
 
+# POEG support
+ifeq ($(CONFIG_RA_POEG),y)
+CSRCS += ra8p1_opeg.c
+endif
+
 # ELC support
 ifeq ($(CONFIG_RA_ELC),y)
 CSRCS += ra8p1_elc.c
@@ -117,6 +122,26 @@ endif
 # SPI loopback example support
 ifeq ($(CONFIG_RA8P1_SPI_LOOPBACK_EXAMPLE),y)
 CSRCS += ra8p1_spi_loopback.c
+endif
+
+# SCI_SPI support
+ifeq ($(CONFIG_RA_SCI_SPI),y)
+CSRCS += ra8p1_sci_spi.c
+endif
+
+# WDT support
+ifeq ($(CONFIG_RA_WDT),y)
+CSRCS += ra8p1_wdt.c
+endif
+
+# IWDT support
+ifeq ($(CONFIG_RA_IWDT),y)
+CSRCS += ra8p1_iwdt.c
+endif
+
+# WDT test application
+ifeq ($(CONFIG_RA8P1_WDT_TEST),y)
+CSRCS += ra8p1_wdg_test.c
 endif
 
 include $(TOPDIR)/boards/Board.mk

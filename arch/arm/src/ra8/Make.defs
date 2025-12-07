@@ -77,6 +77,10 @@ ifeq ($(CONFIG_RA_DMAC),y)
 CHIP_CSRCS += ra_dmac.c
 endif
 
+ifeq ($(CONFIG_RA_DTC),y)
+CHIP_CSRCS += ra_dtc.c
+endif
+
 # MIPI-CSI driver
 ifeq ($(CONFIG_RA_MIPI_CSI),y)
 CHIP_CSRCS += ra_mipi_csi.c
@@ -86,7 +90,11 @@ endif
 # SPI driver
 ifeq ($(CONFIG_RA_SPI),y)
 CHIP_CSRCS += ra_spi.c
-CHIP_CSRCS += ra_dtc.c
+endif
+
+# SCI_SPI driver (Simple SPI using SCI)
+ifeq ($(CONFIG_RA_SCI_SPI),y)
+CHIP_CSRCS += ra_sci_spi.c
 endif
 
 # OSPI driver
@@ -97,6 +105,11 @@ endif
 # PWM driver
 ifeq ($(CONFIG_RA_GPT),y)
 CHIP_CSRCS += ra_gpt.c
+endif
+
+# POEG driver
+ifeq ($(CONFIG_RA_POEG),y)
+CHIP_CSRCS += ra_poeg.c
 endif
 
 # ELC driver
@@ -156,6 +169,16 @@ endif
 # SDRAM driver
 ifeq ($(CONFIG_RA_SDRAM),y)
 CHIP_CSRCS += ra_sdram.c
+endif
+
+# WDT driver
+ifeq ($(CONFIG_RA_WDT),y)
+CHIP_CSRCS += ra_wdt.c
+endif
+
+# IWDT driver
+ifeq ($(CONFIG_RA_IWDT),y)
+CHIP_CSRCS += ra_iwdt.c
 endif
 
 # IDLE task custom

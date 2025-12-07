@@ -108,7 +108,7 @@ CONFIG_ARCH_DPFPU=y
 
 # Enable idle state logging
 CONFIG_ARCH_IDLE_CUSTOM=y
-CONFIG_RA_IDLE_LOG_STATE=y
+
 
 ##############################################################################
 # I2C Configuration

@@ -151,12 +151,13 @@ struct ra_sdhi_dev_s
   uint8_t            max_bus_width; /* Maximum supported bus width */
 
   /* DMA support */
-#ifdef CONFIG_RA_DMA
+#ifdef CONFIG_RA_DMAC
   bool               dma_enabled;   /* DMA is enabled for transfers */
   ra_dmac_handle_t   dma_tx;        /* TX DMA handle */
   ra_dmac_handle_t   dma_rx;        /* RX DMA handle */
   volatile bool      dma_tx_done;   /* TX DMA completion flag */
   volatile bool      dma_rx_done;   /* RX DMA completion flag */
+  int                dma_channel;   /* Assigned DMA channel (-1 = dynamic) */
 #endif
 
   /* Error handling */
@@ -195,7 +196,8 @@ static int  ra_sdhi_dma_req_isr(int irq, void *context, void *arg);
 static void ra_sdhi_callback(void *arg);
 
 /* DMA Support */
-#ifdef CONFIG_RA_DMA
+#ifdef CONFIG_RA_DMAC
+static void ra_sdhi_get_dma_channel(struct ra_sdhi_dev_s *priv, int *channel);
 static int  ra_sdhi_dma_setup(struct ra_sdhi_dev_s *priv);
 static int  ra_sdhi_dma_transfer(struct ra_sdhi_dev_s *priv, const void *txbuffer,
                                  void *rxbuffer, size_t nbytes);
@@ -466,7 +468,7 @@ static int ra_sdhi_dma_req_isr(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_RA_DMA
+#ifdef CONFIG_RA_DMAC
 static void ra_sdhi_dma_tx_callback(void *handle, int event, void *arg)
 {
   struct ra_sdhi_dev_s *priv = (struct ra_sdhi_dev_s *)arg;
@@ -524,6 +526,35 @@ static void ra_sdhi_dma_rx_callback(void *handle, int event, void *arg)
 }
 
 /****************************************************************************
+ * Name: ra_sdhi_get_dma_channel
+ *
+ * Description:
+ *   Get DMA channel assignment from Kconfig for the specified SDHI channel
+ *
+ ****************************************************************************/
+
+static void ra_sdhi_get_dma_channel(struct ra_sdhi_dev_s *priv, int *channel)
+{
+  /* Default to dynamic allocation */
+  *channel = -1;
+
+  if (priv->channel == 0)
+    {
+#ifdef CONFIG_RA_DMAC_SDHI0_CHANNEL
+      *channel = CONFIG_RA_DMAC_SDHI0_CHANNEL;
+#endif
+    }
+  else if (priv->channel == 1)
+    {
+#ifdef CONFIG_RA_DMAC_SDHI1_CHANNEL
+      *channel = CONFIG_RA_DMAC_SDHI1_CHANNEL;
+#endif
+    }
+
+  mcinfo("SDHI%d DMA channel: %d\n", priv->channel, *channel);
+}
+
+/****************************************************************************
  * Name: ra_sdhi_dma_setup
  *
  * Description:
@@ -542,11 +573,16 @@ static int ra_sdhi_dma_setup(struct ra_sdhi_dev_s *priv)
       return ret;
     }
 
+  /* Get DMA channel assignment from Kconfig */
+  ra_sdhi_get_dma_channel(priv, &priv->dma_channel);
+
   priv->dma_enabled = true;
   priv->dma_tx = NULL;
   priv->dma_rx = NULL;
   priv->dma_tx_done = false;
   priv->dma_rx_done = false;
+
+  mcinfo("SDHI%d DMA setup completed (channel=%d)\n", priv->channel, priv->dma_channel);
 
   return OK;
 }
@@ -599,7 +635,18 @@ static int ra_sdhi_dma_transfer(struct ra_sdhi_dev_s *priv,
       config.callback = ra_sdhi_dma_tx_callback;
       config.user_data = priv;
 
-      ret = ra_dmac_open(&priv->dma_tx, &config);
+      /* Use assigned channel if configured, otherwise use dynamic allocation */
+      if (priv->dma_channel >= 0)
+        {
+          ret = ra_dmac_open_channel(&priv->dma_tx, &config, priv->dma_channel);
+          mcinfo("SDHI TX DMA using assigned channel %d\n", priv->dma_channel);
+        }
+      else
+        {
+          ret = ra_dmac_open(&priv->dma_tx, &config);
+          mcinfo("SDHI TX DMA using dynamic channel allocation\n");
+        }
+
       if (ret < 0)
         {
           return ret;
@@ -634,7 +681,18 @@ static int ra_sdhi_dma_transfer(struct ra_sdhi_dev_s *priv,
       config.callback = ra_sdhi_dma_rx_callback;
       config.user_data = priv;
 
-      ret = ra_dmac_open(&priv->dma_rx, &config);
+      /* Use assigned channel if configured, otherwise use dynamic allocation */
+      if (priv->dma_channel >= 0)
+        {
+          ret = ra_dmac_open_channel(&priv->dma_rx, &config, priv->dma_channel);
+          mcinfo("SDHI RX DMA using assigned channel %d\n", priv->dma_channel);
+        }
+      else
+        {
+          ret = ra_dmac_open(&priv->dma_rx, &config);
+          mcinfo("SDHI RX DMA using dynamic channel allocation\n");
+        }
+
       if (ret < 0)
         {
           if (priv->dma_tx)
@@ -699,7 +757,7 @@ static void ra_sdhi_dma_cleanup(struct ra_sdhi_dev_s *priv)
   priv->dma_tx_done = false;
   priv->dma_rx_done = false;
 }
-#endif /* CONFIG_RA_DMA */
+#endif /* CONFIG_RA_DMAC */
 
 /****************************************************************************
  * Name: ra_sdhi_wait_cbsy_clear
@@ -1446,7 +1504,7 @@ static int ra_sdhi_recvsetup(struct sdio_dev_s *dev, uint8_t *buffer,
   priv->buffer = (uint32_t*)buffer;
   priv->remaining = nbytes;
 
-#ifdef CONFIG_RA_DMA
+#ifdef CONFIG_RA_DMAC
   /* Use DMA for multi-block transfers if enabled and aligned */
   if (priv->dma_enabled && nbytes >= RA_SDHI_DMA_BLOCK_SIZE &&
       (nbytes % RA_SDHI_DMA_BLOCK_SIZE) == 0 &&
@@ -1480,7 +1538,7 @@ static int ra_sdhi_sendsetup(struct sdio_dev_s *dev, const uint8_t *buffer,
   priv->buffer = (uint32_t*)buffer;
   priv->remaining = nbytes;
 
-#ifdef CONFIG_RA_DMA
+#ifdef CONFIG_RA_DMAC
   /* Use DMA for multi-block transfers if enabled and aligned */
   if (priv->dma_enabled && nbytes >= RA_SDHI_DMA_BLOCK_SIZE &&
       (nbytes % RA_SDHI_DMA_BLOCK_SIZE) == 0 &&
@@ -1510,7 +1568,7 @@ static int ra_sdhi_cancel(struct sdio_dev_s *dev)
 {
   struct ra_sdhi_dev_s *priv = (struct ra_sdhi_dev_s *)dev;
 
-#ifdef CONFIG_RA_DMA
+#ifdef CONFIG_RA_DMAC
   /* Cleanup DMA if active */
   if (priv->dma_enabled && (priv->dma_tx != NULL || priv->dma_rx != NULL))
     {
@@ -1728,7 +1786,7 @@ struct sdio_dev_s *ra_sdhi_initialize(int channel)
   ra_icu_set_event(priv->elc_dma, priv->elc_dma);
   /* These IRQs will be attached and prioritized when DMA mode is implemented */
 
-#ifdef CONFIG_RA_DMA
+#ifdef CONFIG_RA_DMAC
   /* Setup DMA if enabled */
   ret = ra_sdhi_dma_setup(priv);
   if (ret < 0)

@@ -58,7 +58,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ra8p1_bringup
+ * Name: board_bringup
  *
  * Description:
  *   Perform architecture-specific initialization
@@ -71,7 +71,7 @@
  *
  ****************************************************************************/
 
-int ra8p1_bringup(void)
+int board_bringup(void)
 {
   int ret = 0;
 
@@ -92,7 +92,15 @@ int ra8p1_bringup(void)
 #endif
 
   /* Configure all GPIO pins */
-  ra8p1_gpio_initialize();
+  board_gpio_initialize();
+
+#ifdef CONFIG_RA_SCI_SPI
+  ret = board_sci_spi_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SCI SPI: %d\n", ret);
+    }
+#endif
 
 #ifdef CONFIG_RA_I3C
   ret = board_i3c_initialize();
@@ -219,6 +227,23 @@ int ra8p1_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_RA_POEG
+  /* Initialize POEG for emergency PWM shutdown
+   * Note: POEG should be initialized after GPT modules
+   * to provide hardware failsafe for PWM outputs
+   */
+
+  ret = board_poeg_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize POEG: %d\n", ret);
+    }
+  else
+    {
+      syslog(LOG_INFO, "POEG initialized successfully\n");
+    }
+#endif
+
 #ifdef CONFIG_RA_MRAM
   /* Initialize MRAM storage for OTA/bootloader and parameter storage */
 
@@ -289,9 +314,17 @@ int ra8p1_bringup(void)
     }
 #endif
 
-#ifdef RA8P1_EXAMPLE_SUPPORT
+#ifdef CONFIG_RA8P1_EXAMPLE_SUPPORT
     /* Run application examples */
   ra8p1_app_examples();
+#endif
+
+#ifdef CONFIG_RA_WDT
+  board_wdt_initialize();
+#endif
+
+#ifdef CONFIG_RA_IWDT
+  board_iwdt_initialize();
 #endif
 
   return ret;

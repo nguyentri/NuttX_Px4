@@ -135,6 +135,7 @@ int ra_dmac_initialize(void);
 
 /* DMAC transfer functions */
 int ra_dmac_open(ra_dmac_handle_t *handle, const ra_dmac_config_t *config);
+int ra_dmac_open_channel(ra_dmac_handle_t *handle, const ra_dmac_config_t *config, int channel);
 int ra_dmac_close(ra_dmac_handle_t handle);
 int ra_dmac_enable(ra_dmac_handle_t handle);
 int ra_dmac_disable(ra_dmac_handle_t handle);

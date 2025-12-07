@@ -74,6 +74,11 @@ if(CONFIG_RA_DMAC)
   list(APPEND SRCS ra_dmac.c)
 endif()
 
+# DTC driver
+if(CONFIG_RA_DTC)
+    list(APPEND SRCS ra_dtc.c)
+endif()
+
 # MIPI-CSI driver
 if(CONFIG_RA_MIPI_CSI)
   list(APPEND SRCS ra_mipi_csi.c)
@@ -81,12 +86,22 @@ endif()
 
 # SPI driver
 if(CONFIG_RA_SPI)
-  list(APPEND SRCS ra_spi.c ra_dtc.c)
+  list(APPEND SRCS ra_spi.c)
+endif()
+
+# SCI_SPI driver (Simple SPI using SCI)
+if(CONFIG_RA_SCI_SPI)
+  list(APPEND SRCS ra_sci_spi.c)
 endif()
 
 # PWM driver
 if(CONFIG_RA_GPT)
   list(APPEND SRCS ra_gpt.c)
+endif()
+
+# POEG driver
+if(CONFIG_RA_POEG)
+  list(APPEND SRCS ra_poeg.c)
 endif()
 
 # ELC driver
@@ -112,6 +127,16 @@ endif()
 # SDRAM driver
 if(CONFIG_RA_SDRAM)
   list(APPEND SRCS ra_sdram.c)
+endif()
+
+# WDT driver
+if(CONFIG_RA_WDT)
+  list(APPEND SRCS ra_wdt.c)
+endif()
+
+# IWDT driver
+if(CONFIG_RA_IWDT)
+  list(APPEND SRCS ra_iwdt.c)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})
