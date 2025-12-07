@@ -634,5 +634,39 @@ int board_poeg_software_disable(void);
 
 #endif /* CONFIG_RA_POEG */
 
+/****************************************************************************
+ * Name: board_ipc_initialize
+ *
+ * Description:
+ *   Initialize IPC subsystem for dual-core communication
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RA_IPC
+int board_ipc_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: ra8p1_ipc_test
+ *
+ * Description:
+ *   IPC test application for dual-core communication testing
+ *
+ * Input Parameters:
+ *   argc - Number of arguments
+ *   argv - Argument array
+ *
+ * Returned Value:
+ *   EXIT_SUCCESS on success; EXIT_FAILURE on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RA8P1_IPC_TEST
+int ra8p1_ipc_test(int argc, char *argv[]);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_RA8_EVK_RA8P1_SRC_H */

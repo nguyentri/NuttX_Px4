@@ -159,4 +159,9 @@ ifeq ($(CONFIG_RA8P1_WDT_TEST),y)
 CSRCS += ra8p1_wdg_test.c
 endif
 
+# IPC test application
+ifeq ($(CONFIG_RA8P1_IPC_TEST),y)
+CSRCS += ra8p1_ipc_test.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

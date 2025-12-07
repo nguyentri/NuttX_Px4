@@ -362,6 +362,21 @@ int board_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_RA_IPC
+  /* Initialize Inter-Processor Communication */
+
+  ret = board_ipc_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize IPC: %d\n", ret);
+    }
+  else
+    {
+      syslog(LOG_INFO, "IPC initialized successfully on CPU%d\n",
+             CONFIG_RA_CPU_CORE);
+    }
+#endif
+
 #ifdef CONFIG_RA8P1_EXAMPLE_SUPPORT
     /* Run application examples */
   ra8p1_app_examples();

@@ -144,6 +144,11 @@ if(CONFIG_RA_IPC)
   list(APPEND SRCS ra_ipc.c)
 endif()
 
+# IPCC upper-half integration
+if(CONFIG_RA_IPC_IPCC)
+  list(APPEND SRCS ra_ipc_ipcc.c)
+endif()
+
 # LPM (Low Power Mode) driver
 if(CONFIG_RA_LPM)
   list(APPEND SRCS ra_lpm.c)

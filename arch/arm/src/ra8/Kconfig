@@ -11,7 +11,7 @@ choice
 
 config ARCH_CHIP_R7FA8E1AFDCFB
    bool "R7FA8E1AFDCFB (LQFP144)"
-   select RA8_FAMILY
+   select RA8_CM85_FAMILY
    select RA8E1_GROUP
    # Serial Communication - 6 SCI UART channels
    select RA_HAVE_SCI0_UART
@@ -82,7 +82,7 @@ config ARCH_CHIP_R7FA8E1AFDCFB
 
 config ARCH_CHIP_R7FA8E1AFDCFP
    bool "R7FA8E1AFDCFP (LQFP100)"
-   select RA8_FAMILY
+   select RA8_CM85_FAMILY
    select RA8E1_GROUP
    # Serial Communication - 6 SCI UART channels
    select RA_HAVE_SCI0_UART
@@ -140,7 +140,6 @@ config ARCH_CHIP_R7FA8E1AFDCFP
 
 config ARCH_CHIP_R7KA8P1KFLCAC
    bool "R7KA8P1KFLCAC (PLBG0289JA)"
-   select RA8_FAMILY
    select RA8P1_GROUP
    # Serial Communication - 10 SCI UART channels
    select RA_HAVE_SCI0_UART
@@ -255,6 +254,40 @@ config ARCH_CHIP_R7KA8P1KFLCAC
 
 endchoice
 
+# CPU Core Selection for Dual-Core RA8P1
+choice
+   prompt "CPU Core Selection"
+   default RA_CPU_CORE_CM85
+   depends on RA8P1_GROUP
+   help
+     Select which CPU core to build for on dual-core RA8P1 MCU.
+     Each core requires separate firmware build.
+
+config RA_CPU_CORE_CM85
+   bool "Cortex-M85 (CPU0) - Primary Core"
+   select RA8_CM85_FAMILY
+   help
+     Build for Cortex-M85 primary core (CPU0) running at 1GHz.
+     This is the main application processor with Helium MVE.
+     Typical use: Main flight controller, sensor fusion, navigation.
+
+config RA_CPU_CORE_CM33
+   bool "Cortex-M33 (CPU1) - Secondary Core"
+   select RA8_CM33_FAMILY
+   help
+     Build for Cortex-M33 secondary core (CPU1) running at 250MHz.
+     This is the safety/real-time processor with TrustZone.
+     Typical use: Safety monitor, RC input, real-time I/O offload.
+
+endchoice
+
+config RA_CPU_CORE
+   int
+   default 0 if RA_CPU_CORE_CM85
+   default 1 if RA_CPU_CORE_CM33
+   help
+     CPU core number (0=CM85, 1=CM33)
+
 # RA8E1 Group Configuration
 config RA8E1_GROUP
    bool
@@ -271,9 +304,9 @@ config RA8P1_GROUP
      Enables the RA8P1 group of features and peripherals.
      This is required for all RA8P1 configurations.
 
-config RA8_FAMILY
+config RA8_CM85_FAMILY
    bool
-   default y
+   default n
    select ARCH_CORTEXM85
    select ARCH_HAVE_FPU
    select ARCH_HAVE_THUMB
@@ -295,9 +328,12 @@ config RA8_FAMILY
    select ARCH_HAVE_IRQPRIO
    select ARCH_IRQPRIO
    help
-     Enables all core features for the RA8E1 Cortex-M85 family.
+     Enables all core features for the RA8 Cortex-M85 family.
+
+if RA8_CM85_FAMILY
 
 menu "Cortex-M85 Core Features"
+
 config ARCH_CORTEXM85
    bool
    default y
@@ -389,6 +425,131 @@ config ARCH_HAVE_SDIO
      SDIO (Secure Digital Input Output) interface present.
 
 endmenu
+
+endif # RA8_CM85_FAMILY
+
+config RA8_CM33_FAMILY
+   bool
+   default n
+   select ARCH_CORTEXM33
+   select ARCH_HAVE_FPU
+   select ARCH_HAVE_THUMB
+   select ARMV8M_HAVE_ICACHE
+   select ARMV8M_HAVE_DCACHE
+   select ARMV8M_HAVE_ITCM
+   select ARMV8M_HAVE_DTCM
+   select ARMV8M_HAVE_SECURITY
+   select ARMV8M_HAVE_MPU
+   select ARMV8M_HAVE_SMPU
+   select ARMV8M_HAVE_SYSTICK
+   select ARMV8M_HAVE_CORESIGHT
+   select ARCH_HAVE_CODE_FLASH
+   select ARCH_HAVE_DATA_FLASH
+   select ARCH_HAVE_SRAM
+   select ARCH_HAVE_SDIO
+   select ARCH_HAVE_IRQPRIO
+   select ARCH_IRQPRIO
+   help
+     Enables all core features for the RA8 Cortex-M33 family.
+     Note: CM33 does NOT have Helium MVE or double-precision FPU.
+
+if RA8_CM33_FAMILY
+
+menu "Cortex-M33 Core Features"
+
+config ARCH_CORTEXM33
+   bool
+   default y
+   help
+     Selects the Arm Cortex-M33 core.
+
+config ARMV8M_HAVE_ICACHE
+   bool
+   default y
+   help
+     Instruction cache present.
+
+config ARMV8M_HAVE_DCACHE
+   bool
+   default y
+   help
+     Data cache present.
+
+config ARMV8M_HAVE_ITCM
+   bool
+   default y
+   help
+     Instruction Tightly Coupled Memory present.
+
+config ARMV8M_HAVE_DTCM
+   bool
+   default y
+   help
+     Data Tightly Coupled Memory present.
+
+config ARMV8M_HAVE_HELIUM
+   bool
+   default y
+   help
+     Arm Helium (M-Profile Vector Extension) present.
+
+config ARMV8M_HAVE_SECURITY
+   bool
+   default y
+   help
+     Armv8-M Security Extension present.
+
+config ARMV8M_HAVE_MPU
+   bool
+   default y
+   help
+     Memory Protection Unit present.
+
+config ARMV8M_HAVE_SMPU
+   bool
+   default y
+   help
+     Secure Memory Protection Unit present.
+
+config ARMV8M_HAVE_SYSTICK
+   bool
+   default y
+   help
+     SysTick timer present (secure and non-secure).
+
+config ARMV8M_HAVE_CORESIGHT
+   bool
+   default y
+   help
+     CoreSight ETM-M85 trace present.
+
+config ARCH_HAVE_CODE_FLASH
+   bool
+   default y
+   help
+     1 MB code flash memory.
+
+config ARCH_HAVE_DATA_FLASH
+   bool
+   default y
+   help
+     12 KB data flash memory.
+
+config ARCH_HAVE_SRAM
+   bool
+   default y
+   help
+     544 KB SRAM including 32 KB TCM.
+
+config ARCH_HAVE_SDIO
+   bool
+   default y
+   help
+     SDIO (Secure Digital Input Output) interface present.
+
+endmenu
+
+endif # RA8_CM33_FAMILY
 
 menu "MCU Clocks Configuration"
 
@@ -3244,55 +3405,6 @@ config RA_LPM_DEBUG
 
 endif # RA_LPM
 
-config RA_HAVE_ULPT
-    bool
-    default n
-
-config RA_HAVE_ULPT0
-    bool
-    default n
-
-config RA_HAVE_ULPT1
-    bool
-    default n
-
-config RA_ULPT0
-    bool "Enable ULPT0"
-    default n
-    depends on RA_HAVE_ULPT0
-    help
-      Enable ULPT channel 0.
-
-config RA_ULPT1
-    bool "Enable ULPT1"
-    default n
-    depends on RA_HAVE_ULPT1
-    help
-      Enable ULPT channel 1.
-
-config RA_ULPT
-    bool "Ultra-Low Power Timer (ULPT)"
-    default n
-    depends on RA_HAVE_ULPT
-    depends on RA_ULPT0 || RA_ULPT1
-    help
-      Enable the RA8 Ultra-Low Power Timer (ULPT) driver.
-      ULPT is a 32-bit down counter that can operate during low power
-      modes using LOCO or sub-clock as the count source.
-      ULPT can be used as a wake-up source from sleep, deep sleep,
-      and standby modes.
-
-if RA_ULPT
-
-config RA_ULPT_LOCO_FREQ
-    int "LOCO Frequency (Hz)"
-    default 32768
-    help
-      LOCO oscillator frequency in Hz.
-      Default is 32768 Hz (32.768 kHz).
-
-endif # RA_ULPT
-
 endmenu
 
 menu "Watchdog Timer"
@@ -3438,37 +3550,68 @@ config RA_IPC_CH3_ENABLE
      Enable IPC Channel 3 for inter-core communication.
      Each channel supports 32-bit data transfer.
 
+config RA_IPC_IPCC
+   bool "Enable IPCC Upper-Half Integration"
+   default n
+   depends on DRIVERS_IPCC
+   help
+     Enable NuttX IPCC (Inter-Processor Communication Controller)
+     upper-half integration. This provides standard character device
+     interface (/dev/ipccN) for IPC channels and enables integration
+     with OpenAMP/RPMsg framework.
+
+     When enabled, IPC channels are registered with the IPCC framework
+     and can be accessed via file operations (open, read, write, ioctl).
+
+     Select 'y' for OpenAMP/RPMsg support.
+
+config RA_IPC_SHMEM_BASE
+   hex "Shared Memory Base Address"
+   default 0x22050000
+   depends on RA_IPC_IPCC
+   help
+     Physical address of shared memory region for IPC communication.
+     This must be in non-cached RAM accessible by both cores.
+
+     Default 0x22050000 is upper 64KB of RA8P1 SRAM0.
+
+     WARNING: Ensure this region does not overlap with:
+     - Heap memory
+     - Stack regions
+     - Other core's private memory
+
+config RA_IPC_SHMEM_SIZE
+   int "Shared Memory Size (bytes)"
+   default 65536
+   range 4096 262144
+   depends on RA_IPC_IPCC
+   help
+     Size of shared memory region for IPC buffers in bytes.
+
+     Minimum: 4KB (sufficient for basic IPC)
+     Recommended: 64KB (for OpenAMP/RPMsg)
+     Maximum: 256KB
+
+     Larger sizes allow more buffering but reduce available RAM.
+
+config RA_IPC_OPENAMP
+   bool "Enable OpenAMP Support"
+   default n
+   depends on RA_IPC_IPCC && OPENAMP
+   help
+     Enable integration with OpenAMP (Open Asymmetric Multi-Processing)
+     framework for high-level inter-core communication using RPMsg
+     (Remote Processor Messaging).
+
+     This enables:
+     - Virtio transport over IPC channels
+     - RPMsg endpoint management
+     - Resource table for remoteproc
+     - Shared memory management for OpenAMP
+
+     Required for PX4 multi-core autopilot architecture.
+
 endif # RA_IPC
-
-endmenu
-
-menu "ADC"
-config RA_HAVE_ADC12
-   bool
-   default n
-
-config RA_ADC12
-   bool "12-bit ADC"
-   default n
-   depends on RA_HAVE_ADC12
-   help
-     Enable 12-bit Analog-to-Digital Converter.
-
-config RA_ADC
-   bool "RA8 ADC Driver"
-   default n
-   depends on RA_ADC12
-   select ADC
-   help
-     Enable RA8 ADC driver with DTC support.
-
-config RA_ADC_BATTERY_MONITOR
-   bool "Battery monitoring support"
-   default n
-   depends on RA_ADC
-   help
-     Enable battery monitoring functions for voltage and current
-     measurement using ADC channels.
 
 endmenu
 
@@ -3545,9 +3688,7 @@ comment "Direct Memory Access Controller (DMAC)"
 
 config RA_HAVE_DMAC
    bool
-   default y if RA8_FAMILY
-   help
-     RA8 family has DMA controller support.
+   default n
 
 config RA_DMAC
    bool "DMAC (Direct Memory Access Controller) support"

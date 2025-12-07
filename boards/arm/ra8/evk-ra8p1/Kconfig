@@ -75,3 +75,18 @@ config RA8P1_WDT_TEST
 		- Prints refresh status every 3 seconds
 		- Pressing SW1 button stops refresh, triggering WDT reset
 		- LED indicates reset status and activity
+
+config RA8P1_IPC_TEST
+	bool "IPC dual-core communication test"
+	default n
+	depends on RA_IPC && RA8P1_EXAMPLE_SUPPORT
+	---help---
+		Enable IPC test application for dual-core communication testing.
+		This application demonstrates:
+		- Hardware semaphore operations
+		- Channel-based message passing
+		- Interrupt-driven communication
+		- IPC mutex synchronization
+
+		Build and flash this application on BOTH cores (CM85 and CM33)
+		to test inter-processor communication.
