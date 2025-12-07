@@ -139,6 +139,11 @@ if(CONFIG_RA_IWDT)
   list(APPEND SRCS ra_iwdt.c)
 endif()
 
+# IPC driver (Inter-Processor Communication)
+if(CONFIG_RA_IPC)
+  list(APPEND SRCS ra_ipc.c)
+endif()
+
 # LPM (Low Power Mode) driver
 if(CONFIG_RA_LPM)
   list(APPEND SRCS ra_lpm.c)

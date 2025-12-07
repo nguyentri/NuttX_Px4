@@ -3364,6 +3364,84 @@ endif # RA_IWDT
 
 endmenu
 
+menu "Inter-Processor Communication (IPC)"
+
+config RA_HAVE_IPC
+   bool
+   default n
+
+config RA_IPC
+   bool "Inter-Processor Communication (IPC)"
+   default n
+   depends on RA_HAVE_IPC && RA8P1_GROUP
+   select SPINLOCK
+   help
+     Enable the RA8 Inter-Processor Communication (IPC) driver.
+     IPC provides hardware-based communication between dual cores
+     on RA8P1 MCU, including:
+     - 16 hardware semaphores for resource locking
+     - Inter-core NMI generation
+     - 4 message channels (2 per core pair)
+     - FIFO-based data transfer
+
+     This driver is required for:
+     - OpenAMP and RPMsg communication
+     - Dual-core applications
+     - Core-to-core synchronization
+
+     Note: Only available on RA8P1 dual-core MCU.
+
+if RA_IPC
+
+config RA_IPC_DEBUG
+   bool "Enable IPC Debug Messages"
+   default n
+   depends on DEBUG_FEATURES
+   help
+     Enable detailed debug output for IPC driver operations,
+     including semaphore operations, channel communication,
+     and interrupt handling.
+
+config RA_IPC_USE_NMI
+   bool "Enable IPC NMI Support"
+   default y
+   help
+     Enable Non-Maskable Interrupt (NMI) support for inter-core
+     communication. NMI can be used for critical notifications
+     between cores that require immediate attention.
+
+config RA_IPC_CH0_ENABLE
+   bool "Enable IPC Channel 0"
+   default y
+   help
+     Enable IPC Channel 0 for inter-core communication.
+     Each channel supports 32-bit data transfer.
+
+config RA_IPC_CH1_ENABLE
+   bool "Enable IPC Channel 1"
+   default y
+   help
+     Enable IPC Channel 1 for inter-core communication.
+     Each channel supports 32-bit data transfer.
+
+config RA_IPC_CH2_ENABLE
+   bool "Enable IPC Channel 2"
+   default n
+   help
+     Enable IPC Channel 2 for inter-core communication.
+     Each channel supports 32-bit data transfer.
+
+config RA_IPC_CH3_ENABLE
+   bool "Enable IPC Channel 3"
+   default n
+   help
+     Enable IPC Channel 3 for inter-core communication.
+     Each channel supports 32-bit data transfer.
+
+endif # RA_IPC
+
+endmenu
+
 menu "ADC"
 config RA_HAVE_ADC12
    bool

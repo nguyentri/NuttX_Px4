@@ -186,6 +186,11 @@ ifeq ($(CONFIG_RA_IWDT),y)
 CHIP_CSRCS += ra_iwdt.c
 endif
 
+# IPC driver (Inter-Processor Communication)
+ifeq ($(CONFIG_RA_IPC),y)
+CHIP_CSRCS += ra_ipc.c
+endif
+
 # LPM (Low Power Mode) driver
 ifeq ($(CONFIG_RA_LPM),y)
 CHIP_CSRCS += ra_lpm.c

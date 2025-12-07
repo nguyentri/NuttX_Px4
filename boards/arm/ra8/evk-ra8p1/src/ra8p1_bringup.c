@@ -102,6 +102,20 @@ int board_bringup(void)
   board_iwdt_initialize();
 #endif
 
+#ifdef CONFIG_RA_IPC
+  /* Initialize Inter-Processor Communication */
+
+  ret = board_ipc_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize IPC: %d\n", ret);
+    }
+  else
+    {
+      syslog(LOG_INFO, "IPC initialized successfully\n");
+    }
+#endif
+
 #ifdef CONFIG_RA_SCI_SPI
   ret = board_sci_spi_initialize();
   if (ret < 0)

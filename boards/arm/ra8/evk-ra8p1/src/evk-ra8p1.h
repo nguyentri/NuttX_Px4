@@ -434,6 +434,27 @@ int wdg_test_main(int argc, char *argv[]);
 #endif
 
 /****************************************************************************
+ * IPC (Inter-Processor Communication) Interface
+ ****************************************************************************/
+
+#ifdef CONFIG_RA_IPC
+
+/****************************************************************************
+ * Name: board_ipc_initialize
+ *
+ * Description:
+ *   Initialize the IPC subsystem for the board.
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure.
+ *
+ ****************************************************************************/
+
+int board_ipc_initialize(void);
+
+#endif /* CONFIG_RA_IPC */
+
+/****************************************************************************
  * LPM (Low Power Mode) Interface
  ****************************************************************************/
 

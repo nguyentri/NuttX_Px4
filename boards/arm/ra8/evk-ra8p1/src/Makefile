@@ -144,6 +144,11 @@ ifeq ($(CONFIG_RA_IWDT),y)
 CSRCS += ra8p1_iwdt.c
 endif
 
+# IPC support
+ifeq ($(CONFIG_RA_IPC),y)
+CSRCS += ra8p1_ipc.c
+endif
+
 # LPM (Low Power Mode) support
 ifeq ($(CONFIG_RA_LPM),y)
 CSRCS += ra8p1_lpm.c
