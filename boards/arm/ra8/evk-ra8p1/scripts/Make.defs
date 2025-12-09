@@ -23,15 +23,23 @@ include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/arch/arm/src/armv8-m/Toolchain.defs
 
 # Determine linker script based on build type
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
-  LDSCRIPT = kernel-space.ld
-else ifeq ($(CONFIG_BUILD_KERNEL),y)
-  LDSCRIPT = kernel-space.ld
+ifeq ($(CONFIG_RA_CPU_CORE), 0)
+  LDSCRIPT = cm85/evk-ra8p1_cm85.ld
+else ifeq ($(CONFIG_RA_CPU_CORE),1)
+  LDSCRIPT = cm33/evk-ra8p1_cm33.ld
 else
-  LDSCRIPT = evk-ra8p1.ld
+# No core clarified
+  LDSCRIPT = common/evk-ra8p1.ld
 endif
 
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
+
+# Add linker script search paths for INCLUDE directives
+# The linker needs to find included .ld files (common/, cm85/, cm33/)
+LDFLAGS += -L $(BOARD_DIR)$(DELIM)scripts$(DELIM)cm85
+LDFLAGS += -L $(BOARD_DIR)$(DELIM)scripts$(DELIM)cm33
+LDFLAGS += -L $(BOARD_DIR)$(DELIM)scripts$(DELIM)common
+LDFLAGS += -L $(BOARD_DIR)$(DELIM)scripts
 
 # ARM Cortex-M85 specific flags
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
