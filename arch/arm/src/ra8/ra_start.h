@@ -49,8 +49,8 @@
 #endif
 
 /* Linker section macros */
-#define RA_PLACE_IN_SECTION(x)    __attribute__((section(x))) __attribute__((__used__))
-#define RA_ALIGN_VARIABLE(x)      __attribute__((aligned(x)))
+#define RA_PLACE_IN_SECTION(x)              __attribute__((section(x))) __attribute__((__used__))
+#define RA_ALIGN_VARIABLE(x)                __attribute__((aligned(x)))
 
 /* Stack and heap alignment */
 #define RA_STACK_ALIGNMENT        (8)
@@ -69,21 +69,21 @@
 
 /* IWDT configuration based on Kconfig */
 #ifdef CONFIG_RA_IWDT_ENABLE
-#  define RA_OFS_IWDT_START       (1 << 1)  /* Auto-start mode */
-#  define RA_OFS_IWDT_TIMEOUT     (CONFIG_RA_IWDT_TIMEOUT << 2)
-#  define RA_OFS_IWDT_CLK_DIV     (CONFIG_RA_IWDT_CLK_DIV << 4)
-#  define RA_OFS_IWDT_WINDOW_END  (CONFIG_RA_IWDT_WINDOW_END << 8)
+#  define RA_OFS_IWDT_START        (1 << 1)  /* Auto-start mode */
+#  define RA_OFS_IWDT_TIMEOUT      (CONFIG_RA_IWDT_TIMEOUT << 2)
+#  define RA_OFS_IWDT_CLK_DIV      (CONFIG_RA_IWDT_CLK_DIV << 4)
+#  define RA_OFS_IWDT_WINDOW_END   (CONFIG_RA_IWDT_WINDOW_END << 8)
 #  define RA_OFS_IWDT_WINDOW_START (CONFIG_RA_IWDT_WINDOW_START << 10)
-#  define RA_OFS_IWDT_RESET_IRQ   (CONFIG_RA_IWDT_RESET_IRQ << 12)
-#  define RA_OFS_IWDT_STOP_CTRL   (CONFIG_RA_IWDT_STOP_CTRL << 14)
+#  define RA_OFS_IWDT_RESET_IRQ    (CONFIG_RA_IWDT_RESET_IRQ << 12)
+#  define RA_OFS_IWDT_STOP_CTRL    (CONFIG_RA_IWDT_STOP_CTRL << 14)
 #else
-#  define RA_OFS_IWDT_START       (0 << 1)  /* Register-start mode */
-#  define RA_OFS_IWDT_TIMEOUT     (3 << 2)  /* 2048 cycles */
-#  define RA_OFS_IWDT_CLK_DIV     (15 << 4) /* Divide by 128 */
-#  define RA_OFS_IWDT_WINDOW_END  (3 << 8)  /* 0% (no window) */
+#  define RA_OFS_IWDT_START        (0 << 1)  /* Register-start mode */
+#  define RA_OFS_IWDT_TIMEOUT      (3 << 2)  /* 2048 cycles */
+#  define RA_OFS_IWDT_CLK_DIV      (15 << 4) /* Divide by 128 */
+#  define RA_OFS_IWDT_WINDOW_END   (3 << 8)  /* 0% (no window) */
 #  define RA_OFS_IWDT_WINDOW_START (3 << 10) /* 100% (no window) */
-#  define RA_OFS_IWDT_RESET_IRQ   (1 << 12) /* Reset enabled */
-#  define RA_OFS_IWDT_STOP_CTRL   (1 << 14) /* Stop in low power modes */
+#  define RA_OFS_IWDT_RESET_IRQ    (1 << 12) /* Reset enabled */
+#  define RA_OFS_IWDT_STOP_CTRL    (1 << 14) /* Stop in low power modes */
 #endif
 
 /* WDT configuration based on Kconfig */
@@ -132,12 +132,12 @@
 #  define RA_OPTION_SETTING_OFS1_SEL (0x00000000)
 #endif
 
-/* option setting default values */
-#define RA_OPTION_SETTING_OFS1      (0xFFFFFFFF) /* Default OFS1 value */
-#define RA_OPTION_SETTING_DUALSEL   (0xFFFFFFFF) /* Default dual bank select */
-#define RA_OPTION_SETTING_BANKSEL   (0xFFFFFFFF) /* Default bank select */
-#define RA_OPTION_SETTING_BPS       (0xFFFFFFFF) /* Default boot protection */
-#define RA_OPTION_SETTING_PBPS      (0xFFFFFFFF) /* Default P/E boot protection */
+/* Option setting default values */
+#define RA_OPTION_SETTING_OFS1        (0xFFFFFFFF) /* Default OFS1 value */
+#define RA_OPTION_SETTING_DUALSEL     (0xFFFFFFFF) /* Default dual bank select */
+#define RA_OPTION_SETTING_BANKSEL     (0xFFFFFFFF) /* Default bank select */
+#define RA_OPTION_SETTING_BPS         (0xFFFFFFFF) /* Default boot protection */
+#define RA_OPTION_SETTING_PBPS        (0xFFFFFFFF) /* Default P/E boot protection */
 
 /* Secure versions of option settings (for TrustZone secure builds) */
 #define RA_OPTION_SETTING_BANKSEL_SEC  (0xFFFFFFFF)

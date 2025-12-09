@@ -141,85 +141,83 @@ RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_bps_se
 
 #else /* CONFIG_RA8E1_GROUP */
 
-#define RA_CFG_CPU_CORE           (0) /* RA8P1 is Cortex-M85 based */
-
 /* Option byte Configuration registers to sections */
-#if defined RA_CFG_OPTION_SETTING_OFS0 && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+#if defined RA_CFG_OPTION_SETTING_OFS0 && !RA_TZ_NONSECURE_BUILD && (CONFIG_RA_CPU_CORE == 0)
 RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_ofs0") g_bsp_cfg_option_setting_ofs0[] = {RA_CFG_OPTION_SETTING_OFS0};
 #endif
-#if defined RA_CFG_OPTION_SETTING_OFS2 && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+#if defined RA_CFG_OPTION_SETTING_OFS2 && !RA_TZ_NONSECURE_BUILD && (CONFIG_RA_CPU_CORE == 0)
 RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_ofs2") g_bsp_cfg_option_setting_ofs2[] = {RA_CFG_OPTION_SETTING_OFS2};
 #endif
-#if defined RA_CFG_OPTION_SETTING_SAS && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+#if defined RA_CFG_OPTION_SETTING_SAS && !RA_TZ_NONSECURE_BUILD && (CONFIG_RA_CPU_CORE == 0)
 RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_sas") g_bsp_cfg_option_setting_sas[] = {RA_CFG_OPTION_SETTING_SAS};
 #endif
-#if defined RA_CFG_OPTION_SETTING_OFS1 && (RA_CFG_CPU_CORE == 0)
+#if defined RA_CFG_OPTION_SETTING_OFS1 && (CONFIG_RA_CPU_CORE == 0)
 RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_ofs1") g_bsp_cfg_option_setting_ofs1[] = {RA_CFG_OPTION_SETTING_OFS1};
 #endif
-#if defined RA_CFG_OPTION_SETTING_OFS1_SEC && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+#if defined RA_CFG_OPTION_SETTING_OFS1_SEC && !RA_TZ_NONSECURE_BUILD && (CONFIG_RA_CPU_CORE == 0)
 RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_ofs1_sec") g_bsp_cfg_option_setting_ofs1_sec[] = {RA_CFG_OPTION_SETTING_OFS1_SEC};
 #endif
-#if defined RA_CFG_OPTION_SETTING_OFS1_SEL && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+#if defined RA_CFG_OPTION_SETTING_OFS1_SEL && !RA_TZ_NONSECURE_BUILD && (CONFIG_RA_CPU_CORE == 0)
 RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_ofs1_sel") g_bsp_cfg_option_setting_ofs1_sel[] = {RA_CFG_OPTION_SETTING_OFS1_SEL};
 #endif
-#if defined RA_CFG_OPTION_SETTING_OFS3 && (RA_CFG_CPU_CORE == 0)
+#if defined RA_CFG_OPTION_SETTING_OFS3 && (CONFIG_RA_CPU_CORE == 0)
 RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_ofs3") g_bsp_cfg_option_setting_ofs3[] = {RA_CFG_OPTION_SETTING_OFS3};
 #endif
-#if defined RA_CFG_OPTION_SETTING_OFS3_SEC && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+#if defined RA_CFG_OPTION_SETTING_OFS3_SEC && !RA_TZ_NONSECURE_BUILD && (CONFIG_RA_CPU_CORE == 0)
 RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_ofs3_sec") g_bsp_cfg_option_setting_ofs3_sec[] = {RA_CFG_OPTION_SETTING_OFS3_SEC};
 #endif
-#if defined RA_CFG_OPTION_SETTING_OFS3_SEL && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+#if defined RA_CFG_OPTION_SETTING_OFS3_SEL && !RA_TZ_NONSECURE_BUILD && (CONFIG_RA_CPU_CORE == 0)
 RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_ofs3_sel") g_bsp_cfg_option_setting_ofs3_sel[] = {RA_CFG_OPTION_SETTING_OFS3_SEL};
 #endif
-#if defined RA_CFG_OPTION_SETTING_BPS && (RA_CFG_CPU_CORE == 0)
+#if defined RA_CFG_OPTION_SETTING_BPS && (CONFIG_RA_CPU_CORE == 0)
 RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_bps") g_bsp_cfg_option_setting_bps[] = {RA_CFG_OPTION_SETTING_BPS};
 #endif
-#if defined RA_CFG_OPTION_SETTING_BPS_SEC && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+#if defined RA_CFG_OPTION_SETTING_BPS_SEC && !RA_TZ_NONSECURE_BUILD && (CONFIG_RA_CPU_CORE == 0)
 RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_bps_sec") g_bsp_cfg_option_setting_bps_sec[] = {RA_CFG_OPTION_SETTING_BPS_SEC};
 #endif
-#if defined RA_CFG_OPTION_SETTING_OTP_FSBLCTRL0 && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+#if defined RA_CFG_OPTION_SETTING_OTP_FSBLCTRL0 && !RA_TZ_NONSECURE_BUILD && (CONFIG_RA_CPU_CORE == 0)
 RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_otp_fsblctrl0") g_bsp_cfg_option_setting_otp_fsblctrl0[] = {RA_CFG_OPTION_SETTING_OTP_FSBLCTRL0};
 #endif
-#if defined RA_CFG_OPTION_SETTING_OTP_FSBLCTRL1 && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+#if defined RA_CFG_OPTION_SETTING_OTP_FSBLCTRL1 && !RA_TZ_NONSECURE_BUILD && (CONFIG_RA_CPU_CORE == 0)
 RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_otp_fsblctrl1") g_bsp_cfg_option_setting_otp_fsblctrl1[] = {RA_CFG_OPTION_SETTING_OTP_FSBLCTRL1};
 #endif
-#if defined RA_CFG_OPTION_SETTING_OTP_FSBLCTRL2 && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+#if defined RA_CFG_OPTION_SETTING_OTP_FSBLCTRL2 && !RA_TZ_NONSECURE_BUILD && (CONFIG_RA_CPU_CORE == 0)
 RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_otp_fsblctrl2") g_bsp_cfg_option_setting_otp_fsblctrl2[] = {RA_CFG_OPTION_SETTING_OTP_FSBLCTRL2};
 #endif
-#if defined RA_CFG_OPTION_SETTING_OTP_SAMR && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+#if defined RA_CFG_OPTION_SETTING_OTP_SAMR && !RA_TZ_NONSECURE_BUILD && (CONFIG_RA_CPU_CORE == 0)
 RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_otp_samr") g_bsp_cfg_option_setting_otp_samr[] = {RA_CFG_OPTION_SETTING_OTP_SAMR};
 #endif
-#if defined RA_CFG_OPTION_SETTING_OTP_SACC00 && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+#if defined RA_CFG_OPTION_SETTING_OTP_SACC00 && !RA_TZ_NONSECURE_BUILD && (CONFIG_RA_CPU_CORE == 0)
 RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_otp_sacc00") g_bsp_cfg_option_setting_otp_sacc00[] = {RA_CFG_OPTION_SETTING_OTP_SACC00};
 #endif
-#if defined RA_CFG_OPTION_SETTING_OTP_SACC10 && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+#if defined RA_CFG_OPTION_SETTING_OTP_SACC10 && !RA_TZ_NONSECURE_BUILD && (CONFIG_RA_CPU_CORE == 0)
 RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_otp_sacc10") g_bsp_cfg_option_setting_otp_sacc10[] = {RA_CFG_OPTION_SETTING_OTP_SACC10};
 #endif
-#if defined RA_CFG_OPTION_SETTING_OTP_SACC01 && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+#if defined RA_CFG_OPTION_SETTING_OTP_SACC01 && !RA_TZ_NONSECURE_BUILD && (CONFIG_RA_CPU_CORE == 0)
 RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_otp_sacc01") g_bsp_cfg_option_setting_otp_sacc01[] = {RA_CFG_OPTION_SETTING_OTP_SACC01};
 #endif
-#if defined RA_CFG_OPTION_SETTING_OTP_SACC11 && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+#if defined RA_CFG_OPTION_SETTING_OTP_SACC11 && !RA_TZ_NONSECURE_BUILD && (CONFIG_RA_CPU_CORE == 0)
 RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_otp_sacc11") g_bsp_cfg_option_setting_otp_sacc11[] = {RA_CFG_OPTION_SETTING_OTP_SACC11};
 #endif
-#if defined RA_CFG_OPTION_SETTING_OTP_SACC02 && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+#if defined RA_CFG_OPTION_SETTING_OTP_SACC02 && !RA_TZ_NONSECURE_BUILD && (CONFIG_RA_CPU_CORE == 0)
 RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_otp_sacc02") g_bsp_cfg_option_setting_otp_sacc02[] = {RA_CFG_OPTION_SETTING_OTP_SACC02};
 #endif
-#if defined RA_CFG_OPTION_SETTING_OTP_SACC12 && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+#if defined RA_CFG_OPTION_SETTING_OTP_SACC12 && !RA_TZ_NONSECURE_BUILD && (CONFIG_RA_CPU_CORE == 0)
 RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_otp_sacc12") g_bsp_cfg_option_setting_otp_sacc12[] = {RA_CFG_OPTION_SETTING_OTP_SACC12};
 #endif
-#if defined RA_CFG_OPTION_SETTING_OTP_SACC03 && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+#if defined RA_CFG_OPTION_SETTING_OTP_SACC03 && !RA_TZ_NONSECURE_BUILD && (CONFIG_RA_CPU_CORE == 0)
 RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_otp_sacc03") g_bsp_cfg_option_setting_otp_sacc03[] = {RA_CFG_OPTION_SETTING_OTP_SACC03};
 #endif
-#if defined RA_CFG_OPTION_SETTING_OTP_SACC13 && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+#if defined RA_CFG_OPTION_SETTING_OTP_SACC13 && !RA_TZ_NONSECURE_BUILD && (CONFIG_RA_CPU_CORE == 0)
 RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_otp_sacc13") g_bsp_cfg_option_setting_otp_sacc13[] = {RA_CFG_OPTION_SETTING_OTP_SACC13};
 #endif
-#if defined RA_CFG_OPTION_SETTING_OTP_PBPS_SEC && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+#if defined RA_CFG_OPTION_SETTING_OTP_PBPS_SEC && !RA_TZ_NONSECURE_BUILD && (CONFIG_RA_CPU_CORE == 0)
 RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_otp_pbps_sec") g_bsp_cfg_option_setting_otp_pbps_sec[] = {RA_CFG_OPTION_SETTING_OTP_PBPS_SEC};
 #endif
-#if defined RA_CFG_OPTION_SETTING_OTP_PBPS && (RA_CFG_CPU_CORE == 0)
+#if defined RA_CFG_OPTION_SETTING_OTP_PBPS && (CONFIG_RA_CPU_CORE == 0)
 RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_otp_pbps") g_bsp_cfg_option_setting_otp_pbps[] = {RA_CFG_OPTION_SETTING_OTP_PBPS};
 #endif
-#if defined RA_CFG_OPTION_SETTING_OTP_ZHUK && !RA_TZ_NONSECURE_BUILD && (RA_CFG_CPU_CORE == 0)
+#if defined RA_CFG_OPTION_SETTING_OTP_ZHUK && !RA_TZ_NONSECURE_BUILD && (CONFIG_RA_CPU_CORE == 0)
 RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_otp_zhuk") g_bsp_cfg_option_setting_otp_zhuk[] = {RA_CFG_OPTION_SETTING_OTP_ZHUK};
 #endif
 
@@ -252,7 +250,7 @@ typedef enum e_ra_init_mem
 typedef struct st_ra_init_type
 {
     uint32_t copy_64 :8; /* if 1, must use 64 bit copy operation (to keep ecc happy) */
-    uint32_t external :8; /* =1 if either source or destination is external, else 0  */
+    uint32_t external :8; /* set 1 if either source or destination is external, else 0  */
     uint32_t source_type :8;
     uint32_t destination_type :8;
 } ra_init_type_t;
@@ -436,6 +434,7 @@ static volatile uint16_t g_register_protect_counters[4] = {0};
 /* Function prototype for nx_start */
 void nx_start(void);
 
+#ifdef USE_EARLYSERIALINIT
 
 /****************************************************************************
  * Name: ra_earlyserialgpioinit
@@ -452,8 +451,6 @@ static void ra_earlyserialgpioinit(void)
    * Full SCI_B configuration is done later in arm_earlyserialinit()
    * This avoids duplication between lowputc and serial driver initialization
    */
-
-  /* Configure GPIO pins for console UART only */
 #if defined(CONFIG_SCI0_SERIAL_CONSOLE)
   ra_gpioconfig(GPIO_SCI0_RX);
   ra_gpioconfig(GPIO_SCI0_TX);
@@ -474,11 +471,28 @@ static void ra_earlyserialgpioinit(void)
   ra_gpioconfig(GPIO_SCI4_RX); */
   ra_gpioconfig(GPIO_SCI4_TX); */
 #endif
+#if defined(CONFIG_SCI5_SERIAL_CONSOLE)
+  ra_gpioconfig(GPIO_SCI5_RX);
+  ra_gpioconfig(GPIO_SCI5_TX);
+#endif
+#if defined(CONFIG_SCI6_SERIAL_CONSOLE)
+  ra_gpioconfig(GPIO_SCI6_RX);
+  ra_gpioconfig(GPIO_SCI6_TX);
+#endif
+#if defined(CONFIG_SCI7_SERIAL_CONSOLE)
+  ra_gpioconfig(GPIO_SCI7_RX);
+  ra_gpioconfig(GPIO_SCI7_TX);
+#endif
+#if defined(CONFIG_SCI8_SERIAL_CONSOLE)
+  ra_gpioconfig(GPIO_SCI8_RX);
+  ra_gpioconfig(GPIO_SCI8_TX);
+#endif
 #if defined(CONFIG_SCI9_SERIAL_CONSOLE)
   ra_gpioconfig(GPIO_SCI9_RX);
   ra_gpioconfig(GPIO_SCI9_TX);
 #endif
 }
+#endif /* USE_EARLYSERIALINIT */
 
 /****************************************************************************
  * Public Functions

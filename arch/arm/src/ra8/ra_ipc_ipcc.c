@@ -46,15 +46,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Shared memory configuration */
 
-#ifndef CONFIG_RA_IPC_SHMEM_BASE
-#  define CONFIG_RA_IPC_SHMEM_BASE    0x22050000  /* Shared RAM region */
-#endif
-
-#ifndef CONFIG_RA_IPC_SHMEM_SIZE
-#  define CONFIG_RA_IPC_SHMEM_SIZE    0x00010000  /* 64KB */
-#endif
 
 /* Default buffer sizes if not configured */
 
@@ -91,7 +83,7 @@ static struct ra_ipcc_state_s g_ra_ipcc[RA_IPC_NUM_CHANNELS];
 
 /* Shared memory pool for inter-core communication */
 
-static uint8_t g_ipc_shmem[CONFIG_RA_IPC_SHMEM_SIZE]
+static uint8_t g_ipc_shmem[BOARD_IPC_SHMEM_SIZE]
   __attribute__((section(".ipc_shared"), aligned(32)));
 
 /****************************************************************************
@@ -394,7 +386,7 @@ int ra_ipcc_initialize(void)
 
   _info("Initializing IPCC upper-half integration\n");
   _info("Shared memory: base=0x%08x size=%u bytes\n",
-        CONFIG_RA_IPC_SHMEM_BASE, CONFIG_RA_IPC_SHMEM_SIZE);
+        BOARD_IPC_SHMEM_BASE, BOARD_IPC_SHMEM_SIZE);
 
   /* Initialize each IPCC channel */
 
@@ -488,7 +480,7 @@ int ra_ipc_get_shmem(FAR uintptr_t *paddr, FAR uintptr_t *vaddr,
 
   if (size != NULL)
     {
-      *size = CONFIG_RA_IPC_SHMEM_SIZE;
+      *size = BOARD_IPC_SHMEM_SIZE;
     }
 
   return OK;

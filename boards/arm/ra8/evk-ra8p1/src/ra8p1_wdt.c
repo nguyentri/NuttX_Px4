@@ -59,9 +59,12 @@ void board_wdt_initialize(void)
 {
   int ret;
 
-  /* Initialize the watchdog timer */
-
-  ret = ra_wdt_initialize("/dev/watchdog0");
+  /* Initialize the watchdog timer.  Use channel 1 for CM33 core, channel 0 otherwise. */
+#if defined(CONFIG_RA_CPU_CORE_CM33) && CONFIG_RA_CPU_CORE_CM33
+  ret = ra_wdt_initialize("/dev/watchdog0", 1);
+#else
+  ret = ra_wdt_initialize("/dev/watchdog0", 0);
+#endif
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: ra_wdt_initialize failed: %d\n", ret);

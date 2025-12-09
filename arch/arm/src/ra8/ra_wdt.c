@@ -57,16 +57,6 @@
 
 #define WDT_MAXTIMEOUT (10000) /* 10 seconds (arbitrary max) */
 
-/* Register Access **********************************************************/
-
-#define ra_getreg8(o)    getreg8(R_WDT_BASE + (o))
-#define ra_getreg16(o)   getreg16(R_WDT_BASE + (o))
-#define ra_getreg32(o)   getreg32(R_WDT_BASE + (o))
-
-#define ra_putreg8(v,o)  putreg8(v, R_WDT_BASE + (o))
-#define ra_putreg16(v,o) putreg16(v, R_WDT_BASE + (o))
-#define ra_putreg32(v,o) putreg32(v, R_WDT_BASE + (o))
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -81,6 +71,7 @@ struct ra_wdt_lowerhalf_s
   uint8_t  tops;    /* The timeout period select value */
   int      irq;     /* The IRQ number */
   xcpt_t   handler; /* User NMI handler */
+  uint8_t  channel; /* Channel index (0..WDT_MAX_CHANNELS-1) */
 };
 
 /****************************************************************************
@@ -151,7 +142,7 @@ static int ra_wdt_interrupt(int irq, FAR void *context, FAR void *arg)
 
   /* Read and clear status flags */
 
-  uint16_t sr = ra_getreg16(R_WDT_WDTSR_OFFSET);
+  uint16_t sr = getreg16(R_WDT_WDTSR(priv->channel));
   if (sr & R_WDT_WDTSR_UNDFF)
     {
       wdwarn("WDT underflow detected\n");
@@ -210,7 +201,7 @@ static int ra_wdt_start(FAR struct watchdog_lowerhalf_s *lower)
 
   /* Check if WDT already running (auto-start mode or previous start) */
 
-  uint16_t sr = ra_getreg16(R_WDT_WDTSR_OFFSET);
+  uint16_t sr = getreg16(R_WDT_WDTSR(priv->channel));
   if (sr & (R_WDT_WDTSR_UNDFF | R_WDT_WDTSR_REFEF))
     {
       wdwarn("WDT status flags set - may be in auto-start mode\n");
@@ -231,11 +222,11 @@ static int ra_wdt_start(FAR struct watchdog_lowerhalf_s *lower)
             (priv->cks & R_WDT_WDTCR_CKS_MASK) |
             (priv->tops & R_WDT_WDTCR_TOPS_MASK));
 
-  ra_putreg16(regval, R_WDT_WDTCR_OFFSET);
+  putreg16(regval, R_WDT_WDTCR(priv->channel));
 
   /* Reset the WDT */
-  ra_putreg8(0x00, R_WDT_WDTRR_OFFSET);
-  ra_putreg8(0xff, R_WDT_WDTRR_OFFSET);
+  putreg8(0x00, R_WDT_WDTRR(priv->channel));
+  putreg8(0xff, R_WDT_WDTRR(priv->channel));
 
   priv->started = true;
 
@@ -303,8 +294,8 @@ static int ra_wdt_keepalive(FAR struct watchdog_lowerhalf_s *lower)
 
   /* Refresh the WDT */
   /* Write 0x00 then 0xFF to WDTRR to refresh */
-  ra_putreg8(0x00, R_WDT_WDTRR_OFFSET);
-  ra_putreg8(0xff, R_WDT_WDTRR_OFFSET);
+  putreg8(0x00, R_WDT_WDTRR(priv->channel));
+  putreg8(0xff, R_WDT_WDTRR(priv->channel));
 
   return OK;
 }
@@ -344,16 +335,55 @@ static int ra_wdt_getstatus(FAR struct watchdog_lowerhalf_s *lower,
       status->flags |= WDFLAGS_ACTIVE;
     }
 
-  /* Calculate time left */
-  /* This is tricky on RA8 WDT as it's a down counter but we don't have direct access to the counter value easily
-     or it's not exposed in the header I saw.
-     Wait, WDTRR is refresh register.
-     Usually there is a counter register, but maybe not exposed.
-     Let's assume we return the configured timeout.
-  */
-
+  /* Calculate time left from down counter value in WDTSR */
   status->timeout = priv->timeout;
-  status->timeleft = 0; /* Not supported */
+  status->timeleft = 0;
+
+  if (priv->started)
+    {
+      uint16_t wdtsr = getreg16(R_WDT_WDTSR(priv->channel));
+      uint32_t counter = wdtsr & R_WDT_WDTSR_CNTVAL_MASK;
+      uint32_t pclk = ra_get_peripheral_clock(RA_PCLK_PCLKB);
+      uint32_t cks_div = 128; /* default */
+
+      switch (priv->cks)
+        {
+        case R_WDT_WDTCR_CKS_0001:
+          cks_div = 4;
+          break;
+        case R_WDT_WDTCR_CKS_0100:
+          cks_div = 64;
+          break;
+        case R_WDT_WDTCR_CKS_1111:
+          cks_div = 128;
+          break;
+        case R_WDT_WDTCR_CKS_0110:
+          cks_div = 512;
+          break;
+        case R_WDT_WDTCR_CKS_0111:
+          cks_div = 2048;
+          break;
+        case R_WDT_WDTCR_CKS_1000:
+          cks_div = 8192;
+          break;
+        default:
+          cks_div = 128;
+          break;
+        }
+
+      if (pclk != 0)
+        {
+          uint64_t timeleft_ms = ((uint64_t)counter * (uint64_t)cks_div * 1000ULL) / (uint64_t)pclk;
+          if (timeleft_ms > UINT32_MAX)
+            {
+              status->timeleft = UINT32_MAX;
+            }
+          else
+            {
+              status->timeleft = (uint32_t)timeleft_ms;
+            }
+        }
+    }
 
   return OK;
 }
@@ -567,7 +597,7 @@ static int ra_wdt_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
  *
  ****************************************************************************/
 
-int ra_wdt_initialize(FAR const char *devpath)
+int ra_wdt_initialize(FAR const char *devpath, int channel)
 {
   FAR struct ra_wdt_lowerhalf_s *priv = &g_wdtdev;
   int ret;
@@ -584,10 +614,26 @@ int ra_wdt_initialize(FAR const char *devpath)
 
   priv->handler = NULL;
 
+  /* Validate and store channel */
+  if (channel < 0 || channel >= WDT_MAX_CHANNELS)
+    {
+      wderr("ERROR: invalid channel %d (max %d)\n", channel, WDT_MAX_CHANNELS);
+      return -EINVAL;
+    }
+  priv->channel = (uint8_t)channel;
+  /* Default to 128 divider and maximum tops (16384 cycles) */
+  priv->cks = R_WDT_WDTCR_CKS_1111;
+  priv->tops = R_WDT_WDTCR_TOPS_11;
+  /* Default to 128 divider and maximum tops (16384 cycles) */
+  priv->cks = R_WDT_WDTCR_CKS_1111;
+  priv->tops = R_WDT_WDTCR_TOPS_11;
+
   /* Attach the interrupt (don't enable yet - will enable in NMI mode) */
 
 #ifdef RA_ELC_WDT0_UNDERFLOW
-  priv->irq = ra_icu_attach(RA_ELC_WDT0_UNDERFLOW, ra_wdt_interrupt, priv, false);
+  /* Choose event based on channel */
+  int event = (channel == 0) ? RA_ELC_WDT0_UNDERFLOW : RA_ELC_WDT1_UNDERFLOW;
+  priv->irq = ra_icu_attach(event, ra_wdt_interrupt, priv, false);
   if (priv->irq < 0)
     {
       wderr("ERROR: ra_icu_attach failed: %d\n", priv->irq);

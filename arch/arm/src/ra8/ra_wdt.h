@@ -54,6 +54,7 @@ extern "C"
  * Input Parameters:
  *   devpath - The full path to the watchdog.  This should be of the form
  *     /dev/watchdog0
+ *  channel  - The WDT channel number (0..WDT_MAX_CHANNELS-1)
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -61,7 +62,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int ra_wdt_initialize(FAR const char *devpath);
+int ra_wdt_initialize(FAR const char *devpath, int channel);
 
 #undef EXTERN
 #if defined(__cplusplus)

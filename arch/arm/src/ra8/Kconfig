@@ -1,6 +1,13 @@
 #
 # RA8 Family MCU Configuration Options
 #
+# Based on official Renesas User Manuals:
+#  - RA8E1: Single Cortex-M85 @ 360MHz
+#    - 544KB SRAM (including 32KB TCM)
+#    - 1MB Code Flash + 12KB Data Flash
+#  - RA8P1: Dual Cortex-M85 @ 1GHz + Cortex-M33 @ 250MHz
+#    - 2MB SRAM with ECC + dedicated TCM per core
+#    - 1MB MRAM (no separate data flash)
 
 comment "RA8 Family MCU Selection"
 
@@ -290,45 +297,62 @@ config RA_CPU_CORE
 
 # RA8E1 Group Configuration
 config RA8E1_GROUP
-   bool
-   default n
-   help
-     Enables the RA8E1 group of features and peripherals.
-     This is required for all RA8E1 configurations.
+    bool
+    default n
+    help
+       RA8E1 Group: Single-core Cortex-M85 @ 360MHz
+       - 544 KB SRAM (including 32 KB TCM - not separate)
+       - 1 MB Code Flash + 12 KB Data Flash
+       - 16KB I-Cache + 16KB D-Cache
+       - Helium MVE (M-Profile Vector Extension)
+       This is required for all RA8E1 configurations.
 
 # RA8P1 Group Configuration
 config RA8P1_GROUP
-   bool
-   default n
-   help
-     Enables the RA8P1 group of features and peripherals.
-     This is required for all RA8P1 configurations.
+    bool
+    default n
+    help
+       RA8P1 Group: Dual-core
+       - CM85 (CPU0): 1GHz, 128KB ITCM + 128KB DTCM, 16KB I-Cache + 16KB D-Cache
+       - CM33 (CPU1): 250MHz, 64KB CTCM + 64KB STCM, 16KB C-Cache + 16KB S-Cache
+       - 2 MB Shared SRAM with ECC
+       - 1 MB MRAM (no separate data flash)
+       - Each core has dedicated TCM at same virtual addresses
+       - Requires CPU core selection in "CPU Core Selection" menu
+
+       This is required for all RA8P1 configurations.
 
 config RA8_CM85_FAMILY
-   bool
-   default n
-   select ARCH_CORTEXM85
-   select ARCH_HAVE_FPU
-   select ARCH_HAVE_THUMB
-   select ARCH_HAVE_DPFPU
-   select ARMV8M_HAVE_ICACHE
-   select ARMV8M_HAVE_DCACHE
-   select ARMV8M_HAVE_ITCM
-   select ARMV8M_HAVE_DTCM
-   select ARMV8M_HAVE_HELIUM
-   select ARMV8M_HAVE_SECURITY
-   select ARMV8M_HAVE_MPU
-   select ARMV8M_HAVE_SMPU
-   select ARMV8M_HAVE_SYSTICK
-   select ARMV8M_HAVE_CORESIGHT
-   select ARCH_HAVE_CODE_FLASH
-   select ARCH_HAVE_DATA_FLASH
-   select ARCH_HAVE_SRAM
-   select ARCH_HAVE_SDIO
-   select ARCH_HAVE_IRQPRIO
-   select ARCH_IRQPRIO
-   help
-     Enables all core features for the RA8 Cortex-M85 family.
+    bool
+    default n
+    select ARCH_CORTEXM85
+    select ARCH_HAVE_FPU
+    select ARCH_HAVE_THUMB
+    select ARCH_HAVE_DPFPU
+    select ARMV8M_HAVE_ICACHE
+    select ARMV8M_HAVE_DCACHE
+    select ARMV8M_HAVE_ITCM
+    select ARMV8M_HAVE_DTCM
+    select ARMV8M_HAVE_HELIUM
+    select ARMV8M_HAVE_SECURITY
+    select ARMV8M_HAVE_MPU
+    select ARMV8M_HAVE_SMPU
+    select ARMV8M_HAVE_SYSTICK
+    select ARMV8M_HAVE_CORESIGHT
+    select ARCH_HAVE_CODE_FLASH
+    select ARCH_HAVE_DATA_FLASH
+    select ARCH_HAVE_SRAM
+    select ARCH_HAVE_SDIO
+    select ARCH_HAVE_IRQPRIO
+    select ARCH_IRQPRIO
+    help
+       Enables all core features for the RA8 Cortex-M85 family.
+       RA8E1 CM85:
+       - 360MHz, 32KB TCM total, 16KB I-Cache + 16KB D-Cache
+       RA8P1 CM85 (CPU0):
+       - 1GHz, 128KB ITCM + 128KB DTCM, 16KB I-Cache + 16KB D-Cache
+       - Dedicated TCM @ 0x00000000 (ITCM) / 0x20000000 (DTCM)
+       All CM85 cores support Helium MVE and double-precision FPU.
 
 if RA8_CM85_FAMILY
 
@@ -341,34 +365,51 @@ config ARCH_CORTEXM85
      Selects the Arm Cortex-M85 core.
 
 config ARMV8M_HAVE_ICACHE
-   bool
-   default y
-   help
-     Instruction cache present.
+    bool
+    default y
+    help
+       Instruction cache present (hardware-implemented).
+       RA8E1: 16 KB I-Cache with ECC
+       RA8P1: 16 KB I-Cache with ECC
+       This is built into the Cortex-M85 core.
 
 config ARMV8M_HAVE_DCACHE
    bool
    default y
    help
-     Data cache present.
+       Data cache present (hardware-implemented).
+       RA8E1: 16 KB D-Cache with ECC
+       RA8P1: 16 KB D-Cache with ECC
+       This is built into the Cortex-M85 core.
 
 config ARMV8M_HAVE_ITCM
    bool
    default y
    help
-     Instruction Tightly Coupled Memory present.
+       Instruction Tightly Coupled Memory present.
+       RA8E1: Part of 32 KB total TCM (split unknown - check datasheet)
+       RA8P1: 128 KB dedicated ITCM @ 0x00000000 with ECC (CPU0 only)
+       TCM provides zero-wait-state memory access.
 
 config ARMV8M_HAVE_DTCM
    bool
    default y
    help
-     Data Tightly Coupled Memory present.
+       Data Tightly Coupled Memory present.
+       RA8E1: Part of 32 KB total TCM (split unknown - check datasheet)
+       RA8P1: 128 KB dedicated DTCM @ 0x20000000 with ECC (CPU0 only)
+       TCM provides zero-wait-state memory access.
 
 config ARMV8M_HAVE_HELIUM
    bool
-   default y
-   help
-     Arm Helium (M-Profile Vector Extension) present.
+    default y
+    help
+       Arm Helium (M-Profile Vector Extension) present.
+       Cortex-M85 supports Helium MVE (Integer and Floating-Point):
+       - Integer MVE operations
+       - Half-precision floating-point MVE (MVE-F)
+       - Single-precision floating-point MVE (MVE-F)
+       Provides SIMD acceleration for DSP and ML workloads.
 
 config ARMV8M_HAVE_SECURITY
    bool
@@ -404,19 +445,42 @@ config ARCH_HAVE_CODE_FLASH
    bool
    default y
    help
-     1 MB code flash memory.
+       Code memory:
+       RA8E1: 1 MB Code Flash (traditional NOR flash)
+       - Dual-bank support for FOTA
+       - Background operation support
+       - SWAP operation support
+       RA8P1: 1 MB MRAM (Magnetoresistive RAM - non-volatile)
+       - Shared between CM85 and CM33
+       - Faster write, no erase needed
+       - Unlimited endurance
 
 config ARCH_HAVE_DATA_FLASH
    bool
-   default y
-   help
-     12 KB data flash memory.
+    default y if RA8E1_GROUP
+    default n if RA8P1_GROUP
+      help
+       Data flash memory:
+       RA8E1: 12 KB data flash
+       - 100,000 program/erase cycles
+       - For configuration/parameter storage
+       RA8P1: No separate data flash
+       - Use MRAM partition for parameter storage instead
 
 config ARCH_HAVE_SRAM
    bool
    default y
    help
-     544 KB SRAM including 32 KB TCM.
+       System SRAM:
+       RA8E1: 544 KB total SRAM
+       - INCLUDES 32 KB TCM (not separate)
+       - Effective user SRAM: ~512 KB (544KB - 32KB TCM)
+       RA8P1: 2 MB Shared SRAM with ECC
+       - Accessible by both CM85 and CM33
+       - SEPARATE from dedicated TCM regions
+       - TCM regions:
+          - CM85: 128KB ITCM + 128KB DTCM
+          - CM33: 64KB CTCM + 64KB STCM
 
 config ARCH_HAVE_SDIO
    bool
@@ -434,8 +498,8 @@ config RA8_CM33_FAMILY
    select ARCH_CORTEXM33
    select ARCH_HAVE_FPU
    select ARCH_HAVE_THUMB
-   select ARMV8M_HAVE_ICACHE
-   select ARMV8M_HAVE_DCACHE
+   select ARMV8M_HAVE_ICACHE    # Renesas implements C-Cache (Code-bus Cache)
+   select ARMV8M_HAVE_DCACHE    # Renesas implements S-Cache (System-bus Cache)
    select ARMV8M_HAVE_ITCM
    select ARMV8M_HAVE_DTCM
    select ARMV8M_HAVE_SECURITY
@@ -450,8 +514,23 @@ config RA8_CM33_FAMILY
    select ARCH_HAVE_IRQPRIO
    select ARCH_IRQPRIO
    help
-     Enables all core features for the RA8 Cortex-M33 family.
-     Note: CM33 does NOT have Helium MVE or double-precision FPU.
+       Enables all core features for the RA8 Cortex-M33 family.
+       RA8P1 CM33 (CPU1) - 250MHz:
+       - 64 KB CTCM + 64 KB STCM with ECC
+       - 16 KB C-Cache + 16 KB S-Cache with ECC (Renesas implementation!)
+       - Single-precision FPU (FPv5-SP)
+       - NO double-precision FPU
+       - NO Helium MVE
+       - Armv8-DSP Extension (saturating math, SIMD integer)
+       - TrustZone security extension
+       IMPORTANT: Standard ARM Cortex-M33 does NOT have caches, but
+       Renesas RA8P1 implements custom caches:
+       - C-Cache (Code-bus Cache): 16 KB with ECC
+       - S-Cache (System-bus Cache): 16 KB with ECC
+       Also, CM33 uses different TCM naming:
+       - CTCM (Code TCM) instead of ITCM
+       - STCM (System TCM) instead of DTCM
+       Both at same virtual addresses as CM85 but separate physical memory.
 
 if RA8_CM33_FAMILY
 
@@ -465,33 +544,86 @@ config ARCH_CORTEXM33
 
 config ARMV8M_HAVE_ICACHE
    bool
-   default y
-   help
-     Instruction cache present.
+    default y    # Renesas RA8P1 implements C-Cache!
+    help
+       Code-bus Cache (C-Cache) present - Renesas implementation.
+       IMPORTANT: Standard ARM Cortex-M33 core does NOT include caches.
+       However, Renesas RA8P1 implements custom cache for CM33:
+       C-Cache (Code-bus Cache): 16 KB with ECC
+       - Accelerates code execution from external memory
+       - Hardware-implemented by Renesas (not standard ARM)
+       This is equivalent to Instruction Cache (I-Cache) but uses
+       Renesas-specific naming and implementation.
+       Source: RA8P1 User's Manual, Section (2) CPU1 - Cache
 
 config ARMV8M_HAVE_DCACHE
    bool
-   default y
-   help
-     Data cache present.
+    default y    # Renesas RA8P1 implements S-Cache!
+    help
+       System-bus Cache (S-Cache) present - Renesas implementation.
+       IMPORTANT: Standard ARM Cortex-M33 core does NOT include caches.
+       However, Renesas RA8P1 implements custom cache for CM33:
+       S-Cache (System-bus Cache): 16 KB with ECC
+       - Accelerates data access from external memory
+       - Hardware-implemented by Renesas (not standard ARM)
+       This is equivalent to Data Cache (D-Cache) but uses
+       Renesas-specific naming and implementation.
+       Source: RA8P1 User's Manual, Section (2) CPU1 - Cache
+       NOTE: Cache coherency between CM85 and CM33 must be managed
+       by software when sharing data in external SRAM/SDRAM.
 
 config ARMV8M_HAVE_ITCM
    bool
    default y
    help
-     Instruction Tightly Coupled Memory present.
+   Code Tightly Coupled Memory (CTCM) present.
+   RA8P1 CM33: 64 KB CTCM @ 0x00000000 with ECC
+   RENESAS NAMING: CM33 uses "CTCM" (Code TCM) instead of standard
+   ARM "ITCM" (Instruction TCM). Functionally equivalent.
+   IMPORTANT: Virtual address 0x00000000 is same as CM85 ITCM,
+   but physically separate memory - each core has dedicated TCM.
+   Source: RA8P1 User's Manual, Section (2) CPU1:
+   "Tightly Coupled Memory (TCM): CTCM: 64 KB with ECC"
+   TCM provides zero-wait-state memory access for critical code.
+   Note: NuttX uses ARMV8M_HAVE_ITCM flag for both ITCM and CTCM
+   as they serve the same purpose.
 
 config ARMV8M_HAVE_DTCM
    bool
    default y
    help
-     Data Tightly Coupled Memory present.
+   System Tightly Coupled Memory (STCM) present.
+   RA8P1 CM33: 64 KB STCM @ 0x20000000 with ECC
+   RENESAS NAMING: CM33 uses "STCM" (System TCM) instead of standard
+   ARM "DTCM" (Data TCM). Functionally equivalent.
+   IMPORTANT: Virtual address 0x20000000 is same as CM85 DTCM,
+   but physically separate memory - each core has dedicated TCM.
+   Source: RA8P1 User's Manual, Section (2) CPU1:
+   "Tightly Coupled Memory (TCM): STCM: 64 KB with ECC"
+   TCM provides zero-wait-state memory access for critical data.
+   Note: NuttX uses ARMV8M_HAVE_DTCM flag for both DTCM and STCM
+   as they serve the same purpose.
 
 config ARMV8M_HAVE_HELIUM
    bool
-   default y
-   help
-     Arm Helium (M-Profile Vector Extension) present.
+    default n
+    help
+       Arm Helium (M-Profile Vector Extension) NOT AVAILABLE.
+       The user manual confirms CM33 (CPU1) features:
+       - ARMv8-M architecture (not ARMv8.1-M)
+       - Armv8-DSP Extension (basic SIMD integer operations)
+       - NO M-Profile Vector Extension (MVE/Helium)
+       Only CM85 (CPU0) has Helium:
+       - CM85: ARMv8.1-M with MVE-F (Integer + Float Helium)
+       - CM33: ARMv8-M with DSP Extension only
+       For SIMD operations on RA8P1:
+       - Use CM85 core for Helium MVE (best performance)
+       - Use CM33 DSP extension for basic SIMD integer ops
+       Enabling this incorrectly causes build failures or illegal
+       instruction exceptions at runtime.
+       Source: RA8P1 User's Manual
+       - CPU0 (CM85): "M-profile Vector Extension (MVE)"
+       - CPU1 (CM33): "Armv8-DSP Extension" (no MVE listed)
 
 config ARMV8M_HAVE_SECURITY
    bool
@@ -524,22 +656,37 @@ config ARMV8M_HAVE_CORESIGHT
      CoreSight ETM-M85 trace present.
 
 config ARCH_HAVE_CODE_FLASH
-   bool
-   default y
-   help
-     1 MB code flash memory.
+    bool
+    default y
+    help
+       Code memory (shared with CM85 on RA8P1):
+       - 1 MB MRAM @ 0x02000000
+       - Both cores can execute from MRAM
+       - No erase required (MRAM advantage)
 
 config ARCH_HAVE_DATA_FLASH
-   bool
-   default y
-   help
-     12 KB data flash memory.
+    bool
+    default n
+    help
+       RA8P1 does NOT have separate data flash.
+
+       Use MRAM partition for parameter storage instead.
 
 config ARCH_HAVE_SRAM
-   bool
-   default y
-   help
-     544 KB SRAM including 32 KB TCM.
+    bool
+    default y
+    help
+       System SRAM on RA8P1 (shared between cores):
+
+       Shared SRAM: 2 MB with ECC @ 0x22000000
+       - Accessible by both CM85 and CM33
+
+       CM33 Dedicated TCM (CPU1 only, separate from shared SRAM):
+       - CTCM: 64 KB @ 0x00000000 with ECC (Code TCM)
+       - STCM: 64 KB @ 0x20000000 with ECC (System TCM)
+
+       IMPORTANT: TCM addresses are same as CM85 but physically separate.
+       Each core sees its own TCM at standard ARM addresses.
 
 config ARCH_HAVE_SDIO
    bool
@@ -1904,17 +2051,32 @@ config RA_DTCM_HEAP
 
 config RA_DTCM_BASE
    hex "DTCM Base Address"
-   default 0x20000000
+    default 0x20000000
    depends on RA_DTCM_HEAP
    help
-     Base address of the DTCM memory region.
+       Base address of the DTCM memory region.
+
+       Standard ARM TCM address: 0x20000000
+
+       RA8E1: Part of 32 KB total TCM
+       RA8P1 CM85: 128 KB DTCM (CPU0 dedicated)
+       RA8P1 CM33: 64 KB STCM (CPU1 dedicated)
+
+       On RA8P1, both cores use same virtual address but access
+       different physical memory - each core has dedicated TCM.
 
 config RA_DTCM_SIZE
    int "DTCM Size (bytes)"
-   default 65536
+    default 32768 if RA8E1_GROUP                       # 32 KB total TCM
+    default 131072 if RA8P1_GROUP && RA8_CM85_FAMILY   # 128 KB DTCM
+    default 65536 if RA8P1_GROUP && RA8_CM33_FAMILY    # 64 KB STCM
    depends on RA_DTCM_HEAP
    help
-     Size of the DTCM memory region in bytes.
+       Size of the DTCM/STCM memory region (hardware-fixed).
+
+       RA8E1: 32 KB total TCM (16KB instruction + 16KB data)
+       RA8P1 CM85: 128 KB DTCM with ECC
+       RA8P1 CM33: 64 KB STCM with ECC
 
 config RA_ITCM_HEAP
    bool "Use ITCM for heap"
@@ -1925,17 +2087,35 @@ config RA_ITCM_HEAP
 
 config RA_ITCM_BASE
    hex "ITCM Base Address"
-   default 0x00000000
+    default 0x00000000
    depends on RA_ITCM_HEAP
    help
-     Base address of the ITCM memory region.
+       Base address of the ITCM memory region.
+
+       Standard ARM TCM address: 0x00000000
+
+       RA8E1: May not have separate ITCM (check datasheet)
+       RA8P1 CM85: 128 KB ITCM (CPU0 dedicated)
+       RA8P1 CM33: 64 KB CTCM (CPU1 dedicated, called "Code TCM")
+
+       On RA8P1, both cores use same virtual address but access
+       different physical memory - each core has dedicated TCM.
 
 config RA_ITCM_SIZE
    int "ITCM Size (bytes)"
-   default 65536
+    default 0 if RA8E1_GROUP                           # May not have separate ITCM
+    default 131072 if RA8P1_GROUP && RA8_CM85_FAMILY   # 128 KB ITCM
+    default 65536 if RA8P1_GROUP && RA8_CM33_FAMILY    # 64 KB CTCM
    depends on RA_ITCM_HEAP
    help
-     Size of the ITCM memory region in bytes.
+       Size of the ITCM/CTCM memory region (hardware-fixed).
+
+       RA8E1: 0 (may not have separate ITCM - verify datasheet)
+       RA8P1 CM85: 128 KB ITCM with ECC
+       RA8P1 CM33: 64 KB CTCM with ECC (Renesas calls it "Code TCM")
+
+       These are hardware-determined sizes from user manuals.
+       Do not modify unless verified in official documentation.
 
 config RA_EXTERNAL_RAM_HEAP
    bool "Use external RAM for heap"
@@ -1981,9 +2161,38 @@ config RA_HEAP_ALIGNMENT
 
 config RA_SRAM_BASE
    hex "SRAM Base Address"
-   default 0x20000000
+   default 0x20000000 if RA8E1_GROUP
+   default 0x22000000 if RA8P1_GROUP
    help
      Base address of the main SRAM memory region.
+
+     RA8E1: 0x20000000
+     - 544 KB total (includes 32 KB TCM - not separate)
+     - Effective user SRAM: ~512 KB
+
+     RA8P1: 0x22000000
+     - 2 MB shared SRAM with ECC
+     - Separate from TCM regions
+     - Both cores can access shared SRAM
+     - Coordinate memory usage between cores!
+
+     RA8P1 TCM regions (separate from shared SRAM):
+     - CM85 ITCM: 0x00000000 (128 KB, CPU0 only)
+     - CM85 DTCM: 0x20000000 (128 KB, CPU0 only)
+     - CM33 CTCM: 0x00000000 (64 KB, CPU1 only)
+     - CM33 STCM: 0x20000000 (64 KB, CPU1 only)
+
+     CRITICAL: On RA8P1, TCM and shared SRAM are at different bases:
+     - TCM: 0x00000000/0x20000000 (per-core dedicated)
+     - Shared: 0x22000000 (both cores access)
+
+     Each core has its own TCM at standard addresses, but shared
+     resources require explicit coordination.
+
+config RA_SRAM_SIZE
+   hex "SRAM Size (bytes)"
+   default 0x00088000 if RA8E1_GROUP  # 544 KB (includes TCM)
+   default 0x00200000 if RA8P1_GROUP  # 2 MB shared
 
 comment "SDRAM Controller"
 
@@ -3564,35 +3773,6 @@ config RA_IPC_IPCC
      and can be accessed via file operations (open, read, write, ioctl).
 
      Select 'y' for OpenAMP/RPMsg support.
-
-config RA_IPC_SHMEM_BASE
-   hex "Shared Memory Base Address"
-   default 0x22050000
-   depends on RA_IPC_IPCC
-   help
-     Physical address of shared memory region for IPC communication.
-     This must be in non-cached RAM accessible by both cores.
-
-     Default 0x22050000 is upper 64KB of RA8P1 SRAM0.
-
-     WARNING: Ensure this region does not overlap with:
-     - Heap memory
-     - Stack regions
-     - Other core's private memory
-
-config RA_IPC_SHMEM_SIZE
-   int "Shared Memory Size (bytes)"
-   default 65536
-   range 4096 262144
-   depends on RA_IPC_IPCC
-   help
-     Size of shared memory region for IPC buffers in bytes.
-
-     Minimum: 4KB (sufficient for basic IPC)
-     Recommended: 64KB (for OpenAMP/RPMsg)
-     Maximum: 256KB
-
-     Larger sizes allow more buffering but reduce available RAM.
 
 config RA_IPC_OPENAMP
    bool "Enable OpenAMP Support"

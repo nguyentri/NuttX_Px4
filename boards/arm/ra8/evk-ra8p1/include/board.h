@@ -69,15 +69,9 @@
  * IPC Shared Memory Configuration
  ****************************************************************************/
 
-/* Shared memory region for inter-processor communication (IPC/OpenAMP)
- * This must be in non-cached RAM accessible by both cores.
- * RA8P1 has 2MB SRAM, allocate 64KB from high address for IPC.
- */
-#define BOARD_IPC_SHMEM_BASE            0x22050000  /* Upper 64KB of SRAM0 */
-#define BOARD_IPC_SHMEM_SIZE            0x00010000  /* 64KB */
-
-/* Shared memory alignment (required for cache coherency) */
-#define BOARD_IPC_SHMEM_ALIGN           32
+/* Shared memory region for inter-processor communication (IPC/OpenAMP) */
+#define BOARD_IPC_SHMEM_BASE            _sipc  /* Base IPC address between CM85 and CM33 regions */
+#define BOARD_IPC_SHMEM_SIZE            (_eipc - _sipc)  /* ipc size */
 
 /****************************************************************************
  * Clock Configuration - Based on BSP configuration
