@@ -197,7 +197,6 @@ static uint32_t ra_spi_getreg32(struct ra_spi_priv_s *priv, uint8_t offset);
 #ifdef CONFIG_RA_DTC
 /* DTC support */
 static int ra_spi_dtc_setup(struct ra_spi_priv_s *priv);
-static void ra_spi_start_transfer(struct ra_spi_priv_s *priv);
 static void ra_spi_dtc_stop(struct ra_spi_priv_s *priv);
 static int ra_spi_dtc_configure_transfer(struct ra_spi_priv_s *priv,
                                          const void *txbuffer, void *rxbuffer,
@@ -782,74 +781,6 @@ static int ra_spi_dtc_reconfigure(struct ra_spi_priv_s *priv)
   priv->dtc_active = true;
 
   return OK;
-}
-
-/****************************************************************************
- * Name: ra_spi_start_transfer
- *
- * Description:
- *   Start DTC transfer
- *
- ****************************************************************************/
-
-static void ra_spi_start_transfer(struct ra_spi_priv_s *priv)
-{
-  uint32_t spcr;
-
-  spiinfo("Transfer start for SPI%d - TX IRQ=%d, RX IRQ=%d, TEI IRQ=%d, ERI IRQ=%d\n",
-          priv->config->bus, priv->txi_irq, priv->rxi_irq, priv->tei_irq, priv->eri_irq);
-
-  /* Clear any existing interrupt flags before enabling interrupts */
-  ra_spi_putreg32(priv, R_SPI_B_SPSRC_OFFSET, R_SPI_B_SPSRC_ALL_CLEAR);
-
-  /* Clear FIFOs to ensure a clean start */
-  ra_spi_putreg32(priv, R_SPI_B_SPFCR_OFFSET, R_SPI_B_SPFCR_SPFRST);
-
-  /* Get SPCR and enable appropriate interrupts for DTC-driven transfer */
-  spcr = ra_spi_getreg32(priv, R_SPI_B_SPCR_OFFSET);
-
-  /* Enable Transmit Empty interrupt if transmitting (DTC TX or TX buffer present) */
-  if (priv->txbuffer)
-    {
-      spcr |= R_SPI_B_SPCR_SPTIE;
-    }
-
-  /* Enable Receive Buffer Full interrupt if receiving */
-  if (priv->rxbuffer)
-    {
-      spcr |= R_SPI_B_SPCR_SPRIE;
-    }
-
-  /* Now set SPE to start the transfer. For non-DTC full-duplex transfers we
-   * should preload the first one or two transmit words to fill the hardware
-   * shift register and buffer.
-   */
-  if (!priv->dtc_active && priv->txbuffer)
-    {
-      /* Temporarily disable TXI IRQ so we can preload without racing the ISR */
-      up_disable_irq(priv->txi_irq);
-
-      /* Enable SPI transfer */
-      ra_spi_putreg32(priv, R_SPI_B_SPCR_OFFSET, spcr | R_SPI_B_SPCR_SPE);
-
-      /* Prefill up to two transmit words to start the pipeline */
-      ra_spi_transmit(priv);
-      if (priv->ntxwords > 0)
-        {
-          ra_spi_transmit(priv);
-        }
-
-      /* Clear pending TXI and re-enable the IRQ */
-      ra_icu_clear_irq(priv->txi_irq);
-      up_enable_irq(priv->txi_irq);
-    }
-  else
-    {
-      /* Default: enable SPE and let ISR handle transmit */
-      ra_spi_putreg32(priv, R_SPI_B_SPCR_OFFSET, spcr | R_SPI_B_SPCR_SPE);
-    }
-
-  spiinfo("SPI transfer started: SPCR=0x%08lx\n", spcr);
 }
 
 /****************************************************************************
@@ -1976,7 +1907,6 @@ static void ra_spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
           spierr("SPI%d DMA setup failed: %d, falling back to DTC/PIO\n",
                  priv->config->bus, ret);
           /* Fall through to DTC or PIO mode */
-
           use_dma = false;
 #ifdef CONFIG_RA_DTC
           use_dtc = priv->config->use_dtc && (dev_config != NULL && dev_config->use_dtc);

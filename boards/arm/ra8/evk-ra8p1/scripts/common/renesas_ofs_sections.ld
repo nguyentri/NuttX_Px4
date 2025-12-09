@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/ra8/evk-ra8p1/scripts/cm85/cm85_option_settings.ld
+ * boards/arm/ra8/evk-ra8p1/scripts/common/renesas_ofs_sections.ld
  *
  * Renesas Option Setting Bytes
  * Hardware configuration registers programmed during reset
