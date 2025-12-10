@@ -294,6 +294,46 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
     .elc        = RA_ELC_GPT5_CAPTURE_COMPARE_A,  /* GPT5 capture/compare A IRQ */
   },
 #endif
+#ifdef CONFIG_RA_GPT6
+  {
+    .base       = R_GPT32_CH_BASE(6),
+    .mstp       = RA_MSTP_GPT6,
+    .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
+    .max_period = UINT32_MAX, /* 32-bit timer */
+    .channel    = 6,
+    .elc        = RA_ELC_GPT6_CAPTURE_COMPARE_A,  /* GPT6 capture/compare A IRQ */
+  },
+#endif
+#ifdef CONFIG_RA_GPT7
+  {
+    .base       = R_GPT32_CH_BASE(7),
+    .mstp       = RA_MSTP_GPT7,
+    .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
+    .max_period = UINT32_MAX, /* 32-bit timer */
+    .channel    = 7,
+    .elc        = RA_ELC_GPT7_CAPTURE_COMPARE_A,  /* GPT7 capture/compare A IRQ */
+  },
+#endif
+#ifdef CONFIG_RA_GPT8
+  {
+    .base       = R_GPT32_CH_BASE(8),
+    .mstp       = RA_MSTP_GPT8,
+    .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
+    .max_period = UINT32_MAX, /* 32-bit timer */
+    .channel    = 8,
+    .elc        = RA_ELC_GPT8_CAPTURE_COMPARE_A,  /* GPT8 capture/compare A IRQ */
+  },
+#endif
+#ifdef CONFIG_RA_GPT9
+  {
+    .base       = R_GPT32_CH_BASE(9),
+    .mstp       = RA_MSTP_GPT9,
+    .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
+    .max_period = UINT32_MAX, /* 32-bit timer */
+    .channel    = 9,
+    .elc        = RA_ELC_GPT9_CAPTURE_COMPARE_A,  /* GPT9 capture/compare A IRQ */
+  },
+#endif
 #ifdef CONFIG_RA_GPT10
   {
     .base       = R_GPT32_CH_BASE(10),

@@ -52,8 +52,8 @@
 #include "ra_gpio.h"
 #include "ra_clock.h"
 
-#ifdef CONFIG_SERIAL_TXDMA || CONFIG_SERIAL_RXDMA
-#if CONFIG_RA_DMAC
+#if defined (CONFIG_SERIAL_TXDMA) || defined (CONFIG_SERIAL_RXDMA)
+#if defined CONFIG_RA_DMAC
 #  include "ra_dmac.h"
 #else
 #  error "DMA support required for serial TXDMA or RXDMA"

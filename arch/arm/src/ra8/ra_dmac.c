@@ -320,7 +320,7 @@ int ra_dmac_initialize(void)
 
   /* Enable DMAC/DTC module clock via MSTP */
 
-  ra_mstp_start(RA_MSTP_DMAC_DTC);
+  ra_mstp_start(RA_MSTP_DMAC);
 
   /* Enable DMAC global operation (DMAST.DMST = 1) */
 
