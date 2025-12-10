@@ -32,11 +32,22 @@
 #include <debug.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 
 #include "arm_internal.h"
 #include "chip.h"
 #include "hardware/ra_memorymap.h"
 #include "hardware/ra_hardware.h"
+#include "hardware/ra8p1/ra_sdram.h"
+
+#ifdef CONFIG_RA_DMAC
+#include "ra_dmac.h"
+#endif
+
+#ifdef CONFIG_ARMV8M_DCACHE
+#include <nuttx/cache.h>
+#endif
 
 #include "ra_sdram.h"
 
@@ -62,121 +73,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* SDRAM Controller Register Base (within BUS peripheral) */
-
-#define RA_SDRAM_BASE               (R_BUS_SDRAM)
-
-/* SDRAM Register Offsets (relative to R_BUS_SDRAM) */
-
-#define RA_SDRAM_SDCCR_OFFSET       0x00  /* SDC Control Register */
-#define RA_SDRAM_SDCMOD_OFFSET      0x01  /* SDC Mode Register */
-#define RA_SDRAM_SDAMOD_OFFSET      0x02  /* SDRAM Access Mode Register */
-#define RA_SDRAM_SDSELF_OFFSET      0x10  /* SDRAM Self-Refresh Control Register */
-#define RA_SDRAM_SDRFCR_OFFSET      0x14  /* SDRAM Refresh Control Register */
-#define RA_SDRAM_SDRFEN_OFFSET      0x16  /* SDRAM Auto-Refresh Control Register */
-#define RA_SDRAM_SDICR_OFFSET       0x20  /* SDRAM Initialization Control Register */
-#define RA_SDRAM_SDIR_OFFSET        0x24  /* SDRAM Initialization Register */
-#define RA_SDRAM_SDADR_OFFSET       0x40  /* SDRAM Address Register */
-#define RA_SDRAM_SDTR_OFFSET        0x44  /* SDRAM Timing Register */
-#define RA_SDRAM_SDMOD_OFFSET       0x48  /* SDRAM Mode Register */
-#define RA_SDRAM_SDSR_OFFSET        0x50  /* SDRAM Status Register */
-
-/* Register Addresses */
-
-#define RA_SDRAM_SDCCR              (RA_SDRAM_BASE + RA_SDRAM_SDCCR_OFFSET)
-#define RA_SDRAM_SDCMOD             (RA_SDRAM_BASE + RA_SDRAM_SDCMOD_OFFSET)
-#define RA_SDRAM_SDAMOD             (RA_SDRAM_BASE + RA_SDRAM_SDAMOD_OFFSET)
-#define RA_SDRAM_SDSELF             (RA_SDRAM_BASE + RA_SDRAM_SDSELF_OFFSET)
-#define RA_SDRAM_SDRFCR             (RA_SDRAM_BASE + RA_SDRAM_SDRFCR_OFFSET)
-#define RA_SDRAM_SDRFEN             (RA_SDRAM_BASE + RA_SDRAM_SDRFEN_OFFSET)
-#define RA_SDRAM_SDICR              (RA_SDRAM_BASE + RA_SDRAM_SDICR_OFFSET)
-#define RA_SDRAM_SDIR               (RA_SDRAM_BASE + RA_SDRAM_SDIR_OFFSET)
-#define RA_SDRAM_SDADR              (RA_SDRAM_BASE + RA_SDRAM_SDADR_OFFSET)
-#define RA_SDRAM_SDTR               (RA_SDRAM_BASE + RA_SDRAM_SDTR_OFFSET)
-#define RA_SDRAM_SDMOD              (RA_SDRAM_BASE + RA_SDRAM_SDMOD_OFFSET)
-#define RA_SDRAM_SDSR               (RA_SDRAM_BASE + RA_SDRAM_SDSR_OFFSET)
-
-/* SDCCR - SDC Control Register */
-
-#define SDCCR_EXENB                 (1 << 0)  /* Operation Enable */
-#define SDCCR_BSIZE_SHIFT           4
-#define SDCCR_BSIZE_MASK            (3 << SDCCR_BSIZE_SHIFT)
-#define SDCCR_BSIZE_16BIT           (0 << SDCCR_BSIZE_SHIFT)
-#define SDCCR_BSIZE_32BIT           (1 << SDCCR_BSIZE_SHIFT)
-#define SDCCR_BSIZE_8BIT            (2 << SDCCR_BSIZE_SHIFT)
-
-/* SDCMOD - SDC Mode Register */
-
-#define SDCMOD_EMODE                (1 << 0)  /* Endian Mode */
-
-/* SDAMOD - SDRAM Access Mode Register */
-
-#define SDAMOD_BE                   (1 << 0)  /* Continuous Access Enable */
-
-/* SDSELF - SDRAM Self-Refresh Control Register */
-
-#define SDSELF_SFEN                 (1 << 0)  /* Self-Refresh Enable */
-
-/* SDRFCR - SDRAM Refresh Control Register */
-
-#define SDRFCR_RFC_SHIFT            0
-#define SDRFCR_RFC_MASK             0xfff
-#define SDRFCR_REFW_SHIFT           12
-#define SDRFCR_REFW_MASK            (0xf << SDRFCR_REFW_SHIFT)
-
-/* SDRFEN - SDRAM Auto-Refresh Control Register */
-
-#define SDRFEN_RFEN                 (1 << 0)  /* Auto-Refresh Enable */
-
-/* SDICR - SDRAM Initialization Sequence Control Register */
-
-#define SDICR_INIRQ                 (1 << 0)  /* Initialization Sequence Start */
-
-/* SDIR - SDRAM Initialization Register */
-
-#define SDIR_ARFI_SHIFT             0
-#define SDIR_ARFI_MASK              0xf
-#define SDIR_ARFC_SHIFT             4
-#define SDIR_ARFC_MASK              (0xf << SDIR_ARFC_SHIFT)
-#define SDIR_PRC_SHIFT              8
-#define SDIR_PRC_MASK               (0x7 << SDIR_PRC_SHIFT)
-
-/* SDADR - SDRAM Address Register */
-
-#define SDADR_MXC_SHIFT             0
-#define SDADR_MXC_MASK              0x3
-
-/* SDTR - SDRAM Timing Register */
-
-#define SDTR_CL_SHIFT               0
-#define SDTR_CL_MASK                0x7
-#define SDTR_WR                     (1 << 8)
-#define SDTR_RP_SHIFT               9
-#define SDTR_RP_MASK                (0x7 << SDTR_RP_SHIFT)
-#define SDTR_RCD_SHIFT              12
-#define SDTR_RCD_MASK               (0x3 << SDTR_RCD_SHIFT)
-#define SDTR_RAS_SHIFT              16
-#define SDTR_RAS_MASK               (0x7 << SDTR_RAS_SHIFT)
-
-/* SDMOD - SDRAM Mode Register */
-
-#define SDMOD_MR_SHIFT              0
-#define SDMOD_MR_MASK               0x7fff
-
-/* Mode Register bits for SDRAM device */
-
-#define MR_BURST_LENGTH_1           0
-#define MR_BURST_TYPE_SEQUENTIAL    (0 << 3)
-#define MR_CAS_LATENCY_SHIFT        4
-#define MR_OP_MODE_STANDARD         (0 << 7)
-#define MR_WB_SINGLE_LOC_ACC        (1 << 9)
-
-/* SDSR - SDRAM Status Register */
-
-#define SDSR_MRSST                  (1 << 0)  /* Mode Register Setting Status */
-#define SDSR_INIST                  (1 << 3)  /* Initialization Status */
-#define SDSR_SRFST                  (1 << 4)  /* Self-Refresh Status */
 
 /* Register protection key */
 
@@ -215,6 +111,21 @@ static uint8_t g_sdram_bus_width = CONFIG_RA_SDRAM_BUS_WIDTH;
 
 static bool g_sdram_initialized = false;
 
+#ifdef CONFIG_RA_DMAC
+/* DMAC transfer state */
+
+static ra_dmac_handle_t g_sdram_dma_handle = NULL;
+static volatile bool g_sdram_dma_complete = false;
+static sem_t g_sdram_dma_sem;
+static bool g_sdram_dma_initialized = false;
+static ra_sdram_dma_callback_t g_sdram_dma_user_callback = NULL;
+static void *g_sdram_dma_user_arg = NULL;
+static int g_sdram_dma_channel = -1;  /* Configured DMA channel */
+static void *g_sdram_dma_read_dest = NULL;  /* Read destination for cache invalidation */
+static size_t g_sdram_dma_read_length = 0;  /* Read length for cache invalidation */
+
+#endif /* CONFIG_RA_DMAC */
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -225,14 +136,27 @@ static bool g_sdram_initialized = false;
  * Description:
  *   Wait until all status bits in SDSR are cleared.
  *
+ * Returned Value:
+ *   OK on success; -ETIMEDOUT on timeout.
+ *
  ****************************************************************************/
 
-static void ra_sdram_wait_status_clear(void)
+static int ra_sdram_wait_status_clear(void)
 {
+  uint32_t timeout = RA_SDRAM_TIMEOUT_US / RA_SDRAM_POLL_DELAY_US;
+
   while (getreg8(RA_SDRAM_SDSR) != 0)
     {
-      /* Wait for all status bits to be cleared */
+      if (--timeout == 0)
+        {
+          sdramerr("ERROR: Timeout waiting for SDSR clear\n");
+          return -ETIMEDOUT;
+        }
+
+      up_udelay(RA_SDRAM_POLL_DELAY_US);
     }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -241,14 +165,27 @@ static void ra_sdram_wait_status_clear(void)
  * Description:
  *   Wait until initialization sequence completes.
  *
+ * Returned Value:
+ *   OK on success; -ETIMEDOUT on timeout.
+ *
  ****************************************************************************/
 
-static void ra_sdram_wait_init_complete(void)
+static int ra_sdram_wait_init_complete(void)
 {
+  uint32_t timeout = RA_SDRAM_TIMEOUT_US / RA_SDRAM_POLL_DELAY_US;
+
   while ((getreg8(RA_SDRAM_SDSR) & SDSR_INIST) != 0)
     {
-      /* Wait for initialization to complete */
+      if (--timeout == 0)
+        {
+          sdramerr("ERROR: Timeout waiting for init complete\n");
+          return -ETIMEDOUT;
+        }
+
+      up_udelay(RA_SDRAM_POLL_DELAY_US);
     }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -257,14 +194,27 @@ static void ra_sdram_wait_init_complete(void)
  * Description:
  *   Wait until Mode Register Setting completes.
  *
+ * Returned Value:
+ *   OK on success; -ETIMEDOUT on timeout.
+ *
  ****************************************************************************/
 
-static void ra_sdram_wait_mrs_complete(void)
+static int ra_sdram_wait_mrs_complete(void)
 {
+  uint32_t timeout = RA_SDRAM_TIMEOUT_US / RA_SDRAM_POLL_DELAY_US;
+
   while ((getreg8(RA_SDRAM_SDSR) & SDSR_MRSST) != 0)
     {
-      /* Wait for MRS to complete */
+      if (--timeout == 0)
+        {
+          sdramerr("ERROR: Timeout waiting for MRS complete\n");
+          return -ETIMEDOUT;
+        }
+
+      up_udelay(RA_SDRAM_POLL_DELAY_US);
     }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -336,6 +286,7 @@ int ra_sdram_initialize(const struct ra_sdram_config_s *config,
   uint16_t sdmod_val;
   uint8_t bsize;
   irqstate_t flags;
+  int ret;
 
   /* Use provided config or default */
 
@@ -352,7 +303,12 @@ int ra_sdram_initialize(const struct ra_sdram_config_s *config,
 
   /* Step 1: Wait for all status bits in SDSR to be 0 */
 
-  ra_sdram_wait_status_clear();
+  ret = ra_sdram_wait_status_clear();
+  if (ret < 0)
+    {
+      leave_critical_section(flags);
+      return ret;
+    }
 
   /* Step 2: Set initialization parameters in SDIR
    * Note: Must only write to SDIR once after reset.
@@ -379,7 +335,12 @@ int ra_sdram_initialize(const struct ra_sdram_config_s *config,
 
       /* Wait for initialization to complete */
 
-      ra_sdram_wait_init_complete();
+      ret = ra_sdram_wait_init_complete();
+      if (ret < 0)
+        {
+          leave_critical_section(flags);
+          return ret;
+        }
     }
 
   /* Step 6: Configure SDRAM controller settings */
@@ -394,7 +355,12 @@ int ra_sdram_initialize(const struct ra_sdram_config_s *config,
 
   /* Wait for status clear before SDMOD modification */
 
-  ra_sdram_wait_status_clear();
+  ret = ra_sdram_wait_status_clear();
+  if (ret < 0)
+    {
+      leave_critical_section(flags);
+      return ret;
+    }
 
   if (init_memory)
     {
@@ -411,7 +377,12 @@ int ra_sdram_initialize(const struct ra_sdram_config_s *config,
 
       /* Wait for MRS to complete (tMRD) */
 
-      ra_sdram_wait_mrs_complete();
+      ret = ra_sdram_wait_mrs_complete();
+      if (ret < 0)
+        {
+          leave_critical_section(flags);
+          return ret;
+        }
     }
 
   /* Step 8: Set timing parameters in SDTR (must do in single write) */
@@ -482,6 +453,8 @@ int ra_sdram_selfrefresh_enable(void)
 {
   irqstate_t flags;
   uint8_t bsize;
+  uint32_t timeout;
+  int ret = OK;
 
   if (!g_sdram_initialized)
     {
@@ -498,21 +471,29 @@ int ra_sdram_selfrefresh_enable(void)
 
   /* Wait for access to be disabled and all status bits cleared */
 
+  timeout = RA_SDRAM_TIMEOUT_US / RA_SDRAM_POLL_DELAY_US;
   while ((getreg8(RA_SDRAM_SDCCR) & SDCCR_EXENB) ||
          (getreg8(RA_SDRAM_SDSR) != 0))
     {
-      /* Wait */
+      if (--timeout == 0)
+        {
+          sdramerr("ERROR: Timeout entering self-refresh\n");
+          ret = -ETIMEDOUT;
+          goto errout;
+        }
+
+      up_udelay(RA_SDRAM_POLL_DELAY_US);
     }
 
   /* Enable self-refresh mode */
 
   putreg8(SDSELF_SFEN, RA_SDRAM_SDSELF);
 
-  leave_critical_section(flags);
-
   sdraminfo("SDRAM entered self-refresh mode\n");
 
-  return OK;
+errout:
+  leave_critical_section(flags);
+  return ret;
 }
 
 /****************************************************************************
@@ -528,6 +509,7 @@ int ra_sdram_selfrefresh_disable(void)
   irqstate_t flags;
   uint8_t bsize;
   uint8_t sdckocr;
+  int ret;
 
   if (!g_sdram_initialized)
     {
@@ -548,7 +530,12 @@ int ra_sdram_selfrefresh_disable(void)
 
   /* Wait for all status bits to be cleared */
 
-  ra_sdram_wait_status_clear();
+  ret = ra_sdram_wait_status_clear();
+  if (ret < 0)
+    {
+      leave_critical_section(flags);
+      return ret;
+    }
 
   /* Disable self-refresh mode */
 
@@ -578,6 +565,412 @@ bool ra_sdram_is_initialized(void)
 {
   return g_sdram_initialized;
 }
+
+/****************************************************************************
+ * Name: ra_sdram_test
+ *
+ * Description:
+ *   Perform a basic read/write test on SDRAM memory.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RA_DMAC
+
+/****************************************************************************
+ * Name: ra_sdram_dma_callback
+ *
+ * Description:
+ *   DMAC transfer completion callback.
+ *
+ ****************************************************************************/
+
+static void ra_sdram_dma_callback(void *handle, int event, void *arg)
+{
+  g_sdram_dma_complete = true;
+  nxsem_post(&g_sdram_dma_sem);
+
+  /* Call user callback if registered */
+
+  if (g_sdram_dma_user_callback != NULL)
+    {
+      g_sdram_dma_user_callback(g_sdram_dma_user_arg);
+    }
+}
+
+/****************************************************************************
+ * Name: ra_sdram_dma_init
+ *
+ * Description:
+ *   Initialize DMAC for SDRAM transfers.
+ *
+ ****************************************************************************/
+
+static int ra_sdram_dma_init(void)
+{
+  int ret;
+
+  if (g_sdram_dma_initialized)
+    {
+      return OK;
+    }
+
+  /* Get configured DMA channel from Kconfig */
+
+#ifdef CONFIG_RA_DMAC_SDRAM_CHANNEL
+  g_sdram_dma_channel = CONFIG_RA_DMAC_SDRAM_CHANNEL;
+#else
+  g_sdram_dma_channel = -1;  /* Dynamic allocation */
+#endif
+
+  if (g_sdram_dma_channel < 0)
+    {
+      sdraminfo("SDRAM DMA channel not configured, using dynamic allocation\n");
+    }
+  else
+    {
+      sdraminfo("SDRAM DMA using channel %d\n", g_sdram_dma_channel);
+    }
+
+  /* Initialize DMAC module */
+
+  ret = ra_dmac_initialize();
+  if (ret < 0)
+    {
+      sdramerr("ERROR: DMAC initialization failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Initialize semaphore for waiting */
+
+  ret = nxsem_init(&g_sdram_dma_sem, 0, 0);
+  if (ret < 0)
+    {
+      sdramerr("ERROR: Semaphore initialization failed: %d\n", ret);
+      return ret;
+    }
+
+  g_sdram_dma_initialized = true;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: ra_sdram_dma_write
+ *
+ * Description:
+ *   Write data to SDRAM using DMAC transfer.
+ *
+ ****************************************************************************/
+
+int ra_sdram_dma_write(void *dest, const void *src, size_t length,
+                       ra_sdram_dma_callback_t callback, void *arg)
+{
+  ra_dmac_config_t dma_config;
+  int ret;
+
+  if (!g_sdram_initialized)
+    {
+      return -ENODEV;
+    }
+
+  /* Check alignment (must be 4-byte aligned) */
+
+  if (((uintptr_t)dest & 0x3) || ((uintptr_t)src & 0x3) || (length & 0x3))
+    {
+      sdramerr("ERROR: Address or length not 4-byte aligned\n");
+      return -EINVAL;
+    }
+
+  /* Initialize DMAC if needed */
+
+  ret = ra_sdram_dma_init();
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+#ifdef CONFIG_ARMV8M_DCACHE
+  /* Clean cache for source buffer */
+
+  up_clean_dcache((uintptr_t)src, (uintptr_t)src + length);
+#endif
+
+  /* Configure DMAC transfer */
+
+  memset(&dma_config, 0, sizeof(dma_config));
+  dma_config.src_addr = (uint32_t)src;
+  dma_config.dest_addr = (uint32_t)dest;
+  dma_config.transfer_count = length / 4;  /* Transfer in 32-bit words */
+  dma_config.size = RA_DMAC_SIZE_4_BYTE;
+  dma_config.src_addr_mode = RA_DMAC_ADDR_MODE_INCREMENTED;
+  dma_config.dest_addr_mode = RA_DMAC_ADDR_MODE_INCREMENTED;
+  dma_config.mode = RA_DMAC_MODE_NORMAL;
+  dma_config.repeat_area = RA_DMAC_REPEAT_AREA_NONE;
+  dma_config.trigger = RA_DMAC_TRIGGER_SOFTWARE;
+  dma_config.callback = ra_sdram_dma_callback;
+  dma_config.p_callback_memory = NULL;
+
+  /* Save user callback */
+
+  g_sdram_dma_user_callback = callback;
+  g_sdram_dma_user_arg = arg;
+
+  /* Open or reopen DMA channel */
+
+  if (g_sdram_dma_handle != NULL)
+    {
+      ra_dmac_close(g_sdram_dma_handle);
+      g_sdram_dma_handle = NULL;
+    }
+
+  /* Open with configured channel or dynamic allocation */
+
+  if (g_sdram_dma_channel >= 0)
+    {
+      ret = ra_dmac_open_channel(&g_sdram_dma_handle, &dma_config,
+                                 g_sdram_dma_channel);
+    }
+  else
+    {
+      ret = ra_dmac_open(&g_sdram_dma_handle, &dma_config);
+    }
+
+  if (ret < 0)
+    {
+      sdramerr("ERROR: DMAC open failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Reset transfer complete flag */
+
+  g_sdram_dma_complete = false;
+
+  /* Enable and start transfer */
+
+  ret = ra_dmac_enable(g_sdram_dma_handle);
+  if (ret < 0)
+    {
+      sdramerr("ERROR: DMAC enable failed: %d\n", ret);
+      ra_dmac_close(g_sdram_dma_handle);
+      g_sdram_dma_handle = NULL;
+      return ret;
+    }
+
+  ret = ra_dmac_software_start(g_sdram_dma_handle);
+  if (ret < 0)
+    {
+      sdramerr("ERROR: DMAC software start failed: %d\n", ret);
+      ra_dmac_close(g_sdram_dma_handle);
+      g_sdram_dma_handle = NULL;
+      return ret;
+    }
+
+  sdraminfo("DMA write started: src=0x%08lx dest=0x%08lx len=%zu\n",
+            (unsigned long)src, (unsigned long)dest, length);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: ra_sdram_dma_read
+ *
+ * Description:
+ *   Read data from SDRAM using DMAC transfer.
+ *
+ ****************************************************************************/
+
+int ra_sdram_dma_read(void *dest, const void *src, size_t length,
+                      ra_sdram_dma_callback_t callback, void *arg)
+{
+  ra_dmac_config_t dma_config;
+  int ret;
+
+  if (!g_sdram_initialized)
+    {
+      return -ENODEV;
+    }
+
+  /* Check alignment (must be 4-byte aligned) */
+
+  if (((uintptr_t)dest & 0x3) || ((uintptr_t)src & 0x3) || (length & 0x3))
+    {
+      sdramerr("ERROR: Address or length not 4-byte aligned\n");
+      return -EINVAL;
+    }
+
+  /* Initialize DMAC if needed */
+
+  ret = ra_sdram_dma_init();
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Configure DMAC transfer */
+
+  memset(&dma_config, 0, sizeof(dma_config));
+  dma_config.src_addr = (uint32_t)src;
+  dma_config.dest_addr = (uint32_t)dest;
+  dma_config.transfer_count = length / 4;  /* Transfer in 32-bit words */
+  dma_config.size = RA_DMAC_SIZE_4_BYTE;
+  dma_config.src_addr_mode = RA_DMAC_ADDR_MODE_INCREMENTED;
+  dma_config.dest_addr_mode = RA_DMAC_ADDR_MODE_INCREMENTED;
+  dma_config.mode = RA_DMAC_MODE_NORMAL;
+  dma_config.repeat_area = RA_DMAC_REPEAT_AREA_NONE;
+  dma_config.trigger = RA_DMAC_TRIGGER_SOFTWARE;
+  dma_config.callback = ra_sdram_dma_callback;
+  dma_config.p_callback_memory = NULL;
+
+  /* Save user callback */
+
+  g_sdram_dma_user_callback = callback;
+  g_sdram_dma_user_arg = arg;
+
+  /* Open or reopen DMA channel */
+
+  if (g_sdram_dma_handle != NULL)
+    {
+      ra_dmac_close(g_sdram_dma_handle);
+      g_sdram_dma_handle = NULL;
+    }
+
+  /* Open with configured channel or dynamic allocation */
+
+  if (g_sdram_dma_channel >= 0)
+    {
+      ret = ra_dmac_open_channel(&g_sdram_dma_handle, &dma_config,
+                                 g_sdram_dma_channel);
+    }
+  else
+    {
+      ret = ra_dmac_open(&g_sdram_dma_handle, &dma_config);
+    }
+
+  if (ret < 0)
+    {
+      sdramerr("ERROR: DMAC open failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Reset transfer complete flag */
+
+  g_sdram_dma_complete = false;
+
+  /* Enable and start transfer */
+
+  ret = ra_dmac_enable(g_sdram_dma_handle);
+  if (ret < 0)
+    {
+      sdramerr("ERROR: DMAC enable failed: %d\n", ret);
+      ra_dmac_close(g_sdram_dma_handle);
+      g_sdram_dma_handle = NULL;
+      return ret;
+    }
+
+  ret = ra_dmac_software_start(g_sdram_dma_handle);
+  if (ret < 0)
+    {
+      sdramerr("ERROR: DMAC software start failed: %d\n", ret);
+      ra_dmac_close(g_sdram_dma_handle);
+      g_sdram_dma_handle = NULL;
+      return ret;
+    }
+
+  sdraminfo("DMA read started: src=0x%08lx dest=0x%08lx len=%zu\n",
+            (unsigned long)src, (unsigned long)dest, length);
+
+#ifdef CONFIG_ARMV8M_DCACHE
+  /* Save destination buffer info for cache invalidation after transfer */
+
+  g_sdram_dma_read_dest = dest;
+  g_sdram_dma_read_length = length;
+#endif
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: ra_sdram_dma_wait
+ *
+ * Description:
+ *   Wait for ongoing DMAC transfer to complete.
+ *
+ ****************************************************************************/
+
+int ra_sdram_dma_wait(uint32_t timeout_ms)
+{
+  struct timespec abstime;
+  int ret;
+
+  if (!g_sdram_initialized)
+    {
+      return -ENODEV;
+    }
+
+  if (g_sdram_dma_handle == NULL)
+    {
+      return -EINVAL;
+    }
+
+  /* Wait with timeout if specified */
+
+  if (timeout_ms > 0)
+    {
+      ret = clock_gettime(CLOCK_REALTIME, &abstime);
+      if (ret < 0)
+        {
+          return -errno;
+        }
+
+      abstime.tv_sec += timeout_ms / 1000;
+      abstime.tv_nsec += (timeout_ms % 1000) * 1000000;
+
+      if (abstime.tv_nsec >= 1000000000)
+        {
+          abstime.tv_sec++;
+          abstime.tv_nsec -= 1000000000;
+        }
+
+      ret = nxsem_timedwait(&g_sdram_dma_sem, &abstime);
+      if (ret < 0)
+        {
+          if (ret == -ETIMEDOUT)
+            {
+              sdramerr("ERROR: DMA transfer timeout\n");
+            }
+
+          return ret;
+        }
+    }
+  else
+    {
+      /* Infinite wait */
+
+      ret = nxsem_wait(&g_sdram_dma_sem);
+      if (ret < 0)
+        {
+          return ret;
+        }
+    }
+
+#ifdef CONFIG_ARMV8M_DCACHE
+  /* Invalidate cache for read destination buffer to reflect DMA data */
+
+  if (g_sdram_dma_read_dest != NULL && g_sdram_dma_read_length > 0)
+    {
+      up_invalidate_dcache((uintptr_t)g_sdram_dma_read_dest,
+                          (uintptr_t)g_sdram_dma_read_dest +
+                          g_sdram_dma_read_length);
+      g_sdram_dma_read_dest = NULL;
+      g_sdram_dma_read_length = 0;
+    }
+#endif
+
+  sdraminfo("DMA transfer complete\n");
+
+  return OK;
+}
+
+#endif /* CONFIG_RA_DMAC */
 
 /****************************************************************************
  * Name: ra_sdram_test

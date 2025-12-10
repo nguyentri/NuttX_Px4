@@ -4504,7 +4504,7 @@ config RA_DMAC_GPT13_CHANNEL
 config RA_DMAC_SDHI_CHANNEL
    int "SDHI DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_SDHI
    help
      DMAC channel for SDHI (SD/MMC Host Interface) transfers (-1 = disabled).
@@ -4514,7 +4514,7 @@ config RA_DMAC_SDHI_CHANNEL
 config RA_DMAC_SDRAM_CHANNEL
    int "SDRAM DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_SDRAM
    help
      DMAC channel for SDRAM controller transfers (-1 = disabled).
@@ -4524,7 +4524,7 @@ config RA_DMAC_SDRAM_CHANNEL
 config RA_DMAC_QSPI0_CHANNEL
    int "QSPI0 DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_OSPI
    help
      DMAC channel for QSPI0 (Quad SPI 0) transfers (-1 = disabled).
@@ -4534,7 +4534,7 @@ config RA_DMAC_QSPI0_CHANNEL
 config RA_DMAC_QSPI1_CHANNEL
    int "QSPI1 DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_OSPI
    help
      DMAC channel for QSPI1 (Quad SPI 1) transfers (-1 = disabled).

@@ -140,6 +140,7 @@
 #  include "hardware/ra8p1/ra_rtc.h"
 #  include "hardware/ra8p1/ra_sci_b.h"
 #  include "hardware/ra8p1/ra_sdhi.h"
+#  include "hardware/ra8p1/ra_sdram.h"
 #  include "hardware/ra8p1/ra_spi_b.h"
 #  include "hardware/ra8p1/ra_sram.h"
 #  include "hardware/ra8p1/ra_ssie.h"

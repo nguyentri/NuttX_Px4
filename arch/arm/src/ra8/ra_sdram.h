@@ -152,6 +152,10 @@ struct ra_sdram_config_s
   uint8_t  init_prc;       /* Init Precharge Cycle Count */
 };
 
+/* SDRAM DMA callback function type */
+
+typedef void (*ra_sdram_dma_callback_t)(void *arg);
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -246,6 +250,66 @@ bool ra_sdram_is_initialized(void);
 #ifdef CONFIG_RA_SDRAM_TEST
 int ra_sdram_test(uintptr_t base, size_t size);
 #endif
+
+/****************************************************************************
+ * Name: ra_sdram_dma_write
+ *
+ * Description:
+ *   Write data to SDRAM using DMAC transfer.
+ *
+ * Input Parameters:
+ *   dest      - Destination address in SDRAM
+ *   src       - Source buffer address
+ *   length    - Number of bytes to transfer (must be multiple of 4)
+ *   callback  - Optional callback function called on transfer completion
+ *   arg       - Optional argument passed to callback
+ *
+ * Returned Value:
+ *   OK on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RA_DMAC
+int ra_sdram_dma_write(void *dest, const void *src, size_t length,
+                       ra_sdram_dma_callback_t callback, void *arg);
+
+/****************************************************************************
+ * Name: ra_sdram_dma_read
+ *
+ * Description:
+ *   Read data from SDRAM using DMAC transfer.
+ *
+ * Input Parameters:
+ *   dest      - Destination buffer address
+ *   src       - Source address in SDRAM
+ *   length    - Number of bytes to transfer (must be multiple of 4)
+ *   callback  - Optional callback function called on transfer completion
+ *   arg       - Optional argument passed to callback
+ *
+ * Returned Value:
+ *   OK on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int ra_sdram_dma_read(void *dest, const void *src, size_t length,
+                      ra_sdram_dma_callback_t callback, void *arg);
+
+/****************************************************************************
+ * Name: ra_sdram_dma_wait
+ *
+ * Description:
+ *   Wait for ongoing DMAC transfer to complete.
+ *
+ * Input Parameters:
+ *   timeout_ms - Timeout in milliseconds (0 = infinite wait)
+ *
+ * Returned Value:
+ *   OK on success; -ETIMEDOUT on timeout; other negative errno on failure.
+ *
+ ****************************************************************************/
+
+int ra_sdram_dma_wait(uint32_t timeout_ms);
+#endif /* CONFIG_RA_DMAC */
 
 #ifdef __cplusplus
 }
