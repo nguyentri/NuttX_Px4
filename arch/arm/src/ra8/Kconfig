@@ -2486,6 +2486,42 @@ config RA_SCI4_UART
    ---help---
       Enable support for SCI4 UART peripheral.
 
+config RA_SCI5_UART
+   bool "SCI5 UART support"
+   default n
+   depends on RA_HAVE_SCI5_UART
+   select RA_SCI
+   select SCI5_SERIALDRIVER
+   ---help---
+      Enable support for SCI5 UART peripheral.
+
+config RA_SCI6_UART
+   bool "SCI6 UART support"
+   default n
+   depends on RA_HAVE_SCI6_UART
+   select RA_SCI
+   select SCI6_SERIALDRIVER
+   ---help---
+      Enable support for SCI6 UART peripheral.
+
+config RA_SCI7_UART
+   bool "SCI7 UART support"
+   default n
+   depends on RA_HAVE_SCI7_UART
+   select RA_SCI
+   select SCI7_SERIALDRIVER
+   ---help---
+      Enable support for SCI7 UART peripheral.
+
+config RA_SCI8_UART
+   bool "SCI8 UART support"
+   default n
+   depends on RA_HAVE_SCI8_UART
+   select RA_SCI
+   select SCI8_SERIALDRIVER
+   ---help---
+      Enable support for SCI8 UART peripheral.
+
 config RA_SCI9_UART
    bool "SCI9 UART support"
    default n
@@ -2546,6 +2582,46 @@ config RA_SCI4_TXBUFSIZE
    default 256
    depends on RA_SCI4_UART
 
+config RA_SCI5_RXBUFSIZE
+   int "SCI5 receive buffer size"
+   default 256
+   depends on RA_SCI5_UART
+
+config RA_SCI5_TXBUFSIZE
+   int "SCI5 transmit buffer size"
+   default 256
+   depends on RA_SCI5_UART
+
+config RA_SCI6_RXBUFSIZE
+   int "SCI6 receive buffer size"
+   default 256
+   depends on RA_SCI6_UART
+
+config RA_SCI6_TXBUFSIZE
+   int "SCI6 transmit buffer size"
+   default 256
+   depends on RA_SCI6_UART
+
+config RA_SCI7_RXBUFSIZE
+   int "SCI7 receive buffer size"
+   default 256
+   depends on RA_SCI7_UART
+
+config RA_SCI7_TXBUFSIZE
+   int "SCI7 transmit buffer size"
+   default 256
+   depends on RA_SCI7_UART
+
+config RA_SCI8_RXBUFSIZE
+   int "SCI8 receive buffer size"
+   default 256
+   depends on RA_SCI8_UART
+
+config RA_SCI8_TXBUFSIZE
+   int "SCI8 transmit buffer size"
+   default 256
+   depends on RA_SCI8_UART
+
 config RA_SCI9_RXBUFSIZE
    int "SCI9 receive buffer size"
    default 256
@@ -2560,15 +2636,15 @@ config RA_SCI9_TXBUFSIZE
 config RA_SCI_UART_FLOWCONTROL
    bool "Enable SCI UART flow control support"
    default n
-   depends on RA_SCI0_UART || RA_SCI1_UART || RA_SCI2_UART || RA_SCI3_UART || RA_SCI4_UART || RA_SCI9_UART
+   depends on RA_SCI0_UART || RA_SCI1_UART || RA_SCI2_UART || RA_SCI3_UART || RA_SCI4_UART || RA_SCI5_UART || RA_SCI6_UART || RA_SCI7_UART || RA_SCI8_UART || RA_SCI9_UART
    help
      Enable hardware flow control (RTS/CTS) support for SCI UARTs.
-     Not all SCI channels support flow control - check RA8E1 datasheet.
+     Not all SCI channels support flow control - check hardware manual.
 
 config RA_SCI_UART_RS485
    bool "Enable SCI UART RS485 support"
    default n
-   depends on RA_SCI0_UART || RA_SCI1_UART || RA_SCI2_UART || RA_SCI3_UART || RA_SCI4_UART || RA_SCI9_UART
+   depends on RA_SCI0_UART || RA_SCI1_UART || RA_SCI2_UART || RA_SCI3_UART || RA_SCI4_UART || RA_SCI5_UART || RA_SCI6_UART || RA_SCI7_UART || RA_SCI8_UART || RA_SCI9_UART
    help
      Enable RS485 transceiver control (DE signal) for SCI UARTs.
      Useful for half-duplex communication protocols.
@@ -2576,10 +2652,43 @@ config RA_SCI_UART_RS485
 config RA_SCI_UART_BAUDRATE_MODULATION
    bool "Enable SCI UART baud rate modulation"
    default y
-   depends on RA_SCI0_UART || RA_SCI1_UART || RA_SCI2_UART || RA_SCI3_UART || RA_SCI4_UART || RA_SCI9_UART
+   depends on RA_SCI0_UART || RA_SCI1_UART || RA_SCI2_UART || RA_SCI3_UART || RA_SCI4_UART || RA_SCI5_UART || RA_SCI6_UART || RA_SCI7_UART || RA_SCI8_UART || RA_SCI9_UART
    help
      Enable baud rate modulation for more accurate baud rates.
      Reduces baud rate error for better communication reliability.
+
+config RA_SCI_FIFO_MODE
+   bool "Enable SCI-B FIFO Mode"
+   default y
+   depends on RA_SCI0_UART || RA_SCI1_UART || RA_SCI2_UART || RA_SCI3_UART || RA_SCI4_UART || RA_SCI5_UART || RA_SCI6_UART || RA_SCI7_UART || RA_SCI8_UART || RA_SCI9_UART
+   help
+     Enable FIFO mode for SCI-B channels that support it.
+     RA8 series SCI channels have 16-byte TX/RX FIFOs which improve
+     performance and reduce interrupt overhead. The driver will
+     automatically detect which channels support FIFO.
+
+config RA_SCI_FIFO_RX_TRIGGER
+   int "RX FIFO Trigger Level (1-15)"
+   default 1
+   range 1 15
+   depends on RA_SCI_FIFO_MODE
+   help
+     Number of bytes in RX FIFO to trigger receive interrupt.
+     Lower values = lower latency, higher interrupt rate.
+     Higher values = higher latency, lower interrupt rate.
+     Default: 1 (trigger on each byte for lowest latency).
+     Note: Interrupt also triggers after 15 bit times with no data.
+
+config RA_SCI_FIFO_TX_TRIGGER
+   int "TX FIFO Trigger Level (1-15)"
+   default 15
+   range 1 15
+   depends on RA_SCI_FIFO_MODE
+   help
+     Trigger TX interrupt when FIFO has this many or fewer bytes.
+     Lower values = more interrupts, higher values = better efficiency.
+     Default: 15 (trigger when 15 or fewer bytes in FIFO, i.e., 1+ slots free).
+
 endmenu
 
 menu "I2C"
@@ -3924,30 +4033,32 @@ config RA_DMAC_TRANSFER_MODES
 
 menu "DMAC Channel Assignment"
 
-comment "Assign DMAC channels to peripherals (channels 0-7)"
+comment "Assign DMAC channels to peripherals (channels 0-7 and 10-17)"
 
 config RA_DMAC_SPI0_TX_CHANNEL
    int "SPI0 TX DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_SPI0
    help
      DMAC channel for SPI0 transmit (-1 = disabled).
      Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.  (Channels 8-9 are invalid.)
 
 config RA_DMAC_SPI0_RX_CHANNEL
    int "SPI0 RX DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_SPI0
    help
      DMAC channel for SPI0 receive (-1 = disabled).
      Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.  (Channels 8-9 are invalid.)
 
 config RA_DMAC_SPI1_TX_CHANNEL
    int "SPI1 TX DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_SPI1
    help
      DMAC channel for SPI1 transmit (-1 = disabled).
@@ -3956,43 +4067,47 @@ config RA_DMAC_SPI1_TX_CHANNEL
 config RA_DMAC_SPI1_RX_CHANNEL
    int "SPI1 RX DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_SPI1
-   help
-     DMAC channel for SPI1 receive (-1 = disabled).
-     Must be unique across all peripheral assignments.
+    help
+       DMAC channel for SPI1 receive (-1 = disabled).
+       Must be unique across all peripheral assignments.
+         Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.  (Channels 8-9 are invalid.)
 
 config RA_DMAC_I2C0_CHANNEL
    int "I2C0 DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_I2C0
-   help
-     DMAC channel for I2C0 transfers (-1 = disabled).
-     Must be unique across all peripheral assignments.
+    help
+       DMAC channel for I2C0 transfers (-1 = disabled).
+       Must be unique across all peripheral assignments.
+         Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.  (Channels 8-9 are invalid.)
 
 config RA_DMAC_I2C1_CHANNEL
    int "I2C1 DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_I2C1
-   help
-     DMAC channel for I2C1 transfers (-1 = disabled).
-     Must be unique across all peripheral assignments.
+    help
+       DMAC channel for I2C1 transfers (-1 = disabled).
+       Must be unique across all peripheral assignments.
+         Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.  (Channels 8-9 are invalid.)
 
 config RA_DMAC_I2C2_CHANNEL
    int "I2C2 DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_I2C2
-   help
-     DMAC channel for I2C2 transfers (-1 = disabled).
-     Must be unique across all peripheral assignments.
+    help
+       DMAC channel for I2C2 transfers (-1 = disabled).
+       Must be unique across all peripheral assignments.
+         Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.  (Channels 8-9 are invalid.)
 
 config RA_DMAC_ADC_CHANNEL
    int "ADC DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_ADC
    help
      DMAC channel for ADC data transfers (-1 = disabled).
@@ -4001,7 +4116,7 @@ config RA_DMAC_ADC_CHANNEL
 config RA_DMAC_UART0_TX_CHANNEL
    int "UART0 TX DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_SCI0_UART
    help
      DMAC channel for UART0 transmit (-1 = disabled).
@@ -4010,7 +4125,7 @@ config RA_DMAC_UART0_TX_CHANNEL
 config RA_DMAC_UART0_RX_CHANNEL
    int "UART0 RX DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_SCI0_UART
    help
      DMAC channel for UART0 receive (-1 = disabled).
@@ -4019,7 +4134,7 @@ config RA_DMAC_UART0_RX_CHANNEL
 config RA_DMAC_UART1_TX_CHANNEL
    int "UART1 TX DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_SCI1_UART
    help
      DMAC channel for UART1 transmit (-1 = disabled).
@@ -4028,7 +4143,7 @@ config RA_DMAC_UART1_TX_CHANNEL
 config RA_DMAC_UART1_RX_CHANNEL
    int "UART1 RX DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_SCI1_UART
    help
      DMAC channel for UART1 receive (-1 = disabled).
@@ -4037,7 +4152,7 @@ config RA_DMAC_UART1_RX_CHANNEL
 config RA_DMAC_UART2_TX_CHANNEL
    int "UART2 TX DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_SCI2_UART
    help
      DMAC channel for UART2 transmit (-1 = disabled).
@@ -4046,7 +4161,7 @@ config RA_DMAC_UART2_TX_CHANNEL
 config RA_DMAC_UART2_RX_CHANNEL
    int "UART2 RX DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_SCI2_UART
    help
      DMAC channel for UART2 receive (-1 = disabled).
@@ -4055,7 +4170,7 @@ config RA_DMAC_UART2_RX_CHANNEL
 config RA_DMAC_UART3_TX_CHANNEL
    int "UART3 TX DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_SCI3_UART
    help
      DMAC channel for UART3 transmit (-1 = disabled).
@@ -4064,7 +4179,7 @@ config RA_DMAC_UART3_TX_CHANNEL
 config RA_DMAC_UART3_RX_CHANNEL
    int "UART3 RX DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_SCI3_UART
    help
      DMAC channel for UART3 receive (-1 = disabled).
@@ -4073,7 +4188,7 @@ config RA_DMAC_UART3_RX_CHANNEL
 config RA_DMAC_UART4_TX_CHANNEL
    int "UART4 TX DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_SCI4_UART
    help
      DMAC channel for UART4 transmit (-1 = disabled).
@@ -4082,16 +4197,88 @@ config RA_DMAC_UART4_TX_CHANNEL
 config RA_DMAC_UART4_RX_CHANNEL
    int "UART4 RX DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_SCI4_UART
    help
      DMAC channel for UART4 receive (-1 = disabled).
      Must be unique across all peripheral assignments.
 
+config RA_DMAC_UART5_TX_CHANNEL
+   int "UART5 TX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI5_UART
+   help
+     DMAC channel for UART5 transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART5_RX_CHANNEL
+   int "UART5 RX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI5_UART
+   help
+     DMAC channel for UART5 receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART6_TX_CHANNEL
+   int "UART6 TX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI6_UART
+   help
+     DMAC channel for UART6 transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART6_RX_CHANNEL
+   int "UART6 RX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI6_UART
+   help
+     DMAC channel for UART6 receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART7_TX_CHANNEL
+   int "UART7 TX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI7_UART
+   help
+     DMAC channel for UART7 transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART7_RX_CHANNEL
+   int "UART7 RX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI7_UART
+   help
+     DMAC channel for UART7 receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART8_TX_CHANNEL
+   int "UART8 TX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI8_UART
+   help
+     DMAC channel for UART8 transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART8_RX_CHANNEL
+   int "UART8 RX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI8_UART
+   help
+     DMAC channel for UART8 receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
 config RA_DMAC_UART9_TX_CHANNEL
    int "UART9 TX DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_SCI9_UART
    help
      DMAC channel for UART9 transmit (-1 = disabled).
@@ -4100,7 +4287,7 @@ config RA_DMAC_UART9_TX_CHANNEL
 config RA_DMAC_UART9_RX_CHANNEL
    int "UART9 RX DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_SCI9_UART
    help
      DMAC channel for UART9 receive (-1 = disabled).
@@ -4109,7 +4296,7 @@ config RA_DMAC_UART9_RX_CHANNEL
 config RA_DMAC_SCI0_SPI_TX_CHANNEL
    int "SCI0_SPI TX DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_SCI0_SPI
    help
      DMAC channel for SCI0_SPI transmit (-1 = disabled).
@@ -4118,7 +4305,7 @@ config RA_DMAC_SCI0_SPI_TX_CHANNEL
 config RA_DMAC_SCI0_SPI_RX_CHANNEL
    int "SCI0_SPI RX DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_SCI0_SPI
    help
      DMAC channel for SCI0_SPI receive (-1 = disabled).
@@ -4127,7 +4314,7 @@ config RA_DMAC_SCI0_SPI_RX_CHANNEL
 config RA_DMAC_SCI1_SPI_TX_CHANNEL
    int "SCI1_SPI TX DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_SCI1_SPI
    help
      DMAC channel for SCI1_SPI transmit (-1 = disabled).
@@ -4136,7 +4323,7 @@ config RA_DMAC_SCI1_SPI_TX_CHANNEL
 config RA_DMAC_SCI1_SPI_RX_CHANNEL
    int "SCI1_SPI RX DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_SCI1_SPI
    help
      DMAC channel for SCI1_SPI receive (-1 = disabled).
@@ -4145,7 +4332,7 @@ config RA_DMAC_SCI1_SPI_RX_CHANNEL
 config RA_DMAC_SCI2_SPI_TX_CHANNEL
    int "SCI2_SPI TX DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_SCI2_SPI
    help
      DMAC channel for SCI2_SPI transmit (-1 = disabled).
@@ -4154,7 +4341,7 @@ config RA_DMAC_SCI2_SPI_TX_CHANNEL
 config RA_DMAC_SCI2_SPI_RX_CHANNEL
    int "SCI2_SPI RX DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_SCI2_SPI
    help
      DMAC channel for SCI2_SPI receive (-1 = disabled).
@@ -4163,7 +4350,7 @@ config RA_DMAC_SCI2_SPI_RX_CHANNEL
 config RA_DMAC_SCI3_SPI_TX_CHANNEL
    int "SCI3_SPI TX DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_SCI3_SPI
    help
      DMAC channel for SCI3_SPI transmit (-1 = disabled).
@@ -4172,7 +4359,7 @@ config RA_DMAC_SCI3_SPI_TX_CHANNEL
 config RA_DMAC_SCI3_SPI_RX_CHANNEL
    int "SCI3_SPI RX DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_SCI3_SPI
    help
      DMAC channel for SCI3_SPI receive (-1 = disabled).
@@ -4181,7 +4368,7 @@ config RA_DMAC_SCI3_SPI_RX_CHANNEL
 config RA_DMAC_SCI4_SPI_TX_CHANNEL
    int "SCI4_SPI TX DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_SCI4_SPI
    help
      DMAC channel for SCI4_SPI transmit (-1 = disabled).
@@ -4190,7 +4377,7 @@ config RA_DMAC_SCI4_SPI_TX_CHANNEL
 config RA_DMAC_SCI4_SPI_RX_CHANNEL
    int "SCI4_SPI RX DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_SCI4_SPI
    help
      DMAC channel for SCI4_SPI receive (-1 = disabled).
@@ -4199,7 +4386,7 @@ config RA_DMAC_SCI4_SPI_RX_CHANNEL
 config RA_DMAC_SCI9_SPI_TX_CHANNEL
    int "SCI9_SPI TX DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_SCI9_SPI
    help
      DMAC channel for SCI9_SPI transmit (-1 = disabled).
@@ -4208,7 +4395,7 @@ config RA_DMAC_SCI9_SPI_TX_CHANNEL
 config RA_DMAC_SCI9_SPI_RX_CHANNEL
    int "SCI9_SPI RX DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_SCI9_SPI
    help
      DMAC channel for SCI9_SPI receive (-1 = disabled).
@@ -4217,7 +4404,7 @@ config RA_DMAC_SCI9_SPI_RX_CHANNEL
 config RA_DMAC_GPT0_CHANNEL
    int "GPT0 DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_GPT0
    help
      DMAC channel for GPT0 transfers (-1 = disabled).
@@ -4227,7 +4414,7 @@ config RA_DMAC_GPT0_CHANNEL
 config RA_DMAC_GPT1_CHANNEL
    int "GPT1 DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_GPT1
    help
      DMAC channel for GPT1 transfers (-1 = disabled).
@@ -4237,7 +4424,7 @@ config RA_DMAC_GPT1_CHANNEL
 config RA_DMAC_GPT2_CHANNEL
    int "GPT2 DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_GPT2
    help
      DMAC channel for GPT2 transfers (-1 = disabled).
@@ -4247,7 +4434,7 @@ config RA_DMAC_GPT2_CHANNEL
 config RA_DMAC_GPT3_CHANNEL
    int "GPT3 DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_GPT3
    help
      DMAC channel for GPT3 transfers (-1 = disabled).
@@ -4257,7 +4444,7 @@ config RA_DMAC_GPT3_CHANNEL
 config RA_DMAC_GPT4_CHANNEL
    int "GPT4 DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_GPT4
    help
      DMAC channel for GPT4 transfers (-1 = disabled).
@@ -4267,7 +4454,7 @@ config RA_DMAC_GPT4_CHANNEL
 config RA_DMAC_GPT5_CHANNEL
    int "GPT5 DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_GPT5
    help
      DMAC channel for GPT5 transfers (-1 = disabled).
@@ -4277,7 +4464,7 @@ config RA_DMAC_GPT5_CHANNEL
 config RA_DMAC_GPT10_CHANNEL
    int "GPT10 DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_GPT10
    help
      DMAC channel for GPT10 transfers (-1 = disabled).
@@ -4287,7 +4474,7 @@ config RA_DMAC_GPT10_CHANNEL
 config RA_DMAC_GPT11_CHANNEL
    int "GPT11 DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_GPT11
    help
      DMAC channel for GPT11 transfers (-1 = disabled).
@@ -4297,7 +4484,7 @@ config RA_DMAC_GPT11_CHANNEL
 config RA_DMAC_GPT12_CHANNEL
    int "GPT12 DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_GPT12
    help
      DMAC channel for GPT12 transfers (-1 = disabled).
@@ -4307,7 +4494,7 @@ config RA_DMAC_GPT12_CHANNEL
 config RA_DMAC_GPT13_CHANNEL
    int "GPT13 DMAC channel"
    default -1
-   range -1 7
+   range -1 17
    depends on RA_GPT13
    help
      DMAC channel for GPT13 transfers (-1 = disabled).

@@ -29,18 +29,34 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* DMAC Base Address */
-#ifndef R_DMAC_BASE
+/* DMAC Base Addresses - Two DMAC units, each with 8 channels */
+/* DMAC Unit 0: Channels 0-7  (DMAC0-DMAC7)   at 0x4000A000-0x4000A1C0 */
+/* DMAC Unit 1: Channels 10-17 (DMAC10-DMAC17) at 0x4000A200-0x4000A3C0 */
+#ifndef R_DMAC0_BASE
 #if !defined(CONFIG_RA_TZ_NONSECURE_BUILD) || (CONFIG_RA_TZ_NONSECURE_BUILD == 0)
-#define R_DMAC_BASE           0x4000a000
+#define R_DMAC0_BASE          0x4000a000  /* DMAC Unit 0 base */
+#define R_DMAC1_BASE          0x4000a200  /* DMAC Unit 1 base */
 #else
-#define R_DMAC_BASE           0x5000a000
+#define R_DMAC0_BASE          0x5000a000  /* DMAC Unit 0 base (Non-secure) */
+#define R_DMAC1_BASE          0x5000a200  /* DMAC Unit 1 base (Non-secure) */
 #endif
 #endif
 
-/* Channel stride for multi-channel peripherals */
-#define R_DMAC_CH_STRIDE    0x00000040
-#define R_DMAC_CH_BASE(ch)   (R_DMAC_BASE + ((uint32_t)(ch) * R_DMAC_CH_STRIDE))
+/* Legacy compatibility: R_DMAC_BASE maps to DMAC Unit 0 */
+#ifndef R_DMAC_BASE
+#define R_DMAC_BASE           R_DMAC0_BASE
+#endif
+
+/* Channel stride within a DMAC unit */
+#define R_DMAC_CH_STRIDE      0x00000040
+
+/* Channel base address calculation:
+ * - Channels 0-7:   DMAC Unit 0, ch = 0-7
+ * - Channels 10-17: DMAC Unit 1, ch = 10-17 (unit 1, local ch 0-7)
+ */
+#define R_DMAC_CH_BASE(ch)    (((ch) < 10) ? \
+                               (R_DMAC0_BASE + ((uint32_t)(ch) * R_DMAC_CH_STRIDE)) : \
+                               (R_DMAC1_BASE + ((uint32_t)((ch) - 10) * R_DMAC_CH_STRIDE)))
 
 /* DMAC Register Offsets */
 
@@ -211,6 +227,33 @@
 
 /* Maximum number of channels */
 
-#define DMAC_MAX_CHANNELS    8
+#define DMAC_MAX_CHANNELS        16  /* Total: 8 channels per unit × 2 units */
+#define DMAC_CHANNELS_PER_UNIT   8   /* Channels per DMAC unit */
+#define DMAC_NUM_UNITS           2   /* Number of DMAC units */
+
+/* Channel ID definitions for both DMAC units:
+ * Unit 0: Channels 0-7
+ * Unit 1: Channels 10-17 (decimal notation)
+ */
+#define DMAC_UNIT0_CH0           0
+#define DMAC_UNIT0_CH1           1
+#define DMAC_UNIT0_CH2           2
+#define DMAC_UNIT0_CH3           3
+#define DMAC_UNIT0_CH4           4
+#define DMAC_UNIT0_CH5           5
+#define DMAC_UNIT0_CH6           6
+#define DMAC_UNIT0_CH7           7
+#define DMAC_UNIT1_CH0           10
+#define DMAC_UNIT1_CH1           11
+#define DMAC_UNIT1_CH2           12
+#define DMAC_UNIT1_CH3           13
+#define DMAC_UNIT1_CH4           14
+#define DMAC_UNIT1_CH5           15
+#define DMAC_UNIT1_CH6           16
+#define DMAC_UNIT1_CH7           17
+
+/* Helper macros to extract unit and local channel from channel ID */
+#define DMAC_GET_UNIT(ch)        (((ch) < 10) ? 0 : 1)
+#define DMAC_GET_LOCAL_CH(ch)    (((ch) < 10) ? (ch) : ((ch) - 10))
 
 #endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_DMAC_H */

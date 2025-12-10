@@ -29,14 +29,26 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* DMA Base Address */
-#ifndef R_DMA_BASE
+/* DMA Base Addresses - Global control for both DMAC units */
+/* DMA0: Controls DMAC Unit 0 (channels 0-7)   at 0x4000A800 */
+/* DMA1: Controls DMAC Unit 1 (channels 10-17) at 0x4000AC00 */
+#ifndef R_DMA0_BASE
 #if !defined(CONFIG_RA_TZ_NONSECURE_BUILD) || (CONFIG_RA_TZ_NONSECURE_BUILD == 0)
-#define R_DMA_BASE           0x4000a800
+#define R_DMA0_BASE          0x4000a800  /* DMA Unit 0 global control */
+#define R_DMA1_BASE          0x4000ac00  /* DMA Unit 1 global control */
 #else
-#define R_DMA_BASE           0x5000a800
+#define R_DMA0_BASE          0x5000a800  /* DMA Unit 0 global control (Non-secure) */
+#define R_DMA1_BASE          0x5000ac00  /* DMA Unit 1 global control (Non-secure) */
 #endif
 #endif
+
+/* Legacy compatibility: R_DMA_BASE maps to DMA Unit 0 */
+#ifndef R_DMA_BASE
+#define R_DMA_BASE           R_DMA0_BASE
+#endif
+
+/* DMA unit base selection macro */
+#define R_DMA_UNIT_BASE(unit) (((unit) == 0) ? R_DMA0_BASE : R_DMA1_BASE)
 
 /* DMA Register Offsets */
 
@@ -48,10 +60,17 @@
 
 /* DMA Register Addresses */
 
-#define R_DMA_DMAST                               (R_DMA_BASE + R_DMA_DMAST_OFFSET)
-#define R_DMA_DMCTL                               (R_DMA_BASE + R_DMA_DMCTL_OFFSET)
-#define R_DMA_DMECHR                              (R_DMA_BASE + R_DMA_DMECHR_OFFSET)
-#define R_DMA_DELSR(m)                            (R_DMA_BASE + R_DMA_DELSR_OFFSET(m))
+/* Legacy macros for Unit 0 (backward compatibility) */
+#define R_DMA_DMAST                               (R_DMA0_BASE + R_DMA_DMAST_OFFSET)
+#define R_DMA_DMCTL                               (R_DMA0_BASE + R_DMA_DMCTL_OFFSET)
+#define R_DMA_DMECHR                              (R_DMA0_BASE + R_DMA_DMECHR_OFFSET)
+#define R_DMA_DELSR(m)                            (R_DMA0_BASE + R_DMA_DELSR_OFFSET(m))
+
+/* Unit-aware macros for both DMA units */
+#define R_DMA_DMAST_UNIT(unit)                    (R_DMA_UNIT_BASE(unit) + R_DMA_DMAST_OFFSET)
+#define R_DMA_DMCTL_UNIT(unit)                    (R_DMA_UNIT_BASE(unit) + R_DMA_DMCTL_OFFSET)
+#define R_DMA_DMECHR_UNIT(unit)                   (R_DMA_UNIT_BASE(unit) + R_DMA_DMECHR_OFFSET)
+#define R_DMA_DELSR_UNIT(unit, m)                 (R_DMA_UNIT_BASE(unit) + R_DMA_DELSR_OFFSET(m))
 
 /* Register bit definitions */
 /* DMAST Register bit definitions */
@@ -88,6 +107,8 @@
 
 /* Maximum number of channels */
 
-#define DMA_MAX_CHANNELS    8
+#define DMA_MAX_CHANNELS         16  /* Total: 8 channels per unit × 2 units */
+#define DMA_CHANNELS_PER_UNIT    8   /* Channels per DMA unit */
+#define DMA_NUM_UNITS            2   /* Number of DMA units */
 
 #endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8P1_DMA_H */

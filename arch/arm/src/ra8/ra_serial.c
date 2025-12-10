@@ -52,9 +52,36 @@
 #include "ra_gpio.h"
 #include "ra_clock.h"
 
+#ifdef CONFIG_SERIAL_TXDMA || CONFIG_SERIAL_RXDMA
+#if CONFIG_RA_DMAC
+#  include "ra_dmac.h"
+#else
+#  error "DMA support required for serial TXDMA or RXDMA"
+#endif
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Default to FIFO mode if not explicitly disabled */
+#if defined(CONFIG_RA_SCI_FIFO_MODE)
+/* Set Trigger levels and release reset
+* For RA8 SCI-B with 16-byte FIFO:
+* RTRG: RX trigger level (configurable via Kconfig, default: 1 for low latency)
+* TTRG: TX trigger level (configurable via Kconfig, default: 15 for efficiency)
+* RSTRG: RTS flow control trigger (set to 15 = fifo_depth - 1)
+*
+* RX interrupt triggers when: count >= RTRG or timeout after 15 bit times
+* TX interrupt triggers when: count <= TTRG (free space available)
+*/
+#ifndef CONFIG_RA_SCI_FIFO_RX_TRIGGER
+#define CONFIG_RA_SCI_FIFO_RX_TRIGGER 1  /* Default: trigger on 1 byte */
+#endif
+#ifndef CONFIG_RA_SCI_FIFO_TX_TRIGGER
+#define CONFIG_RA_SCI_FIFO_TX_TRIGGER 15 /* Default: trigger when ≤15 in FIFO */
+#endif
+#endif
 
 /* Is there a serial console?  */
 
@@ -91,6 +118,54 @@
 #undef CONFIG_SCI1_SERIAL_CONSOLE
 #undef CONFIG_SCI2_SERIAL_CONSOLE
 #undef CONFIG_SCI3_SERIAL_CONSOLE
+#undef CONFIG_SCI5_SERIAL_CONSOLE
+#undef CONFIG_SCI6_SERIAL_CONSOLE
+#undef CONFIG_SCI7_SERIAL_CONSOLE
+#undef CONFIG_SCI8_SERIAL_CONSOLE
+#undef CONFIG_SCI9_SERIAL_CONSOLE
+#define HAVE_CONSOLE        1
+#elif defined(CONFIG_SCI5_SERIAL_CONSOLE) && defined(CONFIG_RA_SCI5_UART)
+#undef CONFIG_SCI0_SERIAL_CONSOLE
+#undef CONFIG_SCI1_SERIAL_CONSOLE
+#undef CONFIG_SCI2_SERIAL_CONSOLE
+#undef CONFIG_SCI3_SERIAL_CONSOLE
+#undef CONFIG_SCI4_SERIAL_CONSOLE
+#undef CONFIG_SCI6_SERIAL_CONSOLE
+#undef CONFIG_SCI7_SERIAL_CONSOLE
+#undef CONFIG_SCI8_SERIAL_CONSOLE
+#undef CONFIG_SCI9_SERIAL_CONSOLE
+#define HAVE_CONSOLE        1
+#elif defined(CONFIG_SCI6_SERIAL_CONSOLE) && defined(CONFIG_RA_SCI6_UART)
+#undef CONFIG_SCI0_SERIAL_CONSOLE
+#undef CONFIG_SCI1_SERIAL_CONSOLE
+#undef CONFIG_SCI2_SERIAL_CONSOLE
+#undef CONFIG_SCI3_SERIAL_CONSOLE
+#undef CONFIG_SCI4_SERIAL_CONSOLE
+#undef CONFIG_SCI5_SERIAL_CONSOLE
+#undef CONFIG_SCI7_SERIAL_CONSOLE
+#undef CONFIG_SCI8_SERIAL_CONSOLE
+#undef CONFIG_SCI9_SERIAL_CONSOLE
+#define HAVE_CONSOLE        1
+#elif defined(CONFIG_SCI7_SERIAL_CONSOLE) && defined(CONFIG_RA_SCI7_UART)
+#undef CONFIG_SCI0_SERIAL_CONSOLE
+#undef CONFIG_SCI1_SERIAL_CONSOLE
+#undef CONFIG_SCI2_SERIAL_CONSOLE
+#undef CONFIG_SCI3_SERIAL_CONSOLE
+#undef CONFIG_SCI4_SERIAL_CONSOLE
+#undef CONFIG_SCI5_SERIAL_CONSOLE
+#undef CONFIG_SCI6_SERIAL_CONSOLE
+#undef CONFIG_SCI8_SERIAL_CONSOLE
+#undef CONFIG_SCI9_SERIAL_CONSOLE
+#define HAVE_CONSOLE        1
+#elif defined(CONFIG_SCI8_SERIAL_CONSOLE) && defined(CONFIG_RA_SCI8_UART)
+#undef CONFIG_SCI0_SERIAL_CONSOLE
+#undef CONFIG_SCI1_SERIAL_CONSOLE
+#undef CONFIG_SCI2_SERIAL_CONSOLE
+#undef CONFIG_SCI3_SERIAL_CONSOLE
+#undef CONFIG_SCI4_SERIAL_CONSOLE
+#undef CONFIG_SCI5_SERIAL_CONSOLE
+#undef CONFIG_SCI6_SERIAL_CONSOLE
+#undef CONFIG_SCI7_SERIAL_CONSOLE
 #undef CONFIG_SCI9_SERIAL_CONSOLE
 #define HAVE_CONSOLE        1
 #elif defined(CONFIG_SCI9_SERIAL_CONSOLE) && defined(CONFIG_RA_SCI9_UART)
@@ -99,6 +174,10 @@
 #undef CONFIG_SCI2_SERIAL_CONSOLE
 #undef CONFIG_SCI3_SERIAL_CONSOLE
 #undef CONFIG_SCI4_SERIAL_CONSOLE
+#undef CONFIG_SCI5_SERIAL_CONSOLE
+#undef CONFIG_SCI6_SERIAL_CONSOLE
+#undef CONFIG_SCI7_SERIAL_CONSOLE
+#undef CONFIG_SCI8_SERIAL_CONSOLE
 #define HAVE_CONSOLE        1
 #else
 #if !defined(CONFIG_NO_SERIAL_CONSOLE) && !defined(CONFIG_SERIAL_RTT_CONSOLE)
@@ -110,6 +189,10 @@
 #undef CONFIG_SCI2_SERIAL_CONSOLE
 #undef CONFIG_SCI3_SERIAL_CONSOLE
 #undef CONFIG_SCI4_SERIAL_CONSOLE
+#undef CONFIG_SCI5_SERIAL_CONSOLE
+#undef CONFIG_SCI6_SERIAL_CONSOLE
+#undef CONFIG_SCI7_SERIAL_CONSOLE
+#undef CONFIG_SCI8_SERIAL_CONSOLE
 #undef CONFIG_SCI9_SERIAL_CONSOLE
 #undef HAVE_CONSOLE
 #endif
@@ -136,6 +219,22 @@
 #define CONSOLE_DEV     g_uart4port /* UART4 is console */
 #define TTYS0_DEV       g_uart4port /* UART4 is ttyS0 */
 #define UART4_ASSIGNED  1
+#elif defined(CONFIG_SCI5_SERIAL_CONSOLE)
+#define CONSOLE_DEV     g_uart5port /* UART5 is console */
+#define TTYS0_DEV       g_uart5port /* UART5 is ttyS0 */
+#define UART5_ASSIGNED  1
+#elif defined(CONFIG_SCI6_SERIAL_CONSOLE)
+#define CONSOLE_DEV     g_uart6port /* UART6 is console */
+#define TTYS0_DEV       g_uart6port /* UART6 is ttyS0 */
+#define UART6_ASSIGNED  1
+#elif defined(CONFIG_SCI7_SERIAL_CONSOLE)
+#define CONSOLE_DEV     g_uart7port /* UART7 is console */
+#define TTYS0_DEV       g_uart7port /* UART7 is ttyS0 */
+#define UART7_ASSIGNED  1
+#elif defined(CONFIG_SCI8_SERIAL_CONSOLE)
+#define CONSOLE_DEV     g_uart8port /* UART8 is console */
+#define TTYS0_DEV       g_uart8port /* UART8 is ttyS0 */
+#define UART8_ASSIGNED  1
 #elif defined(CONFIG_SCI9_SERIAL_CONSOLE)
 #define CONSOLE_DEV     g_uart9port /* UART9 is console */
 #define TTYS0_DEV       g_uart9port /* UART9 is ttyS0 */
@@ -157,6 +256,18 @@
 #elif defined(CONFIG_RA_SCI4_UART)
 #define TTYS0_DEV       g_uart4port /* UART4 is ttyS0 */
 #define UART4_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI5_UART)
+#define TTYS0_DEV       g_uart5port /* UART5 is ttyS0 */
+#define UART5_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI6_UART)
+#define TTYS0_DEV       g_uart6port /* UART6 is ttyS0 */
+#define UART6_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI7_UART)
+#define TTYS0_DEV       g_uart7port /* UART7 is ttyS0 */
+#define UART7_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI8_UART)
+#define TTYS0_DEV       g_uart8port /* UART8 is ttyS0 */
+#define UART8_ASSIGNED  1
 #elif defined(CONFIG_RA_SCI9_UART)
 #define TTYS0_DEV       g_uart9port /* UART9 is ttyS0 */
 #define UART9_ASSIGNED  1
@@ -180,6 +291,18 @@
 #elif defined(CONFIG_RA_SCI4_UART) && !defined(UART4_ASSIGNED)
 #define TTYS1_DEV       g_uart4port /* UART4 is ttyS1 */
 #define UART4_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI5_UART) && !defined(UART5_ASSIGNED)
+#define TTYS1_DEV       g_uart5port /* UART5 is ttyS1 */
+#define UART5_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI6_UART) && !defined(UART6_ASSIGNED)
+#define TTYS1_DEV       g_uart6port /* UART6 is ttyS1 */
+#define UART6_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI7_UART) && !defined(UART7_ASSIGNED)
+#define TTYS1_DEV       g_uart7port /* UART7 is ttyS1 */
+#define UART7_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI8_UART) && !defined(UART8_ASSIGNED)
+#define TTYS1_DEV       g_uart8port /* UART8 is ttyS1 */
+#define UART8_ASSIGNED  1
 #elif defined(CONFIG_RA_SCI9_UART) && !defined(UART9_ASSIGNED)
 #define TTYS1_DEV       g_uart9port /* UART9 is ttyS1 */
 #define UART9_ASSIGNED  1
@@ -202,8 +325,258 @@
 #elif defined(CONFIG_RA_SCI4_UART) && !defined(UART4_ASSIGNED)
 #define TTYS2_DEV       g_uart4port /* UART4 is ttyS2 */
 #define UART4_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI5_UART) && !defined(UART5_ASSIGNED)
+#define TTYS2_DEV       g_uart5port /* UART5 is ttyS2 */
+#define UART5_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI6_UART) && !defined(UART6_ASSIGNED)
+#define TTYS2_DEV       g_uart6port /* UART6 is ttyS2 */
+#define UART6_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI7_UART) && !defined(UART7_ASSIGNED)
+#define TTYS2_DEV       g_uart7port /* UART7 is ttyS2 */
+#define UART7_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI8_UART) && !defined(UART8_ASSIGNED)
+#define TTYS2_DEV       g_uart8port /* UART8 is ttyS2 */
+#define UART8_ASSIGNED  1
 #elif defined(CONFIG_RA_SCI9_UART) && !defined(UART9_ASSIGNED)
 #define TTYS2_DEV       g_uart9port /* UART9 is ttyS2 */
+#define UART9_ASSIGNED  1
+#endif
+
+/* Pick ttys3. */
+
+#if defined(CONFIG_RA_SCI0_UART) && !defined(UART0_ASSIGNED)
+#define TTYS3_DEV       g_uart0port /* UART0 is ttyS3 */
+#define UART0_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI1_UART) && !defined(UART1_ASSIGNED)
+#define TTYS3_DEV       g_uart1port /* UART1 is ttyS3 */
+#define UART1_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI2_UART) && !defined(UART2_ASSIGNED)
+#define TTYS3_DEV       g_uart2port /* UART2 is ttyS3 */
+#define UART2_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI3_UART) && !defined(UART3_ASSIGNED)
+#define TTYS3_DEV       g_uart3port /* UART3 is ttyS3 */
+#define UART3_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI4_UART) && !defined(UART4_ASSIGNED)
+#define TTYS3_DEV       g_uart4port /* UART4 is ttyS3 */
+#define UART4_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI5_UART) && !defined(UART5_ASSIGNED)
+#define TTYS3_DEV       g_uart5port /* UART5 is ttyS3 */
+#define UART5_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI6_UART) && !defined(UART6_ASSIGNED)
+#define TTYS3_DEV       g_uart6port /* UART6 is ttyS3 */
+#define UART6_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI7_UART) && !defined(UART7_ASSIGNED)
+#define TTYS3_DEV       g_uart7port /* UART7 is ttyS3 */
+#define UART7_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI8_UART) && !defined(UART8_ASSIGNED)
+#define TTYS3_DEV       g_uart8port /* UART8 is ttyS3 */
+#define UART8_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI9_UART) && !defined(UART9_ASSIGNED)
+#define TTYS3_DEV       g_uart9port /* UART9 is ttyS3 */
+#define UART9_ASSIGNED  1
+#endif
+
+/* Pick ttys4. */
+
+#if defined(CONFIG_RA_SCI0_UART) && !defined(UART0_ASSIGNED)
+#define TTYS4_DEV       g_uart0port /* UART0 is ttyS4 */
+#define UART0_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI1_UART) && !defined(UART1_ASSIGNED)
+#define TTYS4_DEV       g_uart1port /* UART1 is ttyS4 */
+#define UART1_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI2_UART) && !defined(UART2_ASSIGNED)
+#define TTYS4_DEV       g_uart2port /* UART2 is ttyS4 */
+#define UART2_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI3_UART) && !defined(UART3_ASSIGNED)
+#define TTYS4_DEV       g_uart3port /* UART3 is ttyS4 */
+#define UART3_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI4_UART) && !defined(UART4_ASSIGNED)
+#define TTYS4_DEV       g_uart4port /* UART4 is ttyS4 */
+#define UART4_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI5_UART) && !defined(UART5_ASSIGNED)
+#define TTYS4_DEV       g_uart5port /* UART5 is ttyS4 */
+#define UART5_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI6_UART) && !defined(UART6_ASSIGNED)
+#define TTYS4_DEV       g_uart6port /* UART6 is ttyS4 */
+#define UART6_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI7_UART) && !defined(UART7_ASSIGNED)
+#define TTYS4_DEV       g_uart7port /* UART7 is ttyS4 */
+#define UART7_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI8_UART) && !defined(UART8_ASSIGNED)
+#define TTYS4_DEV       g_uart8port /* UART8 is ttyS4 */
+#define UART8_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI9_UART) && !defined(UART9_ASSIGNED)
+#define TTYS4_DEV       g_uart9port /* UART9 is ttyS4 */
+#define UART9_ASSIGNED  1
+#endif
+
+/* Pick ttys5. */
+
+#if defined(CONFIG_RA_SCI0_UART) && !defined(UART0_ASSIGNED)
+#define TTYS5_DEV       g_uart0port /* UART0 is ttyS5 */
+#define UART0_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI1_UART) && !defined(UART1_ASSIGNED)
+#define TTYS5_DEV       g_uart1port /* UART1 is ttyS5 */
+#define UART1_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI2_UART) && !defined(UART2_ASSIGNED)
+#define TTYS5_DEV       g_uart2port /* UART2 is ttyS5 */
+#define UART2_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI3_UART) && !defined(UART3_ASSIGNED)
+#define TTYS5_DEV       g_uart3port /* UART3 is ttyS5 */
+#define UART3_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI4_UART) && !defined(UART4_ASSIGNED)
+#define TTYS5_DEV       g_uart4port /* UART4 is ttyS5 */
+#define UART4_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI5_UART) && !defined(UART5_ASSIGNED)
+#define TTYS5_DEV       g_uart5port /* UART5 is ttyS5 */
+#define UART5_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI6_UART) && !defined(UART6_ASSIGNED)
+#define TTYS5_DEV       g_uart6port /* UART6 is ttyS5 */
+#define UART6_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI7_UART) && !defined(UART7_ASSIGNED)
+#define TTYS5_DEV       g_uart7port /* UART7 is ttyS5 */
+#define UART7_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI8_UART) && !defined(UART8_ASSIGNED)
+#define TTYS5_DEV       g_uart8port /* UART8 is ttyS5 */
+#define UART8_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI9_UART) && !defined(UART9_ASSIGNED)
+#define TTYS5_DEV       g_uart9port /* UART9 is ttyS5 */
+#define UART9_ASSIGNED  1
+#endif
+
+/* Pick ttys6. */
+
+#if defined(CONFIG_RA_SCI0_UART) && !defined(UART0_ASSIGNED)
+#define TTYS6_DEV       g_uart0port /* UART0 is ttyS6 */
+#define UART0_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI1_UART) && !defined(UART1_ASSIGNED)
+#define TTYS6_DEV       g_uart1port /* UART1 is ttyS6 */
+#define UART1_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI2_UART) && !defined(UART2_ASSIGNED)
+#define TTYS6_DEV       g_uart2port /* UART2 is ttyS6 */
+#define UART2_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI3_UART) && !defined(UART3_ASSIGNED)
+#define TTYS6_DEV       g_uart3port /* UART3 is ttyS6 */
+#define UART3_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI4_UART) && !defined(UART4_ASSIGNED)
+#define TTYS6_DEV       g_uart4port /* UART4 is ttyS6 */
+#define UART4_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI5_UART) && !defined(UART5_ASSIGNED)
+#define TTYS6_DEV       g_uart5port /* UART5 is ttyS6 */
+#define UART5_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI6_UART) && !defined(UART6_ASSIGNED)
+#define TTYS6_DEV       g_uart6port /* UART6 is ttyS6 */
+#define UART6_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI7_UART) && !defined(UART7_ASSIGNED)
+#define TTYS6_DEV       g_uart7port /* UART7 is ttyS6 */
+#define UART7_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI8_UART) && !defined(UART8_ASSIGNED)
+#define TTYS6_DEV       g_uart8port /* UART8 is ttyS6 */
+#define UART8_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI9_UART) && !defined(UART9_ASSIGNED)
+#define TTYS6_DEV       g_uart9port /* UART9 is ttyS6 */
+#define UART9_ASSIGNED  1
+#endif
+
+/* Pick ttys7. */
+
+#if defined(CONFIG_RA_SCI0_UART) && !defined(UART0_ASSIGNED)
+#define TTYS7_DEV       g_uart0port /* UART0 is ttyS7 */
+#define UART0_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI1_UART) && !defined(UART1_ASSIGNED)
+#define TTYS7_DEV       g_uart1port /* UART1 is ttyS7 */
+#define UART1_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI2_UART) && !defined(UART2_ASSIGNED)
+#define TTYS7_DEV       g_uart2port /* UART2 is ttyS7 */
+#define UART2_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI3_UART) && !defined(UART3_ASSIGNED)
+#define TTYS7_DEV       g_uart3port /* UART3 is ttyS7 */
+#define UART3_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI4_UART) && !defined(UART4_ASSIGNED)
+#define TTYS7_DEV       g_uart4port /* UART4 is ttyS7 */
+#define UART4_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI5_UART) && !defined(UART5_ASSIGNED)
+#define TTYS7_DEV       g_uart5port /* UART5 is ttyS7 */
+#define UART5_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI6_UART) && !defined(UART6_ASSIGNED)
+#define TTYS7_DEV       g_uart6port /* UART6 is ttyS7 */
+#define UART6_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI7_UART) && !defined(UART7_ASSIGNED)
+#define TTYS7_DEV       g_uart7port /* UART7 is ttyS7 */
+#define UART7_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI8_UART) && !defined(UART8_ASSIGNED)
+#define TTYS7_DEV       g_uart8port /* UART8 is ttyS7 */
+#define UART8_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI9_UART) && !defined(UART9_ASSIGNED)
+#define TTYS7_DEV       g_uart9port /* UART9 is ttyS7 */
+#define UART9_ASSIGNED  1
+#endif
+
+/* Pick ttys8. */
+
+#if defined(CONFIG_RA_SCI0_UART) && !defined(UART0_ASSIGNED)
+#define TTYS8_DEV       g_uart0port /* UART0 is ttyS8 */
+#define UART0_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI1_UART) && !defined(UART1_ASSIGNED)
+#define TTYS8_DEV       g_uart1port /* UART1 is ttyS8 */
+#define UART1_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI2_UART) && !defined(UART2_ASSIGNED)
+#define TTYS8_DEV       g_uart2port /* UART2 is ttyS8 */
+#define UART2_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI3_UART) && !defined(UART3_ASSIGNED)
+#define TTYS8_DEV       g_uart3port /* UART3 is ttyS8 */
+#define UART3_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI4_UART) && !defined(UART4_ASSIGNED)
+#define TTYS8_DEV       g_uart4port /* UART4 is ttyS8 */
+#define UART4_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI5_UART) && !defined(UART5_ASSIGNED)
+#define TTYS8_DEV       g_uart5port /* UART5 is ttyS8 */
+#define UART5_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI6_UART) && !defined(UART6_ASSIGNED)
+#define TTYS8_DEV       g_uart6port /* UART6 is ttyS8 */
+#define UART6_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI7_UART) && !defined(UART7_ASSIGNED)
+#define TTYS8_DEV       g_uart7port /* UART7 is ttyS8 */
+#define UART7_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI8_UART) && !defined(UART8_ASSIGNED)
+#define TTYS8_DEV       g_uart8port /* UART8 is ttyS8 */
+#define UART8_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI9_UART) && !defined(UART9_ASSIGNED)
+#define TTYS8_DEV       g_uart9port /* UART9 is ttyS8 */
+#define UART9_ASSIGNED  1
+#endif
+
+/* Pick ttys9. */
+
+#if defined(CONFIG_RA_SCI0_UART) && !defined(UART0_ASSIGNED)
+#define TTYS9_DEV       g_uart0port /* UART0 is ttyS9 */
+#define UART0_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI1_UART) && !defined(UART1_ASSIGNED)
+#define TTYS9_DEV       g_uart1port /* UART1 is ttyS9 */
+#define UART1_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI2_UART) && !defined(UART2_ASSIGNED)
+#define TTYS9_DEV       g_uart2port /* UART2 is ttyS9 */
+#define UART2_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI3_UART) && !defined(UART3_ASSIGNED)
+#define TTYS9_DEV       g_uart3port /* UART3 is ttyS9 */
+#define UART3_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI4_UART) && !defined(UART4_ASSIGNED)
+#define TTYS9_DEV       g_uart4port /* UART4 is ttyS9 */
+#define UART4_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI5_UART) && !defined(UART5_ASSIGNED)
+#define TTYS9_DEV       g_uart5port /* UART5 is ttyS9 */
+#define UART5_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI6_UART) && !defined(UART6_ASSIGNED)
+#define TTYS9_DEV       g_uart6port /* UART6 is ttyS9 */
+#define UART6_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI7_UART) && !defined(UART7_ASSIGNED)
+#define TTYS9_DEV       g_uart7port /* UART7 is ttyS9 */
+#define UART7_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI8_UART) && !defined(UART8_ASSIGNED)
+#define TTYS9_DEV       g_uart8port /* UART8 is ttyS9 */
+#define UART8_ASSIGNED  1
+#elif defined(CONFIG_RA_SCI9_UART) && !defined(UART9_ASSIGNED)
+#define TTYS9_DEV       g_uart9port /* UART9 is ttyS9 */
 #define UART9_ASSIGNED  1
 #endif
 
@@ -218,6 +591,14 @@
 #elif defined(CONFIG_RA_SCI3_UART)
 #  define HAVE_UART 1
 #elif defined(CONFIG_RA_SCI4_UART)
+#  define HAVE_UART 1
+#elif defined(CONFIG_RA_SCI5_UART)
+#  define HAVE_UART 1
+#elif defined(CONFIG_RA_SCI6_UART)
+#  define HAVE_UART 1
+#elif defined(CONFIG_RA_SCI7_UART)
+#  define HAVE_UART 1
+#elif defined(CONFIG_RA_SCI8_UART)
 #  define HAVE_UART 1
 #elif defined(CONFIG_RA_SCI9_UART)
 #  define HAVE_UART 1
@@ -267,6 +648,22 @@ struct up_dev_s
   int parity;               /* 0=none, 1=odd, 2=even */
   int bits;                 /* Number of bits (5-9) */
   bool stopbits2;           /* true: Configure with 2 stop bits instead of 1 */
+  uint8_t fifo_depth;       /* FIFO depth: 0=no FIFO, 16=FIFO supported */
+
+#ifdef CONFIG_SERIAL_TXDMA
+  ra_dmac_handle_t  dma_tx_handle; /* DMAC handle for TX */
+  int               dma_tx_chn;    /* DMAC channel for TX */
+  sem_t             dmatx_sem;     /* Sem for DMA wait */
+#endif
+
+#ifdef CONFIG_SERIAL_RXDMA
+  ra_dmac_handle_t  dma_rx_handle; /* DMAC handle for RX */
+  int               dma_rx_chn;    /* DMAC channel for RX */
+  uint8_t          *rx_dma_buf;    /* Buffer for RX DMAC */
+  size_t            rx_dma_size;   /* Size of RX DMAC buffer */
+  size_t            rx_dma_pos;    /* Current read position */
+  sem_t             dmarx_sem;     /* Sem for DMA wait */
+#endif
 };
 
 static const struct uart_ops_s g_uart_ops =
@@ -280,7 +677,16 @@ static const struct uart_ops_s g_uart_ops =
   .rxint        = up_rxint,
   .rxavailable  = up_rxavailable,
   .send         = up_send,
+#ifdef CONFIG_SERIAL_TXDMA
+  .dmasend      = up_dma_send,
+  .dmatxavail   = up_dma_txavailable,
+  .txint        = up_dma_txint,
+#else
   .txint        = up_txint,
+#endif
+#ifdef CONFIG_SERIAL_RXDMA
+  .dmarxavail   = up_dma_rxavailable,
+#endif
   .txready      = up_txready,
   .txempty      = up_txempty,
 };
@@ -311,6 +717,26 @@ static char g_uart4rxbuffer[CONFIG_SCI4_RXBUFSIZE];
 static char g_uart4txbuffer[CONFIG_SCI4_TXBUFSIZE];
 #endif
 
+#ifdef CONFIG_RA_SCI5_UART
+static char g_uart5rxbuffer[CONFIG_SCI5_RXBUFSIZE];
+static char g_uart5txbuffer[CONFIG_SCI5_TXBUFSIZE];
+#endif
+
+#ifdef CONFIG_RA_SCI6_UART
+static char g_uart6rxbuffer[CONFIG_SCI6_RXBUFSIZE];
+static char g_uart6txbuffer[CONFIG_SCI6_TXBUFSIZE];
+#endif
+
+#ifdef CONFIG_RA_SCI7_UART
+static char g_uart7rxbuffer[CONFIG_SCI7_RXBUFSIZE];
+static char g_uart7txbuffer[CONFIG_SCI7_TXBUFSIZE];
+#endif
+
+#ifdef CONFIG_RA_SCI8_UART
+static char g_uart8rxbuffer[CONFIG_SCI8_RXBUFSIZE];
+static char g_uart8txbuffer[CONFIG_SCI8_TXBUFSIZE];
+#endif
+
 #ifdef CONFIG_RA_SCI9_UART
 static char g_uart9rxbuffer[CONFIG_SCI9_RXBUFSIZE];
 static char g_uart9txbuffer[CONFIG_SCI9_TXBUFSIZE];
@@ -333,6 +759,12 @@ static struct up_dev_s  g_uart0priv =
   .parity       = CONFIG_SCI0_PARITY,
   .bits         = CONFIG_SCI0_BITS,
   .stopbits2    = CONFIG_SCI0_2STOP,
+#ifdef CONFIG_SERIAL_TXDMA
+  .dma_tx_chn   = CONFIG_RA_DMAC_UART0_TX_CHANNEL,
+#endif
+#ifdef CONFIG_SERIAL_RXDMA
+  .dma_rx_chn   = CONFIG_RA_DMAC_UART0_RX_CHANNEL,
+#endif
 };
 
 static uart_dev_t g_uart0port =
@@ -369,6 +801,12 @@ static struct up_dev_s  g_uart1priv =
   .parity       = CONFIG_SCI1_PARITY,
   .bits         = CONFIG_SCI1_BITS,
   .stopbits2    = CONFIG_SCI1_2STOP,
+#ifdef CONFIG_SERIAL_TXDMA
+  .dma_tx_chn   = CONFIG_RA_DMAC_UART1_TX_CHANNEL,
+#endif
+#ifdef CONFIG_SERIAL_RXDMA
+  .dma_rx_chn   = CONFIG_RA_DMAC_UART1_RX_CHANNEL,
+#endif
 };
 
 static uart_dev_t  g_uart1port =
@@ -405,6 +843,12 @@ static struct up_dev_s  g_uart2priv =
   .parity       = CONFIG_SCI2_PARITY,
   .bits         = CONFIG_SCI2_BITS,
   .stopbits2    = CONFIG_SCI2_2STOP,
+#ifdef CONFIG_SERIAL_TXDMA
+  .dma_tx_chn   = CONFIG_RA_DMAC_UART2_TX_CHANNEL,
+#endif
+#ifdef CONFIG_SERIAL_RXDMA
+  .dma_rx_chn   = CONFIG_RA_DMAC_UART2_RX_CHANNEL,
+#endif
 };
 
 static uart_dev_t  g_uart2port =
@@ -441,6 +885,12 @@ static struct up_dev_s  g_uart3priv =
   .parity       = CONFIG_SCI3_PARITY,
   .bits         = CONFIG_SCI3_BITS,
   .stopbits2    = CONFIG_SCI3_2STOP,
+#ifdef CONFIG_SERIAL_TXDMA
+  .dma_tx_chn   = CONFIG_RA_DMAC_UART3_TX_CHANNEL,
+#endif
+#ifdef CONFIG_SERIAL_RXDMA
+  .dma_rx_chn   = CONFIG_RA_DMAC_UART3_RX_CHANNEL,
+#endif
 };
 
 static uart_dev_t  g_uart3port =
@@ -477,6 +927,12 @@ static struct up_dev_s  g_uart4priv =
   .parity       = CONFIG_SCI4_PARITY,
   .bits         = CONFIG_SCI4_BITS,
   .stopbits2    = CONFIG_SCI4_2STOP,
+#ifdef CONFIG_SERIAL_TXDMA
+  .dma_tx_chn   = CONFIG_RA_DMAC_UART4_TX_CHANNEL,
+#endif
+#ifdef CONFIG_SERIAL_RXDMA
+  .dma_rx_chn   = CONFIG_RA_DMAC_UART4_RX_CHANNEL,
+#endif
 };
 
 static uart_dev_t  g_uart4port =
@@ -493,6 +949,174 @@ static uart_dev_t  g_uart4port =
   },
   .ops   = &g_uart_ops,
   .priv = &g_uart4priv,
+};
+#endif
+
+#ifdef CONFIG_RA_SCI5_UART
+static struct up_dev_s  g_uart5priv =
+{
+  .scibase      = R_SCI_B_CH_BASE(5),
+  .mstp         = R_MSTP_MSTPCRB_SCI5,
+  .rxi_irq      = -1,               /* Will be assigned by ICU */
+  .txi_irq      = -1,               /* Will be assigned by ICU */
+  .tei_irq      = -1,               /* Will be assigned by ICU */
+  .eri_irq      = -1,               /* Will be assigned by ICU */
+  .elc_rx       = RA_ELC_SCI5_RXI,
+  .elc_tx       = RA_ELC_SCI5_TXI,
+  .elc_txe      = RA_ELC_SCI5_TEI,
+  .elc_err      = RA_ELC_SCI5_ERI,
+  .baud         = CONFIG_SCI5_BAUD,
+  .parity       = CONFIG_SCI5_PARITY,
+  .bits         = CONFIG_SCI5_BITS,
+  .stopbits2    = CONFIG_SCI5_2STOP,
+#ifdef CONFIG_SERIAL_TXDMA
+  .dma_tx_chn   = CONFIG_RA_DMAC_UART5_TX_CHANNEL,
+#endif
+#ifdef CONFIG_SERIAL_RXDMA
+  .dma_rx_chn   = CONFIG_RA_DMAC_UART5_RX_CHANNEL,
+#endif
+};
+
+static uart_dev_t  g_uart5port =
+{
+  .recv     =
+  {
+    .size   = CONFIG_SCI5_RXBUFSIZE,
+    .buffer = g_uart5rxbuffer,
+  },
+  .xmit  =
+  {
+    .size   = CONFIG_SCI5_TXBUFSIZE,
+    .buffer = g_uart5txbuffer,
+  },
+  .ops   = &g_uart_ops,
+  .priv = &g_uart5priv,
+};
+#endif
+
+#ifdef CONFIG_RA_SCI6_UART
+static struct up_dev_s  g_uart6priv =
+{
+  .scibase      = R_SCI_B_CH_BASE(6),
+  .mstp         = R_MSTP_MSTPCRB_SCI6,
+  .rxi_irq      = -1,               /* Will be assigned by ICU */
+  .txi_irq      = -1,               /* Will be assigned by ICU */
+  .tei_irq      = -1,               /* Will be assigned by ICU */
+  .eri_irq      = -1,               /* Will be assigned by ICU */
+  .elc_rx       = RA_ELC_SCI6_RXI,
+  .elc_tx       = RA_ELC_SCI6_TXI,
+  .elc_txe      = RA_ELC_SCI6_TEI,
+  .elc_err      = RA_ELC_SCI6_ERI,
+  .baud         = CONFIG_SCI6_BAUD,
+  .parity       = CONFIG_SCI6_PARITY,
+  .bits         = CONFIG_SCI6_BITS,
+  .stopbits2    = CONFIG_SCI6_2STOP,
+#ifdef CONFIG_SERIAL_TXDMA
+  .dma_tx_chn   = CONFIG_RA_DMAC_UART6_TX_CHANNEL,
+#endif
+#ifdef CONFIG_SERIAL_RXDMA
+  .dma_rx_chn   = CONFIG_RA_DMAC_UART6_RX_CHANNEL,
+#endif
+};
+
+static uart_dev_t  g_uart6port =
+{
+  .recv     =
+  {
+    .size   = CONFIG_SCI6_RXBUFSIZE,
+    .buffer = g_uart6rxbuffer,
+  },
+  .xmit  =
+  {
+    .size   = CONFIG_SCI6_TXBUFSIZE,
+    .buffer = g_uart6txbuffer,
+  },
+  .ops   = &g_uart_ops,
+  .priv = &g_uart6priv,
+};
+#endif
+
+#ifdef CONFIG_RA_SCI7_UART
+static struct up_dev_s  g_uart7priv =
+{
+  .scibase      = R_SCI_B_CH_BASE(7),
+  .mstp         = R_MSTP_MSTPCRB_SCI7,
+  .rxi_irq      = -1,               /* Will be assigned by ICU */
+  .txi_irq      = -1,               /* Will be assigned by ICU */
+  .tei_irq      = -1,               /* Will be assigned by ICU */
+  .eri_irq      = -1,               /* Will be assigned by ICU */
+  .elc_rx       = RA_ELC_SCI7_RXI,
+  .elc_tx       = RA_ELC_SCI7_TXI,
+  .elc_txe      = RA_ELC_SCI7_TEI,
+  .elc_err      = RA_ELC_SCI7_ERI,
+  .baud         = CONFIG_SCI7_BAUD,
+  .parity       = CONFIG_SCI7_PARITY,
+  .bits         = CONFIG_SCI7_BITS,
+  .stopbits2    = CONFIG_SCI7_2STOP,
+#ifdef CONFIG_SERIAL_TXDMA
+  .dma_tx_chn   = CONFIG_RA_DMAC_UART7_TX_CHANNEL,
+#endif
+#ifdef CONFIG_SERIAL_RXDMA
+  .dma_rx_chn   = CONFIG_RA_DMAC_UART7_RX_CHANNEL,
+#endif
+};
+
+static uart_dev_t  g_uart7port =
+{
+  .recv     =
+  {
+    .size   = CONFIG_SCI7_RXBUFSIZE,
+    .buffer = g_uart7rxbuffer,
+  },
+  .xmit  =
+  {
+    .size   = CONFIG_SCI7_TXBUFSIZE,
+    .buffer = g_uart7txbuffer,
+  },
+  .ops   = &g_uart_ops,
+  .priv = &g_uart7priv,
+};
+#endif
+
+#ifdef CONFIG_RA_SCI8_UART
+static struct up_dev_s  g_uart8priv =
+{
+  .scibase      = R_SCI_B_CH_BASE(8),
+  .mstp         = R_MSTP_MSTPCRB_SCI8,
+  .rxi_irq      = -1,               /* Will be assigned by ICU */
+  .txi_irq      = -1,               /* Will be assigned by ICU */
+  .tei_irq      = -1,               /* Will be assigned by ICU */
+  .eri_irq      = -1,               /* Will be assigned by ICU */
+  .elc_rx       = RA_ELC_SCI8_RXI,
+  .elc_tx       = RA_ELC_SCI8_TXI,
+  .elc_txe      = RA_ELC_SCI8_TEI,
+  .elc_err      = RA_ELC_SCI8_ERI,
+  .baud         = CONFIG_SCI8_BAUD,
+  .parity       = CONFIG_SCI8_PARITY,
+  .bits         = CONFIG_SCI8_BITS,
+  .stopbits2    = CONFIG_SCI8_2STOP,
+#ifdef CONFIG_SERIAL_TXDMA
+  .dma_tx_chn   = CONFIG_RA_DMAC_UART8_TX_CHANNEL,
+#endif
+#ifdef CONFIG_SERIAL_RXDMA
+  .dma_rx_chn   = CONFIG_RA_DMAC_UART8_RX_CHANNEL,
+#endif
+};
+
+static uart_dev_t  g_uart8port =
+{
+  .recv     =
+  {
+    .size   = CONFIG_SCI8_RXBUFSIZE,
+    .buffer = g_uart8rxbuffer,
+  },
+  .xmit  =
+  {
+    .size   = CONFIG_SCI8_TXBUFSIZE,
+    .buffer = g_uart8txbuffer,
+  },
+  .ops   = &g_uart_ops,
+  .priv = &g_uart8priv,
 };
 #endif
 
@@ -513,6 +1137,12 @@ static struct up_dev_s  g_uart9priv =
   .parity       = CONFIG_SCI9_PARITY,
   .bits         = CONFIG_SCI9_BITS,
   .stopbits2    = CONFIG_SCI9_2STOP,
+#ifdef CONFIG_SERIAL_TXDMA
+  .dma_tx_chn   = CONFIG_RA_DMAC_UART9_TX_CHANNEL,
+#endif
+#ifdef CONFIG_SERIAL_RXDMA
+  .dma_rx_chn   = CONFIG_RA_DMAC_UART9_RX_CHANNEL,
+#endif
 };
 
 static uart_dev_t  g_uart9port =
@@ -932,20 +1562,24 @@ static void up_sci_config(struct up_dev_s *priv)
 
   up_serialout(priv, R_SCI_B_CCR2_OFFSET, regval);
 
- // _info("SCI%d: Baud %lu, CCR2=0x%08lx (BGDM=%d, ABCS=%d, ABCSE=%d, ABCSE2=%d, CKS=%d, BRR=%d, MDDR=%d)\n",
-  //       priv->scibase == R_SCI0_B_BASE ? 0 :
-  //       priv->scibase == R_SCI1_B_BASE ? 1 :
-  //       priv->scibase == R_SCI2_B_BASE ? 2 :
-  //       priv->scibase == R_SCI3_B_BASE ? 3 :
-  //       priv->scibase == R_SCI4_B_BASE ? 4 : 9,
-  //       (unsigned long)priv->baud, (unsigned long)regval,
-  //       baud_setting.bgdm, baud_setting.abcs, baud_setting.abcse, baud_setting.abcse2,
-  //       baud_setting.cks, baud_setting.brr, baud_setting.mddr);
+
+  /* Detect FIFO capability for this channel */
+  priv->fifo_depth = 0;
+#ifdef CONFIG_RA_SCI_FIFO_MODE
+  priv->fifo_depth = 16; /* RA8 SCI-B channels have 16-byte TX/RX FIFOs */
+#endif
 
   /* Configure CCR3 for character format
    * From working XML: CHR=2 (8-bit), LSBF=1, RXDESEL=1 = 0x00009200
+   * Enable FIFO Mode (FM=1) only if channel supports it
    */
-  regval = R_SCI_B_CCR3_LSBF | R_SCI_B_CCR3_RXDESEL; /* Base configuration from XML */
+  regval = R_SCI_B_CCR3_LSBF | R_SCI_B_CCR3_RXDESEL;
+#ifdef CONFIG_RA_SCI_FIFO_MODE
+  if (priv->fifo_depth > 0)
+    {
+      regval |= R_SCI_B_CCR3_FM;
+    }
+#endif
 
   if (priv->bits == 7)
     {
@@ -966,6 +1600,24 @@ static void up_sci_config(struct up_dev_s *priv)
   /* Configure CCR4 - no special features needed */
   regval = 0;
   up_serialout(priv, R_SCI_B_CCR4_OFFSET, regval);
+
+#ifdef CONFIG_RA_SCI_FIFO_MODE
+  /* Configure FIFO (FCR) only if channel supports it */
+  if (priv->fifo_depth > 0)
+    {
+      /* Reset FIFOs first (RFRST=1, TFRST=1) */
+      up_serialout(priv, R_SCI_B_FCR_OFFSET, R_SCI_B_FCR_RFRST | R_SCI_B_FCR_TFRST);
+
+      uint32_t rx_trig = CONFIG_RA_SCI_FIFO_RX_TRIGGER & 0xF;
+      uint32_t tx_trig = CONFIG_RA_SCI_FIFO_TX_TRIGGER & 0xF;
+      uint32_t rts_trig = 15; /* RTS flow control at 15 (FIFO nearly full) */
+
+      uint32_t fcr_val = (rx_trig << R_SCI_B_FCR_RTRG_SHIFT) |
+                         (tx_trig << R_SCI_B_FCR_TTRG_SHIFT) |
+                         (rts_trig << R_SCI_B_FCR_RSTRG_SHIFT);
+      up_serialout(priv, R_SCI_B_FCR_OFFSET, fcr_val);
+    }
+#endif
 
   /* Clear any pending status flags */
   up_serialout(priv, R_SCI_B_CFCLR_OFFSET, 0xFFFFFFFF);
@@ -1062,6 +1714,65 @@ static int up_attach(struct uart_dev_s *dev)
   struct up_dev_s   *priv = (struct up_dev_s *)dev->priv;
   int               ret;
 
+#ifdef CONFIG_SERIAL_TXDMA
+  /* Initialize DMAC for TX if channel is assigned */
+  if (priv->dma_tx_chn >= 0)
+    {
+      ra_dmac_config_t dma_cfg;
+      memset(&dma_cfg, 0, sizeof(dma_cfg));
+
+      dma_cfg.mode = RA_DMAC_MODE_NORMAL;
+      dma_cfg.size = RA_DMAC_SIZE_BYTE;
+      dma_cfg.src_addr_mode = RA_DMAC_ADDR_INCR;
+      dma_cfg.dest_addr_mode = RA_DMAC_ADDR_FIXED;
+      dma_cfg.dest_addr = (uint32_t)(priv->scibase + R_SCI_B_TDR_OFFSET);
+      dma_cfg.trigger = priv->elc_tx; /* Trigger on SCI TXI */
+      dma_cfg.callback = up_dma_txcallback;
+      dma_cfg.user_data = dev;
+
+      /* Open DMAC channel */
+      ret = ra_dmac_open_channel(priv->dma_tx_chn, &priv->dma_tx_handle, &dma_cfg);
+      if (ret < 0)
+        {
+          serr("ERROR: Failed to open DMAC channel %d for SCI TX: %d\n",
+               priv->dma_tx_chn, ret);
+          /* Fallback to interrupt mode? For now, just warn. */
+        }
+      else
+        {
+          nxsem_init(&priv->dmatx_sem, 0, 0);
+        }
+    }
+#endif
+
+#ifdef CONFIG_SERIAL_RXDMA
+  /* Initialize DMAC for RX */
+  if (priv->dma_rx_chn >= 0)
+    {
+      ra_dmac_config_t dma_cfg;
+      memset(&dma_cfg, 0, sizeof(dma_cfg));
+
+      dma_cfg.mode = RA_DMAC_MODE_NORMAL;
+      dma_cfg.src_addr = (uint32_t)(priv->scibase + R_SCI_B_RDR_OFFSET);
+      dma_cfg.dest_addr = (uint32_t)dev->recv.buffer;
+      dma_cfg.transfer_size = RA_DMAC_TRANSFER_SIZE_1BYTE;
+      dma_cfg.src_addr_mode = RA_DMAC_ADDR_MODE_FIXED;
+      dma_cfg.dest_addr_mode = RA_DMAC_ADDR_MODE_INCREMENTED;
+      dma_cfg.trigger = priv->elc_rx; /* Trigger on SCI RXI */
+      dma_cfg.callback = up_dma_rxcallback;
+      dma_cfg.user_data = dev;
+
+      /* Open DMAC channel */
+      ret = ra_dmac_open_channel(priv->dma_rx_chn, &priv->dma_rx_handle, &dma_cfg);
+      if (ret < 0)
+        {
+          serr("ERROR: Failed to open DMAC channel %d for SCI RX: %d\n",
+               priv->dma_rx_chn, ret);
+          /* Fallback to interrupt mode? For now, just warn. */
+        }
+    }
+#endif
+
   /* Attach and enable the IRQ using the ICU API */
 
   ret = ra_icu_attach(priv->elc_rx, up_rxinterrupt, dev, true);
@@ -1071,6 +1782,10 @@ static int up_attach(struct uart_dev_s *dev)
     }
   priv->rxi_irq = ret; /* Store the assigned IRQ number */
 
+  /* For TX, if using DMA, we still attach the interrupt but might keep it disabled
+   * or use it for special cases. The DMAC will consume the ELC event.
+   * However, NuttX serial logic expects us to enable/disable TX interrupts.
+   */
   ret = ra_icu_attach(priv->elc_tx, up_txinterrupt, dev, true);
   if (ret < 0)
     {
@@ -1105,6 +1820,23 @@ static void up_detach(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
 
+#ifdef CONFIG_SERIAL_TXDMA
+  if (priv->dma_tx_handle)
+    {
+      ra_dmac_close(priv->dma_tx_handle);
+      priv->dma_tx_handle = NULL;
+      nxsem_destroy(&priv->dmatx_sem);
+    }
+#endif
+
+#ifdef CONFIG_SERIAL_RXDMA
+  if (priv->dma_rx_handle)
+    {
+      ra_dmac_close(priv->dma_rx_handle);
+      priv->dma_rx_handle = NULL;
+    }
+#endif
+
   ra_icu_detach(priv->rxi_irq);
   ra_icu_detach(priv->txi_irq);
   ra_icu_detach(priv->tei_irq);
@@ -1122,6 +1854,17 @@ static void up_detach(struct uart_dev_s *dev)
 static int up_rxinterrupt(int irq, void *context, void *arg)
 {
   struct uart_dev_s *dev = (struct uart_dev_s *)arg;
+
+#ifdef CONFIG_SERIAL_RXDMA
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+  if (priv->dma_rx_handle)
+    {
+      /* DMAC transfer in progress - update availability */
+      up_dma_rxavailable(dev);
+      uart_recvchars(dev);
+      return OK;
+    }
+#endif
 
   uart_recvchars(dev);
 
@@ -1236,8 +1979,13 @@ static int up_receive(struct uart_dev_s *dev, unsigned int *status)
   /* Read the received byte from RDR_BY register */
   ch = (int)(up_serialin(priv, R_SCI_B_RDR_OFFSET) & 0xff);
 
-  /* Clear RDRF flag by writing to CFCLR register (SCI_B requirement) */
+  /* In FIFO mode, reading RDR updates the FIFO count.
+   * RDRF is a status flag based on count >= RTRG.
+   * We do NOT clear RDRF manually here.
+   */
+#ifndef CONFIG_RA_SCI_FIFO_MODE
   up_serialout(priv, R_SCI_B_CFCLR_OFFSET, R_SCI_B_CFCLR_RDRFC);
+#endif
 
   return ch;
 }
@@ -1288,8 +2036,213 @@ static bool up_rxavailable(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
 
-  return (up_serialin(priv, R_SCI_B_CSR_OFFSET) & R_SCI_B_CSR_RDRF) != 0;
+#ifdef CONFIG_SERIAL_RXDMA
+  if (priv->dma_rx_handle)
+    {
+      up_dma_rxavailable(dev);
+      return (dev->recv.head != dev->recv.tail);
+    }
+#endif
+
+  /* Check FRSR.DR (Data Ready) bit for FIFO mode */
+  return (up_serialin(priv, R_SCI_B_FRSR_OFFSET) & R_SCI_B_FRSR_DR) != 0;
 }
+
+#ifdef CONFIG_SERIAL_TXDMA
+/****************************************************************************
+ * Name: up_dma_txcallback
+ *
+ * Description:
+ *   This function is called when the DMA transfer is complete.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SERIAL_RXDMA
+/****************************************************************************
+ * Name: up_dma_rxavailable
+ *
+ * Description:
+ *   Check for available RX data in DMA buffer and update head pointer.
+ *
+ ****************************************************************************/
+
+static void up_dma_rxavailable(struct uart_dev_s *dev)
+{
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+
+  if (priv->dma_rx_handle)
+    {
+      uint32_t remaining = ra_dmac_getcount(priv->dma_rx_handle);
+      uint32_t received = dev->recv.size - remaining;
+
+      /* Update head. Assuming buffer starts at index 0. */
+      dev->recv.head = received % dev->recv.size;
+
+      /* Notify upper half */
+      uart_recvchars(dev);
+    }
+}
+
+/****************************************************************************
+ * Name: up_dma_rxcallback
+ *
+ * Description:
+ *   DMAC callback for RX transfer completion (buffer full).
+ *
+ ****************************************************************************/
+
+static void up_dma_rxcallback(ra_dmac_handle_t handle, uint32_t event, void *user_data)
+{
+  struct uart_dev_s *dev = (struct uart_dev_s *)user_data;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+
+  /* DMAC completion event */
+  if (event == RA_DMAC_EVENT_TRANSFER_END)
+    {
+      /* Transfer complete - update head position */
+      up_dma_rxavailable(dev);
+
+      /* Notify upper half of received data */
+      uart_recvchars(dev);
+    }
+}
+#endif
+
+static void up_dma_txcallback(ra_dmac_handle_t handle, uint32_t event, void *arg)
+{
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
+  struct up_dev_s   *priv = (struct up_dev_s *)dev->priv;
+
+  if (event & RA_DMAC_EVENT_COMPLETE)
+    {
+      /* DMA transfer completed.
+       * Notify the upper half that the transfer is done.
+       */
+      uart_xmitchars(dev);
+    }
+}
+
+/****************************************************************************
+ * Name: up_dma_txavailable
+ *
+ * Description:
+ *   This function is called to check if DMA is available.
+ *
+ ****************************************************************************/
+
+static void up_dma_txavailable(struct uart_dev_s *dev)
+{
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+
+  /* If DMA is not initialized, fallback to interrupt */
+  if (priv->dma_tx_handle == NULL)
+    {
+      uart_xmitchars(dev);
+      return;
+    }
+
+  /* If DMA is busy, do nothing. The callback will trigger next send. */
+  /* Note: We might need a way to check if DMA is active.
+   * For now, we assume uart_xmitchars handles the flow.
+   */
+  uart_xmitchars(dev);
+}
+
+/****************************************************************************
+ * Name: up_dma_send
+ *
+ * Description:
+ *   This function is called to start a DMA transfer.
+ *
+ ****************************************************************************/
+
+static void up_dma_send(struct uart_dev_s *dev)
+{
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+
+  /* If DMA is not initialized, fallback to interrupt send (not implemented here) */
+  if (priv->dma_tx_handle == NULL)
+    {
+      /* This should not happen if dmasend is called */
+      return;
+    }
+
+  /* Setup DMA transfer */
+  /* Note: dev->dmatx.buffer and dev->dmatx.length are set by upper half */
+
+  /* We need to flush cache if buffer is in cacheable region */
+  up_clean_dcache((uintptr_t)dev->dmatx.buffer,
+                  (uintptr_t)dev->dmatx.buffer + dev->dmatx.length);
+
+  /* Reload DMAC configuration with new buffer */
+  ra_dmac_reload(priv->dma_tx_handle,
+                 (uint32_t)dev->dmatx.buffer,
+                 (uint32_t)(priv->scibase + R_SCI_B_TDR_OFFSET),
+                 dev->dmatx.length);
+
+  /* Start DMAC */
+  ra_dmac_start(priv->dma_tx_handle);
+
+  /* Enable TX interrupts (TIE) to trigger DMAC?
+   * On RA, the DMAC is triggered by the ELC event (SCI TXI).
+   * We need to ensure SCI TXI is generated.
+   * Setting TIE in CCR0 enables the interrupt output.
+   * If DMAC is linked to the event, it intercepts it.
+   */
+  uint32_t regval = up_serialin(priv, R_SCI_B_CCR0_OFFSET);
+  regval |= R_SCI_B_CCR0_TIE;
+  up_serialout(priv, R_SCI_B_CCR0_OFFSET, regval);
+}
+
+/****************************************************************************
+ * Name: up_dma_txint
+ *
+ * Description:
+ *   Call to enable or disable TX interrupts for DMA
+ *
+ ****************************************************************************/
+
+static void up_dma_txint(struct uart_dev_s *dev, bool enable)
+{
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+  if (enable)
+    {
+      /* Enable the TX interrupt to trigger DMA */
+      uint32_t regval = up_serialin(priv, R_SCI_B_CCR0_OFFSET);
+      regval |= R_SCI_B_CCR0_TIE;
+      up_serialout(priv, R_SCI_B_CCR0_OFFSET, regval);
+
+      /* If we are not using DMA (fallback), we would call uart_xmitchars here */
+      if (priv->dma_tx_handle == NULL)
+        {
+           uart_xmitchars(dev);
+        }
+      else
+        {
+           /* Trigger DMA if needed? Usually enabling TIE is enough if TDR is empty */
+           up_dma_txavailable(dev);
+        }
+    }
+  else
+    {
+      /* Disable the TX interrupt */
+      uint32_t regval = up_serialin(priv, R_SCI_B_CCR0_OFFSET);
+      regval &= ~R_SCI_B_CCR0_TIE;
+      up_serialout(priv, R_SCI_B_CCR0_OFFSET, regval);
+
+      /* Also stop DMA if running? */
+      if (priv->dma_tx_handle)
+        {
+          ra_dmac_stop(priv->dma_tx_handle);
+        }
+    }
+
+  leave_critical_section(flags);
+}
+#endif
 
 /****************************************************************************
  * Name: up_send
@@ -1306,8 +2259,12 @@ static void up_send(struct uart_dev_s *dev, int ch)
   /* Send the character to TDR_BY register (byte access) */
   up_serialout(priv, R_SCI_B_TDR_OFFSET, (uint8_t)ch);
 
-  /* Clear TDRE flag by writing to CFCLR register */
+  /* In FIFO mode, TDRE is a status flag based on count <= TTRG.
+   * We do NOT clear TDRE manually here.
+   */
+#ifndef CONFIG_RA_SCI_FIFO_MODE
   up_serialout(priv, R_SCI_B_CFCLR_OFFSET, R_SCI_B_CFCLR_TDREC);
+#endif
 }
 
 /****************************************************************************
@@ -1415,6 +2372,18 @@ void arm_earlyserialinit(void)
 #ifdef TTYS5_DEV
   up_disableallints(TTYS5_DEV.priv, NULL);
 #endif
+#ifdef TTYS6_DEV
+  up_disableallints(TTYS6_DEV.priv, NULL);
+#endif
+#ifdef TTYS7_DEV
+  up_disableallints(TTYS7_DEV.priv, NULL);
+#endif
+#ifdef TTYS8_DEV
+  up_disableallints(TTYS8_DEV.priv, NULL);
+#endif
+#ifdef TTYS9_DEV
+  up_disableallints(TTYS9_DEV.priv, NULL);
+#endif
 
 #ifdef HAVE_CONSOLE
   /* Configure the console device */
@@ -1429,7 +2398,11 @@ void arm_earlyserialinit(void)
 #ifndef HAVE_CONSOLE
   /* If no console, or if TTYS0 is not the console, initialize it */
   up_setup(&TTYS0_DEV);
-#elif !defined(CONFIG_SCI0_SERIAL_CONSOLE) && !defined(CONFIG_SCI1_SERIAL_CONSOLE) && !defined(CONFIG_SCI2_SERIAL_CONSOLE) && !defined(CONFIG_SCI3_SERIAL_CONSOLE) && !defined(CONFIG_SCI4_SERIAL_CONSOLE) && !defined(CONFIG_SCI9_SERIAL_CONSOLE)
+#elif !defined(CONFIG_SCI0_SERIAL_CONSOLE) && !defined(CONFIG_SCI1_SERIAL_CONSOLE) && \
+ !defined(CONFIG_SCI2_SERIAL_CONSOLE) && !defined(CONFIG_SCI3_SERIAL_CONSOLE) && \
+ !defined(CONFIG_SCI4_SERIAL_CONSOLE) && !defined(CONFIG_SCI5_SERIAL_CONSOLE) && \
+ !defined(CONFIG_SCI6_SERIAL_CONSOLE) && !defined(CONFIG_SCI7_SERIAL_CONSOLE) && \
+ !defined(CONFIG_SCI8_SERIAL_CONSOLE) && !defined(CONFIG_SCI9_SERIAL_CONSOLE)
   /* TTYS0 is not the console, initialize it */
   up_setup(&TTYS0_DEV);
 #endif
@@ -1454,6 +2427,22 @@ void arm_earlyserialinit(void)
 
 #ifdef TTYS5_DEV
   up_setup(&TTYS5_DEV);
+#endif
+
+#ifdef TTYS6_DEV
+  up_setup(&TTYS6_DEV);
+#endif
+
+#ifdef TTYS7_DEV
+  up_setup(&TTYS7_DEV);
+#endif
+
+#ifdef TTYS8_DEV
+  up_setup(&TTYS8_DEV);
+#endif
+
+#ifdef TTYS9_DEV
+  up_setup(&TTYS9_DEV);
 #endif
 }
 
@@ -1490,6 +2479,18 @@ void arm_serialinit(void)
 #endif
 #ifdef TTYS5_DEV
   uart_register("/dev/ttyS5", &TTYS5_DEV);
+#endif
+#ifdef TTYS6_DEV
+  uart_register("/dev/ttyS6", &TTYS6_DEV);
+#endif
+#ifdef TTYS7_DEV
+  uart_register("/dev/ttyS7", &TTYS7_DEV);
+#endif
+#ifdef TTYS8_DEV
+  uart_register("/dev/ttyS8", &TTYS8_DEV);
+#endif
+#ifdef TTYS9_DEV
+  uart_register("/dev/ttyS9", &TTYS9_DEV);
 #endif
 }
 

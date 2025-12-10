@@ -33,6 +33,392 @@
 #include "hardware/ra_memorymap.h"
 
 /****************************************************************************
+ * Validate RA DMAC channel Kconfig values.
+ * These checks ensure that users do not select invalid non-existent channel
+ * numbers 8 and 9 (there are two DMAC units enabling channels 0-7 and
+ * 10-17). Kconfig allows ranges and we use compile-time checks to trap
+ * invalid assignments early.
+****************************************************************************/
+
+#ifdef CONFIG_RA_DMAC_SPI0_TX_CHANNEL
+#if (CONFIG_RA_DMAC_SPI0_TX_CHANNEL == 8) || (CONFIG_RA_DMAC_SPI0_TX_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_SPI0_TX_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_SPI0_TX_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_SPI0_RX_CHANNEL
+#if (CONFIG_RA_DMAC_SPI0_RX_CHANNEL == 8) || (CONFIG_RA_DMAC_SPI0_RX_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_SPI0_RX_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_SPI0_RX_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_SPI1_TX_CHANNEL
+#if (CONFIG_RA_DMAC_SPI1_TX_CHANNEL == 8) || (CONFIG_RA_DMAC_SPI1_TX_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_SPI1_TX_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_SPI1_TX_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_SPI1_RX_CHANNEL
+#if (CONFIG_RA_DMAC_SPI1_RX_CHANNEL == 8) || (CONFIG_RA_DMAC_SPI1_RX_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_SPI1_RX_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_SPI1_RX_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_I2C0_CHANNEL
+#if (CONFIG_RA_DMAC_I2C0_CHANNEL == 8) || (CONFIG_RA_DMAC_I2C0_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_I2C0_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_I2C0_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_I2C1_CHANNEL
+#if (CONFIG_RA_DMAC_I2C1_CHANNEL == 8) || (CONFIG_RA_DMAC_I2C1_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_I2C1_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_I2C1_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_I2C2_CHANNEL
+#if (CONFIG_RA_DMAC_I2C2_CHANNEL == 8) || (CONFIG_RA_DMAC_I2C2_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_I2C2_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_I2C2_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_ADC_CHANNEL
+#if (CONFIG_RA_DMAC_ADC_CHANNEL == 8) || (CONFIG_RA_DMAC_ADC_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_ADC_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_ADC_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_UART0_TX_CHANNEL
+#if (CONFIG_RA_DMAC_UART0_TX_CHANNEL == 8) || (CONFIG_RA_DMAC_UART0_TX_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_UART0_TX_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_UART0_TX_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_UART0_RX_CHANNEL
+#if (CONFIG_RA_DMAC_UART0_RX_CHANNEL == 8) || (CONFIG_RA_DMAC_UART0_RX_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_UART0_RX_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_UART0_RX_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_UART1_TX_CHANNEL
+#if (CONFIG_RA_DMAC_UART1_TX_CHANNEL == 8) || (CONFIG_RA_DMAC_UART1_TX_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_UART1_TX_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_UART1_TX_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_UART1_RX_CHANNEL
+#if (CONFIG_RA_DMAC_UART1_RX_CHANNEL == 8) || (CONFIG_RA_DMAC_UART1_RX_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_UART1_RX_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_UART1_RX_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_UART2_TX_CHANNEL
+#if (CONFIG_RA_DMAC_UART2_TX_CHANNEL == 8) || (CONFIG_RA_DMAC_UART2_TX_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_UART2_TX_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_UART2_TX_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_UART2_RX_CHANNEL
+#if (CONFIG_RA_DMAC_UART2_RX_CHANNEL == 8) || (CONFIG_RA_DMAC_UART2_RX_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_UART2_RX_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_UART2_RX_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_UART3_TX_CHANNEL
+#if (CONFIG_RA_DMAC_UART3_TX_CHANNEL == 8) || (CONFIG_RA_DMAC_UART3_TX_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_UART3_TX_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_UART3_TX_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_UART3_RX_CHANNEL
+#if (CONFIG_RA_DMAC_UART3_RX_CHANNEL == 8) || (CONFIG_RA_DMAC_UART3_RX_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_UART3_RX_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_UART3_RX_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_UART4_TX_CHANNEL
+#if (CONFIG_RA_DMAC_UART4_TX_CHANNEL == 8) || (CONFIG_RA_DMAC_UART4_TX_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_UART4_TX_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_UART4_TX_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_UART4_RX_CHANNEL
+#if (CONFIG_RA_DMAC_UART4_RX_CHANNEL == 8) || (CONFIG_RA_DMAC_UART4_RX_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_UART4_RX_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_UART4_RX_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_UART5_TX_CHANNEL
+#if (CONFIG_RA_DMAC_UART5_TX_CHANNEL == 8) || (CONFIG_RA_DMAC_UART5_TX_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_UART5_TX_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_UART5_TX_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_UART5_RX_CHANNEL
+#if (CONFIG_RA_DMAC_UART5_RX_CHANNEL == 8) || (CONFIG_RA_DMAC_UART5_RX_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_UART5_RX_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_UART5_RX_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_UART6_TX_CHANNEL
+#if (CONFIG_RA_DMAC_UART6_TX_CHANNEL == 8) || (CONFIG_RA_DMAC_UART6_TX_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_UART6_TX_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_UART6_TX_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_UART6_RX_CHANNEL
+#if (CONFIG_RA_DMAC_UART6_RX_CHANNEL == 8) || (CONFIG_RA_DMAC_UART6_RX_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_UART6_RX_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_UART6_RX_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_UART7_TX_CHANNEL
+#if (CONFIG_RA_DMAC_UART7_TX_CHANNEL == 8) || (CONFIG_RA_DMAC_UART7_TX_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_UART7_TX_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_UART7_TX_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_UART7_RX_CHANNEL
+#if (CONFIG_RA_DMAC_UART7_RX_CHANNEL == 8) || (CONFIG_RA_DMAC_UART7_RX_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_UART7_RX_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_UART7_RX_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_UART8_TX_CHANNEL
+#if (CONFIG_RA_DMAC_UART8_TX_CHANNEL == 8) || (CONFIG_RA_DMAC_UART8_TX_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_UART8_TX_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_UART8_TX_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_UART8_RX_CHANNEL
+#if (CONFIG_RA_DMAC_UART8_RX_CHANNEL == 8) || (CONFIG_RA_DMAC_UART8_RX_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_UART8_RX_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_UART8_RX_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_UART9_TX_CHANNEL
+#if (CONFIG_RA_DMAC_UART9_TX_CHANNEL == 8) || (CONFIG_RA_DMAC_UART9_TX_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_UART9_TX_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_UART9_TX_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_UART9_RX_CHANNEL
+#if (CONFIG_RA_DMAC_UART9_RX_CHANNEL == 8) || (CONFIG_RA_DMAC_UART9_RX_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_UART9_RX_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_UART9_RX_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_SCI0_SPI_TX_CHANNEL
+#if (CONFIG_RA_DMAC_SCI0_SPI_TX_CHANNEL == 8) || (CONFIG_RA_DMAC_SCI0_SPI_TX_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_SCI0_SPI_TX_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_SCI0_SPI_TX_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_SCI0_SPI_RX_CHANNEL
+#if (CONFIG_RA_DMAC_SCI0_SPI_RX_CHANNEL == 8) || (CONFIG_RA_DMAC_SCI0_SPI_RX_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_SCI0_SPI_RX_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_SCI0_SPI_RX_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_SCI1_SPI_TX_CHANNEL
+#if (CONFIG_RA_DMAC_SCI1_SPI_TX_CHANNEL == 8) || (CONFIG_RA_DMAC_SCI1_SPI_TX_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_SCI1_SPI_TX_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_SCI1_SPI_TX_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_SCI1_SPI_RX_CHANNEL
+#if (CONFIG_RA_DMAC_SCI1_SPI_RX_CHANNEL == 8) || (CONFIG_RA_DMAC_SCI1_SPI_RX_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_SCI1_SPI_RX_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_SCI1_SPI_RX_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_SCI2_SPI_TX_CHANNEL
+#if (CONFIG_RA_DMAC_SCI2_SPI_TX_CHANNEL == 8) || (CONFIG_RA_DMAC_SCI2_SPI_TX_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_SCI2_SPI_TX_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_SCI2_SPI_TX_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_SCI2_SPI_RX_CHANNEL
+#if (CONFIG_RA_DMAC_SCI2_SPI_RX_CHANNEL == 8) || (CONFIG_RA_DMAC_SCI2_SPI_RX_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_SCI2_SPI_RX_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_SCI2_SPI_RX_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_SCI3_SPI_TX_CHANNEL
+#if (CONFIG_RA_DMAC_SCI3_SPI_TX_CHANNEL == 8) || (CONFIG_RA_DMAC_SCI3_SPI_TX_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_SCI3_SPI_TX_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_SCI3_SPI_TX_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_SCI3_SPI_RX_CHANNEL
+#if (CONFIG_RA_DMAC_SCI3_SPI_RX_CHANNEL == 8) || (CONFIG_RA_DMAC_SCI3_SPI_RX_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_SCI3_SPI_RX_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_SCI3_SPI_RX_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+
+#ifdef CONFIG_RA_DMAC_SCI4_SPI_TX_CHANNEL
+#if (CONFIG_RA_DMAC_SCI4_SPI_TX_CHANNEL == 8) || (CONFIG_RA_DMAC_SCI4_SPI_TX_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_SCI4_SPI_TX_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_SCI4_SPI_TX_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_SCI4_SPI_RX_CHANNEL
+#if (CONFIG_RA_DMAC_SCI4_SPI_RX_CHANNEL == 8) || (CONFIG_RA_DMAC_SCI4_SPI_RX_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_SCI4_SPI_RX_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_SCI4_SPI_RX_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_SCI9_SPI_TX_CHANNEL
+#if (CONFIG_RA_DMAC_SCI9_SPI_TX_CHANNEL == 8) || (CONFIG_RA_DMAC_SCI9_SPI_TX_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_SCI9_SPI_TX_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_SCI9_SPI_TX_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_SCI9_SPI_RX_CHANNEL
+#if (CONFIG_RA_DMAC_SCI9_SPI_RX_CHANNEL == 8) || (CONFIG_RA_DMAC_SCI9_SPI_RX_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_SCI9_SPI_RX_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_SCI9_SPI_RX_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_GPT0_CHANNEL
+#if (CONFIG_RA_DMAC_GPT0_CHANNEL == 8) || (CONFIG_RA_DMAC_GPT0_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_GPT0_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_GPT0_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_GPT1_CHANNEL
+#if (CONFIG_RA_DMAC_GPT1_CHANNEL == 8) || (CONFIG_RA_DMAC_GPT1_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_GPT1_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_GPT1_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_GPT2_CHANNEL
+#if (CONFIG_RA_DMAC_GPT2_CHANNEL == 8) || (CONFIG_RA_DMAC_GPT2_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_GPT2_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_GPT2_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+
+#ifdef CONFIG_RA_DMAC_GPT3_CHANNEL
+#if (CONFIG_RA_DMAC_GPT3_CHANNEL == 8) || (CONFIG_RA_DMAC_GPT3_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_GPT3_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_GPT3_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_GPT4_CHANNEL
+#if (CONFIG_RA_DMAC_GPT4_CHANNEL == 8) || (CONFIG_RA_DMAC_GPT4_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_GPT4_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_GPT4_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_GPT5_CHANNEL
+#if (CONFIG_RA_DMAC_GPT5_CHANNEL == 8) || (CONFIG_RA_DMAC_GPT5_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_GPT5_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_GPT5_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_GPT10_CHANNEL
+#if (CONFIG_RA_DMAC_GPT10_CHANNEL == 8) || (CONFIG_RA_DMAC_GPT10_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_GPT10_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_GPT10_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_GPT11_CHANNEL
+#if (CONFIG_RA_DMAC_GPT11_CHANNEL == 8) || (CONFIG_RA_DMAC_GPT11_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_GPT11_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_GPT11_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+
+#ifdef CONFIG_RA_DMAC_GPT12_CHANNEL
+#if (CONFIG_RA_DMAC_GPT12_CHANNEL == 8) || (CONFIG_RA_DMAC_GPT12_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_GPT12_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_GPT12_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_GPT13_CHANNEL
+#if (CONFIG_RA_DMAC_GPT13_CHANNEL == 8) || (CONFIG_RA_DMAC_GPT13_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_GPT13_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_GPT13_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17)"
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_SDHI_CHANNEL
+#if (CONFIG_RA_DMAC_SDHI_CHANNEL == 8) || (CONFIG_RA_DMAC_SDHI_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_SDHI_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_SDHI_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17). Note: SDHI typically only supports 0-7."
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_SDRAM_CHANNEL
+#if (CONFIG_RA_DMAC_SDRAM_CHANNEL == 8) || (CONFIG_RA_DMAC_SDRAM_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_SDRAM_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_SDRAM_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17). Note: SDRAM typically only supports 0-7."
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_QSPI0_CHANNEL
+#if (CONFIG_RA_DMAC_QSPI0_CHANNEL == 8) || (CONFIG_RA_DMAC_QSPI0_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_QSPI0_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_QSPI0_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17). Note: QSPI typically only supports 0-7."
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC_QSPI1_CHANNEL
+#if (CONFIG_RA_DMAC_QSPI1_CHANNEL == 8) || (CONFIG_RA_DMAC_QSPI1_CHANNEL == 9) || \
+  (CONFIG_RA_DMAC_QSPI1_CHANNEL > 17)
+#error "CONFIG_RA_DMAC_QSPI1_CHANNEL: invalid DMAC channel (valid: -1, 0-7, 10-17). Note: QSPI typically only supports 0-7."
+#endif
+#endif
+#endif
+#endif
+#endif
+
+/****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
