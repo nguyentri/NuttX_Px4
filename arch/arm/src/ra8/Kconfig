@@ -717,23 +717,28 @@ config RA_CLOCK_PLL1P
 
 config RA_CLOCK_HOCO
    bool "Balanced Performance Mode (HOCO - 48MHz)"
+    default y if RA8E1_GROUP
+    default n if RA8P1_GROUP
    help
      Use HOCO at 48MHz for balanced performance and lower power consumption.
      Good for most applications with moderate performance requirements.
 
 config RA_CLOCK_MOCO
    bool "Low Power Mode (MOCO - 8MHz)"
+   default y
    help
      Use MOCO at 8MHz for minimal power consumption.
      Suitable for low-power applications and battery-powered devices.
 
 config RA_CLOCK_LOCO
    bool "Ultra Low Power Mode (LOCO - 32.768kHz)"
+   default y
    help
      Use LOCO at 32.768kHz for ultra-low power consumption.
 
 config RA_CLOCK_MAIN
    bool "External Crystal Mode (Main OSC)"
+   default y
    help
      Use external crystal oscillator as system clock.
 
@@ -744,7 +749,7 @@ config RA_CLOCK_PLL
 
 endchoice
 
-# Clock Profile Configuration (Phase 1 Optimization)
+# Clock Profile Configuration
 choice
    prompt "Clock Configuration Profile"
    default RA_CLOCK_PROFILE_DEFAULT
@@ -823,7 +828,6 @@ config RA_XTAL_FREQUENCY
 if RA_CLOCK_PLL || RA_CLOCK_PLL1P
 
 menu "PLL Configuration"
-   visible if RA_CLOCK_PROFILE_CUSTOM
 
 choice
    prompt "PLL Source Clock"
@@ -893,7 +897,7 @@ config RA_PLL1R_DIV
      For RA8E1: default 1 means /2 (720MHz / 2 = 360MHz)
      For RA8P1: default 4 means /5 (2000MHz / 5 = 400MHz)
 
-menu "PLL2 Configuration (RA8P1 only)"
+menu "PLL2 Configuration"
    depends on RA8P1_GROUP
 
 config RA_PLL2_ENABLE
@@ -907,7 +911,8 @@ if RA_PLL2_ENABLE
 
 choice
    prompt "PLL2 Source Clock"
-   default RA_PLL2_SOURCE_MAIN_OSC
+   default RA_PLL2_SOURCE_HOCO if RA8E1_GROUP
+   default RA_PLL2_SOURCE_MAIN_OSC if RA8P1_GROUP
    help
      Select the PLL2 input source clock.
 
@@ -972,9 +977,8 @@ endmenu
 endif # RA_CLOCK_PLL || RA_CLOCK_PLL1P
 
 menu "System Clock Dividers"
-   visible if RA_CLOCK_PROFILE_CUSTOM
 
-comment "Phase 2 Optimization: Direct divider value selection (no encoding lookup needed)"
+comment "Direct divider value selection (no encoding lookup needed)"
 
 choice
    prompt "CPU Clock Divider"
@@ -1402,7 +1406,6 @@ config RA_FCLK_DIV
 endmenu
 
 menu "Peripheral Clock Sources"
-   visible if RA_CLOCK_PROFILE_CUSTOM
 
 choice
    prompt "SCI Clock Source"

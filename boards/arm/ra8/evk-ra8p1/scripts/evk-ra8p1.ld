@@ -32,65 +32,11 @@
  * ===================================================
  * INTERNAL MRAM (1MB) - Boot, NuttX kernel, critical drivers
  * EXTERNAL OSPI FLASH (64MB) - PX4 application code and modules
- *
- * Dual-Core Memory Partitioning:
- * ==============================
- * MRAM (1MB total) - Critical Code Only:
- *   - CM85 (CPU0): 0x02000000 - 0x0207FFFF (512KB)
- *     * Boot vectors, NuttX kernel, drivers, system libs
- *   - CM33 (CPU1): 0x02080000 - 0x020FFFFF (512KB)
- *
- * OSPI Flash (64MB) - Application Code:
- *   - CM85 (CPU0): 0x80000000 - 0x83FFFFFF (64MB)
- *     * PX4 application modules, non-critical code
- *   - CM33 (CPU1): Can share or partition as needed
- *
- * User SRAM (1664KB @ 0x22000000):
- *   - CM85 (CPU0): 0x22000000 - 0x220CFFFF (832KB)
- *   - Shared IPC:  0x220D0000 - 0x220DFFFF (64KB) - Non-cacheable
- *   - CM33 (CPU1): 0x220E0000 - 0x221FFFFF (768KB)
- *
- * CM85 (CPU0) TCM - Dedicated, not shared:
- *   - ITCM: 128KB @ 0x00000000 - Ultra-fast code execution
- *   - DTCM: 128KB @ 0x20000000 - Ultra-fast data access
- *
- * CM33 (CPU1) TCM - Dedicated, not shared:
- *   - ITCM: 64KB @ 0x00000000 - Fast code execution
- *   - DTCM: 64KB @ 0x20000000 - Fast data access
  */
-
-/* Default to CM85 configuration if not specified */
-#ifndef CONFIG_RA_CPU_CORE
-#define CONFIG_RA_CPU_CORE 0
-#endif
-
-#if CONFIG_RA_CPU_CORE == 0
-/* Cortex-M85 (CPU0) Memory Map */
 RAM_START = 0x22000000;
-/* Assign remaining User SRAM to CM85 when CM33 is configured for small footprint */
-RAM_LENGTH = 0x00150000;    /* 1344KB for CM85 (remaining after CM33 256KB + IPC 64KB) */
+RAM_LENGTH = 0x001d4000;
 FLASH_START = 0x02000000;
-/* Use remaining MRAM (1MB total) for CM85 when CM33 uses 128KB */
-FLASH_LENGTH = 0x000E0000;  /* 896KB for CM85 - NuttX kernel + PX4 app storage */
-FLASH_APP_START = 0x80000000;
-FLASH_APP_LENGTH = 0x04000000; /* 64MB OSPI - PX4 application code */
-#elif CONFIG_RA_CPU_CORE == 1
-/* Cortex-M33 (CPU1) Memory Map */
-RAM_START = 0x220E0000;
-/* Reduced allocation for CM33 to only 256KB to leave more SRAM for CM85 */
-RAM_LENGTH = 0x00040000;    /* 256KB for CM33 */
-FLASH_START = 0x02080000;
-/* Reduced MRAM allocation for CM33 to only 128KB */
-FLASH_LENGTH = 0x00020000;  /* 128KB for CM33 */
-FLASH_APP_START = 0x80000000;
-FLASH_APP_LENGTH = 0x04000000; /* 64MB OSPI - Shared or partitioned */
-#else
-#error "Invalid CONFIG_RA_CPU_CORE value. Must be 0 (CM85) or 1 (CM33)"
-#endif
-
-/* Shared Memory Region (accessible by both cores) */
-IPC_SHMEM_START = 0x220D0000;
-IPC_SHMEM_LENGTH = 0x00010000;  /* 64KB */
+FLASH_LENGTH = 0x00100000;
 DATA_FLASH_START = 0x27000000;
 DATA_FLASH_LENGTH = 0x00000000;
 SDRAM_START = 0x68000000;
@@ -155,35 +101,15 @@ OPTION_SETTING_OTP_PBPS_START = 0x12e17780;
 OPTION_SETTING_OTP_PBPS_LENGTH = 0x00000080;
 OPTION_SETTING_OTP_ZHUK_START = 0x02e17920;
 OPTION_SETTING_OTP_ZHUK_LENGTH = 0x00000004;
-#if CONFIG_RA_CPU_CORE == 0
-/* CM85 has 128KB ITCM + 128KB DTCM = 256KB total TCM */
 ITCM_START = 0x00000000;
-ITCM_LENGTH = 0x00020000;  /* 128KB ITCM */
+ITCM_LENGTH = 0x00020000;
 DTCM_START = 0x20000000;
-DTCM_LENGTH = 0x00020000;  /* 128KB DTCM */
-#elif CONFIG_RA_CPU_CORE == 1
-/* CM33 has 64KB ITCM + 64KB DTCM = 128KB total TCM */
-ITCM_START = 0x00000000;
-ITCM_LENGTH = 0x00010000;  /* 64KB ITCM */
-DTCM_START = 0x20000000;
-DTCM_LENGTH = 0x00010000;  /* 64KB DTCM */
-#endif
+DTCM_LENGTH = 0x00020000;
 
 MEMORY
 {
-    /* Core-specific memories (partitioned by CPU core) */
     RAM (rwx) : ORIGIN = RAM_START, LENGTH = RAM_LENGTH
-
-    /* Internal MRAM - NuttX kernel and critical drivers */
     FLASH (rx) : ORIGIN = FLASH_START, LENGTH = FLASH_LENGTH
-
-    /* External OSPI Flash - PX4 application code (XIP - Execute In Place) */
-    FLASH_APP (rx) : ORIGIN = FLASH_APP_START, LENGTH = FLASH_APP_LENGTH
-
-    /* Shared memory for IPC (non-cacheable, accessible by both cores) */
-    IPC_SHMEM (rwx) : ORIGIN = IPC_SHMEM_START, LENGTH = IPC_SHMEM_LENGTH
-
-    /* Common memories (accessible by both cores) */
     DATA_FLASH (rx) : ORIGIN = DATA_FLASH_START, LENGTH = DATA_FLASH_LENGTH
     SDRAM (rwx) : ORIGIN = SDRAM_START, LENGTH = SDRAM_LENGTH
     OSPI0_CS0 (rwx) : ORIGIN = OSPI0_CS0_START, LENGTH = OSPI0_CS0_LENGTH
@@ -1004,93 +930,6 @@ SECTIONS
 
     }> FLASH
 
-    /***** FLASH_APP (OSPI External Flash) - PX4 Application Code ******/
-    .flash_app.startof :
-    {
-        __ddsc_FLASH_APP_START = .;
-        __px4_app_start = .;
-    }> FLASH_APP
-
-    /* PX4 Application Code - Execute-In-Place from OSPI Flash */
-    __flash_app_text$$ :
-    {
-        __flash_app_text$$Base = .;
-        _stext_app = .;
-
-        /* PX4 modules and applications */
-        modules/*/libmodules__*.a:*(.text .text.*)
-        modules/*/libmodules__*.a:*(.rodata .rodata.*)
-
-        /* PX4 drivers (non-critical) */
-        drivers/*/libdrivers__*.a:*(.text .text.*)
-        drivers/*/libdrivers__*.a:*(.rodata .rodata.*)
-
-        /* PX4 libraries */
-        lib/*/liblib__*.a:*(.text .text.*)
-        lib/*/liblib__*.a:*(.rodata .rodata.*)
-
-        /* PX4 systemcmds */
-        systemcmds/*/libsystemcmds__*.a:*(.text .text.*)
-        systemcmds/*/libsystemcmds__*.a:*(.rodata .rodata.*)
-
-        /* PX4 examples */
-        examples/*/libexamples__*.a:*(.text .text.*)
-        examples/*/libexamples__*.a:*(.rodata .rodata.*)
-
-        /* All other PX4 application code not explicitly in FLASH */
-        *libapps.a:*(.text .text.*)
-        *libapps.a:*(.rodata .rodata.*)
-
-        /* User applications */
-        *(.app_text)
-        *(.app_rodata)
-
-        . = ALIGN(32);
-        _etext_app = .;
-        __flash_app_text$$Limit = .;
-    }> FLASH_APP
-
-    /* PX4 Application Read-Only Data */
-    __flash_app_rodata$$ :
-    {
-        __flash_app_rodata$$Base = .;
-
-        /* Additional RO data from PX4 modules */
-        *(.app_rodata.*)
-        *(.px4_rodata)
-        *(.px4_rodata.*)
-
-        . = ALIGN(32);
-        __flash_app_rodata$$Limit = .;
-    }> FLASH_APP
-
-    /* PX4 Application constructors/destructors */
-    __flash_app_init$$ :
-    {
-        . = ALIGN(32);
-        __app_preinit_array_start = .;
-        KEEP(*(.app_preinit_array))
-        __app_preinit_array_end = .;
-
-        . = ALIGN(32);
-        __app_init_array_start = .;
-        KEEP(*(SORT(.app_init_array.*)))
-        KEEP(*(.app_init_array))
-        __app_init_array_end = .;
-
-        . = ALIGN(32);
-        __app_fini_array_start = .;
-        KEEP(*(SORT(.app_fini_array.*)))
-        KEEP(*(.app_fini_array))
-        __app_fini_array_end = .;
-    }> FLASH_APP
-
-    .flash_app.endof :
-    {
-        __px4_app_end = .;
-        __ddsc_FLASH_APP_END = .;
-    }> FLASH_APP
-
     /***** OPTION_SETTING_OFS0 memory section allocations ******/
     .option_setting_ofs0.startof :
     {
@@ -1604,121 +1443,3 @@ PROVIDE( _etext = ADDR(__flash_readonly$$) + SIZEOF(__flash_readonly$$) );
 PROVIDE( _eronly = ADDR(__flash_readonly$$) + SIZEOF(__flash_readonly$$) );
 PROVIDE( _sbss = ADDR(__ram_zero$$) );
 PROVIDE( _ebss = ADDR(__ram_zero$$) + SIZEOF(__ram_zero$$) );
-PROVIDE( _sipc = ADDR(__ipc_shmem_data_start) );
-PROVIDE( _eipc = ADDR(__ipc_shmem_data_end) );
-
-/*
- * ============================================================================
- * RA8P1 Dual-Core Hybrid Memory Map for Large Applications (PX4)
- * ============================================================================
- *
- * CORTEX-M85 (CPU0) - Primary Core @ 1GHz
- * ----------------------------------------
- * INTERNAL MRAM (512KB):
- *   0x02000000 - 0x0207FFFF - NuttX kernel, boot code, critical drivers
- *                            - Vectors, syscalls, IRQ handlers
- *                            - Essential RTOS functions
- *                            - Critical device drivers (UART, console)
- *
- * EXTERNAL OSPI FLASH (64MB) - Execute-In-Place (XIP):
- *   0x80000000 - 0x83FFFFFF - PX4 application code
- *                            - Flight controllers, estimators, navigators
- *                            - Non-critical drivers (sensors, actuators)
- *                            - User modules and examples
- *                            - System commands and utilities
- *
- * SRAM (320KB):
- *   0x22000000 - 0x2204FFFF - All runtime data (NuttX + PX4)
- *                            - .data, .bss, heap, stacks
- *
- * ITCM (128KB):
- *   0x00000000 - 0x0001FFFF - Ultra-fast code execution
- *                            - Time-critical ISRs
- *                            - DSP/Math libraries
- *
- * DTCM (128KB):
- *   0x20000000 - 0x0001FFFF - Ultra-fast data access
- *                            - DMA buffers
- *                            - Sensor data buffers
- *
- * CORTEX-M33 (CPU1) - Secondary Core @ 250MHz
- * --------------------------------------------
- * MRAM:  0x02080000 - 0x020FFFFF (512KB) - Code/RO Data
- * OSPI:  0x80000000 - 0x83FFFFFF (64MB)  - Shared application space
- * SRAM:  0x22060000 - 0x221D3FFF (~1.5MB) - Data/BSS/Heap/Stack
- * ITCM:  0x00000000 - 0x0001FFFF (128KB) - Fast code execution
- * DTCM:  0x20000000 - 0x0001FFFF (128KB) - Fast data access
- *
- * SHARED MEMORY - Inter-Processor Communication
- * ----------------------------------------------
- * IPC:   0x220D0000 - 0x220DFFFF (64KB)  - Non-cacheable shared region
- *                                         - Hardware semaphores
- *                                         - Message queues
- *                                         - Mailboxes
- *                                         - Shared buffers
- *
- * COMMON MEMORIES (Accessible by both cores)
- * -------------------------------------------
- * SDRAM: 0x68000000 - 0x6FFFFFFF (128MB) - External SDRAM
- * OSPI0: 0x80000000 - 0x8FFFFFFF (256MB) - Octo-SPI Flash 0 (XIP enabled)
- * OSPI1: 0x70000000 - 0x77FFFFFF (128MB) - Octo-SPI Flash 1
- *
- * CODE PLACEMENT STRATEGY:
- * ========================
- * INTERNAL MRAM (Fast, Limited):
- *   ✓ NuttX kernel (sched, mm, fs, net)
- *   ✓ Boot code and vectors
- *   ✓ Critical drivers (console, timer, interrupt controller)
- *   ✓ System libraries (libc stubs, startup code)
- *   ✗ PX4 application code (too large, >1MB)
- *
- * EXTERNAL OSPI FLASH (Large, XIP):
- *   ✓ PX4 application modules (modules/*)
- *   ✓ PX4 drivers (drivers/*)
- *   ✓ PX4 libraries (lib/*)
- *   ✓ PX4 system commands (systemcmds/*)
- *   ✓ User examples and applications
- *   ✗ Time-critical ISRs (use ITCM instead)
- *
- * ITCM (Ultra-fast, Very Limited):
- *   ✓ High-frequency ISRs
- *   ✓ DSP/Math hotspots
- *   ✓ Real-time control loops
- *
- * PERFORMANCE NOTES:
- * ==================
- * - MRAM: 0 wait states @ 1GHz (fastest)
- * - OSPI XIP: ~3-5 wait states with cache (acceptable for most code)
- * - OSPI performance improved by:
- *   * Instruction cache (enabled)
- *   * Prefetch buffer
- *   * Octo-SPI mode (8-bit data width)
- *   * 200MHz OSPI clock
- *
- * MEMORY ACCESS NOTES:
- * ====================
- * - Each core's TCM (ITCM/DTCM) is private and not accessible by the other core
- * - MRAM and SRAM partitions are enforced by MPU configuration
- * - IPC shared memory MUST be configured as non-cacheable on both cores
- * - Use hardware semaphores for synchronization between cores
- * - Cache coherency protocols must be followed for shared SDRAM access
- * - OSPI Flash supports Execute-In-Place (XIP) with caching enabled
- *
- * BUILD CONFIGURATION:
- * ====================
- * - Set CONFIG_RA_CPU_CORE=0 for CM85 build
- * - Set CONFIG_RA_CPU_CORE=1 for CM33 build
- * - Each core requires separate firmware image
- * - Use defconfigs: ipc-cm85 or ipc-cm33
- * - PX4 modules automatically placed in OSPI via linker pattern matching
- *
- * DEBUGGING:
- * ==========
- * - Check symbols: nm nuttx | grep -E "(__flash_app|__px4_app)"
- * - Verify placement: objdump -h nuttx
- * - Memory usage: size nuttx
- * - Section info: readelf -S nuttx
- *
- * ============================================================================
- */
-
