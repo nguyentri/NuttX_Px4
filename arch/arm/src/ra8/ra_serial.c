@@ -1231,22 +1231,54 @@ struct clock_baud_table_s
   uint32_t num_settings;
 };
 
+
+/* Baud rate settings for 500MHz SCICLK (BGDM/ABCS/ABCSE/CKS, BRR, MDDR) */
+static const struct common_baudrate_settings_s g_baud_500mhz[] =
+{
+  /* baud,    bgdm, abcs, abcse, abcse2, cks,  brr, mddr */
+  {   9600,     0,    0,     0,     0,     1,  202, 256 },  /* Div=128, BRR=202, Error≈+0.22% */
+  {  19200,     1,    0,     0,     0,     1,  202, 256 },  /* Div=64,  BRR=202, Error≈+0.22% */
+  {  38400,     0,    0,     0,     0,     0,  202, 256 },  /* Div=32,  BRR=202, Error≈+0.22% */
+  {  57600,     0,    0,     1,     0,     1,  179, 256 },  /* Div=24,  BRR=179, Error≈+0.47% */
+  { 115200,     1,    0,     0,     0,     0,  134, 256 },  /* Div=16,  BRR=134, Error≈+0.47% */
+  { 230400,     0,    0,     1,     0,     0,  179, 256 },  /* Div=6,   BRR=179, Error≈+0.47% */
+  { 460800,     0,    0,     1,     0,     0,   89, 256 },  /* Div=6,   BRR=89,  Error≈+0.47% */
+  { 921600,     0,    0,     1,     0,     0,   44, 256 },  /* Div=6,   BRR=44,  Error≈+0.47% */
+  /* 1843200 cannot meet ≤1.5% error without BRME/MDDR; best w/o BRME: Div=6, BRR=21, Error≈+2.75% */
+};
+
+/* Corrected baud rate settings for 250 MHz SCICLK */
+static const struct common_baudrate_settings_s g_baud_250mhz[] =
+{
+  /* baud,   bgdm, abcs, abcse, abcse2, cks,  brr, mddr */
+  {   9600,    0,    0,     0,     0,     1,  202, 256 },  /* Div=128, BRR=202, Error=+0.22% */
+  {  19200,    1,    0,     0,     0,     1,  202, 256 },  /* Div=64,  BRR=202, Error=+0.22% */
+  {  38400,    0,    0,     0,     0,     0,  202, 256 },  /* Div=32,  BRR=202, Error=+0.22% */
+  {  57600,    0,    0,     1,     0,     1,  179, 256 },  /* Div=24,  BRR=179, Error=+0.47% */
+  { 115200,    1,    0,     0,     0,     0,  134, 256 },  /* Div=16,  BRR=134, Error=+0.47% */
+  { 230400,    0,    0,     1,     0,     0,  179, 256 },  /* Div=6,   BRR=179, Error=+0.47% */
+  { 460800,    0,    0,     1,     0,     0,   89, 256 },  /* Div=6,   BRR=89,  Error=+0.47% */
+  { 921600,    0,    0,     1,     0,     0,   44, 256 },  /* Div=6,   BRR=44,  Error=+0.47% */
+  /* 1843200 cannot meet ≤1.5% without BRME/MDDR;
+     best w/o BRME: Div=6, BRR=21, Error≈+2.75% */
+};
+
 /* Baud rate settings for 120MHz SCICLK */
 static const struct common_baudrate_settings_s g_baud_120mhz[] =
 {
   /* baud,   bgdm, abcs, abcse, abcse2, cks, brr, mddr */
-  {   9600,    1,    0,    0,     0,     1,  195,  128 },  /* BGDM=1, ABCS=0, CKS=1, BRR=195, MDDR=128 */
-  {  19200,    1,    0,    0,     0,     1,   97,  128 },  /* BGDM=1, ABCS=0, CKS=1, BRR=97, MDDR=128 */
-  {  38400,    1,    0,    0,     0,     0,   97,  128 },  /* BGDM=1, ABCS=0, CKS=0, BRR=97, MDDR=128 */
-  {  57600,    1,    0,    0,     0,     0,   64,  128 },  /* BGDM=1, ABCS=0, CKS=0, BRR=64, MDDR=128 */
-  { 115200,    1,    0,    0,     0,     0,   32,  128 },  /* BGDM=1, ABCS=0, CKS=0, BRR=32, MDDR=128 */
-  { 230400,    1,    0,    0,     0,     0,   15,  128 },  /* BGDM=1, ABCS=0, CKS=0, BRR=15, MDDR=128 */
-  { 460800,    1,    0,    0,     0,     0,    7,  128 },  /* BGDM=1, ABCS=0, CKS=0, BRR=7, MDDR=128 */
-  { 921600,    1,    0,    0,     0,     0,    3,  128 },  /* BGDM=1, ABCS=0, CKS=0, BRR=3, MDDR=128 */
-  {1843200,    1,    0,    0,     0,     0,    1,  128 },  /* BGDM=1, ABCS=0, CKS=0, BRR=1, MDDR=128 */
+  {   9600,    1,    0,    0,     0,     1,  102,  135 },  /* BGDM=1, ABCS=0, CKS=1, BRR=102, MDDR=135, err=0.004% */
+  {  19200,    0,    0,    0,     0,     0,  102,  135 },  /* BGDM=0, ABCS=0, CKS=0, BRR=102, MDDR=135, err=0.004% */
+  {  38400,    1,    0,    0,     0,     0,  102,  135 },  /* BGDM=1, ABCS=0, CKS=0, BRR=102, MDDR=135, err=0.004% */
+  {  57600,    1,    0,    0,     0,     0,   87,  173 },  /* BGDM=1, ABCS=0, CKS=0, BRR=87, MDDR=173, err=0.009% */
+  { 115200,    1,    0,    0,     0,     0,   43,  173 },  /* BGDM=1, ABCS=0, CKS=0, BRR=43, MDDR=173, err=0.009% */
+  { 230400,    1,    0,    0,     0,     0,   21,  173 },  /* BGDM=1, ABCS=0, CKS=0, BRR=21, MDDR=173, err=0.009% */
+  { 460800,    1,    0,    0,     0,     0,   10,  173 },  /* BGDM=1, ABCS=0, CKS=0, BRR=10, MDDR=173, err=0.009% */
+  { 921600,    1,    0,    0,     0,     0,    6,  220 },  /* BGDM=1, ABCS=0, CKS=0, BRR=6, MDDR=220, err=0.092% */
+  {1843200,    1,    0,    0,     0,     0,    3,  251 },  /* BGDM=1, ABCS=0, CKS=0, BRR=3, MDDR=251, err=0.262% */
 };
 
-/* Baud rate settings for 90MHz SCICLK (360MHz PLL1P / 4) */
+/* Baud rate settings for 90MHz SCICLK */
 static const struct common_baudrate_settings_s g_baud_90mhz[] =
 {
   /* baud,   bgdm, abcs, abcse, abcse2, cks, brr, mddr */
@@ -1294,6 +1326,8 @@ static const struct common_baudrate_settings_s g_baud_60mhz[] =
 /* Clock-specific baud rate table */
 static const struct clock_baud_table_s g_common_baud_settings[] =
 {
+  { 500000000, g_baud_500mhz, sizeof(g_baud_500mhz) / sizeof(g_baud_500mhz[0]) },
+  { 250000000, g_baud_250mhz, sizeof(g_baud_250mhz) / sizeof(g_baud_250mhz[0]) },
   { 120000000, g_baud_120mhz, sizeof(g_baud_120mhz) / sizeof(g_baud_120mhz[0]) },
   {  90000000, g_baud_90mhz,  sizeof(g_baud_90mhz) / sizeof(g_baud_90mhz[0]) },
   {  80000000, g_baud_80mhz,  sizeof(g_baud_80mhz) / sizeof(g_baud_80mhz[0]) },
@@ -1316,14 +1350,12 @@ struct baud_setting
 
 static int up_calculate_baud_setting(uint32_t baudrate, struct baud_setting *p_baud_setting)
 {
-  ra_clock_config_t clock_config;
   uint32_t freq_hz;
   int32_t hit_bit_err = 100000; /* 100% error as starting point */
   uint32_t divisor;
 
   /* Get SCI clock frequency */
-  ra_get_clock_config(&clock_config);
-  freq_hz = clock_config.sciclk_freq;
+  freq_hz = ra_get_peripheral_clock(RA_PCLK_SCICLK);
 
   if (baudrate == 0 || freq_hz == 0)
     {
@@ -1349,7 +1381,8 @@ static int up_calculate_baud_setting(uint32_t baudrate, struct baud_setting *p_b
                   p_baud_setting->abcse2 = settings[j].abcse2;
                   p_baud_setting->cks = settings[j].cks;
                   p_baud_setting->brr = settings[j].brr;
-                  p_baud_setting->brme = 0;
+                  /* Enable bit rate modulation if MDDR != 128 */
+                  p_baud_setting->brme = (settings[j].mddr != 128) ? 1 : 0;
                   p_baud_setting->mddr = settings[j].mddr;
                   return 0;
                 }

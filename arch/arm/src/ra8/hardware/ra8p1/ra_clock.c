@@ -252,11 +252,14 @@ static void ra_clock_freq_var_init(void)
   g_clock_freq[RA_CLOCKS_SOURCE_CLOCK_HOCO]     = RA_HOCO_HZ;
   g_clock_freq[RA_CLOCKS_SOURCE_CLOCK_MOCO]     = RA_MOCO_FREQ_HZ;
   g_clock_freq[RA_CLOCKS_SOURCE_CLOCK_LOCO]     = RA_LOCO_FREQ_HZ;
-  g_clock_freq[RA_CLOCKS_SOURCE_CLOCK_MAIN_OSC] = 0U;  /* Main OSC not populated */
+  g_clock_freq[RA_CLOCKS_SOURCE_CLOCK_MAIN_OSC] = CONFIG_RA_MAIN_OSC_FREQUENCY;
   g_clock_freq[RA_CLOCKS_SOURCE_CLOCK_SUBCLOCK] = RA_SUBCLOCK_FREQ_HZ;
-  g_clock_freq[RA_CLOCKS_SOURCE_CLOCK_PLL]      = RA_CFG_PLL1P_FREQUENCY_HZ;
-  g_clock_freq[RA_CLOCKS_SOURCE_CLOCK_PLL1Q]    = RA_CFG_PLL1Q_FREQUENCY_HZ;
-  g_clock_freq[RA_CLOCKS_SOURCE_CLOCK_PLL1R]    = RA_CFG_PLL1R_FREQUENCY_HZ;
+  g_clock_freq[RA_CLOCKS_SOURCE_CLOCK_PLL]      = CONFIG_RA_PLL1P_FREQUENCY_HZ;
+  g_clock_freq[RA_CLOCKS_SOURCE_CLOCK_PLL2P]    = CONFIG_RA_PLL2P_FREQUENCY_HZ;
+  g_clock_freq[RA_CLOCKS_SOURCE_CLOCK_PLL1Q]    = CONFIG_RA_PLL1Q_FREQUENCY_HZ;
+  g_clock_freq[RA_CLOCKS_SOURCE_CLOCK_PLL1R]    = CONFIG_RA_PLL1R_FREQUENCY_HZ;
+  g_clock_freq[RA_CLOCKS_SOURCE_CLOCK_PLL2Q]    = CONFIG_RA_PLL2Q_FREQUENCY_HZ;
+  g_clock_freq[RA_CLOCKS_SOURCE_CLOCK_PLL2R]    = CONFIG_RA_PLL2R_FREQUENCY_HZ;
 
   ra_sys_core_clock_update();
 }
@@ -390,24 +393,24 @@ static void ra_peripheral_clock_init(void)
 #if defined(CONFIG_RA_LCD) && defined(R_SYSC_LCDCKCR)
   ra_peripheral_clock_set((volatile uint8_t *)R_SYSC_LCDCKCR,
                           (volatile uint8_t *)R_SYSC_LCDCKDIVCR,
-                          RA_CFG_LCDCLK_DIV,
-                          RA_CFG_LCDCLK_SOURCE);
+                          CONFIG_RA_LCDCLK_DIV,
+                          CONFIG_RA_LCDCLK_SOURCE);
 #endif
 
   /* Set the I3C clock if I3C is enabled */
 #if defined(CONFIG_RA_I3C) && defined(R_SYSC_I3CCKCR)
   ra_peripheral_clock_set((volatile uint8_t *)R_SYSC_I3CCKCR,
                           (volatile uint8_t *)R_SYSC_I3CCKDIVCR,
-                          RA_CFG_I3CCLK_DIV,
-                          RA_CFG_I3CCLK_SOURCE);
+                          CONFIG_RA_I3CCLK_DIV,
+                          CONFIG_RA_I3CCLK_SOURCE);
 #endif
 
   /* Set the USB60 clock if USB60 is enabled */
 #if defined(CONFIG_RA_USB60) && defined(R_SYSC_USB60CKCR)
   ra_peripheral_clock_set((volatile uint8_t *)R_SYSC_USB60CKCR,
                           (volatile uint8_t *)R_SYSC_USB60CKDIVCR,
-                          RA_CFG_USB60CLK_DIV,
-                          RA_CFG_USB60CLK_SOURCE);
+                          CONFIG_RA_USB60CLK_DIV,
+                          CONFIG_RA_USB60CLK_SOURCE);
 #endif
 
   /* Set the ESW (Ethernet Switch) clock if ESW is enabled */
@@ -522,11 +525,11 @@ static void ra_prv_clock_set_hard_reset(void)
   putreg16(RA_PRV_STARTUP_SCKDIVCR2, R_SYSC_SCKDIVCR2);
 
   /* Set the system source clock */
-  putreg8(RA_CFG_CLOCK_SOURCE, R_SYSC_SCKSCR);
+  putreg8(CONFIG_RA_CLOCK_SOURCE, R_SYSC_SCKSCR);
 
   /* Wait for settling delay. */
   ra_sys_core_clock_update();
-  up_udelay(RA_CFG_CLOCK_SETTLING_DELAY_US);
+  up_udelay(CONFIG_RA_CLOCK_SETTLING_DELAY_US);
 
   /* Continue and set clock to actual target speed. */
   putreg16(RA_PRV_STARTUP_SCKDIVCR2, R_SYSC_SCKDIVCR2);
@@ -534,10 +537,10 @@ static void ra_prv_clock_set_hard_reset(void)
 
   /* Wait for settling delay. */
   ra_sys_core_clock_update();
-  up_udelay(RA_CFG_CLOCK_SETTLING_DELAY_US);
+  up_udelay(CONFIG_RA_CLOCK_SETTLING_DELAY_US);
 
   /* Set the system source clock again */
-  putreg8(RA_CFG_CLOCK_SOURCE, R_SYSC_SCKSCR);
+  putreg8(CONFIG_RA_CLOCK_SOURCE, R_SYSC_SCKSCR);
 
   /* Update the CMSIS core clock variable so that it reflects the new ICLK frequency. */
   ra_sys_core_clock_update();
@@ -763,14 +766,7 @@ static void ra_update_clock_config(void)
   g_ra_clock_config.pclkb_freq = source_freq / RA_DIV_TO_DIVISOR(pclkb_div);
   g_ra_clock_config.pclkc_freq = source_freq / RA_DIV_TO_DIVISOR(pclkc_div);
   g_ra_clock_config.pclkd_freq = source_freq / RA_DIV_TO_DIVISOR(pclkd_div);
-
-  /* Calculate SCICLK frequency
-   * Use predefined macro from ra_clock.h that calculates:
-   * RA_PLL1P_FREQUENCY / RA_DIV_TO_DIVISOR(CONFIG_RA_SCICLK_DIV)
-   */
-  g_ra_clock_config.sciclk_freq = RA_SCICLK_FREQUENCY;
-
-  g_ra_clock_config.hoco_frequency = RA_HOCO_FREQUENCY;
+  g_ra_clock_config.hoco_frequency = CONFIG_RA_HOCO_FREQUENCY;
 }
 
 /****************************************************************************
@@ -822,7 +818,6 @@ void ra_print_clock_info(void)
   syslog(LOG_INFO, "  PCLKE: %lu Hz\n", config.pclke_freq);
   syslog(LOG_INFO, "  BCLK: %lu Hz\n", config.bclk_freq);
   syslog(LOG_INFO, "  FCLK: %lu Hz\n", config.fclk_freq);
-  syslog(LOG_INFO, "  SCICLK: %lu Hz\n", config.sciclk_freq);
   syslog(LOG_INFO, "  Clock Source: %d\n", config.clock_source);
   syslog(LOG_INFO, "  HOCO: %s\n", config.hoco_enabled ? "Enabled" : "Disabled");
   syslog(LOG_INFO, "  MOCO: %s\n", config.moco_enabled ? "Enabled" : "Disabled");
@@ -843,41 +838,25 @@ uint32_t ra_get_peripheral_clock(int peripheral_id)
   ra_clock_config_t config;
   uint32_t source_freq;
   uint8_t divider;
+  uint8_t clock_source;
 
   ra_get_clock_config(&config);
 
   switch (peripheral_id)
     {
-      case RA_PCLK_ICLK:        /* System clock (ICK) */
-        return config.iclk_freq;
-
-      case RA_PCLK_PCLKA:       /* Peripheral Clock A */
-        return config.pclka_freq;
-
-      case RA_PCLK_PCLKB:       /* Peripheral Clock B */
-        return config.pclkb_freq;
-
-      case RA_PCLK_PCLKC:       /* Peripheral Clock C */
-        return config.pclkc_freq;
-
-      case RA_PCLK_PCLKD:       /* Peripheral Clock D */
-        return config.pclkd_freq;
-
-      case RA_PCLK_PCLKE:       /* Peripheral Clock E */
-        return config.pclke_freq;
-
-      case RA_PCLK_BCLK:        /* External bus clock */
-        return config.bclk_freq;
-
-      case RA_PCLK_FCLK:        /* Flash interface clock */
-        return config.fclk_freq;
-
-      case RA_PCLK_SCICLK:      /* SCI clock */
-        return config.sciclk_freq;
-
+     case RA_PCLK_SCICLK:      /* SCI clock */
+#if defined(R_SYSC_SCICKCR)
+        clock_source = getreg8(R_SYSC_SCICKCR) & 0x0F;
+        source_freq = g_clock_freq[clock_source];
+        divider = getreg8(R_SYSC_SCICKDIVCR) & 0x0F;
+        return source_freq / RA_DIV_TO_DIVISOR(divider);
+#else
+        return 0;
+#endif
       case RA_PCLK_SPICLK:      /* SPI clock */
 #if defined(R_SYSC_SPICKCR)
-        source_freq = RA_SYSTEM_CLOCK_FREQUENCY;
+        clock_source = getreg8(R_SYSC_SPICKCR) & 0x0F;
+        source_freq = g_clock_freq[clock_source];
         divider = getreg8(R_SYSC_SPICKDIVCR) & 0x0F;
         return source_freq / RA_DIV_TO_DIVISOR(divider);
 #else
@@ -886,7 +865,8 @@ uint32_t ra_get_peripheral_clock(int peripheral_id)
 
       case RA_PCLK_CANFDCLK:    /* CANFD clock */
 #if defined(R_SYSC_CANFDCKCR)
-        source_freq = RA_SYSTEM_CLOCK_FREQUENCY;
+        clock_source = getreg8(R_SYSC_CANFDCKCR) & 0x0F;
+        source_freq = g_clock_freq[clock_source];
         divider = getreg8(R_SYSC_CANFDCKDIVCR) & 0x0F;
         return source_freq / RA_DIV_TO_DIVISOR(divider);
 #else
@@ -895,7 +875,8 @@ uint32_t ra_get_peripheral_clock(int peripheral_id)
 
       case RA_PCLK_GPTCLK:      /* GPT clock */
 #if defined(R_SYSC_GPTCKCR)
-        source_freq = RA_SYSTEM_CLOCK_FREQUENCY;
+        clock_source = getreg8(R_SYSC_GPTCKCR) & 0x0F;
+        source_freq = g_clock_freq[clock_source];
         divider = getreg8(R_SYSC_GPTCKDIVCR) & 0x0F;
         return source_freq / RA_DIV_TO_DIVISOR(divider);
 #else
@@ -907,26 +888,28 @@ uint32_t ra_get_peripheral_clock(int peripheral_id)
 
       case RA_PCLK_ADCCLK:      /* ADC clock */
 #if defined(R_SYSC_ADCCKCR)
-        source_freq = RA_SYSTEM_CLOCK_FREQUENCY;
+        clock_source = getreg8(R_SYSC_ADCCKCR) & 0x0F;
+        source_freq = g_clock_freq[clock_source];
         divider = getreg8(R_SYSC_ADCCKDIVCR) & 0x0F;
         return source_freq / RA_DIV_TO_DIVISOR(divider);
 #else
         return 0;
 #endif
 
-      case RA_PCLK_OCTACLK:     /* OSPI clock */
+      case RA_PCLK_OCTACLK:     /* OSPI clock - uses PCLKB */
 #if defined(R_SYSC_OCTACKCR)
-        source_freq = RA_SYSTEM_CLOCK_FREQUENCY;
+        clock_source = getreg8(R_SYSC_OCTACKCR) & 0x0F;
+        source_freq = g_clock_freq[clock_source];
         divider = getreg8(R_SYSC_OCTACKDIVCR) & 0x0F;
         return source_freq / RA_DIV_TO_DIVISOR(divider);
 #else
-        return 0;
+        return config.pclkb_freq;
 #endif
 
       case RA_PCLK_LCDCLK:      /* LCD clock */
 #if defined(R_SYSC_LCDCKCR)
-        /* LCD typically uses PLL2R, need to calculate from configured source */
-        source_freq = RA_CFG_PLL2R_FREQUENCY_HZ;
+        clock_source = getreg8(R_SYSC_LCDCKCR) & 0x0F;
+        source_freq = g_clock_freq[clock_source];
         divider = getreg8(R_SYSC_LCDCKDIVCR) & 0x0F;
         return source_freq / RA_DIV_TO_DIVISOR(divider);
 #else
@@ -935,8 +918,8 @@ uint32_t ra_get_peripheral_clock(int peripheral_id)
 
       case RA_PCLK_I3CCLK:      /* I3C clock */
 #if defined(R_SYSC_I3CCKCR)
-        /* I3C typically uses PLL2Q, need to calculate from configured source */
-        source_freq = RA_CFG_PLL2Q_FREQUENCY_HZ;
+        clock_source = getreg8(R_SYSC_I3CCKCR) & 0x0F;
+        source_freq = g_clock_freq[clock_source];
         divider = getreg8(R_SYSC_I3CCKDIVCR) & 0x0F;
         return source_freq / RA_DIV_TO_DIVISOR(divider);
 #else
@@ -945,8 +928,8 @@ uint32_t ra_get_peripheral_clock(int peripheral_id)
 
       case RA_PCLK_USB60CLK:    /* USB 60MHz clock */
 #if defined(R_SYSC_USB60CKCR)
-        /* USB60 typically uses PLL2R, need to calculate from configured source */
-        source_freq = RA_CFG_PLL2R_FREQUENCY_HZ;
+        clock_source = getreg8(R_SYSC_USB60CKCR) & 0x0F;
+        source_freq = g_clock_freq[clock_source];
         divider = getreg8(R_SYSC_USB60CKDIVCR) & 0x0F;
         return source_freq / RA_DIV_TO_DIVISOR(divider);
 #else
@@ -955,7 +938,8 @@ uint32_t ra_get_peripheral_clock(int peripheral_id)
 
       case RA_PCLK_ESWCLK:      /* Ethernet Switch clock */
 #if defined(R_SYSC_ESWCKCR)
-        source_freq = RA_SYSTEM_CLOCK_FREQUENCY;
+        clock_source = getreg8(R_SYSC_ESWCKCR) & 0x0F;
+        source_freq = g_clock_freq[clock_source];
         divider = getreg8(R_SYSC_ESWCKDIVCR) & 0x0F;
         return source_freq / RA_DIV_TO_DIVISOR(divider);
 #else
@@ -964,7 +948,8 @@ uint32_t ra_get_peripheral_clock(int peripheral_id)
 
       case RA_PCLK_ESWPHYCLK:   /* Ethernet Switch PHY clock */
 #if defined(R_SYSC_ESWPCKCR)
-        source_freq = RA_SYSTEM_CLOCK_FREQUENCY;
+        clock_source = getreg8(R_SYSC_ESWPCKCR) & 0x0F;
+        source_freq = g_clock_freq[clock_source];
         divider = getreg8(R_SYSC_ESWPCKDIVCR) & 0x0F;
         return source_freq / RA_DIV_TO_DIVISOR(divider);
 #else
@@ -973,7 +958,8 @@ uint32_t ra_get_peripheral_clock(int peripheral_id)
 
       case RA_PCLK_ETHPHYCLK:   /* Ethernet PHY clock */
 #if defined(R_SYSC_ETHPCKCR)
-        source_freq = RA_SYSTEM_CLOCK_FREQUENCY;
+        clock_source = getreg8(R_SYSC_ETHPCKCR) & 0x0F;
+        source_freq = g_clock_freq[clock_source];
         divider = getreg8(R_SYSC_ETHPCKDIVCR) & 0x0F;
         return source_freq / RA_DIV_TO_DIVISOR(divider);
 #else
@@ -981,6 +967,6 @@ uint32_t ra_get_peripheral_clock(int peripheral_id)
 #endif
 
       default:
-        return config.system_clock_freq;
+        return 0;
     }
 }

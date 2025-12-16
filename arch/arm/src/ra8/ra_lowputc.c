@@ -146,6 +146,34 @@
 #    define RA_CONSOLE_BITS     CONFIG_SCI4_BITS
 #    define RA_CONSOLE_PARITY   CONFIG_SCI4_PARITY
 #    define RA_CONSOLE_2STOP    CONFIG_SCI4_2STOP
+#  elif defined(CONFIG_SCI5_SERIAL_CONSOLE)
+#    define RA_CONSOLE_BASE     R_SCI_B_CH_BASE(5)
+#    define RA_CONSOLE_MTSP     R_MSTP_MSTPCRB_SCI5
+#    define RA_CONSOLE_BAUD     CONFIG_SCI5_BAUD
+#    define RA_CONSOLE_BITS     CONFIG_SCI5_BITS
+#    define RA_CONSOLE_PARITY   CONFIG_SCI5_PARITY
+#    define RA_CONSOLE_2STOP    CONFIG_SCI5_2STOP
+#  elif defined(CONFIG_SCI6_SERIAL_CONSOLE)
+#    define RA_CONSOLE_BASE     R_SCI_B_CH_BASE(6)
+#    define RA_CONSOLE_MTSP     R_MSTP_MSTPCRB_SCI6
+#    define RA_CONSOLE_BAUD     CONFIG_SCI6_BAUD
+#    define RA_CONSOLE_BITS     CONFIG_SCI6_BITS
+#    define RA_CONSOLE_PARITY   CONFIG_SCI6_PARITY
+#    define RA_CONSOLE_2STOP    CONFIG_SCI6_2STOP
+#  elif defined(CONFIG_SCI7_SERIAL_CONSOLE)
+#    define RA_CONSOLE_BASE     R_SCI_B_CH_BASE(7)
+#    define RA_CONSOLE_MTSP     R_MSTP_MSTPCRB_SCI7
+#    define RA_CONSOLE_BAUD     CONFIG_SCI7_BAUD
+#    define RA_CONSOLE_BITS     CONFIG_SCI7_BITS
+#    define RA_CONSOLE_PARITY   CONFIG_SCI7_PARITY
+#    define RA_CONSOLE_2STOP    CONFIG_SCI7_2STOP
+#  elif defined(CONFIG_SCI8_SERIAL_CONSOLE)
+#    define RA_CONSOLE_BASE     R_SCI_B_CH_BASE(8)
+#    define RA_CONSOLE_MTSP     R_MSTP_MSTPCRB_SCI8
+#    define RA_CONSOLE_BAUD     CONFIG_SCI8_BAUD
+#    define RA_CONSOLE_BITS     CONFIG_SCI8_BITS
+#    define RA_CONSOLE_PARITY   CONFIG_SCI8_PARITY
+#    define RA_CONSOLE_2STOP    CONFIG_SCI8_2STOP
 #  elif defined(CONFIG_SCI9_SERIAL_CONSOLE)
 #    define RA_CONSOLE_BASE     R_SCI_B_CH_BASE(9)
 #    define RA_CONSOLE_MTSP     R_MSTP_MSTPCRB_SCI9
@@ -200,22 +228,25 @@ void arm_lowputc(char ch)
 #ifdef HAVE_CONSOLE
   irqstate_t flags;
 
-  /* RA8E1 uses SCI_B (version 2) registers, not legacy SCI registers
-   * For SCI_B:
-   * - Use CSR register for status instead of SSR
-   * - Use TDR_BY register for byte transmission instead of TDR
-   * - TDRE flag is at bit position 29 in CSR, not bit 7 in SSR
-   */
+  /* Timeout safe checking - allow reasonable time for UART to be ready */
+  volatile uint32_t time_out = 100000;
 
   /* Wait for Transmit Data Register Empty (TDRE) flag in CSR register */
-  while ((getreg32(RA_CONSOLE_BASE + R_SCI_B_CSR_OFFSET) & R_SCI_B_CSR_TDRE) == 0)
+  while ((time_out > 0) && ((getreg32(RA_CONSOLE_BASE + R_SCI_B_CSR_OFFSET) & R_SCI_B_CSR_TDRE) == 0))
     {
+        time_out--;
+    }
+
+  /* If timeout expired, UART is not ready - exit early to avoid hang */
+  if (time_out == 0)
+    {
+      return;
     }
 
   /* Disable interrupts so that the test and the transmission are atomic */
   flags = spin_lock_irqsave(&g_ra_lowputc_lock);
 
-  /* Double-check TDRE is still set */
+  /* Double-check TDRE is still set before transmitting */
   if ((getreg32(RA_CONSOLE_BASE + R_SCI_B_CSR_OFFSET) & R_SCI_B_CSR_TDRE) != 0)
     {
       /* Send the character to TDR_BY register (byte access) */

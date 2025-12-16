@@ -754,7 +754,7 @@ choice
    prompt "Clock Configuration Profile"
    default RA_CLOCK_PROFILE_DEFAULT
    help
-     Select a validated clock configuration profile that matches FSP defaults.
+     Select a validated clock configuration profile.
      This simplifies clock setup by providing tested configurations.
 
      - Default: Maximum performance (RA8E1: 360MHz, RA8P1: 1000MHz)
@@ -1409,7 +1409,8 @@ menu "Peripheral Clock Sources"
 
 choice
    prompt "SCI Clock Source"
-   default RA_SCICLK_SOURCE_PLL1P if RA_SCI && (RA_CLOCK_PLL || RA_CLOCK_PLL1P)
+   default RA_SCICLK_SOURCE_PLL1P if RA_SCI && RA8E1_GROUP
+   default RA_SCICLK_SOURCE_PLL2R if RA_SCI && RA8P1_GROUP
    default RA_SCICLK_SOURCE_HOCO if RA_SCI
    default RA_SCICLK_SOURCE_DISABLED
    help
@@ -1456,12 +1457,14 @@ endchoice
 
 config RA_SCICLK_DIV
    int "SCI Clock Divider"
-   default 2
+   default 2 if RA8E1_GROUP
+   default 2 if RA8P1_GROUP
    range 0 8
    depends on !RA_SCICLK_SOURCE_DISABLED
    help
      SCI clock divider (0=/1, 1=/2, 2=/4, 3=/6, 4=/8, 5=/3, 6=/5, 7=/10, 8=/16).
-     Default: 2 (/4) gives 90MHz from 360MHz PLL1P.
+     For RA8E1: default 2 (/4) gives 90MHz from 360MHz PLL1P.
+     For RA8P1: default 2 (/4) gives 120MHz from 480MHz PLL2R.
 
 choice
    prompt "SPI Clock Source"

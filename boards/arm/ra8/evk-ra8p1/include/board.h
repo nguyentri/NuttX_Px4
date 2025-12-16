@@ -99,8 +99,8 @@
  * Resolution: This is the default console. To use Pmod 1 SPI,
  *             redirect console to SCI0 or SCI7.
  */
-#define GPIO_SCI2_RX   GPIO_RXD2_B  /* P802 - Console RX ⚠️ Conflicts: MISO2, OSPI_SIO6 */
-#define GPIO_SCI2_TX   GPIO_TXD2_B  /* P801 - Console TX ⚠️ Conflicts: MOSI2, OSPI_DQS */
+#define GPIO_SCI2_RX   GPIO_RXD2_A  /* P802 - Console RX ⚠️ Conflicts: MISO2, OSPI_SIO6 */
+#define GPIO_SCI2_TX   GPIO_TXD2_A  /* P801 - Console TX ⚠️ Conflicts: MOSI2, OSPI_DQS */
 
 /* SCI0 - Pmod 2 UART (P602=RXD0/MISOB, P603=TXD0/MOSIB)
  * ⚠️  CONFLICT: Shares pins with Pmod 2 SPI!
@@ -675,6 +675,7 @@
 #define LED_2_BIT    		(1 << LED_2)
 
 /* GPIO initialization list pattern */
+#if (0)
 #define RA8_GPIO_INIT_LIST  { \
   GPIO_SCI2_RX,                 /* Console RX - P802 */ \
   GPIO_SCI2_TX,                 /* Console TX - P801 */ \
@@ -697,6 +698,14 @@
   GPIO_USER_SW1,                /* User Button SW1 - P009 */ \
   GPIO_USER_SW2                 /* User Button SW2 - P008 */ \
 }
-
+#else
+#define RA8_GPIO_INIT_LIST  { \
+  GPIO_USER_LED_BLUE,           /* Blue LED - P600 */ \
+  GPIO_USER_LED_GREEN,          /* Green LED - P303 */ \
+  GPIO_USER_LED_RED,            /* Red LED - PA07 */ \
+  GPIO_USER_SW1,                /* User Button SW1 - P009 */ \
+  GPIO_USER_SW2                 /* User Button SW2 - P008 */ \
+}
+#endif
 
 #endif /* __BOARDS_ARM_RA8_EVK_RA8P1_INCLUDE_BOARD_H */

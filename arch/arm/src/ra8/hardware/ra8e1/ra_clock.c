@@ -225,9 +225,9 @@ static void ra_clock_freq_var_init(void)
   g_clock_freq[RA_CLOCKS_SOURCE_CLOCK_LOCO]     = RA_LOCO_FREQ_HZ;
   g_clock_freq[RA_CLOCKS_SOURCE_CLOCK_MAIN_OSC] = 0U;  /* Main OSC not populated */
   g_clock_freq[RA_CLOCKS_SOURCE_CLOCK_SUBCLOCK] = RA_SUBCLOCK_FREQ_HZ;
-  g_clock_freq[RA_CLOCKS_SOURCE_CLOCK_PLL]      = RA_CFG_PLL1P_FREQUENCY_HZ;
-  g_clock_freq[RA_CLOCKS_SOURCE_CLOCK_PLL1Q]    = RA_CFG_PLL1Q_FREQUENCY_HZ;
-  g_clock_freq[RA_CLOCKS_SOURCE_CLOCK_PLL1R]    = RA_CFG_PLL1R_FREQUENCY_HZ;
+  g_clock_freq[RA_CLOCKS_SOURCE_CLOCK_PLL]      = CONFIG_RA_PLL1P_FREQUENCY_HZ;
+  g_clock_freq[RA_CLOCKS_SOURCE_CLOCK_PLL1Q]    = CONFIG_RA_PLL1Q_FREQUENCY_HZ;
+  g_clock_freq[RA_CLOCKS_SOURCE_CLOCK_PLL1R]    = CONFIG_RA_PLL1R_FREQUENCY_HZ;
 
   ra_sys_core_clock_update();
 }
@@ -375,11 +375,11 @@ static void ra_prv_clock_set_hard_reset(void)
 #endif
 
   /* Set the system source clock */
-  putreg8(RA_CFG_CLOCK_SOURCE, R_SYSC_SCKSCR);
+  putreg8(CONFIG_RA_CLOCK_SOURCE, R_SYSC_SCKSCR);
 
   /* Wait for settling delay. */
   ra_sys_core_clock_update();
-  up_udelay(RA_CFG_CLOCK_SETTLING_DELAY_US);
+  up_udelay(CONFIG_RA_CLOCK_SETTLING_DELAY_US);
 
   /* Continue and set clock to actual target speed. */
   putreg8(RA_PRV_STARTUP_SCKDIVCR2, R_SYSC_SCKDIVCR2);
@@ -387,10 +387,10 @@ static void ra_prv_clock_set_hard_reset(void)
 
   /* Wait for settling delay. */
   ra_sys_core_clock_update();
-  up_udelay(RA_CFG_CLOCK_SETTLING_DELAY_US);
+  up_udelay(CONFIG_RA_CLOCK_SETTLING_DELAY_US);
 
   /* Set the system source clock again */
-  putreg8(RA_CFG_CLOCK_SOURCE, R_SYSC_SCKSCR);
+  putreg8(CONFIG_RA_CLOCK_SOURCE, R_SYSC_SCKSCR);
 
   /* Update the CMSIS core clock variable so that it reflects the new ICLK frequency. */
   ra_sys_core_clock_update();
@@ -567,13 +567,7 @@ static void ra_update_clock_config(void)
   g_ra_clock_config.pclkc_freq = source_freq / RA_DIV_TO_DIVISOR(pclkc_div);
   g_ra_clock_config.pclkd_freq = source_freq / RA_DIV_TO_DIVISOR(pclkd_div);
 
-  /* Calculate SCICLK frequency
-   * Use predefined macro from ra_clock.h that calculates:
-   * RA_PLL1P_FREQUENCY / RA_DIV_TO_DIVISOR(CONFIG_RA_SCICLK_DIV)
-   */
-  g_ra_clock_config.sciclk_freq = RA_SCICLK_FREQUENCY;
-
-  g_ra_clock_config.hoco_frequency = RA_HOCO_FREQUENCY;
+  g_ra_clock_config.hoco_frequency = CONFIG_RA_HOCO_FREQUENCY;
 }
 
 /****************************************************************************
