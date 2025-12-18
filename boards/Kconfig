@@ -2551,6 +2551,14 @@ config ARCH_BOARD_EVK_RA8P1
 		This is the board configuration for the Renesas EVK-RA8P1 evaluation board.
 		This board features the Renesas RA8P1 MPU (R7KA8P1KFLCAC) with ARM Cortex-M85 core.
 
+config ARCH_BOARD_EVK_RZV2H
+	bool "Renesas EVK-RZV2H evaluation board"
+	depends on ARCH_CHIP_R9A09G057
+	select ARCH_HAVE_LEDS
+	---help---
+		This is the board configuration for the Renesas EVK-RZV2H evaluation board.
+		This board features the Renesas RZV2H MPU (R9A09G057) with ARM Cortex-R8 core.
+
 config ARCH_BOARD_CUSTOM
 	bool "Custom development board"
 	---help---
@@ -2876,6 +2884,7 @@ config ARCH_BOARD
 	default "xx3823"                   if ARCH_BOARD_XX3823
 	default "fpb-ra8e1"                if ARCH_BOARD_FPB_RA8E1
 	default "evk-ra8p1"                if ARCH_BOARD_EVK_RA8P1
+	default "evk-rzv2h"                if ARCH_BOARD_EVK_RZV2H
 
 comment "Common Board Options"
 
@@ -2930,6 +2939,10 @@ endif
 
 if ARCH_BOARD_EVK_RA8P1
 source "boards/arm/ra8/evk-ra8p1/Kconfig"
+endif
+
+if ARCH_BOARD_EVK_RZV2H
+source "boards/arm/rzv/evk-rzv2h/Kconfig"
 endif
 
 if ARCH_BOARD_CUSTOM

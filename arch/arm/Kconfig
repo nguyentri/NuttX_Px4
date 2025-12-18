@@ -546,6 +546,11 @@ config ARCH_CHIP_RA8
 	---help---
 		Renesas RA8 Architecture (ARM Cortex-M85).
 
+config ARCH_CHIP_RZV
+	bool "Renesas RZV"
+	---help---
+		Renesas RZV Architecture (ARM Cortex-R8).
+
 config ARCH_CHIP_ARM_CUSTOM
 	bool "Custom ARM chip"
 	select ARCH_CHIP_CUSTOM
@@ -784,6 +789,14 @@ config ARCH_CORTEXR7
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_TESTSET
 
+config ARCH_CORTEXR8
+	bool
+	default n
+	select ARCH_ARMV7R
+	select ARCH_DCACHE
+	select ARCH_ICACHE
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_TESTSET
 config ARCH_ARMV8M
 	bool
 	default n
@@ -933,6 +946,7 @@ config ARCH_CHIP
 	default "phy62xx"	if ARCH_CHIP_PHY62XX
 	default "tlsr82"	if ARCH_CHIP_TLSR82
 	default "ra8"		if ARCH_CHIP_RA8
+	default "rzv"		if ARCH_CHIP_RZV
 
 config ARCH_HAVE_TRUSTZONE
 	bool
@@ -1260,6 +1274,9 @@ endif
 if ARCH_ARMV7M
 source "arch/arm/src/armv7-m/Kconfig"
 endif
+if ARCH_ARMV7R
+source "arch/arm/src/armv7-r/Kconfig"
+endif
 if ARCH_ARMV8M
 source "arch/arm/src/armv8-m/Kconfig"
 endif
@@ -1268,5 +1285,8 @@ source "arch/arm/src/imxrt/Kconfig"
 endif
 if ARCH_CHIP_RA8
 source "arch/arm/src/ra8/Kconfig"
+endif
+if ARCH_CHIP_RZV
+source "arch/arm/src/rzv/Kconfig"
 endif
 endif # ARCH_ARM

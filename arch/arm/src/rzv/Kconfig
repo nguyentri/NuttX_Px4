@@ -1,0 +1,599 @@
+#
+# RZV2H MPU Configuration Options
+#
+
+comment "RZV2H MPU Selection"
+
+choice
+   prompt "RZV2H Chip Selection"
+   default ARCH_CHIP_R9A09G057
+   depends on ARCH_CHIP_RZV
+
+config ARCH_CHIP_R9A09G057
+   bool "R9A09G057 (BGA324)"
+   select RZV_FAMILY
+   select RZV2H_GROUP
+   select RZV_HAVE_SCIF0_UART
+   select RZV_HAVE_SCIF1_UART
+   select RZV_HAVE_SCIF2_UART
+   select RZV_HAVE_SCIF3_UART
+   select RZV_HAVE_SCIF4_UART
+   select RZV_HAVE_I2C0
+   select RZV_HAVE_I2C1
+   select RZV_HAVE_I2C2
+   select RZV_HAVE_I2C3
+   select RZV_HAVE_DMAC
+   select RZV_HAVE_SPI0
+   select RZV_HAVE_SPI1
+   select RZV_HAVE_SPI2
+   select RZV_HAVE_CAN0
+   select RZV_HAVE_CAN1
+   select RZV_HAVE_ETHERC_MII
+   select RZV_HAVE_ETHERC_RMII
+   select RZV_HAVE_USBFS
+   select RZV_HAVE_OSPI
+   select RZV_HAVE_SSIE
+   select RZV_HAVE_GTM
+   select RZV_HAVE_GTM0
+   select RZV_HAVE_GTM1
+   select RZV_HAVE_GTM2
+   select RZV_HAVE_GTM3
+   select RZV_HAVE_GTM4
+   select RZV_HAVE_GTM5
+   select RZV_HAVE_GTM6
+   select RZV_HAVE_GTM7
+   select RZV_HAVE_OSTM
+   select RZV_HAVE_OSTM0
+   select RZV_HAVE_OSTM1
+   select RZV_HAVE_OSTM2
+   select RZV_HAVE_WDT
+   select RZV_HAVE_ADC12
+   select RZV_HAVE_DAC12
+   select RZV_HAVE_ACMPHS
+   select RZV_HAVE_GPT
+   select RZV_HAVE_GPT0
+   select RZV_HAVE_GPT1
+   select RZV_HAVE_GPT2
+   select RZV_HAVE_GPT3
+   select RZV_HAVE_GPT4
+   select RZV_HAVE_GPT5
+   select RZV_HAVE_GPT6
+   select RZV_HAVE_GPT7
+
+endchoice
+
+# RZV2H Group Configuration
+config RZV2H_GROUP
+   bool
+   default y
+   help
+     Enables the RZV2H group of features and peripherals.
+     This is required for all RZV2H configurations.
+
+config RZV_FAMILY
+   bool
+   default y
+   select ARCH_CORTEXR8
+   select ARCH_HAVE_FPU
+   select ARCH_HAVE_THUMB
+   select ARCH_HAVE_DPFPU
+   select ARCH_HAVE_MPU
+   select ARMV7R_HAVE_GICv2
+   ---help---
+     RZV family of Renesas MPUs
+
+config RZV2H_BUILD_CR8_0
+    bool "Build for CR8_0 core"
+    default y
+    help
+      Build for the CR8_0 core of the RZV2H.
+      This is the default core for the EVK-RZV2H board.
+
+config RZV2H_BUILD_CR8_1
+    bool "Build for CR8_1 core"
+    default n
+    help
+      Build for the CR8_1 core of the RZV2H.
+      This is the secondary core for the EVK-RZV2H board.
+
+config RZV2H_BUILD_CM33
+    bool "Build for CM33 core"
+    default n
+    help
+      Build for the CM33 core of the RZV2H.
+      This core is used for TrustZone security features. It is currently not supported.
+
+# Peripheral availability
+config RZV_HAVE_SCIF0_UART
+   bool
+   default n
+
+config RZV_HAVE_SCIF1_UART
+   bool
+   default n
+
+config RZV_HAVE_SCIF2_UART
+   bool
+   default n
+
+config RZV_HAVE_SCIF3_UART
+   bool
+   default n
+
+config RZV_HAVE_SCIF4_UART
+   bool
+   default n
+
+config RZV_HAVE_I2C0
+   bool
+   default n
+
+config RZV_HAVE_I2C1
+   bool
+   default n
+
+config RZV_HAVE_I2C2
+   bool
+   default n
+
+config RZV_HAVE_I2C3
+   bool
+   default n
+
+config RZV_HAVE_DMAC
+   bool
+   default n
+
+config RZV_HAVE_SPI0
+   bool
+   default n
+
+config RZV_HAVE_SPI1
+   bool
+   default n
+
+config RZV_HAVE_SPI2
+   bool
+   default n
+
+config RZV_HAVE_CAN0
+   bool
+   default n
+
+config RZV_HAVE_CAN1
+   bool
+   default n
+
+config RZV_HAVE_ETHERC_MII
+   bool
+   default n
+
+config RZV_HAVE_ETHERC_RMII
+   bool
+   default n
+
+config RZV_HAVE_USBFS
+   bool
+   default n
+
+config RZV_HAVE_OSPI
+   bool
+   default n
+
+config RZV_HAVE_SSIE
+   bool
+   default n
+
+config RZV_HAVE_GTM
+   bool
+   default n
+
+config RZV_HAVE_GTM0
+   bool
+   default n
+
+config RZV_HAVE_GTM1
+   bool
+   default n
+
+config RZV_HAVE_GTM2
+   bool
+   default n
+
+config RZV_HAVE_GTM3
+   bool
+   default n
+
+config RZV_HAVE_GTM4
+   bool
+   default n
+
+config RZV_HAVE_GTM5
+   bool
+   default n
+
+config RZV_HAVE_GTM6
+   bool
+   default n
+
+config RZV_HAVE_GTM7
+   bool
+   default n
+
+config RZV_HAVE_GPT
+   bool
+   default n
+
+config RZV_HAVE_GPT0
+   bool
+   default n
+
+config RZV_HAVE_GPT1
+   bool
+   default n
+
+config RZV_HAVE_GPT2
+   bool
+   default n
+
+config RZV_HAVE_GPT3
+   bool
+   default n
+
+config RZV_HAVE_GPT4
+   bool
+   default n
+
+config RZV_HAVE_GPT5
+   bool
+   default n
+
+config RZV_HAVE_GPT6
+   bool
+   default n
+
+config RZV_HAVE_GPT7
+   bool
+   default n
+
+config RZV_HAVE_OSTM
+   bool
+   default n
+
+config RZV_HAVE_OSTM0
+   bool
+   default n
+
+config RZV_HAVE_OSTM1
+   bool
+   default n
+
+config RZV_HAVE_OSTM2
+   bool
+   default n
+
+config RZV_HAVE_WDT
+   bool
+   default n
+
+config RZV_HAVE_ADC12
+   bool
+   default n
+
+config RZV_HAVE_DAC12
+   bool
+   default n
+
+config RZV_HAVE_ACMPHS
+   bool
+   default n
+
+# RZV peripheral drivers
+
+comment "RZV Peripheral Selection"
+
+# Serial Communication Interface (SCI) - UART mode
+
+config RZV_UART_SCI
+   bool
+   default n
+
+config RZV_SCI0
+   bool "SCI0 UART"
+   default n
+   select RZV_UART_SCI
+   select SCI0_SERIALDRIVER
+   ---help---
+     Enable SCI0 in UART mode.
+
+config RZV_SCI1
+   bool "SCI1 UART"
+   default n
+   select RZV_UART_SCI
+   select SCI1_SERIALDRIVER
+   ---help---
+     Enable SCI1 in UART mode.
+
+config RZV_SCI2
+   bool "SCI2 UART"
+   default n
+   select RZV_UART_SCI
+   select SCI2_SERIALDRIVER
+   ---help---
+     Enable SCI2 in UART mode.
+
+config RZV_SCI3
+   bool "SCI3 UART"
+   default n
+   select RZV_UART_SCI
+   select SCI3_SERIALDRIVER
+   ---help---
+     Enable SCI3 in UART mode.
+
+config RZV_SCI4
+   bool "SCI4 UART"
+   default n
+   select RZV_UART_SCI
+   select SCI4_SERIALDRIVER
+   ---help---
+     Enable SCI4 in UART mode.
+
+config RZV_SCI5
+   bool "SCI5 UART"
+   default n
+   select RZV_UART_SCI
+   select SCI5_SERIALDRIVER
+   ---help---
+     Enable SCI5 in UART mode.
+
+config RZV_SCI6
+   bool "SCI6 UART"
+   default n
+   select RZV_UART_SCI
+   select SCI6_SERIALDRIVER
+   ---help---
+     Enable SCI6 in UART mode.
+
+config RZV_SCI7
+   bool "SCI7 UART"
+   default n
+   select RZV_UART_SCI
+   select SCI7_SERIALDRIVER
+   ---help---
+     Enable SCI7 in UART mode.
+
+config RZV_SCI8
+   bool "SCI8 UART"
+   default n
+   select RZV_UART_SCI
+   select SCI8_SERIALDRIVER
+   ---help---
+     Enable SCI8 in UART mode.
+
+config RZV_SCI9
+   bool "SCI9 UART"
+   default n
+   select RZV_UART_SCI
+   select SCI9_SERIALDRIVER
+   ---help---
+     Enable SCI9 in UART mode.
+
+# Serial Communications Interface with FIFO (SCIF) - legacy compatibility
+
+config RZV_SCIF0
+   bool "SCIF0"
+   default n
+   depends on RZV_HAVE_SCIF0_UART
+   select RZV_UART_SCI
+   select UART0_SERIALDRIVER
+
+config RZV_SCIF1
+   bool "SCIF1"
+   default n
+   depends on RZV_HAVE_SCIF1_UART
+   select RZV_UART_SCI
+   select UART1_SERIALDRIVER
+
+config RZV_SCIF2
+   bool "SCIF2"
+   default n
+   depends on RZV_HAVE_SCIF2_UART
+   select RZV_UART_SCI
+   select UART2_SERIALDRIVER
+
+config RZV_SCIF3
+   bool "SCIF3"
+   default n
+   depends on RZV_HAVE_SCIF3_UART
+   select RZV_UART_SCI
+   select UART3_SERIALDRIVER
+
+config RZV_SCIF4
+   bool "SCIF4"
+   default n
+   depends on RZV_HAVE_SCIF4_UART
+   select RZV_UART_SCI
+   select UART4_SERIALDRIVER
+
+config RZV_RIIC
+   bool
+   default n
+   select I2C
+
+config RZV_RIIC0
+   bool "I2C0 (RIIC0)"
+   default n
+   depends on RZV_HAVE_I2C0
+   select RZV_RIIC
+
+config RZV_RIIC1
+   bool "I2C1 (RIIC1)"
+   default n
+   depends on RZV_HAVE_I2C1
+   select RZV_RIIC
+
+config RZV_RIIC2
+   bool "I2C2 (RIIC2)"
+   default n
+   depends on RZV_HAVE_I2C2
+   select RZV_RIIC
+
+config RZV_RIIC3
+   bool "I2C3 (RIIC3)"
+   default n
+   depends on RZV_HAVE_I2C3
+   select RZV_RIIC
+
+config RZV_SPI
+   bool
+   default n
+
+config RZV_SPI0
+   bool "SPI0"
+   default n
+   depends on RZV_HAVE_SPI0
+   select RZV_SPI
+
+config RZV_SPI1
+   bool "SPI1"
+   default n
+   depends on RZV_HAVE_SPI1
+   select RZV_SPI
+
+config RZV_SPI2
+   bool "SPI2"
+   default n
+   depends on RZV_HAVE_SPI2
+   select RZV_SPI
+
+config RZV_DMA
+   bool "DMA support"
+   default n
+   depends on RZV_HAVE_DMAC
+   select ARCH_DMA
+
+config RZV_TIMER
+   bool
+   default n
+
+config RZV_OSTM0
+   bool "OS Timer 0"
+   default n
+   depends on RZV_HAVE_OSTM0
+   select RZV_TIMER
+
+config RZV_OSTM1
+   bool "OS Timer 1"
+   default n
+   depends on RZV_HAVE_OSTM1
+   select RZV_TIMER
+
+config RZV_OSTM2
+   bool "OS Timer 2"
+   default n
+   depends on RZV_HAVE_OSTM2
+   select RZV_TIMER
+
+config RZV_GPT
+   bool "General PWM Timer (GPT)"
+   default n
+   depends on RZV_HAVE_GPT
+   select PWM
+   ---help---
+     Enable support for the RZV General PWM Timer (GPT) peripheral.
+
+config RZV_GPT_PWM
+   bool "GPT PWM support"
+   default n
+   depends on RZV_GPT
+   select PWM
+   ---help---
+     Enable PWM functionality for the RZV GPT peripheral.
+
+config RZV_GPT_TIMER
+   bool "GPT Timer support"
+   default n
+   depends on RZV_GPT
+   select TIMER
+   ---help---
+     Enable Timer functionality for the RZV GPT peripheral.
+
+config RZV_GPT_ONESHOT
+   bool "GPT One-shot mode support"
+   default n
+   depends on RZV_GPT_PWM
+   select PWM_PULSECOUNT
+   ---help---
+     Enable One-shot mode for the RZV GPT PWM driver.
+
+config RZV_GPT0
+   bool "GPT0"
+   default n
+   depends on RZV_HAVE_GPT0 && RZV_GPT
+   ---help---
+     Enable GPT0 channel.
+
+config RZV_GPT1
+   bool "GPT1"
+   default n
+   depends on RZV_HAVE_GPT1 && RZV_GPT
+   ---help---
+     Enable GPT1 channel.
+
+config RZV_GPT2
+   bool "GPT2"
+   default n
+   depends on RZV_HAVE_GPT2 && RZV_GPT
+   ---help---
+     Enable GPT2 channel.
+
+config RZV_GPT3
+   bool "GPT3"
+   default n
+   depends on RZV_HAVE_GPT3 && RZV_GPT
+   ---help---
+     Enable GPT3 channel.
+
+config RZV_GPT4
+   bool "GPT4"
+   default n
+   depends on RZV_HAVE_GPT4 && RZV_GPT
+   ---help---
+     Enable GPT4 channel.
+
+config RZV_GPT5
+   bool "GPT5"
+   default n
+   depends on RZV_HAVE_GPT5 && RZV_GPT
+   ---help---
+     Enable GPT5 channel.
+
+config RZV_GPT6
+   bool "GPT6"
+   default n
+   depends on RZV_HAVE_GPT6 && RZV_GPT
+   ---help---
+     Enable GPT6 channel.
+
+config RZV_GPT7
+   bool "GPT7"
+   default n
+   depends on RZV_HAVE_GPT7 && RZV_GPT
+   ---help---
+     Enable GPT7 channel.
+
+config RZV_ADC
+   bool "ADC support"
+   default n
+   depends on RZV_HAVE_ADC12
+
+config RZV_DAC
+   bool "DAC support"
+   default n
+   depends on RZV_HAVE_DAC12
+
+config RZV_ETHERNET
+   bool "Ethernet support"
+   default n
+   depends on RZV_HAVE_ETHERC_MII || RZV_HAVE_ETHERC_RMII
+   select NETDEVICES
