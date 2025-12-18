@@ -1,0 +1,24 @@
+# ##############################################################################
+# boards/arm/rzv/rdk-rzv2h/Kconfig
+#
+# Kconfig for the RDK-RZV2H board support package for the RZV2H MPU.
+#
+if ARCH_BOARD_RDK_RZV2H
+
+config BOARD_RDK_RZV2H
+    bool "RDK-RZV2H Board Support"
+    help
+      Enable support for the RDK-RZV2H board based on the RZV2H MPU.
+
+config BOARD_RDK_RZV2H_I2C_GY912_EXAMPLE
+    bool "Enable GY-912 I2C sensor example"
+    default n
+    depends on RZV_RIIC
+    help
+      Enable the GY-912 sensor module example application. This example
+      demonstrates I2C communication with the ICM-20948 9-axis IMU and
+      BMP388 pressure sensor on the GY-912 module using the RIIC interface.
+
+endif
+
+# ##############################################################################

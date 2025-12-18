@@ -87,14 +87,14 @@ config RZV2H_BUILD_CR8_0
     default y
     help
       Build for the CR8_0 core of the RZV2H.
-      This is the default core for the EVK-RZV2H board.
+      This is the default core for the RDK-RZV2H board.
 
 config RZV2H_BUILD_CR8_1
     bool "Build for CR8_1 core"
     default n
     help
       Build for the CR8_1 core of the RZV2H.
-      This is the secondary core for the EVK-RZV2H board.
+      This is the secondary core for the RDK-RZV2H board.
 
 config RZV2H_BUILD_CM33
     bool "Build for CM33 core"
