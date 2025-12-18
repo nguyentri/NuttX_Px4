@@ -113,5 +113,8 @@ CONFIG_DEBUG_SPI_INFO=y
 
 # ===== APPLICATION CONFIGURATION =====
 
-# Enable the GY-912 example application
-CONFIG_RDK_RZV2H_SPI_GY912_EXAMPLE=y
+# Enable example support
+CONFIG_RZV2H_EXAMPLE_SUPPORT=y
+
+# Enable the GY-921 SPI example application
+CONFIG_RZV2H_SPI_GY921_EXAMPLE=y

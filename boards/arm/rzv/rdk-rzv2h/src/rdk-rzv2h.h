@@ -25,18 +25,23 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
 #include <stdint.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define LED_DRIVER_PATH "/dev/userleds"
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
 /* Forward declarations */
+
 struct spi_dev_s;
+struct i2c_master_s;
 
 /****************************************************************************
  * Public Data
@@ -49,7 +54,7 @@ struct spi_dev_s;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: rzv2h_bringup
+ * Name: board_bringup
  *
  * Description:
  *   Perform architecture-specific initialization
@@ -57,68 +62,107 @@ struct spi_dev_s;
  *   CONFIG_BOARD_LATE_INITIALIZE=y :
  *     Called from board_late_initialize().
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_BOARDCTL=y :
+ *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_BOARDCTL=y :
  *     Called from the NSH library
  *
  ****************************************************************************/
 
-int rzv2h_bringup(void);
+int board_bringup(void);
 
 /****************************************************************************
- * Name: rzv2h_led_initialize
- *
- * Description:
- *   Initialize LEDs
- *
- ****************************************************************************/
-
-void rzv2h_led_initialize(void);
-
-/****************************************************************************
- * Name: rzv2h_button_initialize
+ * Name: board_button_initialize
  *
  * Description:
  *   Initialize buttons
  *
  ****************************************************************************/
 
-void rzv2h_button_initialize(void);
-
-/****************************************************************************
- * Name: rzv2h_pwm_setup
- *
- * Description:
- *   Configure the GPT channel routed to the EVK PWM test point and register
- *   the lower-half driver with the NuttX PWM subsystem.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_RZV_GPT_PWM
-int rzv2h_pwm_setup(void);
+#ifdef CONFIG_ARCH_BUTTONS
+void board_button_initialize(void);
 #endif
 
 /****************************************************************************
- * Name: rzv2h_serial_setup
+ * Name: board_i2c_initialize
  *
  * Description:
- *   Configure SCI/UART pins for serial communication
+ *   Initialize I2C bus and return a pointer to the I2C device
  *
  ****************************************************************************/
 
-#ifdef CONFIG_RZV_UART_SCI
-void rzv2h_serial_setup(void);
+#ifdef CONFIG_RZV_RIIC
+struct i2c_master_s *board_i2c_initialize(int bus);
 #endif
 
 /****************************************************************************
- * Name: rzv2h_serial_register
+ * Name: board_spi_initialize
  *
  * Description:
- *   Register SCI/UART devices
+ *   Initialize SPI buses
  *
  ****************************************************************************/
 
-#ifdef CONFIG_RZV_UART_SCI
-int rzv2h_serial_register(void);
+#ifdef CONFIG_RZV_SPI
+int board_spi_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: board_adc_initialize
+ *
+ * Description:
+ *   Initialize ADC and register device
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RZV_ADC
+int board_adc_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: board_pwm_initialize
+ *
+ * Description:
+ *   Initialize GPT PWM devices and register with PWM subsystem
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PWM
+int board_pwm_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: rzv2h_app_examples
+ *
+ * Description:
+ *   Run all enabled board example applications
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RZV2H_EXAMPLE_SUPPORT
+int rzv2h_app_examples(void);
+#endif
+
+/****************************************************************************
+ * Example application initialization functions
+ ****************************************************************************/
+
+#ifdef CONFIG_RZV2H_SPI_LOOPBACK_EXAMPLE
+int rzv2h_spi_loopback_init(void);
+int rzv2h_spi_loopback_main(int argc, char *argv[]);
+#endif
+
+#ifdef CONFIG_RZV2H_I2C_GY912_EXAMPLE
+int rzv2h_i2c_gy912_init(void);
+int rzv2h_i2c_gy912_main(int argc, char *argv[]);
+#endif
+
+#ifdef CONFIG_RZV2H_SPI_GY921_EXAMPLE
+int rzv2h_spi_gy921_init(void);
+int rzv2h_spi_gy921_main(int argc, char *argv[]);
+#endif
+
+#ifdef CONFIG_RZV2H_PWM_ONESHOT_EXAMPLE
+int rzv2h_pwm_oneshot_init(void);
+int rzv2h_pwm_oneshot_main(int argc, char *argv[]);
 #endif
 
 #endif /* __ASSEMBLY__ */

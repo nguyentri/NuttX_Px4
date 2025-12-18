@@ -22,22 +22,40 @@
  * Included Files
  ****************************************************************************/
 
- #include <stddef.h>
+#include <nuttx/config.h>
 
 #include <sys/mount.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <syslog.h>
+#include <debug.h>
+#include <errno.h>
 
+#include <nuttx/board.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/leds/userled.h>
+#include <nuttx/timers/pwm.h>
 
+#include <arch/board/board.h>
+#include "arm_internal.h"
 #include "rdk-rzv2h.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#undef HAVE_LEDS
+
+#if !defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER)
+#  define HAVE_LEDS 1
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: rzv2h_bringup
+ * Name: board_bringup
  *
  * Description:
  *   Perform architecture-specific initialization
@@ -45,14 +63,16 @@
  *   CONFIG_BOARD_LATE_INITIALIZE=y :
  *     Called from board_late_initialize().
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_BOARDCTL=y :
+ *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_BOARDCTL=y :
  *     Called from the NSH library
  *
  ****************************************************************************/
 
-int rzv2h_bringup(void)
+int board_bringup(void)
 {
   int ret = 0;
+
+  syslog(LOG_INFO, "NuttX: RDK-RZV2H Board bring-up starting...\n");
 
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
@@ -62,37 +82,123 @@ int rzv2h_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
     }
+  else
+    {
+      syslog(LOG_INFO, "Mounted procfs at /proc\n");
+    }
+#endif
+
+#ifdef HAVE_LEDS
+  /* Initialize LED support */
+
+  board_userled_initialize();
+
+  /* Register the LED driver */
+
+  ret = userled_lower_initialize(LED_DRIVER_PATH);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
+  else
+    {
+      syslog(LOG_INFO, "LED driver initialized successfully\n");
+    }
 #endif
 
 #ifdef CONFIG_ARCH_BUTTONS
   /* Initialize buttons */
 
-  rzv2h_button_initialize();
+  board_button_initialize();
+  syslog(LOG_INFO, "Buttons initialized\n");
 #endif
 
-#ifdef CONFIG_RZV_GPT_PWM
-  ret = rzv2h_pwm_setup();
+#if defined(CONFIG_RZV_RIIC0) || defined(CONFIG_RZV_RIIC1) || defined(CONFIG_RZV_RIIC2)
+  /* Initialize I2C buses */
+
+#ifdef CONFIG_RZV_RIIC0
+  if (board_i2c_initialize(0) != NULL)
+    {
+      syslog(LOG_INFO, "I2C0 (RIIC0) initialized successfully\n");
+    }
+  else
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize I2C0\n");
+    }
+#endif
+
+#ifdef CONFIG_RZV_RIIC1
+  if (board_i2c_initialize(1) != NULL)
+    {
+      syslog(LOG_INFO, "I2C1 (RIIC1) initialized successfully\n");
+    }
+  else
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize I2C1\n");
+    }
+#endif
+
+#ifdef CONFIG_RZV_RIIC2
+  if (board_i2c_initialize(2) != NULL)
+    {
+      syslog(LOG_INFO, "I2C2 (RIIC2) initialized successfully\n");
+    }
+  else
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize I2C2\n");
+    }
+#endif
+#endif
+
+#ifdef CONFIG_RZV_SPI
+  /* Initialize SPI buses */
+
+  ret = board_spi_initialize();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize PWM: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI: %d\n", ret);
+    }
+  else
+    {
+      syslog(LOG_INFO, "SPI initialized successfully\n");
     }
 #endif
 
 #ifdef CONFIG_RZV_ADC
-  {
-    /* Initialize ADC device for board bringup. Use channel 0 by default. */
-    extern int rzv_adc_initialize(const char *devpath, const uint8_t *chanlist,
-                                  int nchannels);
-    static const uint8_t chanlist[] = { 0 };
-    ret = rzv_adc_initialize("/dev/adc0", chanlist, 1);
-    if (ret < 0)
-      {
-        syslog(LOG_ERR, "ERROR: Failed to initialize ADC: %d\n", ret);
-      }
-  }
+  /* Initialize ADC module */
+
+  ret = board_adc_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize ADC: %d\n", ret);
+    }
+  else
+    {
+      syslog(LOG_INFO, "ADC initialized successfully\n");
+    }
 #endif
 
-  (void)ret;
+#ifdef CONFIG_PWM
+  /* Initialize GPT PWM devices */
+
+  ret = board_pwm_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize GPT PWM: %d\n", ret);
+    }
+  else
+    {
+      syslog(LOG_INFO, "GPT PWM devices initialized successfully\n");
+    }
+#endif
+
+#ifdef CONFIG_RZV2H_EXAMPLE_SUPPORT
+  /* Run application examples */
+
+  rzv2h_app_examples();
+#endif
+
+  syslog(LOG_INFO, "NuttX: RDK-RZV2H Board bring-up complete\n");
   return ret;
 }
 
@@ -115,6 +221,6 @@ void board_late_initialize(void)
 {
   /* Perform board-specific initialization */
 
-  rzv2h_bringup();
+  board_bringup();
 }
 #endif
