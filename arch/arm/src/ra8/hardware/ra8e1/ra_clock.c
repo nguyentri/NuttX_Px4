@@ -164,7 +164,16 @@ uint32_t g_sys_core_clock = CONFIG_RA_HOCO_FREQUENCY;
 static ra_clock_config_t g_ra_clock_config;
 
 /* Clock frequency array */
-static uint32_t g_clock_freq[16];  /* Array size to accommodate all clock sources */
+static const uint32_t g_clock_freq[16] = {
+  [RA_CLOCKS_SOURCE_CLOCK_HOCO]     = RA_HOCO_HZ,
+  [RA_CLOCKS_SOURCE_CLOCK_MOCO]     = RA_MOCO_FREQ_HZ,
+  [RA_CLOCKS_SOURCE_CLOCK_LOCO]     = RA_LOCO_FREQ_HZ,
+  [RA_CLOCKS_SOURCE_CLOCK_MAIN_OSC] = 0U,  /* Main OSC not populated */
+  [RA_CLOCKS_SOURCE_CLOCK_SUBCLOCK] = RA_SUBCLOCK_FREQ_HZ,
+  [RA_CLOCKS_SOURCE_CLOCK_PLL]      = CONFIG_RA_PLL1P_FREQUENCY_HZ,
+  [RA_CLOCKS_SOURCE_CLOCK_PLL1Q]    = CONFIG_RA_PLL1Q_FREQUENCY_HZ,
+  [RA_CLOCKS_SOURCE_CLOCK_PLL1R]    = CONFIG_RA_PLL1R_FREQUENCY_HZ,
+};
 
 /****************************************************************************
  * Private Functions
@@ -208,28 +217,6 @@ void ra_sys_core_clock_update (void)
       /* Standard power-of-2 dividers */
       g_sys_core_clock = g_clock_freq[clock_index] >> cpuclk_div;
     };
-}
-
-/****************************************************************************
- * Name: ra_clock_freq_var_init
- *
- * Description:
- *   Initialize clock frequency array
- *
- ****************************************************************************/
-
-static void ra_clock_freq_var_init(void)
-{
-  g_clock_freq[RA_CLOCKS_SOURCE_CLOCK_HOCO]     = RA_HOCO_HZ;
-  g_clock_freq[RA_CLOCKS_SOURCE_CLOCK_MOCO]     = RA_MOCO_FREQ_HZ;
-  g_clock_freq[RA_CLOCKS_SOURCE_CLOCK_LOCO]     = RA_LOCO_FREQ_HZ;
-  g_clock_freq[RA_CLOCKS_SOURCE_CLOCK_MAIN_OSC] = 0U;  /* Main OSC not populated */
-  g_clock_freq[RA_CLOCKS_SOURCE_CLOCK_SUBCLOCK] = RA_SUBCLOCK_FREQ_HZ;
-  g_clock_freq[RA_CLOCKS_SOURCE_CLOCK_PLL]      = CONFIG_RA_PLL1P_FREQUENCY_HZ;
-  g_clock_freq[RA_CLOCKS_SOURCE_CLOCK_PLL1Q]    = CONFIG_RA_PLL1Q_FREQUENCY_HZ;
-  g_clock_freq[RA_CLOCKS_SOURCE_CLOCK_PLL1R]    = CONFIG_RA_PLL1R_FREQUENCY_HZ;
-
-  ra_sys_core_clock_update();
 }
 
 /****************************************************************************
@@ -418,20 +405,17 @@ static void ra_prv_clock_set_hard_reset(void)
 
 static void ra_clock_init(void)
 {
-  /* Step 1: Unlock system registers */
+  /* Unlock system registers */
   putreg16(RA_PRV_PRCR_UNLOCK, R_SYSC_PRCR_S);
 
-  /* Step 2: Initialize clock frequency variables */
-  ra_clock_freq_var_init();
-
-  /* Step 3: Start HOCO if used */
+  /* Start HOCO if used */
 #if defined(CONFIG_RA_CLOCK_HOCO)
   putreg8(0U, R_SYSC_HOCOCR);  /* Enable HOCO */
   /* Wait for HOCO to stabilize */
   RA_HARDWARE_WAIT((getreg8(R_SYSC_OSCSF) & R_SYSC_OSCSF_HOCOSF), R_SYSC_OSCSF_HOCOSF);
 #endif
 
-  /* Step 4: Configure and start PLL if used */
+  /* Configure and start PLL if used */
 #if defined(CONFIG_RA8E1_GROUP)
   putreg16((uint16_t)RA_PRV_PLLCCR, R_SYSC_PLLCCR);
   putreg16((uint16_t)RA_PRV_PLLCCR2, R_SYSC_PLLCCR2);
@@ -440,13 +424,13 @@ static void ra_clock_init(void)
   RA_HARDWARE_WAIT((getreg8(R_SYSC_OSCSF) & R_SYSC_OSCSF_PLLSF), R_SYSC_OSCSF_PLLSF);
 #endif
 
-  /* Step 5: Set clocks from hard reset state */
+  /* Set clocks from hard reset state */
   ra_prv_clock_set_hard_reset();
 
-  /* Step 6: Configure peripheral clocks */
+  /* Configure peripheral clocks */
   ra_peripheral_clock_init();
 
-  /* Step 7: Lock system registers */
+  /* Lock system registers */
   putreg16(RA_PRV_PRCR_LOCK, R_SYSC_PRCR_S);
 }
 

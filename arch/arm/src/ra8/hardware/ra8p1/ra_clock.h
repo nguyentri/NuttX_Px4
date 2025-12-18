@@ -51,24 +51,6 @@
 #  define CONFIG_RA_MAIN_OSC_FREQUENCY    24000000  /* 24MHz External Crystal (RA8P1 EVK) */
 #endif
 
-/* System Clock Selection */
-
-#ifndef RA_CKSEL
-#  ifdef CONFIG_RA_CLOCK_PLL1P
-#    define RA_CKSEL                   5         /* PLL1P */
-#  elif defined(CONFIG_RA_CLOCK_PLL)
-#    define RA_CKSEL                   5         /* PLL */
-#  elif defined(CONFIG_RA_CLOCK_HOCO)
-#    define RA_CKSEL                   0         /* HOCO */
-#  elif defined(CONFIG_RA_CLOCK_MOCO)
-#    define RA_CKSEL                   1         /* MOCO */
-#  elif defined(CONFIG_RA_CLOCK_MAIN_OSC)
-#    define RA_CKSEL                   3         /* Main OSC */
-#  else
-#    define RA_CKSEL                   0         /* Default to HOCO */
-#  endif
-#endif
-
 /* Clock Source Definitions */
 #define RA_CLOCKS_SOURCE_CLOCK_HOCO      0     /* HOCO */
 #define RA_CLOCKS_SOURCE_CLOCK_MOCO      1     /* MOCO */
@@ -427,9 +409,7 @@
 #endif
 
 /****************************************************************************
- * Configuration Default Macro (Phase 3 Optimization)
- * Single macro to define CONFIG_RA_* with profile-based fallback.
- * Reduces ~140 lines of repetitive if/else to concise definitions.
+ * Configuration Default Macro
  ****************************************************************************/
 #define RA_CONFIG_DEFAULT(cfg, profile, fallback) \
     _RA_CONFIG_DEFAULT_IMPL(cfg, profile, fallback)
@@ -525,76 +505,94 @@
 #endif
 
 /* System clock dividers with profile-based defaults */
-#ifndef CONFIG_RA_CPUCLK_DIV
-#  ifdef RA_PROFILE_CPUCLK_DIV
-#    define CONFIG_RA_CPUCLK_DIV      RA_PROFILE_CPUCLK_DIV
-#  else
-#    define CONFIG_RA_CPUCLK_DIV      RA_CLOCKS_SYS_CLOCK_DIV_1
-#  endif
+/* Override any Kconfig setting */
+#ifdef CONFIG_RA_CPUCLK_DIV
+#  undef CONFIG_RA_CPUCLK_DIV
+#endif
+#ifdef RA_PROFILE_CPUCLK_DIV
+#  define CONFIG_RA_CPUCLK_DIV      RA_PROFILE_CPUCLK_DIV
+#else
+#  define CONFIG_RA_CPUCLK_DIV      RA_CLOCKS_SYS_CLOCK_DIV_1  /* /1 -> 1000MHz */
 #endif
 
-#ifndef CONFIG_RA_ICK_DIV
-#  ifdef RA_PROFILE_ICK_DIV
-#    define CONFIG_RA_ICK_DIV         RA_PROFILE_ICK_DIV
-#  else
-#    define CONFIG_RA_ICK_DIV         RA_CLOCKS_SYS_CLOCK_DIV_4
-#  endif
+/* Override any Kconfig setting - must use RA_CLOCKS_SYS_CLOCK_DIV_X constants, not raw values */
+#ifdef CONFIG_RA_ICK_DIV
+#  undef CONFIG_RA_ICK_DIV
+#endif
+#ifdef RA_PROFILE_ICK_DIV
+#  define CONFIG_RA_ICK_DIV         RA_PROFILE_ICK_DIV
+#else
+#  define CONFIG_RA_ICK_DIV         RA_CLOCKS_SYS_CLOCK_DIV_4  /* /4 -> 250MHz */
 #endif
 
-#ifndef CONFIG_RA_PCKA_DIV
-#  ifdef RA_PROFILE_PCKA_DIV
-#    define CONFIG_RA_PCKA_DIV        RA_PROFILE_PCKA_DIV
-#  else
-#    define CONFIG_RA_PCKA_DIV        RA_CLOCKS_SYS_CLOCK_DIV_8
-#  endif
+/* Override any Kconfig setting */
+#ifdef CONFIG_RA_PCKA_DIV
+#  undef CONFIG_RA_PCKA_DIV
+#endif
+#ifdef RA_PROFILE_PCKA_DIV
+#  define CONFIG_RA_PCKA_DIV        RA_PROFILE_PCKA_DIV
+#else
+#  define CONFIG_RA_PCKA_DIV        RA_CLOCKS_SYS_CLOCK_DIV_8  /* /8 -> 125MHz */
 #endif
 
-#ifndef CONFIG_RA_PCKB_DIV
-#  ifdef RA_PROFILE_PCKB_DIV
-#    define CONFIG_RA_PCKB_DIV        RA_PROFILE_PCKB_DIV
-#  else
-#    define CONFIG_RA_PCKB_DIV        RA_CLOCKS_SYS_CLOCK_DIV_16
-#  endif
+/* Override any Kconfig setting */
+#ifdef CONFIG_RA_PCKB_DIV
+#  undef CONFIG_RA_PCKB_DIV
+#endif
+#ifdef RA_PROFILE_PCKB_DIV
+#  define CONFIG_RA_PCKB_DIV        RA_PROFILE_PCKB_DIV
+#else
+#  define CONFIG_RA_PCKB_DIV        RA_CLOCKS_SYS_CLOCK_DIV_16  /* /16 -> 62.5MHz */
 #endif
 
-#ifndef CONFIG_RA_PCKC_DIV
-#  ifdef RA_PROFILE_PCKC_DIV
-#    define CONFIG_RA_PCKC_DIV        RA_PROFILE_PCKC_DIV
-#  else
-#    define CONFIG_RA_PCKC_DIV        RA_CLOCKS_SYS_CLOCK_DIV_8
-#  endif
+/* Override any Kconfig setting */
+#ifdef CONFIG_RA_PCKC_DIV
+#  undef CONFIG_RA_PCKC_DIV
+#endif
+#ifdef RA_PROFILE_PCKC_DIV
+#  define CONFIG_RA_PCKC_DIV        RA_PROFILE_PCKC_DIV
+#else
+#  define CONFIG_RA_PCKC_DIV        RA_CLOCKS_SYS_CLOCK_DIV_8  /* /8 -> 125MHz */
 #endif
 
-#ifndef CONFIG_RA_PCKD_DIV
-#  ifdef RA_PROFILE_PCKD_DIV
-#    define CONFIG_RA_PCKD_DIV        RA_PROFILE_PCKD_DIV
-#  else
-#    define CONFIG_RA_PCKD_DIV        RA_CLOCKS_SYS_CLOCK_DIV_4
-#  endif
+/* Override any Kconfig setting */
+#ifdef CONFIG_RA_PCKD_DIV
+#  undef CONFIG_RA_PCKD_DIV
+#endif
+#ifdef RA_PROFILE_PCKD_DIV
+#  define CONFIG_RA_PCKD_DIV        RA_PROFILE_PCKD_DIV
+#else
+#  define CONFIG_RA_PCKD_DIV        RA_CLOCKS_SYS_CLOCK_DIV_4  /* /4 -> 250MHz */
 #endif
 
-#ifndef CONFIG_RA_PCKE_DIV
-#  ifdef RA_PROFILE_PCKE_DIV
-#    define CONFIG_RA_PCKE_DIV        RA_PROFILE_PCKE_DIV
-#  else
-#    define CONFIG_RA_PCKE_DIV        RA_CLOCKS_SYS_CLOCK_DIV_4
-#  endif
+/* Override any Kconfig setting */
+#ifdef CONFIG_RA_PCKE_DIV
+#  undef CONFIG_RA_PCKE_DIV
+#endif
+#ifdef RA_PROFILE_PCKE_DIV
+#  define CONFIG_RA_PCKE_DIV        RA_PROFILE_PCKE_DIV
+#else
+#  define CONFIG_RA_PCKE_DIV        RA_CLOCKS_SYS_CLOCK_DIV_4  /* /4 -> 250MHz */
 #endif
 
-#ifndef CONFIG_RA_BCLK_DIV
-#  ifdef RA_PROFILE_BCLK_DIV
-#    define CONFIG_RA_BCLK_DIV        RA_PROFILE_BCLK_DIV
-#  else
-#    define CONFIG_RA_BCLK_DIV        RA_CLOCKS_SYS_CLOCK_DIV_8
-#  endif
+/* Override any Kconfig setting */
+#ifdef CONFIG_RA_BCLK_DIV
+#  undef CONFIG_RA_BCLK_DIV
+#endif
+#ifdef RA_PROFILE_BCLK_DIV
+#  define CONFIG_RA_BCLK_DIV        RA_PROFILE_BCLK_DIV
+#else
+#  define CONFIG_RA_BCLK_DIV        RA_CLOCKS_SYS_CLOCK_DIV_8  /* /8 -> 125MHz */
 #endif
 
-#ifndef CONFIG_RA_FCLK_DIV
-#  ifdef RA_PROFILE_FCLK_DIV
-#    define CONFIG_RA_FCLK_DIV        RA_PROFILE_FCLK_DIV
-#  else
-#    define CONFIG_RA_FCLK_DIV        RA_CLOCKS_SYS_CLOCK_DIV_8
-#  endif
+/* Override any Kconfig setting - must use RA_CLOCKS_SYS_CLOCK_DIV_X constants, not raw values */
+#ifdef CONFIG_RA_FCLK_DIV
+#  undef CONFIG_RA_FCLK_DIV
+#endif
+#ifdef RA_PROFILE_FCLK_DIV
+#  define CONFIG_RA_FCLK_DIV        RA_PROFILE_FCLK_DIV
+#else
+#  define CONFIG_RA_FCLK_DIV        RA_CLOCKS_SYS_CLOCK_DIV_8  /* /8 -> 125MHz (MRPCLK) */
 #endif
 
 /* Peripheral Clock Divider Defaults */
@@ -643,25 +641,37 @@
 /* PLL source frequency selection */
 #if defined(CONFIG_RA_PLL_SOURCE_HOCO)
 #  define RA_PLL_SOURCE_FREQ          CONFIG_RA_HOCO_FREQUENCY
-#  define CONFIG_RA_PLL_SOURCE        RA_CLOCKS_SOURCE_CLOCK_HOCO
+#  ifndef CONFIG_RA_PLL_SOURCE
+#    define CONFIG_RA_PLL_SOURCE      RA_CLOCKS_SOURCE_CLOCK_HOCO
+#  endif
 #elif defined(CONFIG_RA_PLL_SOURCE_MAIN_OSC)
 #  define RA_PLL_SOURCE_FREQ          CONFIG_RA_MAIN_OSC_FREQUENCY
-#  define CONFIG_RA_PLL_SOURCE        RA_CLOCKS_SOURCE_CLOCK_MAIN_OSC
+#  ifndef CONFIG_RA_PLL_SOURCE
+#    define CONFIG_RA_PLL_SOURCE      RA_CLOCKS_SOURCE_CLOCK_MAIN_OSC
+#  endif
 #else
 #  define RA_PLL_SOURCE_FREQ          CONFIG_RA_HOCO_FREQUENCY
-#  define CONFIG_RA_PLL_SOURCE        RA_CLOCKS_SOURCE_CLOCK_HOCO
+#  ifndef CONFIG_RA_PLL_SOURCE
+#    define CONFIG_RA_PLL_SOURCE      RA_CLOCKS_SOURCE_CLOCK_HOCO
+#  endif
 #endif
 
 /* PLL2 source frequency selection */
 #if defined(CONFIG_RA_PLL2_SOURCE_HOCO)
 #  define RA_PLL2_SOURCE_FREQ         CONFIG_RA_HOCO_FREQUENCY
-#  define CONFIG_RA_PLL2_SOURCE       RA_CLOCKS_SOURCE_CLOCK_HOCO
+#  ifndef CONFIG_RA_PLL2_SOURCE
+#    define CONFIG_RA_PLL2_SOURCE     RA_CLOCKS_SOURCE_CLOCK_HOCO
+#  endif
 #elif defined(CONFIG_RA_PLL2_SOURCE_MAIN_OSC)
 #  define RA_PLL2_SOURCE_FREQ         CONFIG_RA_MAIN_OSC_FREQUENCY
-#  define CONFIG_RA_PLL2_SOURCE       RA_CLOCKS_SOURCE_CLOCK_MAIN_OSC
+#  ifndef CONFIG_RA_PLL2_SOURCE
+#    define CONFIG_RA_PLL2_SOURCE     RA_CLOCKS_SOURCE_CLOCK_MAIN_OSC
+#  endif
 #else
 #  define RA_PLL2_SOURCE_FREQ         CONFIG_RA_MAIN_OSC_FREQUENCY
-#  define CONFIG_RA_PLL2_SOURCE       RA_CLOCKS_SOURCE_CLOCK_MAIN_OSC
+#  ifndef CONFIG_RA_PLL2_SOURCE
+#    define CONFIG_RA_PLL2_SOURCE     RA_CLOCKS_SOURCE_CLOCK_MAIN_OSC
+#  endif
 #endif
 
 /* Clock settling delay */
@@ -890,13 +900,6 @@
 #  endif
 #endif
 
-#ifndef RA_HOCOEN
-#  ifdef CONFIG_RA_HOCO_ENABLE
-#    define RA_HOCOEN                  0         /* HOCO enabled */
-#  else
-#    define RA_HOCOEN                  1         /* HOCO disabled */
-#  endif
-#endif
 
 #define RA_STARTUP_SOURCE_CLOCK_HZ    (CONFIG_RA_PLL1P_FREQUENCY_HZ)
 
@@ -936,15 +939,24 @@
 #define CONFIG_RA_PCLKD_DIV              CONFIG_RA_PCKD_DIV
 #define CONFIG_RA_PCLKE_DIV              CONFIG_RA_PCKE_DIV
 
-/* RA8P1-specific clocks - provide defaults if not defined in Kconfig */
+/* RA8P1-specific clocks - provide defaults if not defined in Kconfig
+ * Note: For dual-core RA8P1 (CM85+CM33), CPUCLK1 typically runs at reduced speed
+ * Target SCKDIVCR2: 0x0020 (CPUCLK1=/4, NPUCLK=/1, MRICLK=/1)
+ */
 #ifndef CONFIG_RA_CPUCLK1_DIV
-#  define CONFIG_RA_CPUCLK1_DIV          RA_CLOCKS_SYS_CLOCK_DIV_4
+#  define CONFIG_RA_CPUCLK1_DIV          RA_CLOCKS_SYS_CLOCK_DIV_4  /* CM33 at 250MHz (1GHz/4) */
 #endif
 #ifndef CONFIG_RA_NPUCLK_DIV
-#  define CONFIG_RA_NPUCLK_DIV           RA_CLOCKS_SYS_CLOCK_DIV_2
+#  define CONFIG_RA_NPUCLK_DIV           RA_CLOCKS_SYS_CLOCK_DIV_1  /* NPU at full speed */
 #endif
-#ifndef CONFIG_RA_MRICLK_DIV
-#  define CONFIG_RA_MRICLK_DIV           RA_CLOCKS_SYS_CLOCK_DIV_4
+/* Override any Kconfig setting for MRICLK */
+#ifdef CONFIG_RA_MRICLK_DIV
+#  undef CONFIG_RA_MRICLK_DIV
+#endif
+#ifdef RA_PROFILE_MRICLK_DIV
+#  define CONFIG_RA_MRICLK_DIV           RA_PROFILE_MRICLK_DIV
+#else
+#  define CONFIG_RA_MRICLK_DIV           RA_CLOCKS_SYS_CLOCK_DIV_4  /* /4 -> 250MHz (match FSP) */
 #endif
 
 /* External Bus Configuration */

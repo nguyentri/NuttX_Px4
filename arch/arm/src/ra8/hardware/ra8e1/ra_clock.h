@@ -57,23 +57,7 @@
  * X=Integer portion of the multiplier.
  * Y=Fractional portion of the multiplier.
  */
- #define RA_CLOCKS_PLL_MUL(X, Y)    ((((X) -1U) << 2UL) | ((Y) == 50U ? 3U : ((Y) / 33UL)))
-
-#ifndef RA_CKSEL
-#  ifdef CONFIG_RA_CLOCK_PLL1P
-#    define RA_CKSEL                   5         /* PLL1P */
-#  elif defined(CONFIG_RA_CLOCK_PLL)
-#    define RA_CKSEL                   5         /* PLL */
-#  elif defined(CONFIG_RA_CLOCK_HOCO)
-#    define RA_CKSEL                   0         /* HOCO */
-#  elif defined(CONFIG_RA_CLOCK_MOCO)
-#    define RA_CKSEL                   1         /* MOCO */
-#  elif defined(CONFIG_RA_CLOCK_MAIN_OSC)
-#    define RA_CKSEL                   3         /* Main OSC */
-#  else
-#    define RA_CKSEL                   0         /* Default to HOCO */
-#  endif
-#endif
+#define RA_CLOCKS_PLL_MUL(X, Y)    ((((X) -1U) << 2UL) | ((Y) == 50U ? 3U : ((Y) / 33UL)))
 
 /* Clock Source Definitions */
 #define RA_CLOCKS_SOURCE_CLOCK_HOCO      0     /* HOCO */
@@ -620,14 +604,6 @@
 #    define RA_HOCO_FREQUENCY          8
 #  else
 #    define RA_HOCO_FREQUENCY          2         /* Default 20MHz for RA */
-#  endif
-#endif
-
-#ifndef RA_HOCOEN
-#  ifdef CONFIG_RA_HOCO_ENABLE
-#    define RA_HOCOEN                  0         /* HOCO enabled */
-#  else
-#    define RA_HOCOEN                  1         /* HOCO disabled */
 #  endif
 #endif
 

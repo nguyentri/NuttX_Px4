@@ -698,56 +698,62 @@ endmenu
 
 endif # RA8_CM33_FAMILY
 
+config RA_MCU_CLOCKS_ENABLE
+   bool "Enable MCU Clocks Configuration"
+   default y
+   help
+     Enable the top-level MCU Clocks Configuration menu and related options.
+
+if RA_MCU_CLOCKS_ENABLE
+
 menu "MCU Clocks Configuration"
 
-# High-Level Clock Configuration Aliases
-choice
-   prompt "Clock Configuration Mode"
-   default RA_CLOCK_PLL1P
-   help
-     Select a clock configuration mode. These are aliases for existing
-     clock configurations to simplify common use cases.
-
+# High-Level Clock Configuration Options
 config RA_CLOCK_PLL1P
-   bool "Maximum Performance Mode (PLL1P - 360MHz)"
+   bool "Enable PLL1P Mode (Maximum Performance)"
+   default y
    help
-     Configure MCU for maximum performance using PLL1P at 360MHz.
-     This is an alias for RA_CLOCK_PLL1P configuration.
+     Configure MCU for maximum performance using PLL1P.
      Best for applications requiring highest CPU performance.
+     RA8E1: Up to 360MHz
+     RA8P1: Up to 1000MHz
 
 config RA_CLOCK_HOCO
-   bool "Balanced Performance Mode (HOCO - 48MHz)"
-    default y if RA8E1_GROUP
-    default n if RA8P1_GROUP
+   bool "Enable HOCO Mode (Balanced Performance)"
+   default y
    help
-     Use HOCO at 48MHz for balanced performance and lower power consumption.
+     Use HOCO (High-Speed On-Chip Oscillator) for balanced performance
+     and lower power consumption.
      Good for most applications with moderate performance requirements.
+     Typical frequencies: 16-64 MHz
 
 config RA_CLOCK_MOCO
-   bool "Low Power Mode (MOCO - 8MHz)"
+   bool "Enable MOCO Mode (Low Power)"
    default y
    help
-     Use MOCO at 8MHz for minimal power consumption.
+     Use MOCO (Medium-Speed On-Chip Oscillator) for low power consumption.
      Suitable for low-power applications and battery-powered devices.
+     Fixed frequency: 8MHz
 
 config RA_CLOCK_LOCO
-   bool "Ultra Low Power Mode (LOCO - 32.768kHz)"
+   bool "Enable LOCO Mode (Ultra Low Power)"
    default y
    help
-     Use LOCO at 32.768kHz for ultra-low power consumption.
+     Use LOCO (Low-Speed On-Chip Oscillator) for ultra-low power consumption.
+     Fixed frequency: 32.768kHz
 
 config RA_CLOCK_MAIN
-   bool "External Crystal Mode (Main OSC)"
+   bool "Enable Main OSC Mode (External Crystal)"
    default y
    help
      Use external crystal oscillator as system clock.
+     Requires external crystal hardware.
 
 config RA_CLOCK_PLL
-   bool "PLL Mode (Legacy - same as PLL1P)"
+   bool "Enable PLL Mode (Legacy - same as PLL1P)"
+   default y
    help
      Use PLL output as system clock (legacy option, same as PLL1P).
-
-endchoice
 
 # Clock Profile Configuration
 choice
@@ -790,21 +796,10 @@ config RA_CLOCK_PROFILE_CUSTOM
 
 endchoice
 
-# Automatic clock frequency calculation
-config RA_MCU_CLOCK_FREQUENCY
-   int "MCU Core Clock Frequency (Hz)"
-   default 360000000 if RA_CLOCK_PLL1P && !RA_CLOCK_PROFILE_LOW_POWER
-   default 360000000 if RA_CLOCK_PLL && !RA_CLOCK_PROFILE_LOW_POWER
-   default 120000000 if (RA_CLOCK_PLL1P || RA_CLOCK_PLL) && RA_CLOCK_PROFILE_LOW_POWER && RA8E1_GROUP
-   default 500000000 if (RA_CLOCK_PLL1P || RA_CLOCK_PLL) && RA_CLOCK_PROFILE_LOW_POWER && RA8P1_GROUP
-   default 48000000 if RA_CLOCK_HOCO
-   default 8000000 if RA_CLOCK_MOCO
-   default 32768 if RA_CLOCK_LOCO
-   default 20000000 if RA_CLOCK_MAIN
-   help
-     Set the MCU core clock frequency in Hertz.
-     RA8E1 supports up to 360MHz with PLL1P enabled.
-     RA8P1 supports up to 1000MHz with PLL1P enabled.
+# HOCO Mode Configuration
+if RA_CLOCK_HOCO
+
+menu "HOCO Configuration"
 
 config RA_HOCO_FREQUENCY
    int "HOCO Frequency (Hz)"
@@ -816,6 +811,47 @@ config RA_HOCO_FREQUENCY
      Valid frequencies: 16, 18, 20, 24, 32, 48, 64 MHz.
      Default is 20MHz for RA8E1, 48MHz for RA8P1.
 
+endmenu
+
+endif # RA_CLOCK_HOCO
+
+# MOCO Mode Configuration
+if RA_CLOCK_MOCO
+
+menu "MOCO Configuration"
+
+config RA_MOCO_FREQUENCY
+   int "MOCO Frequency (Hz)"
+   default 8000000
+   help
+     MOCO (Medium-Speed On-Chip Oscillator) frequency.
+     Fixed at 8MHz.
+
+endmenu
+
+endif # RA_CLOCK_MOCO
+
+# LOCO Mode Configuration
+if RA_CLOCK_LOCO
+
+menu "LOCO Configuration"
+
+config RA_LOCO_FREQUENCY
+   int "LOCO Frequency (Hz)"
+   default 32768
+   help
+     LOCO (Low-Speed On-Chip Oscillator) frequency.
+     Fixed at 32.768kHz.
+
+endmenu
+
+endif # RA_CLOCK_LOCO
+
+# Main OSC Mode Configuration
+if RA_CLOCK_MAIN
+
+menu "Main OSC Configuration"
+
 config RA_XTAL_FREQUENCY
    int "External Crystal Frequency (Hz)"
    default 20000000 if RA8E1_GROUP
@@ -825,9 +861,14 @@ config RA_XTAL_FREQUENCY
      External crystal oscillator frequency in Hz.
      Typically 20MHz for RA8E1 FPB board, 24MHz for RA8P1 EVK board.
 
+endmenu
+
+endif # RA_CLOCK_MAIN
+
+# PLL/PLL1P Mode Configuration
 if RA_CLOCK_PLL || RA_CLOCK_PLL1P
 
-menu "PLL Configuration"
+menu "PLL/PLL1P Configuration"
 
 choice
    prompt "PLL Source Clock"
@@ -843,6 +884,14 @@ config RA_PLL_SOURCE_MAIN_OSC
    bool "Main Oscillator (External Crystal)"
 
 endchoice
+
+config RA_PLL_SOURCE
+   int
+   default 0 if RA_PLL_SOURCE_HOCO
+   default 3 if RA_PLL_SOURCE_MAIN_OSC
+   help
+     Numeric value for PLL source clock.
+     0 = HOCO, 3 = Main OSC
 
 config RA_PLL_DIV
    int "PLL Input Divider"
@@ -923,6 +972,14 @@ config RA_PLL2_SOURCE_MAIN_OSC
    bool "Main Oscillator (External Crystal)"
 
 endchoice
+
+config RA_PLL2_SOURCE
+   int
+   default 0 if RA_PLL2_SOURCE_HOCO
+   default 3 if RA_PLL2_SOURCE_MAIN_OSC
+   help
+     Numeric value for PLL2 source clock (used in C code comparisons).
+     0 = HOCO, 3 = Main OSC
 
 config RA_PLL2_DIV
    int "PLL2 Input Divider"
@@ -1030,11 +1087,11 @@ config RA_CPUCLK_DIV
 choice
    prompt "ICLK Divider (Internal System Bus Clock)"
    default RA_ICK_DIV_3 if RA8E1_GROUP
-   default RA_ICK_DIV_4 if RA8P1_GROUP
+   default RA_ICK_DIV_8 if RA8P1_GROUP
    help
      Select internal clock (ICLK) divider for system bus.
      RA8E1: /3 gives 120MHz from 360MHz
-     RA8P1: /4 gives 250MHz from 1000MHz
+     RA8P1: /8 gives 125MHz from 1000MHz
 
 config RA_ICK_DIV_1
    bool "Divide by 1"
@@ -1359,11 +1416,11 @@ config RA_BCLK_DIV
 choice
    prompt "FCLK Divider (Flash Clock)"
    default RA_FCLK_DIV_6 if RA8E1_GROUP
-   default RA_FCLK_DIV_8 if RA8P1_GROUP
+   default RA_FCLK_DIV_4 if RA8P1_GROUP
    help
      Select flash clock divider.
      RA8E1: /6 gives 60MHz
-     RA8P1: /8 gives 125MHz
+     RA8P1: /4 gives 250MHz
 
 config RA_FCLK_DIV_1
    bool "Divide by 1"
@@ -2032,6 +2089,8 @@ config RA_MCU_PLL_ENABLE
      Required for maximum performance (360MHz).
 
 endmenu
+
+endif # RA_MCU_CLOCKS_ENABLE
 
 menu "Memory Configuration"
 
@@ -5275,14 +5334,6 @@ config RA_WDT_STOP_CTRL
 
 endif # RA_WDT_ENABLE
 
-config RA_HOCO_ENABLE
-    bool "Enable HOCO Oscillation"
-    default y if RA_CLOCK_HOCO || RA_CLOCK_PLL || RA_CLOCK_PLL1P
-    help
-      Enable High-Speed On-Chip Oscillator (HOCO) after reset.
-      When disabled, HOCO is stopped after reset.
-      Automatically enabled when HOCO is used as system clock or PLL source.
-
 config RA_VOLTAGE_DETECTION_LEVEL
     int "Voltage Detection Level"
     default 7
@@ -5320,6 +5371,41 @@ config RA_OFS1_SETTING
       Enable Option Function Select Register 1 (OFS1) configuration.
       This configures additional system settings.
 
+config RA_OFS3_SETTING
+    bool "Enable OFS3 Option Setting"
+    default n
+    depends on RA8P1_GROUP
+    help
+      Enable Option Function Select Register 3 (OFS3) configuration.
+      This configures additional system settings for RA8P1.
+      Only available on RA8P1 MCUs.
+
+config RA_OFS3_SEL_SETTING
+    bool "Enable OFS3 Selection Setting"
+    default n
+    depends on RA8P1_GROUP
+    help
+      Option Function Select Register 3 for Security Attribution.
+      Only available on RA8P1 MCUs in TrustZone secure builds.
+
+config RA_OFS3_SEC_SETTING
+    bool "Enable OFS3 Security Setting"
+    default n
+    depends on RA8P1_GROUP
+    help
+      Enable Option Function Select Register 3 security settings.
+      This configures secure/non-secure OFS3 regions.
+      Only available on RA8P1 MCUs in TrustZone secure builds.
+
+config RA_SAS_SETTING
+    bool "Enable SAS Setting"
+    default n
+    depends on RA8P1_GROUP
+    help
+      Enable Secure Area Setting (SAS) configuration.
+      This configures secure area boundaries for TrustZone.
+      Only available on RA8P1 MCUs.
+
 config RA_OFS1_SEL_SETTING
     bool "Enable OFS1 Selection Setting"
     default y
@@ -5353,6 +5439,16 @@ config RA_BOOT_PROTECT_SETTING
     help
       Enable boot protection configuration settings.
 
+config RA_OTP_SETTING
+    bool "Enable OTP (One-Time Programmable) Settings"
+    default n
+    depends on RA8P1_GROUP
+    help
+      Enable OTP (One-Time Programmable) configuration settings.
+      These settings are permanent once programmed.
+      Only available on RA8P1 MCUs.
+      WARNING: These settings cannot be reversed once programmed!
+
 if RA_OPTION_SETTING_ENABLE
 
 comment "Option Setting Register Values"
@@ -5372,24 +5468,70 @@ config RA_OPTION_SETTING_OFS0
 
 config RA_OPTION_SETTING_OFS1
     hex "OFS1 (Option Function Select Register 1)"
-    default 0xFEFFF8F8
+    default 0xFEFFF8F8 if RA8E1_GROUP
+    default 0xFFFFFFFF if RA8P1_GROUP
     depends on RA_OFS1_SETTING
     help
       Option Function Select Register 1 configuration.
       This register configures additional system settings including
       HOCO frequency and various security/power settings.
-      Default: 0xFEFFF8F8 (HOCO frequency settings enabled)
+      Default: 0xFEFFF8F8 if RA8E1_GROUP
+               0xFFFFFFFF if RA8P1_GROUP
 
 config RA_OPTION_SETTING_OFS2
     hex "OFS2 (Option Function Select Register 2)"
-    default 0xFFFFFFFF
+    default 0xFFFFFFFF if RA8E1_GROUP
+    default 0xFFFFFFEF if RA8P1_GROUP
     depends on RA_OFS2_SETTING
     help
       Option Function Select Register 2 configuration.
       This register configures:
       - DCDC power supply settings
       - Additional power management options
-      Default: 0xFFFFFFFF (DCDC enabled)
+      - NPU Security settings on RA8P1
+      - External VDD Voltage select for SDRAM on RA8P1
+      Default: 0xFFFFFFFF if RA8E1_GROUP
+               0xFFFFFFEF if RA8P1_GROUP
+
+config RA_OPTION_SETTING_SAS
+    hex "SAS (Secure Area Setting)"
+    default 0xFFFFFFFF
+    depends on RA_SAS_SETTING
+    help
+      Secure Area Setting register configuration.
+      This register configures secure area boundaries for TrustZone.
+      Only available on RA8P1 MCUs.
+      Default: 0xFFFFFFFF (no secure areas defined)
+
+config RA_OPTION_SETTING_OFS3
+    hex "OFS3 (Option Function Select Register 3)"
+    default 0xFFFFFFFF
+    depends on RA_OFS3_SETTING
+    help
+      Option Function Select Register 3 configuration.
+      This register configures additional system settings.
+      Only available on RA8P1 MCUs.
+      Default: 0xFFFFFFFF
+
+config RA_OPTION_SETTING_OFS3_SEC
+    hex "OFS3_SEC (OFS3 Security Settings)"
+    default 0xFFFFFFFF
+    depends on RA_OFS3_SEC_SETTING
+    help
+      Option Function Select Register 3 Security configuration.
+      Configures secure/non-secure OFS3 settings.
+      Only available on RA8P1 MCUs in TrustZone secure builds.
+      Default: 0xFFFFFFFF
+
+config RA_OPTION_SETTING_OFS3_SEL
+    hex "OFS3_SEL (OFS3 Selection)"
+    default 0x00000000
+    depends on RA_OFS3_SEL_SETTING
+    help
+      Option Function Select Register 3 Selection configuration.
+      Selects between secure and non-secure OFS3 settings.
+      Only available on RA8P1 MCUs in TrustZone secure builds.
+      Default: 0x00000000 (all settings from secure side)
 
 config RA_OPTION_SETTING_DUALSEL
     hex "DUALSEL (Dual Bank Selection)"
@@ -5429,13 +5571,13 @@ config RA_OPTION_SETTING_PBPS
 
 config RA_OPTION_SETTING_OFS1_SEC
     hex "OFS1_SEC (OFS1 Security Settings)"
-    default 0xFDFFF5FF
+    default 0xFEFFFFFF
     depends on RA_OFS1_SEC_SETTING
     help
       Option Function Select Register 1 Security configuration.
       Configures secure/non-secure memory attribution and HOCO frequency.
       Only available in TrustZone secure builds.
-      Default: 0xFDFFF5FF (includes HOCO frequency and security settings)
+      Default: 0xFDFFFFFF (includes HOCO frequency 48MHz and security settings)
 
 config RA_OPTION_SETTING_BANKSEL_SEC
     hex "BANKSEL_SEC (Bank Selection Security)"
@@ -5497,6 +5639,156 @@ config RA_OPTION_SETTING_BPS_SEL
       Only available in TrustZone secure builds.
       Default: 0xFFFFFFFF (default selection)
 
+config RA_OPTION_SETTING_OTP_FSBLCTRL0
+    hex "OTP_FSBLCTRL0 (OTP Flash Security Bootloader Control 0)"
+    default 0xFFFFFFFF
+    depends on RA_OTP_SETTING
+    help
+      OTP Flash Security Bootloader Control register 0.
+      One-time programmable security setting for bootloader.
+      Only available on RA8P1 MCUs.
+      Default: 0xFFFFFFFF
+
+config RA_OPTION_SETTING_OTP_FSBLCTRL1
+    hex "OTP_FSBLCTRL1 (OTP Flash Security Bootloader Control 1)"
+    default 0xFFFFFFFF
+    depends on RA_OTP_SETTING
+    help
+      OTP Flash Security Bootloader Control register 1.
+      One-time programmable security setting for bootloader.
+      Only available on RA8P1 MCUs.
+      Default: 0xFFFFFFFF
+
+config RA_OPTION_SETTING_OTP_FSBLCTRL2
+    hex "OTP_FSBLCTRL2 (OTP Flash Security Bootloader Control 2)"
+    default 0xFFFFFFFF
+    depends on RA_OTP_SETTING
+    help
+      OTP Flash Security Bootloader Control register 2.
+      One-time programmable security setting for bootloader.
+      Only available on RA8P1 MCUs.
+      Default: 0xFFFFFFFF
+
+config RA_OPTION_SETTING_OTP_SAMR
+    hex "OTP_SAMR (OTP Secure Area Memory Region)"
+    default 0xFFFFFFFF
+    depends on RA_OTP_SETTING
+    help
+      OTP Secure Area Memory Region register.
+      One-time programmable setting for secure area boundaries.
+      Only available on RA8P1 MCUs.
+      Default: 0xFFFFFFFF
+
+config RA_OPTION_SETTING_OTP_SACC00
+    hex "OTP_SACC00 (OTP Secure Access Control 00)"
+    default 0xFFFFFFFF
+    depends on RA_OTP_SETTING
+    help
+      OTP Secure Access Control register 00.
+      One-time programmable security access control settings.
+      Only available on RA8P1 MCUs.
+      Default: 0xFFFFFFFF
+
+config RA_OPTION_SETTING_OTP_SACC10
+    hex "OTP_SACC10 (OTP Secure Access Control 10)"
+    default 0xFFFFFFFF
+    depends on RA_OTP_SETTING
+    help
+      OTP Secure Access Control register 10.
+      One-time programmable security access control settings.
+      Only available on RA8P1 MCUs.
+      Default: 0xFFFFFFFF
+
+config RA_OPTION_SETTING_OTP_SACC01
+    hex "OTP_SACC01 (OTP Secure Access Control 01)"
+    default 0xFFFFFFFF
+    depends on RA_OTP_SETTING
+    help
+      OTP Secure Access Control register 01.
+      One-time programmable security access control settings.
+      Only available on RA8P1 MCUs.
+      Default: 0xFFFFFFFF
+
+config RA_OPTION_SETTING_OTP_SACC11
+    hex "OTP_SACC11 (OTP Secure Access Control 11)"
+    default 0xFFFFFFFF
+    depends on RA_OTP_SETTING
+    help
+      OTP Secure Access Control register 11.
+      One-time programmable security access control settings.
+      Only available on RA8P1 MCUs.
+      Default: 0xFFFFFFFF
+
+config RA_OPTION_SETTING_OTP_SACC02
+    hex "OTP_SACC02 (OTP Secure Access Control 02)"
+    default 0xFFFFFFFF
+    depends on RA_OTP_SETTING
+    help
+      OTP Secure Access Control register 02.
+      One-time programmable security access control settings.
+      Only available on RA8P1 MCUs.
+      Default: 0xFFFFFFFF
+
+config RA_OPTION_SETTING_OTP_SACC12
+    hex "OTP_SACC12 (OTP Secure Access Control 12)"
+    default 0xFFFFFFFF
+    depends on RA_OTP_SETTING
+    help
+      OTP Secure Access Control register 12.
+      One-time programmable security access control settings.
+      Only available on RA8P1 MCUs.
+      Default: 0xFFFFFFFF
+
+config RA_OPTION_SETTING_OTP_SACC03
+    hex "OTP_SACC03 (OTP Secure Access Control 03)"
+    default 0xFFFFFFFF
+    depends on RA_OTP_SETTING
+    help
+      OTP Secure Access Control register 03.
+      One-time programmable security access control settings.
+      Only available on RA8P1 MCUs.
+      Default: 0xFFFFFFFF
+
+config RA_OPTION_SETTING_OTP_SACC13
+    hex "OTP_SACC13 (OTP Secure Access Control 13)"
+    default 0xFFFFFFFF
+    depends on RA_OTP_SETTING
+    help
+      OTP Secure Access Control register 13.
+      One-time programmable security access control settings.
+      Only available on RA8P1 MCUs.
+      Default: 0xFFFFFFFF
+
+config RA_OPTION_SETTING_OTP_PBPS_SEC
+    hex "OTP_PBPS_SEC (OTP Permanent Boot Protection Settings Security)"
+    default 0xFFFFFFFF
+    depends on RA_OTP_SETTING
+    help
+      OTP Permanent Boot Protection Settings Security register.
+      One-time programmable boot protection security settings.
+      Only available on RA8P1 MCUs.
+      Default: 0xFFFFFFFF
+
+config RA_OPTION_SETTING_OTP_PBPS
+    hex "OTP_PBPS (OTP Permanent Boot Protection Settings)"
+    default 0xFFFFFFFF
+    depends on RA_OTP_SETTING
+    help
+      OTP Permanent Boot Protection Settings register.
+      One-time programmable boot protection settings.
+      Only available on RA8P1 MCUs.
+      Default: 0xFFFFFFFF
+
+config RA_OPTION_SETTING_OTP_ZHUK
+    hex "OTP_ZHUK (OTP Zero Hidden User Key)"
+    default 0xFFFFFFFF
+    depends on RA_OTP_SETTING
+    help
+      OTP Zero Hidden User Key register.
+      One-time programmable user key for security features.
+      Only available on RA8P1 MCUs.
+      Default: 0xFFFFFFFF
+
 endif # RA_OPTION_SETTING_ENABLE
 
 endmenu
@@ -5522,3 +5814,9 @@ config RA_IDLE_LOG_STATE
    help
      Enable logging of idle state for performance monitoring.
      Useful for debugging and optimizing power consumption.
+
+config RA_LINKER_C
+    bool "RA memory initialization"
+    default y
+    help
+        Enable RAM initialization for RA8 family
