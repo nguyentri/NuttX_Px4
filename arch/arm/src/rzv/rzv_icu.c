@@ -67,7 +67,7 @@ typedef struct
  * registration
  ****************************************************************************/
 
-static rzv_icu_handler_t g_icu_handlers[RZV_IRQ_GIC_SIZE];
+static rzv_icu_handler_t g_icu_handlers[RZV_IRQ_ICU_SLOTS];
 static uint32_t g_icu_slot = 0; /* next available slot */
 
 /****************************************************************************
@@ -117,11 +117,9 @@ static int rzv_icu_interrupt(int irq, void *context, void *arg)
 
 void rzv_icu_clear_irq(int irq)
 {
-  /* On RZV2H with GIC, interrupt acknowledgment is handled by the GIC
-   * hardware. The peripheral driver is responsible for clearing its own
-   * interrupt status flags. This function is maintained for API
-   * compatibility but does not need to modify ICU registers.
-   */
+  if (irq >= RZV_ELC_IRQ0 && irq <= RZV_ELC_IRQ15) {
+    rzv_icu_clear_irq_status(1 << (irq - RZV_ELC_IRQ0));
+  }
 }
 
 /****************************************************************************
@@ -138,7 +136,7 @@ void rzv_icu_initialize(void)
 
   /* Initialize the handlers structure */
 
-  for (i = 0; i < RZV_IRQ_GIC_SIZE; i++)
+  for (i = 0; i < RZV_IRQ_ICU_SLOTS; i++)
     {
       g_icu_handlers[i].el = -1;
       g_icu_handlers[i].handler = NULL;
@@ -162,16 +160,24 @@ void rzv_icu_initialize(void)
 
 int rzv_icu_attach(int event, xcpt_t handler, void *arg, bool irq_enable)
 {
+  irqstate_t flags;
   int slot;
+
+  /* Critical section to prevent race condition in slot allocation */
+
+  flags = enter_critical_section();
 
   /* Find next available slot */
 
-  if (g_icu_slot >= RZV_IRQ_GIC_SIZE)
+  if (g_icu_slot >= RZV_IRQ_ICU_SLOTS)
     {
+      leave_critical_section(flags);
       return -ENOMEM;
     }
 
   slot = g_icu_slot++;
+
+  leave_critical_section(flags);
 
   /* Set up the ICU event link */
 
@@ -215,7 +221,7 @@ int rzv_icu_detach(int icu_irq)
   /* Validate IRQ range */
 
   if (icu_irq < RZV_IRQ_FIRST ||
-      icu_irq >= (RZV_IRQ_FIRST + RZV_IRQ_GIC_SIZE))
+      icu_irq >= (RZV_IRQ_FIRST + RZV_IRQ_ICU_SLOTS))
     {
       return -EINVAL;
     }
@@ -224,7 +230,7 @@ int rzv_icu_detach(int icu_irq)
 
   /* Validate slot range */
 
-  if (slot < 0 || slot >= RZV_IRQ_GIC_SIZE)
+  if (slot < 0 || slot >= RZV_IRQ_ICU_SLOTS)
     {
       return -EINVAL;
     }
@@ -301,7 +307,7 @@ int rzv_icu_set_event(int icu_slot, int event)
   int slot_idx;
   int shift;
 
-  if (icu_slot < 0 || icu_slot >= RZV_IRQ_GIC_SIZE)
+  if (icu_slot < 0 || icu_slot >= RZV_IRQ_ICU_SLOTS)
     {
       return -EINVAL;
     }
@@ -507,6 +513,66 @@ int rzv_icu_set_irq_filter(int irq_num, uint8_t filter_clock)
   putreg32(regval, RZV_ICU_IFLTC);
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: rzv_icu_set_priority
+ *
+ * Description:
+ *   Set interrupt priority for a dynamically allocated ICU IRQ.
+ *   This function wraps the architecture-specific up_prioritize_irq()
+ *   to provide a consistent ICU-level API.
+ *
+ * Input Parameters:
+ *   icu_irq  - ICU IRQ number (RZV_IRQ_FIRST + slot)
+ *   priority - Priority level (0-31 for GIC, 0 = highest, 31 = lowest)
+ *              GIC uses bits[7:3] for 5-bit priority control
+ *              Typical values: 0-7 (high), 8-15 (medium), 16-31 (low)
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ * Notes:
+ *   - Priority must be set before enabling the interrupt
+ *   - Lower numerical values = higher priority
+ *   - Priority 0 is reserved for critical system interrupts
+ *   - GIC implements 5 bits of priority in bits[7:3]
+ *
+ ****************************************************************************/
+
+int rzv_icu_set_priority(int icu_irq, int priority)
+{
+  /* Validate IRQ range */
+
+  if (icu_irq < RZV_IRQ_FIRST ||
+      icu_irq >= (RZV_IRQ_FIRST + RZV_IRQ_ICU_SLOTS))
+    {
+      return -EINVAL;
+    }
+
+  /* Validate priority range (0-31 for GIC 5-bit priority)
+   * GIC uses bits[7:3] of the priority byte, so we have 32 levels
+   * Priority 0x00 = highest, 0xF8 = lowest
+   */
+
+  if (priority < 0 || priority > 31)
+    {
+      return -EINVAL;
+    }
+
+#ifdef CONFIG_ARCH_IRQPRIO
+  /* Use the architecture-specific priority function
+   * up_prioritize_irq expects priority in the format used by GIC
+   * For GIC, priority is in bits [7:3] of the priority byte,
+   * so we need to shift left by 3
+   */
+
+  return up_prioritize_irq(icu_irq, priority << 3);
+#else
+  /* Priority control not enabled in configuration */
+
+  return -ENOSYS;
+#endif
 }
 
 /****************************************************************************

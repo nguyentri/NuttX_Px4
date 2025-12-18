@@ -489,6 +489,10 @@
 #define RZV_ELC_DRP1_ELCO                             (0x1C5)  /* DRP1 Interrupt signal for ELC - Event 0x1C5 */
 #define RZV_ELC_DRP_AI_ELCO                           (0x1C6)  /* DRP-AI Interrupt signal for ELC - Event 0x1C6 */
 #define RZV_ELC_DRP_AI_MAC_ELCO                       (0x1C7)  /* DRP-AI Interrupt signal for ELC - Event 0x1C7 */
+
+/* INTC INTR8SEL registers provide 96 configurable slots (0-95)
+ * mapping to GIC SPI interrupts 32-127 */
+#define RZV_IRQ_ICU_SLOTS                             (96)      /* Hardware-limited INTR8SEL slots */
 #define RZV_IRQ_GIC_SIZE                              (224)     /* Number of interrupts for RZ/V2H */
 
 /* Total number of IRQ numbers */

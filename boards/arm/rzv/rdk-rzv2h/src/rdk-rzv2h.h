@@ -137,6 +137,16 @@ int board_pwm_initialize(void);
  *
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: rzv2h_serial_setup
+ *
+ * Description:
+ *   Configure serial pins for UART operation
+ *
+ ****************************************************************************/
+
+void rzv2h_serial_setup(void);
+
 #ifdef CONFIG_RZV2H_EXAMPLE_SUPPORT
 int rzv2h_app_examples(void);
 #endif

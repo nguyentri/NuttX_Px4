@@ -72,7 +72,7 @@ int rzv2h_pwm_setup(void)
       return OK;
     }
 
-  ret = rzv_gpio_config(BOARD_PWM0_GPIO);
+  ret = rzv_gpioconfig(BOARD_PWM0_GPIO);
   if (ret < 0)
     {
       return ret;

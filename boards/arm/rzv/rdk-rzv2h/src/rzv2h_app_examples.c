@@ -30,6 +30,8 @@
 
 #include <nuttx/config.h>
 #include <syslog.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "rdk-rzv2h.h"
 
@@ -109,7 +111,7 @@ static int rzv2h_pwm_oneshot_example(void)
 int rzv2h_app_examples(void)
 {
   int ret = 0;
-  int last_err = 0;
+  int last_err = ret;
 
   syslog(LOG_INFO, "Starting RDK-RZV2H application examples...\n");
 

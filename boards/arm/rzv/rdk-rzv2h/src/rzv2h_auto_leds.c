@@ -48,7 +48,7 @@
 
 /* This array maps LED numbers to GPIO configurations */
 
-static const rzv_pinconfig_t g_led_gpio[BOARD_NLEDS] =
+static const gpio_pinset_t g_led_gpio[BOARD_NLEDS] =
 {
   BOARD_LED1_GPIO,
   BOARD_LED2_GPIO,
@@ -68,10 +68,10 @@ static const rzv_pinconfig_t g_led_gpio[BOARD_NLEDS] =
 static void led_dumppins(const char *msg)
 {
   ledinfo("%s:\n", msg);
-  ledinfo("  LED1: %d\n", rzv_gpio_read(g_led_gpio[BOARD_LED1]));
-  ledinfo("  LED2: %d\n", rzv_gpio_read(g_led_gpio[BOARD_LED2]));
-  ledinfo("  LED3: %d\n", rzv_gpio_read(g_led_gpio[BOARD_LED3]));
-  ledinfo("  LED4: %d\n", rzv_gpio_read(g_led_gpio[BOARD_LED4]));
+  ledinfo("  LED1: %d\n", rzv_gpioread(g_led_gpio[BOARD_LED1]));
+  ledinfo("  LED2: %d\n", rzv_gpioread(g_led_gpio[BOARD_LED2]));
+  ledinfo("  LED3: %d\n", rzv_gpioread(g_led_gpio[BOARD_LED3]));
+  ledinfo("  LED4: %d\n", rzv_gpioread(g_led_gpio[BOARD_LED4]));
 }
 #else
 #  define led_dumppins(m)
@@ -97,7 +97,7 @@ void board_autoled_initialize(void)
 
   for (i = 0; i < BOARD_NLEDS; i++)
     {
-      rzv_gpio_config(g_led_gpio[i]);
+      rzv_gpioconfig(g_led_gpio[i]);
     }
 
   led_dumppins("board_autoled_initialize()");
@@ -129,30 +129,30 @@ void board_autoled_on(int led)
     {
       case LED_STARTED:
         /* All LEDs off */
-        rzv_gpio_write(g_led_gpio[BOARD_LED1], true);
-        rzv_gpio_write(g_led_gpio[BOARD_LED2], true);
-        rzv_gpio_write(g_led_gpio[BOARD_LED3], true);
-        rzv_gpio_write(g_led_gpio[BOARD_LED4], true);
+        rzv_gpiowrite(g_led_gpio[BOARD_LED1], true);
+        rzv_gpiowrite(g_led_gpio[BOARD_LED2], true);
+        rzv_gpiowrite(g_led_gpio[BOARD_LED3], true);
+        rzv_gpiowrite(g_led_gpio[BOARD_LED4], true);
         break;
 
       case LED_HEAPALLOCATE:
         /* LED1 on */
-        rzv_gpio_write(g_led_gpio[BOARD_LED1], false);
+        rzv_gpiowrite(g_led_gpio[BOARD_LED1], false);
         break;
 
       case LED_IRQSENABLED:
         /* LED2 on */
-        rzv_gpio_write(g_led_gpio[BOARD_LED2], false);
+        rzv_gpiowrite(g_led_gpio[BOARD_LED2], false);
         break;
 
       case LED_STACKCREATED:
         /* LED3 on */
-        rzv_gpio_write(g_led_gpio[BOARD_LED3], false);
+        rzv_gpiowrite(g_led_gpio[BOARD_LED3], false);
         break;
 
       case LED_INIRQ:
         /* LED4 on */
-        rzv_gpio_write(g_led_gpio[BOARD_LED4], false);
+        rzv_gpiowrite(g_led_gpio[BOARD_LED4], false);
         break;
 
       case LED_SIGNAL:
@@ -163,8 +163,8 @@ void board_autoled_on(int led)
       case LED_PANIC:
         /* Toggle LED1 for blinking */
         {
-          bool current = rzv_gpio_read(g_led_gpio[BOARD_LED1]);
-          rzv_gpio_write(g_led_gpio[BOARD_LED1], !current);
+          bool current = rzv_gpioread(g_led_gpio[BOARD_LED1]);
+          rzv_gpiowrite(g_led_gpio[BOARD_LED1], !current);
         }
         break;
 
@@ -199,7 +199,7 @@ void board_autoled_off(int led)
 
       case LED_INIRQ:
         /* LED4 off */
-        rzv_gpio_write(g_led_gpio[BOARD_LED4], true);
+        rzv_gpiowrite(g_led_gpio[BOARD_LED4], true);
         break;
 
       case LED_SIGNAL:
@@ -238,7 +238,7 @@ void board_userled_initialize(void)
 
   for (i = 0; i < BOARD_NLEDS; i++)
     {
-      rzv_gpio_config(g_led_gpio[i]);
+      rzv_gpioconfig(g_led_gpio[i]);
     }
 }
 
@@ -255,7 +255,7 @@ void board_userled(int led, bool ledon)
   if ((unsigned)led < BOARD_NLEDS)
     {
       /* Active low: write inverse of ledon */
-      rzv_gpio_write(g_led_gpio[led], !ledon);
+      rzv_gpiowrite(g_led_gpio[led], !ledon);
     }
 }
 
@@ -276,7 +276,7 @@ void board_userled_all(uint32_t ledset)
   for (i = 0; i < BOARD_NLEDS; i++)
     {
       bool ledon = ((ledset & (1 << i)) != 0);
-      rzv_gpio_write(g_led_gpio[i], !ledon);
+      rzv_gpiowrite(g_led_gpio[i], !ledon);
     }
 }
 

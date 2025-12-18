@@ -408,9 +408,45 @@ struct rzv_uart_s
   bool      stopbits2;  /* True: 2 stop bits */
 };
 
+/* Baud rate calculation structure */
+
+struct baud_setting
+{
+  uint8_t bgdm;    /* Baud rate generator double-speed mode */
+  uint8_t abcs;    /* Asynchronous mode base clock select */
+  uint8_t abcse;   /* Asynchronous mode extended base clock select */
+  uint8_t cks;     /* Clock select (n value) */
+  uint8_t brr;     /* Bit rate register value */
+  uint8_t brme;    /* Bit rate modulation enable */
+  uint16_t mddr;   /* Modulation duty register (128-256) */
+};
+
+struct common_baudrate_settings_s
+{
+  uint32_t baud;
+  uint8_t bgdm;
+  uint8_t abcs;
+  uint8_t abcse;
+  uint8_t cks;
+  uint8_t brr;
+  uint16_t mddr;
+};
+
+struct clock_baud_table_s
+{
+  uint32_t clock_freq;
+  const struct common_baudrate_settings_s *settings;
+  uint32_t num_settings;
+};
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
+/* Baud rate calculation */
+
+static int rzv_calculate_baud_setting(uint32_t baudrate,
+                                     struct baud_setting *p_baud_setting);
 
 /* Serial driver methods */
 
@@ -459,6 +495,61 @@ static const struct uart_ops_s g_uart_ops =
   .txready        = rzv_txready,
   .txempty        = rzv_txempty,
 };
+
+/* Baud rate divisor information (UART mode) */
+
+static const struct
+{
+  uint8_t bgdm : 1;    /* Baud rate generator double-speed mode */
+  uint8_t abcs : 1;    /* Asynchronous mode base clock select */
+  uint8_t abcse : 1;   /* Asynchronous mode extended base clock select */
+  uint8_t cks : 2;     /* Clock select (n value) */
+} g_async_baud[13] =
+{
+  {0, 0, 1, 0},  /* divisor: 6 * 16 = 96 */
+  {1, 1, 0, 0},  /* divisor: 8 * 8 = 64 */
+  {1, 0, 0, 0},  /* divisor: 8 * 16 = 128 (double-speed) */
+  {0, 0, 1, 1},  /* divisor: 6 * 4 * 16 = 384 */
+  {0, 0, 0, 0},  /* divisor: 8 * 16 = 128 */
+  {1, 0, 0, 1},  /* divisor: 8 * 8 * 16 = 1024 (double-speed) */
+  {0, 0, 1, 2},  /* divisor: 6 * 16 * 16 = 1536 */
+  {0, 0, 0, 1},  /* divisor: 8 * 16 * 16 = 2048 */
+  {1, 0, 0, 2},  /* divisor: 8 * 8 * 16 * 16 = 16384 (double-speed) */
+  {0, 0, 1, 3},  /* divisor: 6 * 16 * 16 * 16 = 24576 */
+  {0, 0, 0, 2},  /* divisor: 8 * 16 * 16 * 16 = 32768 */
+  {1, 0, 0, 3},  /* divisor: 8 * 8 * 16 * 16 * 16 = 262144 (double-speed) */
+  {0, 0, 0, 3}   /* divisor: 8 * 16 * 16 * 16 * 16 = 524288 */
+};
+
+static const uint16_t g_div_coefficient[13] =
+{
+  6, 8, 16, 24, 32, 64, 96, 128, 256, 384, 512, 1024, 2048
+};
+
+/* Baud rate settings for 120MHz PCLK (common for RZV2H) */
+
+static const struct common_baudrate_settings_s g_baud_120mhz[] =
+{
+  /*  baud,  bgdm, abcs, abcse, cks, brr, mddr */
+  {   9600,    1,    0,    0,     1,  102,  135 },  /* Error: 0.004% */
+  {  19200,    0,    0,    0,     0,  102,  135 },  /* Error: 0.004% */
+  {  38400,    1,    0,    0,     0,  102,  135 },  /* Error: 0.004% */
+  {  57600,    1,    0,    0,     0,   87,  173 },  /* Error: 0.009% */
+  { 115200,    1,    0,    0,     0,   43,  173 },  /* Error: 0.009% */
+  { 230400,    1,    0,    0,     0,   21,  173 },  /* Error: 0.009% */
+  { 460800,    1,    0,    0,     0,   10,  173 },  /* Error: 0.009% */
+  { 921600,    1,    0,    0,     0,    6,  220 },  /* Error: 0.092% */
+  {1843200,    1,    0,    0,     0,    3,  251 },  /* Error: 0.262% */
+};
+
+static const struct clock_baud_table_s g_common_baud_settings[] =
+{
+  { 120000000, g_baud_120mhz, sizeof(g_baud_120mhz) / sizeof(g_baud_120mhz[0]) },
+};
+
+#define NUM_CLOCK_BAUD_TABLES \
+  (sizeof(g_common_baud_settings) / sizeof(g_common_baud_settings[0]))
+
 #endif
 
 /* I/O buffers */
@@ -892,6 +983,163 @@ static uart_dev_t g_sci9port =
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: rzv_calculate_baud_setting
+ *
+ * Description:
+ *   Calculate baud rate register settings for SCI_B UART.
+ *   Based on Renesas R_SCI_B_UART_BaudCalculate algorithm.
+ *   Supports BGDM, ABCS, ABCSE, CKS, and BRME/MDDR for optimal accuracy.
+ *
+ * Input Parameters:
+ *   baudrate - Desired baud rate (bps)
+ *   p_baud_setting - Output structure for baud rate settings
+ *
+ * Returned Value:
+ *   0 on success, -EINVAL on error (baud rate error > 1.5%)
+ *
+ ****************************************************************************/
+
+static int rzv_calculate_baud_setting(uint32_t baudrate,
+                                     struct baud_setting *p_baud_setting)
+{
+  uint32_t freq_hz;
+  int32_t hit_bit_err = 100000; /* 100% error as starting point */
+  uint32_t divisor;
+
+  /* Get PCLK frequency */
+
+  freq_hz = rzv_get_pclk_frequency();
+
+  if (baudrate == 0 || freq_hz == 0)
+    {
+      return -EINVAL;
+    }
+
+  /* First check common baud rate lookup table for exact matches */
+
+  for (uint32_t i = 0; i < NUM_CLOCK_BAUD_TABLES; i++)
+    {
+      if (g_common_baud_settings[i].clock_freq == freq_hz)
+        {
+          /* Found matching clock frequency table */
+
+          const struct common_baudrate_settings_s *settings =
+            g_common_baud_settings[i].settings;
+          uint32_t num_settings = g_common_baud_settings[i].num_settings;
+
+          for (uint32_t j = 0; j < num_settings; j++)
+            {
+              if (settings[j].baud == baudrate)
+                {
+                  /* Exact match found in lookup table */
+
+                  p_baud_setting->bgdm = settings[j].bgdm;
+                  p_baud_setting->abcs = settings[j].abcs;
+                  p_baud_setting->abcse = settings[j].abcse;
+                  p_baud_setting->cks = settings[j].cks;
+                  p_baud_setting->brr = settings[j].brr;
+                  p_baud_setting->brme = (settings[j].mddr != 128) ? 1 : 0;
+                  p_baud_setting->mddr = settings[j].mddr;
+
+                  sinfo("Baud %u: BRR=%u MDDR=%u BGDM=%u ABCS=%u "
+                        "ABCSE=%u CKS=%u (table)\n",
+                        baudrate, p_baud_setting->brr, p_baud_setting->mddr,
+                        p_baud_setting->bgdm, p_baud_setting->abcs,
+                        p_baud_setting->abcse, p_baud_setting->cks);
+
+                  return 0;
+                }
+            }
+
+          break; /* Found clock table but no matching baud rate */
+        }
+    }
+
+  /* Initialize with default values for calculation */
+
+  p_baud_setting->brr = 255;
+  p_baud_setting->brme = 0;
+  p_baud_setting->mddr = 256; /* Default: no bit rate modulation */
+
+  /* Find the best BRR (bit rate register) value by trying all divisors */
+
+  for (uint32_t select_16_base_clk_cycles = 0;
+       select_16_base_clk_cycles <= 1 && (hit_bit_err > 1500);
+       select_16_base_clk_cycles++)
+    {
+      for (uint32_t i = 0; i < 13; i++)
+        {
+          /* Skip divisors that don't match the clock cycle requirement */
+
+          if (((uint8_t)select_16_base_clk_cycles) ^
+              (g_async_baud[i].abcs | g_async_baud[i].abcse))
+            {
+              continue;
+            }
+
+          divisor = (uint32_t)g_div_coefficient[i] * baudrate;
+          uint32_t temp_brr = freq_hz / divisor;
+
+          if (temp_brr <= 256) /* BRR can be 0-255 */
+            {
+              while (temp_brr > 0)
+                {
+                  temp_brr -= 1;
+
+                  /* Calculate the bit rate error. Formula:
+                   * bit rate error[%] =
+                   *   {(PCLK / (baud * div * (BRR + 1)) - 1} x 100
+                   */
+
+                  int32_t err_divisor = (int32_t)(divisor * (temp_brr + 1));
+                  int64_t bit_err_calc =
+                    (((int64_t)freq_hz) * 100000) / err_divisor - 100000;
+                  int32_t bit_err = (int32_t)bit_err_calc;
+
+                  /* Take the absolute value of the bit rate error */
+
+                  if (bit_err < 0)
+                    {
+                      bit_err = -bit_err;
+                    }
+
+                  /* If this is the best error so far, save these settings */
+
+                  if (bit_err < hit_bit_err)
+                    {
+                      p_baud_setting->bgdm = g_async_baud[i].bgdm;
+                      p_baud_setting->abcs = g_async_baud[i].abcs;
+                      p_baud_setting->abcse = g_async_baud[i].abcse;
+                      p_baud_setting->cks = g_async_baud[i].cks;
+                      p_baud_setting->brr = (uint8_t)temp_brr;
+                      p_baud_setting->mddr = 256; /* No modulation */
+                      hit_bit_err = bit_err;
+                    }
+
+                  break; /* Use first valid BRR for this divisor */
+                }
+            }
+        }
+    }
+
+  /* Return error if the percent error is too large (>1.5%) */
+
+  if (hit_bit_err > 1500)
+    {
+      serr("ERROR: Baud rate %u error too high: %d.%02d%%\n",
+           baudrate, hit_bit_err / 1000, (hit_bit_err % 1000) / 10);
+      return -EINVAL;
+    }
+
+  sinfo("Baud %u: BRR=%u BGDM=%u ABCS=%u ABCSE=%u CKS=%u error=%d.%02d%%\n",
+        baudrate, p_baud_setting->brr, p_baud_setting->bgdm,
+        p_baud_setting->abcs, p_baud_setting->abcse, p_baud_setting->cks,
+        hit_bit_err / 1000, (hit_bit_err % 1000) / 10);
+
+  return 0;
+}
+
+/****************************************************************************
  * Name: rzv_sci_getreg
  ****************************************************************************/
 
@@ -944,6 +1192,9 @@ static int rzv_setup(struct uart_dev_s *dev)
   uint32_t ccr3;
   uint32_t ccr1;
 
+  struct baud_setting baud_setting;
+  int ret;
+
   /* Enable clock for this SCI channel */
 
   rzv_clock_enable(priv->clk_id);
@@ -951,6 +1202,15 @@ static int rzv_setup(struct uart_dev_s *dev)
   /* Deassert module reset */
 
   rzv_module_unreset(priv->clk_id);
+
+  /* CRITICAL: Wait for module power-up (P1 fix)
+   * Hardware requires delay after clock enable before register access
+   */
+
+  for (volatile int i = 0; i < 1000; i++)
+    {
+      /* Delay ~10 μs at typical CPU frequencies */
+    }
 
   /* Disable transmit and receive */
 
@@ -1002,26 +1262,54 @@ static int rzv_setup(struct uart_dev_s *dev)
 
   rzv_sci_putreg(priv, RZV_SCI_CCR_OFFSET(1), ccr1);
 
-  /* Calculate and set baud rate */
+  /* CRITICAL: Calculate baud rate using sophisticated algorithm (P0 fix)
+   * Supports BGDM, ABCS, ABCSE, CKS, and BRME/MDDR for optimal accuracy
+   */
 
-  pclk = rzv_get_pclk_frequency();
-
-  /* BRR = (PCLK / (32 * baud)) - 1 for asynchronous mode */
-
-  brr = (pclk / (32 * priv->baud)) - 1;
-
-  if (brr > 255)
+  ret = rzv_calculate_baud_setting(priv->baud, &baud_setting);
+  if (ret < 0)
     {
-      brr = 255;
+      serr("ERROR: Failed to calculate baud rate for %u bps\n",
+           priv->baud);
+      return ret;
     }
 
+  /* Configure CCR2 with calculated baud rate settings */
+
   ccr2 = rzv_sci_getreg(priv, RZV_SCI_CCR_OFFSET(2));
-  ccr2 = (ccr2 & ~SCI_CCR2_BRR_MASK) | ((brr << SCI_CCR2_BRR_SHIFT) & SCI_CCR2_BRR_MASK);
+  ccr2 &= ~(SCI_CCR2_BRR_MASK | SCI_CCR2_CKS_MASK |
+            SCI_CCR2_MDDR_MASK | SCI_CCR2_BGDM | SCI_CCR2_ABCS |
+            SCI_CCR2_ABCSE | SCI_CCR2_BFME);
+
+  ccr2 |= (baud_setting.bgdm ? SCI_CCR2_BGDM : 0) |
+          (baud_setting.abcs ? SCI_CCR2_ABCS : 0) |
+          (baud_setting.abcse ? SCI_CCR2_ABCSE : 0) |
+          (baud_setting.brme ? SCI_CCR2_BFME : 0) |
+          ((uint32_t)baud_setting.cks << SCI_CCR2_CKS_SHIFT) |
+          ((uint32_t)baud_setting.brr << SCI_CCR2_BRR_SHIFT) |
+          ((uint32_t)baud_setting.mddr << SCI_CCR2_MDDR_SHIFT);
+
   rzv_sci_putreg(priv, RZV_SCI_CCR_OFFSET(2), ccr2);
 
   /* Enable transmit and receive */
 
   rzv_sci_putreg(priv, RZV_SCI_CCR_OFFSET(0), SCI_CCR0_TE | SCI_CCR0_RE);
+
+  /* CRITICAL: Wait for RIST bit before starting reception (P0 fix)
+   * SCI_B hardware requires receiver to stabilize before data transfer
+   * Prevents corruption of first received bytes
+   */
+
+  while ((rzv_sci_getreg(priv, RZV_SCI_CESR_OFFSET) & SCI_CESR_RIST) == 0)
+    {
+      /* Polling loop - typically completes in 1-2 μs */
+    }
+
+  sinfo("SCI%d: Configured at %u baud (BRR=%u, MDDR=%u, "
+        "BGDM=%u, ABCS=%u, ABCSE=%u, CKS=%u)\n",
+        priv->channel, priv->baud, baud_setting.brr, baud_setting.mddr,
+        baud_setting.bgdm, baud_setting.abcs, baud_setting.abcse,
+        baud_setting.cks);
 
   return OK;
 }

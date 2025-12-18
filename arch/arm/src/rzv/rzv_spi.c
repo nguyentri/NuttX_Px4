@@ -41,6 +41,8 @@
 #include "arm_internal.h"
 #include "chip.h"
 #include "rzv_clock.h"
+#include "rzv_icu.h"
+#include "rzv_gpio.h"
 #include "hardware/rzv_memorymap.h"
 #include "hardware/rzv_spi.h"
 
@@ -52,6 +54,12 @@
 
 #define SPI_DEFAULT_FREQUENCY     1000000   /* 1 MHz */
 #define SPI_FIFO_SIZE             4         /* FIFO depth */
+#define SPI_TIMEOUT_MS            1000      /* Transfer timeout in ms */
+#define SPI_TIMEOUT_LOOPS         (SPI_TIMEOUT_MS * 1000) /* Timeout iterations */
+
+/* Error flags to check in SPSR */
+#define SPI_ERROR_FLAGS   (SPI_SPSR_OVRF | SPI_SPSR_MODF | \
+                           SPI_SPSR_PERF | SPI_SPSR_UDRF)
 
 /****************************************************************************
  * Private Types
@@ -64,10 +72,11 @@ struct rzv_spi_config_s
   uintptr_t base;         /* SPI base address */
   uint32_t  frequency;    /* Default SPI frequency */
   uint8_t   port;         /* SPI port number (0-2) */
-  uint8_t   irq_rxi;      /* Receive interrupt */
-  uint8_t   irq_txi;      /* Transmit interrupt */
-  uint8_t   irq_tei;      /* Transmit end interrupt */
-  uint8_t   irq_eri;      /* Error interrupt */
+  uint32_t  clk_id;       /* Clock ID for CPG */
+  uint16_t  elc_rxi;      /* ELC event for RX interrupt */
+  uint16_t  elc_txi;      /* ELC event for TX interrupt */
+  uint16_t  elc_tei;      /* ELC event for Transfer end */
+  uint16_t  elc_eri;      /* ELC event for Error interrupt */
 };
 
 /* SPI Device Private Data */
@@ -77,11 +86,25 @@ struct rzv_spi_priv_s
   struct spi_dev_s spidev;            /* Externally visible part */
   const struct rzv_spi_config_s *config; /* Port configuration */
   sem_t exclsem;                      /* Mutual exclusion semaphore */
+  sem_t waitsem;                      /* Wait for transfer completion */
 
   uint32_t frequency;                 /* Requested clock frequency */
   uint32_t actual;                    /* Actual clock frequency */
   uint8_t  nbits;                     /* Width of word in bits (8 or 16) */
   uint8_t  mode;                      /* SPI mode */
+
+  /* IRQ tracking */
+  int      irq_rxi;                   /* Allocated RX IRQ */
+  int      irq_txi;                   /* Allocated TX IRQ */
+  int      irq_tei;                   /* Allocated TEI IRQ */
+  int      irq_eri;                   /* Allocated Error IRQ */
+
+  /* Transfer state */
+  const void *txbuffer;               /* TX buffer pointer */
+  void       *rxbuffer;               /* RX buffer pointer */
+  size_t      ntxwords;               /* TX words remaining */
+  size_t      nrxwords;               /* RX words remaining */
+  bool        error;                  /* Transfer error flag */
 };
 
 /****************************************************************************
@@ -109,6 +132,13 @@ static void rzv_spi_setfrequency(struct rzv_spi_priv_s *priv,
                                  uint32_t frequency);
 static void rzv_spi_setmode(struct rzv_spi_priv_s *priv, uint8_t mode);
 static void rzv_spi_setbits(struct rzv_spi_priv_s *priv, uint8_t nbits);
+
+/* Interrupt handlers */
+
+static int rzv_spi_rxi_interrupt(int irq, void *context, void *arg);
+static int rzv_spi_txi_interrupt(int irq, void *context, void *arg);
+static int rzv_spi_tei_interrupt(int irq, void *context, void *arg);
+static int rzv_spi_eri_interrupt(int irq, void *context, void *arg);
 
 /* SPI Operations */
 
@@ -197,10 +227,11 @@ static const struct rzv_spi_config_s g_spi0_config =
   .base      = RZV_SPI0_BASE,
   .frequency = SPI_DEFAULT_FREQUENCY,
   .port      = 0,
-  .irq_rxi   = 0,  /* To be configured */
-  .irq_txi   = 0,
-  .irq_tei   = 0,
-  .irq_eri   = 0,
+  .clk_id    = RZV_CPG_CLK_SPI0,
+  .elc_rxi   = RZV_ELC_SP_ELCRDRF_0,
+  .elc_txi   = RZV_ELC_SP_ELCTDRE_0,
+  .elc_tei   = RZV_ELC_SP_ELCCEND_0,
+  .elc_eri   = RZV_ELC_SP_ELCERR_0,
 };
 
 static struct rzv_spi_priv_s g_spi0_priv =
@@ -218,10 +249,11 @@ static const struct rzv_spi_config_s g_spi1_config =
   .base      = RZV_SPI1_BASE,
   .frequency = SPI_DEFAULT_FREQUENCY,
   .port      = 1,
-  .irq_rxi   = 0,
-  .irq_txi   = 0,
-  .irq_tei   = 0,
-  .irq_eri   = 0,
+  .clk_id    = RZV_CPG_CLK_SPI1,
+  .elc_rxi   = RZV_ELC_SP_ELCRDRF_1,
+  .elc_txi   = RZV_ELC_SP_ELCTDRE_1,
+  .elc_tei   = RZV_ELC_SP_ELCCEND_1,
+  .elc_eri   = RZV_ELC_SP_ELCERR_1,
 };
 
 static struct rzv_spi_priv_s g_spi1_priv =
@@ -290,25 +322,34 @@ static void rzv_spi_setfrequency(struct rzv_spi_priv_s *priv,
   /* Get peripheral clock */
   pclk = rzv_get_pclk_frequency();
 
-  /* Calculate bit rate
-   * Bit rate = PCLK / (2 * (SPBR + 1) * 2^BRDV)
+  /* Calculate bit rate using correct formula:
+   * Bit Rate = PCLK / (2 * (SPBR + 1) * 2^BRDV)
+   * Therefore: SPBR = (PCLK / (2 * Bit Rate * 2^BRDV)) - 1
    */
 
   for (brdv = 0; brdv <= 3; brdv++)
     {
-      divisor = frequency * 2 * (1 << brdv);
-      spbr = (pclk / divisor) - 1;
+      uint32_t divider = 2 * frequency * (1 << brdv);
+      uint32_t spbr_calc = (pclk / divider);
 
-      if (spbr <= 255)
+      if (spbr_calc > 0)
         {
+          spbr_calc--; /* SPBR is (divider - 1) */
+        }
+
+      if (spbr_calc <= 255)
+        {
+          spbr = (uint8_t)spbr_calc;
           break;
         }
     }
 
   if (brdv > 3)
     {
+      /* Limit to maximum divisor */
       brdv = 3;
       spbr = 255;
+      spiwarn("Frequency %lu too low, using minimum\n", frequency);
     }
 
   /* Disable SPI (SPCR is a 32-bit control register) */
@@ -341,9 +382,9 @@ static void rzv_spi_setfrequency(struct rzv_spi_priv_s *priv,
 
 static void rzv_spi_setmode(struct rzv_spi_priv_s *priv, uint8_t mode)
 {
-  uint16_t spcmd;
+  uint32_t spcmd;  /* Fixed: SPCMD is 32-bit register */
 
-  /* Disable SPI (SPCR is 32-bit) */
+  /* Disable SPI */
   rzv_spi_putreg32(priv, RZV_SPI_SPCR_OFFSET, 0);
 
   /* Read command register */
@@ -371,10 +412,11 @@ static void rzv_spi_setmode(struct rzv_spi_priv_s *priv, uint8_t mode)
         break;
 
       default:
+        spierr("Invalid mode: %d\n", mode);
         return;
     }
 
-  /* Write command register (32-bit) */
+  /* Write command register */
   rzv_spi_putreg32(priv, RZV_SPI_SPCMD_OFFSET(0), spcmd);
 
   priv->mode = mode;
@@ -392,9 +434,9 @@ static void rzv_spi_setmode(struct rzv_spi_priv_s *priv, uint8_t mode)
 
 static void rzv_spi_setbits(struct rzv_spi_priv_s *priv, uint8_t nbits)
 {
-  uint16_t spcmd;
+  uint32_t spcmd;  /* Fixed: SPCMD is 32-bit register */
 
-  /* Disable SPI (SPCR is 32-bit) */
+  /* Disable SPI */
   rzv_spi_putreg32(priv, RZV_SPI_SPCR_OFFSET, 0);
 
   /* Read command register */
@@ -503,11 +545,37 @@ static void rzv_spi_setbits_dev(struct spi_dev_s *dev, int nbits)
 static uint32_t rzv_spi_send(struct spi_dev_s *dev, uint32_t wd)
 {
   struct rzv_spi_priv_s *priv = (struct rzv_spi_priv_s *)dev;
-  uint32_t rxdata;
+  uint32_t rxdata = 0xffff;
+  uint32_t spsr;
+  int timeout;
 
-  /* Wait for TX buffer empty */
-  while ((rzv_spi_getreg8(priv, RZV_SPI_SPSR_OFFSET) &
-          SPI_SPSR_SPTEF) == 0);
+  /* Wait for TX buffer empty with timeout */
+  timeout = SPI_TIMEOUT_LOOPS;
+  while (timeout-- > 0)
+    {
+      spsr = rzv_spi_getreg32(priv, RZV_SPI_SPSR_OFFSET);
+
+      /* Check for errors */
+      if (spsr & SPI_ERROR_FLAGS)
+        {
+          spierr("SPI error flags: 0x%08lx\n", spsr);
+          /* Clear error flags */
+          rzv_spi_putreg32(priv, RZV_SPI_SPSRC_OFFSET,
+                          spsr & SPI_ERROR_FLAGS);
+          return 0xffff;
+        }
+
+      if (spsr & SPI_SPSR_SPTEF)
+        {
+          break;
+        }
+    }
+
+  if (timeout <= 0)
+    {
+      spierr("TX timeout\n");
+      return 0xffff;
+    }
 
   /* Write data */
   if (priv->nbits == 8)
@@ -519,9 +587,33 @@ static uint32_t rzv_spi_send(struct spi_dev_s *dev, uint32_t wd)
       rzv_spi_putreg16(priv, RZV_SPI_SPDR_OFFSET, (uint16_t)wd);
     }
 
-  /* Wait for RX data full */
-  while ((rzv_spi_getreg8(priv, RZV_SPI_SPSR_OFFSET) &
-          SPI_SPSR_SPRF) == 0);
+  /* Wait for RX data full with timeout */
+  timeout = SPI_TIMEOUT_LOOPS;
+  while (timeout-- > 0)
+    {
+      spsr = rzv_spi_getreg32(priv, RZV_SPI_SPSR_OFFSET);
+
+      /* Check for errors */
+      if (spsr & SPI_ERROR_FLAGS)
+        {
+          spierr("SPI error flags: 0x%08lx\n", spsr);
+          /* Clear error flags */
+          rzv_spi_putreg32(priv, RZV_SPI_SPSRC_OFFSET,
+                          spsr & SPI_ERROR_FLAGS);
+          return 0xffff;
+        }
+
+      if (spsr & SPI_SPSR_SPRF)
+        {
+          break;
+        }
+    }
+
+  if (timeout <= 0)
+    {
+      spierr("RX timeout\n");
+      return 0xffff;
+    }
 
   /* Read received data */
   if (priv->nbits == 8)
@@ -609,6 +701,133 @@ static void rzv_spi_recvblock(struct spi_dev_s *dev,
 #endif
 
 /****************************************************************************
+ * Name: rzv_spi_rxi_interrupt
+ *
+ * Description:
+ *   RX buffer full interrupt handler
+ *
+ ****************************************************************************/
+
+static int rzv_spi_rxi_interrupt(int irq, void *context, void *arg)
+{
+  struct rzv_spi_priv_s *priv = (struct rzv_spi_priv_s *)arg;
+  uint32_t data;
+
+  /* Read received data */
+  if (priv->nrxwords > 0 && priv->rxbuffer)
+    {
+      if (priv->nbits == 8)
+        {
+          data = rzv_spi_getreg8(priv, RZV_SPI_SPDR_OFFSET);
+          ((uint8_t *)priv->rxbuffer)[0] = (uint8_t)data;
+          priv->rxbuffer = (void *)(((uint8_t *)priv->rxbuffer) + 1);
+        }
+      else
+        {
+          data = rzv_spi_getreg16(priv, RZV_SPI_SPDR_OFFSET);
+          ((uint16_t *)priv->rxbuffer)[0] = (uint16_t)data;
+          priv->rxbuffer = (void *)(((uint16_t *)priv->rxbuffer) + 1);
+        }
+
+      priv->nrxwords--;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: rzv_spi_txi_interrupt
+ *
+ * Description:
+ *   TX buffer empty interrupt handler
+ *
+ ****************************************************************************/
+
+static int rzv_spi_txi_interrupt(int irq, void *context, void *arg)
+{
+  struct rzv_spi_priv_s *priv = (struct rzv_spi_priv_s *)arg;
+  uint32_t data = 0xffff;
+
+  /* Transmit next word */
+  if (priv->ntxwords > 0)
+    {
+      if (priv->txbuffer)
+        {
+          if (priv->nbits == 8)
+            {
+              data = ((uint8_t *)priv->txbuffer)[0];
+              priv->txbuffer = (const void *)(((uint8_t *)priv->txbuffer) + 1);
+            }
+          else
+            {
+              data = ((uint16_t *)priv->txbuffer)[0];
+              priv->txbuffer = (const void *)(((uint16_t *)priv->txbuffer) + 1);
+            }
+        }
+
+      /* Write data */
+      if (priv->nbits == 8)
+        {
+          rzv_spi_putreg8(priv, RZV_SPI_SPDR_OFFSET, (uint8_t)data);
+        }
+      else
+        {
+          rzv_spi_putreg16(priv, RZV_SPI_SPDR_OFFSET, (uint16_t)data);
+        }
+
+      priv->ntxwords--;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: rzv_spi_tei_interrupt
+ *
+ * Description:
+ *   Transfer end interrupt handler
+ *
+ ****************************************************************************/
+
+static int rzv_spi_tei_interrupt(int irq, void *context, void *arg)
+{
+  struct rzv_spi_priv_s *priv = (struct rzv_spi_priv_s *)arg;
+
+  /* Signal transfer completion */
+  nxsem_post(&priv->waitsem);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: rzv_spi_eri_interrupt
+ *
+ * Description:
+ *   Error interrupt handler
+ *
+ ****************************************************************************/
+
+static int rzv_spi_eri_interrupt(int irq, void *context, void *arg)
+{
+  struct rzv_spi_priv_s *priv = (struct rzv_spi_priv_s *)arg;
+  uint32_t spsr;
+
+  /* Read status register */
+  spsr = rzv_spi_getreg32(priv, RZV_SPI_SPSR_OFFSET);
+
+  spierr("SPI error interrupt: SPSR=0x%08lx\n", spsr);
+
+  /* Clear error flags */
+  rzv_spi_putreg32(priv, RZV_SPI_SPSRC_OFFSET, spsr & SPI_ERROR_FLAGS);
+
+  /* Set error flag and signal completion */
+  priv->error = true;
+  nxsem_post(&priv->waitsem);
+
+  return OK;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -619,6 +838,7 @@ static void rzv_spi_recvblock(struct spi_dev_s *dev,
 struct spi_dev_s *rzv_spibus_initialize(int port)
 {
   struct rzv_spi_priv_s *priv = NULL;
+  int ret;
 
   /* Get device structure */
   switch (port)
@@ -639,28 +859,160 @@ struct spi_dev_s *rzv_spibus_initialize(int port)
         return NULL;
     }
 
-  /* Initialize semaphore */
+  /* Initialize semaphores */
   nxsem_init(&priv->exclsem, 0, 1);
+  nxsem_init(&priv->waitsem, 0, 0);
+  nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
 
-  /* Initialize SPI hardware */
+  /* Enable module clock */
+  ret = rzv_clock_enable(priv->config->clk_id);
+  if (ret < 0)
+    {
+      spierr("Failed to enable clock: %d\n", ret);
+      return NULL;
+    }
 
-  /* Reset SPI (SPCR/SPCMD are 32-bit registers) */
+  /* Reset SPI - disable all functions */
   rzv_spi_putreg32(priv, RZV_SPI_SPCR_OFFSET, 0);
 
-  /* Configure as master, 8-bit mode (SPCMD is 32-bit) */
+  /* Reset and clear FIFOs */
+  rzv_spi_putreg32(priv, RZV_SPI_SPFCR_OFFSET, SPI_SPFCR_SPFRST);
+  rzv_spi_putreg32(priv, RZV_SPI_SPFCR_OFFSET, 0);
+
+  /* Clear all status flags */
+  rzv_spi_putreg32(priv, RZV_SPI_SPSRC_OFFSET, 0xFD800000);
+
+  /* Configure SPDCR - Data Control Register */
+  rzv_spi_putreg32(priv, RZV_SPI_SPDCR_OFFSET, 0);
+
+  /* Configure SPDCR2 - FIFO trigger levels */
+  rzv_spi_putreg32(priv, RZV_SPI_SPDCR2_OFFSET,
+                  (1 << SPI_SPDCR2_TTRG_SHIFT) |  /* TX trigger = 1 */
+                  (1 << SPI_SPDCR2_RTRG_SHIFT));  /* RX trigger = 1 */
+
+  /* Configure SPDECR - Delay Control Register */
+  rzv_spi_putreg32(priv, RZV_SPI_SPDECR_OFFSET,
+                  (2 << SPI_SPDECR_SCKDL_SHIFT) |   /* Clock delay */
+                  (2 << SPI_SPDECR_SLNDL_SHIFT) |   /* SSL negation delay */
+                  (2 << SPI_SPDECR_SPNDL_SHIFT));   /* Next access delay */
+
+  /* Configure SPCMD0 - Command register for master mode, 8-bit */
   rzv_spi_putreg32(priv, RZV_SPI_SPCMD_OFFSET(0),
-                  SPI_SPCMD_SPB_8BIT);
+                  SPI_SPCMD_SPB_8BIT);  /* 8-bit data */
 
   /* Set default values */
   priv->nbits = 8;
   priv->mode = SPIDEV_MODE0;
+  priv->error = false;
+  priv->txbuffer = NULL;
+  priv->rxbuffer = NULL;
+  priv->ntxwords = 0;
+  priv->nrxwords = 0;
 
   /* Set default frequency */
   rzv_spi_setfrequency(priv, priv->config->frequency);
 
+  /* Attach interrupt handlers using ICU */
+  priv->irq_rxi = rzv_icu_attach(priv->config->elc_rxi,
+                                 rzv_spi_rxi_interrupt, priv, false);
+  if (priv->irq_rxi < 0)
+    {
+      spierr("Failed to attach RXI interrupt: %d\n", priv->irq_rxi);
+      goto errout_clock;
+    }
+
+  priv->irq_txi = rzv_icu_attach(priv->config->elc_txi,
+                                 rzv_spi_txi_interrupt, priv, false);
+  if (priv->irq_txi < 0)
+    {
+      spierr("Failed to attach TXI interrupt: %d\n", priv->irq_txi);
+      goto errout_rxi;
+    }
+
+  priv->irq_tei = rzv_icu_attach(priv->config->elc_tei,
+                                 rzv_spi_tei_interrupt, priv, false);
+  if (priv->irq_tei < 0)
+    {
+      spierr("Failed to attach TEI interrupt: %d\n", priv->irq_tei);
+      goto errout_txi;
+    }
+
+  priv->irq_eri = rzv_icu_attach(priv->config->elc_eri,
+                                 rzv_spi_eri_interrupt, priv, false);
+  if (priv->irq_eri < 0)
+    {
+      spierr("Failed to attach ERI interrupt: %d\n", priv->irq_eri);
+      goto errout_tei;
+    }
+
   /* Enable SPI in master mode */
   rzv_spi_putreg32(priv, RZV_SPI_SPCR_OFFSET,
-                  SPI_SPCR_SPE | SPI_SPCR_MSTR);
+                  SPI_SPCR_SPE |        /* Enable SPI */
+                  SPI_SPCR_MSTR);       /* Master mode */
 
+  spiinfo("SPI%d initialized\n", port);
   return (struct spi_dev_s *)priv;
+
+errout_tei:
+  rzv_icu_detach(priv->irq_tei);
+errout_txi:
+  rzv_icu_detach(priv->irq_txi);
+errout_rxi:
+  rzv_icu_detach(priv->irq_rxi);
+errout_clock:
+  rzv_clock_disable(priv->config->clk_id);
+  return NULL;
+}
+
+/****************************************************************************
+ * Name: rzv_spibus_uninitialize
+ *
+ * Description:
+ *   Uninitialize an SPI bus
+ *
+ ****************************************************************************/
+
+int rzv_spibus_uninitialize(struct spi_dev_s *dev)
+{
+  struct rzv_spi_priv_s *priv = (struct rzv_spi_priv_s *)dev;
+
+  if (priv == NULL)
+    {
+      return -EINVAL;
+    }
+
+  /* Disable SPI */
+  rzv_spi_putreg32(priv, RZV_SPI_SPCR_OFFSET, 0);
+
+  /* Detach interrupt handlers */
+  if (priv->irq_eri >= 0)
+    {
+      rzv_icu_detach(priv->irq_eri);
+    }
+
+  if (priv->irq_tei >= 0)
+    {
+      rzv_icu_detach(priv->irq_tei);
+    }
+
+  if (priv->irq_txi >= 0)
+    {
+      rzv_icu_detach(priv->irq_txi);
+    }
+
+  if (priv->irq_rxi >= 0)
+    {
+      rzv_icu_detach(priv->irq_rxi);
+    }
+
+  /* Disable module clock */
+  rzv_clock_disable(priv->config->clk_id);
+
+  /* Destroy semaphores */
+  nxsem_destroy(&priv->waitsem);
+  nxsem_destroy(&priv->exclsem);
+
+  spiinfo("SPI%d uninitialized\n", priv->config->port);
+
+  return OK;
 }

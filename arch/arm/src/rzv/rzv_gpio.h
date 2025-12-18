@@ -28,6 +28,7 @@
 #include <nuttx/config.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <nuttx/irq.h>
 
 /* Include chip-specific hardware definitions */
@@ -121,9 +122,9 @@
 
 /* GPIO pin configuration type */
 
-typedef uint32_t rzv_pinconfig_t;
+typedef uint32_t gpio_pinset_t;
 
-/* Helper macros to construct rzv_pinconfig_t constants from port/pin
+/* Helper macros to construct gpio_pinset_t constants from port/pin
  * These are guarded so that board- or chip-specific pinmap headers may
  * provide their own variants without causing redefinition warnings.
  *
@@ -132,35 +133,35 @@ typedef uint32_t rzv_pinconfig_t;
  */
 #ifndef GPIO_PIN
 #  define GPIO_PIN(port,pin) \
-	(rzv_pinconfig_t)(((uint32_t)(port) << GPIO_PORT_SHIFT) | \
+	(gpio_pinset_t)(((uint32_t)(port) << GPIO_PORT_SHIFT) | \
 	                  (((uint32_t)(pin) & 0xFFU) << GPIO_PIN_SHIFT))
 #endif
 
 #ifndef GPIO_OUTPUT_HIGH
 #  define GPIO_OUTPUT_HIGH(port,pin) \
-	(rzv_pinconfig_t)(GPIO_PIN((port),(pin)) | RZV_GPIO_OUTPUT | \
+	(gpio_pinset_t)(GPIO_PIN((port),(pin)) | RZV_GPIO_OUTPUT | \
 	                  RZV_GPIO_DRVSTR_NORMAL | RZV_GPIO_INITIAL_HIGH)
 #endif
 
 #ifndef GPIO_OUTPUT_LOW
 #  define GPIO_OUTPUT_LOW(port,pin) \
-	(rzv_pinconfig_t)(GPIO_PIN((port),(pin)) | RZV_GPIO_OUTPUT | \
+	(gpio_pinset_t)(GPIO_PIN((port),(pin)) | RZV_GPIO_OUTPUT | \
 	                  RZV_GPIO_DRVSTR_NORMAL | RZV_GPIO_INITIAL_LOW)
 #endif
 
 #ifndef GPIO_INPUT_PULLUP
 #  define GPIO_INPUT_PULLUP(port,pin) \
-	(rzv_pinconfig_t)(GPIO_PIN((port),(pin)) | RZV_GPIO_INPUT | RZV_GPIO_PULLUP)
+	(gpio_pinset_t)(GPIO_PIN((port),(pin)) | RZV_GPIO_INPUT | RZV_GPIO_PULLUP)
 #endif
 
 #ifndef GPIO_INPUT
 #  define GPIO_INPUT(port,pin) \
-	(rzv_pinconfig_t)(GPIO_PIN((port),(pin)) | RZV_GPIO_INPUT)
+	(gpio_pinset_t)(GPIO_PIN((port),(pin)) | RZV_GPIO_INPUT)
 #endif
 
 #ifndef GPIO_PERIPH_PIN
 #  define GPIO_PERIPH_PIN(port,pin,psel) \
-	(rzv_pinconfig_t)(GPIO_PIN((port),(pin)) | RZV_GPIO_PERIPH | \
+	(gpio_pinset_t)(GPIO_PIN((port),(pin)) | RZV_GPIO_PERIPH | \
 	                  (((uint32_t)(psel) & 0xFU) << GPIO_PSEL_SHIFT))
 #endif
 
@@ -174,81 +175,64 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: rzv_gpio_config
+ * Name: rzv_gpioconfig
  *
  * Description:
  *   Configure a GPIO pin based on encoded pin configuration
  *
  * Input Parameters:
- *   cfg - GPIO pin configuration
+ *   cfgset - GPIO pin configuration
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure
  *
  ****************************************************************************/
 
-int rzv_gpio_config(rzv_pinconfig_t cfg);
+int rzv_gpioconfig(gpio_pinset_t cfgset);
 
 /****************************************************************************
- * Name: rzv_gpio_write
+ * Name: rzv_gpiowrite
  *
  * Description:
  *   Write a value to a GPIO output pin
  *
  * Input Parameters:
- *   cfg   - GPIO pin configuration
- *   value - Output value (true = high, false = low)
+ *   pinset - GPIO pin configuration
+ *   value  - Output value (true = high, false = low)
  *
  ****************************************************************************/
 
-void rzv_gpio_write(rzv_pinconfig_t cfg, bool value);
+void rzv_gpiowrite(gpio_pinset_t pinset, bool value);
 
 /****************************************************************************
- * Name: rzv_gpio_read
+ * Name: rzv_gpioread
  *
  * Description:
  *   Read the value of a GPIO input pin
  *
  * Input Parameters:
- *   cfg - GPIO pin configuration
+ *   pinset - GPIO pin configuration
  *
  * Returned Value:
  *   Pin state (true = high, false = low)
  *
  ****************************************************************************/
 
-bool rzv_gpio_read(rzv_pinconfig_t cfg);
+bool rzv_gpioread(gpio_pinset_t pinset);
 
 /****************************************************************************
- * Name: rzv_gpio_setdrive
- *
- * Description:
- *   Set the drive strength for a GPIO pin
- *
- * Input Parameters:
- *   cfg   - GPIO pin configuration
- *   drive - Drive strength (RZV_GPIO_DRIVE_LOW/MEDIUM/HIGH)
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure
- *
- ****************************************************************************/
-
-int rzv_gpio_setdrive(rzv_pinconfig_t cfg, uint32_t drive);
-
-/****************************************************************************
- * Name: rzv_gpio_set_pullup
+ * Name: rzv_gpiosetpullup
  *
  * Description:
  *   Enable/disable pull-up resistor on GPIO pin
  *
  * Input Parameters:
- *   cfg    - GPIO pin configuration
+ *   pinset - GPIO pin configuration
  *   enable - Enable pull-up (true=enable, false=disable)
  *
  ****************************************************************************/
 
-void rzv_gpio_set_pullup(rzv_pinconfig_t cfg, bool enable);
+void rzv_gpiosetpullup(gpio_pinset_t pinset, bool enable);
 
 /****************************************************************************
  * Name: rzv_gpio_set_pulldown
@@ -262,21 +246,25 @@ void rzv_gpio_set_pullup(rzv_pinconfig_t cfg, bool enable);
  *
  ****************************************************************************/
 
-void rzv_gpio_set_pulldown(rzv_pinconfig_t cfg, bool enable);
+void rzv_gpiosetpulldown(gpio_pinset_t pinset, bool enable);
 
 /****************************************************************************
- * Name: rzv_gpio_set_drive_strength
+ * Name: rzv_gpioconfiglist
  *
  * Description:
- *   Set GPIO pin drive strength
+ *   Configure a list of GPIO pins based on an array of encoded pin
+ *   configurations.
  *
  * Input Parameters:
- *   cfg      - GPIO pin configuration
- *   strength - Drive strength (0=low, 1=mid, 2=high)
+ *   cfgset - Pointer to an array of GPIO configuration encodings
+ *   count  - Number of entries in the cfgset array
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-void rzv_gpio_set_drive_strength(rzv_pinconfig_t cfg, uint8_t strength);
+int rzv_gpioconfiglist(const gpio_pinset_t *cfgset, size_t count);
 
 /****************************************************************************
  * Name: rzv_gpiosetevent
@@ -285,7 +273,7 @@ void rzv_gpio_set_drive_strength(rzv_pinconfig_t cfg, uint8_t strength);
  *   Configure GPIO pin for external interrupt/event detection
  *
  * Input Parameters:
- *   cfg     - GPIO pin configuration
+ *   pinset  - GPIO pin configuration
  *   rising  - Enable interrupt on rising edge
  *   falling - Enable interrupt on falling edge
  *   event   - Enable event (unused, for compatibility)
@@ -297,7 +285,7 @@ void rzv_gpio_set_drive_strength(rzv_pinconfig_t cfg, uint8_t strength);
  *
  ****************************************************************************/
 
-int rzv_gpiosetevent(rzv_pinconfig_t cfg, bool rising, bool falling,
+int rzv_gpiosetevent(gpio_pinset_t pinset, bool rising, bool falling,
                      bool event, xcpt_t func, void *arg);
 
 /****************************************************************************

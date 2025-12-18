@@ -25,16 +25,21 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <assert.h>
 #include <debug.h>
-
-#include <nuttx/irq.h>
+#include <string.h>
 
 #include <nuttx/init.h>
+#include <nuttx/arch.h>
+#include <nuttx/irq.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
 #include "arm_internal.h"
+#include "barriers.h"
+#include "cp15_cacheops.h"
+#include "mpu.h"
 #include "rzv_start.h"
 #include "rzv_clock.h"
 #include "rzv_lowputc.h"
@@ -43,20 +48,39 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* ACTLR register bits for Cortex-R8 */
+#define ACTLR_ATCMPCEN              (1 << 25)  /* ATCM ECC enable */
+#define ACTLR_B0TCMPCEN             (1 << 26)  /* B0TCM ECC enable */
+#define ACTLR_B1TCMPCEN             (1 << 27)  /* B1TCM ECC enable */
+
+/* SCTLR register bits */
+#define SCTLR_M                     (1 << 0)   /* MMU/MPU enable */
+#define SCTLR_A                     (1 << 1)   /* Alignment check enable */
+#define SCTLR_C                     (1 << 2)   /* Data/Unified cache enable */
+#define SCTLR_Z                     (1 << 11)  /* Branch prediction enable */
+#define SCTLR_I                     (1 << 12)  /* Instruction cache enable */
+#define SCTLR_V                     (1 << 13)  /* High vectors */
+
+/* Use the standard NuttX approach for idle stack */
+#ifndef CONFIG_IDLETHREAD_STACKSIZE
+#  define CONFIG_IDLETHREAD_STACKSIZE 2048
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-/* g_idle_topstack: _sbss is the start of the BSS region as defined by the
- * linker script. _ebss lies at the end of the BSS region. The idle task
- * stack starts at the end of BSS and is of size CONFIG_IDLETHREAD_STACKSIZE.
- * The IDLE thread is the thread that the system boots on and, eventually,
- * becomes the IDLE, do nothing task that runs only when there is nothing
- * else to run.  The heap continues from there until the end of memory.
- * The IDLE thread stack is quite small.
- */
+/* Note: g_idle_topstack is defined in armv7-r/arm_head.S */
 
-//const uintptr_t g_idle_topstack = (uintptr_t)&_ebss + CONFIG_IDLETHREAD_STACKSIZE;
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* Reference counter for register protection */
+static volatile uint32_t g_protect_counters[3] =
+{
+  0, 0, 0
+};
 
 /****************************************************************************
  * Private Functions
@@ -77,96 +101,240 @@
 #endif
 
 /****************************************************************************
+ * Name: rzv_enable_tcm
+ *
+ * Description:
+ *   Enable ITCM and DTCM with ECC if supported
+ *
+ ****************************************************************************/
+
+static inline void rzv_enable_tcm(void)
+{
+  uint32_t actlr;
+
+  /* Read Auxiliary Control Register */
+  __asm__ __volatile__
+  (
+    "mrc p15, 0, %0, c1, c0, 1"
+    : "=r" (actlr)
+    :
+    : "memory"
+  );
+
+  /* Enable ECC for TCMs if available */
+  actlr |= ACTLR_ATCMPCEN | ACTLR_B0TCMPCEN | ACTLR_B1TCMPCEN;
+
+  /* Write back */
+  __asm__ __volatile__
+  (
+    "mcr p15, 0, %0, c1, c0, 1"
+    :
+    : "r" (actlr)
+    : "memory"
+  );
+
+  ARM_ISB();
+  ARM_DSB();
+}
+
+/****************************************************************************
+ * Name: rzv_enable_caches
+ *
+ * Description:
+ *   Enable instruction and data caches for Cortex-R8
+ *
+ ****************************************************************************/
+
+static inline void rzv_enable_caches(void)
+{
+  uint32_t sctlr;
+
+  /* Invalidate instruction cache */
+  cp15_invalidate_icache();
+
+  /* Invalidate data cache */
+  cp15_invalidate_dcache_all();
+
+  /* Read System Control Register */
+  __asm__ __volatile__
+  (
+    "mrc p15, 0, %0, c1, c0, 0"
+    : "=r" (sctlr)
+    :
+    : "memory"
+  );
+
+  /* Enable instruction cache, data cache, and branch prediction */
+  sctlr |= SCTLR_I | SCTLR_C | SCTLR_Z;
+
+  /* Write back SCTLR */
+  __asm__ __volatile__
+  (
+    "mcr p15, 0, %0, c1, c0, 0"
+    :
+    : "r" (sctlr)
+    : "memory"
+  );
+
+  ARM_ISB();
+  ARM_DSB();
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: __start
+ * Name: rzv_ram_init
  *
  * Description:
- *   This is the reset entry point.
+ *   Initialize RAM sections (clear BSS, copy initialized data)
  *
  ****************************************************************************/
 
-int main(void)
+void rzv_ram_init(void)
 {
   const uint32_t *src;
   uint32_t *dest;
 
-  /* Disable interrupts */
-
-  //up_irq_disable();
-
-  /* Configure the uart so that we can get debug output as soon as possible */
-
-  rzv_clock_config();
-  rzv_lowsetup();
-  showprogress('A');
-
-  /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
-   * certain that there are no issues with the state of global variables.
-   */
-
-  for (dest = (uint32_t *)_sbss; dest < (uint32_t *)_ebss; )
+  /* Clear .bss section - zero-initialized data */
+  for (dest = (uint32_t *)&_sbss; dest < (uint32_t *)&_ebss; )
     {
       *dest++ = 0;
     }
 
-  showprogress('B');
-
-  /* Move the initialized data section from his temporary holding spot in
-   * FLASH into the correct place in SRAM.  The correct place in SRAM is
-   * give by _sdata and _edata.  The temporary location is in FLASH at the
-   * end of all of the other read-only data (.text, .rodata) at _eronly.
+  /* Copy .data section from flash to RAM
+   * Note: For RZV2H, data may already be in ITCM/DTCM from loader.
+   * The linker script handles the load/run addresses properly.
    */
-
-  for (src = (const uint32_t *)_eronly,
-       dest = (uint32_t *)_sdata; dest < (uint32_t *)_edata;
-      )
+  for (src = &_eronly, dest = (uint32_t *)&_sdata; dest < (uint32_t *)&_edata; )
     {
       *dest++ = *src++;
     }
 
+  ARM_DSB();
+}
+
+/****************************************************************************
+ * Name: rzv_register_protect_disable
+ *
+ * Description:
+ *   Disable register write protection for critical system registers.
+ *   Uses reference counting to allow nested calls.
+ *
+ ****************************************************************************/
+
+void rzv_register_protect_disable(rzv_reg_protect_t regs_to_unprotect)
+{
+  /* For RZV2H, most system registers don't have protection like RA8's PRCR.
+   * GPIO PWPR protection is handled separately in rzv_gpio.c.
+   * This function is provided for API compatibility and future extensions.
+   */
+  if (regs_to_unprotect < 3)
+    {
+      irqstate_t flags = enter_critical_section();
+      g_protect_counters[regs_to_unprotect]++;
+      leave_critical_section(flags);
+    }
+}
+
+/****************************************************************************
+ * Name: rzv_register_protect_enable
+ *
+ * Description:
+ *   Enable register write protection for critical system registers.
+ *   Uses reference counting - only enables when counter reaches zero.
+ *
+ ****************************************************************************/
+
+void rzv_register_protect_enable(rzv_reg_protect_t regs_to_protect)
+{
+  if (regs_to_protect < 3)
+    {
+      irqstate_t flags = enter_critical_section();
+      if (g_protect_counters[regs_to_protect] > 0)
+        {
+          g_protect_counters[regs_to_protect]--;
+        }
+      leave_critical_section(flags);
+    }
+}
+
+/****************************************************************************
+ * Name: arm_boot
+ *
+ * Description:
+ *   Complete boot sequence and start NuttX kernel.
+ *   This is called from ARMv7-R arm_head.S after initial CPU setup.
+ *
+ ****************************************************************************/
+
+void arm_boot(void)
+{
+  /* Disable interrupts during early boot */
+  __asm__ __volatile__ ("cpsid i" : : : "memory");
+
+  showprogress('A');
+
+  /* Enable TCM with ECC */
+  rzv_enable_tcm();
+
+  showprogress('B');
+
+  /* Configure clocks early - needed for peripherals */
+  rzv_clock_config();
+
   showprogress('C');
 
-  /* Perform early serial initialization */
+  /* Initialize RAM sections (BSS and DATA) */
+  rzv_ram_init();
 
+  showprogress('D');
+
+  /* Enable caches and branch prediction */
+  rzv_enable_caches();
+
+  showprogress('E');
+
+  /* Configure low-level serial for early debug output */
+  rzv_lowsetup();
+
+  showprogress('F');
+
+  /* Perform early serial initialization if configured */
 #ifdef USE_EARLYSERIALINIT
   rzv_earlyserialinit();
 #endif
-  showprogress('D');
 
-  /* Initialize onboard resources */
+  showprogress('G');
 
-  //rzv_board_initialize();
-  showprogress('E');
+  /* Initialize board-specific hardware */
+  rzv_board_initialize();
+
+  showprogress('H');
 
   /* Then start NuttX */
-
   showprogress('\r');
   showprogress('\n');
+
   nx_start();
 
-  return 0; /* Should never return */
+  /* Should never return */
+  for (; ; );
 }
 
-/* Minimal arm_boot that delegates to nx_start().  This will start the
- * NuttX kernel.  A real implementation should perform architecture
- * specific memory initialization before calling nx_start().
- */
-void arm_boot(void)
-{
-  main();
-}
+/****************************************************************************
+ * Name: up_backtrace
+ *
+ * Description:
+ *   Get backtrace from specified context. This function is used to get
+ *   the backtrace when an exception occurred.
+ *   Note: Frame-pointer based backtrace is not yet implemented for RZV.
+ *
+ ****************************************************************************/
 
-/* Provide a trivial up_backtrace stub when frame-pointer based
- * backtrace implementation is not compiled in.
- */
 int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
 {
-  (void)tcb;
-  (void)buffer;
-  (void)size;
-  (void)skip;
+  /* Frame-pointer based backtrace not yet implemented */
   return 0;
 }

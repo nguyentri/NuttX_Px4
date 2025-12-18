@@ -317,8 +317,8 @@ void rzv_lowsetup(void)
 #if CONFIG_RZV_CONSOLE_UART == 0
   /* Configure TXD0 and RXD0 pins - adjust based on board */
   /* Example: Port 20, Pin 0 (TXD0) and Pin 1 (RXD0) */
-  rzv_gpio_config(GPIO_PERIPH_PIN(0x20, 0, 1));  /* TXD0 */
-  rzv_gpio_config(GPIO_PERIPH_PIN(0x20, 1, 1));  /* RXD0 */
+  rzv_gpioconfig(GPIO_PERIPH_PIN(0x20, 0, 1));  /* TXD0 */
+  rzv_gpioconfig(GPIO_PERIPH_PIN(0x20, 1, 1));  /* RXD0 */
 #endif
 
   /* Reset FIFOs */

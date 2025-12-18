@@ -69,11 +69,11 @@ void rzv2h_serial_setup(void)
 
   /* Configure TXD1 pin (P38, Port 3 Pin 8, Mode 1) */
 
-  rzv_gpio_config(BOARD_SCI1_TXD_GPIO);
+  rzv_gpioconfig(BOARD_SCI1_TXD_GPIO);
 
   /* Configure RXD1 pin (P39, Port 3 Pin 9, Mode 1) */
 
-  rzv_gpio_config(BOARD_SCI1_RXD_GPIO);
+  rzv_gpioconfig(BOARD_SCI1_RXD_GPIO);
 
   sinfo("SCI1 UART pins configured\n");
 #endif
@@ -86,8 +86,8 @@ void rzv2h_serial_setup(void)
 
   sinfo("Configuring SCI0 pins for UART\n");
 
-  rzv_gpio_config(BOARD_SCI0_TXD_GPIO);
-  rzv_gpio_config(BOARD_SCI0_RXD_GPIO);
+  rzv_gpioconfig(BOARD_SCI0_TXD_GPIO);
+  rzv_gpioconfig(BOARD_SCI0_RXD_GPIO);
 
   sinfo("SCI0 UART pins configured\n");
 #endif

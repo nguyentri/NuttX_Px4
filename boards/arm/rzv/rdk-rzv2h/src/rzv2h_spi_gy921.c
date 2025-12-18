@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/ra8/fpb-ra8e1/src/ra8e1_spi_gy912.c
+ * boards/arm/rzv/rdk-rzv2h/src/rzv2h_spi_gy921.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -46,8 +46,9 @@
 
 #include "arm_internal.h"
 #include "chip.h"
-#include "ra_gpio.h"
-#include "board.h"
+#include "rzv_gpio.h"
+#include "rzv_spi.h"
+#include "rdk-rzv2h.h"
 
 /****************************************************************************
  * Pre-processor Definitions

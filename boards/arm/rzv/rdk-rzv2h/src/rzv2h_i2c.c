@@ -57,8 +57,8 @@ int rzv2h_i2c_initialize(void)
 #ifdef CONFIG_RZV_RIIC0
   /* Configure RIIC0 pins */
 
-  rzv_gpio_config(BOARD_I2C0_SDA_GPIO);
-  rzv_gpio_config(BOARD_I2C0_SCL_GPIO);
+  rzv_gpioconfig(BOARD_I2C0_SDA_GPIO);
+  rzv_gpioconfig(BOARD_I2C0_SCL_GPIO);
 
   /* Initialize RIIC0 */
 
@@ -87,8 +87,8 @@ int rzv2h_i2c_initialize(void)
 #ifdef CONFIG_RZV_RIIC1
   /* Configure RIIC1 pins */
 
-  rzv_gpio_config(BOARD_I2C1_SDA_GPIO);
-  rzv_gpio_config(BOARD_I2C1_SCL_GPIO);
+  rzv_gpioconfig(BOARD_I2C1_SDA_GPIO);
+  rzv_gpioconfig(BOARD_I2C1_SCL_GPIO);
 
   /* Initialize RIIC1 */
 
@@ -117,8 +117,8 @@ int rzv2h_i2c_initialize(void)
 #ifdef CONFIG_RZV_RIIC2
   /* Configure RIIC2 pins */
 
-  rzv_gpio_config(BOARD_I2C2_SDA_GPIO);
-  rzv_gpio_config(BOARD_I2C2_SCL_GPIO);
+  rzv_gpioconfig(BOARD_I2C2_SDA_GPIO);
+  rzv_gpioconfig(BOARD_I2C2_SCL_GPIO);
 
   /* Initialize RIIC2 */
 

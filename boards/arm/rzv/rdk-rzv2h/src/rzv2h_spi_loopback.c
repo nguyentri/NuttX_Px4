@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/ra8/fpb-ra8e1/src/ra8e1_spi_loopback.c
+ * boards/arm/rzv/rdk-rzv2h/src/rzv2h_spi_loopback.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -39,9 +39,9 @@
 #include <nuttx/spi/spi_transfer.h>
 
 #include <arch/board/board.h>
-#include "ra_spi.h"
-#include "ra_gpio.h"
-#include "fpb-ra8e1.h"
+#include "rzv_spi.h"
+#include "rzv_gpio.h"
+#include "rdk-rzv2h.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -93,7 +93,7 @@ static struct spi_loopback_s g_spi_loopback;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ra_spi_select (strong override for loopback)
+ * Name: rzv_spi_select (strong override for loopback)
  *
  * Description:
  *   Enable/disable the SPI chip select for loopback test
@@ -101,7 +101,7 @@ static struct spi_loopback_s g_spi_loopback;
  *
  ****************************************************************************/
 
-void ra_spi_select(struct spi_dev_s *dev, uint32_t devid, bool selected)
+void rzv_spi_select(struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
   /* No CS control needed for loopback testing */
   /* MOSI is connected directly to MISO for each SPI controller */
@@ -111,14 +111,14 @@ void ra_spi_select(struct spi_dev_s *dev, uint32_t devid, bool selected)
 }
 
 /****************************************************************************
- * Name: ra_spi_status (strong override for loopback)
+ * Name: rzv_spi_status (strong override for loopback)
  *
  * Description:
  *   Return status information for loopback test
  *
  ****************************************************************************/
 
-uint8_t ra_spi_status(struct spi_dev_s *dev, uint32_t devid)
+uint8_t rzv_spi_status(struct spi_dev_s *dev, uint32_t devid)
 {
   /* For loopback test, device is always present */
   UNUSED(dev);
@@ -127,83 +127,27 @@ uint8_t ra_spi_status(struct spi_dev_s *dev, uint32_t devid)
 }
 
 /****************************************************************************
- * Name: ra_spi_cmddata (strong override for loopback)
+ * Name: rzv_spi_cmddata (strong override for loopback)
  *
  * Description:
  *   Control the SPI CMD/DATA GPIO for loopback test
  *
  ****************************************************************************/
 
-int ra_spi_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
+int rzv_spi_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   /* Loopback test doesn't use CMD/DATA line */
   return 0;
-}
-
-/*
- * Provide a minimal fixed CS configuration for the loopback demo.
- * This will allow the SPI driver to pick up bits/mode/frequency
- * for each device without requiring board-specific code elsewhere.
- */
-const struct ra_spi_cs_config_s g_loopback_cs[] =
-{
-  /* Device 0: SPI0 */
-  {
-    .devid = RA_SPI_BUS_0,
-    .max_frequency = SPI_FREQUENCY,
-    .mode = SPI_MODE,
-    .bits = 8,
-    .cs_gpio = 0,
-    .cs_type = RA_SPI_CS_CLK_SYS,
-    .ssl_select = 0,
-    .setup_delay = 0,
-    .hold_delay = 0,
-    .negation_delay = 0,
-    .active_low = true,
-    .name = "loopback-spi0",
-  },
-  /* Device 1: SPI1 */
-  {
-    .devid = RA_SPI_BUS_1,
-    .max_frequency = SPI_FREQUENCY,
-    .mode = SPI_MODE,
-    .bits = 8,
-    .cs_gpio = 0,
-    .cs_type = RA_SPI_CS_CLK_SYS,
-    .ssl_select = 0,
-    .setup_delay = 0,
-    .hold_delay = 0,
-    .negation_delay = 0,
-    .active_low = true,
-    .name = "loopback-spi1",
-  }
-};
-
-/* Strong implementation of ra_spi_get_cs_config used by the loopback demo.
- * Returns a pointer to the CS config for the given devid, or NULL if none.
- */
-const struct ra_spi_cs_config_s *ra_spi_get_cs_config(struct spi_dev_s *dev, uint32_t devid)
-{
-  UNUSED(dev);
-
-  for (size_t i = 0; i < sizeof(g_loopback_cs) / sizeof(g_loopback_cs[0]); i++)
-    {
-      if (g_loopback_cs[i].devid == devid)
-        {
-          return &g_loopback_cs[i];
-        }
-    }
-
-  return NULL;
 }
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-/* Use driver-provided API ra_spi_set_loopback() to enable/disable
+/* Use driver-provided API rzv_spi_set_loopback() to enable/disable
  * internal loopback. This avoids referencing low-level register
  * macros from board code and keeps register handling in the driver.
+ * Note: For RZV2H, loopback may need to be implemented if not available.
  */
 
 /****************************************************************************
@@ -375,19 +319,21 @@ static int spi_test_loopback(void)
   /* Test SPI0 loopback */
   syslog(LOG_INFO, "Testing Internal SPI0 loopback ...\n");
   SPI_LOCK(g_spi_loopback.spi0, true);
-  ra_spi_set_loopback(g_spi_loopback.spi0, true, false, false); /* Enable loopback on SPI0 */
+  /* TODO: Implement rzv_spi_set_loopback() in driver if hardware supports it */
+  /* rzv_spi_set_loopback(g_spi_loopback.spi0, true, false, false); */
   SPI_EXCHANGE(g_spi_loopback.spi0, g_spi_loopback.spi0_tx_buff,
                g_spi_loopback.spi0_rx_buff, SPI_BUFF_LEN);
-  ra_spi_set_loopback(g_spi_loopback.spi0, false, false, false); /* Disable loopback on SPI0 */
+  /* rzv_spi_set_loopback(g_spi_loopback.spi0, false, false, false); */
   SPI_LOCK(g_spi_loopback.spi0, false);
 
   /* Test SPI1 loopback */
   syslog(LOG_INFO, "Testing Internal SPI1 loopback ...\n");
   SPI_LOCK(g_spi_loopback.spi1, true);
-  ra_spi_set_loopback(g_spi_loopback.spi1, true, false, false); /* Enable loopback on SPI1 */
+  /* TODO: Implement rzv_spi_set_loopback() in driver if hardware supports it */
+  /* rzv_spi_set_loopback(g_spi_loopback.spi1, true, false, false); */
   SPI_EXCHANGE(g_spi_loopback.spi1, g_spi_loopback.spi1_tx_buff,
                g_spi_loopback.spi1_rx_buff, SPI_BUFF_LEN);
-  ra_spi_set_loopback(g_spi_loopback.spi1, false, false, false); /* Disable loopback on SPI1 */
+  /* rzv_spi_set_loopback(g_spi_loopback.spi1, false, false, false); */
   SPI_LOCK(g_spi_loopback.spi1, false);
 
   syslog(LOG_INFO, "Loopback transfers completed\n");
@@ -399,14 +345,14 @@ static int spi_test_loopback(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ra8e1_spi_loopback_init
+ * Name: rzv2h_spi_loopback_init
  *
  * Description:
  *   Initialize SPI loopback demo
  *
  ****************************************************************************/
 
-int ra8e1_spi_loopback_init(void)
+int rzv2h_spi_loopback_init(void)
 {
   int ret;
 
@@ -416,7 +362,7 @@ int ra8e1_spi_loopback_init(void)
   memset(&g_spi_loopback, 0, sizeof(g_spi_loopback));
 
   /* Get SPI0 as master */
-  g_spi_loopback.spi0 = ra_spibus_initialize(0);
+  g_spi_loopback.spi0 = rzv_spibus_initialize(0);
   if (!g_spi_loopback.spi0)
     {
       syslog(LOG_ERR, "Failed to initialize SPI0\n");
@@ -424,7 +370,7 @@ int ra8e1_spi_loopback_init(void)
     }
 
   /* Get SPI1 as master */
-  g_spi_loopback.spi1 = ra_spibus_initialize(1);
+  g_spi_loopback.spi1 = rzv_spibus_initialize(1);
   if (!g_spi_loopback.spi1)
     {
       syslog(LOG_ERR, "Failed to initialize SPI1\n");
@@ -444,14 +390,14 @@ int ra8e1_spi_loopback_init(void)
 }
 
 /****************************************************************************
- * Name: ra8e1_spi_loopback_test
+ * Name: rzv2h_spi_loopback_test
  *
  * Description:
  *   Run SPI loopback tests
  *
  ****************************************************************************/
 
-int ra8e1_spi_loopback_test(void)
+int rzv2h_spi_loopback_test(void)
 {
   int ret;
 
@@ -486,24 +432,24 @@ int ra8e1_spi_loopback_test(void)
 }
 
 /****************************************************************************
- * Name: ra8e1_spi_loopback_main
+ * Name: rzv2h_spi_loopback_main
  *
  * Description:
  *   Main entry point for SPI loopback demo
  *
  ****************************************************************************/
 
-int ra8e1_spi_loopback_main(int argc, char *argv[])
+int rzv2h_spi_loopback_main(int argc, char *argv[])
 {
   int ret;
 
-  syslog(LOG_INFO, "RA8E1 SPI Loopback Test\n");
-  syslog(LOG_INFO, "=======================\n");
+  syslog(LOG_INFO, "RZV2H SPI Loopback Test\n");
+  syslog(LOG_INFO, "========================\n");
   syslog(LOG_INFO, "This test verifies SPI loopback functionality:\n");
   syslog(LOG_INFO, "- SPI0 and SPI1 both configured as masters\n");
 
   /* Run the test */
-  ret = ra8e1_spi_loopback_test();
+  ret = rzv2h_spi_loopback_test();
   if (ret < 0)
     {
       syslog(LOG_INFO, "Test failed: %d\n", ret);

@@ -42,6 +42,7 @@
 #include "hardware/rzv_riic.h"
 #include "rzv_riic.h"
 #include "rzv_icu.h"
+#include "rzv_clock.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -84,6 +85,11 @@ struct rzv_riic_priv_s
   int irq_txi;                    /* TX interrupt */
   int irq_tei;                    /* Transfer end interrupt */
   int irq_err;                    /* Error interrupt */
+  int irq_stp;                    /* Stop interrupt */
+
+  /* Module clock control */
+
+  uint32_t mstp;                  /* Module stop control ID */
 
   /* Transfer state */
 
@@ -150,7 +156,9 @@ static struct rzv_riic_priv_s g_riic_priv[RZV_RIIC_MAX_CHANNELS] =
     .irq_rxi = -1,
     .irq_txi = -1,
     .irq_tei = -1,
-    .irq_err = -1
+    .irq_err = -1,
+    .irq_stp = -1,
+    .mstp = RZV_CPG_CLK_I2C1
   },
   {
     .dev = { .ops = &rzv_riic_ops },
@@ -160,7 +168,9 @@ static struct rzv_riic_priv_s g_riic_priv[RZV_RIIC_MAX_CHANNELS] =
     .irq_rxi = -1,
     .irq_txi = -1,
     .irq_tei = -1,
-    .irq_err = -1
+    .irq_err = -1,
+    .irq_stp = -1,
+    .mstp = RZV_CPG_CLK_I2C2
   },
   {
     .dev = { .ops = &rzv_riic_ops },
@@ -170,7 +180,9 @@ static struct rzv_riic_priv_s g_riic_priv[RZV_RIIC_MAX_CHANNELS] =
     .irq_rxi = -1,
     .irq_txi = -1,
     .irq_tei = -1,
-    .irq_err = -1
+    .irq_err = -1,
+    .irq_stp = -1,
+    .mstp = RZV_CPG_CLK_I2C3
   }
 };
 
@@ -182,16 +194,16 @@ static struct rzv_riic_priv_s g_riic_priv[RZV_RIIC_MAX_CHANNELS] =
  * Name: rzv_riic_getreg / rzv_riic_putreg
  ****************************************************************************/
 
-static inline uint32_t rzv_riic_getreg(struct rzv_riic_priv_s *priv,
+static inline uint8_t rzv_riic_getreg(struct rzv_riic_priv_s *priv,
                                       unsigned int offset)
 {
-  return getreg32(priv->base + offset);
+  return getreg8(priv->base + offset);
 }
 
 static inline void rzv_riic_putreg(struct rzv_riic_priv_s *priv,
-                                  unsigned int offset, uint32_t value)
+                                  unsigned int offset, uint8_t value)
 {
-  putreg32(value, priv->base + offset);
+  putreg8(value, priv->base + offset);
 }
 
 /****************************************************************************
@@ -201,7 +213,7 @@ static inline void rzv_riic_putreg(struct rzv_riic_priv_s *priv,
 static void rzv_riic_set_frequency(struct rzv_riic_priv_s *priv,
                                   uint32_t frequency)
 {
-  uint32_t cks, brh, brl;
+  uint8_t cks, brh, brl;
 
   /* Select bit rate settings based on frequency */
 
@@ -232,7 +244,7 @@ static void rzv_riic_set_frequency(struct rzv_riic_priv_s *priv,
 
   /* Configure ICMR1: Set clock source */
 
-  uint32_t icmr1 = rzv_riic_getreg(priv, RZV_RIIC_ICMR1_OFFSET);
+  uint8_t icmr1 = rzv_riic_getreg(priv, RZV_RIIC_ICMR1_OFFSET);
   icmr1 &= ~RIIC_ICMR1_CKS_MASK;
   icmr1 |= (cks << RIIC_ICMR1_CKS_SHIFT);
   rzv_riic_putreg(priv, RZV_RIIC_ICMR1_OFFSET, icmr1);
@@ -253,7 +265,7 @@ static void rzv_riic_sendstart(struct rzv_riic_priv_s *priv)
 {
   /* Set master transmit mode and issue start condition */
 
-  uint32_t iccr2 = rzv_riic_getreg(priv, RZV_RIIC_ICCR2_OFFSET);
+  uint8_t iccr2 = rzv_riic_getreg(priv, RZV_RIIC_ICCR2_OFFSET);
   iccr2 |= RIIC_ICCR2_MST | RIIC_ICCR2_TRS | RIIC_ICCR2_ST;
   rzv_riic_putreg(priv, RZV_RIIC_ICCR2_OFFSET, iccr2);
 }
@@ -264,11 +276,13 @@ static void rzv_riic_sendstart(struct rzv_riic_priv_s *priv)
 
 static void rzv_riic_sendstop(struct rzv_riic_priv_s *priv)
 {
-  /* Issue stop condition */
+  /* Issue stop condition - MST and TRS will be cleared by hardware after
+   * STOP completes. Do NOT clear them manually before STOP or it will
+   * cause arbitration loss.
+   */
 
-  uint32_t iccr2 = rzv_riic_getreg(priv, RZV_RIIC_ICCR2_OFFSET);
-  iccr2 &= ~(RIIC_ICCR2_MST | RIIC_ICCR2_TRS);
-  iccr2 |= RIIC_ICCR2_SP;
+  uint8_t iccr2 = rzv_riic_getreg(priv, RZV_RIIC_ICCR2_OFFSET);
+  iccr2 |= RIIC_ICCR2_SP;  /* Set STOP bit only */
   rzv_riic_putreg(priv, RZV_RIIC_ICCR2_OFFSET, iccr2);
 }
 
@@ -336,11 +350,12 @@ static void rzv_riic_irq_nextmsg(struct rzv_riic_priv_s *priv)
         }
       else
         {
-          /* Issue restart */
+          /* Issue restart - clear STOP bit first, then set RESTART and START */
 
           priv->state = RIIC_STATE_RESTART;
-          uint32_t iccr2 = rzv_riic_getreg(priv, RZV_RIIC_ICCR2_OFFSET);
-          iccr2 |= RIIC_ICCR2_RS;
+          uint8_t iccr2 = rzv_riic_getreg(priv, RZV_RIIC_ICCR2_OFFSET);
+          iccr2 &= ~RIIC_ICCR2_SP;  /* Clear any pending STOP */
+          iccr2 |= RIIC_ICCR2_RS | RIIC_ICCR2_ST;  /* Set RESTART and START */
           rzv_riic_putreg(priv, RZV_RIIC_ICCR2_OFFSET, iccr2);
         }
     }
@@ -365,13 +380,15 @@ static int rzv_riic_rxi_interrupt(int irq, void *context, void *arg)
       *priv->ptr++ = rzv_riic_getreg(priv, RZV_RIIC_ICDRR_OFFSET);
       priv->dcnt--;
 
-      /* Check if this is the last byte */
+      /* Check if this is the penultimate byte - must set NACK before
+       * the last byte is received (not at the last byte)
+       */
 
-      if (priv->dcnt == 1)
+      if (priv->dcnt == 2)
         {
-          /* Set NACK for last byte */
+          /* Set NACK before last byte */
 
-          uint32_t icmr3 = rzv_riic_getreg(priv, RZV_RIIC_ICMR3_OFFSET);
+          uint8_t icmr3 = rzv_riic_getreg(priv, RZV_RIIC_ICMR3_OFFSET);
           icmr3 |= RIIC_ICMR3_ACKBT;  /* Send NACK */
           rzv_riic_putreg(priv, RZV_RIIC_ICMR3_OFFSET, icmr3);
         }
@@ -437,16 +454,22 @@ static int rzv_riic_txi_interrupt(int irq, void *context, void *arg)
           {
             /* Disable TXI, wait for TEI */
 
-            uint32_t icier = rzv_riic_getreg(priv, RZV_RIIC_ICIER_OFFSET);
+            uint8_t icier = rzv_riic_getreg(priv, RZV_RIIC_ICIER_OFFSET);
             icier &= ~RIIC_ICIER_TIE;
             rzv_riic_putreg(priv, RZV_RIIC_ICIER_OFFSET, icier);
           }
         break;
 
       case RIIC_STATE_ADDR_READ:
-        /* Address sent for read, switch to receive mode */
+        /* Address sent for read, enable WAIT mode and switch to receive */
 
-        uint32_t iccr2 = rzv_riic_getreg(priv, RZV_RIIC_ICCR2_OFFSET);
+        /* Enable WAIT mode for synchronization */
+        uint8_t icmr3 = rzv_riic_getreg(priv, RZV_RIIC_ICMR3_OFFSET);
+        icmr3 |= RIIC_ICMR3_WAIT;
+        rzv_riic_putreg(priv, RZV_RIIC_ICMR3_OFFSET, icmr3);
+
+        /* Switch to receive mode */
+        uint8_t iccr2 = rzv_riic_getreg(priv, RZV_RIIC_ICCR2_OFFSET);
         iccr2 &= ~RIIC_ICCR2_TRS;  /* Receive mode */
         rzv_riic_putreg(priv, RZV_RIIC_ICCR2_OFFSET, iccr2);
 
@@ -454,7 +477,7 @@ static int rzv_riic_txi_interrupt(int irq, void *context, void *arg)
 
         /* Disable TXI, enable RXI */
 
-        uint32_t icier = rzv_riic_getreg(priv, RZV_RIIC_ICIER_OFFSET);
+        uint8_t icier = rzv_riic_getreg(priv, RZV_RIIC_ICIER_OFFSET);
         icier &= ~RIIC_ICIER_TIE;
         icier |= RIIC_ICIER_RIE;
         rzv_riic_putreg(priv, RZV_RIIC_ICIER_OFFSET, icier);
@@ -483,11 +506,32 @@ static int rzv_riic_tei_interrupt(int irq, void *context, void *arg)
 
   rzv_icu_clear_irq(irq);
 
-  /* Transmit end - move to next message or stop */
+  /* Transmit end - check for STOP condition or move to next message */
 
   if (priv->state == RIIC_STATE_DATA_WRITE)
     {
       rzv_riic_irq_nextmsg(priv);
+    }
+  else if (priv->state == RIIC_STATE_STOP)
+    {
+      /* Check if STOP condition completed */
+      uint8_t icsr2 = rzv_riic_getreg(priv, RZV_RIIC_ICSR2_OFFSET);
+      if (icsr2 & RIIC_ICSR2_STOP)
+        {
+          /* Clear STOP flag */
+          rzv_riic_putreg(priv, RZV_RIIC_ICSR2_OFFSET,
+                         icsr2 & ~RIIC_ICSR2_STOP);
+
+          priv->state = RIIC_STATE_IDLE;
+
+          if (priv->result == 0)
+            {
+              priv->result = OK;
+            }
+
+          /* Wake up waiting thread */
+          nxsem_post(&priv->sem_isr);
+        }
     }
 
   return OK;
@@ -507,7 +551,7 @@ static int rzv_riic_err_interrupt(int irq, void *context, void *arg)
 
   /* Check error flags */
 
-  uint32_t icsr2 = rzv_riic_getreg(priv, RZV_RIIC_ICSR2_OFFSET);
+  uint8_t icsr2 = rzv_riic_getreg(priv, RZV_RIIC_ICSR2_OFFSET);
 
   if (icsr2 & RIIC_ICSR2_NACKF)
     {
@@ -518,10 +562,17 @@ static int rzv_riic_err_interrupt(int irq, void *context, void *arg)
     }
   else if (icsr2 & RIIC_ICSR2_AL)
     {
-      /* Arbitration lost */
+      /* Arbitration lost - try to recover bus */
 
       priv->result = -EAGAIN;
-      i2cerr("Arbitration lost\n");
+      i2cerr("Arbitration lost - attempting recovery\n");
+
+      /* Reset and reinitialize peripheral */
+      rzv_riic_putreg(priv, RZV_RIIC_ICCR1_OFFSET, RIIC_ICCR1_IICRST);
+      up_udelay(10);
+      rzv_riic_putreg(priv, RZV_RIIC_ICCR1_OFFSET, 0);
+      up_udelay(10);
+      rzv_riic_putreg(priv, RZV_RIIC_ICCR1_OFFSET, RIIC_ICCR1_ICE);
     }
   else if (icsr2 & RIIC_ICSR2_TMOF)
     {
@@ -562,7 +613,7 @@ static int rzv_riic_stp_interrupt(int irq, void *context, void *arg)
 
   /* Stop condition detected - transfer complete */
 
-  uint32_t icsr2 = rzv_riic_getreg(priv, RZV_RIIC_ICSR2_OFFSET);
+  uint8_t icsr2 = rzv_riic_getreg(priv, RZV_RIIC_ICSR2_OFFSET);
   rzv_riic_putreg(priv, RZV_RIIC_ICSR2_OFFSET, icsr2 & ~RIIC_ICSR2_STOP);
 
   priv->state = RIIC_STATE_IDLE;
@@ -586,6 +637,16 @@ static int rzv_riic_stp_interrupt(int irq, void *context, void *arg)
 static int rzv_riic_init(struct rzv_riic_priv_s *priv)
 {
   int ret;
+
+  /* CRITICAL: Enable module clock before accessing peripheral registers */
+
+  uint32_t domain = RZV_CPG_DOMAIN(priv->mstp);
+  uint32_t bit = RZV_CPG_BIT(priv->mstp);
+  RZV_MODULE_CLKON(domain, bit);
+
+  /* Small delay for clock stabilization */
+
+  up_udelay(10);
 
   /* Reset RIIC */
 
@@ -611,11 +672,14 @@ static int rzv_riic_init(struct rzv_riic_priv_s *priv)
 
   rzv_riic_set_frequency(priv, 400000);
 
-  /* Attach interrupts */
+  /* Attach interrupts
+   * Note: STOP condition is detected via ICSR2.STOP flag polling in
+   * interrupt handlers, not as a separate interrupt event.
+   */
 
-  int events[6];
-  xcpt_t handlers[6];
-  int *irq_slots[6];
+  int events[4];
+  xcpt_t handlers[4];
+  int *irq_slots[4];
 
   /* Map event numbers based on channel */
 
@@ -662,6 +726,8 @@ static int rzv_riic_init(struct rzv_riic_priv_s *priv)
   irq_slots[1] = &priv->irq_txi;
   irq_slots[2] = &priv->irq_tei;
   irq_slots[3] = &priv->irq_err;
+  /* Note: irq_stp field exists for future use but STOP is currently
+   * handled via ICSR2.STOP polling */
 
   /* Attach all interrupts */
 
@@ -731,6 +797,12 @@ static void rzv_riic_deinit(struct rzv_riic_priv_s *priv)
   /* Disable RIIC */
 
   rzv_riic_putreg(priv, RZV_RIIC_ICCR1_OFFSET, 0);
+
+  /* Disable module clock */
+
+  uint32_t domain = RZV_CPG_DOMAIN(priv->mstp);
+  uint32_t bit = RZV_CPG_BIT(priv->mstp);
+  RZV_MODULE_CLKOFF(domain, bit);
 }
 
 /****************************************************************************
@@ -764,11 +836,11 @@ static int rzv_riic_transfer(struct i2c_master_s *dev,
   priv->result = 0;
   priv->state = RIIC_STATE_START;
 
-  /* Enable interrupts */
+  /* Enable interrupts - note SPIE for STOP condition detection */
 
-  uint32_t icier = RIIC_ICIER_TIE | RIIC_ICIER_TEIE |
-                   RIIC_ICIER_NAKIE | RIIC_ICIER_ALIE |
-                   RIIC_ICIER_SPIE | RIIC_ICIER_TMOIE;
+  uint8_t icier = RIIC_ICIER_TIE | RIIC_ICIER_TEIE |
+                  RIIC_ICIER_NAKIE | RIIC_ICIER_ALIE |
+                  RIIC_ICIER_SPIE | RIIC_ICIER_TMOIE;
   rzv_riic_putreg(priv, RZV_RIIC_ICIER_OFFSET, icier);
 
   /* Start transfer */

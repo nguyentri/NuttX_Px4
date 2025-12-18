@@ -406,4 +406,42 @@
 #  endif
 #endif
 
+/* Bit rate configuration constants ****************************************/
+/* These values are calculated for P0CLK = 100MHz (RZV2H default)
+ * Formula: SCL frequency = P0CLK / (2 * (BRH + 1 + BRL + 1) * 2^CKS)
+ *
+ * For 100kHz (Standard mode):
+ *   100000 = 100000000 / (2 * (BRH + 1 + BRL + 1) * 2^CKS)
+ *   Need: (BRH + BRL + 2) * 2^CKS = 500
+ *   Using CKS=3 (divide by 8): BRH + BRL + 2 = 62.5 ≈ 63
+ *   Using BRH=31, BRL=30: (31+1+30+1)*8 = 504 → ~99.2kHz
+ *
+ * For 400kHz (Fast mode):
+ *   400000 = 100000000 / (2 * (BRH + 1 + BRL + 1) * 2^CKS)
+ *   Need: (BRH + BRL + 2) * 2^CKS = 125
+ *   Using CKS=3 (divide by 8): BRH + BRL + 2 = 15.625 ≈ 16
+ *   Using BRH=7, BRL=7: (7+1+7+1)*8 = 128 → ~390kHz
+ *
+ * For 1MHz (Fast mode plus):
+ *   1000000 = 100000000 / (2 * (BRH + 1 + BRL + 1) * 2^CKS)
+ *   Need: (BRH + BRL + 2) * 2^CKS = 50
+ *   Using CKS=2 (divide by 4): BRH + BRL + 2 = 12.5 ≈ 13
+ *   Using BRH=6, BRL=5: (6+1+5+1)*4 = 52 → ~961kHz
+ */
+
+/* Standard mode: ~100kHz */
+#define RIIC_CKS_100K       3    /* Clock divisor: divide by 2^3 = 8 */
+#define RIIC_BRH_100K       31   /* Bit rate high period */
+#define RIIC_BRL_100K       30   /* Bit rate low period */
+
+/* Fast mode: ~400kHz */
+#define RIIC_CKS_400K       3    /* Clock divisor: divide by 2^3 = 8 */
+#define RIIC_BRH_400K       7    /* Bit rate high period */
+#define RIIC_BRL_400K       7    /* Bit rate low period */
+
+/* Fast mode plus: ~1MHz */
+#define RIIC_CKS_1M         2    /* Clock divisor: divide by 2^2 = 4 */
+#define RIIC_BRH_1M         6    /* Bit rate high period */
+#define RIIC_BRL_1M         5    /* Bit rate low period */
+
 #endif /* __ARCH_ARM_SRC_RZV_HARDWARE_RZV_RIIC_H */

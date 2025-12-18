@@ -25,11 +25,68 @@
 #include <nuttx/config.h>
 
 #include <debug.h>
+#include <stdint.h>
 
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
+#include "arm_internal.h"
+#include "rzv_gpio.h"
 #include "rdk-rzv2h.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* GPIO Port Security Control registers base - RZV2H specific */
+#define RZV2H_GPIO_PMSAR_BASE       0x14030800  /* Port Mode Security Attribution */
+#define RZV2H_GPIO_PSCU_BASE        0x14030C00  /* Port Security Control Unit */
+
+/* Number of GPIO ports in RZV2H (ports 0x20-0x2B = 12 ports) */
+#define RZV2H_GPIO_NPORTS           12
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: rzv_gpio_security_init
+ *
+ * Description:
+ *   Initialize GPIO port security attributes to secure mode (default).
+ *   Must be called before configuring any GPIO pins.
+ *   Based on FSP r_ioport security initialization.
+ *
+ ****************************************************************************/
+
+static void rzv_gpio_security_init(void)
+{
+#ifdef CONFIG_ARM_TRUSTZONE
+  volatile uint32_t *pmsar;
+  volatile uint32_t *pscu;
+  int port;
+
+  /* Initialize PMSAR (Port Mode Security Attribution Register)
+   * Set all pins to secure mode (0 = secure, 1 = non-secure)
+   */
+  pmsar = (volatile uint32_t *)RZV2H_GPIO_PMSAR_BASE;
+  for (port = 0; port < RZV2H_GPIO_NPORTS; port++)
+    {
+      pmsar[port] = 0x00000000;  /* All pins secure */
+    }
+
+  /* Initialize PSCU (Port Security Control Unit)
+   * Configure security control for each port
+   */
+  pscu = (volatile uint32_t *)RZV2H_GPIO_PSCU_BASE;
+  for (port = 0; port < RZV2H_GPIO_NPORTS; port++)
+    {
+      pscu[port] = 0x00000000;  /* Default security settings */
+    }
+
+  ARM_DSB();
+#endif
+}
 
 /****************************************************************************
  * Public Functions
@@ -40,14 +97,19 @@
  *
  * Description:
  *   All RZV architectures must provide the following entry point.  This
- *   entry point is called early in the initialization -- after all memory
- *   has been configured and mapped but before any devices have been
+ *   entry point is called early in the initialization -- after clocks and
+ *   memory have been configured but before any devices have been
  *   initialized.
+ *
+ *   This function is called from rzv_start.c during the boot sequence.
  *
  ****************************************************************************/
 
 void rzv_board_initialize(void)
 {
+  /* Initialize GPIO security attributes (TrustZone) */
+  rzv_gpio_security_init();
+
   /* Configure SCI/UART pins for serial communication */
 
 #ifdef CONFIG_RZV_UART_SCI
@@ -60,9 +122,15 @@ void rzv_board_initialize(void)
   /* Configure SPI-based devices */
 #endif
 
-  /* Configure on-board LEDs if LED support has been selected. */
+  /* Configure on-board LEDs if LED support has been selected */
 
 #ifdef CONFIG_ARCH_LEDS
-  //rzv2h_led_initialize();
+  board_autoled_initialize();
+#endif
+
+  /* Initialize any board-specific GPIO configurations */
+
+#ifdef CONFIG_BOARDCTL_IOCTL
+  /* Additional board-specific initialization can be done via ioctl */
 #endif
 }

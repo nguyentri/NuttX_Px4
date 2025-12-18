@@ -184,6 +184,32 @@ int rzv_icu_attach(int event, xcpt_t handler, void *arg, bool irq_enable);
 int rzv_icu_detach(int icu_irq);
 
 /****************************************************************************
+ * Name: rzv_icu_set_priority
+ *
+ * Description:
+ *   Set interrupt priority for a dynamically allocated ICU IRQ.
+ *   Controls GIC priority for precise interrupt prioritization.
+ *
+ * Input Parameters:
+ *   icu_irq  - IRQ number returned by rzv_icu_attach()
+ *   priority - Priority level (0-31, where 0 = highest priority)
+ *              GIC implements 5-bit priority in bits[7:3]
+ *
+ * Returned Value:
+ *   OK on success; negated errno on failure:
+ *     -EINVAL: Invalid IRQ number or priority out of range
+ *     -ENOSYS: Priority control not enabled (CONFIG_ARCH_IRQPRIO)
+ *
+ * Example:
+ *   int irq = rzv_icu_attach(RZV_ELC_GTM0_GTMTINT, timer_isr, &dev, false);
+ *   rzv_icu_set_priority(irq, 5);  // High priority
+ *   up_enable_irq(irq);
+ *
+ ****************************************************************************/
+
+int rzv_icu_set_priority(int icu_irq, int priority);
+
+/****************************************************************************
  * Name: rzv_icu_set_event
  *
  * Description:

@@ -48,7 +48,7 @@
 
 /* This array maps button numbers to GPIO configurations */
 
-static const rzv_pinconfig_t g_button_gpio[BOARD_NBUTTONS] =
+static const gpio_pinset_t g_button_gpio[BOARD_NBUTTONS] =
 {
   BOARD_BUTTON1_GPIO,
   BOARD_BUTTON2_GPIO,
@@ -121,7 +121,7 @@ uint32_t board_button_initialize(void)
 
   for (i = 0; i < BOARD_NBUTTONS; i++)
     {
-      rzv_gpio_config(g_button_gpio[i]);
+      rzv_gpioconfig(g_button_gpio[i]);
     }
 
   return BOARD_NBUTTONS;
@@ -149,7 +149,7 @@ uint32_t board_buttons(void)
 
   for (i = 0; i < BOARD_NBUTTONS; i++)
     {
-      bool pressed = !rzv_gpio_read(g_button_gpio[i]);
+      bool pressed = !rzv_gpioread(g_button_gpio[i]);
       if (pressed)
         {
           ret |= (1 << i);

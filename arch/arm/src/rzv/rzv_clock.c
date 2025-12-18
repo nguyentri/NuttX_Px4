@@ -38,6 +38,9 @@
 #include <sys/time.h>
 #include <unistd.h>
 
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
+
 /* Ensure the short delay primitive is visible in this TU.  It should be
  * declared in <nuttx/arch.h>, but provide an explicit extern to avoid
  * implicit-declaration warnings in toolchains that don't process the
@@ -312,24 +315,35 @@ int rzv_clock_enable(uint32_t clk_id)
 {
   uint32_t domain = RZV_CPG_DOMAIN(clk_id);
   uint32_t bit = RZV_CPG_BIT(clk_id);
-  uint32_t mask = (1 << bit);
+  uint32_t mask;
   uintptr_t clkon_addr = RZV_CPG_CLKON(domain);
   uintptr_t clkmon_addr = RZV_CPG_CLKMON(domain);
+  irqstate_t flags;
   int ret;
 
-  /* Enable the clock */
+  /* Critical section to protect register access */
 
+  flags = enter_critical_section();
+
+  /* Enable the clock: write-enable bit [31:16] + control bit [15:0]
+   * Per Renesas hardware spec, both bits must be set to enable clock.
+   */
+
+  mask = (1 << (bit + 16)) | (1 << bit);
   rzv_cpg_putreg(mask, clkon_addr);
 
   /* Wait for clock to be enabled */
 
-  ret = rzv_cpg_wait_bit(clkmon_addr, mask, true);
+  ret = rzv_cpg_wait_bit(clkmon_addr, (1 << bit), true);
   if (ret < 0)
     {
       clkerr("ERROR: Timeout enabling clock domain=%u bit=%u\n",
         domain, bit);
+      leave_critical_section(flags);
       return ret;
     }
+
+  leave_critical_section(flags);
 
   clkinfo("Clock enabled: domain=%u bit=%u\n", domain, bit);
 
@@ -348,13 +362,21 @@ int rzv_clock_disable(uint32_t clk_id)
 {
   uint32_t domain = RZV_CPG_DOMAIN(clk_id);
   uint32_t bit = RZV_CPG_BIT(clk_id);
-  uint32_t mask = (1 << (bit + 16));  /* Upper 16 bits for disable */
+  uint32_t mask;
   uintptr_t clkon_addr = RZV_CPG_CLKON(domain);
   uintptr_t clkmon_addr = RZV_CPG_CLKMON(domain);
+  irqstate_t flags;
   int ret;
 
-  /* Disable the clock */
+  /* Critical section to protect register access */
 
+  flags = enter_critical_section();
+
+  /* Disable the clock: write-enable bit [31:16] only, control bit [15:0] = 0
+   * Per Renesas hardware spec, write-enable must be set with control bit clear.
+   */
+
+  mask = (1 << (bit + 16));
   rzv_cpg_putreg(mask, clkon_addr);
 
   /* Wait for clock to be disabled */
@@ -364,8 +386,11 @@ int rzv_clock_disable(uint32_t clk_id)
     {
       clkerr("ERROR: Timeout disabling clock domain=%u bit=%u\n",
         domain, bit);
+      leave_critical_section(flags);
       return ret;
     }
+
+  leave_critical_section(flags);
 
   clkinfo("Clock disabled: domain=%u bit=%u\n", domain, bit);
 
@@ -384,24 +409,35 @@ int rzv_module_reset(uint32_t clk_id)
 {
   uint32_t domain = RZV_CPG_DOMAIN(clk_id);
   uint32_t bit = RZV_CPG_BIT(clk_id);
-  uint32_t mask = (1 << (bit + 16));  /* Upper 16 bits for assert */
+  uint32_t mask;
   uintptr_t mrst_addr = RZV_CPG_RST(domain);
   uintptr_t mrstmon_addr = RZV_CPG_RSTMON(domain);
+  irqstate_t flags;
   int ret;
 
-  /* Assert reset */
+  /* Critical section to protect register access */
 
+  flags = enter_critical_section();
+
+  /* Assert reset: write-enable bit [31:16] only, control bit [15:0] = 0
+   * Per Renesas hardware spec, control bit = 0 means reset asserted.
+   */
+
+  mask = (1 << (bit + 16));
   rzv_cpg_putreg(mask, mrst_addr);
 
-  /* Wait for reset to be asserted */
+  /* Wait for reset to be asserted (monitor bit = 0) */
 
-  ret = rzv_cpg_wait_bit(mrstmon_addr, (1 << bit), true);
+  ret = rzv_cpg_wait_bit(mrstmon_addr, (1 << bit), false);
   if (ret < 0)
     {
       clkerr("ERROR: Timeout asserting reset domain=%u bit=%u\n",
         domain, bit);
+      leave_critical_section(flags);
       return ret;
     }
+
+  leave_critical_section(flags);
 
   clkinfo("Reset asserted: domain=%u bit=%u\n", domain, bit);
 
@@ -420,24 +456,35 @@ int rzv_module_unreset(uint32_t clk_id)
 {
   uint32_t domain = RZV_CPG_DOMAIN(clk_id);
   uint32_t bit = RZV_CPG_BIT(clk_id);
-  uint32_t mask = (1 << bit);  /* Lower 16 bits for deassert */
+  uint32_t mask;
   uintptr_t mrst_addr = RZV_CPG_RST(domain);
   uintptr_t mrstmon_addr = RZV_CPG_RSTMON(domain);
+  irqstate_t flags;
   int ret;
 
-  /* Deassert reset */
+  /* Critical section to protect register access */
 
+  flags = enter_critical_section();
+
+  /* Deassert reset: write-enable bit [31:16] + control bit [15:0]
+   * Per Renesas hardware spec, control bit = 1 means reset released.
+   */
+
+  mask = (1 << (bit + 16)) | (1 << bit);
   rzv_cpg_putreg(mask, mrst_addr);
 
-  /* Wait for reset to be deasserted */
+  /* Wait for reset to be deasserted (monitor bit = 1) */
 
-  ret = rzv_cpg_wait_bit(mrstmon_addr, (1 << bit), false);
+  ret = rzv_cpg_wait_bit(mrstmon_addr, (1 << bit), true);
   if (ret < 0)
     {
       clkerr("ERROR: Timeout deasserting reset domain=%u bit=%u\n",
         domain, bit);
+      leave_critical_section(flags);
       return ret;
     }
+
+  leave_critical_section(flags);
 
   clkinfo("Reset deasserted: domain=%u bit=%u\n", domain, bit);
 
@@ -491,17 +538,154 @@ uint32_t rzv_get_cpu_frequency(void)
 
 
 /****************************************************************************
+ * Name: rzv_pll_init
+ *
+ * Description:
+ *   Initialize PLLs required for system operation. Checks if PLLs are
+ *   already running and starts them if needed.
+ *
+ ****************************************************************************/
+
+static void rzv_pll_init(void)
+{
+  uint32_t pll_mon;
+  uintptr_t pll_stby;
+  uintptr_t pll_mon_addr;
+  const uint32_t pll_lock_mask = 0x11;  /* RESETB + LOCK bits */
+  int timeout;
+
+  /* Initialize PLLCLN (1.6 GHz) if not already running */
+
+  pll_mon_addr = RZV_CPG_BASE + RZV_CPG_PLLCLN_MON_OFFSET;
+  pll_mon = rzv_cpg_getreg(pll_mon_addr);
+  if ((pll_mon & pll_lock_mask) != pll_lock_mask)
+    {
+      pll_stby = RZV_CPG_BASE + RZV_CPG_PLLCLN_STBY_OFFSET;
+      rzv_cpg_putreg(0x00010001, pll_stby);  /* RESETB_WEN + RESETB */
+
+      /* Wait for PLL lock with timeout */
+
+      timeout = CPG_TIMEOUT_COUNT * 10;  /* PLLs need longer timeout */
+      while (timeout-- > 0)
+        {
+          pll_mon = rzv_cpg_getreg(pll_mon_addr);
+          if ((pll_mon & pll_lock_mask) == pll_lock_mask)
+            {
+              clkinfo("PLLCLN locked\n");
+              break;
+            }
+
+          up_udelay(10);
+        }
+
+      if (timeout <= 0)
+        {
+          clkerr("ERROR: PLLCLN lock timeout\n");
+        }
+    }
+
+  /* Initialize PLLDTY (1.6 GHz) if not already running */
+
+  pll_mon_addr = RZV_CPG_BASE + RZV_CPG_PLLDTY_MON_OFFSET;
+  pll_mon = rzv_cpg_getreg(pll_mon_addr);
+  if ((pll_mon & pll_lock_mask) != pll_lock_mask)
+    {
+      pll_stby = RZV_CPG_BASE + RZV_CPG_PLLDTY_STBY_OFFSET;
+      rzv_cpg_putreg(0x00010001, pll_stby);
+
+      timeout = CPG_TIMEOUT_COUNT * 10;
+      while (timeout-- > 0)
+        {
+          pll_mon = rzv_cpg_getreg(pll_mon_addr);
+          if ((pll_mon & pll_lock_mask) == pll_lock_mask)
+            {
+              clkinfo("PLLDTY locked\n");
+              break;
+            }
+
+          up_udelay(10);
+        }
+
+      if (timeout <= 0)
+        {
+          clkerr("ERROR: PLLDTY lock timeout\n");
+        }
+    }
+
+  /* Initialize PLLCA55 (1.8 GHz) if not already running */
+
+  pll_mon_addr = RZV_CPG_BASE + RZV_CPG_PLLCA55_MON_OFFSET;
+  pll_mon = rzv_cpg_getreg(pll_mon_addr);
+  if ((pll_mon & pll_lock_mask) != pll_lock_mask)
+    {
+      pll_stby = RZV_CPG_BASE + RZV_CPG_PLLCA55_STBY_OFFSET;
+      rzv_cpg_putreg(0x00010001, pll_stby);
+
+      timeout = CPG_TIMEOUT_COUNT * 10;
+      while (timeout-- > 0)
+        {
+          pll_mon = rzv_cpg_getreg(pll_mon_addr);
+          if ((pll_mon & pll_lock_mask) == pll_lock_mask)
+            {
+              clkinfo("PLLCA55 locked\n");
+              break;
+            }
+
+          up_udelay(10);
+        }
+
+      if (timeout <= 0)
+        {
+          clkerr("ERROR: PLLCA55 lock timeout\n");
+        }
+    }
+
+  /* Initialize PLLETH (1 GHz) if not already running */
+
+  pll_mon_addr = RZV_CPG_BASE + RZV_CPG_PLLETH_MON_OFFSET;
+  pll_mon = rzv_cpg_getreg(pll_mon_addr);
+  if ((pll_mon & pll_lock_mask) != pll_lock_mask)
+    {
+      pll_stby = RZV_CPG_BASE + RZV_CPG_PLLETH_STBY_OFFSET;
+      rzv_cpg_putreg(0x00010001, pll_stby);
+
+      timeout = CPG_TIMEOUT_COUNT * 10;
+      while (timeout-- > 0)
+        {
+          pll_mon = rzv_cpg_getreg(pll_mon_addr);
+          if ((pll_mon & pll_lock_mask) == pll_lock_mask)
+            {
+              clkinfo("PLLETH locked\n");
+              break;
+            }
+
+          up_udelay(10);
+        }
+
+      if (timeout <= 0)
+        {
+          clkerr("ERROR: PLLETH lock timeout\n");
+        }
+    }
+}
+
+/****************************************************************************
  * Name: rzv_clock_config
  *
  * Description:
- *   Minimal early clock configuration called from reset/start code.  Board
- *   specific ports should replace this with the proper clock setup if
- *   necessary.
+ *   Early clock configuration called from reset/start code. Initializes
+ *   PLLs and sets up the clock frequency table.
  *
  ****************************************************************************/
 
 void rzv_clock_config(void)
 {
+  /* Initialize PLLs first */
+
+  rzv_pll_init();
+
+  /* Initialize the frequency lookup table */
+
   rzv_clock_init_frequency_table();
 }
 
