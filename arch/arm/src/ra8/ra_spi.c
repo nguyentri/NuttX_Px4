@@ -618,7 +618,7 @@ static int ra_spi_dtc_setup(struct ra_spi_priv_s *priv)
       if (!g_dtc_initialized)
         {
           /* Enable DTC module clock */
-          ra_mstp_start(RA_MSTP_DMAC_DTC);
+          ra_mstp_start(RA_MSTP_DTC);
 
           /* Initialize DTC module - this will set up the vector table */
           ra_dtc_initialize();

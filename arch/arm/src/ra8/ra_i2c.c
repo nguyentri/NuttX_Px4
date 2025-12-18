@@ -1306,7 +1306,7 @@ static int ra_i2c_dtc_setup(struct ra_i2c_priv_s *priv)
         {
           /* Enable DTC module clock */
 
-          ra_mstp_start(RA_MSTP_DMAC_DTC);
+          ra_mstp_start(RA_MSTP_DTC);
 
           /* Initialize DTC module - this will set up the vector table */
 

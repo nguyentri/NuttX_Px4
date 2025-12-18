@@ -292,6 +292,7 @@ config RA_CPU_CORE
    int
    default 0 if RA_CPU_CORE_CM85
    default 1 if RA_CPU_CORE_CM33
+   default 1 if RA8E1_GROUP
    help
      CPU core number (0=CM85, 1=CM33)
 

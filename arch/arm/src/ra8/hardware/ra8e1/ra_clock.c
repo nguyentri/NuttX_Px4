@@ -603,7 +603,6 @@ void ra_print_clock_info(void)
   syslog(LOG_INFO, "  PCLKE: %lu Hz\n", config.pclke_freq);
   syslog(LOG_INFO, "  BCLK: %lu Hz\n", config.bclk_freq);
   syslog(LOG_INFO, "  FCLK: %lu Hz\n", config.fclk_freq);
-  syslog(LOG_INFO, "  SCICLK: %lu Hz\n", config.sciclk_freq);
   syslog(LOG_INFO, "  Clock Source: %d\n", config.clock_source);
   syslog(LOG_INFO, "  HOCO: %s\n", config.hoco_enabled ? "Enabled" : "Disabled");
   syslog(LOG_INFO, "  MOCO: %s\n", config.moco_enabled ? "Enabled" : "Disabled");

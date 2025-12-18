@@ -47,6 +47,8 @@
 #define R_ICU_WUPEN1_OFFSET                       0x000001a4  /* Wake Up interrupt enable register 1 */
 /* IELSR%s Registers (0-95) */
 #define R_ICU_IELSR_OFFSET(m)                     (0x00000300 + ((m) * 0x00000004))  /* ICU Event Link Setting Register %s */
+/* DELSR[%s] Registers () */
+#define R_ICU_DELSR_OFFSET(m)                     (0x00006280 + ((m) * 0x00000004))  /* DMAC Event Link Setting Registers */
 
 /* ICU Register Addresses */
 
@@ -56,6 +58,7 @@
 #define R_ICU_WUPEN0                              (R_ICU_BASE + R_ICU_WUPEN0_OFFSET)
 #define R_ICU_WUPEN1                              (R_ICU_BASE + R_ICU_WUPEN1_OFFSET)
 #define R_ICU_IELSR(m)                            (R_ICU_BASE + R_ICU_IELSR_OFFSET(m))
+#define R_ICU_DELSR(m)                            (R_ICU_BASE + R_ICU_DELSR_OFFSET(m))
 
 /* Register bit definitions */
 /* NMIER Register bit definitions */
