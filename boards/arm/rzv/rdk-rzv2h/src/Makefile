@@ -61,14 +61,24 @@ ifeq ($(CONFIG_RZV_UART_SCI),y)
 CSRCS += rzv2h_serial.c
 endif
 
-# I2C support
+# I2C support (RIIC)
 ifeq ($(CONFIG_RZV_I2C),y)
 CSRCS += rzv2h_i2c.c
+endif
+
+# SCI I2C support (Simple I2C mode)
+ifeq ($(CONFIG_RZV_SCI_I2C),y)
+CSRCS += rzv2h_sci_i2c.c
 endif
 
 # SPI support
 ifeq ($(CONFIG_RZV_SPI),y)
 CSRCS += rzv2h_spi.c
+endif
+
+# SCI SPI support (SPI mode)
+ifeq ($(CONFIG_RZV_SCI_SPI),y)
+CSRCS += rzv2h_sci_spi.c
 endif
 
 # GPT PWM support

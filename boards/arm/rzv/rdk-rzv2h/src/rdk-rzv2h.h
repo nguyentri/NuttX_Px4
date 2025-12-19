@@ -106,6 +106,18 @@ int board_spi_initialize(void);
 #endif
 
 /****************************************************************************
+ * Name: board_sci_spi_initialize
+ *
+ * Description:
+ *   Initialize SCI_B SPI buses
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RZV_SCI_SPI
+int board_sci_spi_initialize(void);
+#endif
+
+/****************************************************************************
  * Name: rzv2h_adc_setup
  *
  * Description:

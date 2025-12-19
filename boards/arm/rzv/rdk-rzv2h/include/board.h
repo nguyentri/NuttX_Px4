@@ -174,6 +174,43 @@
 
 #define BOARD_I2C_SENSOR_BUS  0  /* Use RIIC0 for sensor expansion */
 
+/* SCI I2C Configuration (Simple I2C mode on SCI peripherals) **************/
+
+/* SCI0 I2C pins:
+ *
+ * SCI0_SDA: P82 (SDA - Mode 6) - Simple I2C
+ * SCI0_SCL: P83 (SCL - Mode 6) - Simple I2C
+ */
+
+#define BOARD_SCI0_SDA_GPIO   GPIO_TXD0_P8_2_M6     /* P82 = PORT8 pin 2, Mode6 */
+#define BOARD_SCI0_SCL_GPIO   GPIO_RXD0_P8_3_M6     /* P83 = PORT8 pin 3, Mode6 */
+
+/* SCI1 I2C pins:
+ *
+ * SCI1_SDA: P53 (SDA - Mode 11) - Simple I2C
+ * SCI1_SCL: P96 (SCL - Mode 9) - Simple I2C
+ */
+
+#define BOARD_SCI1_SDA_GPIO   GPIO_TXD1_P5_3_M11    /* P53 = PORT5 pin 3, Mode11 */
+#define BOARD_SCI1_SCL_GPIO   GPIO_RXD1_P9_6_M9     /* P96 = PORT9 pin 6, Mode9 */
+
+/* SCI2 I2C pins:
+ *
+ * SCI2_SDA: PA4 (SDA - Mode 11) - Simple I2C
+ * SCI2_SCL: PA7 (SCL - Mode 11) - Simple I2C
+ */
+
+#define BOARD_SCI2_SDA_GPIO   GPIO_TXD2_PA_4_M11    /* PA4 = PORT10 pin 4, Mode11 */
+#define BOARD_SCI2_SCL_GPIO   GPIO_RXD2_PA_7_M11    /* PA7 = PORT10 pin 7, Mode11 */
+
+/* SCI3 I2C pins:
+ *
+ * SCI3_SDA: (Define based on your board schematic)
+ * SCI3_SCL: (Define based on your board schematic)
+ */
+
+/* Note: SCI3 I2C pin configuration depends on board-specific design */
+
 /* SPI Configuration ********************************************************/
 
 /* SPI0 (Pmod Type2 SPI connector CN2):

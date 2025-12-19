@@ -18,6 +18,10 @@ config ARCH_CHIP_R9A09G057
    select RZV_HAVE_SCIF2_UART
    select RZV_HAVE_SCIF3_UART
    select RZV_HAVE_SCIF4_UART
+   select RZV_HAVE_SCI0
+   select RZV_HAVE_SCI1
+   select RZV_HAVE_SCI2
+   select RZV_HAVE_SCI3
    select RZV_HAVE_I2C0
    select RZV_HAVE_I2C1
    select RZV_HAVE_I2C2
@@ -121,6 +125,22 @@ config RZV_HAVE_SCIF3_UART
    default n
 
 config RZV_HAVE_SCIF4_UART
+   bool
+   default n
+
+config RZV_HAVE_SCI0
+   bool
+   default n
+
+config RZV_HAVE_SCI1
+   bool
+   default n
+
+config RZV_HAVE_SCI2
+   bool
+   default n
+
+config RZV_HAVE_SCI3
    bool
    default n
 
@@ -444,6 +464,47 @@ config RZV_I2C3
    depends on RZV_HAVE_I2C3
    select RZV_I2C
 
+config RZV_SCI_I2C
+   bool
+   default n
+   select I2C
+
+config RZV_SCI0_I2C
+   bool "SCI0 Simple I2C"
+   default n
+   depends on RZV_HAVE_SCI0
+   select RZV_SCI_I2C
+   ---help---
+      Enable Simple I2C mode on SCI0. Note: SCI0 can be used as UART or I2C,
+      but not both simultaneously.
+
+config RZV_SCI1_I2C
+   bool "SCI1 Simple I2C"
+   default n
+   depends on RZV_HAVE_SCI1
+   select RZV_SCI_I2C
+   ---help---
+      Enable Simple I2C mode on SCI1. Note: SCI1 can be used as UART or I2C,
+      but not both simultaneously.
+
+config RZV_SCI2_I2C
+   bool "SCI2 Simple I2C"
+   default n
+   depends on RZV_HAVE_SCI2
+   select RZV_SCI_I2C
+   ---help---
+      Enable Simple I2C mode on SCI2. Note: SCI2 can be used as UART or I2C,
+      but not both simultaneously.
+
+config RZV_SCI3_I2C
+   bool "SCI3 Simple I2C"
+   default n
+   depends on RZV_HAVE_SCI3
+   select RZV_SCI_I2C
+   ---help---
+      Enable Simple I2C mode on SCI3. Note: SCI3 can be used as UART or I2C,
+      but not both simultaneously.
+
 config RZV_SPI
    bool
    default n
@@ -465,6 +526,48 @@ config RZV_SPI2
    default n
    depends on RZV_HAVE_SPI2
    select RZV_SPI
+
+# Serial Communication Interface (SCI) - SPI mode
+
+config RZV_SCI_SPI
+   bool
+   default n
+
+config RZV_SCI0_SPI
+   bool "SCI0 SPI mode"
+   default n
+   select RZV_SCI_SPI
+   select SPI
+   ---help---
+      Enable SPI mode on SCI0. Note: SCI0 can be used as UART, I2C, or SPI,
+      but not multiple modes simultaneously.
+
+config RZV_SCI1_SPI
+   bool "SCI1 SPI mode"
+   default n
+   select RZV_SCI_SPI
+   select SPI
+   ---help---
+      Enable SPI mode on SCI1. Note: SCI1 can be used as UART, I2C, or SPI,
+      but not multiple modes simultaneously.
+
+config RZV_SCI2_SPI
+   bool "SCI2 SPI mode"
+   default n
+   select RZV_SCI_SPI
+   select SPI
+   ---help---
+      Enable SPI mode on SCI2. Note: SCI2 can be used as UART, I2C, or SPI,
+      but not multiple modes simultaneously.
+
+config RZV_SCI3_SPI
+   bool "SCI3 SPI mode"
+   default n
+   select RZV_SCI_SPI
+   select SPI
+   ---help---
+      Enable SPI mode on SCI3. Note: SCI3 can be used as UART, I2C, or SPI,
+      but not multiple modes simultaneously.
 
 config RZV_DMA
    bool "DMA support"

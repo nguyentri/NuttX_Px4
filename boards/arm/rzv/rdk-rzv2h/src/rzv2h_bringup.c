@@ -150,6 +150,55 @@ int board_bringup(void)
 #endif
 #endif
 
+#if defined(CONFIG_RZV_SCI0_I2C) || defined(CONFIG_RZV_SCI1_I2C) || \
+    defined(CONFIG_RZV_SCI2_I2C) || defined(CONFIG_RZV_SCI3_I2C)
+  /* Initialize SCI I2C buses (Simple I2C mode) */
+
+#ifdef CONFIG_RZV_SCI0_I2C
+  if (board_sci_i2c_initialize(0) != NULL)
+    {
+      syslog(LOG_INFO, "SCI0 I2C initialized successfully\n");
+    }
+  else
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SCI0 I2C\n");
+    }
+#endif
+
+#ifdef CONFIG_RZV_SCI1_I2C
+  if (board_sci_i2c_initialize(1) != NULL)
+    {
+      syslog(LOG_INFO, "SCI1 I2C initialized successfully\n");
+    }
+  else
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SCI1 I2C\n");
+    }
+#endif
+
+#ifdef CONFIG_RZV_SCI2_I2C
+  if (board_sci_i2c_initialize(2) != NULL)
+    {
+      syslog(LOG_INFO, "SCI2 I2C initialized successfully\n");
+    }
+  else
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SCI2 I2C\n");
+    }
+#endif
+
+#ifdef CONFIG_RZV_SCI3_I2C
+  if (board_sci_i2c_initialize(3) != NULL)
+    {
+      syslog(LOG_INFO, "SCI3 I2C initialized successfully\n");
+    }
+  else
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SCI3 I2C\n");
+    }
+#endif
+#endif
+
 #ifdef CONFIG_RZV_SPI
   /* Initialize SPI buses */
 
@@ -161,6 +210,20 @@ int board_bringup(void)
   else
     {
       syslog(LOG_INFO, "SPI initialized successfully\n");
+    }
+#endif
+
+#ifdef CONFIG_RZV_SCI_SPI
+  /* Initialize SCI_B SPI buses */
+
+  ret = board_sci_spi_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SCI SPI: %d\n", ret);
+    }
+  else
+    {
+      syslog(LOG_INFO, "SCI SPI initialized successfully\n");
     }
 #endif
 

@@ -460,6 +460,13 @@
 #define GPIO_RXD9_MISO9_SCL9_P8_3_M6                        (PORT8 | PIN3 | RZV_PFS_PSEL_MODE6)
 #define GPIO_RXD9_MISO9_SCL9_PB_3_M2                        (PORT11 | PIN3 | RZV_PFS_PSEL_MODE2)
 #define GPIO_RXD_MISO3_SCL3_P3_5_M2                        (PORT3 | PIN5 | RZV_PFS_PSEL_MODE2)
+/* SCI I2C pins (Simple I2C mode) */
+#define GPIO_TXD0_P8_2_M6                        (PORT8 | PIN2 | RZV_PFS_PSEL_MODE6)
+#define GPIO_RXD0_P8_3_M6                        (PORT8 | PIN3 | RZV_PFS_PSEL_MODE6)
+#define GPIO_TXD1_P5_3_M11                        (PORT5 | PIN3 | RZV_PFS_PSEL_MODE11)
+#define GPIO_RXD1_P9_6_M9                        (PORT9 | PIN6 | RZV_PFS_PSEL_MODE9)
+#define GPIO_TXD2_PA_4_M11                        (PORT10 | PIN4 | RZV_PFS_PSEL_MODE11)
+#define GPIO_RXD2_PA_7_M11                        (PORT10 | PIN7 | RZV_PFS_PSEL_MODE11)
 #define GPIO_SCK0_P5_2_M2                        (PORT5 | PIN2 | RZV_PFS_PSEL_MODE2)
 #define GPIO_SCK0_P6_0_M1                        (PORT6 | PIN0 | RZV_PFS_PSEL_MODE1)
 #define GPIO_SCK1_P6_2_M1                        (PORT6 | PIN2 | RZV_PFS_PSEL_MODE1)
