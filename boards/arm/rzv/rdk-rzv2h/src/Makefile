@@ -81,6 +81,11 @@ ifeq ($(CONFIG_RZV_ADC),y)
 CSRCS += rzv2h_adc.c
 endif
 
+# DTC support
+ifeq ($(CONFIG_RZV_DTC),y)
+CSRCS += rzv2h_dtc.c
+endif
+
 ############################################################################
 # Example applications
 ############################################################################

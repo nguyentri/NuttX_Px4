@@ -82,6 +82,8 @@
 #  define RZV_GPT7_BASE               0x13010700
 #endif
 
+#define RZV_GPT_CHANNEL_MASK(ch)      (1u << (ch))
+
 /* GPT Register Offsets ***************************************************/
 
 /* GTEITLI%s Registers (1-2) */
@@ -89,48 +91,49 @@
 #define RZV_GPT_GTWP_OFFSET                              0x0000  /* GPT Write Protect Register */
 #define RZV_GPT_GTSTR_OFFSET                             0x0004  /* GPT Start Register */
 #define RZV_GPT_GTSTP_OFFSET                             0x0008  /* GPT Stop Register */
-#define RZV_GPT_GTSSR_OFFSET                             0x000C  /* GPT Start Source Select Register */
-#define RZV_GPT_GTPSR_OFFSET                             0x0010  /* GPT Stop Source Select Register */
-#define RZV_GPT_GTCSR_OFFSET                             0x0014  /* GPT Clear Source Select Register */
-#define RZV_GPT_GTUPSR_OFFSET                            0x0018  /* GPT Up Count Source Select Register */
-#define RZV_GPT_GTDNSR_OFFSET                            0x001C  /* GPT Down Count Source Select Register */
-#define RZV_GPT_GTICASR_OFFSET                           0x0020  /* GPT Input Capture Source Select Register A */
-#define RZV_GPT_GTICBSR_OFFSET                           0x0024  /* GPT Input Capture Source Select Register B */
-#define RZV_GPT_GTCR_OFFSET                              0x0028  /* GPT Control Register */
-#define RZV_GPT_GTUDDTYC_OFFSET                          0x002C  /* GPT Count Direction and Duty Setting Register */
-#define RZV_GPT_GTIOR_OFFSET                             0x0030  /* GPT I/O Control Register */
-#define RZV_GPT_GTINTAD_OFFSET                           0x0034  /* GPT Interrupt Output Setting Register */
-#define RZV_GPT_GTST_OFFSET                              0x0038  /* GPT Status Register */
-#define RZV_GPT_GTBER_OFFSET                             0x003C  /* GPT Buffer Enable Register */
-#define RZV_GPT_GTITC_OFFSET                             0x0040  /* GPT Interrupt and Capture Setting Register */
-#define RZV_GPT_GTCNT_OFFSET                             0x0044  /* GPT Counter */
-#define RZV_GPT_GTCCRA_OFFSET                            0x0048  /* GPT Capture/Compare Register A */
-#define RZV_GPT_GTCCRB_OFFSET                            0x004C  /* GPT Capture/Compare Register B */
-#define RZV_GPT_GTCCRC_OFFSET                            0x0050  /* GPT Compare Register C */
-#define RZV_GPT_GTCCRE_OFFSET                            0x0054  /* GPT Compare Register E */
-#define RZV_GPT_GTCCRD_OFFSET                            0x0058  /* GPT Compare Register D */
-#define RZV_GPT_GTCCRF_OFFSET                            0x005C  /* GPT Compare Register F */
-#define RZV_GPT_GTPR_OFFSET                              0x0060  /* GPT Cycle Setting Register */
-#define RZV_GPT_GTPBR_OFFSET                             0x0064  /* GPT Cycle Setting Buffer Register */
-#define RZV_GPT_GTPDBR_OFFSET                            0x0068  /* GPT Dead Time Buffer Register */
-#define RZV_GPT_GTADTRA_OFFSET                           0x006C  /* GPT A/D Converter Start Request Timing Register A */
-#define RZV_GPT_GTADTBRA_OFFSET                          0x0070  /* GPT A/D Converter Start Request Timing Buffer Register A */
-#define RZV_GPT_GTADTDBRA_OFFSET                         0x0074  /* GPT A/D Converter Start Request Timing Dead Time Buffer Register A */
-#define RZV_GPT_GTADTRB_OFFSET                           0x0078  /* GPT A/D Converter Start Request Timing Register B */
-#define RZV_GPT_GTADTBRB_OFFSET                          0x007C  /* GPT A/D Converter Start Request Timing Buffer Register B */
-#define RZV_GPT_GTADTDBRB_OFFSET                         0x0080  /* GPT A/D Converter Start Request Timing Dead Time Buffer Register B */
-#define RZV_GPT_GTDTCR_OFFSET                            0x0084  /* GTDTCR */
-#define RZV_GPT_GTDVU_OFFSET                             0x0088  /* GTDVU */
-#define RZV_GPT_GTDVD_OFFSET                             0x008C  /* GTDVD */
-#define RZV_GPT_GTDBU_OFFSET                             0x0090  /* GTDBU */
-#define RZV_GPT_GTDBB_OFFSET                             0x0094  /* GTDBB */
-#define RZV_GPT_GTSOS_OFFSET                             0x0098  /* GTSOS */
-#define RZV_GPT_GTSOTR_OFFSET                            0x009C  /* GTSOTR */
-#define RZV_GPT_GTEITC_OFFSET                            0x00A4  /* GTEITC */
-#define RZV_GPT_GTEITLB_OFFSET                           0x00B0  /* GTEITLB */
-#define RZV_GPT_GTICLF_OFFSET                            0x00B4  /* GTICLF */
-#define RZV_GPT_GTSECSR_OFFSET                           0x00CC  /* GTSECSR */
-#define RZV_GPT_GTSECR_OFFSET                            0x00D0  /* GTSECR */
+#define RZV_GPT_GTCLR_OFFSET                             0x000C  /* GPT Software Clear Register */
+#define RZV_GPT_GTSSR_OFFSET                             0x0010  /* GPT Start Source Select Register */
+#define RZV_GPT_GTPSR_OFFSET                             0x0014  /* GPT Stop Source Select Register */
+#define RZV_GPT_GTCSR_OFFSET                             0x0018  /* GPT Clear Source Select Register */
+#define RZV_GPT_GTUPSR_OFFSET                            0x001C  /* GPT Up Count Source Select Register */
+#define RZV_GPT_GTDNSR_OFFSET                            0x0020  /* GPT Down Count Source Select Register */
+#define RZV_GPT_GTICASR_OFFSET                           0x0024  /* GPT Input Capture Source Select Register A */
+#define RZV_GPT_GTICBSR_OFFSET                           0x0028  /* GPT Input Capture Source Select Register B */
+#define RZV_GPT_GTCR_OFFSET                              0x002C  /* GPT Control Register */
+#define RZV_GPT_GTUDDTYC_OFFSET                          0x0030  /* GPT Count Direction and Duty Setting Register */
+#define RZV_GPT_GTIOR_OFFSET                             0x0034  /* GPT I/O Control Register */
+#define RZV_GPT_GTINTAD_OFFSET                           0x0038  /* GPT Interrupt Output Setting Register */
+#define RZV_GPT_GTST_OFFSET                              0x003C  /* GPT Status Register */
+#define RZV_GPT_GTBER_OFFSET                             0x0040  /* GPT Buffer Enable Register */
+#define RZV_GPT_GTITC_OFFSET                             0x0044  /* GPT Interrupt and Capture Setting Register */
+#define RZV_GPT_GTCNT_OFFSET                             0x0048  /* GPT Counter */
+#define RZV_GPT_GTCCRA_OFFSET                            0x004C  /* GPT Capture/Compare Register A */
+#define RZV_GPT_GTCCRB_OFFSET                            0x0050  /* GPT Capture/Compare Register B */
+#define RZV_GPT_GTCCRC_OFFSET                            0x0054  /* GPT Compare Register C */
+#define RZV_GPT_GTCCRE_OFFSET                            0x0058  /* GPT Compare Register E */
+#define RZV_GPT_GTCCRD_OFFSET                            0x005C  /* GPT Compare Register D */
+#define RZV_GPT_GTCCRF_OFFSET                            0x0060  /* GPT Compare Register F */
+#define RZV_GPT_GTPR_OFFSET                              0x0064  /* GPT Cycle Setting Register */
+#define RZV_GPT_GTPBR_OFFSET                             0x0068  /* GPT Cycle Setting Buffer Register */
+#define RZV_GPT_GTPDBR_OFFSET                            0x006C  /* GPT Dead Time Buffer Register */
+#define RZV_GPT_GTADTRA_OFFSET                           0x0070  /* GPT A/D Converter Start Request Timing Register A */
+#define RZV_GPT_GTADTBRA_OFFSET                          0x0074  /* GPT A/D Converter Start Request Timing Buffer Register A */
+#define RZV_GPT_GTADTDBRA_OFFSET                         0x0078  /* GPT A/D Converter Start Request Timing Dead Time Buffer Register A */
+#define RZV_GPT_GTADTRB_OFFSET                           0x007C  /* GPT A/D Converter Start Request Timing Register B */
+#define RZV_GPT_GTADTBRB_OFFSET                          0x0080  /* GPT A/D Converter Start Request Timing Buffer Register B */
+#define RZV_GPT_GTADTDBRB_OFFSET                         0x0084  /* GPT A/D Converter Start Request Timing Dead Time Buffer Register B */
+#define RZV_GPT_GTDTCR_OFFSET                            0x0088  /* GTDTCR */
+#define RZV_GPT_GTDVU_OFFSET                             0x008C  /* GTDVU */
+#define RZV_GPT_GTDVD_OFFSET                             0x0090  /* GTDVD */
+#define RZV_GPT_GTDBU_OFFSET                             0x0094  /* GTDBU */
+#define RZV_GPT_GTDBB_OFFSET                             0x0098  /* GTDBB */
+#define RZV_GPT_GTSOS_OFFSET                             0x009C  /* GTSOS */
+#define RZV_GPT_GTSOTR_OFFSET                            0x00A0  /* GTSOTR */
+#define RZV_GPT_GTEITC_OFFSET                            0x00A8  /* GTEITC */
+#define RZV_GPT_GTEITLB_OFFSET                           0x00B4  /* GTEITLB */
+#define RZV_GPT_GTICLF_OFFSET                            0x00B8  /* GTICLF */
+#define RZV_GPT_GTSECSR_OFFSET                           0x00D0  /* GTSECSR */
+#define RZV_GPT_GTSECR_OFFSET                            0x00D4  /* GTSECR */
 
 /* GPT Register Addresses **************************************************/
 
@@ -138,6 +141,7 @@
 #define RZV_GPT_GTWP(ch)                             (RZV_GPT##ch##_BASE + RZV_GPT_GTWP_OFFSET)
 #define RZV_GPT_GTSTR(ch)                            (RZV_GPT##ch##_BASE + RZV_GPT_GTSTR_OFFSET)
 #define RZV_GPT_GTSTP(ch)                            (RZV_GPT##ch##_BASE + RZV_GPT_GTSTP_OFFSET)
+#define RZV_GPT_GTCLR(ch)                            (RZV_GPT##ch##_BASE + RZV_GPT_GTCLR_OFFSET)
 #define RZV_GPT_GTSSR(ch)                            (RZV_GPT##ch##_BASE + RZV_GPT_GTSSR_OFFSET)
 #define RZV_GPT_GTPSR(ch)                            (RZV_GPT##ch##_BASE + RZV_GPT_GTPSR_OFFSET)
 #define RZV_GPT_GTCSR(ch)                            (RZV_GPT##ch##_BASE + RZV_GPT_GTCSR_OFFSET)
@@ -334,9 +338,24 @@
 
 #define GPT_GTCR_MD_SHIFT                       (16)      /* Bits 16-18: Md */
 #define GPT_GTCR_MD_MASK                        (0x7 << GPT_GTCR_MD_SHIFT)
+#define GPT_GTCR_MD_SAW                         (0 << GPT_GTCR_MD_SHIFT)
 
 #define GPT_GTCR_TPCS_SHIFT                     (23)      /* Bits 23-26: Tpcs */
 #define GPT_GTCR_TPCS_MASK                      (0xf << GPT_GTCR_TPCS_SHIFT)
+#define GPT_TPCS_DIV1                           0
+#define GPT_TPCS_DIV2                           1
+#define GPT_TPCS_DIV4                           2
+#define GPT_TPCS_DIV8                           3
+#define GPT_TPCS_DIV16                          4
+#define GPT_TPCS_DIV32                          5
+#define GPT_TPCS_DIV64                          6
+#define GPT_TPCS_DIV128                         7
+#define GPT_TPCS_DIV256                         8
+#define GPT_TPCS_DIV512                         9
+#define GPT_TPCS_DIV1024                        10
+#define GPT_TPCS_DIV2048                        11
+#define GPT_TPCS_DIV4096                        12
+#define GPT_TPCS_DIV8192                        13
 
 /* GPT GTCSR Register Bit Definitions ********************************/
 
@@ -663,11 +682,14 @@
 #define GPT_GTINTAD_GRPABH                      (1 << 29)  /* Grpabh */
 
 #define GPT_GTINTAD_GRPABL                      (1 << 30)  /* Grpabl */
+#define GPT_GTINTAD_ENABLE_OVF                  (1 << 6)
 
 /* GPT GTIOR Register Bit Definitions ********************************/
 
 #define GPT_GTIOR_GTIOA_SHIFT                   (0)      /* Bits 0-4: Gtioa */
 #define GPT_GTIOR_GTIOA_MASK                    (0x1f << GPT_GTIOR_GTIOA_SHIFT)
+#define GPT_GTIOR_GTIOA_DISABLE                 (0x00 << GPT_GTIOR_GTIOA_SHIFT)
+#define GPT_GTIOR_GTIOA_HIGH_CMP_LOW            (0x09 << GPT_GTIOR_GTIOA_SHIFT)
 
 #define GPT_GTIOR_OADFLT                        (1 << 6)  /* Oadflt */
 
@@ -685,6 +707,8 @@
 
 #define GPT_GTIOR_GTIOB_SHIFT                   (16)      /* Bits 16-20: Gtiob */
 #define GPT_GTIOR_GTIOB_MASK                    (0x1f << GPT_GTIOR_GTIOB_SHIFT)
+#define GPT_GTIOR_GTIOB_DISABLE                 (0x00 << GPT_GTIOR_GTIOB_SHIFT)
+#define GPT_GTIOR_GTIOB_HIGH_CMP_LOW            (0x09 << GPT_GTIOR_GTIOB_SHIFT)
 
 #define GPT_GTIOR_OBDFLT                        (1 << 22)  /* Obdflt */
 
@@ -1010,6 +1034,9 @@
 
 #define GPT_GTWP_PRKEY_SHIFT                    (8)      /* Bits 8-15: Prkey */
 #define GPT_GTWP_PRKEY_MASK                     (0xff << GPT_GTWP_PRKEY_SHIFT)
+#define GPT_GTWP_PRKEY                          (0xA5u << GPT_GTWP_PRKEY_SHIFT)
+#define GPT_GTWP_UNLOCK                         (GPT_GTWP_PRKEY)
+#define GPT_GTWP_LOCK                           (GPT_GTWP_PRKEY | GPT_GTWP_WP | GPT_GTWP_CMNWP)
 
 /* GPT Channel definitions */
 #define RZV_GPT_CHANNEL_0          0

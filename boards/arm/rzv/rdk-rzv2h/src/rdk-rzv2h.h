@@ -130,6 +130,18 @@ int board_pwm_initialize(void);
 #endif
 
 /****************************************************************************
+ * Name: rzv2h_dtc_initialize
+ *
+ * Description:
+ *   Initialize DTC (Data Transfer Controller)
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RZV_DTC
+int rzv2h_dtc_initialize(void);
+#endif
+
+/****************************************************************************
  * Name: rzv2h_app_examples
  *
  * Description:

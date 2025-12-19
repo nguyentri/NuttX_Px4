@@ -49,33 +49,88 @@
 #  define RZV_DMAC4_BASE              0x12010000
 #endif
 
-/* DMAC Register Offsets **************************************************/
+/* DMAC_B Unit and Channel definitions ************************************/
+
+#define RZV_DMAC_NUM_UNITS          5   /* Number of DMAC units */
+#define RZV_DMAC_CHANNELS_PER_UNIT  16  /* Channels per unit */
+#define RZV_DMAC_MAX_CHANNELS       80  /* Total channels (5 units × 16) */
+
+/* DMAC_B Register Offsets (per channel in group) ************************/
 
 #define RZV_DMAC_CHSTAT_OFFSET                           0x0000  /* Channel Status Register */
 #define RZV_DMAC_CHCTRL_OFFSET                           0x0004  /* Channel Control Register */
 #define RZV_DMAC_CHCFG_OFFSET                            0x0008  /* Channel Configuration Register */
 #define RZV_DMAC_CHITVL_OFFSET                           0x000C  /* Channel Interval Register */
 #define RZV_DMAC_CHEXT_OFFSET                            0x0010  /* Channel Extension Register */
-#define RZV_DMAC_DCTRL_OFFSET                            0x0114  /* DCTRL */
-#define RZV_DMAC_DSTAT_EN_OFFSET                         0x0124  /* DSTAT_EN */
-#define RZV_DMAC_DSTAT_ER_OFFSET                         0x0128  /* DSTAT_ER */
-#define RZV_DMAC_DSTAT_END_OFFSET                        0x012C  /* DSTAT_END */
-#define RZV_DMAC_DST_TC_OFFSET                           0x0130  /* DST_TC */
-#define RZV_DMAC_DSTAT_SUS_OFFSET                        0x0134  /* DSTAT_SUS */
+#define RZV_DMAC_NXLA_OFFSET                             0x0014  /* Next0 Link Address */
+#define RZV_DMAC_CRLA_OFFSET                             0x0018  /* Current Link Address */
+#define RZV_DMAC_NXSA_OFFSET                             0x001C  /* Next0 Source Address */
+#define RZV_DMAC_NXDA_OFFSET                             0x0020  /* Next0 Destination Address */
+#define RZV_DMAC_NXTB_OFFSET                             0x0024  /* Next0 Transfer Byte Count */
+#define RZV_DMAC_CRSA_OFFSET                             0x0028  /* Current Source Address */
+#define RZV_DMAC_CRDA_OFFSET                             0x002C  /* Current Destination Address */
+#define RZV_DMAC_CRTB_OFFSET                             0x0030  /* Current Transfer Byte Count */
+#define RZV_DMAC_DMARS_OFFSET                            0x0034  /* DMA Resource Selector */
 
-/* DMAC Register Addresses *************************************************/
+/* DMAC_B Group Register Offsets ******************************************/
 
-#define RZV_DMAC_CHSTAT(ch)                          (RZV_DMAC##ch##_BASE + RZV_DMAC_CHSTAT_OFFSET)
-#define RZV_DMAC_CHCTRL(ch)                          (RZV_DMAC##ch##_BASE + RZV_DMAC_CHCTRL_OFFSET)
-#define RZV_DMAC_CHCFG(ch)                           (RZV_DMAC##ch##_BASE + RZV_DMAC_CHCFG_OFFSET)
-#define RZV_DMAC_CHITVL(ch)                          (RZV_DMAC##ch##_BASE + RZV_DMAC_CHITVL_OFFSET)
-#define RZV_DMAC_CHEXT(ch)                           (RZV_DMAC##ch##_BASE + RZV_DMAC_CHEXT_OFFSET)
-#define RZV_DMAC_DCTRL(ch)                           (RZV_DMAC##ch##_BASE + RZV_DMAC_DCTRL_OFFSET)
-#define RZV_DMAC_DSTAT_EN(ch)                        (RZV_DMAC##ch##_BASE + RZV_DMAC_DSTAT_EN_OFFSET)
-#define RZV_DMAC_DSTAT_ER(ch)                        (RZV_DMAC##ch##_BASE + RZV_DMAC_DSTAT_ER_OFFSET)
-#define RZV_DMAC_DSTAT_END(ch)                       (RZV_DMAC##ch##_BASE + RZV_DMAC_DSTAT_END_OFFSET)
-#define RZV_DMAC_DST_TC(ch)                          (RZV_DMAC##ch##_BASE + RZV_DMAC_DST_TC_OFFSET)
-#define RZV_DMAC_DSTAT_SUS(ch)                       (RZV_DMAC##ch##_BASE + RZV_DMAC_DSTAT_SUS_OFFSET)
+#define RZV_DMAC_DCTRL_OFFSET                            0x0300  /* DMA Control Register */
+#define RZV_DMAC_DSTAT_EN_OFFSET                         0x0310  /* DMA Status EN Register */
+#define RZV_DMAC_DSTAT_ER_OFFSET                         0x0314  /* DMA Status ER Register */
+#define RZV_DMAC_DSTAT_END_OFFSET                        0x0318  /* DMA Status END Register */
+#define RZV_DMAC_DSTAT_TC_OFFSET                         0x031C  /* DMA Status TC Register */
+#define RZV_DMAC_DSTAT_SUS_OFFSET                        0x0320  /* DMA Status SUS Register */
+
+/* Channel stride within a group */
+#define RZV_DMAC_CHANNEL_STRIDE                          0x0040  /* 64 bytes per channel */
+#define RZV_DMAC_GROUP_STRIDE                            0x0400  /* 1KB per group */
+
+/* DMAC_B Register Address Calculation Macros *****************************/
+
+/* Calculate unit and channel from global channel number */
+#define RZV_DMAC_UNIT(ch)           ((ch) / 16)
+#define RZV_DMAC_CH(ch)             ((ch) % 16)
+
+/* Base address lookup - use inline function instead of token concatenation */
+static inline uintptr_t rzv_dmac_get_base(int unit)
+{
+  static const uintptr_t dmac_bases[RZV_DMAC_NUM_UNITS] =
+  {
+    RZV_DMAC0_BASE,
+    RZV_DMAC1_BASE,
+    RZV_DMAC2_BASE,
+    RZV_DMAC3_BASE,
+    RZV_DMAC4_BASE
+  };
+
+  return (unit < RZV_DMAC_NUM_UNITS) ? dmac_bases[unit] : 0;
+}
+
+#define RZV_DMAC_BASE(unit)         rzv_dmac_get_base(unit)
+
+/* Per-channel register addresses */
+#define RZV_DMAC_CHSTAT(unit, ch)   (RZV_DMAC_BASE(unit) + ((ch) * RZV_DMAC_CHANNEL_STRIDE) + RZV_DMAC_CHSTAT_OFFSET)
+#define RZV_DMAC_CHCTRL(unit, ch)   (RZV_DMAC_BASE(unit) + ((ch) * RZV_DMAC_CHANNEL_STRIDE) + RZV_DMAC_CHCTRL_OFFSET)
+#define RZV_DMAC_CHCFG(unit, ch)    (RZV_DMAC_BASE(unit) + ((ch) * RZV_DMAC_CHANNEL_STRIDE) + RZV_DMAC_CHCFG_OFFSET)
+#define RZV_DMAC_CHITVL(unit, ch)   (RZV_DMAC_BASE(unit) + ((ch) * RZV_DMAC_CHANNEL_STRIDE) + RZV_DMAC_CHITVL_OFFSET)
+#define RZV_DMAC_CHEXT(unit, ch)    (RZV_DMAC_BASE(unit) + ((ch) * RZV_DMAC_CHANNEL_STRIDE) + RZV_DMAC_CHEXT_OFFSET)
+#define RZV_DMAC_NXLA(unit, ch)     (RZV_DMAC_BASE(unit) + ((ch) * RZV_DMAC_CHANNEL_STRIDE) + RZV_DMAC_NXLA_OFFSET)
+#define RZV_DMAC_CRLA(unit, ch)     (RZV_DMAC_BASE(unit) + ((ch) * RZV_DMAC_CHANNEL_STRIDE) + RZV_DMAC_CRLA_OFFSET)
+#define RZV_DMAC_NXSA(unit, ch)     (RZV_DMAC_BASE(unit) + ((ch) * RZV_DMAC_CHANNEL_STRIDE) + RZV_DMAC_NXSA_OFFSET)
+#define RZV_DMAC_NXDA(unit, ch)     (RZV_DMAC_BASE(unit) + ((ch) * RZV_DMAC_CHANNEL_STRIDE) + RZV_DMAC_NXDA_OFFSET)
+#define RZV_DMAC_NXTB(unit, ch)     (RZV_DMAC_BASE(unit) + ((ch) * RZV_DMAC_CHANNEL_STRIDE) + RZV_DMAC_NXTB_OFFSET)
+#define RZV_DMAC_CRSA(unit, ch)     (RZV_DMAC_BASE(unit) + ((ch) * RZV_DMAC_CHANNEL_STRIDE) + RZV_DMAC_CRSA_OFFSET)
+#define RZV_DMAC_CRDA(unit, ch)     (RZV_DMAC_BASE(unit) + ((ch) * RZV_DMAC_CHANNEL_STRIDE) + RZV_DMAC_CRDA_OFFSET)
+#define RZV_DMAC_CRTB(unit, ch)     (RZV_DMAC_BASE(unit) + ((ch) * RZV_DMAC_CHANNEL_STRIDE) + RZV_DMAC_CRTB_OFFSET)
+#define RZV_DMAC_DMARS(unit, ch)    (RZV_DMAC_BASE(unit) + ((ch) * RZV_DMAC_CHANNEL_STRIDE) + RZV_DMAC_DMARS_OFFSET)
+
+/* Group-level register addresses */
+#define RZV_DMAC_DCTRL(unit)        (RZV_DMAC_BASE(unit) + RZV_DMAC_DCTRL_OFFSET)
+#define RZV_DMAC_DSTAT_EN(unit)     (RZV_DMAC_BASE(unit) + RZV_DMAC_DSTAT_EN_OFFSET)
+#define RZV_DMAC_DSTAT_ER(unit)     (RZV_DMAC_BASE(unit) + RZV_DMAC_DSTAT_ER_OFFSET)
+#define RZV_DMAC_DSTAT_END(unit)    (RZV_DMAC_BASE(unit) + RZV_DMAC_DSTAT_END_OFFSET)
+#define RZV_DMAC_DSTAT_TC(unit)     (RZV_DMAC_BASE(unit) + RZV_DMAC_DSTAT_TC_OFFSET)
+#define RZV_DMAC_DSTAT_SUS(unit)    (RZV_DMAC_BASE(unit) + RZV_DMAC_DSTAT_SUS_OFFSET)
 
 /* DMAC B0_GRP_DST_EN Register Bit Definitions ***********************/
 
@@ -233,14 +288,8 @@
 /* TC fields (parameterized for indices 0-7) */
 #define DMAC_DST_TC_TC(n)                                 (1u << (0 + ((unsigned)(n) * 1)))  /* Tc0 */
 
-/* DMAC Channel definitions */
-#define RZV_DMAC_CHANNEL_0         0
-#define RZV_DMAC_CHANNEL_1         1
-#define RZV_DMAC_CHANNEL_2         2
-#define RZV_DMAC_CHANNEL_3         3
-#define RZV_DMAC_CHANNEL_4         4
-
-/* Maximum number of DMAC channels */
-#define RZV_DMAC_MAX_CHANNELS      5
+/* Note: RZV_DMAC_NUM_UNITS and related constants are defined earlier in the file */
 
 #endif /* __ARCH_ARM_SRC_RZV_HARDWARE_RZV_DMAC_H */
+
+

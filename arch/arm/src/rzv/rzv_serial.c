@@ -445,6 +445,12 @@ struct clock_baud_table_s
 
 /* Baud rate calculation */
 
+#if defined(CONFIG_RZV_SCI0) || defined(CONFIG_RZV_SCI1) || \
+  defined(CONFIG_RZV_SCI2) || defined(CONFIG_RZV_SCI3) || \
+  defined(CONFIG_RZV_SCI4) || defined(CONFIG_RZV_SCI5) || \
+  defined(CONFIG_RZV_SCI6) || defined(CONFIG_RZV_SCI7) || \
+  defined(CONFIG_RZV_SCI8) || defined(CONFIG_RZV_SCI9)
+
 static int rzv_calculate_baud_setting(uint32_t baudrate,
                                      struct baud_setting *p_baud_setting);
 
@@ -467,15 +473,6 @@ static bool rzv_txempty(struct uart_dev_s *dev);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
-/* Define the UART ops only if at least one SCI instance is enabled so that
- * the static symbol is not emitted when unused.
- */
-#if defined(CONFIG_RZV_SCI0) || defined(CONFIG_RZV_SCI1) || \
-  defined(CONFIG_RZV_SCI2) || defined(CONFIG_RZV_SCI3) || \
-  defined(CONFIG_RZV_SCI4) || defined(CONFIG_RZV_SCI5) || \
-  defined(CONFIG_RZV_SCI6) || defined(CONFIG_RZV_SCI7) || \
-  defined(CONFIG_RZV_SCI8) || defined(CONFIG_RZV_SCI9)
 
 static const struct uart_ops_s g_uart_ops =
 {
@@ -549,8 +546,6 @@ static const struct clock_baud_table_s g_common_baud_settings[] =
 
 #define NUM_CLOCK_BAUD_TABLES \
   (sizeof(g_common_baud_settings) / sizeof(g_common_baud_settings[0]))
-
-#endif
 
 /* I/O buffers */
 
@@ -1041,9 +1036,10 @@ static int rzv_calculate_baud_setting(uint32_t baudrate,
                   p_baud_setting->brme = (settings[j].mddr != 128) ? 1 : 0;
                   p_baud_setting->mddr = settings[j].mddr;
 
-                  sinfo("Baud %u: BRR=%u MDDR=%u BGDM=%u ABCS=%u "
+                  sinfo("Baud %lu: BRR=%u MDDR=%u BGDM=%u ABCS=%u "
                         "ABCSE=%u CKS=%u (table)\n",
-                        baudrate, p_baud_setting->brr, p_baud_setting->mddr,
+                        (unsigned long)baudrate,
+                        p_baud_setting->brr, p_baud_setting->mddr,
                         p_baud_setting->bgdm, p_baud_setting->abcs,
                         p_baud_setting->abcse, p_baud_setting->cks);
 
@@ -1126,15 +1122,18 @@ static int rzv_calculate_baud_setting(uint32_t baudrate,
 
   if (hit_bit_err > 1500)
     {
-      serr("ERROR: Baud rate %u error too high: %d.%02d%%\n",
-           baudrate, hit_bit_err / 1000, (hit_bit_err % 1000) / 10);
+      serr("ERROR: Baud rate %lu error too high: %ld.%02ld%%\n",
+           (unsigned long)baudrate,
+           (long)(hit_bit_err / 1000),
+           (long)((hit_bit_err % 1000) / 10));
       return -EINVAL;
     }
 
-  sinfo("Baud %u: BRR=%u BGDM=%u ABCS=%u ABCSE=%u CKS=%u error=%d.%02d%%\n",
-        baudrate, p_baud_setting->brr, p_baud_setting->bgdm,
+  sinfo("Baud %lu: BRR=%u BGDM=%u ABCS=%u ABCSE=%u CKS=%u "
+        "error=%ld.%02ld%%\n",
+        (unsigned long)baudrate, p_baud_setting->brr, p_baud_setting->bgdm,
         p_baud_setting->abcs, p_baud_setting->abcse, p_baud_setting->cks,
-        hit_bit_err / 1000, (hit_bit_err % 1000) / 10);
+        (long)(hit_bit_err / 1000), (long)((hit_bit_err % 1000) / 10));
 
   return 0;
 }
@@ -1186,8 +1185,6 @@ static inline void rzv_sci_modifyreg(struct rzv_uart_s *priv,
 static int rzv_setup(struct uart_dev_s *dev)
 {
   struct rzv_uart_s *priv = (struct rzv_uart_s *)dev->priv;
-  uint32_t pclk;
-  uint32_t brr;
   uint32_t ccr2;
   uint32_t ccr3;
   uint32_t ccr1;
@@ -1269,8 +1266,8 @@ static int rzv_setup(struct uart_dev_s *dev)
   ret = rzv_calculate_baud_setting(priv->baud, &baud_setting);
   if (ret < 0)
     {
-      serr("ERROR: Failed to calculate baud rate for %u bps\n",
-           priv->baud);
+      serr("ERROR: Failed to calculate baud rate for %lu bps\n",
+           (unsigned long)priv->baud);
       return ret;
     }
 
@@ -1305,9 +1302,10 @@ static int rzv_setup(struct uart_dev_s *dev)
       /* Polling loop - typically completes in 1-2 μs */
     }
 
-  sinfo("SCI%d: Configured at %u baud (BRR=%u, MDDR=%u, "
+  sinfo("SCI%d: Configured at %lu baud (BRR=%u, MDDR=%u, "
         "BGDM=%u, ABCS=%u, ABCSE=%u, CKS=%u)\n",
-        priv->channel, priv->baud, baud_setting.brr, baud_setting.mddr,
+        priv->channel, (unsigned long)priv->baud,
+        baud_setting.brr, baud_setting.mddr,
         baud_setting.bgdm, baud_setting.abcs, baud_setting.abcse,
         baud_setting.cks);
 
@@ -1847,5 +1845,7 @@ int up_putc(int ch)
   return 0;
 #endif
 }
+
+#endif /* CONFIG_RZV_SCIx enabled */
 
 #endif /* USE_SERIALDRIVER */

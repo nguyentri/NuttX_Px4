@@ -21,6 +21,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #ifdef CONFIG_RZV_GPT_PWM
 
 #include <errno.h>
@@ -28,7 +30,6 @@
 #include <stdint.h>
 
 #include <nuttx/compiler.h>
-#include <nuttx/errno.h>
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/timers/pwm.h>
@@ -183,6 +184,16 @@ static const uint16_t g_rzv_gpt_overflow_event[RZV_GPT_MAX_CHANNELS] =
 };
 #endif
 
+#if defined(CONFIG_PWM_PULSECOUNT)
+#  define RZV_GPT_PULSE_INIT \
+    .remaining = 0,          \
+    .handle    = NULL,       \
+    .irq       = -1,         \
+    .oneshot   = false,
+#else
+#  define RZV_GPT_PULSE_INIT
+#endif
+
 #define RZV_GPT_LOWER_INIT(ch)                                 \
   {                                                             \
     .dev       = { .ops = &g_rzv_gpt_ops },                     \
@@ -193,13 +204,8 @@ static const uint16_t g_rzv_gpt_overflow_event[RZV_GPT_MAX_CHANNELS] =
     .period    = 0,                                             \
     .divsel    = 0,                                             \
     .initialized = false,                                       \
-  .running   = false,                                         \
-#ifdef CONFIG_PWM_PULSECOUNT                                    \
-  .remaining = 0,                                             \
-  .handle    = NULL,                                          \
-  .irq       = -1,                                            \
-  .oneshot   = false,                                         \
-#endif                                                          \
+    .running   = false,                                         \
+    RZV_GPT_PULSE_INIT                                          \
   }
 
 #ifdef CONFIG_RZV_GPT0
@@ -392,12 +398,6 @@ static int rzv_gpt_setup(FAR struct pwm_lowerhalf_s *dev)
       return OK;
     }
 
-  #if defined(CONFIG_PWM_PULSECOUNT)
-  #  define RZV_GPT_PULSE_INIT .irq = -1,
-  #else
-  #  define RZV_GPT_PULSE_INIT
-  #endif
-
   ret = rzv_clock_enable(priv->clkid);
   if (ret < 0)
     {
@@ -408,8 +408,7 @@ static int rzv_gpt_setup(FAR struct pwm_lowerhalf_s *dev)
   if (ret < 0)
     {
       return ret;
-      .running   = false,                                         \
-      RZV_GPT_PULSE_INIT                                          \
+    }
 
   priv->pclk = rzv_get_pclk_frequency();
 

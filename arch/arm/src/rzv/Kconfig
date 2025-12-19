@@ -472,6 +472,161 @@ config RZV_DMA
    depends on RZV_HAVE_DMAC
    select ARCH_DMA
 
+config RZV_DMAC
+   bool "DMAC_B (Direct Memory Access Controller)"
+   default n
+   depends on RZV_HAVE_DMAC
+   select ARCH_DMA
+   ---help---
+     Enable support for the RZV2H DMAC_B (Direct Memory Access Controller).
+     The DMAC_B provides 80 DMA channels (5 units x 16 channels) supporting
+     register mode and link mode transfers with hardware and software triggers.
+     Features include:
+     - Transfer sizes from 1 to 128 bytes
+     - Address increment/fixed modes
+     - Hardware trigger via ELC events
+     - Interrupt-driven operation
+     - Priority control per channel
+
+if RZV_DMAC
+
+config RZV_DMAC_DEBUG
+   bool "DMAC debug output"
+   default n
+   depends on DEBUG_FEATURES
+   ---help---
+     Enable DMAC debug output. This will provide detailed information
+     about DMA transfers, channel configuration, and error conditions.
+
+config RZV_DMAC_REGISTER_LEVEL_DEBUG
+   bool "DMAC register-level debug"
+   default n
+   depends on RZV_DMAC_DEBUG
+   ---help---
+     Enable detailed register-level debugging for DMAC operations.
+     This includes register reads/writes and status monitoring.
+
+comment "DMAC Channel Assignments for Peripherals"
+
+config RZV_DMAC_UART0_RX_CHANNEL
+   int "UART0 RX DMA channel"
+   default -1
+   range -1 79
+   ---help---
+     DMA channel for UART0 receive operations (-1 = no DMA).
+     Valid channels: 0-79 (5 DMAC units × 16 channels each).
+
+config RZV_DMAC_UART0_TX_CHANNEL
+   int "UART0 TX DMA channel"
+   default -1
+   range -1 79
+   ---help---
+     DMA channel for UART0 transmit operations (-1 = no DMA).
+
+config RZV_DMAC_UART1_RX_CHANNEL
+   int "UART1 RX DMA channel"
+   default -1
+   range -1 79
+   ---help---
+     DMA channel for UART1 receive operations (-1 = no DMA).
+
+config RZV_DMAC_UART1_TX_CHANNEL
+   int "UART1 TX DMA channel"
+   default -1
+   range -1 79
+   ---help---
+     DMA channel for UART1 transmit operations (-1 = no DMA).
+
+config RZV_DMAC_UART2_RX_CHANNEL
+   int "UART2 RX DMA channel"
+   default -1
+   range -1 79
+   ---help---
+     DMA channel for UART2 receive operations (-1 = no DMA).
+
+config RZV_DMAC_UART2_TX_CHANNEL
+   int "UART2 TX DMA channel"
+   default -1
+   range -1 79
+   ---help---
+     DMA channel for UART2 transmit operations (-1 = no DMA).
+
+config RZV_DMAC_I2C0_CHANNEL
+   int "I2C0 DMA channel"
+   default -1
+   range -1 79
+   ---help---
+     DMA channel for I2C0 operations (-1 = no DMA).
+
+config RZV_DMAC_I2C1_CHANNEL
+   int "I2C1 DMA channel"
+   default -1
+   range -1 79
+   ---help---
+     DMA channel for I2C1 operations (-1 = no DMA).
+
+config RZV_DMAC_I2C2_CHANNEL
+   int "I2C2 DMA channel"
+   default -1
+   range -1 79
+   ---help---
+     DMA channel for I2C2 operations (-1 = no DMA).
+
+config RZV_DMAC_SPI0_RX_CHANNEL
+   int "SPI0 RX DMA channel"
+   default -1
+   range -1 79
+   ---help---
+     DMA channel for SPI0 receive operations (-1 = no DMA).
+
+config RZV_DMAC_SPI0_TX_CHANNEL
+   int "SPI0 TX DMA channel"
+   default -1
+   range -1 79
+   ---help---
+     DMA channel for SPI0 transmit operations (-1 = no DMA).
+
+config RZV_DMAC_SPI1_RX_CHANNEL
+   int "SPI1 RX DMA channel"
+   default -1
+   range -1 79
+   ---help---
+     DMA channel for SPI1 receive operations (-1 = no DMA).
+
+config RZV_DMAC_SPI1_TX_CHANNEL
+   int "SPI1 TX DMA channel"
+   default -1
+   range -1 79
+   ---help---
+     DMA channel for SPI1 transmit operations (-1 = no DMA).
+
+config RZV_DMAC_ADC_CHANNEL
+   int "ADC DMA channel"
+   default -1
+   range -1 79
+   ---help---
+     DMA channel for ADC data transfer (-1 = no DMA).
+
+config RZV_DMAC_SDHI_CHANNEL
+   int "SDHI DMA channel"
+   default -1
+   range -1 79
+   ---help---
+     DMA channel for SDHI (SD card) operations (-1 = no DMA).
+     Recommended: Use DMAC0 channels (0-15) for high-speed operations.
+
+endif # RZV_DMAC
+
+config RZV_DTC
+   bool "Data Transfer Controller (DTC)"
+   default n
+   depends on RZV_HAVE_DMAC
+   ---help---
+     Enable support for the RZV2H Data Transfer Controller (DTC/XDTC).
+     The DTC provides hardware-triggered data transfers without CPU
+     intervention. It supports normal, repeat, and block transfer modes
+     with configurable source and destination address modes.
+
 config RZV_TIMER
    bool
    default n

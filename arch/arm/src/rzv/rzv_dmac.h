@@ -33,22 +33,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Transfer size options ****************************************************/
-
-#define RZV_DMAC_WIDTH_8BIT         0
-#define RZV_DMAC_WIDTH_16BIT        1
-#define RZV_DMAC_WIDTH_32BIT        2
-#define RZV_DMAC_WIDTH_64BIT        3
-
-/* Address modes ************************************************************/
-
-#define RZV_DMAC_ADDR_INCREMENT     0
-#define RZV_DMAC_ADDR_DECREMENT     1
-#define RZV_DMAC_ADDR_FIXED         2
-
-/* Number of DMA channels ***************************************************/
-
-#define RZV_DMAC_NUM_CHANNELS       8
+/* Note: Transfer sizes, address modes, and channel counts are now defined
+ * as enums below rather than macros to avoid conflicts
+ */
 
 /* DMA channel IDs **********************************************************/
 
@@ -65,19 +52,87 @@
  * Public Types
  ****************************************************************************/
 
-/* DMA transfer configuration */
+/* DMAC_B Transfer Mode */
+
+typedef enum
+{
+  RZV_DMAC_MODE_REGISTER = 0,  /* Register mode */
+  RZV_DMAC_MODE_LINK           /* Link mode */
+} rzv_dmac_mode_t;
+
+/* DMAC_B Transfer Size */
+
+typedef enum
+{
+  RZV_DMAC_SIZE_1BYTE = 0,   /* 1-byte transfer */
+  RZV_DMAC_SIZE_2BYTE,       /* 2-byte transfer */
+  RZV_DMAC_SIZE_4BYTE,       /* 4-byte transfer */
+  RZV_DMAC_SIZE_8BYTE,       /* 8-byte transfer */
+  RZV_DMAC_SIZE_16BYTE,      /* 16-byte transfer */
+  RZV_DMAC_SIZE_32BYTE,      /* 32-byte transfer */
+  RZV_DMAC_SIZE_64BYTE,      /* 64-byte transfer */
+  RZV_DMAC_SIZE_128BYTE      /* 128-byte transfer */
+} rzv_dmac_size_t;
+
+/* DMAC_B Address Mode */
+
+typedef enum
+{
+  RZV_DMAC_ADDR_INCREMENT = 0, /* Increment address */
+  RZV_DMAC_ADDR_FIXED = 2      /* Fixed address */
+} rzv_dmac_addr_mode_t;
+
+/* DMAC_B Trigger Mode */
+
+typedef enum
+{
+  RZV_DMAC_TRIGGER_SW = 0,   /* Software trigger */
+  RZV_DMAC_TRIGGER_HW        /* Hardware trigger */
+} rzv_dmac_trigger_t;
+
+/* DMAC_B Detection Mode */
+
+typedef enum
+{
+  RZV_DMAC_DETECT_LOW_LEVEL = 0,    /* Low level detection */
+  RZV_DMAC_DETECT_FALLING_EDGE,     /* Falling edge detection */
+  RZV_DMAC_DETECT_RISING_EDGE,      /* Rising edge detection */
+  RZV_DMAC_DETECT_BOTH_EDGE,        /* Both edge detection */
+  RZV_DMAC_DETECT_HIGH_LEVEL = 6    /* High level detection */
+} rzv_dmac_detect_t;
+
+/* Forward declaration */
+
+typedef void *rzv_dmac_handle_t;
+
+/* DMAC callback function type */
+
+typedef void (*rzv_dmac_callback_t)(void *handle, int event, void *user_data);
+
+/* DMAC_B transfer configuration */
 
 struct rzv_dmac_config_s
 {
-  uint32_t src_addr;        /* Source address */
-  uint32_t dst_addr;        /* Destination address */
-  uint32_t count;           /* Transfer count in bytes */
-  uint8_t  src_width;       /* Source transfer width */
-  uint8_t  dst_width;       /* Destination transfer width */
-  uint8_t  src_addr_mode;   /* Source address mode */
-  uint8_t  dst_addr_mode;   /* Destination address mode */
-  uint8_t  priority;        /* Channel priority */
-  bool     mem_to_mem;      /* Memory-to-memory transfer */
+  rzv_dmac_mode_t       mode;            /* Transfer mode */
+  rzv_dmac_size_t       src_size;        /* Source transfer width */
+  rzv_dmac_size_t       dst_size;        /* Destination transfer width */
+  rzv_dmac_addr_mode_t  src_addr_mode;   /* Source address mode */
+  rzv_dmac_addr_mode_t  dst_addr_mode;   /* Destination address mode */
+  rzv_dmac_trigger_t    trigger;         /* Trigger mode */
+  rzv_dmac_detect_t     detect_mode;     /* Detection mode */
+
+  uint32_t              src_addr;        /* Source address */
+  uint32_t              dst_addr;        /* Destination address */
+  uint32_t              length;          /* Transfer length in bytes */
+
+  uint8_t               priority;        /* Channel priority (0-7) */
+  uint16_t              transfer_interval; /* Transfer interval */
+
+  int                   elc_event;       /* ELC event number for HW trigger */
+  int                   irq_num;         /* IRQ number for interrupt */
+
+  rzv_dmac_callback_t   callback;        /* Transfer callback */
+  void                 *user_data;       /* User data for callback */
 };
 
 /****************************************************************************
@@ -162,7 +217,7 @@ int rzv_dmac_channel_stop(int channel);
  *   Get DMA channel status
  *
  * Input Parameters:
- *   channel - DMA channel number (0-7)
+ *   channel - DMA channel number (0-79)
  *
  * Returned Value:
  *   Channel status flags
@@ -170,6 +225,38 @@ int rzv_dmac_channel_stop(int channel);
  ****************************************************************************/
 
 uint32_t rzv_dmac_channel_status(int channel);
+
+/****************************************************************************
+ * Name: rzv_dmac_get_remaining_bytes
+ *
+ * Description:
+ *   Get remaining transfer byte count
+ *
+ * Input Parameters:
+ *   channel - DMA channel number (0-79)
+ *
+ * Returned Value:
+ *   Remaining bytes to transfer
+ *
+ ****************************************************************************/
+
+uint32_t rzv_dmac_get_remaining_bytes(int channel);
+
+/* DMAC Event definitions for callbacks */
+
+#define RZV_DMAC_EVENT_COMPLETE  (0)  /* Transfer complete */
+#define RZV_DMAC_EVENT_ERROR     (1)  /* Transfer error */
+
+/* DMAC Channel status bits */
+
+#define RZV_DMAC_STATUS_EN       (1 << 0)  /* Channel enabled */
+#define RZV_DMAC_STATUS_RQST     (1 << 1)  /* Request pending */
+#define RZV_DMAC_STATUS_TACT     (1 << 2)  /* Transfer active */
+#define RZV_DMAC_STATUS_SUS      (1 << 3)  /* Suspended */
+#define RZV_DMAC_STATUS_ER       (1 << 4)  /* Error */
+#define RZV_DMAC_STATUS_END      (1 << 5)  /* Transfer end */
+#define RZV_DMAC_STATUS_TC       (1 << 6)  /* Transfer count match */
+#define RZV_DMAC_STATUS_SR       (1 << 7)  /* Soft request */
 
 #ifdef __cplusplus
 }

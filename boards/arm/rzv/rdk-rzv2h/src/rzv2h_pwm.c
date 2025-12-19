@@ -94,4 +94,9 @@ int rzv2h_pwm_setup(void)
   return OK;
 }
 
+int board_pwm_initialize(void)
+{
+  return rzv2h_pwm_setup();
+}
+
 #endif /* CONFIG_RZV_GPT_PWM */

@@ -56,10 +56,14 @@ CHIP_CSRCS += rzv_riic.c
 CHIP_CSRCS += rzv_dmac.c
 #endif
 
+# DTC driver
+ifeq ($(CONFIG_RZV_DTC),y)
+CHIP_CSRCS += rzv_dtc.c
+endif
+
 # SPI driver
 #ifeq ($(CONFIG_RZV_SPI),y)
 CHIP_CSRCS += rzv_spi.c
-CHIP_CSRCS += rzv_dtc.c
 #endif
 
 # PWM driver
