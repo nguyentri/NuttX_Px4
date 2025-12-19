@@ -48,9 +48,9 @@
 #define RA_GPT_TIMER_ONE_SHOT          1   /* One-shot timer */
 
 /* GPT PWM output modes */
-#define RA_GPT_PWM_SINGLE_OUTPUT       0   /* Single output (GTIOCA only) */
-#define RA_GPT_PWM_COMPLEMENTARY       1   /* Complementary output (GTIOCA + GTIOCB) */
-#define RA_GPT_PWM_INDEPENDENT         2   /* Independent outputs */
+#define RA_PWM_SINGLE_OUTPUT       0   /* Single output (GTIOCA only) */
+#define RA_PWM_COMPLEMENTARY       1   /* Complementary output (GTIOCA + GTIOCB) */
+#define RA_PWM_INDEPENDENT         2   /* Independent outputs */
 
 /* GPT interrupt sources */
 #define RA_GPT_INT_OVERFLOW            (1 << 0)

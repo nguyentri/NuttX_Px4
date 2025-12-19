@@ -48,7 +48,7 @@ config RZV2H_SPI_GY921_EXAMPLE
 config RZV2H_PWM_ONESHOT_EXAMPLE
     bool "GPT PWM oneshot mode example"
     default n
-    depends on RZV_GPT_PWM && RZV2H_EXAMPLE_SUPPORT
+    depends on RZV_PWM && RZV2H_EXAMPLE_SUPPORT
     ---help---
       Enable GPT PWM oneshot mode example for verifying oneshot
       functionality on RDK-RZV2H board.

@@ -23,7 +23,7 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_RZV_GPT_PWM
+#ifdef CONFIG_RZV_PWM
 
 #include <errno.h>
 #include <stdbool.h>
@@ -683,4 +683,4 @@ FAR struct pwm_lowerhalf_s *rzv_gpt_initialize(int channel)
     }
 }
 
-#endif /* CONFIG_RZV_GPT_PWM */
+#endif /* CONFIG_RZV_PWM */

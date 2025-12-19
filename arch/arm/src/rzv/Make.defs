@@ -67,7 +67,7 @@ CHIP_CSRCS += rzv_spi.c
 #endif
 
 # PWM driver
-ifeq ($(CONFIG_RZV_GPT_PWM),y)
+ifeq ($(CONFIG_RZV_PWM),y)
 CHIP_CSRCS += rzv_gpt.c
 endif
 

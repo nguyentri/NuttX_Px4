@@ -657,7 +657,7 @@ config RZV_GPT
    ---help---
      Enable support for the RZV General PWM Timer (GPT) peripheral.
 
-config RZV_GPT_PWM
+config RZV_PWM
    bool "GPT PWM support"
    default n
    depends on RZV_GPT
@@ -676,7 +676,7 @@ config RZV_GPT_TIMER
 config RZV_GPT_ONESHOT
    bool "GPT One-shot mode support"
    default n
-   depends on RZV_GPT_PWM
+   depends on RZV_PWM
    select PWM_PULSECOUNT
    ---help---
      Enable One-shot mode for the RZV GPT PWM driver.

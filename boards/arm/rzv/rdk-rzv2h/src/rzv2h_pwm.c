@@ -22,7 +22,7 @@
  * Included Files
  ****************************************************************************/
 
-#ifdef CONFIG_RZV_GPT_PWM
+#ifdef CONFIG_RZV_PWM
 
 #include <errno.h>
 #include <stdbool.h>
@@ -41,7 +41,7 @@
  ****************************************************************************/
 
 #ifndef BOARD_PWM0_GPIO
-#  error "BOARD_PWM0_GPIO must be defined when CONFIG_RZV_GPT_PWM is enabled"
+#  error "BOARD_PWM0_GPIO must be defined when CONFIG_RZV_PWM is enabled"
 #endif
 
 /****************************************************************************
@@ -99,4 +99,4 @@ int board_pwm_initialize(void)
   return rzv2h_pwm_setup();
 }
 
-#endif /* CONFIG_RZV_GPT_PWM */
+#endif /* CONFIG_RZV_PWM */
