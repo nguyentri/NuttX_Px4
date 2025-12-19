@@ -89,7 +89,7 @@ void board_button_initialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_RZV_RIIC
+#ifdef CONFIG_RZV_I2C
 struct i2c_master_s *board_i2c_initialize(int bus);
 #endif
 
@@ -106,7 +106,7 @@ int board_spi_initialize(void);
 #endif
 
 /****************************************************************************
- * Name: board_adc_initialize
+ * Name: rzv2h_adc_setup
  *
  * Description:
  *   Initialize ADC and register device
@@ -114,7 +114,7 @@ int board_spi_initialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_RZV_ADC
-int board_adc_initialize(void);
+int rzv2h_adc_setup(void);
 #endif
 
 /****************************************************************************
@@ -139,6 +139,30 @@ int board_pwm_initialize(void);
 
 #ifdef CONFIG_RZV_DTC
 int rzv2h_dtc_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: rzv_wdt_setup
+ *
+ * Description:
+ *   Initialize Watchdog Timer
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RZV_WDT
+int rzv_wdt_setup(void);
+#endif
+
+/****************************************************************************
+ * Name: board_timer_initialize
+ *
+ * Description:
+ *   Initialize GTM timers
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RZV_GTM
+int board_timer_initialize(void);
 #endif
 
 /****************************************************************************
@@ -185,6 +209,11 @@ int rzv2h_spi_gy921_main(int argc, char *argv[]);
 #ifdef CONFIG_RZV2H_PWM_ONESHOT_EXAMPLE
 int rzv2h_pwm_oneshot_init(void);
 int rzv2h_pwm_oneshot_main(int argc, char *argv[]);
+#endif
+
+#ifdef CONFIG_RZV2H_WDT_TEST
+int rzv2h_wdt_test_init(void);
+int wdt_test_main(int argc, char *argv[]);
 #endif
 
 #endif /* __ASSEMBLY__ */

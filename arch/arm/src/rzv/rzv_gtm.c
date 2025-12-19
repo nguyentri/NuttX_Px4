@@ -21,217 +21,654 @@
 /****************************************************************************
  * Included Files
  ****************************************************************************/
+
 #include <nuttx/config.h>
 
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <nuttx/irq.h>
-#include <stddef.h>
-#include "chip.h"
 #include <nuttx/arch.h>
+#include <nuttx/timers/timer.h>
+#include <nuttx/kmalloc.h>
 
+#include "chip.h"
 #include "arm_internal.h"
-
 #include "hardware/rzv_gtm.h"
+#include "rzv_gtm.h"
 #include "rzv_icu.h"
-#include "../../include/rzv/rzv2h_irq.h"
+#include "rzv_clock.h"
 
-/* Small helpers for register access to match platform conventions */
-static inline uint32_t rzv_gtm_getreg32(uintptr_t base, unsigned int offset)
-{
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef getreg8
+#  define getreg8(a)    (*(volatile uint8_t *)(a))
+#endif
+
+#ifndef putreg8
+#  define putreg8(v,a)  (*(volatile uint8_t *)(a) = (v))
+#endif
 
 #ifndef getreg32
 #  define getreg32(a)    (*(volatile uint32_t *)(a))
 #endif
 
-  return getreg32(base + offset);
-}
-
-static inline void rzv_gtm_putreg32(uint32_t val, uintptr_t base, unsigned int offset)
-{
-
 #ifndef putreg32
 #  define putreg32(v,a)  (*(volatile uint32_t *)(a) = (v))
 #endif
 
-  putreg32(val, base + offset);
-}
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
 
-static inline uintptr_t rzv_gtm_base(int ch)
+/* GTM lower-half driver state */
+
+struct rzv_gtm_lowerhalf_s
 {
-	switch (ch)
-		{
-			case 0: return RZV_GTM0_BASE;
-			case 1: return RZV_GTM1_BASE;
-			case 2: return RZV_GTM2_BASE;
-			case 3: return RZV_GTM3_BASE;
-			case 4: return RZV_GTM4_BASE;
-			case 5: return RZV_GTM5_BASE;
-			case 6: return RZV_GTM6_BASE;
-			case 7: return RZV_GTM7_BASE;
-			default: return 0;
-		}
-}
-
-/* Per-channel control structure */
-struct rzv_gtm_priv_s
-{
-	int channel;
-	int irq; /* allocated ICU IRQ slot (RZV IRQ number) or -1 */
-
-	/* Handler signature matches NuttX IRQ handlers used elsewhere: int handler(int, void*, void*) */
-	int (*handler)(int, void *, void *);
-	void *arg;      /* handler argument */
+  const struct timer_ops_s *ops;   /* NuttX timer operations */
+  uint32_t base;                   /* GTM base address */
+  uint32_t frequency;              /* Clock frequency in Hz */
+  uint32_t timeout;                /* Configured timeout in microseconds */
+  int channel;                     /* Channel number (0-7) */
+  int irq;                         /* Allocated ICU IRQ slot or -1 */
+  tccb_t callback;                 /* User callback function */
+  void *arg;                       /* Callback argument */
 };
 
-/* Static instances for channels */
-static struct rzv_gtm_priv_s g_gtm_priv[RZV_GTM_MAX_CHANNELS] =
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+/* Register access helpers */
+
+static inline uint32_t gtm_getreg32(struct rzv_gtm_lowerhalf_s *priv,
+                                     unsigned int offset);
+static inline void gtm_putreg32(struct rzv_gtm_lowerhalf_s *priv,
+                                 unsigned int offset, uint32_t val);
+static inline uint8_t gtm_getreg8(struct rzv_gtm_lowerhalf_s *priv,
+                                   unsigned int offset);
+static inline void gtm_putreg8(struct rzv_gtm_lowerhalf_s *priv,
+                                unsigned int offset, uint8_t val);
+
+/* Timer lower-half operations */
+
+static int gtm_timer_start(FAR struct timer_lowerhalf_s *lower);
+static int gtm_timer_stop(FAR struct timer_lowerhalf_s *lower);
+static int gtm_timer_getstatus(FAR struct timer_lowerhalf_s *lower,
+                                FAR struct timer_status_s *status);
+static int gtm_timer_settimeout(FAR struct timer_lowerhalf_s *lower,
+                                 uint32_t timeout);
+static void gtm_timer_setcallback(FAR struct timer_lowerhalf_s *lower,
+                                   tccb_t callback, FAR void *arg);
+static int gtm_timer_maxtimeout(FAR struct timer_lowerhalf_s *lower,
+                                 FAR uint32_t *maxtimeout);
+
+/* Interrupt handler */
+
+static int gtm_interrupt(int irq, void *context, void *arg);
+
+/* Helper functions */
+
+static uintptr_t gtm_get_base(int channel);
+static int gtm_get_elc_event(int channel);
+static uint32_t gtm_get_clk_id(int channel);
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* Timer operations structure */
+
+static const struct timer_ops_s g_gtm_timer_ops =
 {
-	{ .channel = 0, .irq = -1, .handler = NULL, .arg = NULL },
-	{ .channel = 1, .irq = -1, .handler = NULL, .arg = NULL },
-	{ .channel = 2, .irq = -1, .handler = NULL, .arg = NULL },
-	{ .channel = 3, .irq = -1, .handler = NULL, .arg = NULL },
-	{ .channel = 4, .irq = -1, .handler = NULL, .arg = NULL },
-	{ .channel = 5, .irq = -1, .handler = NULL, .arg = NULL },
-	{ .channel = 6, .irq = -1, .handler = NULL, .arg = NULL },
-	{ .channel = 7, .irq = -1, .handler = NULL, .arg = NULL },
+  .start       = gtm_timer_start,
+  .stop        = gtm_timer_stop,
+  .getstatus   = gtm_timer_getstatus,
+  .settimeout  = gtm_timer_settimeout,
+  .setcallback = gtm_timer_setcallback,
+  .maxtimeout  = gtm_timer_maxtimeout,
+  .ioctl       = NULL,  /* No custom ioctls for now */
 };
 
-/* Forward declarations */
-static int rzv_gtm_handler(int irq, void *context, void *arg);
-static int rzv_gtm_attach_irq(struct rzv_gtm_priv_s *priv);
-static void rzv_gtm_detach_irq(struct rzv_gtm_priv_s *priv);
+/* Clock IDs for each GTM channel */
 
-/* Map channel to ELC event constant */
-static int rzv_gtm_event_for_channel(int ch)
+static const uint32_t g_gtm_clocks[RZV_GTM_MAX_CHANNELS] =
 {
-	switch (ch)
-		{
-			case 0: return RZV_ELC_GTM0_GTMTINT;
-			case 1: return RZV_ELC_GTM1_GTMTINT;
-			case 2: return RZV_ELC_GTM2_GTMTINT;
-			case 3: return RZV_ELC_GTM3_GTMTINT;
-			case 4: return RZV_ELC_GTM4_GTMTINT;
-			case 5: return RZV_ELC_GTM5_GTMTINT;
-			case 6: return RZV_ELC_GTM6_GTMTINT;
-			case 7: return RZV_ELC_GTM7_GTMTINT;
-			default: return -EINVAL;
-		}
+  RZV_CPG_CLK_GTM0,
+  RZV_CPG_CLK_GTM1,
+  RZV_CPG_CLK_GTM2,
+  RZV_CPG_CLK_GTM3,
+  RZV_CPG_CLK_GTM4,
+  RZV_CPG_CLK_GTM5,
+  RZV_CPG_CLK_GTM6,
+  RZV_CPG_CLK_GTM7,
+};
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: gtm_getreg32
+ ****************************************************************************/
+
+static inline uint32_t gtm_getreg32(struct rzv_gtm_lowerhalf_s *priv,
+                                     unsigned int offset)
+{
+  return getreg32(priv->base + offset);
 }
 
-/* IRQ handler invoked by ICU for GTM events */
-static int rzv_gtm_handler(int irq, void *context, void *arg)
+/****************************************************************************
+ * Name: gtm_putreg32
+ ****************************************************************************/
+
+static inline void gtm_putreg32(struct rzv_gtm_lowerhalf_s *priv,
+                                 unsigned int offset, uint32_t val)
 {
-	struct rzv_gtm_priv_s *priv = (struct rzv_gtm_priv_s *)arg;
-	/* Clear ICU IRQ state for this allocated slot */
-	rzv_icu_clear_irq(irq);
-
-	/* If user provided a handler, call it. We pass the stored arg. */
-	if (priv->handler)
-		{
-			priv->handler(irq, context, priv->arg);
-		}
-
-		return 0;
+  putreg32(val, priv->base + offset);
 }
 
-static int rzv_gtm_attach_irq(struct rzv_gtm_priv_s *priv)
+/****************************************************************************
+ * Name: gtm_getreg8
+ ****************************************************************************/
+
+static inline uint8_t gtm_getreg8(struct rzv_gtm_lowerhalf_s *priv,
+                                   unsigned int offset)
 {
-	int evt = rzv_gtm_event_for_channel(priv->channel);
-	int ret;
-
-	if (evt < 0)
-		return -EINVAL;
-
-	/* Attach using rzv_icu_attach(event, handler, arg, enable) */
-	ret = rzv_icu_attach(evt, rzv_gtm_handler, priv, true);
-	if (ret < 0)
-		{
-			return ret;
-		}
-
-		priv->irq = ret;
-		return 0;
+  return getreg8(priv->base + offset);
 }
 
-static void rzv_gtm_detach_irq(struct rzv_gtm_priv_s *priv)
+/****************************************************************************
+ * Name: gtm_putreg8
+ ****************************************************************************/
+
+static inline void gtm_putreg8(struct rzv_gtm_lowerhalf_s *priv,
+                                unsigned int offset, uint8_t val)
 {
-	if (priv->irq >= 0)
-		{
-			rzv_icu_detach(priv->irq);
-			priv->irq = -1;
-		}
+  putreg8(val, priv->base + offset);
 }
 
-/* Public simplified API: initialize a channel and register a handler */
-int rzv_gtm_init_channel(int ch, int (*handler)(int, void *, void *), void *arg)
+/****************************************************************************
+ * Name: gtm_get_base
+ ****************************************************************************/
+
+static uintptr_t gtm_get_base(int channel)
 {
-	struct rzv_gtm_priv_s *priv;
-
-	if (ch < 0 || ch >= RZV_GTM_MAX_CHANNELS)
-		return -EINVAL;
-
-	priv = &g_gtm_priv[ch];
-	priv->handler = handler;
-	priv->arg = arg;
-
-		/* Stop timer and attach ICU IRQ */
-		{
-			uintptr_t base = rzv_gtm_base(priv->channel);
-			if (!base)
-				return -EINVAL;
-			rzv_gtm_putreg32(GTM_OSTMTT_OSTMTT, base, RZV_GTM_OSTMTT_OFFSET);
-		}
-		return rzv_gtm_attach_irq(priv);
+  switch (channel)
+    {
+      case 0: return RZV_GTM0_BASE;
+      case 1: return RZV_GTM1_BASE;
+      case 2: return RZV_GTM2_BASE;
+      case 3: return RZV_GTM3_BASE;
+      case 4: return RZV_GTM4_BASE;
+      case 5: return RZV_GTM5_BASE;
+      case 6: return RZV_GTM6_BASE;
+      case 7: return RZV_GTM7_BASE;
+      default: return 0;
+    }
 }
 
-int rzv_gtm_deinit_channel(int ch)
+/****************************************************************************
+ * Name: gtm_get_elc_event
+ ****************************************************************************/
+
+static int gtm_get_elc_event(int channel)
 {
-	struct rzv_gtm_priv_s *priv;
-
-	if (ch < 0 || ch >= RZV_GTM_MAX_CHANNELS)
-		return -EINVAL;
-
-	priv = &g_gtm_priv[ch];
-	rzv_gtm_detach_irq(priv);
-	priv->handler = NULL;
-	priv->arg = NULL;
-		return 0;
+  switch (channel)
+    {
+      case 0: return RZV_ELC_GTM0_GTMTINT;
+      case 1: return RZV_ELC_GTM1_GTMTINT;
+      case 2: return RZV_ELC_GTM2_GTMTINT;
+      case 3: return RZV_ELC_GTM3_GTMTINT;
+      case 4: return RZV_ELC_GTM4_GTMTINT;
+      case 5: return RZV_ELC_GTM5_GTMTINT;
+      case 6: return RZV_ELC_GTM6_GTMTINT;
+      case 7: return RZV_ELC_GTM7_GTMTINT;
+      default: return -EINVAL;
+    }
 }
 
-/* Basic timer control helpers using OSTM registers */
-int rzv_gtm_set_period(int ch, uint32_t period)
+/****************************************************************************
+ * Name: gtm_get_clk_id
+ ****************************************************************************/
+
+static uint32_t gtm_get_clk_id(int channel)
 {
-	if (ch < 0 || ch >= RZV_GTM_MAX_CHANNELS)
-		return -EINVAL;
-	uintptr_t base = rzv_gtm_base(ch);
-	if (!base)
-		return -EINVAL;
-	rzv_gtm_putreg32(period & GTM_OSTMCMP_MASK, base, RZV_GTM_OSTMCMP_OFFSET);
-		return 0;
+  if (channel >= 0 && channel < RZV_GTM_MAX_CHANNELS)
+    {
+      return g_gtm_clocks[channel];
+    }
+
+  return 0;
 }
 
-int rzv_gtm_start(int ch)
+/****************************************************************************
+ * Name: gtm_interrupt
+ *
+ * Description:
+ *   GTM interrupt handler. Called by ICU when GTM compare match occurs.
+ *
+ ****************************************************************************/
+
+static int gtm_interrupt(int irq, void *context, void *arg)
 {
-	if (ch < 0 || ch >= RZV_GTM_MAX_CHANNELS)
-		return -EINVAL;
-	uintptr_t base = rzv_gtm_base(ch);
-	if (!base)
-		return -EINVAL;
-	rzv_gtm_putreg32(GTM_OSTMTS_OSTMTS, base, RZV_GTM_OSTMTS_OFFSET);
-		return 0;
+  struct rzv_gtm_lowerhalf_s *priv = (struct rzv_gtm_lowerhalf_s *)arg;
+
+  /* Clear ICU IRQ state for this allocated slot */
+
+  rzv_icu_clear_irq(irq);
+
+  /* Invoke user callback if registered */
+
+  if (priv->callback != NULL)
+    {
+      uint32_t next_interval_us = 0;
+      priv->callback(&next_interval_us, priv->arg);
+    }
+
+  return OK;
 }
 
-int rzv_gtm_stop(int ch)
+/****************************************************************************
+ * Name: gtm_timer_start
+ *
+ * Description:
+ *   Start the timer, resetting the time to the current timeout.
+ *
+ ****************************************************************************/
+
+static int gtm_timer_start(FAR struct timer_lowerhalf_s *lower)
 {
-	if (ch < 0 || ch >= RZV_GTM_MAX_CHANNELS)
-		return -EINVAL;
-	uintptr_t base = rzv_gtm_base(ch);
-	if (!base)
-		return -EINVAL;
-	rzv_gtm_putreg32(GTM_OSTMTT_OSTMTT, base, RZV_GTM_OSTMTT_OFFSET);
-		return 0;
+  struct rzv_gtm_lowerhalf_s *priv = (struct rzv_gtm_lowerhalf_s *)lower;
+
+  tmrinfo("Starting GTM%d\n", priv->channel);
+
+  /* Start timer by setting OSTMnTS */
+
+  gtm_putreg8(priv, RZV_GTM_OSTMTS_OFFSET, GTM_OSTMTS_OSTMTS);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: gtm_timer_stop
+ *
+ * Description:
+ *   Stop the timer.
+ *
+ ****************************************************************************/
+
+static int gtm_timer_stop(FAR struct timer_lowerhalf_s *lower)
+{
+  struct rzv_gtm_lowerhalf_s *priv = (struct rzv_gtm_lowerhalf_s *)lower;
+
+  tmrinfo("Stopping GTM%d\n", priv->channel);
+
+  /* Stop timer by setting OSTMnTT */
+
+  gtm_putreg8(priv, RZV_GTM_OSTMTT_OFFSET, GTM_OSTMTT_OSTMTT);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: gtm_timer_getstatus
+ *
+ * Description:
+ *   Get the current timer status.
+ *
+ ****************************************************************************/
+
+static int gtm_timer_getstatus(FAR struct timer_lowerhalf_s *lower,
+                                FAR struct timer_status_s *status)
+{
+  struct rzv_gtm_lowerhalf_s *priv = (struct rzv_gtm_lowerhalf_s *)lower;
+  uint8_t te;
+  uint32_t cnt;
+  uint32_t cmp;
+  uint64_t timeleft_ticks;
+
+  DEBUGASSERT(priv != NULL && status != NULL);
+
+  /* Read timer enable status from OSTMnTE */
+
+  te = gtm_getreg8(priv, RZV_GTM_OSTMTE_OFFSET);
+
+  /* Initialize status structure */
+
+  memset(status, 0, sizeof(struct timer_status_s));
+
+  /* Set flags based on timer running state */
+
+  status->flags = (te & GTM_OSTMTE_TE) ? TCFLAGS_ACTIVE : 0;
+
+  /* Read current counter value (OSTMnCNT) */
+
+  cnt = gtm_getreg32(priv, RZV_GTM_OSTMCNT_OFFSET);
+
+  /* Read compare value (OSTMnCMP) */
+
+  cmp = gtm_getreg32(priv, RZV_GTM_OSTMCMP_OFFSET);
+
+  /* Store timeout in microseconds */
+
+  status->timeout = priv->timeout;
+
+  /* Calculate time left until next compare match
+   * In free-running mode, we calculate based on compare value
+   */
+
+  if (te & GTM_OSTMTE_TE)
+    {
+      /* Timer is running - calculate remaining time */
+
+      if (cmp > cnt)
+        {
+          timeleft_ticks = cmp - cnt;
+        }
+      else
+        {
+          /* Counter has passed compare - will wrap and match */
+
+          timeleft_ticks = (UINT32_MAX - cnt) + cmp + 1;
+        }
+
+      /* Convert ticks to microseconds */
+
+      status->timeleft = (uint32_t)((timeleft_ticks * 1000000ULL) /
+                                     priv->frequency);
+    }
+  else
+    {
+      /* Timer is stopped */
+
+      status->timeleft = 0;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: gtm_timer_settimeout
+ *
+ * Description:
+ *   Set a new timeout value (and reset the timer).
+ *
+ ****************************************************************************/
+
+static int gtm_timer_settimeout(FAR struct timer_lowerhalf_s *lower,
+                                 uint32_t timeout)
+{
+  struct rzv_gtm_lowerhalf_s *priv = (struct rzv_gtm_lowerhalf_s *)lower;
+  uint64_t ticks;
+
+  DEBUGASSERT(priv != NULL);
+
+  if (timeout == 0)
+    {
+      tmrerr("ERROR: Invalid timeout: 0\n");
+      return -EINVAL;
+    }
+
+  tmrinfo("GTM%d: Setting timeout to %u microseconds\n",
+          priv->channel, timeout);
+
+  /* Convert microseconds to timer ticks */
+
+  ticks = ((uint64_t)timeout * priv->frequency) / 1000000ULL;
+
+  if (ticks > UINT32_MAX)
+    {
+      tmrerr("ERROR: Timeout too large for 32-bit timer\n");
+      return -ERANGE;
+    }
+
+  /* Store timeout value */
+
+  priv->timeout = timeout;
+
+  /* Set compare register (OSTMnCMP) */
+
+  gtm_putreg32(priv, RZV_GTM_OSTMCMP_OFFSET, (uint32_t)ticks);
+
+  tmrinfo("GTM%d: Set compare value to %u ticks\n",
+          priv->channel, (uint32_t)ticks);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: gtm_timer_setcallback
+ *
+ * Description:
+ *   Set the interrupt callback.
+ *
+ ****************************************************************************/
+
+static void gtm_timer_setcallback(FAR struct timer_lowerhalf_s *lower,
+                                   tccb_t callback, FAR void *arg)
+{
+  struct rzv_gtm_lowerhalf_s *priv = (struct rzv_gtm_lowerhalf_s *)lower;
+
+  DEBUGASSERT(priv != NULL);
+
+  tmrinfo("GTM%d: Setting callback\n", priv->channel);
+
+  /* Save callback and argument */
+
+  priv->callback = callback;
+  priv->arg = arg;
+}
+
+/****************************************************************************
+ * Name: gtm_timer_maxtimeout
+ *
+ * Description:
+ *   Get the maximum timeout value supported by the timer (in microseconds).
+ *
+ ****************************************************************************/
+
+static int gtm_timer_maxtimeout(FAR struct timer_lowerhalf_s *lower,
+                                 FAR uint32_t *maxtimeout)
+{
+  struct rzv_gtm_lowerhalf_s *priv = (struct rzv_gtm_lowerhalf_s *)lower;
+  uint64_t max_us;
+
+  DEBUGASSERT(priv != NULL && maxtimeout != NULL);
+
+  /* Maximum timeout = UINT32_MAX ticks / frequency in MHz */
+
+  max_us = ((uint64_t)UINT32_MAX * 1000000ULL) / priv->frequency;
+
+  /* Clamp to UINT32_MAX microseconds */
+
+  if (max_us > UINT32_MAX)
+    {
+      *maxtimeout = UINT32_MAX;
+    }
+  else
+    {
+      *maxtimeout = (uint32_t)max_us;
+    }
+
+  tmrinfo("GTM%d: Maximum timeout is %u microseconds\n",
+          priv->channel, *maxtimeout);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: rzv_gtm_get_frequency
+ *
+ * Description:
+ *   Get the clock frequency for a GTM channel in Hz.
+ *
+ * Input Parameters:
+ *   channel - GTM channel number (0-7)
+ *
+ * Returned Value:
+ *   Clock frequency in Hz, or 0 on error
+ *
+ ****************************************************************************/
+
+uint32_t rzv_gtm_get_frequency(int channel)
+{
+  /* For now, return configured frequency
+   * TODO: Query actual frequency from CPG if dynamic clock control is used
+   */
+
+  if (channel >= 0 && channel < RZV_GTM_MAX_CHANNELS)
+    {
+      return CONFIG_RZV_GTM_CLOCK_FREQUENCY;
+    }
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: rzv_gtm_timer_initialize
+ *
+ * Description:
+ *   Initialize GTM timer for use as NuttX timer device.
+ *   Returns timer_lowerhalf_s interface for registration with
+ *   timer_register().
+ *
+ * Input Parameters:
+ *   channel - GTM channel number (0-7)
+ *
+ * Returned Value:
+ *   Pointer to timer_lowerhalf_s on success, NULL on failure
+ *
+ ****************************************************************************/
+
+FAR struct timer_lowerhalf_s *rzv_gtm_timer_initialize(int channel)
+{
+  struct rzv_gtm_lowerhalf_s *priv;
+  uintptr_t base;
+  uint32_t clk_id;
+  int evt;
+  int ret;
+
+  tmrinfo("Initializing GTM%d\n", channel);
+
+  /* Validate channel number */
+
+  if (channel < 0 || channel >= RZV_GTM_MAX_CHANNELS)
+    {
+      tmrerr("ERROR: Invalid channel: %d\n", channel);
+      return NULL;
+    }
+
+  /* Get base address */
+
+  base = gtm_get_base(channel);
+  if (base == 0)
+    {
+      tmrerr("ERROR: Failed to get base address for GTM%d\n", channel);
+      return NULL;
+    }
+
+  /* Allocate private structure */
+
+  priv = (struct rzv_gtm_lowerhalf_s *)
+         kmm_zalloc(sizeof(struct rzv_gtm_lowerhalf_s));
+  if (priv == NULL)
+    {
+      tmrerr("ERROR: Failed to allocate memory for GTM%d\n", channel);
+      return NULL;
+    }
+
+  /* Initialize structure */
+
+  priv->ops = &g_gtm_timer_ops;
+  priv->base = base;
+  priv->channel = channel;
+  priv->frequency = rzv_gtm_get_frequency(channel);
+  priv->timeout = 0;
+  priv->irq = -1;
+  priv->callback = NULL;
+  priv->arg = NULL;
+
+  /* Enable GTM clock via CPG */
+
+  clk_id = gtm_get_clk_id(channel);
+  if (clk_id == 0)
+    {
+      tmrerr("ERROR: Failed to get clock ID for GTM%d\n", channel);
+      goto errout_with_priv;
+    }
+
+  ret = rzv_clock_enable(clk_id);
+  if (ret < 0)
+    {
+      tmrerr("ERROR: Failed to enable clock for GTM%d: %d\n",
+             channel, ret);
+      goto errout_with_priv;
+    }
+
+  tmrinfo("GTM%d: Clock enabled (ID: 0x%08x)\n", channel, clk_id);
+
+  /* Stop timer before configuration */
+
+  gtm_putreg8(priv, RZV_GTM_OSTMTT_OFFSET, GTM_OSTMTT_OSTMTT);
+
+  /* Configure timer for free-running mode (required for HRT)
+   * OSTMnMD1 = 1: Free-running mode (counter continues after compare)
+   * OSTMnMD0 = 0: No interrupt on start
+   */
+
+  gtm_putreg8(priv, RZV_GTM_OSTMCTL_OFFSET, GTM_MODE_FREERUN);
+
+  tmrinfo("GTM%d: Configured for free-running mode\n", channel);
+
+  /* Set initial compare value (1 second timeout as default) */
+
+  gtm_putreg32(priv, RZV_GTM_OSTMCMP_OFFSET, priv->frequency);
+  priv->timeout = 1000000;  /* 1 second in microseconds */
+
+  /* Attach interrupt handler via ICU */
+
+  evt = gtm_get_elc_event(channel);
+  if (evt < 0)
+    {
+      tmrerr("ERROR: Failed to get ELC event for GTM%d\n", channel);
+      goto errout_with_clock;
+    }
+
+  ret = rzv_icu_attach(evt, gtm_interrupt, priv, true);
+  if (ret < 0)
+    {
+      tmrerr("ERROR: Failed to attach interrupt for GTM%d: %d\n",
+             channel, ret);
+      goto errout_with_clock;
+    }
+
+  priv->irq = ret;
+
+  tmrinfo("GTM%d: Interrupt attached (IRQ slot: %d, ELC event: 0x%02x)\n",
+          channel, priv->irq, evt);
+
+  /* Timer is now initialized but not started */
+
+  tmrinfo("GTM%d: Initialization complete (frequency: %u Hz)\n",
+          channel, priv->frequency);
+
+  return (FAR struct timer_lowerhalf_s *)priv;
+
+errout_with_clock:
+  rzv_clock_disable(clk_id);
+
+errout_with_priv:
+  kmm_free(priv);
+  return NULL;
 }

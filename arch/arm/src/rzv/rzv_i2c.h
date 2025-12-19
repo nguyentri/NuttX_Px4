@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/rzv/rzv_adc.h
+ * arch/arm/src/rzv/rzv_i2c.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,82 +18,90 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RZV_RZV_ADC_H
-#define __ARCH_ARM_SRC_RZV_RZV_ADC_H
+#ifndef __ARCH_ARM_SRC_RZV_I2C_H
+#define __ARCH_ARM_SRC_RZV_I2C_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <stdint.h>
-#include <stdbool.h>
+#include <nuttx/i2c/i2c_master.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* ADC resolution options for RZV2H ADC_E */
+/* RIIC Port Numbers */
 
-#define RZV_ADC_RESOLUTION_12BIT    0   /* 12-bit resolution (default) */
-#define RZV_ADC_RESOLUTION_10BIT    1   /* 10-bit resolution */
-#define RZV_ADC_RESOLUTION_8BIT     2   /* 8-bit resolution */
-
-/* ADC scan mode options */
-
-#define RZV_ADC_MODE_SINGLE         0   /* Single scan mode */
-#define RZV_ADC_MODE_CONTINUOUS     1   /* Continuous scan mode */
-#define RZV_ADC_MODE_GROUP_SCAN     2   /* Group scan mode */
-
-/* ADC trigger source */
-
-#define RZV_ADC_TRIGGER_SOFTWARE    0   /* Software trigger */
-#define RZV_ADC_TRIGGER_SYNC_TRGA   1   /* Synchronous trigger A */
-#define RZV_ADC_TRIGGER_SYNC_TRGB   2   /* Synchronous trigger B */
-#define RZV_ADC_TRIGGER_ELC         3   /* ELC event trigger */
-
-/* Maximum ADC channels for RZV2H ADC_E */
-
-#define RZV_ADC_MAX_CHANNELS        8   /* Channels 0-7 */
+#define RZV_RIIC0                  0
+#define RZV_RIIC1                  1
+#define RZV_RIIC2                  2
+#define RZV_RIIC3                  3
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
 #ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
 /****************************************************************************
- * Name: rzv_adc_initialize
+ * Name: rzv_i2c_initialize
  *
  * Description:
- *   Initialize the ADC peripheral and register it with the upper-half
- *   ADC driver.
+ *   Initialize the selected RIIC port. And return a unique instance of struct
+ *   i2c_master_s. This function may be called to obtain multiple instances
+ *   of the interface, each of which may be set up with a different frequency
+ *   and slave address.
  *
  * Input Parameters:
- *   devpath   - The device path (e.g., "/dev/adc0")
- *   chanlist  - Array of channel numbers to enable
- *   nchannels - Number of channels in the list
+ *   port - Port number (0-3)
  *
  * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
+ *   Valid I2C device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 
-int rzv_adc_initialize(const char *devpath, const uint8_t *chanlist,
-                       int nchannels);
+struct i2c_master_s *rzv_i2c_initialize(int port);
 
-#ifdef __cplusplus
+/****************************************************************************
+ * Name: rzv_i2c_uninitialize
+ *
+ * Description:
+ *   De-initialize the selected RIIC port, and power down the device.
+ *
+ * Input Parameters:
+ *   dev - Device structure as returned by rzv_i2c_initialize()
+ *
+ * Returned Value:
+ *   OK on success, ERROR when internal reference count mismatch or dev
+ *   points to invalid hardware device.
+ *
+ ****************************************************************************/
+
+int rzv_i2c_uninitialize(struct i2c_master_s *dev);
+
+#undef EXTERN
+#if defined(__cplusplus)
 }
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_RZV_RZV_ADC_H */
+#endif /* __ARCH_ARM_SRC_RZV_I2C_H */

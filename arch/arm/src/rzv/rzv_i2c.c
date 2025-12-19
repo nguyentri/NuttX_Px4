@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/rzv/rzv_riic.c
+ * arch/arm/src/rzv/rzv_i2c.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -39,8 +39,8 @@
 
 #include "arm_internal.h"
 
-#include "hardware/rzv_riic.h"
-#include "rzv_riic.h"
+#include "hardware/rzv_i2c.h"
+#include "rzv_i2c.h"
 #include "rzv_icu.h"
 #include "rzv_clock.h"
 
@@ -56,7 +56,7 @@
 
 /* Transfer state */
 
-enum rzv_riic_state_e
+enum rzv_i2c_state_e
 {
   RIIC_STATE_IDLE = 0,
   RIIC_STATE_START,
@@ -71,7 +71,7 @@ enum rzv_riic_state_e
 
 /* Private data structure for RZV RIIC device */
 
-struct rzv_riic_priv_s
+struct rzv_i2c_priv_s
 {
   struct i2c_master_s dev;        /* Must be first */
   int refs;                       /* Reference count */
@@ -95,7 +95,7 @@ struct rzv_riic_priv_s
 
   sem_t sem_excl;                 /* Mutual exclusion semaphore */
   sem_t sem_isr;                  /* Wait for ISR semaphore */
-  volatile enum rzv_riic_state_e state;
+  volatile enum rzv_i2c_state_e state;
   volatile int result;            /* Transfer result */
 
   /* Current message */
@@ -115,31 +115,31 @@ struct rzv_riic_priv_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int rzv_riic_transfer(struct i2c_master_s *dev,
+static int rzv_i2c_transfer(struct i2c_master_s *dev,
                             struct i2c_msg_s *msgs, int count);
 
 #ifdef CONFIG_I2C_RESET
-static int rzv_riic_reset(struct i2c_master_s *dev);
+static int rzv_i2c_reset(struct i2c_master_s *dev);
 #endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const struct i2c_ops_s rzv_riic_ops =
+static const struct i2c_ops_s rzv_i2c_ops =
 {
-  .transfer = rzv_riic_transfer
+  .transfer = rzv_i2c_transfer
 #ifdef CONFIG_I2C_RESET
-  , .reset  = rzv_riic_reset
+  , .reset  = rzv_i2c_reset
 #endif
 };
 
 /* Device instances */
 
-static struct rzv_riic_priv_s g_riic_priv[RZV_RIIC_MAX_CHANNELS] =
+static struct rzv_i2c_priv_s g_riic_priv[RZV_RIIC_MAX_CHANNELS] =
 {
   {
-    .dev = { .ops = &rzv_riic_ops },
+    .dev = { .ops = &rzv_i2c_ops },
     .refs = 0,
     .port = 0,
     .base = RZV_RIIC0_BASE,
@@ -149,7 +149,7 @@ static struct rzv_riic_priv_s g_riic_priv[RZV_RIIC_MAX_CHANNELS] =
     .irq_err = -1
   },
   {
-    .dev = { .ops = &rzv_riic_ops },
+    .dev = { .ops = &rzv_i2c_ops },
     .refs = 0,
     .port = 1,
     .base = RZV_RIIC1_BASE,
@@ -161,7 +161,7 @@ static struct rzv_riic_priv_s g_riic_priv[RZV_RIIC_MAX_CHANNELS] =
     .mstp = RZV_CPG_CLK_I2C1
   },
   {
-    .dev = { .ops = &rzv_riic_ops },
+    .dev = { .ops = &rzv_i2c_ops },
     .refs = 0,
     .port = 2,
     .base = RZV_RIIC2_BASE,
@@ -173,7 +173,7 @@ static struct rzv_riic_priv_s g_riic_priv[RZV_RIIC_MAX_CHANNELS] =
     .mstp = RZV_CPG_CLK_I2C2
   },
   {
-    .dev = { .ops = &rzv_riic_ops },
+    .dev = { .ops = &rzv_i2c_ops },
     .refs = 0,
     .port = 3,
     .base = RZV_RIIC3_BASE,
@@ -191,26 +191,26 @@ static struct rzv_riic_priv_s g_riic_priv[RZV_RIIC_MAX_CHANNELS] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: rzv_riic_getreg / rzv_riic_putreg
+ * Name: rzv_i2c_getreg / rzv_i2c_putreg
  ****************************************************************************/
 
-static inline uint8_t rzv_riic_getreg(struct rzv_riic_priv_s *priv,
+static inline uint8_t rzv_i2c_getreg(struct rzv_i2c_priv_s *priv,
                                       unsigned int offset)
 {
   return getreg8(priv->base + offset);
 }
 
-static inline void rzv_riic_putreg(struct rzv_riic_priv_s *priv,
+static inline void rzv_i2c_putreg(struct rzv_i2c_priv_s *priv,
                                   unsigned int offset, uint8_t value)
 {
   putreg8(value, priv->base + offset);
 }
 
 /****************************************************************************
- * Name: rzv_riic_set_frequency
+ * Name: rzv_i2c_set_frequency
  ****************************************************************************/
 
-static void rzv_riic_set_frequency(struct rzv_riic_priv_s *priv,
+static void rzv_i2c_set_frequency(struct rzv_i2c_priv_s *priv,
                                   uint32_t frequency)
 {
   uint8_t cks, brh, brl;
@@ -244,53 +244,53 @@ static void rzv_riic_set_frequency(struct rzv_riic_priv_s *priv,
 
   /* Configure ICMR1: Set clock source */
 
-  uint8_t icmr1 = rzv_riic_getreg(priv, RZV_RIIC_ICMR1_OFFSET);
+  uint8_t icmr1 = rzv_i2c_getreg(priv, RZV_RIIC_ICMR1_OFFSET);
   icmr1 &= ~RIIC_ICMR1_CKS_MASK;
   icmr1 |= (cks << RIIC_ICMR1_CKS_SHIFT);
-  rzv_riic_putreg(priv, RZV_RIIC_ICMR1_OFFSET, icmr1);
+  rzv_i2c_putreg(priv, RZV_RIIC_ICMR1_OFFSET, icmr1);
 
   /* Configure bit rate */
 
-  rzv_riic_putreg(priv, RZV_RIIC_ICBRH_OFFSET, brh);
-  rzv_riic_putreg(priv, RZV_RIIC_ICBRL_OFFSET, brl);
+  rzv_i2c_putreg(priv, RZV_RIIC_ICBRH_OFFSET, brh);
+  rzv_i2c_putreg(priv, RZV_RIIC_ICBRL_OFFSET, brl);
 
   priv->frequency = frequency;
 }
 
 /****************************************************************************
- * Name: rzv_riic_sendstart
+ * Name: rzv_i2c_sendstart
  ****************************************************************************/
 
-static void rzv_riic_sendstart(struct rzv_riic_priv_s *priv)
+static void rzv_i2c_sendstart(struct rzv_i2c_priv_s *priv)
 {
   /* Set master transmit mode and issue start condition */
 
-  uint8_t iccr2 = rzv_riic_getreg(priv, RZV_RIIC_ICCR2_OFFSET);
+  uint8_t iccr2 = rzv_i2c_getreg(priv, RZV_RIIC_ICCR2_OFFSET);
   iccr2 |= RIIC_ICCR2_MST | RIIC_ICCR2_TRS | RIIC_ICCR2_ST;
-  rzv_riic_putreg(priv, RZV_RIIC_ICCR2_OFFSET, iccr2);
+  rzv_i2c_putreg(priv, RZV_RIIC_ICCR2_OFFSET, iccr2);
 }
 
 /****************************************************************************
- * Name: rzv_riic_sendstop
+ * Name: rzv_i2c_sendstop
  ****************************************************************************/
 
-static void rzv_riic_sendstop(struct rzv_riic_priv_s *priv)
+static void rzv_i2c_sendstop(struct rzv_i2c_priv_s *priv)
 {
   /* Issue stop condition - MST and TRS will be cleared by hardware after
    * STOP completes. Do NOT clear them manually before STOP or it will
    * cause arbitration loss.
    */
 
-  uint8_t iccr2 = rzv_riic_getreg(priv, RZV_RIIC_ICCR2_OFFSET);
+  uint8_t iccr2 = rzv_i2c_getreg(priv, RZV_RIIC_ICCR2_OFFSET);
   iccr2 |= RIIC_ICCR2_SP;  /* Set STOP bit only */
-  rzv_riic_putreg(priv, RZV_RIIC_ICCR2_OFFSET, iccr2);
+  rzv_i2c_putreg(priv, RZV_RIIC_ICCR2_OFFSET, iccr2);
 }
 
 /****************************************************************************
- * Name: rzv_riic_sendaddr
+ * Name: rzv_i2c_sendaddr
  ****************************************************************************/
 
-static void rzv_riic_sendaddr(struct rzv_riic_priv_s *priv, uint16_t addr,
+static void rzv_i2c_sendaddr(struct rzv_i2c_priv_s *priv, uint16_t addr,
                              uint16_t flags)
 {
   uint8_t data;
@@ -308,14 +308,14 @@ static void rzv_riic_sendaddr(struct rzv_riic_priv_s *priv, uint16_t addr,
 
   /* Send address */
 
-  rzv_riic_putreg(priv, RZV_RIIC_ICDRT_OFFSET, data);
+  rzv_i2c_putreg(priv, RZV_RIIC_ICDRT_OFFSET, data);
 }
 
 /****************************************************************************
- * Name: rzv_riic_irq_nextmsg
+ * Name: rzv_i2c_irq_nextmsg
  ****************************************************************************/
 
-static void rzv_riic_irq_nextmsg(struct rzv_riic_priv_s *priv)
+static void rzv_i2c_irq_nextmsg(struct rzv_i2c_priv_s *priv)
 {
   priv->msgid++;
 
@@ -324,7 +324,7 @@ static void rzv_riic_irq_nextmsg(struct rzv_riic_priv_s *priv)
       /* All messages complete - send stop */
 
       priv->state = RIIC_STATE_STOP;
-      rzv_riic_sendstop(priv);
+      rzv_i2c_sendstop(priv);
     }
   else
     {
@@ -353,21 +353,21 @@ static void rzv_riic_irq_nextmsg(struct rzv_riic_priv_s *priv)
           /* Issue restart - clear STOP bit first, then set RESTART and START */
 
           priv->state = RIIC_STATE_RESTART;
-          uint8_t iccr2 = rzv_riic_getreg(priv, RZV_RIIC_ICCR2_OFFSET);
+          uint8_t iccr2 = rzv_i2c_getreg(priv, RZV_RIIC_ICCR2_OFFSET);
           iccr2 &= ~RIIC_ICCR2_SP;  /* Clear any pending STOP */
           iccr2 |= RIIC_ICCR2_RS | RIIC_ICCR2_ST;  /* Set RESTART and START */
-          rzv_riic_putreg(priv, RZV_RIIC_ICCR2_OFFSET, iccr2);
+          rzv_i2c_putreg(priv, RZV_RIIC_ICCR2_OFFSET, iccr2);
         }
     }
 }
 
 /****************************************************************************
- * Name: rzv_riic_rxi_interrupt
+ * Name: rzv_i2c_rxi_interrupt
  ****************************************************************************/
 
-static int rzv_riic_rxi_interrupt(int irq, void *context, void *arg)
+static int rzv_i2c_rxi_interrupt(int irq, void *context, void *arg)
 {
-  struct rzv_riic_priv_s *priv = (struct rzv_riic_priv_s *)arg;
+  struct rzv_i2c_priv_s *priv = (struct rzv_i2c_priv_s *)arg;
 
   /* Clear interrupt */
 
@@ -377,7 +377,7 @@ static int rzv_riic_rxi_interrupt(int irq, void *context, void *arg)
 
   if (priv->state == RIIC_STATE_DATA_READ && priv->dcnt > 0)
     {
-      *priv->ptr++ = rzv_riic_getreg(priv, RZV_RIIC_ICDRR_OFFSET);
+      *priv->ptr++ = rzv_i2c_getreg(priv, RZV_RIIC_ICDRR_OFFSET);
       priv->dcnt--;
 
       /* Check if this is the penultimate byte - must set NACK before
@@ -388,16 +388,16 @@ static int rzv_riic_rxi_interrupt(int irq, void *context, void *arg)
         {
           /* Set NACK before last byte */
 
-          uint8_t icmr3 = rzv_riic_getreg(priv, RZV_RIIC_ICMR3_OFFSET);
+          uint8_t icmr3 = rzv_i2c_getreg(priv, RZV_RIIC_ICMR3_OFFSET);
           icmr3 |= RIIC_ICMR3_ACKBT;  /* Send NACK */
-          rzv_riic_putreg(priv, RZV_RIIC_ICMR3_OFFSET, icmr3);
+          rzv_i2c_putreg(priv, RZV_RIIC_ICMR3_OFFSET, icmr3);
         }
 
       if (priv->dcnt == 0)
         {
           /* Message complete */
 
-          rzv_riic_irq_nextmsg(priv);
+          rzv_i2c_irq_nextmsg(priv);
         }
     }
 
@@ -405,12 +405,12 @@ static int rzv_riic_rxi_interrupt(int irq, void *context, void *arg)
 }
 
 /****************************************************************************
- * Name: rzv_riic_txi_interrupt
+ * Name: rzv_i2c_txi_interrupt
  ****************************************************************************/
 
-static int rzv_riic_txi_interrupt(int irq, void *context, void *arg)
+static int rzv_i2c_txi_interrupt(int irq, void *context, void *arg)
 {
-  struct rzv_riic_priv_s *priv = (struct rzv_riic_priv_s *)arg;
+  struct rzv_i2c_priv_s *priv = (struct rzv_i2c_priv_s *)arg;
 
   /* Clear interrupt */
 
@@ -422,7 +422,7 @@ static int rzv_riic_txi_interrupt(int irq, void *context, void *arg)
       case RIIC_STATE_RESTART:
         /* Send address */
 
-        rzv_riic_sendaddr(priv, priv->msgs[priv->msgid].addr,
+        rzv_i2c_sendaddr(priv, priv->msgs[priv->msgid].addr,
                         priv->msgs[priv->msgid].flags);
 
         if (priv->flags & I2C_M_READ)
@@ -446,7 +446,7 @@ static int rzv_riic_txi_interrupt(int irq, void *context, void *arg)
           {
             /* Send next data byte */
 
-            rzv_riic_putreg(priv, RZV_RIIC_ICDRT_OFFSET, *priv->ptr++);
+            rzv_i2c_putreg(priv, RZV_RIIC_ICDRT_OFFSET, *priv->ptr++);
             priv->dcnt--;
           }
 
@@ -454,9 +454,9 @@ static int rzv_riic_txi_interrupt(int irq, void *context, void *arg)
           {
             /* Disable TXI, wait for TEI */
 
-            uint8_t icier = rzv_riic_getreg(priv, RZV_RIIC_ICIER_OFFSET);
+            uint8_t icier = rzv_i2c_getreg(priv, RZV_RIIC_ICIER_OFFSET);
             icier &= ~RIIC_ICIER_TIE;
-            rzv_riic_putreg(priv, RZV_RIIC_ICIER_OFFSET, icier);
+            rzv_i2c_putreg(priv, RZV_RIIC_ICIER_OFFSET, icier);
           }
         break;
 
@@ -464,27 +464,27 @@ static int rzv_riic_txi_interrupt(int irq, void *context, void *arg)
         /* Address sent for read, enable WAIT mode and switch to receive */
 
         /* Enable WAIT mode for synchronization */
-        uint8_t icmr3 = rzv_riic_getreg(priv, RZV_RIIC_ICMR3_OFFSET);
+        uint8_t icmr3 = rzv_i2c_getreg(priv, RZV_RIIC_ICMR3_OFFSET);
         icmr3 |= RIIC_ICMR3_WAIT;
-        rzv_riic_putreg(priv, RZV_RIIC_ICMR3_OFFSET, icmr3);
+        rzv_i2c_putreg(priv, RZV_RIIC_ICMR3_OFFSET, icmr3);
 
         /* Switch to receive mode */
-        uint8_t iccr2 = rzv_riic_getreg(priv, RZV_RIIC_ICCR2_OFFSET);
+        uint8_t iccr2 = rzv_i2c_getreg(priv, RZV_RIIC_ICCR2_OFFSET);
         iccr2 &= ~RIIC_ICCR2_TRS;  /* Receive mode */
-        rzv_riic_putreg(priv, RZV_RIIC_ICCR2_OFFSET, iccr2);
+        rzv_i2c_putreg(priv, RZV_RIIC_ICCR2_OFFSET, iccr2);
 
         priv->state = RIIC_STATE_DATA_READ;
 
         /* Disable TXI, enable RXI */
 
-        uint8_t icier = rzv_riic_getreg(priv, RZV_RIIC_ICIER_OFFSET);
+        uint8_t icier = rzv_i2c_getreg(priv, RZV_RIIC_ICIER_OFFSET);
         icier &= ~RIIC_ICIER_TIE;
         icier |= RIIC_ICIER_RIE;
-        rzv_riic_putreg(priv, RZV_RIIC_ICIER_OFFSET, icier);
+        rzv_i2c_putreg(priv, RZV_RIIC_ICIER_OFFSET, icier);
 
         /* Dummy read to trigger first RXI */
 
-        (void)rzv_riic_getreg(priv, RZV_RIIC_ICDRR_OFFSET);
+        (void)rzv_i2c_getreg(priv, RZV_RIIC_ICDRR_OFFSET);
         break;
 
       default:
@@ -495,12 +495,12 @@ static int rzv_riic_txi_interrupt(int irq, void *context, void *arg)
 }
 
 /****************************************************************************
- * Name: rzv_riic_tei_interrupt
+ * Name: rzv_i2c_tei_interrupt
  ****************************************************************************/
 
-static int rzv_riic_tei_interrupt(int irq, void *context, void *arg)
+static int rzv_i2c_tei_interrupt(int irq, void *context, void *arg)
 {
-  struct rzv_riic_priv_s *priv = (struct rzv_riic_priv_s *)arg;
+  struct rzv_i2c_priv_s *priv = (struct rzv_i2c_priv_s *)arg;
 
   /* Clear interrupt */
 
@@ -510,16 +510,16 @@ static int rzv_riic_tei_interrupt(int irq, void *context, void *arg)
 
   if (priv->state == RIIC_STATE_DATA_WRITE)
     {
-      rzv_riic_irq_nextmsg(priv);
+      rzv_i2c_irq_nextmsg(priv);
     }
   else if (priv->state == RIIC_STATE_STOP)
     {
       /* Check if STOP condition completed */
-      uint8_t icsr2 = rzv_riic_getreg(priv, RZV_RIIC_ICSR2_OFFSET);
+      uint8_t icsr2 = rzv_i2c_getreg(priv, RZV_RIIC_ICSR2_OFFSET);
       if (icsr2 & RIIC_ICSR2_STOP)
         {
           /* Clear STOP flag */
-          rzv_riic_putreg(priv, RZV_RIIC_ICSR2_OFFSET,
+          rzv_i2c_putreg(priv, RZV_RIIC_ICSR2_OFFSET,
                          icsr2 & ~RIIC_ICSR2_STOP);
 
           priv->state = RIIC_STATE_IDLE;
@@ -538,12 +538,12 @@ static int rzv_riic_tei_interrupt(int irq, void *context, void *arg)
 }
 
 /****************************************************************************
- * Name: rzv_riic_err_interrupt
+ * Name: rzv_i2c_err_interrupt
  ****************************************************************************/
 
-static int rzv_riic_err_interrupt(int irq, void *context, void *arg)
+static int rzv_i2c_err_interrupt(int irq, void *context, void *arg)
 {
-  struct rzv_riic_priv_s *priv = (struct rzv_riic_priv_s *)arg;
+  struct rzv_i2c_priv_s *priv = (struct rzv_i2c_priv_s *)arg;
 
   /* Clear interrupt */
 
@@ -551,7 +551,7 @@ static int rzv_riic_err_interrupt(int irq, void *context, void *arg)
 
   /* Check error flags */
 
-  uint8_t icsr2 = rzv_riic_getreg(priv, RZV_RIIC_ICSR2_OFFSET);
+  uint8_t icsr2 = rzv_i2c_getreg(priv, RZV_RIIC_ICSR2_OFFSET);
 
   if (icsr2 & RIIC_ICSR2_NACKF)
     {
@@ -568,11 +568,11 @@ static int rzv_riic_err_interrupt(int irq, void *context, void *arg)
       i2cerr("Arbitration lost - attempting recovery\n");
 
       /* Reset and reinitialize peripheral */
-      rzv_riic_putreg(priv, RZV_RIIC_ICCR1_OFFSET, RIIC_ICCR1_IICRST);
+      rzv_i2c_putreg(priv, RZV_RIIC_ICCR1_OFFSET, RIIC_ICCR1_IICRST);
       up_udelay(10);
-      rzv_riic_putreg(priv, RZV_RIIC_ICCR1_OFFSET, 0);
+      rzv_i2c_putreg(priv, RZV_RIIC_ICCR1_OFFSET, 0);
       up_udelay(10);
-      rzv_riic_putreg(priv, RZV_RIIC_ICCR1_OFFSET, RIIC_ICCR1_ICE);
+      rzv_i2c_putreg(priv, RZV_RIIC_ICCR1_OFFSET, RIIC_ICCR1_ICE);
     }
   else if (icsr2 & RIIC_ICSR2_TMOF)
     {
@@ -584,13 +584,13 @@ static int rzv_riic_err_interrupt(int irq, void *context, void *arg)
 
   /* Clear error flags */
 
-  rzv_riic_putreg(priv, RZV_RIIC_ICSR2_OFFSET,
+  rzv_i2c_putreg(priv, RZV_RIIC_ICSR2_OFFSET,
                 icsr2 & ~(RIIC_ICSR2_NACKF | RIIC_ICSR2_AL | RIIC_ICSR2_TMOF));
 
   /* Abort transfer */
 
   priv->state = RIIC_STATE_ERROR;
-  rzv_riic_sendstop(priv);
+  rzv_i2c_sendstop(priv);
 
   /* Wake up waiting thread */
 
@@ -600,12 +600,12 @@ static int rzv_riic_err_interrupt(int irq, void *context, void *arg)
 }
 
 /****************************************************************************
- * Name: rzv_riic_stp_interrupt
+ * Name: rzv_i2c_stp_interrupt
  ****************************************************************************/
 
-static int rzv_riic_stp_interrupt(int irq, void *context, void *arg)
+static int rzv_i2c_stp_interrupt(int irq, void *context, void *arg)
 {
-  struct rzv_riic_priv_s *priv = (struct rzv_riic_priv_s *)arg;
+  struct rzv_i2c_priv_s *priv = (struct rzv_i2c_priv_s *)arg;
 
   /* Clear interrupt */
 
@@ -613,8 +613,8 @@ static int rzv_riic_stp_interrupt(int irq, void *context, void *arg)
 
   /* Stop condition detected - transfer complete */
 
-  uint8_t icsr2 = rzv_riic_getreg(priv, RZV_RIIC_ICSR2_OFFSET);
-  rzv_riic_putreg(priv, RZV_RIIC_ICSR2_OFFSET, icsr2 & ~RIIC_ICSR2_STOP);
+  uint8_t icsr2 = rzv_i2c_getreg(priv, RZV_RIIC_ICSR2_OFFSET);
+  rzv_i2c_putreg(priv, RZV_RIIC_ICSR2_OFFSET, icsr2 & ~RIIC_ICSR2_STOP);
 
   priv->state = RIIC_STATE_IDLE;
 
@@ -631,10 +631,10 @@ static int rzv_riic_stp_interrupt(int irq, void *context, void *arg)
 }
 
 /****************************************************************************
- * Name: rzv_riic_init
+ * Name: rzv_i2c_init
  ****************************************************************************/
 
-static int rzv_riic_init(struct rzv_riic_priv_s *priv)
+static int rzv_i2c_init(struct rzv_i2c_priv_s *priv)
 {
   int ret;
 
@@ -650,27 +650,27 @@ static int rzv_riic_init(struct rzv_riic_priv_s *priv)
 
   /* Reset RIIC */
 
-  rzv_riic_putreg(priv, RZV_RIIC_ICCR1_OFFSET, RIIC_ICCR1_IICRST);
-  rzv_riic_putreg(priv, RZV_RIIC_ICCR1_OFFSET, 0);
+  rzv_i2c_putreg(priv, RZV_RIIC_ICCR1_OFFSET, RIIC_ICCR1_IICRST);
+  rzv_i2c_putreg(priv, RZV_RIIC_ICCR1_OFFSET, 0);
 
   /* Enable RIIC */
 
-  rzv_riic_putreg(priv, RZV_RIIC_ICCR1_OFFSET, RIIC_ICCR1_ICE);
+  rzv_i2c_putreg(priv, RZV_RIIC_ICCR1_OFFSET, RIIC_ICCR1_ICE);
 
   /* Configure noise filter and mode */
 
-  rzv_riic_putreg(priv, RZV_RIIC_ICMR3_OFFSET,
+  rzv_i2c_putreg(priv, RZV_RIIC_ICMR3_OFFSET,
                 RIIC_ICMR3_NF_MASK | RIIC_ICMR3_WAIT);
 
   /* Enable necessary functions */
 
-  rzv_riic_putreg(priv, RZV_RIIC_ICFER_OFFSET,
+  rzv_i2c_putreg(priv, RZV_RIIC_ICFER_OFFSET,
                 RIIC_ICFER_MALE | RIIC_ICFER_NACKE |
                 RIIC_ICFER_NFE | RIIC_ICFER_SCLE);
 
   /* Set default frequency to 400 kHz */
 
-  rzv_riic_set_frequency(priv, 400000);
+  rzv_i2c_set_frequency(priv, 400000);
 
   /* Attach interrupts
    * Note: STOP condition is detected via ICSR2.STOP flag polling in
@@ -717,10 +717,10 @@ static int rzv_riic_init(struct rzv_riic_priv_s *priv)
         return -EINVAL;
     }
 
-  handlers[0] = rzv_riic_rxi_interrupt;
-  handlers[1] = rzv_riic_txi_interrupt;
-  handlers[2] = rzv_riic_tei_interrupt;
-  handlers[3] = rzv_riic_err_interrupt;
+  handlers[0] = rzv_i2c_rxi_interrupt;
+  handlers[1] = rzv_i2c_txi_interrupt;
+  handlers[2] = rzv_i2c_tei_interrupt;
+  handlers[3] = rzv_i2c_err_interrupt;
 
   irq_slots[0] = &priv->irq_rxi;
   irq_slots[1] = &priv->irq_txi;
@@ -759,14 +759,14 @@ static int rzv_riic_init(struct rzv_riic_priv_s *priv)
 }
 
 /****************************************************************************
- * Name: rzv_riic_deinit
+ * Name: rzv_i2c_deinit
  ****************************************************************************/
 
-static void rzv_riic_deinit(struct rzv_riic_priv_s *priv)
+static void rzv_i2c_deinit(struct rzv_i2c_priv_s *priv)
 {
   /* Disable interrupts */
 
-  rzv_riic_putreg(priv, RZV_RIIC_ICIER_OFFSET, 0);
+  rzv_i2c_putreg(priv, RZV_RIIC_ICIER_OFFSET, 0);
 
   /* Detach interrupts */
 
@@ -796,7 +796,7 @@ static void rzv_riic_deinit(struct rzv_riic_priv_s *priv)
 
   /* Disable RIIC */
 
-  rzv_riic_putreg(priv, RZV_RIIC_ICCR1_OFFSET, 0);
+  rzv_i2c_putreg(priv, RZV_RIIC_ICCR1_OFFSET, 0);
 
   /* Disable module clock */
 
@@ -806,13 +806,13 @@ static void rzv_riic_deinit(struct rzv_riic_priv_s *priv)
 }
 
 /****************************************************************************
- * Name: rzv_riic_transfer
+ * Name: rzv_i2c_transfer
  ****************************************************************************/
 
-static int rzv_riic_transfer(struct i2c_master_s *dev,
+static int rzv_i2c_transfer(struct i2c_master_s *dev,
                             struct i2c_msg_s *msgs, int count)
 {
-  struct rzv_riic_priv_s *priv = (struct rzv_riic_priv_s *)dev;
+  struct rzv_i2c_priv_s *priv = (struct rzv_i2c_priv_s *)dev;
   int ret;
 
   DEBUGASSERT(dev != NULL && msgs != NULL && count > 0);
@@ -841,11 +841,11 @@ static int rzv_riic_transfer(struct i2c_master_s *dev,
   uint8_t icier = RIIC_ICIER_TIE | RIIC_ICIER_TEIE |
                   RIIC_ICIER_NAKIE | RIIC_ICIER_ALIE |
                   RIIC_ICIER_SPIE | RIIC_ICIER_TMOIE;
-  rzv_riic_putreg(priv, RZV_RIIC_ICIER_OFFSET, icier);
+  rzv_i2c_putreg(priv, RZV_RIIC_ICIER_OFFSET, icier);
 
   /* Start transfer */
 
-  rzv_riic_sendstart(priv);
+  rzv_i2c_sendstart(priv);
 
   /* Wait for completion with timeout */
 
@@ -868,7 +868,7 @@ static int rzv_riic_transfer(struct i2c_master_s *dev,
 
       /* Force stop */
 
-      rzv_riic_sendstop(priv);
+      rzv_i2c_sendstop(priv);
       priv->state = RIIC_STATE_IDLE;
       ret = -ETIMEDOUT;
     }
@@ -879,7 +879,7 @@ static int rzv_riic_transfer(struct i2c_master_s *dev,
 
   /* Disable interrupts */
 
-  rzv_riic_putreg(priv, RZV_RIIC_ICIER_OFFSET, 0);
+  rzv_i2c_putreg(priv, RZV_RIIC_ICIER_OFFSET, 0);
 
   /* Release exclusive access */
 
@@ -889,13 +889,13 @@ static int rzv_riic_transfer(struct i2c_master_s *dev,
 }
 
 /****************************************************************************
- * Name: rzv_riic_reset
+ * Name: rzv_i2c_reset
  ****************************************************************************/
 
 #ifdef CONFIG_I2C_RESET
-static int rzv_riic_reset(struct i2c_master_s *dev)
+static int rzv_i2c_reset(struct i2c_master_s *dev)
 {
-  struct rzv_riic_priv_s *priv = (struct rzv_riic_priv_s *)dev;
+  struct rzv_i2c_priv_s *priv = (struct rzv_i2c_priv_s *)dev;
   int ret;
 
   DEBUGASSERT(dev != NULL);
@@ -910,8 +910,8 @@ static int rzv_riic_reset(struct i2c_master_s *dev)
 
   /* Deinitialize and reinitialize */
 
-  rzv_riic_deinit(priv);
-  ret = rzv_riic_init(priv);
+  rzv_i2c_deinit(priv);
+  ret = rzv_i2c_init(priv);
 
   /* Release exclusive access */
 
@@ -926,12 +926,12 @@ static int rzv_riic_reset(struct i2c_master_s *dev)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: rzv_riic_initialize
+ * Name: rzv_i2c_initialize
  ****************************************************************************/
 
-struct i2c_master_s *rzv_riic_initialize(int port)
+struct i2c_master_s *rzv_i2c_initialize(int port)
 {
-  struct rzv_riic_priv_s *priv;
+  struct rzv_i2c_priv_s *priv;
   int ret;
 
   /* Validate port */
@@ -956,7 +956,7 @@ struct i2c_master_s *rzv_riic_initialize(int port)
 
       /* Initialize hardware */
 
-      ret = rzv_riic_init(priv);
+      ret = rzv_i2c_init(priv);
       if (ret < 0)
         {
           i2cerr("Hardware init failed: %d\n", ret);
@@ -974,12 +974,12 @@ struct i2c_master_s *rzv_riic_initialize(int port)
 }
 
 /****************************************************************************
- * Name: rzv_riic_uninitialize
+ * Name: rzv_i2c_uninitialize
  ****************************************************************************/
 
-int rzv_riic_uninitialize(struct i2c_master_s *dev)
+int rzv_i2c_uninitialize(struct i2c_master_s *dev)
 {
-  struct rzv_riic_priv_s *priv = (struct rzv_riic_priv_s *)dev;
+  struct rzv_i2c_priv_s *priv = (struct rzv_i2c_priv_s *)dev;
 
   DEBUGASSERT(dev != NULL);
 
@@ -994,7 +994,7 @@ int rzv_riic_uninitialize(struct i2c_master_s *dev)
     {
       /* Deinitialize hardware */
 
-      rzv_riic_deinit(priv);
+      rzv_i2c_deinit(priv);
 
       /* Destroy semaphores */
 

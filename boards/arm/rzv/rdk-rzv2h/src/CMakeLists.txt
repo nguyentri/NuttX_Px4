@@ -46,7 +46,7 @@ if(CONFIG_RZV_UART_SCI)
   list(APPEND SRCS rzv2h_serial.c)
 endif()
 
-if(CONFIG_RZV_RIIC)
+if(CONFIG_RZV_I2C)
   list(APPEND SRCS rzv2h_i2c.c)
 endif()
 

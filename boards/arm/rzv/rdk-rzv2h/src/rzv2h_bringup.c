@@ -113,10 +113,10 @@ int board_bringup(void)
   syslog(LOG_INFO, "Buttons initialized\n");
 #endif
 
-#if defined(CONFIG_RZV_RIIC0) || defined(CONFIG_RZV_RIIC1) || defined(CONFIG_RZV_RIIC2)
-  /* Initialize I2C buses */
+#if defined(CONFIG_RZV_I2C0) || defined(CONFIG_RZV_I2C1) || defined(CONFIG_RZV_I2C2)
+  /* Initialize I2C bus */
 
-#ifdef CONFIG_RZV_RIIC0
+#ifdef CONFIG_RZV_I2C0
   if (board_i2c_initialize(0) != NULL)
     {
       syslog(LOG_INFO, "I2C0 (RIIC0) initialized successfully\n");
@@ -127,7 +127,7 @@ int board_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_RZV_RIIC1
+#ifdef CONFIG_RZV_I2C1
   if (board_i2c_initialize(1) != NULL)
     {
       syslog(LOG_INFO, "I2C1 (RIIC1) initialized successfully\n");
@@ -138,7 +138,7 @@ int board_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_RZV_RIIC2
+#ifdef CONFIG_RZV_I2C2
   if (board_i2c_initialize(2) != NULL)
     {
       syslog(LOG_INFO, "I2C2 (RIIC2) initialized successfully\n");
@@ -167,7 +167,7 @@ int board_bringup(void)
 #ifdef CONFIG_RZV_ADC
   /* Initialize ADC module */
 
-  ret = board_adc_initialize();
+  ret = rzv2h_adc_setup();
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize ADC: %d\n", ret);
@@ -189,6 +189,34 @@ int board_bringup(void)
   else
     {
       syslog(LOG_INFO, "GPT PWM devices initialized successfully\n");
+    }
+#endif
+
+#ifdef CONFIG_RZV_WDT
+  /* Initialize Watchdog Timer */
+
+  ret = rzv_wdt_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize WDT: %d\n", ret);
+    }
+  else
+    {
+      syslog(LOG_INFO, "Watchdog Timer initialized successfully\n");
+    }
+#endif
+
+#ifdef CONFIG_RZV_GTM
+  /* Initialize GTM Timers */
+
+  ret = board_timer_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize GTM timers: %d\n", ret);
+    }
+  else
+    {
+      syslog(LOG_INFO, "GTM timers initialized successfully\n");
     }
 #endif
 

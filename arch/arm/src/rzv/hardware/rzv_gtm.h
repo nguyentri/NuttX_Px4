@@ -92,10 +92,27 @@
 #define RZV_GTM_OSTMTT_OFFSET_N(n)     (0x18 + ((n) * RZV_GTM_OSTM_CHANNEL_STRIDE))
 #define RZV_GTM_OSTMCTL_OFFSET_N(n)    (0x20 + ((n) * RZV_GTM_OSTM_CHANNEL_STRIDE))
 
-/* Bitmask  */
-#  define GTM_OSTMTT_OSTMTT       (1 << 0)
-#  define GTM_OSTMTS_OSTMTS       (1 << 0)
-#  define GTM_OSTMCMP_MASK        (0xffffffffu)
+/* Register Bit Definitions */
+
+/* OSTMnCTL Register Bit Definitions */
+#define GTM_OSTMCTL_MD0         (1 << 0)  /* Interrupt on start enable */
+#define GTM_OSTMCTL_MD1         (1 << 1)  /* Timer mode: 1=free-run, 0=interval */
+
+/* OSTMnTE Register Bit Definitions */
+#define GTM_OSTMTE_TE           (1 << 0)  /* Timer enable status (read-only) */
+
+/* OSTMnTS Register Bit Definitions */
+#define GTM_OSTMTS_OSTMTS       (1 << 0)  /* Start timer */
+
+/* OSTMnTT Register Bit Definitions */
+#define GTM_OSTMTT_OSTMTT       (1 << 0)  /* Stop timer */
+
+/* OSTMnCMP Register Bit Definitions */
+#define GTM_OSTMCMP_MASK        (0xffffffffu)  /* 32-bit compare value */
+
+/* Timer Modes */
+#define GTM_MODE_INTERVAL       (0)                      /* Stops at compare */
+#define GTM_MODE_FREERUN        (GTM_OSTMCTL_MD1)       /* Continuous */
 
 
 #endif /* __ARCH_ARM_SRC_RZV_HARDWARE_RZV_GTM_H */

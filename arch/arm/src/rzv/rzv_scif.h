@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/rzv/rzv_riic.h
+ * arch/arm/src/rzv/rzv_scif.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,26 +18,28 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RZV_RIIC_H
-#define __ARCH_ARM_SRC_RZV_RIIC_H
+#ifndef __ARCH_ARM_SRC_RZV_SCIF_H
+#define __ARCH_ARM_SRC_RZV_SCIF_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/i2c/i2c_master.h>
+#include <stdint.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* RIIC Port Numbers */
+/* SCIFA Base Addresses for RZV2H */
 
-#define RZV_RIIC0                  0
-#define RZV_RIIC1                  1
-#define RZV_RIIC2                  2
-#define RZV_RIIC3                  3
+#ifndef RZV_SCIFA0_BASE
+#  define RZV_SCIFA0_BASE              0x11C01400UL
+#endif
+
+/* Additional SCIFA channels (define as needed) */
+/* RZV2H datasheet indicates only SCIFA0 for console UART */
 
 /****************************************************************************
  * Public Types
@@ -49,8 +51,7 @@
 
 #ifndef __ASSEMBLY__
 
-#undef EXTERN
-#if defined(__cplusplus)
+#ifdef __cplusplus
 #define EXTERN extern "C"
 extern "C"
 {
@@ -63,45 +64,37 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: rzv_riic_initialize
+ * Name: arm_serialinit
  *
  * Description:
- *   Initialize the selected RIIC port. And return a unique instance of struct
- *   i2c_master_s. This function may be called to obtain multiple instances
- *   of the interface, each of which may be set up with a different frequency
- *   and slave address.
- *
- * Input Parameters:
- *   port - Port number (0-3)
- *
- * Returned Value:
- *   Valid I2C device structure reference on success; a NULL on failure
+ *   Initialize serial drivers and register them with the serial upper half.
+ *   This function is called from up_initialize() during boot.
  *
  ****************************************************************************/
 
-struct i2c_master_s *rzv_riic_initialize(int port);
+void arm_serialinit(void);
 
 /****************************************************************************
- * Name: rzv_riic_uninitialize
+ * Name: up_putc
  *
  * Description:
- *   De-initialize the selected RIIC port, and power down the device.
+ *   Provide priority, low-level access to the console for debug output.
+ *   This function blocks until character transmission is complete.
  *
  * Input Parameters:
- *   dev - Device structure as returned by rzv_riic_initialize()
+ *   ch - Character to output
  *
  * Returned Value:
- *   OK on success, ERROR when internal reference count mismatch or dev
- *   points to invalid hardware device.
+ *   Sent character
  *
  ****************************************************************************/
 
-int rzv_riic_uninitialize(struct i2c_master_s *dev);
+int up_putc(int ch);
 
 #undef EXTERN
-#if defined(__cplusplus)
+#ifdef __cplusplus
 }
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_RZV_RIIC_H */
+#endif /* __ARCH_ARM_SRC_RZV_SCIF_H */

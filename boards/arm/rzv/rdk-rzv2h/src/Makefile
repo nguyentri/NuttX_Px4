@@ -62,7 +62,7 @@ CSRCS += rzv2h_serial.c
 endif
 
 # I2C support
-ifeq ($(CONFIG_RZV_RIIC),y)
+ifeq ($(CONFIG_RZV_I2C),y)
 CSRCS += rzv2h_i2c.c
 endif
 
@@ -84,6 +84,21 @@ endif
 # DTC support
 ifeq ($(CONFIG_RZV_DTC),y)
 CSRCS += rzv2h_dtc.c
+endif
+
+# Watchdog Timer support
+ifeq ($(CONFIG_RZV_WDT),y)
+CSRCS += rzv2h_wdt.c
+endif
+
+# WDT test application
+ifeq ($(CONFIG_RZV2H_WDT_TEST),y)
+CSRCS += rzv2h_wdt_test.c
+endif
+
+# GTM Timer support
+ifeq ($(CONFIG_RZV_GTM),y)
+CSRCS += rzv2h_timer.c
 endif
 
 ############################################################################

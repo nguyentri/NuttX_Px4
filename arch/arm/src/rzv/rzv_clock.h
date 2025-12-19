@@ -88,6 +88,16 @@
 #define RZV_CPG_CLK_OSTM1           (4 << 16 | 9)   /* OSTM1 clock */
 #define RZV_CPG_CLK_OSTM2           (4 << 16 | 10)  /* OSTM2 clock */
 
+/* GTM (OSTM) clocks - aliases for compatibility */
+#define RZV_CPG_CLK_GTM0            RZV_CPG_CLK_OSTM0  /* GTM0 = OSTM0 */
+#define RZV_CPG_CLK_GTM1            RZV_CPG_CLK_OSTM1  /* GTM1 = OSTM1 */
+#define RZV_CPG_CLK_GTM2            RZV_CPG_CLK_OSTM2  /* GTM2 = OSTM2 */
+#define RZV_CPG_CLK_GTM3            (4 << 16 | 11)     /* GTM3 clock */
+#define RZV_CPG_CLK_GTM4            (4 << 16 | 12)     /* GTM4 clock */
+#define RZV_CPG_CLK_GTM5            (4 << 16 | 13)     /* GTM5 clock */
+#define RZV_CPG_CLK_GTM6            (4 << 16 | 14)     /* GTM6 clock */
+#define RZV_CPG_CLK_GTM7            (4 << 16 | 15)     /* GTM7 clock */
+
 /* Domain 5 - DMA */
 #define RZV_CPG_CLK_DMAC0           (5 << 16 | 0)   /* DMAC0 clock */
 #define RZV_CPG_CLK_DMAC1           (5 << 16 | 1)   /* DMAC1 clock */

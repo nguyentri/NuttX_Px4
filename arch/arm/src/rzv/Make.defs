@@ -47,9 +47,9 @@ CHIP_CSRCS += rzv_adc.c
 #endif
 
 # I2C driver
-#ifeq ($(CONFIG_RZV_RIIC),y)
-CHIP_CSRCS += rzv_riic.c
-#endif
+ifeq ($(CONFIG_RZV_I2C),y)
+CHIP_CSRCS += rzv_i2c.c
+endif
 
 # DMAC driver
 #ifeq ($(CONFIG_RZV_DMA),y)
@@ -72,9 +72,14 @@ CHIP_CSRCS += rzv_gpt.c
 endif
 
 # Timer driver
-#ifeq ($(CONFIG_RZV_GTM),y)
+ifeq ($(CONFIG_RZV_GTM),y)
 CHIP_CSRCS += rzv_gtm.c
-#endif
+endif
+
+# Watchdog Timer driver
+ifeq ($(CONFIG_RZV_WDT),y)
+CHIP_CSRCS += rzv_wdt.c
+endif
 
 # IDLE task custom
 #ifeq ($(CONFIG_ARCH_IDLE_CUSTOM),y)

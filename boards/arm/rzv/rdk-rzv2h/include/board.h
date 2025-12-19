@@ -201,15 +201,53 @@
 
 /* ADC Configuration ********************************************************/
 
-/* ADC input channels:
+/* ADC input channels for RZV2H ADC_E peripheral:
  *
- * ADC0_CH0: AN000 (Analog input)
- * ADC0_CH1: AN001 (Analog input)
- * ADC0_CH2: AN002 (Analog input)
- * ADC0_CH3: AN003 (Analog input)
+ * The RDK-RZV2H board provides ADC input channels AN000-AN007.
+ * Configure which channels to enable in rzv2h_adc.c
+ *
+ * Channel mappings (typical RZV2H pinout - verify with board schematic):
+ *   AN000 - Analog input 0
+ *   AN001 - Analog input 1
+ *   AN002 - Analog input 2
+ *   AN003 - Analog input 3
+ *   AN004 - Analog input 4
+ *   AN005 - Analog input 5
+ *   AN006 - Analog input 6
+ *   AN007 - Analog input 7
+ *
+ * Note: ADC pins are typically dedicated analog inputs and may not
+ * require explicit GPIO configuration. Refer to the RZV2H hardware
+ * manual for specific pin functions.
  */
 
-#define BOARD_ADC_NCHANNELS   4
+/* Default ADC channel configuration - modify as needed */
+
+#define BOARD_ADC_CHANNEL_0     0    /* AN000 */
+#define BOARD_ADC_CHANNEL_1     1    /* AN001 */
+#define BOARD_ADC_CHANNEL_2     2    /* AN002 */
+#define BOARD_ADC_CHANNEL_3     3    /* AN003 */
+
+/* Uncomment to enable additional channels */
+
+/* #define BOARD_ADC_CHANNEL_4     4 */ /* AN004 */
+/* #define BOARD_ADC_CHANNEL_5     5 */ /* AN005 */
+/* #define BOARD_ADC_CHANNEL_6     6 */ /* AN006 */
+/* #define BOARD_ADC_CHANNEL_7     7 */ /* AN007 */
+
+/* Total number of enabled ADC channels */
+
+#define BOARD_ADC_NCHANNELS     4
+
+/* ADC GPIO pin definitions (if needed for explicit configuration)
+ * Most ADC pins are dedicated analog inputs and don't need GPIO setup.
+ * These definitions are provided for boards that require it.
+ */
+
+/* #define BOARD_ADC_PIN_AN000     GPIO_P4_4_ANALOG */  /* Example - verify with schematic */
+/* #define BOARD_ADC_PIN_AN001     GPIO_P4_5_ANALOG */
+/* #define BOARD_ADC_PIN_AN002     GPIO_P4_6_ANALOG */
+/* #define BOARD_ADC_PIN_AN003     GPIO_P4_7_ANALOG */
 
 /* GPIO Pins ***********************************************************/
 
@@ -334,6 +372,18 @@ void rzv_spi_initialize(void);
 
 #ifdef CONFIG_RZV_SPI
 int board_spi_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: rzv2h_adc_setup
+ *
+ * Description:
+ *   Initialize ADC and register the ADC device
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RZV_ADC
+int rzv2h_adc_setup(void);
 #endif
 
 #undef EXTERN

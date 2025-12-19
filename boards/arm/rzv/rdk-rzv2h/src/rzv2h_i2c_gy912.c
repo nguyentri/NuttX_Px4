@@ -43,7 +43,7 @@
 #include "arm_internal.h"
 #include "chip.h"
 #include "rzv_gpio.h"
-#include "rzv_riic.h"
+#include "rzv_i2c.h"
 
 #include "rdk-rzv2h.h"
 
@@ -51,7 +51,7 @@
 #define I2C_GY912_BUFFER_SIZE         64
 #define I2C_GY912_MAX_CHANNELS        2
 
-#ifdef CONFIG_RZV_RIIC
+#ifdef CONFIG_RZV_I2C
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -498,7 +498,7 @@ int gy912_i2c_initialize(void)
   i2cinfo("Initializing GY-912 sensor module\n");
 
   /* Get I2C interface */
-  g_i2c_dev = rzv_riic_initialize(I2C_PORT);
+  g_i2c_dev = rzv_i2c_initialize(I2C_PORT);
   if (g_i2c_dev == NULL)
     {
       i2cerr("Failed to initialize I2C%d\n", I2C_PORT);
@@ -665,6 +665,6 @@ int rzv2h_i2c_gy912_main(int argc, char *argv[])
   return rzv2h_i2c_gy912_test();
 }
 
-#endif /* CONFIG_RZV_RIIC */
+#endif /* CONFIG_RZV_I2C */
 
 #endif /* CONFIG_RDK_RZV2H_I2C_GY912_EXAMPLE */

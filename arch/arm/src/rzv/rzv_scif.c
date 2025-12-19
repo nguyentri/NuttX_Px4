@@ -46,14 +46,16 @@
 #include "arm_internal.h"
 #include "rzv_icu.h"
 #include "rzv_clock.h"
+#include "hardware/rzv2h/rzv2h_memorymap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* SCIF Register Offsets (same as in rzv_lowputc.c) */
+/* SCIFA Register Offsets (SCIF with FIFO for RZV2H) */
 #define RZV_SCIF_SMR_OFFSET      0x00
-#define RZV_SCIF_BRR_OFFSET      0x02
+#define RZV_SCIF_BRR_OFFSET      0x02  /* Byte offset in MDDR/BRR union */
+#define RZV_SCIF_MDDR_OFFSET     0x02  /* Modulation Duty Register */
 #define RZV_SCIF_SCR_OFFSET      0x04
 #define RZV_SCIF_FTDR_OFFSET     0x06
 #define RZV_SCIF_FSR_OFFSET      0x08
@@ -62,6 +64,8 @@
 #define RZV_SCIF_FDR_OFFSET      0x0E
 #define RZV_SCIF_SPTR_OFFSET     0x10
 #define RZV_SCIF_LSR_OFFSET      0x12
+#define RZV_SCIF_SEMR_OFFSET     0x14  /* Serial Extended Mode Register */
+#define RZV_SCIF_FTCR_OFFSET     0x16  /* FIFO Trigger Control Register */
 
 /* Register bit definitions */
 #define SCIF_SMR_CKS_MASK        0x0003
@@ -94,6 +98,22 @@
 #define SCIF_FCR_RTRG_MASK       0x00C0
 
 #define SCIF_LSR_ORER            0x0001
+
+/* SEMR (Serial Extended Mode Register) bit definitions */
+#define SCIF_SEMR_ABCS0          0x01  /* Asynchronous base clock select */
+#define SCIF_SEMR_NFEN           0x04  /* Noise filter enable */
+#define SCIF_SEMR_DIR            0x08  /* Data transfer direction */
+#define SCIF_SEMR_MDDRS          0x10  /* Modulation duty register select */
+#define SCIF_SEMR_BRME           0x20  /* Bit rate modulation enable */
+#define SCIF_SEMR_BGDM           0x80  /* Baud rate generator double speed mode */
+
+/* FTCR (FIFO Trigger Control Register) bit definitions */
+#define SCIF_FTCR_TFTC_SHIFT     0     /* TX FIFO trigger count */
+#define SCIF_FTCR_TFTC_MASK      0x001F
+#define SCIF_FTCR_TTRGS          0x0080  /* TX trigger select */
+#define SCIF_FTCR_RFTC_SHIFT     8     /* RX FIFO trigger count */
+#define SCIF_FTCR_RFTC_MASK      0x1F00
+#define SCIF_FTCR_RTRGS          0x8000  /* RX trigger select */
 
 /* Which UART with be configured as the console */
 #if defined(CONFIG_SCIF0_SERIAL_CONSOLE)
@@ -180,8 +200,10 @@
 
 struct rzv_scif_s
 {
-  uintptr_t base;        /* SCIF register base address */
+  uintptr_t base;        /* SCIFA register base address */
   uint32_t  baud;        /* Configured baud rate */
+  uint32_t  clk_id;      /* Clock ID for this SCIFA channel */
+  uint8_t   channel;     /* Channel number (0-4) */
   uint8_t   irq_rxi;     /* RX interrupt number */
   uint8_t   irq_txi;     /* TX interrupt number */
   uint8_t   irq_tei;     /* TX end interrupt number */
@@ -267,9 +289,11 @@ static char g_scif3txbuffer[CONFIG_SCIF3_TXBUFSIZE];
 #ifdef CONFIG_RZV_SCIF0
 static struct rzv_scif_s g_scif0priv =
 {
-  .base           = RZV_SCI0_BASE,
+  .base           = RZV_SCIFA0_BASE,
   .baud           = CONFIG_SCIF0_BAUD,
-  .irq_rxi        = 0,  /* To be set via ICU */
+  .clk_id         = RZV_CPG_CLK_SCI0,
+  .channel        = 0,
+  .irq_rxi        = 0,  /* Set dynamically via ICU */
   .irq_txi        = 0,
   .irq_tei        = 0,
   .irq_eri        = 0,
@@ -304,9 +328,11 @@ static uart_dev_t g_scif0port =
 #ifdef CONFIG_RZV_SCIF1
 static struct rzv_scif_s g_scif1priv =
 {
-  .base           = RZV_SCI1_BASE,
+  .base           = RZV_SCIFA0_BASE,  /* Only SCIFA0 defined for now */
   .baud           = CONFIG_SCIF1_BAUD,
-  .irq_rxi        = 0,
+  .clk_id         = RZV_CPG_CLK_SCI1,
+  .channel        = 1,
+  .irq_rxi        = 0,  /* Set dynamically via ICU */
   .irq_txi        = 0,
   .irq_tei        = 0,
   .irq_eri        = 0,
@@ -355,11 +381,14 @@ static void rzv_scif_setbaud(struct rzv_scif_s *priv)
   uint8_t brr;
   uint8_t cks;
   uint8_t smr;
+  uint8_t semr;
+  bool brme_enable = false;
+  bool bgdm_enable = false;
 
-  /* Get peripheral clock frequency */
-  pclk = rzv_get_pclk_frequency();
+  /* Get peripheral clock frequency (P0CLK for SCIFA) */
+  pclk = RZV_CLOCK_P0CLK_HZ;
 
-  /* Calculate divisor */
+  /* Try standard calculation: BRR = (pclk / (32 * 2^(2*cks) * baud)) - 1 */
   for (cks = 0; cks <= 3; cks++)
     {
       divisor = pclk / (32 * (1 << (2 * cks)) * priv->baud);
@@ -370,11 +399,57 @@ static void rzv_scif_setbaud(struct rzv_scif_s *priv)
         }
     }
 
+  /* If standard failed, try BGDM (double-speed mode) */
   if (cks > 3)
     {
+      for (cks = 0; cks <= 3; cks++)
+        {
+          divisor = pclk / (16 * (1 << (2 * cks)) * priv->baud);
+          if (divisor > 0 && divisor <= 256)
+            {
+              brr = (uint8_t)(divisor - 1);
+              bgdm_enable = true;
+              break;
+            }
+        }
+    }
+
+  /* If still failed, try BRME with BGDM */
+  if (cks > 3)
+    {
+      for (cks = 0; cks <= 3; cks++)
+        {
+          divisor = pclk / (8 * (1 << (2 * cks)) * priv->baud);
+          if (divisor > 0 && divisor <= 256)
+            {
+              brr = (uint8_t)(divisor - 1);
+              brme_enable = true;
+              bgdm_enable = true;
+              break;
+            }
+        }
+    }
+
+  if (cks > 3)
+    {
+      _err("SCIF%d: Cannot achieve baud %lu with pclk %lu\n",
+           priv->channel, priv->baud, pclk);
       cks = 0;
       brr = 0;
     }
+
+  /* Configure SEMR first (before BRR) */
+  semr = getreg8(priv->base + RZV_SCIF_SEMR_OFFSET);
+  semr &= ~(SCIF_SEMR_BRME | SCIF_SEMR_BGDM);
+  if (brme_enable)
+    {
+      semr |= SCIF_SEMR_BRME;
+    }
+  if (bgdm_enable)
+    {
+      semr |= SCIF_SEMR_BGDM;
+    }
+  putreg8(semr, priv->base + RZV_SCIF_SEMR_OFFSET);
 
   /* Set bit rate register */
   putreg8(brr, priv->base + RZV_SCIF_BRR_OFFSET);
@@ -386,6 +461,9 @@ static void rzv_scif_setbaud(struct rzv_scif_s *priv)
 
   /* Wait for at least 1 bit time */
   up_udelay((1000000 / priv->baud) + 1);
+
+  _info("SCIF%d: Baud %lu, BRR=%d, CKS=%d, BRME=%d, BGDM=%d\n",
+        priv->channel, priv->baud, brr, cks, brme_enable, bgdm_enable);
 }
 
 /****************************************************************************
@@ -398,18 +476,42 @@ static int rzv_scif_setup(struct uart_dev_s *dev)
   uint8_t smr;
   uint16_t scr;
   uint16_t fcr;
+  uint16_t fsr;
+  uint16_t ftcr;
+  int ret;
+
+  /* CRITICAL: Enable peripheral clock first */
+  ret = rzv_clock_enable(priv->clk_id);
+  if (ret < 0)
+    {
+      _err("SCIF%d: Failed to enable clock: %d\n", priv->channel, ret);
+      return ret;
+    }
 
   /* Disable transmit and receive */
   putreg16(0, priv->base + RZV_SCIF_SCR_OFFSET);
+
+  /* Wait for transmit end before configuration */
+  while (!(getreg16(priv->base + RZV_SCIF_FSR_OFFSET) & SCIF_FSR_TEND))
+    {
+      /* Wait for TX to complete */
+    }
 
   /* Reset FIFOs */
   fcr = SCIF_FCR_TFRST | SCIF_FCR_RFRST;
   putreg16(fcr, priv->base + RZV_SCIF_FCR_OFFSET);
   up_udelay(100);
 
-  /* Configure FIFO control register */
-  fcr = 0x0030 | 0x0000;  /* TTRG=8 bytes, RTRG=1 byte */
+  /* Configure FIFO control register with basic triggers */
+  fcr = (SCIF_FCR_TTRG_8 << 4) | (SCIF_FCR_RTRG_1 << 6);
   putreg16(fcr, priv->base + RZV_SCIF_FCR_OFFSET);
+
+  /* Configure FTCR for dynamic FIFO triggers (optional enhancement) */
+  ftcr = (8 << SCIF_FTCR_TFTC_SHIFT) |   /* TX trigger at 8 bytes free */
+         (1 << SCIF_FTCR_RFTC_SHIFT);     /* RX trigger at 1 byte */
+  /* Enable FTCR-based triggers */
+  ftcr |= SCIF_FTCR_TTRGS | SCIF_FTCR_RTRGS;
+  putreg16(ftcr, priv->base + RZV_SCIF_FTCR_OFFSET);
 
   /* Configure serial mode register */
   smr = 0;
@@ -442,9 +544,37 @@ static int rzv_scif_setup(struct uart_dev_s *dev)
   putreg16(0, priv->base + RZV_SCIF_FSR_OFFSET);
   putreg16(0, priv->base + RZV_SCIF_LSR_OFFSET);
 
+  /* Configure flow control if enabled */
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
+  fcr = getreg16(priv->base + RZV_SCIF_FCR_OFFSET);
+
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  if (priv->iflow)
+    {
+      /* Enable RTS flow control (modem control enable) */
+      fcr |= SCIF_FCR_MCE;
+      _info("SCIF%d: RTS flow control enabled\n", priv->channel);
+    }
+#endif
+
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
+  if (priv->oflow)
+    {
+      /* Enable CTS flow control (modem control enable) */
+      fcr |= SCIF_FCR_MCE;
+      _info("SCIF%d: CTS flow control enabled\n", priv->channel);
+    }
+#endif
+
+  putreg16(fcr, priv->base + RZV_SCIF_FCR_OFFSET);
+#endif
+
   /* Enable transmit and receive */
   scr = SCIF_SCR_TE | SCIF_SCR_RE;
   putreg16(scr, priv->base + RZV_SCIF_SCR_OFFSET);
+
+  _info("SCIF%d: Setup complete (base=0x%08lx, baud=%lu)\n",
+        priv->channel, priv->base, priv->baud);
 
   return OK;
 }
@@ -462,6 +592,105 @@ static void rzv_scif_shutdown(struct uart_dev_s *dev)
 }
 
 /****************************************************************************
+ * Name: rzv_scif_rxi_interrupt
+ ****************************************************************************/
+
+static int rzv_scif_rxi_interrupt(int irq, void *context, void *arg)
+{
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
+  struct rzv_scif_s *priv = (struct rzv_scif_s *)dev->priv;
+  uint16_t fsr;
+
+  /* Read status register */
+  fsr = getreg16(priv->base + RZV_SCIF_FSR_OFFSET);
+
+  /* Handle receive */
+  if (fsr & (SCIF_FSR_RDF | SCIF_FSR_DR))
+    {
+      uart_recvchars(dev);
+
+      /* Clear RDF flag */
+      fsr &= ~(SCIF_FSR_RDF | SCIF_FSR_DR);
+      putreg16(fsr, priv->base + RZV_SCIF_FSR_OFFSET);
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: rzv_scif_txi_interrupt
+ ****************************************************************************/
+
+static int rzv_scif_txi_interrupt(int irq, void *context, void *arg)
+{
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
+  struct rzv_scif_s *priv = (struct rzv_scif_s *)dev->priv;
+  uint16_t fsr;
+
+  /* Read status register */
+  fsr = getreg16(priv->base + RZV_SCIF_FSR_OFFSET);
+
+  /* Handle transmit */
+  if (fsr & SCIF_FSR_TDFE)
+    {
+      uart_xmitchars(dev);
+
+      /* Clear TDFE flag */
+      fsr &= ~SCIF_FSR_TDFE;
+      putreg16(fsr, priv->base + RZV_SCIF_FSR_OFFSET);
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: rzv_scif_eri_interrupt
+ ****************************************************************************/
+
+static int rzv_scif_eri_interrupt(int irq, void *context, void *arg)
+{
+  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
+  struct rzv_scif_s *priv = (struct rzv_scif_s *)dev->priv;
+  uint16_t fsr;
+  uint16_t lsr;
+
+  /* Read status registers */
+  fsr = getreg16(priv->base + RZV_SCIF_FSR_OFFSET);
+  lsr = getreg16(priv->base + RZV_SCIF_LSR_OFFSET);
+
+  /* Handle errors */
+  if (fsr & (SCIF_FSR_ER | SCIF_FSR_BRK | SCIF_FSR_FER | SCIF_FSR_PER))
+    {
+      _err("SCIF%d: Error - FSR=0x%04x LSR=0x%04x\n",
+           priv->channel, fsr, lsr);
+
+      /* Clear error flags */
+      fsr &= ~(SCIF_FSR_ER | SCIF_FSR_BRK | SCIF_FSR_FER | SCIF_FSR_PER);
+      putreg16(fsr, priv->base + RZV_SCIF_FSR_OFFSET);
+    }
+
+  /* Handle overrun error */
+  if (lsr & SCIF_LSR_ORER)
+    {
+      _err("SCIF%d: Overrun error\n", priv->channel);
+
+      /* Clear overrun flag */
+      lsr &= ~SCIF_LSR_ORER;
+      putreg16(lsr, priv->base + RZV_SCIF_LSR_OFFSET);
+
+      /* Reset RX FIFO on overrun */
+      uint16_t fcr = getreg16(priv->base + RZV_SCIF_FCR_OFFSET);
+      fcr |= SCIF_FCR_RFRST;
+      putreg16(fcr, priv->base + RZV_SCIF_FCR_OFFSET);
+      up_udelay(10);
+      fcr &= ~SCIF_FCR_RFRST;
+      putreg16(fcr, priv->base + RZV_SCIF_FCR_OFFSET);
+    }
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: rzv_scif_attach
  ****************************************************************************/
 
@@ -470,22 +699,31 @@ static int rzv_scif_attach(struct uart_dev_s *dev)
   struct rzv_scif_s *priv = (struct rzv_scif_s *)dev->priv;
   int ret;
 
-  /* Attach RXI interrupt */
-  ret = irq_attach(priv->irq_rxi, rzv_scif_interrupt, dev);
-  if (ret == OK)
+  /* Map ELC event 0x107 (UB1_RXI_EDGE_N) to RXI interrupt via ICU */
+  priv->irq_rxi = rzv_icu_attach(RZV_ELC_UB1_RXI_EDGE_N,
+                                  rzv_scif_rxi_interrupt, dev, true);
+  if (priv->irq_rxi < 0)
     {
-      /* Attach TXI interrupt */
-      ret = irq_attach(priv->irq_txi, rzv_scif_interrupt, dev);
+      _err("SCIF%d: Failed to attach RXI interrupt\n", priv->channel);
+      return priv->irq_rxi;
     }
 
-  if (ret == OK)
+  /* Map ELC event 0x108 (UB1_TXI_EDGE_N) to TXI interrupt via ICU */
+  priv->irq_txi = rzv_icu_attach(RZV_ELC_UB1_TXI_EDGE_N,
+                                  rzv_scif_txi_interrupt, dev, true);
+  if (priv->irq_txi < 0)
     {
-      /* Enable interrupts at the GIC level */
-      up_enable_irq(priv->irq_rxi);
-      up_enable_irq(priv->irq_txi);
+      _err("SCIF%d: Failed to attach TXI interrupt\n", priv->channel);
+      rzv_icu_detach(priv->irq_rxi);
+      return priv->irq_txi;
     }
 
-  return ret;
+  /* Note: TEI (transmit end) interrupt is optional for now */
+
+  _info("SCIF%d: Interrupts attached (RXI=%d, TXI=%d)\n",
+        priv->channel, priv->irq_rxi, priv->irq_txi);
+
+  return OK;
 }
 
 /****************************************************************************
@@ -496,61 +734,23 @@ static void rzv_scif_detach(struct uart_dev_s *dev)
 {
   struct rzv_scif_s *priv = (struct rzv_scif_s *)dev->priv;
 
-  /* Disable interrupts */
-  up_disable_irq(priv->irq_rxi);
-  up_disable_irq(priv->irq_txi);
+  /* Detach interrupts via ICU */
+  if (priv->irq_rxi > 0)
+    {
+      rzv_icu_detach(priv->irq_rxi);
+      priv->irq_rxi = 0;
+    }
 
-  /* Detach interrupts */
-  irq_detach(priv->irq_rxi);
-  irq_detach(priv->irq_txi);
+  if (priv->irq_txi > 0)
+    {
+      rzv_icu_detach(priv->irq_txi);
+      priv->irq_txi = 0;
+    }
+
+  _info("SCIF%d: Interrupts detached\n", priv->channel);
 }
 
-/****************************************************************************
- * Name: rzv_scif_interrupt
- ****************************************************************************/
 
-static int rzv_scif_interrupt(int irq, void *context, void *arg)
-{
-  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
-  struct rzv_scif_s *priv;
-  uint16_t fsr;
-
-  DEBUGASSERT(dev != NULL && dev->priv != NULL);
-  priv = (struct rzv_scif_s *)dev->priv;
-
-  /* Get status register */
-  fsr = getreg16(priv->base + RZV_SCIF_FSR_OFFSET);
-
-  /* Handle receive interrupt */
-  if (fsr & SCIF_FSR_RDF)
-    {
-      uart_recvchars(dev);
-
-      /* Clear RDF flag */
-      fsr &= ~SCIF_FSR_RDF;
-      putreg16(fsr, priv->base + RZV_SCIF_FSR_OFFSET);
-    }
-
-  /* Handle transmit interrupt */
-  if (fsr & SCIF_FSR_TDFE)
-    {
-      uart_xmitchars(dev);
-
-      /* Clear TDFE flag */
-      fsr &= ~SCIF_FSR_TDFE;
-      putreg16(fsr, priv->base + RZV_SCIF_FSR_OFFSET);
-    }
-
-  /* Handle errors */
-  if (fsr & (SCIF_FSR_ER | SCIF_FSR_BRK | SCIF_FSR_FER | SCIF_FSR_PER))
-    {
-      /* Clear error flags */
-      fsr &= ~(SCIF_FSR_ER | SCIF_FSR_BRK | SCIF_FSR_FER | SCIF_FSR_PER);
-      putreg16(fsr, priv->base + RZV_SCIF_FSR_OFFSET);
-    }
-
-  return OK;
-}
 
 /****************************************************************************
  * Name: rzv_scif_ioctl

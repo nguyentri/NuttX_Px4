@@ -95,6 +95,20 @@ static int rzv2h_pwm_oneshot_example(void)
 }
 #endif
 
+#ifdef CONFIG_RZV2H_WDT_TEST
+static int rzv2h_wdt_test_example(void)
+{
+  int ret = rzv2h_wdt_test_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "WDT test init failed: %d\n", ret);
+      return ret;
+    }
+
+  return wdt_test_main(0, NULL);
+}
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -164,6 +178,19 @@ int rzv2h_app_examples(void)
   else
     {
       syslog(LOG_INFO, "PWM Oneshot example completed successfully\n");
+    }
+#endif
+
+#ifdef CONFIG_RZV2H_WDT_TEST
+  ret = rzv2h_wdt_test_example();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "WDT test example failed: %d\n", ret);
+      last_err = ret;
+    }
+  else
+    {
+      syslog(LOG_INFO, "WDT test example completed successfully\n");
     }
 #endif
 

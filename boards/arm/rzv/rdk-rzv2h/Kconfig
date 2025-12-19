@@ -61,4 +61,13 @@ config RZV2H_ADC_EXAMPLE
       Enable ADC test example for verifying ADC driver functionality
       on RDK-RZV2H board.
 
+config RZV2H_WDT_TEST
+    bool "Watchdog Timer (WDT) test application"
+    default n
+    depends on RZV_WDT && RZV2H_EXAMPLE_SUPPORT
+    ---help---
+      Enable WDT test application for verifying watchdog timer functionality
+      on RDK-RZV2H board. This application demonstrates watchdog initialization,
+      periodic refresh, timeout testing, and system reset behavior.
+
 # ##############################################################################

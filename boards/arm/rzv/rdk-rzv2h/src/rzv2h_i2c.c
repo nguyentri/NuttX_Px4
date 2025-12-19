@@ -34,7 +34,7 @@
 #include <arch/board/board.h>
 
 #include "rzv_gpio.h"
-#include "rzv_riic.h"
+#include "rzv_i2c.h"
 #include "rdk-rzv2h.h"
 
 /****************************************************************************
@@ -54,7 +54,7 @@ int rzv2h_i2c_initialize(void)
   struct i2c_master_s *i2c;
   int ret = OK;
 
-#ifdef CONFIG_RZV_RIIC0
+#ifdef CONFIG_RZV_I2C0
   /* Configure RIIC0 pins */
 
   rzv_gpioconfig(BOARD_I2C0_SDA_GPIO);
@@ -62,7 +62,7 @@ int rzv2h_i2c_initialize(void)
 
   /* Initialize RIIC0 */
 
-  i2c = rzv_riic_initialize(0);
+  i2c = rzv_i2c_initialize(0);
   if (i2c == NULL)
     {
       i2cerr("ERROR: Failed to initialize I2C0\n");
@@ -84,7 +84,7 @@ int rzv2h_i2c_initialize(void)
     }
 #endif
 
-#ifdef CONFIG_RZV_RIIC1
+#ifdef CONFIG_RZV_I2C1
   /* Configure RIIC1 pins */
 
   rzv_gpioconfig(BOARD_I2C1_SDA_GPIO);
@@ -92,7 +92,7 @@ int rzv2h_i2c_initialize(void)
 
   /* Initialize RIIC1 */
 
-  i2c = rzv_riic_initialize(1);
+  i2c = rzv_i2c_initialize(1);
   if (i2c == NULL)
     {
       i2cerr("ERROR: Failed to initialize I2C1\n");
@@ -114,7 +114,7 @@ int rzv2h_i2c_initialize(void)
     }
 #endif
 
-#ifdef CONFIG_RZV_RIIC2
+#ifdef CONFIG_RZV_I2C2
   /* Configure RIIC2 pins */
 
   rzv_gpioconfig(BOARD_I2C2_SDA_GPIO);
@@ -122,7 +122,7 @@ int rzv2h_i2c_initialize(void)
 
   /* Initialize RIIC2 */
 
-  i2c = rzv_riic_initialize(2);
+  i2c = rzv_i2c_initialize(2);
   if (i2c == NULL)
     {
       i2cerr("ERROR: Failed to initialize I2C2\n");
@@ -144,12 +144,12 @@ int rzv2h_i2c_initialize(void)
     }
 #endif
 
-#ifdef CONFIG_RZV_RIIC3
+#ifdef CONFIG_RZV_I2C3
   /* Configure RIIC3 pins (if defined in board.h) */
 
   /* Note: RIIC3 pins not currently defined in EVK board.h */
 
-  i2c = rzv_riic_initialize(3);
+  i2c = rzv_i2c_initialize(3);
   if (i2c == NULL)
     {
       i2cerr("ERROR: Failed to initialize I2C3\n");

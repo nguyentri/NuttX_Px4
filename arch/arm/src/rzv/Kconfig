@@ -415,34 +415,34 @@ config RZV_SCIF4
    select RZV_UART_SCI
    select UART4_SERIALDRIVER
 
-config RZV_RIIC
+config RZV_I2C
    bool
    default n
    select I2C
 
-config RZV_RIIC0
+config RZV_I2C0
    bool "I2C0 (RIIC0)"
    default n
    depends on RZV_HAVE_I2C0
-   select RZV_RIIC
+   select RZV_I2C
 
-config RZV_RIIC1
+config RZV_I2C1
    bool "I2C1 (RIIC1)"
    default n
    depends on RZV_HAVE_I2C1
-   select RZV_RIIC
+   select RZV_I2C
 
-config RZV_RIIC2
+config RZV_I2C2
    bool "I2C2 (RIIC2)"
    default n
    depends on RZV_HAVE_I2C2
-   select RZV_RIIC
+   select RZV_I2C
 
-config RZV_RIIC3
+config RZV_I2C3
    bool "I2C3 (RIIC3)"
    default n
    depends on RZV_HAVE_I2C3
-   select RZV_RIIC
+   select RZV_I2C
 
 config RZV_SPI
    bool
@@ -649,6 +649,81 @@ config RZV_OSTM2
    depends on RZV_HAVE_OSTM2
    select RZV_TIMER
 
+# GTM (General Timer Module / OSTM) Configuration
+
+config RZV_GTM
+   bool "General Timer Module (GTM/OSTM)"
+   default n
+   depends on RZV_HAVE_GTM
+   select TIMER
+   ---help---
+     Enable support for the RZV General Timer Module (GTM/OSTM).
+     This is a 32-bit free-running timer suitable for high-resolution
+     timing applications like PX4 HRT (High Resolution Timer).
+
+config RZV_GTM_CLOCK_FREQUENCY
+   int "GTM clock frequency (Hz)"
+   default 200000000
+   depends on RZV_GTM
+   ---help---
+     The GTM clock frequency in Hz. Default is 200 MHz.
+
+config RZV_GTM0_TIMER
+   bool "GTM0 Timer"
+   default n
+   depends on RZV_HAVE_GTM0 && RZV_GTM
+   ---help---
+     Enable GTM0 as a timer device.
+
+config RZV_GTM1_TIMER
+   bool "GTM1 Timer"
+   default n
+   depends on RZV_HAVE_GTM1 && RZV_GTM
+   ---help---
+     Enable GTM1 as a timer device.
+
+config RZV_GTM2_TIMER
+   bool "GTM2 Timer"
+   default n
+   depends on RZV_HAVE_GTM2 && RZV_GTM
+   ---help---
+     Enable GTM2 as a timer device.
+
+config RZV_GTM3_TIMER
+   bool "GTM3 Timer"
+   default n
+   depends on RZV_HAVE_GTM3 && RZV_GTM
+   ---help---
+     Enable GTM3 as a timer device.
+
+config RZV_GTM4_TIMER
+   bool "GTM4 Timer"
+   default n
+   depends on RZV_HAVE_GTM4 && RZV_GTM
+   ---help---
+     Enable GTM4 as a timer device.
+
+config RZV_GTM5_TIMER
+   bool "GTM5 Timer"
+   default n
+   depends on RZV_HAVE_GTM5 && RZV_GTM
+   ---help---
+     Enable GTM5 as a timer device.
+
+config RZV_GTM6_TIMER
+   bool "GTM6 Timer"
+   default n
+   depends on RZV_HAVE_GTM6 && RZV_GTM
+   ---help---
+     Enable GTM6 as a timer device.
+
+config RZV_GTM7_TIMER
+   bool "GTM7 Timer"
+   default n
+   depends on RZV_HAVE_GTM7 && RZV_GTM
+   ---help---
+     Enable GTM7 as a timer device.
+
 config RZV_GPT
    bool "General PWM Timer (GPT)"
    default n
@@ -752,3 +827,79 @@ config RZV_ETHERNET
    default n
    depends on RZV_HAVE_ETHERC_MII || RZV_HAVE_ETHERC_RMII
    select NETDEVICES
+
+# Watchdog Timer (WDT)
+
+config RZV_WDT
+   bool "Watchdog Timer (WDT)"
+   default n
+   depends on RZV_HAVE_WDT
+   select WATCHDOG
+   ---help---
+     Enable Watchdog Timer support. The RZV2H has 4 WDT channels, one for
+     each CPU domain (CR8_0, CR8_1, CM33, CA55).
+
+if RZV_WDT
+
+config RZV_WDT_INTERRUPT_MODE
+   bool "Use interrupt mode (NMI) instead of reset"
+   default n
+   ---help---
+     Configure WDT to generate NMI interrupt on timeout instead of
+     system reset. This allows for graceful handling of watchdog events.
+     If not selected, the watchdog will cause a system reset on timeout.
+
+config RZV_WDT0
+   bool "WDT0 (CR8_0 domain)"
+   default n
+   ---help---
+     Enable WDT0 for CR8_0 core domain. This is typically used for
+     real-time control applications.
+
+config RZV_WDT0_DEVPATH
+   string "WDT0 device path"
+   default "/dev/watchdog0"
+   depends on RZV_WDT0
+   ---help---
+     Device path for WDT0, defaults to /dev/watchdog0
+
+config RZV_WDT1
+   bool "WDT1 (CR8_1 domain)"
+   default n
+   ---help---
+     Enable WDT1 for CR8_1 core domain.
+
+config RZV_WDT1_DEVPATH
+   string "WDT1 device path"
+   default "/dev/watchdog1"
+   depends on RZV_WDT1
+   ---help---
+     Device path for WDT1, defaults to /dev/watchdog1
+
+config RZV_WDT2
+   bool "WDT2 (CM33 domain)"
+   default n
+   ---help---
+     Enable WDT2 for CM33 core domain.
+
+config RZV_WDT2_DEVPATH
+   string "WDT2 device path"
+   default "/dev/watchdog2"
+   depends on RZV_WDT2
+   ---help---
+     Device path for WDT2, defaults to /dev/watchdog2
+
+config RZV_WDT3
+   bool "WDT3 (CA55 domain)"
+   default n
+   ---help---
+     Enable WDT3 for CA55 core domain.
+
+config RZV_WDT3_DEVPATH
+   string "WDT3 device path"
+   default "/dev/watchdog3"
+   depends on RZV_WDT3
+   ---help---
+     Device path for WDT3, defaults to /dev/watchdog3
+
+endif # RZV_WDT

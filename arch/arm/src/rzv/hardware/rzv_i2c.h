@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/rzv/hardware/rzv_riic.h
+ * arch/arm/src/rzv/hardware/rzv_i2c.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RZV_HARDWARE_RZV_RIIC_H
-#define __ARCH_ARM_SRC_RZV_HARDWARE_RZV_RIIC_H
+#ifndef __ARCH_ARM_SRC_RZV_HARDWARE_RZV_I2C_H
+#define __ARCH_ARM_SRC_RZV_HARDWARE_RZV_I2C_H
 
 /****************************************************************************
  * Included Files
@@ -444,4 +444,4 @@
 #define RIIC_BRH_1M         6    /* Bit rate high period */
 #define RIIC_BRL_1M         5    /* Bit rate low period */
 
-#endif /* __ARCH_ARM_SRC_RZV_HARDWARE_RZV_RIIC_H */
+#endif /* __ARCH_ARM_SRC_RZV_HARDWARE_RZV_I2C_H */

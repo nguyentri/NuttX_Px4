@@ -1,12 +1,31 @@
 /****************************************************************************
  * arch/arm/src/rzv/rzv_gtm.h
  *
- * Public API for RZV GTM (OS Timer) support.
- */
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_RZV_RZV_GTM_H
 #define __ARCH_ARM_SRC_RZV_RZV_GTM_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -14,24 +33,61 @@ extern "C"
 {
 #endif
 
-/* Initialize a GTM channel and register an IRQ handler.
- * handler: function of signature int handler(int irq, void *context, void *arg)
- * arg: user argument passed back to the handler
- * Returns 0 on success or a negative errno.
- */
-int rzv_gtm_init_channel(int ch, int (*handler)(int, void *, void *), void *arg);
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
-/* Deinitialize a GTM channel and detach any allocated IRQ slot. */
-int rzv_gtm_deinit_channel(int ch);
+/* Default clock frequency for GTM (200 MHz typical for RZV2H) */
+#ifndef CONFIG_RZV_GTM_CLOCK_FREQUENCY
+#  define CONFIG_RZV_GTM_CLOCK_FREQUENCY  200000000
+#endif
 
-/* Set the timer period (OSTM compare) in raw counts. */
-int rzv_gtm_set_period(int ch, uint32_t period_counts);
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
 
-/* Start the GTM OS Timer channel. */
-int rzv_gtm_start(int ch);
+#ifndef __ASSEMBLY__
 
-/* Stop the GTM OS Timer channel. */
-int rzv_gtm_stop(int ch);
+struct timer_lowerhalf_s;
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: rzv_gtm_timer_initialize
+ *
+ * Description:
+ *   Initialize GTM timer for use as NuttX timer device.
+ *   Returns timer_lowerhalf_s interface for registration with timer_register().
+ *
+ * Input Parameters:
+ *   channel - GTM channel number (0-7)
+ *
+ * Returned Value:
+ *   Pointer to timer_lowerhalf_s on success, NULL on failure
+ *
+ ****************************************************************************/
+
+FAR struct timer_lowerhalf_s *rzv_gtm_timer_initialize(int channel);
+
+/****************************************************************************
+ * Name: rzv_gtm_get_frequency
+ *
+ * Description:
+ *   Get the clock frequency for a GTM channel in Hz.
+ *
+ * Input Parameters:
+ *   channel - GTM channel number (0-7)
+ *
+ * Returned Value:
+ *   Clock frequency in Hz, or 0 on error
+ *
+ ****************************************************************************/
+
+uint32_t rzv_gtm_get_frequency(int channel);
+
+#endif /* __ASSEMBLY__ */
 
 #ifdef __cplusplus
 }
