@@ -119,8 +119,8 @@
 
 /* Maximum values ***********************************************************/
 
-#define RZV_CPG_MAX_CLKON     3     /* CLKON0-CLKON2 */
-#define RZV_CPG_MAX_RST       3     /* RST0-RST2 */
+#define RZV_CPG_MAX_CLKON     24    /* CLKON0-CLKON24 */
+#define RZV_CPG_MAX_RST       17    /* RST0-RST17 */
 
 /* Board-specific clock frequencies (Hz) ************************************/
 /* These values are derived from the Renesas FSP clock configuration tool
@@ -260,6 +260,18 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+/*
+ * Clock status structure - provides comprehensive clock state information
+ */
+
+struct rzv_clock_status_s
+{
+  bool enabled;          /* Clock is enabled */
+  bool reset_asserted;   /* Reset is asserted (module held in reset) */
+  uint32_t domain;       /* Clock domain number */
+  uint32_t bit;          /* Bit position in domain */
+};
 
 /*
  * Clock tree frequency identifiers.  These align with the Renesas FSP
@@ -470,6 +482,77 @@ uint32_t rzv_clock_get_rate(enum rzv_clock_id_e clock_id);
  */
 
 const char *rzv_clock_get_name(enum rzv_clock_id_e clock_id);
+
+/****************************************************************************
+ * Name: rzv_clock_set_lowpower_mode
+ *
+ * Description:\n *   Enable or disable low-power mode for a clock domain.
+ *   In low-power mode, the clock may be gated when not actively used.
+ *
+ * Input Parameters:
+ *   clk_id - Clock identifier (domain + bit encoded)
+ *   enable - true to enable low-power mode, false to disable
+ *
+ * Returned Value:
+ *   OK on success, negative errno on failure
+ *
+ ****************************************************************************/
+
+int rzv_clock_set_lowpower_mode(uint32_t clk_id, bool enable);
+
+/****************************************************************************
+ * Name: rzv_clock_enable_monitoring
+ *
+ * Description:
+ *   Enable clock monitoring to detect frequency anomalies and failures.
+ *
+ * Input Parameters:
+ *   clock_id - Clock to monitor from rzv_clock_id_e enum
+ *   enable   - true to enable monitoring, false to disable
+ *
+ * Returned Value:
+ *   OK on success, negative errno on failure
+ *
+ ****************************************************************************/
+
+int rzv_clock_enable_monitoring(enum rzv_clock_id_e clock_id, bool enable);
+
+/****************************************************************************
+ * Name: rzv_clock_set_frequency
+ *
+ * Description:
+ *   Dynamically change clock frequency for power/performance optimization.
+ *
+ * Input Parameters:
+ *   clock_id     - Clock to modify from rzv_clock_id_e enum
+ *   frequency_hz - Target frequency in Hz
+ *
+ * Returned Value:
+ *   OK on success, negative errno on failure
+ *
+ ****************************************************************************/
+
+int rzv_clock_set_frequency(enum rzv_clock_id_e clock_id,
+                            uint32_t frequency_hz);
+
+/****************************************************************************
+ * Name: rzv_clock_get_status
+ *
+ * Description:
+ *   Get comprehensive status of a clock domain including enable state,
+ *   reset state, domain, and bit position.
+ *
+ * Input Parameters:
+ *   clk_id - Clock identifier (domain + bit encoded)
+ *   status - Pointer to status structure to populate
+ *
+ * Returned Value:
+ *   OK on success, negative errno on failure
+ *
+ ****************************************************************************/
+
+int rzv_clock_get_status(uint32_t clk_id,
+                         struct rzv_clock_status_s *status);
 
 /*
  * Initialize early clock configuration for the SoC/board.  This is called

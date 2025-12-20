@@ -42,9 +42,9 @@ CHIP_CSRCS += rzv_timerisr.c
 CHIP_CSRCS += rzv_serial.c
 
 # ADC driver
-#ifeq ($(CONFIG_RZV_ADC),y)
+ifeq ($(CONFIG_RZV_ADC),y)
 CHIP_CSRCS += rzv_adc.c
-#endif
+endif
 
 # I2C driver (RIIC)
 ifeq ($(CONFIG_RZV_I2C),y)
@@ -57,9 +57,9 @@ CHIP_CSRCS += rzv_sci_i2c.c
 endif
 
 # DMAC driver
-#ifeq ($(CONFIG_RZV_DMA),y)
+ifeq ($(CONFIG_RZV_DMA),y)
 CHIP_CSRCS += rzv_dmac.c
-#endif
+endif
 
 # DTC driver
 ifeq ($(CONFIG_RZV_DTC),y)
@@ -67,9 +67,9 @@ CHIP_CSRCS += rzv_dtc.c
 endif
 
 # SPI driver
-#ifeq ($(CONFIG_RZV_SPI),y)
+ifeq ($(CONFIG_RZV_SPI),y)
 CHIP_CSRCS += rzv_spi.c
-#endif
+endif
 
 # SCI SPI driver (SPI mode)
 ifeq ($(CONFIG_RZV_SCI_SPI),y)

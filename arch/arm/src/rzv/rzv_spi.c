@@ -166,12 +166,27 @@ static void rzv_spi_recvblock(struct spi_dev_s *dev,
  * Private Data
  ****************************************************************************/
 
-/* Weak default implementations for board-specific SPI functions */
+/* Weak default implementations for board-specific SPI functions
+ *
+ * Note: Hardware CS support via SSLP register is available but requires
+ * board-specific configuration. To enable hardware CS:
+ *
+ * 1. Define board-specific rzv_spi_select() that configures SSLP register:
+ *    - Set SSLP bits in SPCMD register for automatic CS control
+ *    - Configure SSL pin polarity via SSLP register
+ *
+ * 2. Configure GPIO pins for SSL function (not GPIO mode)
+ *
+ * The default implementation uses GPIO-based manual CS control via
+ * board_spi_select() which is more flexible and commonly used.
+ */
 
 weak_function void rzv_spi_select(struct spi_dev_s *dev, uint32_t devid,
                                    bool selected)
 {
-  /* Default implementation does nothing */
+  /* Default implementation uses board-provided GPIO CS.
+   * For hardware CS, override this function to configure SSLP.
+   */
 }
 
 weak_function uint8_t rzv_spi_status(struct spi_dev_s *dev, uint32_t devid)
@@ -314,7 +329,6 @@ static void rzv_spi_setfrequency(struct rzv_spi_priv_s *priv,
                                  uint32_t frequency)
 {
   uint32_t pclk;
-  uint32_t divisor;
   uint8_t spbr;
   uint8_t brdv;
 
@@ -381,7 +395,11 @@ static void rzv_spi_setfrequency(struct rzv_spi_priv_s *priv,
 
 static void rzv_spi_setmode(struct rzv_spi_priv_s *priv, uint8_t mode)
 {
-  uint32_t spcmd;  /* Fixed: SPCMD is 32-bit register */
+  uint32_t spcmd;  /* SPCMD is 32-bit register on RZV2H */
+  irqstate_t flags;
+
+  /* Critical section for atomic register modification */
+  flags = enter_critical_section();
 
   /* Disable SPI */
   rzv_spi_putreg32(priv, RZV_SPI_SPCR_OFFSET, 0);
@@ -412,10 +430,11 @@ static void rzv_spi_setmode(struct rzv_spi_priv_s *priv, uint8_t mode)
 
       default:
         spierr("Invalid mode: %d\n", mode);
+        leave_critical_section(flags);
         return;
     }
 
-  /* Write command register */
+  /* Write command register atomically */
   rzv_spi_putreg32(priv, RZV_SPI_SPCMD_OFFSET(0), spcmd);
 
   priv->mode = mode;
@@ -423,6 +442,8 @@ static void rzv_spi_setmode(struct rzv_spi_priv_s *priv, uint8_t mode)
   /* Re-enable SPI */
   rzv_spi_putreg32(priv, RZV_SPI_SPCR_OFFSET,
                   SPI_SPCR_SPE | SPI_SPCR_MSTR);
+
+  leave_critical_section(flags);
 
   spiinfo("Mode: %d\n", mode);
 }

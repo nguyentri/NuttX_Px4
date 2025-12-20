@@ -44,11 +44,41 @@
 #include "hardware/rzv_sci.h"
 #include <arch/rzv/rzv2h_irq.h>
 
+#if defined(CONFIG_SERIAL_TXDMA) || defined(CONFIG_SERIAL_RXDMA)
+#  include "rzv_dmac.h"
+#endif
+
 #ifdef USE_SERIALDRIVER
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* FIFO Mode Configuration */
+#if defined(CONFIG_RZV_SCI_FIFO_MODE)
+/* Set Trigger levels and release reset
+ * For RZV2H SCI-B with 16-byte FIFO:
+ * RTRG: RX trigger level (configurable via Kconfig, default: 1 for low latency)
+ * TTRG: TX trigger level (configurable via Kconfig, default: 15 for efficiency)
+ * RSTRG: RTS flow control trigger (set to 15 = fifo_depth - 1)
+ *
+ * RX interrupt triggers when: count >= RTRG or timeout after 15 bit times
+ * TX interrupt triggers when: count <= TTRG (free space available)
+ */
+#ifndef CONFIG_RZV_SCI_FIFO_RX_TRIGGER
+#  define CONFIG_RZV_SCI_FIFO_RX_TRIGGER 1  /* Default: trigger on 1 byte */
+#endif
+#ifndef CONFIG_RZV_SCI_FIFO_TX_TRIGGER
+#  define CONFIG_RZV_SCI_FIFO_TX_TRIGGER 15 /* Default: trigger when ≤15 in FIFO */
+#endif
+#endif
+
+/* DMA buffer sizes */
+#ifdef CONFIG_SERIAL_RXDMA
+#  ifndef CONFIG_RZV_SERIAL_RXDMA_BUFFER_SIZE
+#    define CONFIG_RZV_SERIAL_RXDMA_BUFFER_SIZE 256
+#  endif
+#endif
 
 /* Console configuration */
 
@@ -393,6 +423,7 @@ struct rzv_uart_s
   uintptr_t uartbase;   /* Base address of UART registers */
   uint32_t  baud;       /* Configured baud rate */
   uint32_t  clk_id;     /* Clock identifier */
+  uint32_t  sr;         /* Saved status bits for error recovery */
   uint8_t   channel;    /* SCI channel number (0-9) */
   int       irq_rxi;    /* Dynamically allocated RX interrupt (ICU slot) */
   int       irq_txi;    /* Dynamically allocated TX interrupt (ICU slot) */
@@ -405,6 +436,22 @@ struct rzv_uart_s
   uint8_t   parity;     /* 0=none, 1=odd, 2=even */
   uint8_t   bits;       /* Number of bits (7 or 8) */
   bool      stopbits2;  /* True: 2 stop bits */
+  uint8_t   fifo_depth; /* FIFO depth: 0=no FIFO, 16=FIFO supported */
+
+#ifdef CONFIG_SERIAL_TXDMA
+  int               dma_tx_chn;    /* DMAC channel for TX (-1 = not configured) */
+  rzv_dmac_handle_t dma_tx_handle; /* DMAC handle for TX */
+  bool              dma_tx_active; /* DMA transfer in progress */
+#endif
+
+#ifdef CONFIG_SERIAL_RXDMA
+  int               dma_rx_chn;    /* DMAC channel for RX (-1 = not configured) */
+  rzv_dmac_handle_t dma_rx_handle; /* DMAC handle for RX */
+  uint8_t          *rx_dma_buf;    /* Buffer for RX DMAC */
+  size_t            rx_dma_size;   /* Size of RX DMAC buffer */
+  size_t            rx_dma_pos;    /* Current read position */
+  bool              dma_rx_active; /* DMA transfer in progress */
+#endif
 };
 
 /* Baud rate calculation structure */
@@ -469,6 +516,26 @@ static void rzv_txint(struct uart_dev_s *dev, bool enable);
 static bool rzv_txready(struct uart_dev_s *dev);
 static bool rzv_txempty(struct uart_dev_s *dev);
 
+#ifdef CONFIG_RZV_SCI_FIFO_MODE
+static void rzv_fifo_configure(struct rzv_uart_s *priv);
+#endif
+
+#ifdef CONFIG_SERIAL_TXDMA
+static void rzv_dma_txcallback(void *handle, int event, void *user_data);
+static int  rzv_dma_setup_tx(struct rzv_uart_s *priv);
+static void rzv_dma_shutdown_tx(struct rzv_uart_s *priv);
+static void rzv_dma_send(struct uart_dev_s *dev, const char *buffer, size_t len);
+static void rzv_dma_txint(struct uart_dev_s *dev, bool enable);
+static void rzv_dma_txavailable(struct uart_dev_s *dev);
+#endif
+
+#ifdef CONFIG_SERIAL_RXDMA
+static void rzv_dma_rxcallback(void *handle, int event, void *user_data);
+static int  rzv_dma_setup_rx(struct rzv_uart_s *priv);
+static void rzv_dma_shutdown_rx(struct rzv_uart_s *priv);
+static void rzv_dma_rxavailable(struct uart_dev_s *dev);
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -487,7 +554,16 @@ static const struct uart_ops_s g_uart_ops =
   .rxflowcontrol  = NULL,
 #endif
   .send           = rzv_send,
+#ifdef CONFIG_SERIAL_TXDMA
+  .dmasend        = (void *)rzv_dma_send,
+  .dmatxavail     = rzv_dma_txavailable,
+  .txint          = rzv_dma_txint,
+#else
   .txint          = rzv_txint,
+#endif
+#ifdef CONFIG_SERIAL_RXDMA
+  .dmarxavail     = rzv_dma_rxavailable,
+#endif
   .txready        = rzv_txready,
   .txempty        = rzv_txempty,
 };
@@ -566,6 +642,7 @@ static struct rzv_uart_s g_sci0priv =
   .uartbase  = RZV_SCI0_BASE,
   .baud      = CONFIG_SCI0_BAUD,
   .clk_id    = RZV_CPG_CLK_SCI0,
+  .sr        = 0,
   .channel   = 0,
   .irq_rxi   = -1,  /* Allocated dynamically via ICU */
   .irq_txi   = -1,
@@ -578,6 +655,18 @@ static struct rzv_uart_s g_sci0priv =
   .parity    = CONFIG_SCI0_PARITY,
   .bits      = CONFIG_SCI0_BITS,
   .stopbits2 = CONFIG_SCI0_2STOP,
+  .fifo_depth= 0,
+#ifdef CONFIG_SERIAL_TXDMA
+  .dma_tx_chn = -1,  /* Not configured by default */
+  .dma_tx_active = false,
+#endif
+#ifdef CONFIG_SERIAL_RXDMA
+  .dma_rx_chn = -1,  /* Not configured by default */
+  .rx_dma_buf = NULL,
+  .rx_dma_size = 0,
+  .rx_dma_pos = 0,
+  .dma_rx_active = false,
+#endif
 };
 
 static uart_dev_t g_sci0port =
@@ -605,6 +694,7 @@ static struct rzv_uart_s g_sci1priv =
   .uartbase  = RZV_SCI1_BASE,
   .baud      = CONFIG_SCI1_BAUD,
   .clk_id    = RZV_CPG_CLK_SCI1,
+  .sr        = 0,
   .channel   = 1,
   .irq_rxi   = -1,  /* Allocated dynamically via ICU */
   .irq_txi   = -1,
@@ -617,6 +707,18 @@ static struct rzv_uart_s g_sci1priv =
   .parity    = CONFIG_SCI1_PARITY,
   .bits      = CONFIG_SCI1_BITS,
   .stopbits2 = CONFIG_SCI1_2STOP,
+  .fifo_depth= 0,
+#ifdef CONFIG_SERIAL_TXDMA
+  .dma_tx_chn = -1,
+  .dma_tx_active = false,
+#endif
+#ifdef CONFIG_SERIAL_RXDMA
+  .dma_rx_chn = -1,
+  .rx_dma_buf = NULL,
+  .rx_dma_size = 0,
+  .rx_dma_pos = 0,
+  .dma_rx_active = false,
+#endif
 };
 
 static uart_dev_t g_sci1port =
@@ -647,6 +749,7 @@ static struct rzv_uart_s g_sci2priv =
   .uartbase  = RZV_SCI2_BASE,
   .baud      = CONFIG_SCI2_BAUD,
   .clk_id    = RZV_CPG_CLK_SCI2,
+  .sr        = 0,
   .channel   = 2,
   .irq_rxi   = -1,
   .irq_txi   = -1,
@@ -659,6 +762,18 @@ static struct rzv_uart_s g_sci2priv =
   .parity    = CONFIG_SCI2_PARITY,
   .bits      = CONFIG_SCI2_BITS,
   .stopbits2 = CONFIG_SCI2_2STOP,
+  .fifo_depth= 0,
+#ifdef CONFIG_SERIAL_TXDMA
+  .dma_tx_chn = -1,
+  .dma_tx_active = false,
+#endif
+#ifdef CONFIG_SERIAL_RXDMA
+  .dma_rx_chn = -1,
+  .rx_dma_buf = NULL,
+  .rx_dma_size = 0,
+  .rx_dma_pos = 0,
+  .dma_rx_active = false,
+#endif
 };
 
 static uart_dev_t g_sci2port =
@@ -689,6 +804,7 @@ static struct rzv_uart_s g_sci3priv =
   .uartbase  = RZV_SCI3_BASE,
   .baud      = CONFIG_SCI3_BAUD,
   .clk_id    = RZV_CPG_CLK_SCI3,
+  .sr        = 0,
   .channel   = 3,
   .irq_rxi   = -1,
   .irq_txi   = -1,
@@ -701,6 +817,18 @@ static struct rzv_uart_s g_sci3priv =
   .parity    = CONFIG_SCI3_PARITY,
   .bits      = CONFIG_SCI3_BITS,
   .stopbits2 = CONFIG_SCI3_2STOP,
+  .fifo_depth= 0,
+#ifdef CONFIG_SERIAL_TXDMA
+  .dma_tx_chn = -1,
+  .dma_tx_active = false,
+#endif
+#ifdef CONFIG_SERIAL_RXDMA
+  .dma_rx_chn = -1,
+  .rx_dma_buf = NULL,
+  .rx_dma_size = 0,
+  .rx_dma_pos = 0,
+  .dma_rx_active = false,
+#endif
 };
 
 static uart_dev_t g_sci3port =
@@ -731,6 +859,7 @@ static struct rzv_uart_s g_sci4priv =
   .uartbase  = RZV_SCI4_BASE,
   .baud      = CONFIG_SCI4_BAUD,
   .clk_id    = RZV_CPG_CLK_SCI4,
+  .sr        = 0,
   .channel   = 4,
   .irq_rxi   = -1,
   .irq_txi   = -1,
@@ -743,6 +872,18 @@ static struct rzv_uart_s g_sci4priv =
   .parity    = CONFIG_SCI4_PARITY,
   .bits      = CONFIG_SCI4_BITS,
   .stopbits2 = CONFIG_SCI4_2STOP,
+  .fifo_depth= 0,
+#ifdef CONFIG_SERIAL_TXDMA
+  .dma_tx_chn = -1,
+  .dma_tx_active = false,
+#endif
+#ifdef CONFIG_SERIAL_RXDMA
+  .dma_rx_chn = -1,
+  .rx_dma_buf = NULL,
+  .rx_dma_size = 0,
+  .rx_dma_pos = 0,
+  .dma_rx_active = false,
+#endif
 };
 
 static uart_dev_t g_sci4port =
@@ -773,6 +914,7 @@ static struct rzv_uart_s g_sci5priv =
   .uartbase  = RZV_SCI5_BASE,
   .baud      = CONFIG_SCI5_BAUD,
   .clk_id    = RZV_CPG_CLK_SCI5,
+  .sr        = 0,
   .channel   = 5,
   .irq_rxi   = -1,
   .irq_txi   = -1,
@@ -785,6 +927,18 @@ static struct rzv_uart_s g_sci5priv =
   .parity    = CONFIG_SCI5_PARITY,
   .bits      = CONFIG_SCI5_BITS,
   .stopbits2 = CONFIG_SCI5_2STOP,
+  .fifo_depth= 0,
+#ifdef CONFIG_SERIAL_TXDMA
+  .dma_tx_chn = -1,
+  .dma_tx_active = false,
+#endif
+#ifdef CONFIG_SERIAL_RXDMA
+  .dma_rx_chn = -1,
+  .rx_dma_buf = NULL,
+  .rx_dma_size = 0,
+  .rx_dma_pos = 0,
+  .dma_rx_active = false,
+#endif
 };
 
 static uart_dev_t g_sci5port =
@@ -815,6 +969,7 @@ static struct rzv_uart_s g_sci6priv =
   .uartbase  = RZV_SCI6_BASE,
   .baud      = CONFIG_SCI6_BAUD,
   .clk_id    = RZV_CPG_CLK_SCI6,
+  .sr        = 0,
   .channel   = 6,
   .irq_rxi   = -1,
   .irq_txi   = -1,
@@ -827,6 +982,18 @@ static struct rzv_uart_s g_sci6priv =
   .parity    = CONFIG_SCI6_PARITY,
   .bits      = CONFIG_SCI6_BITS,
   .stopbits2 = CONFIG_SCI6_2STOP,
+  .fifo_depth= 0,
+#ifdef CONFIG_SERIAL_TXDMA
+  .dma_tx_chn = -1,
+  .dma_tx_active = false,
+#endif
+#ifdef CONFIG_SERIAL_RXDMA
+  .dma_rx_chn = -1,
+  .rx_dma_buf = NULL,
+  .rx_dma_size = 0,
+  .rx_dma_pos = 0,
+  .dma_rx_active = false,
+#endif
 };
 
 static uart_dev_t g_sci6port =
@@ -857,6 +1024,7 @@ static struct rzv_uart_s g_sci7priv =
   .uartbase  = RZV_SCI7_BASE,
   .baud      = CONFIG_SCI7_BAUD,
   .clk_id    = RZV_CPG_CLK_SCI7,
+  .sr        = 0,
   .channel   = 7,
   .irq_rxi   = -1,
   .irq_txi   = -1,
@@ -869,6 +1037,18 @@ static struct rzv_uart_s g_sci7priv =
   .parity    = CONFIG_SCI7_PARITY,
   .bits      = CONFIG_SCI7_BITS,
   .stopbits2 = CONFIG_SCI7_2STOP,
+  .fifo_depth= 0,
+#ifdef CONFIG_SERIAL_TXDMA
+  .dma_tx_chn = -1,
+  .dma_tx_active = false,
+#endif
+#ifdef CONFIG_SERIAL_RXDMA
+  .dma_rx_chn = -1,
+  .rx_dma_buf = NULL,
+  .rx_dma_size = 0,
+  .rx_dma_pos = 0,
+  .dma_rx_active = false,
+#endif
 };
 
 static uart_dev_t g_sci7port =
@@ -899,6 +1079,7 @@ static struct rzv_uart_s g_sci8priv =
   .uartbase  = RZV_SCI8_BASE,
   .baud      = CONFIG_SCI8_BAUD,
   .clk_id    = RZV_CPG_CLK_SCI8,
+  .sr        = 0,
   .channel   = 8,
   .irq_rxi   = -1,
   .irq_txi   = -1,
@@ -911,6 +1092,18 @@ static struct rzv_uart_s g_sci8priv =
   .parity    = CONFIG_SCI8_PARITY,
   .bits      = CONFIG_SCI8_BITS,
   .stopbits2 = CONFIG_SCI8_2STOP,
+  .fifo_depth= 0,
+#ifdef CONFIG_SERIAL_TXDMA
+  .dma_tx_chn = -1,
+  .dma_tx_active = false,
+#endif
+#ifdef CONFIG_SERIAL_RXDMA
+  .dma_rx_chn = -1,
+  .rx_dma_buf = NULL,
+  .rx_dma_size = 0,
+  .rx_dma_pos = 0,
+  .dma_rx_active = false,
+#endif
 };
 
 static uart_dev_t g_sci8port =
@@ -941,6 +1134,7 @@ static struct rzv_uart_s g_sci9priv =
   .uartbase  = RZV_SCI9_BASE,
   .baud      = CONFIG_SCI9_BAUD,
   .clk_id    = RZV_CPG_CLK_SCI9,
+  .sr        = 0,
   .channel   = 9,
   .irq_rxi   = -1,
   .irq_txi   = -1,
@@ -953,6 +1147,18 @@ static struct rzv_uart_s g_sci9priv =
   .parity    = CONFIG_SCI9_PARITY,
   .bits      = CONFIG_SCI9_BITS,
   .stopbits2 = CONFIG_SCI9_2STOP,
+  .fifo_depth= 0,
+#ifdef CONFIG_SERIAL_TXDMA
+  .dma_tx_chn = -1,
+  .dma_tx_active = false,
+#endif
+#ifdef CONFIG_SERIAL_RXDMA
+  .dma_rx_chn = -1,
+  .rx_dma_buf = NULL,
+  .rx_dma_size = 0,
+  .rx_dma_pos = 0,
+  .dma_rx_active = false,
+#endif
 };
 
 static uart_dev_t g_sci9port =
@@ -1173,6 +1379,286 @@ static inline void rzv_sci_modifyreg(struct rzv_uart_s *priv,
 }
 
 /****************************************************************************
+ * Name: rzv_fifo_configure
+ *
+ * Description:
+ *   Configure SCI FIFO mode with trigger levels
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RZV_SCI_FIFO_MODE
+static void rzv_fifo_configure(struct rzv_uart_s *priv)
+{
+  uint32_t fcr;
+
+  /* Configure FIFO Control Register (FCR)
+   * - RTRG: RX FIFO trigger level
+   * - TTRG: TX FIFO trigger level
+   * - RSTRG: RTS trigger level
+   * - Enable FIFOs (FM=1)
+   */
+
+  fcr = (CONFIG_RZV_SCI_FIFO_RX_TRIGGER << SCI_FCR_RTRG_SHIFT) |
+        (CONFIG_RZV_SCI_FIFO_TX_TRIGGER << SCI_FCR_TTRG_SHIFT) |
+        ((priv->fifo_depth - 1) << SCI_FCR_RSTRG_SHIFT) |
+        SCI_FCR_FM;  /* Enable FIFO mode */
+
+  rzv_sci_putreg(priv, RZV_SCI_FCR_OFFSET, fcr);
+
+  /* Reset FIFOs */
+
+  rzv_sci_modifyreg(priv, RZV_SCI_FCR_OFFSET, 0,
+                   SCI_FCR_TFRST | SCI_FCR_RFRST);
+
+  /* Wait for FIFO reset to complete */
+
+  while ((rzv_sci_getreg(priv, RZV_SCI_FCR_OFFSET) &
+         (SCI_FCR_TFRST | SCI_FCR_RFRST)) != 0);
+}
+#endif
+
+/****************************************************************************
+ * Name: rzv_dma_txcallback
+ *
+ * Description:
+ *   DMA TX completion callback
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SERIAL_TXDMA
+static void rzv_dma_txcallback(void *handle, int event, void *user_data)
+{
+  struct rzv_uart_s *priv = (struct rzv_uart_s *)user_data;
+  struct uart_dev_s *dev = (struct uart_dev_s *)((char *)user_data -
+                            offsetof(struct uart_dev_s, priv));
+
+  priv->dma_tx_active = false;
+
+  /* Notify upper layer that DMA transfer is complete */
+
+  uart_xmitchars_done(dev);
+}
+
+static int rzv_dma_setup_tx(struct rzv_uart_s *priv)
+{
+  struct rzv_dmac_config_s dma_config;
+
+  if (priv->dma_tx_chn < 0)
+    {
+      return -EINVAL;  /* No DMA channel configured */
+    }
+
+  /* Initialize DMA channel */
+
+  int ret = rzv_dmac_channel_initialize(priv->dma_tx_chn);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Configure DMA for UART TX
+   * - Source: memory (increment)
+   * - Destination: UART TDR register (fixed)
+   * - Trigger: UART TX event (hardware)
+   */
+
+  memset(&dma_config, 0, sizeof(dma_config));
+  dma_config.mode           = RZV_DMAC_MODE_REGISTER;
+  dma_config.src_size       = RZV_DMAC_SIZE_1BYTE;
+  dma_config.dst_size       = RZV_DMAC_SIZE_1BYTE;
+  dma_config.src_addr_mode  = RZV_DMAC_ADDR_INCREMENT;
+  dma_config.dst_addr_mode  = RZV_DMAC_ADDR_FIXED;
+  dma_config.trigger        = RZV_DMAC_TRIGGER_HW;
+  dma_config.detect_mode    = RZV_DMAC_DETECT_RISING_EDGE;
+  dma_config.dst_addr       = priv->uartbase + RZV_SCI_TDR_OFFSET;
+  dma_config.elc_event      = priv->evt_txi;
+  dma_config.callback       = rzv_dma_txcallback;
+  dma_config.user_data      = priv;
+
+  ret = rzv_dmac_channel_configure(priv->dma_tx_chn, &dma_config);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  priv->dma_tx_active = false;
+  return OK;
+}
+
+static void rzv_dma_shutdown_tx(struct rzv_uart_s *priv)
+{
+  if (priv->dma_tx_chn >= 0)
+    {
+      rzv_dmac_channel_stop(priv->dma_tx_chn);
+    }
+}
+
+static void rzv_dma_send(struct uart_dev_s *dev, const char *buffer,
+                        size_t len)
+{
+  struct rzv_uart_s *priv = (struct rzv_uart_s *)dev->priv;
+  struct rzv_dmac_config_s dma_config;
+
+  if (priv->dma_tx_active || priv->dma_tx_chn < 0)
+    {
+      return;
+    }
+
+  /* Update DMA source address and length */
+
+  memset(&dma_config, 0, sizeof(dma_config));
+  dma_config.src_addr = (uint32_t)buffer;
+  dma_config.length   = len;
+
+  rzv_dmac_channel_configure(priv->dma_tx_chn, &dma_config);
+
+  priv->dma_tx_active = true;
+
+  /* Start DMA transfer */
+
+  rzv_dmac_channel_start(priv->dma_tx_chn);
+}
+
+static void rzv_dma_txint(struct uart_dev_s *dev, bool enable)
+{
+  /* DMA mode doesn't use TX interrupts directly */
+}
+
+static void rzv_dma_txavailable(struct uart_dev_s *dev)
+{
+  struct rzv_uart_s *priv = (struct rzv_uart_s *)dev->priv;
+
+  if (!priv->dma_tx_active)
+    {
+      uart_xmitchars_dma(dev);
+    }
+}
+#endif /* CONFIG_SERIAL_TXDMA */
+
+/****************************************************************************
+ * Name: rzv_dma_rxcallback
+ *
+ * Description:
+ *   DMA RX completion callback
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SERIAL_RXDMA
+static void rzv_dma_rxcallback(void *handle, int event, void *user_data)
+{
+  struct rzv_uart_s *priv = (struct rzv_uart_s *)user_data;
+  struct uart_dev_s *dev = (struct uart_dev_s *)((char *)user_data -
+                            offsetof(struct uart_dev_s, priv));
+
+  /* Notify upper layer that data is available */
+
+  uart_recvchars(dev);
+}
+
+static int rzv_dma_setup_rx(struct rzv_uart_s *priv)
+{
+  struct rzv_dmac_config_s dma_config;
+
+  if (priv->dma_rx_chn < 0)
+    {
+      return -EINVAL;
+    }
+
+  /* Allocate DMA buffer */
+
+  priv->rx_dma_buf = kmm_malloc(CONFIG_RZV_SERIAL_RXDMA_BUFFER_SIZE);
+  if (!priv->rx_dma_buf)
+    {
+      return -ENOMEM;
+    }
+
+  priv->rx_dma_size = CONFIG_RZV_SERIAL_RXDMA_BUFFER_SIZE;
+  priv->rx_dma_pos = 0;
+
+  /* Initialize DMA channel */
+
+  int ret = rzv_dmac_channel_initialize(priv->dma_rx_chn);
+  if (ret < 0)
+    {
+      kmm_free(priv->rx_dma_buf);
+      return ret;
+    }
+
+  /* Configure DMA for UART RX
+   * - Source: UART RDR register (fixed)
+   * - Destination: memory (increment)
+   * - Trigger: UART RX event (hardware)
+   */
+
+  memset(&dma_config, 0, sizeof(dma_config));
+  dma_config.mode           = RZV_DMAC_MODE_REGISTER;
+  dma_config.src_size       = RZV_DMAC_SIZE_1BYTE;
+  dma_config.dst_size       = RZV_DMAC_SIZE_1BYTE;
+  dma_config.src_addr_mode  = RZV_DMAC_ADDR_FIXED;
+  dma_config.dst_addr_mode  = RZV_DMAC_ADDR_INCREMENT;
+  dma_config.trigger        = RZV_DMAC_TRIGGER_HW;
+  dma_config.detect_mode    = RZV_DMAC_DETECT_RISING_EDGE;
+  dma_config.src_addr       = priv->uartbase + RZV_SCI_RDR_OFFSET;
+  dma_config.dst_addr       = (uint32_t)priv->rx_dma_buf;
+  dma_config.length         = priv->rx_dma_size;
+  dma_config.elc_event      = priv->evt_rxi;
+  dma_config.callback       = rzv_dma_rxcallback;
+  dma_config.user_data      = priv;
+
+  ret = rzv_dmac_channel_configure(priv->dma_rx_chn, &dma_config);
+  if (ret < 0)
+    {
+      kmm_free(priv->rx_dma_buf);
+      return ret;
+    }
+
+  priv->dma_rx_active = true;
+
+  /* Start DMA reception */
+
+  rzv_dmac_channel_start(priv->dma_rx_chn);
+
+  return OK;
+}
+
+static void rzv_dma_shutdown_rx(struct rzv_uart_s *priv)
+{
+  if (priv->dma_rx_chn >= 0)
+    {
+      rzv_dmac_channel_stop(priv->dma_rx_chn);
+
+      if (priv->rx_dma_buf)
+        {
+          kmm_free(priv->rx_dma_buf);
+          priv->rx_dma_buf = NULL;
+        }
+    }
+}
+
+static void rzv_dma_rxavailable(struct uart_dev_s *dev)
+{
+  struct rzv_uart_s *priv = (struct rzv_uart_s *)dev->priv;
+  size_t dma_pos;
+
+  if (priv->dma_rx_active)
+    {
+      /* Get current DMA position */
+
+      dma_pos = priv->rx_dma_size -
+               rzv_dmac_get_remaining_count(priv->dma_rx_chn);
+
+      if (dma_pos != priv->rx_dma_pos)
+        {
+          /* New data available, notify upper layer */
+
+          uart_recvchars(dev);
+          priv->rx_dma_pos = dma_pos;
+        }
+    }
+}
+#endif /* CONFIG_SERIAL_RXDMA */
+
+/****************************************************************************
  * Name: rzv_setup
  *
  * Description:
@@ -1240,6 +1726,12 @@ static int rzv_setup(struct uart_dev_s *dev)
   /* Set asynchronous mode */
 
   ccr3 = (ccr3 & ~SCI_CCR3_MOD_MASK) | SCI_CCR3_MOD_ASYNC;
+
+  /* IDSEL: Idle detection select (P2 fix)
+   * Use edge detection for idle (typical for UART)
+   */
+  ccr3 |= SCI_CCR3_IDSEL;
+
   rzv_sci_putreg(priv, RZV_SCI_CCR_OFFSET(3), ccr3);
 
   /* Configure parity */
@@ -1255,6 +1747,11 @@ static int rzv_setup(struct uart_dev_s *dev)
     {
       ccr1 |= SCI_CCR1_PE | SCI_CCR1_PM;  /* Even parity */
     }
+
+  /* SPB2IO: Serial Port Break I/O (P2 fix)
+   * Set to output mode to enable break signal transmission
+   */
+  ccr1 |= SCI_CCR1_SPB2IO;
 
   rzv_sci_putreg(priv, RZV_SCI_CCR_OFFSET(1), ccr1);
 
@@ -1300,6 +1797,15 @@ static int rzv_setup(struct uart_dev_s *dev)
     {
       /* Polling loop - typically completes in 1-2 μs */
     }
+
+  /* Configure FIFO if supported (RZV2H SCI-B has 16-byte FIFOs) */
+
+#ifdef CONFIG_RZV_SCI_FIFO_MODE
+  priv->fifo_depth = 16;  /* RZV2H SCI_B has 16-byte FIFOs */
+  rzv_fifo_configure(priv);
+#else
+  priv->fifo_depth = 0;
+#endif
 
   sinfo("SCI%d: Configured at %lu baud (BRR=%u, MDDR=%u, "
         "BGDM=%u, ABCS=%u, ABCSE=%u, CKS=%u)\n",
@@ -1395,6 +1901,36 @@ static int rzv_attach(struct uart_dev_s *dev)
         priv->channel, priv->irq_rxi, priv->irq_txi,
         priv->irq_tei, priv->irq_eri);
 
+#ifdef CONFIG_SERIAL_TXDMA
+  /* Configure DMA channel for TX if enabled */
+  if (priv->dma_tx_chn >= 0)
+    {
+      ret = rzv_dma_setup_tx(priv);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "UART%d: TX DMA setup failed: %d\n",
+                 priv->channel, ret);
+          /* Continue without DMA */
+          priv->dma_tx_chn = -1;
+        }
+    }
+#endif
+
+#ifdef CONFIG_SERIAL_RXDMA
+  /* Configure DMA channel for RX if enabled */
+  if (priv->dma_rx_chn >= 0)
+    {
+      ret = rzv_dma_setup_rx(priv);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "UART%d: RX DMA setup failed: %d\n",
+                 priv->channel, ret);
+          /* Continue without DMA */
+          priv->dma_rx_chn = -1;
+        }
+    }
+#endif
+
   return OK;
 
 errout_tei:
@@ -1425,6 +1961,16 @@ errout:
 static void rzv_detach(struct uart_dev_s *dev)
 {
   struct rzv_uart_s *priv = (struct rzv_uart_s *)dev->priv;
+
+#ifdef CONFIG_SERIAL_TXDMA
+  /* Shutdown TX DMA */
+  rzv_dma_shutdown_tx(priv);
+#endif
+
+#ifdef CONFIG_SERIAL_RXDMA
+  /* Shutdown RX DMA */
+  rzv_dma_shutdown_rx(priv);
+#endif
 
   /* Disable interrupts in the SCI peripheral */
 
@@ -1485,6 +2031,14 @@ static int rzv_interrupt(int irq, void *context, void *arg)
 
   csr = rzv_sci_getreg(priv, RZV_SCI_CSR_OFFSET);
   ccr0 = rzv_sci_getreg(priv, RZV_SCI_CCR_OFFSET(0));
+
+  /* Save error status bits for error recovery (P2 fix)
+   * Store framing error, parity error, and overrun error flags
+   */
+  if (csr & (SCI_CSR_FER | SCI_CSR_PER | SCI_CSR_ORER))
+    {
+      priv->sr = csr & (SCI_CSR_FER | SCI_CSR_PER | SCI_CSR_ORER);
+    }
 
   /* Check for errors (overrun, framing, parity) */
 
@@ -1590,9 +2144,16 @@ static int rzv_receive(struct uart_dev_s *dev, unsigned int *status)
 
   rdr = rzv_sci_getreg(priv, RZV_SCI_RDR_OFFSET);
 
-  /* Return status from CSR (error flags) and data from RDR */
+  /* Use saved error status (P2 fix)
+   * Combine current CSR with saved error bits to ensure
+   * error conditions are not lost between interrupt and receive
+   */
 
-  *status = csr;
+  *status = csr | priv->sr;
+
+  /* Clear saved error status after reporting */
+  priv->sr = 0;
+
   return (rdr & SCI_RDR_RDAT_MASK) >> SCI_RDR_RDAT_SHIFT;
 }
 
@@ -1666,6 +2227,11 @@ static void rzv_send(struct uart_dev_s *dev, int ch)
 static void rzv_txint(struct uart_dev_s *dev, bool enable)
 {
   struct rzv_uart_s *priv = (struct rzv_uart_s *)dev->priv;
+  irqstate_t flags;
+
+  /* Use critical section to prevent race with TX interrupt handler */
+
+  flags = enter_critical_section();
 
   if (enable)
     {
@@ -1677,6 +2243,8 @@ static void rzv_txint(struct uart_dev_s *dev, bool enable)
       rzv_sci_modifyreg(priv, RZV_SCI_CCR_OFFSET(0),
                        SCI_CCR0_TIE | SCI_CCR0_TEIE, 0);
     }
+
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

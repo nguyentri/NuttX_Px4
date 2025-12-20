@@ -384,7 +384,6 @@ static int rzv_dmac_find_free_channel(void)
 int rzv_dmac_channel_initialize(int channel)
 {
   int unit;
-  int ch;
   int i;
 
   if (channel < 0 || channel >= RZV_DMAC_MAX_CHANNELS)
@@ -393,7 +392,6 @@ int rzv_dmac_channel_initialize(int channel)
     }
 
   unit = RZV_DMAC_UNIT(channel);
-  ch = RZV_DMAC_CH(channel);
 
   if (g_dmac_unit_initialized[unit])
     {

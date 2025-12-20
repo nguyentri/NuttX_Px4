@@ -215,7 +215,10 @@ static void rzv_i2c_set_frequency(struct rzv_i2c_priv_s *priv,
 {
   uint8_t cks, brh, brl;
 
-  /* Select bit rate settings based on frequency */
+  /* Select bit rate settings based on frequency
+   * Note: For improved accuracy, consider calculating from actual clock
+   * frequency with rounding: (clkfreq + frequency) / (2 * frequency) - 1
+   */
 
   if (frequency <= 100000)
     {
@@ -241,6 +244,10 @@ static void rzv_i2c_set_frequency(struct rzv_i2c_priv_s *priv,
       brh = RIIC_BRH_1M;
       brl = RIIC_BRL_1M;
     }
+
+  /* Store configured frequency for reference */
+
+  priv->frequency = frequency;
 
   /* Configure ICMR1: Set clock source */
 

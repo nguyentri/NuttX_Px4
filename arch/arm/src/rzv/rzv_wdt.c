@@ -227,6 +227,10 @@ static int rzv_wdt_clock_enable(uint8_t channel)
 
 static void rzv_wdt_refresh_sequence(struct rzv_wdt_priv_s *priv)
 {
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
   /* Step 1: Write 0x00 */
 
   rzv_wdt_putreg8(priv, RZV_WDT_WDTRR_OFFSET, 0x00);
@@ -234,6 +238,8 @@ static void rzv_wdt_refresh_sequence(struct rzv_wdt_priv_s *priv)
   /* Step 2: Write 0xFF */
 
   rzv_wdt_putreg8(priv, RZV_WDT_WDTRR_OFFSET, 0xFF);
+
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

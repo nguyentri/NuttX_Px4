@@ -107,6 +107,65 @@ config RZV2H_BUILD_CM33
       Build for the CM33 core of the RZV2H.
       This core is used for TrustZone security features. It is currently not supported.
 
+# Clock Configuration
+
+menu "RZV2H Clock Configuration"
+
+config RZV_CLOCK_CONFIG_ENABLE
+   bool "Enable custom clock configuration"
+   default n
+   ---help---
+     Enable custom clock configuration options. When disabled, the clock
+     system uses reset defaults which match the standard board configuration.
+
+config RZV_OSC_FREQUENCY
+   int "Main oscillator frequency (Hz)"
+   default 24000000
+   depends on RZV_CLOCK_CONFIG_ENABLE
+   ---help---
+     Main oscillator (OSC) frequency in Hz. Default is 24 MHz for RDK-RZV2H.
+
+config RZV_OSC2_FREQUENCY
+   int "Secondary oscillator frequency (Hz)"
+   default 4800000
+   depends on RZV_CLOCK_CONFIG_ENABLE
+   ---help---
+     Secondary oscillator (OSC2) frequency in Hz. Default is 4.8 MHz.
+
+config RZV_CLOCK_RETRY_COUNT
+   int "Clock operation retry count"
+   default 3
+   range 0 10
+   ---help---
+     Number of retry attempts for clock enable/disable and reset operations.
+     Set to 0 to disable retries. Default is 3 retries with exponential backoff.
+
+config RZV_CLOCK_ENABLE_TIMEOUT
+   int "Clock enable timeout (10us units)"
+   default 1000
+   range 100 10000
+   ---help---
+     Timeout for clock enable operations in 10-microsecond units.
+     Default is 1000 (10ms). Increase if clock enable operations timeout.
+
+config RZV_CLOCK_PLL_TIMEOUT
+   int "PLL lock timeout (10us units)"
+   default 10000
+   range 1000 100000
+   ---help---
+     Timeout for PLL lock operations in 10-microsecond units.
+     Default is 10000 (100ms). PLLs typically lock within a few milliseconds.
+
+config RZV_CLOCK_DEBUG
+   bool "Enable clock debug logging"
+   default n
+   depends on DEBUG_FEATURES
+   ---help---
+     Enable detailed debug logging for clock operations including register
+     dumps on failures. Useful for diagnosing clock configuration issues.
+
+endmenu
+
 # Peripheral availability
 config RZV_HAVE_SCIF0_UART
    bool
@@ -397,6 +456,55 @@ config RZV_SCI9
    select SCI9_SERIALDRIVER
    ---help---
      Enable SCI9 in UART mode.
+
+# SCI FIFO Configuration
+
+config RZV_SCI_FIFO_MODE
+   bool "Enable SCI FIFO mode"
+   default y
+   depends on RZV_UART_SCI
+   ---help---
+     Enable 16-byte FIFO mode for SCI-B UART channels.
+     This significantly reduces interrupt load at high baud rates.
+
+     Performance improvement:
+     - Without FIFO: ~92,160 interrupts/sec at 921600 baud
+     - With FIFO: ~5,760 interrupts/sec (16x reduction)
+
+config RZV_SCI_FIFO_RX_TRIGGER
+   int "RX FIFO trigger level"
+   default 1
+   range 1 15
+   depends on RZV_SCI_FIFO_MODE
+   ---help---
+     RX interrupt triggers when FIFO contains >= this many bytes.
+     Lower values = lower latency, higher interrupt rate.
+     Higher values = fewer interrupts, may increase latency.
+
+     Recommended: 1 for low latency (console), 8-15 for throughput
+
+config RZV_SCI_FIFO_TX_TRIGGER
+   int "TX FIFO trigger level"
+   default 15
+   range 0 15
+   depends on RZV_SCI_FIFO_MODE
+   ---help---
+     TX interrupt triggers when FIFO has <= this many bytes free.
+     Higher values = fewer interrupts, better throughput.
+
+     Recommended: 15 (maximum efficiency)
+
+config RZV_SERIAL_RXDMA_BUFFER_SIZE
+   int "RX DMA buffer size"
+   default 256
+   range 64 4096
+   depends on SERIAL_RXDMA
+   ---help---
+     Size of circular buffer for RX DMA transfers.
+     Larger buffers reduce DMA interrupt frequency but increase
+     memory usage and potential latency.
+
+     Recommended: 256 (balances performance and memory)
 
 # Serial Communications Interface with FIFO (SCIF) - legacy compatibility
 

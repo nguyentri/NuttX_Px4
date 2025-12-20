@@ -45,6 +45,7 @@ struct rzv_adc_config_s
   uint8_t   irq;          /* ADC interrupt number */
   int       elc_event;    /* ELC event number for ICU attachment */
   uint8_t   resolution;   /* ADC resolution (bits) */
+  uint32_t  clk;          /* CPG clock identifier (RZV_CPG_CLK_ADCx) */
 };
 
 /* ADC Device Private Data */
@@ -112,6 +113,7 @@ static const struct rzv_adc_config_s g_adc0_config =
   .irq        = 0,  /* Legacy IRQ field (unused when elc_event is set) */
   .elc_event  = RZV_ELC_ADC0_ADA_ADELCREQ,
   .resolution = 12,
+  .clk        = RZV_CPG_CLK_ADC0,  /* Clock control */
 };
 
 static struct rzv_adc_priv_s g_adc0_priv =
@@ -134,7 +136,9 @@ static const struct rzv_adc_config_s g_adc1_config =
 {
   .base       = RZV_ADC1_BASE,
   .irq        = 0,
+  .elc_event  = 0,
   .resolution = 12,
+  .clk        = RZV_CPG_CLK_ADC1,  /* Clock control */
 };
 
 static struct rzv_adc_priv_s g_adc1_priv =
@@ -265,6 +269,16 @@ static int rzv_adc_setup(struct adc_dev_s *dev)
 {
   struct rzv_adc_priv_s *priv = (struct rzv_adc_priv_s *)dev->ad_priv;
   int ret;
+
+  /* CRITICAL: Enable module clock before accessing peripheral registers */
+
+  uint32_t domain = RZV_CPG_DOMAIN(priv->config->clk);
+  uint32_t bit = RZV_CPG_BIT(priv->config->clk);
+  RZV_MODULE_CLKON(domain, bit);
+
+  /* Small delay for clock stabilization */
+
+  up_udelay(10);
 
   /* Initialize semaphores */
   nxsem_init(&priv->exclsem, 0, 1);

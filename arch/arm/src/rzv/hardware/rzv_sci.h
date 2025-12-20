@@ -136,6 +136,7 @@
 #define SCI_CCR_MPIE(m)                                   (1 << 8)  /* Mpie */
 #define SCI_CCR_DCME(m)                                   (1 << 9)  /* Dcme */
 #define SCI_CCR_IDSEL(m)                                  (1 << 10)  /* Idsel */
+#define SCI_CCR3_IDSEL                                    (1 << 10)  /* Idsel for CCR3 */
 #define SCI_CCR_RIE(m)                                    (1 << 16)  /* Rie */
 #define SCI_CCR_TIE(m)                                    (1 << 20)  /* Tie */
 #define SCI_CCR_TEIE(m)                                   (1 << 21)  /* Teie */
@@ -347,6 +348,7 @@
 /* SCI FCR Register Bit Definitions **********************************/
 
 #define SCI_FCR_DRES                            (1 << 0)  /* Dres */
+#define SCI_FCR_FM                              (1 << 7)  /* FIFO Mode Enable */
 
 #define SCI_FCR_TTRG_SHIFT                      (8)      /* Bits 8-12: Ttrg */
 #define SCI_FCR_TTRG_MASK                       (0x1f << SCI_FCR_TTRG_SHIFT)

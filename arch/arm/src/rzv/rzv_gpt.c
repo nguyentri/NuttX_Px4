@@ -40,6 +40,26 @@
 #include "rzv_gpt.h"
 #include "hardware/rzv_gpt.h"
 
+/* GPT Pin Configuration Requirements:
+ *
+ * The GPT module requires proper GPIO pin configuration for PWM output.
+ * Before using GPT/PWM, configure pins via rzv_gpio_config():
+ *
+ * For GPT channel N:
+ *   - GTIOCA_N: PWM output A (channel 0 in CONFIG_PWM_MULTICHAN)
+ *   - GTIOCB_N: PWM output B (channel 1 in CONFIG_PWM_MULTICHAN)
+ *
+ * Example for GPT0:
+ *   rzv_gpio_config(GPIO_GPT0_GTIOCA);  // Configure as peripheral function
+ *   rzv_gpio_config(GPIO_GPT0_GTIOCB);  // Configure as peripheral function
+ *
+ * Pin definitions should be in board.h using pinmap constants:
+ *   #define GPIO_GPT0_GTIOCA  (GPIO_PERIPH | GPIO_PORT_XX | GPIO_PIN_YY | ...)
+ *
+ * Refer to RZV2H hardware manual for pin assignment tables and
+ * peripheral function select (PSEL) values for each GPT channel.
+ */
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -318,8 +338,17 @@ static int gpt_compute_period(FAR struct rzv_gpt_lowerhalf_s *priv,
 
 static uint32_t gpt_duty_to_counts(uint32_t period, ub16_t duty)
 {
+  /* Use 64-bit arithmetic to prevent overflow even with maximum
+   * 32-bit period and 16-bit duty cycle values.
+   * Add 0x8000 for rounding (equivalent to 0.5 in fixed-point).
+   *
+   * Maximum calculation: (2^32 - 1) * (2^16 - 1) + 0x8000 fits in 64 bits.
+   * This ensures no overflow even at highest frequencies and duty cycles.
+   */
   uint64_t tmp = ((uint64_t)period * duty + 0x8000u);
   tmp >>= 16;
+
+  /* Clamp to valid range */
   if (tmp >= period)
     {
       return period ? period - 1 : 0;
