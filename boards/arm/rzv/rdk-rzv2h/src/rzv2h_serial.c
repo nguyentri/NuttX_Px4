@@ -59,32 +59,13 @@
 
 void rzv2h_serial_setup(void)
 {
-#if defined(CONFIG_RZV_SCI1) || defined(CONFIG_SCI1_SERIAL_CONSOLE)
-  /* Configure SCI1 pins for UART operation
-   * SCI1_TXD: P38 (Mode 1)
-   * SCI1_RXD: P39 (Mode 1)
-   */
-
-  sinfo("Configuring SCI1 pins for UART (NSH console)\n");
-
-  /* Configure TXD1 pin (P38, Port 3 Pin 8, Mode 1) */
-
-  rzv_gpioconfig(BOARD_SCI1_TXD_GPIO);
-
-  /* Configure RXD1 pin (P39, Port 3 Pin 9, Mode 1) */
-
-  rzv_gpioconfig(BOARD_SCI1_RXD_GPIO);
-
-  sinfo("SCI1 UART pins configured\n");
-#endif
-
 #if defined(CONFIG_RZV_SCI0)
-  /* Configure SCI0 pins for UART operation if enabled
-   * SCI0_TXD: P44 (Mode 5)
-   * SCI0_RXD: P45 (Mode 5)
+  /* Configure SCI0 pins for UART operation (RC input)
+   * SCI0_TXD: P5_0 (Mode 1)
+   * SCI0_RXD: P5_1 (Mode 1)
    */
 
-  sinfo("Configuring SCI0 pins for UART\n");
+  sinfo("Configuring SCI0 pins for UART (RC input)\n");
 
   rzv_gpioconfig(BOARD_SCI0_TXD_GPIO);
   rzv_gpioconfig(BOARD_SCI0_RXD_GPIO);
@@ -92,14 +73,46 @@ void rzv2h_serial_setup(void)
   sinfo("SCI0 UART pins configured\n");
 #endif
 
-#if defined(CONFIG_RZV_SCI2)
-  /* Configure SCI2 pins for UART operation if enabled
-   * Default pins for SCI2 depend on board configuration
+#if defined(CONFIG_RZV_SCI1) || defined(CONFIG_SCI1_SERIAL_CONSOLE)
+  /* Configure SCI1 pins for UART operation (MAVLink)
+   * SCI1_TXD: P5_2 (Mode 1)
+   * SCI1_RXD: P5_3 (Mode 1)
    */
 
-  sinfo("Configuring SCI2 pins for UART\n");
+  sinfo("Configuring SCI1 pins for UART (MAVLink)\n");
 
-  /* Add SCI2 pin configuration here if needed */
+  rzv_gpioconfig(BOARD_SCI1_TXD_GPIO);
+  rzv_gpioconfig(BOARD_SCI1_RXD_GPIO);
+
+  sinfo("SCI1 UART pins configured\n");
+#endif
+
+#if defined(CONFIG_RZV_SCI2)
+  /* Configure SCI2 pins for UART operation (GPS)
+   * SCI2_TXD: P5_4 (Mode 1)
+   * SCI2_RXD: P5_5 (Mode 1)
+   */
+
+  sinfo("Configuring SCI2 pins for UART (GPS)\n");
+
+  rzv_gpioconfig(BOARD_SCI2_TXD_GPIO);
+  rzv_gpioconfig(BOARD_SCI2_RXD_GPIO);
+
+  sinfo("SCI2 UART pins configured\n");
+#endif
+
+#if defined(CONFIG_RZV_SCI3) || defined(CONFIG_SCI3_SERIAL_CONSOLE)
+  /* Configure SCI3 pins for UART operation (NSH Console)
+   * SCI3_TXD: P5_6 (Mode 1)
+   * SCI3_RXD: P5_7 (Mode 1)
+   */
+
+  sinfo("Configuring SCI3 pins for UART (NSH Console)\n");
+
+  rzv_gpioconfig(BOARD_SCI3_TXD_GPIO);
+  rzv_gpioconfig(BOARD_SCI3_RXD_GPIO);
+
+  sinfo("SCI3 UART pins configured\n");
 #endif
 }
 

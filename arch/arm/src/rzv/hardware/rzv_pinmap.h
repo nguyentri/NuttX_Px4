@@ -28,7 +28,6 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "hardware/rzv_memorymap.h"
 
 #if defined(CONFIG_RZV2H_GROUP)
 #  include "rzv2h/rzv2h_pinmap.h"

@@ -42,7 +42,6 @@
 #include "rzv_clock.h"
 #include "rzv_icu.h"
 #include "hardware/rzv_sci.h"
-#include "hardware/rzv_memorymap.h"
 #include <arch/rzv/rzv2h_irq.h>
 
 #ifdef USE_SERIALDRIVER
@@ -1844,6 +1843,38 @@ int up_putc(int ch)
 #else
   return 0;
 #endif
+}
+
+#else /* No SCI devices configured */
+
+/****************************************************************************
+ * Name: arm_serialinit
+ *
+ * Description:
+ *   Stub for when no serial devices are configured.
+ *   This is still needed when USE_SERIALDRIVER is defined but no
+ *   SCI ports are enabled (e.g., using RTT console).
+ *
+ ****************************************************************************/
+
+void arm_serialinit(void)
+{
+  /* Nothing to do - no serial devices configured */
+}
+
+/****************************************************************************
+ * Name: up_putc
+ *
+ * Description:
+ *   Stub for when no serial devices are configured.
+ *
+ ****************************************************************************/
+
+int up_putc(int ch)
+{
+  /* No console device available */
+
+  return 0;
 }
 
 #endif /* CONFIG_RZV_SCIx enabled */

@@ -40,7 +40,6 @@
 #include "rzv_clock.h"
 #include "rzv_icu.h"
 #include "hardware/rzv_wdt.h"
-#include "hardware/rzv_memorymap.h"
 
 #ifdef CONFIG_RZV_WDT
 

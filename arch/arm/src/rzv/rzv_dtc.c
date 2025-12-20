@@ -40,7 +40,6 @@
 
 #include "arm_internal.h"
 #include "chip.h"
-#include "hardware/rzv_memorymap.h"
 #include "rzv_dtc.h"
 #include "rzv_icu.h"
 

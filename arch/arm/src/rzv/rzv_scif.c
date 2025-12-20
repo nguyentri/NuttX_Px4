@@ -46,76 +46,14 @@
 #include "arm_internal.h"
 #include "rzv_icu.h"
 #include "rzv_clock.h"
-#include "hardware/rzv2h/rzv2h_memorymap.h"
+#include "hardware/rzv_scifa.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* SCIFA Register Offsets (SCIF with FIFO for RZV2H) */
-#define RZV_SCIF_SMR_OFFSET      0x00
-#define RZV_SCIF_BRR_OFFSET      0x02  /* Byte offset in MDDR/BRR union */
-#define RZV_SCIF_MDDR_OFFSET     0x02  /* Modulation Duty Register */
-#define RZV_SCIF_SCR_OFFSET      0x04
-#define RZV_SCIF_FTDR_OFFSET     0x06
-#define RZV_SCIF_FSR_OFFSET      0x08
-#define RZV_SCIF_FRDR_OFFSET     0x0A
-#define RZV_SCIF_FCR_OFFSET      0x0C
-#define RZV_SCIF_FDR_OFFSET      0x0E
-#define RZV_SCIF_SPTR_OFFSET     0x10
-#define RZV_SCIF_LSR_OFFSET      0x12
-#define RZV_SCIF_SEMR_OFFSET     0x14  /* Serial Extended Mode Register */
-#define RZV_SCIF_FTCR_OFFSET     0x16  /* FIFO Trigger Control Register */
-
-/* Register bit definitions */
-#define SCIF_SMR_CKS_MASK        0x0003
-#define SCIF_SMR_STOP            0x0008
-#define SCIF_SMR_PM              0x0010
-#define SCIF_SMR_PE              0x0020
-#define SCIF_SMR_CHR             0x0040
-
-#define SCIF_SCR_RE              0x0010
-#define SCIF_SCR_TE              0x0020
-#define SCIF_SCR_RIE             0x0040
-#define SCIF_SCR_TIE             0x0080
-#define SCIF_SCR_REIE            0x0008
-#define SCIF_SCR_TEIE            0x0004
-
-#define SCIF_FSR_DR              0x0001
-#define SCIF_FSR_RDF             0x0002
-#define SCIF_FSR_PER             0x0004
-#define SCIF_FSR_FER             0x0008
-#define SCIF_FSR_BRK             0x0010
-#define SCIF_FSR_TDFE            0x0020
-#define SCIF_FSR_TEND            0x0040
-#define SCIF_FSR_ER              0x0080
-
-#define SCIF_FCR_LOOP            0x0001
-#define SCIF_FCR_RFRST           0x0002
-#define SCIF_FCR_TFRST           0x0004
-#define SCIF_FCR_MCE             0x0008
-#define SCIF_FCR_TTRG_MASK       0x0030
-#define SCIF_FCR_RTRG_MASK       0x00C0
-
-#define SCIF_LSR_ORER            0x0001
-
-/* SEMR (Serial Extended Mode Register) bit definitions */
-#define SCIF_SEMR_ABCS0          0x01  /* Asynchronous base clock select */
-#define SCIF_SEMR_NFEN           0x04  /* Noise filter enable */
-#define SCIF_SEMR_DIR            0x08  /* Data transfer direction */
-#define SCIF_SEMR_MDDRS          0x10  /* Modulation duty register select */
-#define SCIF_SEMR_BRME           0x20  /* Bit rate modulation enable */
-#define SCIF_SEMR_BGDM           0x80  /* Baud rate generator double speed mode */
-
-/* FTCR (FIFO Trigger Control Register) bit definitions */
-#define SCIF_FTCR_TFTC_SHIFT     0     /* TX FIFO trigger count */
-#define SCIF_FTCR_TFTC_MASK      0x001F
-#define SCIF_FTCR_TTRGS          0x0080  /* TX trigger select */
-#define SCIF_FTCR_RFTC_SHIFT     8     /* RX FIFO trigger count */
-#define SCIF_FTCR_RFTC_MASK      0x1F00
-#define SCIF_FTCR_RTRGS          0x8000  /* RX trigger select */
-
 /* Which UART with be configured as the console */
+
 #if defined(CONFIG_SCIF0_SERIAL_CONSOLE)
 #  define CONSOLE_DEV     g_scif0port  /* SCIF0 is console */
 #  define TTYS0_DEV       g_scif0port  /* SCIF0 is ttyS0 */

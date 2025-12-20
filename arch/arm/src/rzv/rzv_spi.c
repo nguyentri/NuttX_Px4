@@ -43,7 +43,6 @@
 #include "rzv_clock.h"
 #include "rzv_icu.h"
 #include "rzv_gpio.h"
-#include "hardware/rzv_memorymap.h"
 #include "hardware/rzv_spi.h"
 
 /****************************************************************************

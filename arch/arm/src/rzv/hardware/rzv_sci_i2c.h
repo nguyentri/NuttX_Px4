@@ -26,15 +26,23 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include "hardware/rzv_memorymap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* SCI_B I2C Register Offsets (for Simple I2C mode)
- * Note: SCI base addresses are defined in rzv_memorymap.h
- */
+/* SCI Base Addresses ****************************************************/
+
+#define RZV_SCI0_BASE               0x12800C00
+#define RZV_SCI1_BASE               0x12801000
+#define RZV_SCI2_BASE               0x12801400
+#define RZV_SCI3_BASE               0x12801800
+#define RZV_SCI4_BASE               0x12801C00
+#define RZV_SCI5_BASE               0x12802000
+#define RZV_SCI6_BASE               0x12802400
+#define RZV_SCI7_BASE               0x12802800
+#define RZV_SCI8_BASE               0x12802C00
+#define RZV_SCI9_BASE               0x12803000
 
 #define RZV_SCI_SMR_OFFSET       0x00  /* Serial Mode Register */
 #define RZV_SCI_BRR_OFFSET       0x01  /* Bit Rate Register */

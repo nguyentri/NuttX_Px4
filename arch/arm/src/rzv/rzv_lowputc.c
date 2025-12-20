@@ -33,6 +33,7 @@
 #include "rzv_lowputc.h"
 #include "rzv_clock.h"
 #include "rzv_gpio.h"
+#include "hardware/rzv_sci.h"
 
 /****************************************************************************
  * Pre-processor Definitions

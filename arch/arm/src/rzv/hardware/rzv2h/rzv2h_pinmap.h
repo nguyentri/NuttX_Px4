@@ -27,7 +27,6 @@
 
 #include <nuttx/config.h>
 #include "chip.h"
-#include "hardware/rzv_memorymap.h"
 
 /****************************************************************************
  * Pre-processor Definitions

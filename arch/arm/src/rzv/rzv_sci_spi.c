@@ -45,8 +45,7 @@
 
 #include "arm_internal.h"
 #include "chip.h"
-#include "hardware/rzv_memorymap.h"
-#include "hardware/rzv2h/rzv_sci_b_spi.h"
+#include "hardware/rzv_sci_spi.h"
 #include "barriers.h"
 
 #include "rzv_clock.h"

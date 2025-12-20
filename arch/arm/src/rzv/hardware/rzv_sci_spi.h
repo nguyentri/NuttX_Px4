@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/rzv/hardware/rzv2h/rzv_sci_b_spi.h
+ * arch/arm/src/rzv/hardware/rzv2h/rzv_sci_spi.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RZV_HARDWARE_RZV2H_RZV_SCI_B_SPI_H
-#define __ARCH_ARM_SRC_RZV_HARDWARE_RZV2H_RZV_SCI_B_SPI_H
+#ifndef __ARCH_ARM_SRC_RZV_HARDWARE_RZV2H_RZV_SCI_SPI_H
+#define __ARCH_ARM_SRC_RZV_HARDWARE_RZV2H_RZV_SCI_SPI_H
 
 /****************************************************************************
  * Included Files
@@ -267,4 +267,4 @@
 #define RZV_SCI_SPI_MAX_FREQUENCY   50000000   /* 50 MHz max */
 #define RZV_SCI_SPI_MIN_FREQUENCY   1000       /* 1 kHz min */
 
-#endif /* __ARCH_ARM_SRC_RZV_HARDWARE_RZV2H_RZV_SCI_B_SPI_H */
+#endif /* __ARCH_ARM_SRC_RZV_HARDWARE_RZV2H_RZV_SCI_SPI_H */

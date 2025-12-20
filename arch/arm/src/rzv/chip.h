@@ -33,7 +33,6 @@
  */
 
 #include <arch/rzv/chip.h>
-#include "hardware/rzv_memorymap.h"
 
 /* Include the chip interrupt definition file */
 

@@ -27,7 +27,6 @@
 #include "arm_internal.h"
 #include "chip.h"
 #include "rzv_clock.h"
-#include "hardware/rzv_memorymap.h"
 #include "hardware/rzv_adc.h"
 /* ICU API for dynamic event -> IRQ routing */
 #include "rzv_icu.h"
