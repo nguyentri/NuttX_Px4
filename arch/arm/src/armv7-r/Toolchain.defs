@@ -74,11 +74,13 @@ ifeq ($(CONFIG_ARCH_COVERAGE),y)
 endif
 
 ifeq ($(CONFIG_ARCH_CORTEXR4),y)
-  ARCHCPUFLAGS += -mcpu=cortex-r4
+  ARCHCPUFLAGS = -mcpu=cortex-r4
 else ifeq ($(CONFIG_ARCH_CORTEXR5),y)
-  ARCHCPUFLAGS += -mcpu=cortex-r5
+  ARCHCPUFLAGS = -mcpu=cortex-r5
 else ifeq ($(CONFIG_ARCH_CORTEXR7),y)
-  ARCHCPUFLAGS += -mcpu=cortex-r7
+  ARCHCPUFLAGS = -mcpu=cortex-r7
+else ifeq ($(CONFIG_ARCH_CORTEXR8),y)
+  ARCHCPUFLAGS = -mcpu=cortex-r8
 endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)

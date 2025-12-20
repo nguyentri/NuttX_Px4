@@ -797,6 +797,7 @@ config ARCH_CORTEXR8
 	select ARCH_ICACHE
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_TESTSET
+
 config ARCH_ARMV8M
 	bool
 	default n

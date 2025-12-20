@@ -33,9 +33,6 @@ endif
 
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 
-# ARM Cortex-R8 specific flags
-ARCHCPUFLAGS = -mcpu=cortex-r8 -mfpu=vfpv3-d16 -mfloat-abi=hard
-
 # Compile flags
 CFLAGS := $(ARCHCFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
 CPICFLAGS = $(ARCHPICFLAGS) $(CFLAGS)
