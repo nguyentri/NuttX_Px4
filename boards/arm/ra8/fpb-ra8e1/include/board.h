@@ -71,9 +71,9 @@
 #define GPIO_I2C3_SDA   	GPIO_TXD3_MOSI3_SDA3_A /* P511 - Expansion I2C */
 #define GPIO_I2C3_SCL   	GPIO_RXD3_MISO3_SCL3_A /* P512 - Expansion I2C */
 
-/* LED Pin Definitions */
-#define GPIO_LED1       GPIO_P404_OUTPUT_HIGH  /* P404 - LED1 */
-#define GPIO_LED2       GPIO_P405_OUTPUT_HIGH  /* P405 - LED2 */
+/* LED Pin Definitions - Active high, initialize to OFF (LOW) */
+#define GPIO_LED1       GPIO_P404_OUTPUT_LOW  /* P404 - LED1 */
+#define GPIO_LED2       GPIO_P408_OUTPUT_LOW  /* P408 - LED2 */
 
 /* Button Pin Definitions */
 #define GPIO_SW1        	GPIO_IRQ13_P009_DS        /* P009 - User Button */

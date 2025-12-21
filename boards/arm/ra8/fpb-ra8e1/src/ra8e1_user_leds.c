@@ -46,7 +46,7 @@
 
 uint32_t board_userled_initialize(void)
 {
-  /* Configure LED GPIOs for output */
+  /* Configure LED GPIOs - active high, initialized to OFF by OUTPUT_LOW */
 
   ra_gpioconfig(GPIO_LED1);
   ra_gpioconfig(GPIO_LED2);

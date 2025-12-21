@@ -322,10 +322,10 @@
  * LED Pin Definitions
  ****************************************************************************/
 
-/* User LEDs */
-#define GPIO_USER_LED_BLUE    GPIO_P600_OUTPUT_HIGH  /* P600 ✓ NO CONFLICTS */
-#define GPIO_USER_LED_GREEN   GPIO_P303_OUTPUT_HIGH  /* P303 ⚠️ Conflicts: GPT7B */
-#define GPIO_USER_LED_RED     GPIO_PA07_OUTPUT_HIGH  /* PA07 ✓ NO CONFLICTS */
+/* User LEDs - Active high, initialize to OFF (LOW) */
+#define GPIO_USER_LED_BLUE    GPIO_P600_OUTPUT_LOW  /* P600 ✓ NO CONFLICTS */
+#define GPIO_USER_LED_GREEN   GPIO_P303_OUTPUT_LOW  /* P303 ⚠️ Conflicts: GPT7B */
+#define GPIO_USER_LED_RED     GPIO_PA07_OUTPUT_LOW  /* PA07 ✓ NO CONFLICTS */
 
 /* LED Aliases */
 #define GPIO_LED1             GPIO_USER_LED_BLUE

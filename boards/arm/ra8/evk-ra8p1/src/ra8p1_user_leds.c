@@ -61,7 +61,7 @@
  * Private Data
  ****************************************************************************/
 
-static bool g_led3_state = true; /* LED3 Green - Active low, true = off */
+static bool g_led3_state = false; /* LED3 Green - Active high, false = off */
 static struct work_s g_blink_work;
 
 /****************************************************************************
@@ -102,16 +102,12 @@ static void led_blink_worker(void *arg)
 
 uint32_t board_userled_initialize(void)
 {
-   /* Configure LED GPIOs for output */
-   ra_gpioconfig(GPIO_LED1);
-   ra_gpioconfig(GPIO_LED2);
-   ra_gpioconfig(GPIO_LED3);
-   ra_gpiowrite(GPIO_LED1, true);
-   ra_gpiowrite(GPIO_LED2, true);
-   ra_gpiowrite(GPIO_LED3, true);
+  /* Configure LED GPIOs - active high, initialized to OFF by OUTPUT_LOW */
+  ra_gpioconfig(GPIO_LED1);
+  ra_gpioconfig(GPIO_LED2);
+  ra_gpioconfig(GPIO_LED3);
 
   /* Start LED3 (Green) automatic blink on work queue */
-
   syslog(LOG_INFO, "Starting LED3 (Green) auto-blink at 1 Hz\n");
   work_queue(LPWORK, &g_blink_work, led_blink_worker, NULL,
              MSEC2TICK(LED_BLINK_DELAY));
