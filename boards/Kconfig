@@ -2539,6 +2539,8 @@ config ARCH_BOARD_FPB_RA8E1
 	bool "Renesas FPB-RA8E1 development board"
 	depends on ARCH_CHIP_R7FA8E1AFDCFB
 	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+    select ARCH_HAVE_IRQBUTTONS
 	---help---
 		This is the board configuration for the Renesas FPB-RA8E1 development board.
 		This board features the Renesas RA8E1 MCU (R7FA8E1AFDCFB) with ARM Cortex-M85 core.
@@ -2547,6 +2549,8 @@ config ARCH_BOARD_EVK_RA8P1
 	bool "Renesas EVK-RA8P1 evaluation board"
 	depends on ARCH_CHIP_R7KA8P1KFLCAC
 	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+    select ARCH_HAVE_IRQBUTTONS
 	---help---
 		This is the board configuration for the Renesas EVK-RA8P1 evaluation board.
 		This board features the Renesas RA8P1 MPU (R7KA8P1KFLCAC) with ARM Cortex-M85 core.
@@ -2554,7 +2558,8 @@ config ARCH_BOARD_EVK_RA8P1
 config ARCH_BOARD_RDK_RZV2H
 	bool "Renesas RDK-RZV2H evaluation board"
 	depends on ARCH_CHIP_R9A09G057
-	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+    select ARCH_HAVE_IRQBUTTONS
 	---help---
 		This is the board configuration for the Renesas RDK-RZV2H evaluation board.
 		This board features the Renesas RZV2H MPU (R9A09G057) with ARM Cortex-R8 core.

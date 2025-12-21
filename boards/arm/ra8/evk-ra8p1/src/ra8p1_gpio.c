@@ -35,12 +35,22 @@
  * Name: board_gpio_initialize
  *
  * Description:
- *   Initialize all board GPIO pins using centralized configuration
+ *   Initialize all board GPIO pins.
+ *
+ *   GPIO initialization is distributed:
+ *   - LEDs: Initialized by ra_gpioconfiglist() from board.h RA8_GPIO_INIT_LIST
+ *           in board_late_initialize() (ra8p1_bringup.c)
+ *   - Buttons: Initialized by board_button_initialize() when CONFIG_ARCH_BUTTONS
+ *   - Other peripherals: Initialized by their respective drivers
+ *
+ *   This function is called early in initialization and does not perform
+ *   GPIO configuration directly.
  *
  ****************************************************************************/
 
 int board_gpio_initialize(void)
 {
-  const uint32_t gpio_list[] = RA8_GPIO_INIT_LIST;
-  return ra_gpioconfiglist(gpio_list, sizeof(gpio_list) / sizeof(uint32_t));
+  /* GPIO initialization is handled by individual subsystems */
+
+  return OK;
 }

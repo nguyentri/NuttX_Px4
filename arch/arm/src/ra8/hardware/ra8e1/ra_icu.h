@@ -40,6 +40,7 @@
 
 /* ICU Register Offsets */
 
+#define R_ICU_IRQCR_OFFSET                        0x00000000  /* IRQ Control Register (8-bits) */
 #define R_ICU_NMIER_OFFSET                        0x00000100  /* Non-Maskable Interrupt Enable Register */
 #define R_ICU_NMICLR_OFFSET                       0x00000110  /* Non-Maskable Interrupt Status Clear Register */
 #define R_ICU_NMISR_OFFSET                        0x00000120  /* Non-Maskable Interrupt Status Register */
@@ -52,6 +53,7 @@
 
 /* ICU Register Addresses */
 
+#define R_ICU_IRQCR(m)                            (R_ICU_BASE + R_ICU_IRQCR_OFFSET + ((m) * 0x00000001))
 #define R_ICU_NMIER                               (R_ICU_BASE + R_ICU_NMIER_OFFSET)
 #define R_ICU_NMICLR                              (R_ICU_BASE + R_ICU_NMICLR_OFFSET)
 #define R_ICU_NMISR                               (R_ICU_BASE + R_ICU_NMISR_OFFSET)
@@ -61,6 +63,13 @@
 #define R_ICU_DELSR(m)                            (R_ICU_BASE + R_ICU_DELSR_OFFSET(m))
 
 /* Register bit definitions */
+/* IRQCR Register bit definitions */
+#define R_ICU_IRQCR_FLTEN                         (1 << 7)  /* IRQ Digital Filter Enable */
+#define R_ICU_IRQCR_FCLKSEL_SHIFT                 (4)       /* IRQ Digital Filter Sampling Clock Select */
+#define R_ICU_IRQCR_FCLKSEL_MASK                  (0x03)
+#define R_ICU_IRQCR_IRQMD_SHIFT                   (0)       /* IRQ Detection Sense Select */
+#define R_ICU_IRQCR_IRQMD_MASK                    (0x03)
+
 /* NMIER Register bit definitions */
 #define R_ICU_NMIER_IWDTEN                        (1 << 0)  /* IWDT Underflow/Refresh Error Interrupt Enable */
 

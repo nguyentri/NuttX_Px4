@@ -29,6 +29,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <debug.h>
+#include <syslog.h>
+
+#include <nuttx/clock.h>
+#include <nuttx/wqueue.h>
 
 #include "chip.h"
 #include "ra_gpio.h"
@@ -36,6 +40,57 @@
 #include <arch/board/board.h>
 
 #ifndef CONFIG_ARCH_LEDS
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* This file is only compiled when CONFIG_ARCH_LEDS is NOT set.
+ * In this mode, LEDs are controlled by user applications via the userled driver.
+ * The auto-blink feature demonstrates background LED control.
+ *
+ * LED assignments in nsh-leds configuration:
+ *   LED1 (Blue/P600)  - Controlled by SW1 button press (toggle)
+ *   LED2 (Red/PA07)   - Available for user control via NSH commands
+ *   LED3 (Green/P303) - Auto-blink at 1Hz (this file)
+ */
+
+#define LED_BLINK_DELAY     1000 /* 1 second LED blink delay (ms) */
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static bool g_led3_state = true; /* LED3 Green - Active low, true = off */
+static struct work_s g_blink_work;
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: led_blink_worker
+ *
+ * Description:
+ *   Work queue handler to blink LED3 (Green) every 1 second.
+ *
+ ****************************************************************************/
+
+static void led_blink_worker(void *arg)
+{
+  /* Toggle LED3 (Green) state */
+
+  g_led3_state = !g_led3_state;
+
+  /* Blink LED3 (Green LED on P303) */
+
+  ra_gpiowrite(GPIO_LED3, g_led3_state);
+
+  /* Schedule next blink */
+
+  work_queue(LPWORK, &g_blink_work, led_blink_worker, NULL,
+             MSEC2TICK(LED_BLINK_DELAY));
+}
 
 /****************************************************************************
  * Public Functions
@@ -47,7 +102,20 @@
 
 uint32_t board_userled_initialize(void)
 {
-  /* LED GPIOs are configured by ra_gpioconfiglist() in board bringup */
+   /* Configure LED GPIOs for output */
+   ra_gpioconfig(GPIO_LED1);
+   ra_gpioconfig(GPIO_LED2);
+   ra_gpioconfig(GPIO_LED3);
+   ra_gpiowrite(GPIO_LED1, true);
+   ra_gpiowrite(GPIO_LED2, true);
+   ra_gpiowrite(GPIO_LED3, true);
+
+  /* Start LED3 (Green) automatic blink on work queue */
+
+  syslog(LOG_INFO, "Starting LED3 (Green) auto-blink at 1 Hz\n");
+  work_queue(LPWORK, &g_blink_work, led_blink_worker, NULL,
+             MSEC2TICK(LED_BLINK_DELAY));
+
   return NLEDS;
 }
 
@@ -59,15 +127,15 @@ void board_userled(int led, bool ledon)
 {
   gpio_pinset_t ledcfg;
 
+  /* LEDs are active high on this board */
+
   if (led == LED_1)
     {
       ledcfg = GPIO_LED1;
-      ledon = ledon;
     }
   else if (led == LED_2)
     {
       ledcfg = GPIO_LED2;
-      ledon = !ledon;  /* Invert logic for LED2 */
     }
   else
     {
@@ -84,6 +152,8 @@ void board_userled(int led, bool ledon)
 void board_userled_all(uint32_t ledset)
 {
   bool ledon;
+
+  /* Active high: drive high to turn LED on */
 
   ledon = ((ledset & LED_1_BIT) != 0);
   ra_gpiowrite(GPIO_LED1, ledon);

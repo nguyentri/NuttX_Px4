@@ -62,15 +62,15 @@ void board_userled(int led, bool ledon)
 {
   gpio_pinset_t ledcfg;
 
+  /* LEDs are active high on this board */
+
   if (led == LED_1)
     {
       ledcfg = GPIO_LED1;
-      ledon = ledon;
     }
   else if (led == LED_2)
     {
       ledcfg = GPIO_LED2;
-      ledon = !ledon;  /* Invert logic for LED2 */
     }
   else
     {
@@ -87,6 +87,8 @@ void board_userled(int led, bool ledon)
 void board_userled_all(uint32_t ledset)
 {
   bool ledon;
+
+  /* Active high: drive high to turn LED on */
 
   ledon = ((ledset & LED_1_BIT) != 0);
   ra_gpiowrite(GPIO_LED1, ledon);

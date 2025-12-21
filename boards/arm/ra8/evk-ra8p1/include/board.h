@@ -329,8 +329,8 @@
 
 /* LED Aliases */
 #define GPIO_LED1             GPIO_USER_LED_BLUE
-#define GPIO_LED2             GPIO_USER_LED_GREEN
-#define GPIO_LED3             GPIO_USER_LED_RED
+#define GPIO_LED2             GPIO_USER_LED_RED
+#define GPIO_LED3             GPIO_USER_LED_GREEN
 
 /****************************************************************************
  * Button and Switch Pin Definitions
@@ -338,7 +338,7 @@
 
 /* User Switches */
 #define GPIO_USER_SW1         GPIO_IRQ13_P009_DS      /* P009 - SW1 (IRQ13-DS) */
-#define GPIO_USER_SW2         GPIO_P008_INPUT_PULLUP  /* P008 - SW2 (IRQ12-DS) */
+#define GPIO_USER_SW2         GPIO_IRQ12_P008_DS  /* P008 - SW2 (IRQ12-DS) */
 
 /* Button Aliases */
 #define GPIO_SW1              GPIO_USER_SW1

@@ -1088,11 +1088,11 @@ config RA_CPUCLK_DIV
 choice
    prompt "ICLK Divider (Internal System Bus Clock)"
    default RA_ICK_DIV_3 if RA8E1_GROUP
-   default RA_ICK_DIV_8 if RA8P1_GROUP
+   default RA_ICK_DIV_4 if RA8P1_GROUP
    help
      Select internal clock (ICLK) divider for system bus.
      RA8E1: /3 gives 120MHz from 360MHz
-     RA8P1: /8 gives 125MHz from 1000MHz
+     RA8P1: /4 gives 250MHz from 1000MHz
 
 config RA_ICK_DIV_1
    bool "Divide by 1"
@@ -1417,11 +1417,11 @@ config RA_BCLK_DIV
 choice
    prompt "FCLK Divider (Flash Clock)"
    default RA_FCLK_DIV_6 if RA8E1_GROUP
-   default RA_FCLK_DIV_4 if RA8P1_GROUP
+   default RA_FCLK_DIV_8 if RA8P1_GROUP
    help
      Select flash clock divider.
      RA8E1: /6 gives 60MHz
-     RA8P1: /4 gives 250MHz
+     RA8P1: /8 gives 125MHz (MRPCLK)
 
 config RA_FCLK_DIV_1
    bool "Divide by 1"

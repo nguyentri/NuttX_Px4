@@ -33,6 +33,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/irq.h>
+#include <nuttx/clock.h>
 
 #include "ra_gpio.h"
 #include "ra_icu.h"
@@ -40,12 +41,17 @@
 #include <arch/board/board.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define BUTTON_DEBOUNCE_MS  50   /* 50ms debounce time */
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static bool g_led1_state = true; /* Active low, true = off */
-static bool g_led2_state = true; /* Active low, true = off */
-static volatile uint32_t g_button_press_count = 0;
+static bool g_led1_state = false; /* LED1 - Active high, false = off */
+static volatile clock_t g_last_sw1_time = 0;
 
 /****************************************************************************
  * Private Functions
@@ -65,21 +71,40 @@ static volatile uint32_t g_button_press_count = 0;
 
 static int button_handler_isr(int irq, void *context, void *arg)
 {
-  /* Increment press counter */
+  clock_t current_time;
+  clock_t elapsed_ticks;
+  uint32_t elapsed_ms;
 
-  g_button_press_count++;
+  /* Get current time in ticks */
 
-  /* Toggle both LEDs to provide visual feedback */
+  current_time = clock_systime_ticks();
+
+  /* Debounce check for SW1 */
+
+  if (g_last_sw1_time > 0)
+    {
+      elapsed_ticks = current_time - g_last_sw1_time;
+      elapsed_ms = TICK2MSEC(elapsed_ticks);
+
+      if (elapsed_ms < BUTTON_DEBOUNCE_MS)
+        {
+          return OK;  /* Ignore bounced press */
+        }
+    }
+
+  /* Update last press time */
+
+  g_last_sw1_time = current_time;
+
+  /* Toggle LED1 */
 
   g_led1_state = !g_led1_state;
-  g_led2_state = !g_led2_state;
-
   ra_gpiowrite(GPIO_LED1, g_led1_state);
-  ra_gpiowrite(GPIO_LED2, g_led2_state);
 
   /* Log button press (keep brief for ISR) */
 
-  syslog(LOG_INFO, "Button pressed! Count: %lu\n", g_button_press_count);
+  syslog(LOG_INFO, "SW1 pressed! LED1 is now %s\n",
+         g_led1_state ? "ON" : "OFF");
 
   return OK;
 }
@@ -92,11 +117,8 @@ static int button_handler_isr(int irq, void *context, void *arg)
  * Name: board_button_initialize
  *
  * Description:
- *   Initialize button with external interrupt capability.
- *   This demonstrates:
- *   - GPIO configuration for input with pull-up
- *   - External interrupt configuration (falling edge)
- *   - LED initialization for output
+ *   Initialize SW1 button with external interrupt capability.
+ *   SW1 controls LED1 with 50ms debouncing.
  *
  ****************************************************************************/
 
@@ -104,11 +126,14 @@ uint32_t board_button_initialize(void)
 {
   int ret;
 
-  /* Configure button pin with external interrupt
+  /* Configure SW1 button with external interrupt
    * - Input with pull-up resistor
    * - Interrupt on falling edge (button press)
-   * - Interrupt handler: button_handler_isr
+   * - 50ms software debounce
    */
+
+  syslog(LOG_INFO, "Initializing SW1 button\n");
+
   ret = ra_gpioconfig(GPIO_SW1);
   if (ret < 0)
     {
@@ -123,6 +148,8 @@ uint32_t board_button_initialize(void)
              ret);
       return ret;
     }
+
+  syslog(LOG_INFO, "SW1 configured successfully\n");
 
   return OK;
 }

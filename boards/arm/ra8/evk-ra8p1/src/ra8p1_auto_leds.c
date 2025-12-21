@@ -46,30 +46,34 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/*  There are two user-controllable LEDs on board the RA8P1 FPB board:
+/*  There are three user-controllable LEDs on the EVK-RA8P1 board:
  *
- *     LED              GPIO
- *     ---------------- -----
- *     LED1 Green       P404
- *     LED2 Green       P408
+ *     LED              GPIO     Color
+ *     ---------------- -----    -----
+ *     LED1             P600     Blue
+ *     LED2             PA07     Red
+ *     LED3             P303     Green
  *
- * These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
- * defined.  In that case, the usage by the board port is defined in
- * include/board.h and src/ra8p1_auto_leds.c. The LEDs are used to encode
- * OS-related events as follows:
+ * LEDs are active HIGH (GPIO high = LED on, GPIO low = LED off).
  *
- *   SYMBOL                MEANING                         LED STATE
- *                                                   LED1       LED2
- *   -------------------  -----------------------  --------- ---------
- *   LED_STARTED          NuttX has been started     OFF       OFF
- *   LED_HEAPALLOCATE     Heap has been allocated    OFF       OFF
- *   LED_IRQSENABLED      Interrupts enabled         OFF       OFF
- *   LED_STACKCREATED     Idle stack created         ON        OFF
- *   LED_INIRQ            In an interrupt            N/C       ON
- *   LED_SIGNAL           In a signal handler        N/C       ON
- *   LED_ASSERTION        An assertion failed        N/C       ON
- *   LED_PANIC            The system has crashed     N/C     Blinking
- *   LED_IDLE             MCU is in sleep mode       ------ Not used ------
+ * When CONFIG_ARCH_LEDS is defined, these LEDs are controlled by the kernel
+ * to indicate system state (see board.h and ra8p1_auto_leds.c).
+ * When CONFIG_ARCH_LEDS is not defined, these LEDs can be controlled by
+ * user applications via the userled driver (see ra8p1_user_leds.c).
+ *
+ * The LEDs encode OS-related events as follows:
+ *
+ *   SYMBOL                MEANING                    LED1(Blue)  LED2(Red)  LED3(Green)
+ *   -------------------  -----------------------    ----------  ---------  -----------
+ *   LED_STARTED          NuttX has been started        OFF        OFF         OFF
+ *   LED_HEAPALLOCATE     Heap has been allocated       OFF        OFF         OFF
+ *   LED_IRQSENABLED      Interrupts enabled            OFF        OFF         OFF
+ *   LED_STACKCREATED     Idle stack created            ON         OFF         OFF
+ *   LED_INIRQ            In an interrupt               N/C        ON          N/C
+ *   LED_SIGNAL           In a signal handler           N/C        ON          N/C
+ *   LED_ASSERTION        An assertion failed           N/C        ON          N/C
+ *   LED_PANIC            The system has crashed        N/C      Blinking      N/C
+ *   LED_IDLE             MCU is in sleep mode          N/C        N/C         ON
  */
 
 /****************************************************************************
@@ -82,7 +86,13 @@
 
 void board_autoled_initialize(void)
 {
-  /* LED GPIOs are configured by ra_gpioconfiglist() in board bringup */
+    /* Configure LED GPIOs for output */
+    ra_gpioconfig(GPIO_LED1);
+    ra_gpioconfig(GPIO_LED2);
+    ra_gpioconfig(GPIO_LED3);
+    ra_gpiowrite(GPIO_LED1, true);
+    ra_gpiowrite(GPIO_LED2, true);
+    ra_gpiowrite(GPIO_LED3, true);
 }
 
 /****************************************************************************
@@ -93,27 +103,29 @@ void board_autoled_on(int led)
 {
   switch (led)
     {
-      /* 0: LED_STARTED, LED_HEAPALLOCATE, LED_IRQSENABLED: LED1=OFF LED2=OFF */
+      /* 0: LED_STARTED, LED_HEAPALLOCATE, LED_IRQSENABLED: All OFF */
       default:
       case 0:
-        ra_gpiowrite(GPIO_LED1, true);  /* LED off (active low) */
-        ra_gpiowrite(GPIO_LED2, true);  /* LED off (active low) */
+        ra_gpiowrite(GPIO_LED1, false);  /* Blue LED off (active high) */
+        ra_gpiowrite(GPIO_LED2, false);  /* Red LED off (active high) */
+        ra_gpiowrite(GPIO_LED3, false);  /* Green LED off (active high) */
         break;
 
-      /* 1: LED_STACKCREATED: LED1=ON LED2=OFF */
+      /* 1: LED_STACKCREATED: Blue ON, others OFF */
       case 1:
-        ra_gpiowrite(GPIO_LED1, false); /* LED on (active low) */
-        ra_gpiowrite(GPIO_LED2, true);  /* LED off (active low) */
+        ra_gpiowrite(GPIO_LED1, true);  /* Blue LED on (active high) */
+        ra_gpiowrite(GPIO_LED2, false); /* Red LED off (active high) */
+        ra_gpiowrite(GPIO_LED3, false); /* Green LED off (active high) */
         break;
 
-      /* 2: LED_INIRQ, LED_SIGNAL, LED_ASSERTION: LED1=N/C LED2=ON */
+      /* 2: LED_INIRQ, LED_SIGNAL, LED_ASSERTION: Red ON */
       case 2:
-        ra_gpiowrite(GPIO_LED2, false); /* LED on (active low) */
+        ra_gpiowrite(GPIO_LED2, true);  /* Red LED on (active high) */
         break;
 
-      /* 3: LED_PANIC: LED2=Blinking */
+      /* 3: LED_PANIC: Red blinking */
       case 3:
-        ra_gpiowrite(GPIO_LED2, false); /* LED on (active low) */
+        ra_gpiowrite(GPIO_LED2, true);  /* Red LED on (active high) */
         break;
     }
 }
@@ -132,14 +144,14 @@ void board_autoled_off(int led)
       case 1:
         break;
 
-      /* 2: LED_INIRQ, LED_SIGNAL, LED_ASSERTION: LED1=N/C LED2=OFF */
+      /* 2: LED_INIRQ, LED_SIGNAL, LED_ASSERTION: Red OFF */
       case 2:
-        ra_gpiowrite(GPIO_LED2, true);  /* LED off (active low) */
+        ra_gpiowrite(GPIO_LED2, false); /* Red LED off (active high) */
         break;
 
-      /* 3: LED_PANIC: LED2=Blinking */
+      /* 3: LED_PANIC: Red blinking */
       case 3:
-        ra_gpiowrite(GPIO_LED2, true);  /* LED off (active low) */
+        ra_gpiowrite(GPIO_LED2, false); /* Red LED off (active high) */
         break;
     }
 }

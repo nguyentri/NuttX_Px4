@@ -50,8 +50,10 @@
  *
  *     LED              GPIO        Active
  *     ---------------- -----       ------
- *     LED1 Green       P404        Low
- *     LED2 Green       P408        Low
+ *     LED1 Green       P404        High
+ *     LED2 Green       P408        High
+ *
+ * LEDs are active HIGH (GPIO high = LED on, GPIO low = LED off).
  *
  * These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
  * defined.  In that case, the usage by the board port is defined in
@@ -71,7 +73,7 @@
  *   LED_PANIC            The system has crashed     N/C       Blinking
  *   LED_IDLE             MCU is in sleep mode       Not used
  *
- * Note: LEDs are active low (write false/0 to turn on, true/1 to turn off)
+ * Note: LEDs are active high (write true/1 to turn on, false/0 to turn off)
  */
 
 /****************************************************************************
@@ -87,8 +89,8 @@ void board_autoled_initialize(void)
     /* Configure LED GPIOs for output */
     ra_gpioconfig(GPIO_LED1);
     ra_gpioconfig(GPIO_LED2);
-    ra_gpiowrite(GPIO_LED1, true);
-    ra_gpiowrite(GPIO_LED2, true);
+    ra_gpiowrite(GPIO_LED1, false);
+    ra_gpiowrite(GPIO_LED2, false);
 }
 
 /****************************************************************************

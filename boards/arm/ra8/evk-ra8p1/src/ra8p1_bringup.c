@@ -47,6 +47,7 @@
 
 #if !defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER)
 #  define HAVE_LEDS 1
+#  define LED_DRIVER_PATH "/dev/userleds"
 #endif
 
 /****************************************************************************

@@ -94,7 +94,7 @@
  * Bits 31-28: FCLK divider    Bits 27-24: ICLK divider    Bits 23-20: PCLKE divider
  * Bits 19-16: BCLK divider    Bits 15-12: PCLKA divider   Bits 11-8:  PCLKB divider
  * Bits 7-4:   PCLKC divider   Bits 3-0:   PCLKD divider
- * FSP default: FCLK=/8(3), ICLK=/4(2), PCLKE=/4(2), BCLK=/8(3), PCLKA=/8(3), PCLKB=/16(4), PCLKC=/8(3), PCLKD=/4(2)
+ * Default: FCLK=/8(3), ICLK=/4(2), PCLKE=/4(2), BCLK=/8(3), PCLKA=/8(3), PCLKB=/16(4), PCLKC=/8(3), PCLKD=/4(2)
  * Expected value: 0x32233432
  */
 #define RA_PRV_STARTUP_SCKDIVCR_FCLK_BITS        ((CONFIG_RA_FCLK_DIV & 0xFU) << 28U)
@@ -128,15 +128,15 @@
                                                   RA_PRV_STARTUP_SCKDIVCR2_NPUCK_BITS | \
                                                   RA_PRV_STARTUP_SCKDIVCR2_MRICK_BITS)
 
-/* PLL2 configuration - Match FSP for RA8P1 PLLCCR_TYPE 6
+/* PLL2 configuration for RA8P1 PLLCCR_TYPE 6
  * For PLLCCR_TYPE 6: PLLMULNF starts at bit 6, mask is 0x7FF (11-bit)
- * BSP_CLOCKS_PLL_MUL(X,Y) = ((X-1) << 2) | fractional
+ * CLOCKS_PLL_MUL(X,Y) = ((X-1) << 2) | fractional
  * Expected PLL2CCR for MUL=300, DIV=/3: ((299<<2)<<6) | (0<<4) | 2 = 0x12B02
  */
 #define RA_PRV_PLL2CCR_PLLMULNF_BIT               (6)  // PLLMULNF field starts at bit 6
 #define RA_PRV_PLL2CCR_PLSRCSEL_BIT               (4)  // PL2SRCSEL starts at bit 4
 #define RA_PRV_PLL2_MUL_CFG_MACRO_PLLMUL_MASK     (0x7FFU)  // 11-bit mask for multiplier
-/* PLL2 source select: Match FSP - Main OSC = 0, HOCO = 1 */
+/* PLL2 source select: Main OSC = 0, HOCO = 1 */
 #if CONFIG_RA_PLL2_SOURCE == RA_CLOCKS_SOURCE_CLOCK_MAIN_OSC
 #  define RA_PRV_PL2SRCSEL                        (0)
 #elif CONFIG_RA_PLL2_SOURCE == RA_CLOCKS_SOURCE_CLOCK_HOCO
@@ -144,7 +144,7 @@
 #else
 #  define RA_PRV_PL2SRCSEL                        (0)
 #endif
-/* Use FSP BSP_CLOCKS_PLL_MUL format: ((MUL-1) << 2) shifted to bit 6 */
+/* CLOCKS_PLL_MUL format: ((MUL-1) << 2) shifted to bit 6 */
 #define RA_PRV_PLL2CCR                            (((((((CONFIG_RA_PLL2_MUL) - 1U) << 2U) | 0U) & RA_PRV_PLL2_MUL_CFG_MACRO_PLLMUL_MASK) << \
                                                       RA_PRV_PLL2CCR_PLLMULNF_BIT) | \
                                                     (RA_PRV_PL2SRCSEL << RA_PRV_PLL2CCR_PLSRCSEL_BIT) | \
@@ -167,7 +167,7 @@
 #define RA_PRV_PLLCCR_PLSRCSEL_BIT              (4)  // PLSRCSEL starts at bit 4
 #define RA_PRV_PLL_MUL_CFG_MACRO_PLLMUL_MASK    (0x7FFU)  // 11-bit mask for multiplier
 /* Note: RA_PRV_PLSRCSEL is defined above based on CONFIG_RA_PLL_SOURCE */
-/* Use FSP BSP_CLOCKS_PLL_MUL format: ((MUL-1) << 2) shifted to bit 6 */
+/* Use CLOCKS_PLL_MUL format: ((MUL-1) << 2) shifted to bit 6 */
 #define RA_PRV_PLLCCR                           (((((((CONFIG_RA_PLL_MUL) - 1U) << 2U) | 0U) & RA_PRV_PLL_MUL_CFG_MACRO_PLLMUL_MASK) << \
                                                     RA_PRV_PLLCCR_PLLMULNF_BIT) | \
                                                   (RA_PRV_PLSRCSEL << RA_PRV_PLLCCR_PLSRCSEL_BIT) | \
@@ -233,32 +233,18 @@ static void ra_update_clock_config(void);
 
 void ra_sys_core_clock_update (void)
 {
-  uint32_t clock_index = getreg8(R_SYSC_SCKSCR);
+  uint8_t clock_index = getreg8(R_SYSC_SCKSCR) & R_SYSC_SCKSCR_CKSEL_MASK;
+  uint32_t source_freq = (clock_index < (sizeof(g_clock_freq) / sizeof(g_clock_freq[0]))) ?
+                         g_clock_freq[clock_index] : RA_HOCO_HZ;
   uint8_t cpuck = (getreg8(R_SYSC_SCKDIVCR2) & R_SYSC_SCKDIVCR2_CPUCK_MASK) >> R_SYSC_SCKDIVCR2_CPUCK_SHIFT;
-  uint8_t cpuclk_div = cpuck;
 
- /* Handle special divider cases first */
-  if (8U == cpuclk_div)
+  if ((cpuck == RA_CLOCKS_CLOCK_DISABLED) || (source_freq == 0U))
     {
-      g_sys_core_clock = g_clock_freq[clock_index] / 3U;
+      g_sys_core_clock = 0U;
+      return;
     }
-  else if (9U == cpuclk_div)
-    {
-      g_sys_core_clock = g_clock_freq[clock_index] / 6U;
-    }
-  else if (10U == cpuclk_div)
-    {
-      g_sys_core_clock = g_clock_freq[clock_index] / 12U;
-    }
-  else if (11U == cpuclk_div)
-    {
-      g_sys_core_clock = g_clock_freq[clock_index] / 24U;
-    }
-  else
-    {
-      /* Standard power-of-2 dividers */
-      g_sys_core_clock = g_clock_freq[clock_index] >> cpuclk_div;
-    };
+
+  g_sys_core_clock = source_freq / RA_DIV_TO_DIVISOR(cpuck);
 }
 
 /****************************************************************************

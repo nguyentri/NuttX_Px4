@@ -369,8 +369,12 @@ int ra_icu_filter_config(int icu_irq, uint8_t mode, bool filter_enable,
 {
   uint32_t regval;
 
-  /* Validate IRQ range - only IRQ0-IRQ15 support configuration */
+  /* Validate IRQ range */
+#if defined(CONFIG_RA8E1_GROUP)
   if (icu_irq < 0 || icu_irq > 15)
+#elif defined(CONFIG_RA8P1_GROUP)
+  if (icu_irq < 0 || icu_irq > 31)
+#endif
     {
       return -EINVAL;
     }
@@ -379,17 +383,53 @@ int ra_icu_filter_config(int icu_irq, uint8_t mode, bool filter_enable,
   putreg32(0, R_ICU_IELSR(icu_irq));
 
   /* Set interrupt detection mode */
-  regval = (mode & R_ICU_COMMON_IRQCR_IRQMD_MASK) << R_ICU_COMMON_IRQCR_IRQMD_SHIFT;
+#if defined(CONFIG_RA8E1_GROUP)
+  /* RA8E1 uses simple IRQCR register */
+  regval = (mode & R_ICU_IRQCR_IRQMD_MASK) << R_ICU_IRQCR_IRQMD_SHIFT;
 
   /* Set filter configuration if enabled */
   if (filter_enable)
     {
-      regval |= R_ICU_COMMON_IRQCR_FLTEN;
-      regval |= (filter_clock & R_ICU_COMMON_IRQCR_FCLKSEL_MASK) << R_ICU_COMMON_IRQCR_FCLKSEL_SHIFT;
+      regval |= R_ICU_IRQCR_FLTEN;
+      regval |= (filter_clock & R_ICU_IRQCR_FCLKSEL_MASK) << R_ICU_IRQCR_FCLKSEL_SHIFT;
     }
 
   /* Write to the IRQCR register */
-  putreg8(regval, R_ICU_COMMON_IRQCR(icu_irq));
+  putreg8(regval, R_ICU_IRQCR(icu_irq));
+
+#elif defined(CONFIG_RA8P1_GROUP)
+  /* RA8P1 has two IRQ control register banks */
+  if (icu_irq <= 15)
+    {
+      /* Use IRQCRA for IRQ0-IRQ15 */
+      regval = (mode & R_ICU_IRQCRA_IRQMD_MASK) << R_ICU_IRQCRA_IRQMD_SHIFT;
+
+      /* Set filter configuration if enabled */
+      if (filter_enable)
+        {
+          regval |= R_ICU_IRQCRA_FLTEN;
+          regval |= (filter_clock & R_ICU_IRQCRA_FCLKSEL_MASK) << R_ICU_IRQCRA_FCLKSEL_SHIFT;
+        }
+
+      /* Write to the IRQCRA register */
+      putreg8(regval, R_ICU_IRQCRA(icu_irq));
+    }
+  else
+    {
+      /* Use IRQCRB for IRQ16-IRQ31 */
+      regval = (mode & R_ICU_IRQCRB_IRQMD_MASK) << R_ICU_IRQCRB_IRQMD_SHIFT;
+
+      /* Set filter configuration if enabled */
+      if (filter_enable)
+        {
+          regval |= R_ICU_IRQCRB_FLTEN;
+          regval |= (filter_clock & R_ICU_IRQCRB_FCLKSEL_MASK) << R_ICU_IRQCRB_FCLKSEL_SHIFT;
+        }
+
+      /* Write to the IRQCRB register */
+      putreg8(regval, R_ICU_IRQCRB(icu_irq - 16));
+    }
+#endif
 
   return OK;
 }

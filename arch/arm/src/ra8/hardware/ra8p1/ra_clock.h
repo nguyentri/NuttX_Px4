@@ -411,12 +411,6 @@
 /****************************************************************************
  * Configuration Default Macro
  ****************************************************************************/
-#define RA_CONFIG_DEFAULT(cfg, profile, fallback) \
-    _RA_CONFIG_DEFAULT_IMPL(cfg, profile, fallback)
-
-/* Implementation detail: Check for profile override, else use fallback */
-#define _RA_CONFIG_DEFAULT_IMPL(cfg, profile, fallback) \
-    _RA_CONFIG_DEFAULT_##cfg##_IMPL(profile, fallback)
 
 /* PLL configuration with profile-based defaults */
 #ifndef CONFIG_RA_PLL_SOURCE
@@ -505,94 +499,76 @@
 #endif
 
 /* System clock dividers with profile-based defaults */
-/* Override any Kconfig setting */
-#ifdef CONFIG_RA_CPUCLK_DIV
-#  undef CONFIG_RA_CPUCLK_DIV
-#endif
-#ifdef RA_PROFILE_CPUCLK_DIV
-#  define CONFIG_RA_CPUCLK_DIV      RA_PROFILE_CPUCLK_DIV
-#else
-#  define CONFIG_RA_CPUCLK_DIV      RA_CLOCKS_SYS_CLOCK_DIV_1  /* /1 -> 1000MHz */
+#ifndef CONFIG_RA_CPUCLK_DIV
+#  ifdef RA_PROFILE_CPUCLK_DIV
+#    define CONFIG_RA_CPUCLK_DIV      RA_PROFILE_CPUCLK_DIV
+#  else
+#    define CONFIG_RA_CPUCLK_DIV      RA_CLOCKS_SYS_CLOCK_DIV_1  /* /1 -> 1000MHz */
+#  endif
 #endif
 
-/* Override any Kconfig setting - must use RA_CLOCKS_SYS_CLOCK_DIV_X constants, not raw values */
-#ifdef CONFIG_RA_ICK_DIV
-#  undef CONFIG_RA_ICK_DIV
-#endif
-#ifdef RA_PROFILE_ICK_DIV
-#  define CONFIG_RA_ICK_DIV         RA_PROFILE_ICK_DIV
-#else
-#  define CONFIG_RA_ICK_DIV         RA_CLOCKS_SYS_CLOCK_DIV_4  /* /4 -> 250MHz */
+#ifndef CONFIG_RA_ICK_DIV
+#  ifdef RA_PROFILE_ICK_DIV
+#    define CONFIG_RA_ICK_DIV         RA_PROFILE_ICK_DIV
+#  else
+#    define CONFIG_RA_ICK_DIV         RA_CLOCKS_SYS_CLOCK_DIV_4  /* /4 -> 250MHz */
+#  endif
 #endif
 
-/* Override any Kconfig setting */
-#ifdef CONFIG_RA_PCKA_DIV
-#  undef CONFIG_RA_PCKA_DIV
-#endif
-#ifdef RA_PROFILE_PCKA_DIV
-#  define CONFIG_RA_PCKA_DIV        RA_PROFILE_PCKA_DIV
-#else
-#  define CONFIG_RA_PCKA_DIV        RA_CLOCKS_SYS_CLOCK_DIV_8  /* /8 -> 125MHz */
+#ifndef CONFIG_RA_PCKA_DIV
+#  ifdef RA_PROFILE_PCKA_DIV
+#    define CONFIG_RA_PCKA_DIV        RA_PROFILE_PCKA_DIV
+#  else
+#    define CONFIG_RA_PCKA_DIV        RA_CLOCKS_SYS_CLOCK_DIV_8  /* /8 -> 125MHz */
+#  endif
 #endif
 
-/* Override any Kconfig setting */
-#ifdef CONFIG_RA_PCKB_DIV
-#  undef CONFIG_RA_PCKB_DIV
-#endif
-#ifdef RA_PROFILE_PCKB_DIV
-#  define CONFIG_RA_PCKB_DIV        RA_PROFILE_PCKB_DIV
-#else
-#  define CONFIG_RA_PCKB_DIV        RA_CLOCKS_SYS_CLOCK_DIV_16  /* /16 -> 62.5MHz */
+#ifndef CONFIG_RA_PCKB_DIV
+#  ifdef RA_PROFILE_PCKB_DIV
+#    define CONFIG_RA_PCKB_DIV        RA_PROFILE_PCKB_DIV
+#  else
+#    define CONFIG_RA_PCKB_DIV        RA_CLOCKS_SYS_CLOCK_DIV_16  /* /16 -> 62.5MHz */
+#  endif
 #endif
 
-/* Override any Kconfig setting */
-#ifdef CONFIG_RA_PCKC_DIV
-#  undef CONFIG_RA_PCKC_DIV
-#endif
-#ifdef RA_PROFILE_PCKC_DIV
-#  define CONFIG_RA_PCKC_DIV        RA_PROFILE_PCKC_DIV
-#else
-#  define CONFIG_RA_PCKC_DIV        RA_CLOCKS_SYS_CLOCK_DIV_8  /* /8 -> 125MHz */
+#ifndef CONFIG_RA_PCKC_DIV
+#  ifdef RA_PROFILE_PCKC_DIV
+#    define CONFIG_RA_PCKC_DIV        RA_PROFILE_PCKC_DIV
+#  else
+#    define CONFIG_RA_PCKC_DIV        RA_CLOCKS_SYS_CLOCK_DIV_8  /* /8 -> 125MHz */
+#  endif
 #endif
 
-/* Override any Kconfig setting */
-#ifdef CONFIG_RA_PCKD_DIV
-#  undef CONFIG_RA_PCKD_DIV
-#endif
-#ifdef RA_PROFILE_PCKD_DIV
-#  define CONFIG_RA_PCKD_DIV        RA_PROFILE_PCKD_DIV
-#else
-#  define CONFIG_RA_PCKD_DIV        RA_CLOCKS_SYS_CLOCK_DIV_4  /* /4 -> 250MHz */
+#ifndef CONFIG_RA_PCKD_DIV
+#  ifdef RA_PROFILE_PCKD_DIV
+#    define CONFIG_RA_PCKD_DIV        RA_PROFILE_PCKD_DIV
+#  else
+#    define CONFIG_RA_PCKD_DIV        RA_CLOCKS_SYS_CLOCK_DIV_4  /* /4 -> 250MHz */
+#  endif
 #endif
 
-/* Override any Kconfig setting */
-#ifdef CONFIG_RA_PCKE_DIV
-#  undef CONFIG_RA_PCKE_DIV
-#endif
-#ifdef RA_PROFILE_PCKE_DIV
-#  define CONFIG_RA_PCKE_DIV        RA_PROFILE_PCKE_DIV
-#else
-#  define CONFIG_RA_PCKE_DIV        RA_CLOCKS_SYS_CLOCK_DIV_4  /* /4 -> 250MHz */
+#ifndef CONFIG_RA_PCKE_DIV
+#  ifdef RA_PROFILE_PCKE_DIV
+#    define CONFIG_RA_PCKE_DIV        RA_PROFILE_PCKE_DIV
+#  else
+#    define CONFIG_RA_PCKE_DIV        RA_CLOCKS_SYS_CLOCK_DIV_4  /* /4 -> 250MHz */
+#  endif
 #endif
 
-/* Override any Kconfig setting */
-#ifdef CONFIG_RA_BCLK_DIV
-#  undef CONFIG_RA_BCLK_DIV
-#endif
-#ifdef RA_PROFILE_BCLK_DIV
-#  define CONFIG_RA_BCLK_DIV        RA_PROFILE_BCLK_DIV
-#else
-#  define CONFIG_RA_BCLK_DIV        RA_CLOCKS_SYS_CLOCK_DIV_8  /* /8 -> 125MHz */
+#ifndef CONFIG_RA_BCLK_DIV
+#  ifdef RA_PROFILE_BCLK_DIV
+#    define CONFIG_RA_BCLK_DIV        RA_PROFILE_BCLK_DIV
+#  else
+#    define CONFIG_RA_BCLK_DIV        RA_CLOCKS_SYS_CLOCK_DIV_8  /* /8 -> 125MHz */
+#  endif
 #endif
 
-/* Override any Kconfig setting - must use RA_CLOCKS_SYS_CLOCK_DIV_X constants, not raw values */
-#ifdef CONFIG_RA_FCLK_DIV
-#  undef CONFIG_RA_FCLK_DIV
-#endif
-#ifdef RA_PROFILE_FCLK_DIV
-#  define CONFIG_RA_FCLK_DIV        RA_PROFILE_FCLK_DIV
-#else
-#  define CONFIG_RA_FCLK_DIV        RA_CLOCKS_SYS_CLOCK_DIV_8  /* /8 -> 125MHz (MRPCLK) */
+#ifndef CONFIG_RA_FCLK_DIV
+#  ifdef RA_PROFILE_FCLK_DIV
+#    define CONFIG_RA_FCLK_DIV        RA_PROFILE_FCLK_DIV
+#  else
+#    define CONFIG_RA_FCLK_DIV        RA_CLOCKS_SYS_CLOCK_DIV_8  /* /8 -> 125MHz (MRPCLK) */
+#  endif
 #endif
 
 /* Peripheral Clock Divider Defaults */
@@ -949,14 +925,12 @@
 #ifndef CONFIG_RA_NPUCLK_DIV
 #  define CONFIG_RA_NPUCLK_DIV           RA_CLOCKS_SYS_CLOCK_DIV_1  /* NPU at full speed */
 #endif
-/* Override any Kconfig setting for MRICLK */
-#ifdef CONFIG_RA_MRICLK_DIV
-#  undef CONFIG_RA_MRICLK_DIV
-#endif
-#ifdef RA_PROFILE_MRICLK_DIV
-#  define CONFIG_RA_MRICLK_DIV           RA_PROFILE_MRICLK_DIV
-#else
-#  define CONFIG_RA_MRICLK_DIV           RA_CLOCKS_SYS_CLOCK_DIV_4  /* /4 -> 250MHz (match FSP) */
+#ifndef CONFIG_RA_MRICLK_DIV
+#  ifdef RA_PROFILE_MRICLK_DIV
+#    define CONFIG_RA_MRICLK_DIV           RA_PROFILE_MRICLK_DIV
+#  else
+#    define CONFIG_RA_MRICLK_DIV           RA_CLOCKS_SYS_CLOCK_DIV_4  /* /4 -> 250MHz (match FSP) */
+#  endif
 #endif
 
 /* External Bus Configuration */
