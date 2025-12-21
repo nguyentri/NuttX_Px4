@@ -2009,16 +2009,11 @@ static int up_receive(struct uart_dev_s *dev, unsigned int *status)
   *status   = priv->sr;
   priv->sr  = 0;
 
-  /* Read the received byte from RDR_BY register */
-  ch = (int)(up_serialin(priv, R_SCI_B_RDR_OFFSET) & 0xff);
+  /* Read the received byte from the byte-access register */
+  ch = (int)(up_serialin(priv, R_SCI_B_RDR_BY_OFFSET) & 0xff);
 
-  /* In FIFO mode, reading RDR updates the FIFO count.
-   * RDRF is a status flag based on count >= RTRG.
-   * We do NOT clear RDRF manually here.
-   */
-#ifndef CONFIG_RA_SCI_FIFO_MODE
+  /* Clear RDRF so the next RXI interrupt can fire (needed for FIFO mode too) */
   up_serialout(priv, R_SCI_B_CFCLR_OFFSET, R_SCI_B_CFCLR_RDRFC);
-#endif
 
   return ch;
 }
@@ -2077,8 +2072,16 @@ static bool up_rxavailable(struct uart_dev_s *dev)
     }
 #endif
 
-  /* Check FRSR.DR (Data Ready) bit for FIFO mode */
-  return (up_serialin(priv, R_SCI_B_FRSR_OFFSET) & R_SCI_B_FRSR_DR) != 0;
+#ifdef CONFIG_RA_SCI_FIFO_MODE
+  /* With FIFO enabled, check receive count > 0 */
+  if (priv->fifo_depth > 0)
+    {
+      return (up_serialin(priv, R_SCI_B_FRSR_OFFSET) & R_SCI_B_FRSR_R_MASK) != 0;
+    }
+#endif
+
+  /* Non-FIFO path: rely on CSR.RDRF */
+  return (up_serialin(priv, R_SCI_B_CSR_OFFSET) & R_SCI_B_CSR_RDRF) != 0;
 }
 
 #ifdef CONFIG_SERIAL_TXDMA
@@ -2290,14 +2293,10 @@ static void up_send(struct uart_dev_s *dev, int ch)
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
 
   /* Send the character to TDR_BY register (byte access) */
-  up_serialout(priv, R_SCI_B_TDR_OFFSET, (uint8_t)ch);
+  up_serialout(priv, R_SCI_B_TDR_BY_OFFSET, (uint8_t)ch);
 
-  /* In FIFO mode, TDRE is a status flag based on count <= TTRG.
-   * We do NOT clear TDRE manually here.
-   */
-#ifndef CONFIG_RA_SCI_FIFO_MODE
+  /* Clear TDRE so the next TXI interrupt can be generated (FIFO and non-FIFO) */
   up_serialout(priv, R_SCI_B_CFCLR_OFFSET, R_SCI_B_CFCLR_TDREC);
-#endif
 }
 
 /****************************************************************************

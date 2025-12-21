@@ -2725,7 +2725,7 @@ config RA_SCI_UART_BAUDRATE_MODULATION
 
 config RA_SCI_FIFO_MODE
    bool "Enable SCI-B FIFO Mode"
-   default n
+   default y
    depends on RA_SCI0_UART || RA_SCI1_UART || RA_SCI2_UART || RA_SCI3_UART || RA_SCI4_UART || RA_SCI5_UART || RA_SCI6_UART || RA_SCI7_UART || RA_SCI8_UART || RA_SCI9_UART
    help
      Enable FIFO mode for SCI-B channels that support it.

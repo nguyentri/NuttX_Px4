@@ -93,28 +93,26 @@
  * UART/SCI Pin Definitions
  ****************************************************************************/
 
-/* SCI2 - NSH Console (Pmod 1 UART: P802=RXD2, P801=TXD2/MOSI2)
- * ⚠️  CONFLICT: Shares pins with Pmod 1 SPI and OSPI DQS/SIO6!
- * Hardware: Usually hardwired to USB-Serial converter
- * Resolution: This is the default console. To use Pmod 1 SPI,
- *             redirect console to SCI0 or SCI7.
+/* SCI0 - NSH Console (P602=RXD0/MISOB, P603=TXD0/MOSIB)
+ * ⚠️  CONFLICT: Shares pins with Pmod 2 SPI (SPI0)
  */
-#define GPIO_SCI2_RX   GPIO_RXD2_A  /* P802 - Console RX ⚠️ Conflicts: MISO2, OSPI_SIO6 */
-#define GPIO_SCI2_TX   GPIO_TXD2_A  /* P801 - Console TX ⚠️ Conflicts: MOSI2, OSPI_DQS */
+#define GPIO_SCI0_RX   GPIO_RXD0_B  /* P602 - Console RX ⚠️ Conflicts: MISO0 */
+#define GPIO_SCI0_TX   GPIO_TXD0_B  /* P603 - Console TX ⚠️ Conflicts: MOSI0 */
 
-/* SCI0 - Pmod 2 UART (P602=RXD0/MISOB, P603=TXD0/MOSIB)
- * ⚠️  CONFLICT: Shares pins with Pmod 2 SPI!
- * Use Case: Alternate console location when SCI2 is used for Pmod 1 SPI
- */
-#define GPIO_SCI0_RX   GPIO_RXD0_B  /* P602 - Pmod 2 RX ⚠️ Conflicts: MISO0 */
-#define GPIO_SCI0_TX   GPIO_TXD0_B  /* P603 - Pmod 2 TX ⚠️ Conflicts: MOSI0 */
+/* SCI4 - alt C on J1 parallel display header (TELEM/GPS/RC if LCD unused) */
+#define GPIO_SCI4_RX   GPIO_RXD4_C  /* P715 - J1 pin 37 */
+#define GPIO_SCI4_TX   GPIO_TXD4_C  /* P714 - J1 pin 38 */
 
-/* SCI7 - Arduino/mikroBUS UART (P808=RXD7, P809=TXD7)
- * ✓ SAFE: No major conflicts
- * Use Case: Alternate console location or Arduino/mikroBUS communication
- */
-#define GPIO_SCI7_RX   GPIO_RXD7_A  /* P808 - Arduino D0/mikroBUS RX ✓ SAFE */
-#define GPIO_SCI7_TX   GPIO_TXD7_A  /* P809 - Arduino D1/mikroBUS TX ✓ SAFE */
+/* SCI5 - alt C on J1 parallel display header (GPS/RC if SDRAM/LCD unused) */
+#define GPIO_SCI5_RX   GPIO_RXD5_C  /* PB02(P112) - J1 pin 32 */
+#define GPIO_SCI5_TX   GPIO_TXD5_C  /* PB03(P113) - J1 pin 29 */
+
+/* SCI9 - optional UART on P208/P209 (off graphics/SDRAM/OSPI) */
+#define GPIO_SCI9_RX   GPIO_RXD9_B  /* P208 */
+#define GPIO_SCI9_TX   GPIO_TXD9_B  /* P209 */
+
+/* SCI8 RX-only option for RC input (P806 RXD8_A, no TX required) */
+#define GPIO_SCI8_RX   GPIO_RXD8_A  /* P806 - RC input */
 
 /****************************************************************************
  * SPI Pin Definitions
@@ -258,8 +256,8 @@
 /* Motor PWM Configuration using GPT channels
  * Motor 1: P912 (GPT3A)
  * Motor 2: P915 (GPT5A)
- * Motor 3: P903 (GPT11A
- * Motor 4: P515 (GPT13A
+ * Motor 3: P903 (GPT11A)
+ * Motor 4: P515 (GPT13A)
  *
  * Note: Pin assignments verified from RA8P1 pinmap for ESC control
  */
@@ -677,21 +675,14 @@
 /* GPIO initialization list pattern */
 #if (0)
 #define RA8_GPIO_INIT_LIST  { \
-  GPIO_SCI2_RX,                 /* Console RX - P802 */ \
-  GPIO_SCI2_TX,                 /* Console TX - P801 */ \
   GPIO_SCI0_RX,                 /* Pmod 2 UART RX - P602 */ \
   GPIO_SCI0_TX,                 /* Pmod 2 UART TX - P603 */ \
-  GPIO_SCI7_RX,                 /* Arduino/mikroBUS UART RX - P808 */ \
-  GPIO_SCI7_TX,                 /* Arduino/mikroBUS UART TX - P809 */ \
   GPIO_ARDUINO_SPI_SCK,         /* P102 - Arduino D13 */ \
   GPIO_ARDUINO_SPI_MISO,        /* P100 - Arduino D12 */ \
   GPIO_ARDUINO_SPI_MOSI,        /* P101 - Arduino D11 */ \
   GPIO_ARDUINO_SPI_CS0,         /* P103 - Arduino D10 */ \
-  GPIO_ARDUINO_SPI_CS1,         /* P110 - repurposed for another CS */ \
   GPIO_I2C0_SCL,                /* I2C0 Clock - P400 */ \
   GPIO_I2C0_SDA,                /* I2C0 Data - P401 */ \
-  GPIO_I2C1_SCL,                /* I2C1 Clock - P512 */ \
-  GPIO_I2C1_SDA,                /* I2C1 Data - P511 */ \
   GPIO_USER_LED_BLUE,           /* Blue LED - P600 */ \
   GPIO_USER_LED_GREEN,          /* Green LED - P303 */ \
   GPIO_USER_LED_RED,            /* Red LED - PA07 */ \
