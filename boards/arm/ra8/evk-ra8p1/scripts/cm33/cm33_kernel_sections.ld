@@ -13,9 +13,12 @@ SECTIONS
     {
         __flash_readonly$$Base = .;
 
-        /* Interrupt vectors - must be first */
+        /* Interrupt vectors - must be first and aligned */
+        . = ALIGN(512);
         _svectors = ABSOLUTE(.);
-        *(.vectors)
+        _VECTORS = ABSOLUTE(.);
+        KEEP(*(.vectors))
+        KEEP(*(.application_vectors))
         _evectors = ABSOLUTE(.);
 
         /* Code sections */

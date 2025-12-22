@@ -9,8 +9,8 @@ cm85:
     permissions: rx
   ram:
     start: '0x22000000'
-    length: '0x000D0000'
-    description: 832KB SRAM for CM85
+    length: '0x000E2000'
+    description: 904KB SRAM for CM85
     permissions: rwx
   itcm:
     start: '0x00000000'
@@ -30,9 +30,9 @@ cm33:
     description: 512KB MRAM for CM33
     permissions: rx
   ram:
-    start: '0x220E0000'
-    length: '0x000C0000'
-    description: 768KB SRAM for CM33
+    start: '0x220EA000'
+    length: '0x000EA000'
+    description: 936KB SRAM for CM33
     permissions: rwx
   itcm:
     start: '0x00000000'
@@ -47,17 +47,17 @@ cm33:
 
 shared:
   ipc:
-    start: '0x220D0000'
-    length: '0x00010000'
-    description: 64KB IPC shared memory (FIXED - non-cacheable)
+    start: '0x220E2000'
+    length: '0x00008000'
+    description: 32KB IPC shared memory (FIXED - non-cacheable)
     permissions: rw
   sdram:
     start: '0x68000000'
-    length: '0x08000000'
-    description: 128MB external SDRAM
+    length: '0x04000000'
+    description: 64MB external SDRAM for CM85 (CM33 at 0x6C000000)
     permissions: rwx
   ospi_flash:
     start: '0x80000000'
-    length: '0x04000000'
-    description: 64MB OSPI Flash (XIP enabled)
+    length: '0x08000000'
+    description: 128MB OSPI Flash for CM85 (CM33 at 0x88000000, XIP enabled)
     permissions: rx

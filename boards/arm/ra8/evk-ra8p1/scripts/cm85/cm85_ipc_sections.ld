@@ -9,7 +9,7 @@
 
 SECTIONS
 {
-    /* IPC shared memory region - 64KB @ 0x220D0000 */
+    /* IPC shared memory region - 32KB @ 0x220E2000 */
     .ipc_shmem (NOLOAD) :
     {
         __ipc_shmem_data_start = .;
