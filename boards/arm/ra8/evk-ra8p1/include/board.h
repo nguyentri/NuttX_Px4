@@ -107,7 +107,7 @@
 #define GPIO_SCI5_RX   GPIO_RXD5_C  /* PB02(P112) - J1 pin 32 */
 #define GPIO_SCI5_TX   GPIO_TXD5_C  /* PB03(P113) - J1 pin 29 */
 
-/* SCI9 - optional UART on P208/P209 (off graphics/SDRAM/OSPI) */
+/* SCI9 - optional UART on P208/P209 (P209/SWO/TDO, P208/TDI) */
 #define GPIO_SCI9_RX   GPIO_RXD9_B  /* P208 */
 #define GPIO_SCI9_TX   GPIO_TXD9_B  /* P209 */
 
