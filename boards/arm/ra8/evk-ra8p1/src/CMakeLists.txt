@@ -98,6 +98,10 @@ if(CONFIG_RA_LPM)
   list(APPEND SRCS ra8p1_lpm.c)
 endif()
 
+if(CONFIG_RA_USBDEV)
+  list(APPEND SRCS ra8p1_usb.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 set_property(GLOBAL PROPERTY LD_SCRIPT

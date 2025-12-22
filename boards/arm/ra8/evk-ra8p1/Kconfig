@@ -36,6 +36,15 @@ config RA8P1_OSPI_EXAMPLE
 		Enable OSPI test example for verifying OSPI driver functionality
 		on EVK-RA8P1 board.
 
+config RA8P1_USB_CDC_CONSOLE
+	bool "USB CDC/ACM console"
+	default n
+	depends on RA_USBDEV && CDCACM
+	select USBDEV_TRACE
+	---help---
+		Enable USB CDC/ACM virtual serial port as system console.
+		This allows nsh shell and other console output over USB.
+
 config RA8P1_SCI_SPI_EXAMPLE
 	bool "SCI SPI test example"
 	default n

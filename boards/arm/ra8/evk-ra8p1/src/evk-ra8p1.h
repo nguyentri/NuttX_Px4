@@ -97,6 +97,23 @@ int board_sci_spi_initialize(void);
 #endif
 
 /****************************************************************************
+ * Name: ra8p1_usb_initialize
+ *
+ * Description:
+ *   Initialize USB device controller for EVK-RA8P1 board
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RA_USBDEV
+int ra8p1_usb_initialize(void);
+int ra8p1_usbpullup(struct usbdev_s *dev, bool enable);
+void ra8p1_usbsuspend(struct usbdev_s *dev, bool resume);
+#endif
+
+/****************************************************************************
  * Name: board_cac_initialize
  *
  * Description:

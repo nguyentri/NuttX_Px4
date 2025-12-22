@@ -201,6 +201,11 @@ ifeq ($(CONFIG_RA_ULPT),y)
 CHIP_CSRCS += ra_ulpt.c
 endif
 
+# USB Device Controller driver
+ifeq ($(CONFIG_RA_USBDEV),y)
+CHIP_CSRCS += ra_usbdev.c
+endif
+
 # IDLE task custom
 ifeq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += ra_idle.c

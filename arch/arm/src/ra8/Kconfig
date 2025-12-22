@@ -3418,6 +3418,29 @@ config RA_USB60
    default y if RA_USBHS
    help
      USB 60MHz clock automatically enabled when USB High-Speed is enabled.
+
+config RA_USBDEV
+   bool "USB Device Controller"
+   default n
+   depends on USBDEV && (RA_USBFS || RA_USBHS)
+   help
+     Enable RA8 USB device controller driver. This provides a NuttX
+     usbdev interface for CDC-ACM, Mass Storage, and other USB device
+     classes. Requires either USBFS (Full-Speed 12 Mbps) or USBHS
+     (High-Speed 480 Mbps) hardware module to be enabled.
+
+if RA_USBDEV
+
+config RA_USBDEV_DMA
+   bool "USB Device DMA Support"
+   default n
+   depends on RA_DMAC
+   help
+     Enable DMA transfers for USB bulk endpoints using D0/D1 FIFOs.
+     This improves throughput for large data transfers. Requires DMAC
+     to be enabled. If disabled, uses programmed I/O (PIO) mode.
+
+endif # RA_USBDEV
 endmenu
 
 menu "Storage Interfaces"

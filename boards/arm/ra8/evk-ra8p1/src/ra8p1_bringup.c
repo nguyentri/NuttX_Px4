@@ -378,6 +378,40 @@ int board_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_RA_USBDEV
+  /* Initialize USB device controller */
+
+  ret = ra8p1_usb_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize USB device: %d\n", ret);
+    }
+  else
+    {
+      syslog(LOG_INFO, "USB device initialized successfully\n");
+    }
+
+#ifdef CONFIG_CDCACM
+  /* Register CDC/ACM serial driver */
+
+  ret = cdcacm_initialize(0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to register CDC/ACM: %d\n", ret);
+    }
+  else
+    {
+      syslog(LOG_INFO, "USB CDC/ACM registered successfully\n");
+
+#ifdef CONFIG_RA8P1_USB_CDC_CONSOLE
+      /* Set USB CDC/ACM as console if configured */
+
+      syslog(LOG_INFO, "USB CDC/ACM console enabled on /dev/ttyACM0\n");
+#endif
+    }
+#endif
+#endif
+
 #ifdef CONFIG_RA8P1_EXAMPLE_SUPPORT
     /* Run application examples */
   ra8p1_app_examples();
