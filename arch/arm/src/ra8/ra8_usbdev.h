@@ -186,45 +186,54 @@ struct ra_usbdev_s
   /* IRQ number for cleanup */
 
   int      irq;
+
+#ifdef CONFIG_RA_USBDEV_DMA
+  /* DMA channels for D0FIFO and D1FIFO */
+
+  void    *dma_d0_handle;                 /* D0FIFO DMA handle (Pipe 1) */
+  void    *dma_d1_handle;                 /* D1FIFO DMA handle (Pipe 2) */
+  int      dma_d0_channel;                /* Assigned D0FIFO DMA channel */
+  int      dma_d1_channel;                /* Assigned D1FIFO DMA channel */
+  sem_t    dma_d0_sem;                    /* D0FIFO DMA completion semaphore */
+  sem_t    dma_d1_sem;                    /* D1FIFO DMA completion semaphore */
+#endif
 };
 
 /****************************************************************************
- * Private Function Prototypes
+ * Public Function Prototypes
  ****************************************************************************/
 
-/* Request queue operations */
+/****************************************************************************
+ * Name: ra_usbdev_initialize
+ *
+ * Description:
+ *   Initialize the RA8 USB device controller hardware.
+ *   Called by board-specific initialization code.
+ *
+ ****************************************************************************/
 
-static struct ra_req_s *ra_rqdequeue(struct ra_ep_s *privep);
-static bool ra_rqenqueue(struct ra_ep_s *privep, struct ra_req_s *req);
+void ra_usbdev_initialize(void);
 
-/* Low level FIFO operations */
+/****************************************************************************
+ * Name: arm_usbinitialize
+ *
+ * Description:
+ *   Initialize USB hardware (called by the system during early boot).
+ *   This is the standard NuttX USB initialization interface.
+ *
+ ****************************************************************************/
 
-static void ra_fifo_write(uint8_t pipe, const uint8_t *data, size_t len);
-static size_t ra_fifo_read(uint8_t pipe, uint8_t *data, size_t maxlen);
+void arm_usbinitialize(void);
 
-/* Endpoint operations */
+/****************************************************************************
+ * Name: usbdev_register
+ *
+ * Description:
+ *   Register a USB device class driver. This is provided by the NuttX
+ *   USB device framework.
+ *
+ ****************************************************************************/
 
-static int ra_epconfigure(struct usbdev_ep_s *ep,
-                          const struct usb_epdesc_s *desc, bool last);
-static int ra_epdisable(struct usbdev_ep_s *ep);
-static struct usbdev_req_s *ra_epallocreq(struct usbdev_ep_s *ep);
-static void ra_epfreereq(struct usbdev_ep_s *ep, struct usbdev_req_s *req);
-static int ra_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req);
-static int ra_epcancel(struct usbdev_ep_s *ep, struct usbdev_req_s *req);
-static int ra_epstall(struct usbdev_ep_s *ep, bool resume);
-
-/* Device operations */
-
-static struct usbdev_ep_s *ra_allocep(struct usbdev_s *dev,
-                                      uint8_t epno, bool in, uint8_t eptype);
-static void ra_freeep(struct usbdev_s *dev, struct usbdev_ep_s *ep);
-static int ra_getframe(struct usbdev_s *dev);
-static int ra_wakeup(struct usbdev_s *dev);
-static int ra_selfpowered(struct usbdev_s *dev, bool selfpowered);
-static int ra_pullup(struct usbdev_s *dev, bool enable);
-
-/* Interrupt handling */
-
-static int ra_usbfs_interrupt(int irq, void *context, void *arg);
+int usbdev_register(struct usbdevclass_driver_s *driver);
 
 #endif /* __ARCH_ARM_SRC_RA8_RA8_USBDEV_H */

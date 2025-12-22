@@ -114,6 +114,11 @@ ifeq ($(CONFIG_RTC_DRIVER),y)
 CSRCS += ra8p1_rtc.c
 endif
 
+# USB Device support
+ifeq ($(CONFIG_RA_USBDEV),y)
+  CSRCS += ra8p1_usb.c
+endif
+
 # ELC support
 ifeq ($(CONFIG_RA8P1_ADC_HW_TRIGGER_EXAMPLE),y)
 CSRCS += ra8p1_adc_b_hwtrigger.c

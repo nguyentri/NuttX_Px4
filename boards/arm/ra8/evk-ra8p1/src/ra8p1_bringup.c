@@ -36,6 +36,10 @@
 #include <nuttx/leds/userled.h>
 #include <nuttx/timers/pwm.h>
 
+#ifdef CONFIG_CDCACM
+#include <nuttx/usb/cdcacm.h>
+#endif
+
 #include <arch/board/board.h>
 #include "arm_internal.h"
 #include "evk-ra8p1.h"

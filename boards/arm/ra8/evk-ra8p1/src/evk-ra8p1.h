@@ -45,8 +45,6 @@
  * Public Types
  ****************************************************************************/
 
-/* Forward declarations */
-struct spi_dev_s;
 
 /****************************************************************************
  * Public Data
@@ -93,6 +91,8 @@ int board_gpio_initialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_RA_SCI_SPI
+/* Forward declarations */
+struct spi_dev_s;
 int board_sci_spi_initialize(void);
 #endif
 
@@ -108,6 +108,8 @@ int board_sci_spi_initialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_RA_USBDEV
+/*Forward declarations */
+struct usbdev_s;
 int ra8p1_usb_initialize(void);
 int ra8p1_usbpullup(struct usbdev_s *dev, bool enable);
 void ra8p1_usbsuspend(struct usbdev_s *dev, bool resume);
@@ -359,12 +361,16 @@ int ra8p1_app_examples(void);
 #endif
 
 #ifdef CONFIG_RA8P1_SPI_LOOPBACK_EXAMPLE
+/* Forward declarations */
+struct spi_dev_s;
 int ra8p1_spi_loopback_init(void);
 int ra8p1_spi_loopback_test(void);
 int ra8p1_spi_loopback_main(int argc, char *argv[]);
  #endif
 
 #ifdef CONFIG_RA8P1_SPI_MASTERSLAVE_EXAMPLE
+/* Forward declarations */
+struct spi_dev_s;
 int ra8p1_spi_masterslave_init(void);
 int ra8p1_spi_masterslave_test(void);
 int ra8p1_spi_masterslave_main(int argc, char *argv[]);
@@ -375,22 +381,11 @@ int ra8p1_adc_bms_init(void);
 int ra8p1_adc_bms_main(int argc, FAR char *argv[]);
 #endif
 
-#ifdef CONFIG_RA8P1_ADC_EXAMPLE
-/* Board-level ADC initialization */
-int ra8p1_adc_driver_initialize(void);
-#endif
-
-#ifdef CONFIG_RA8P1_CODE_FLASH_EXAMPLE
-int ra8p1_code_flash_init(void);
-int ra8p1_code_flash_test(void);
-int ra8p1_code_flash_info(void);
-int ra8p1_code_flash_main(int argc, char *argv[]);
-#endif
-
-#ifdef CONFIG_RA8P1_DATA_FLASH_EXAMPLE
-int ra8p1_data_flash_init(void);
-int ra8p1_data_flash_test(void);
-int ra8p1_data_flash_main(int argc, char *argv[]);
+#ifdef CONFIG_RA8P1_MRAM_EXAMPLE
+int ra8p1_mram_init(void);
+int ra8p1_mram_test(void);
+int ra8p1_mram_info(void);
+int ra8p1_mram_main(int argc, char *argv[]);
 #endif
 
 #ifdef CONFIG_RA8P1_PWM_EXAMPLE
@@ -419,16 +414,16 @@ int ra8p1_i2c_acc_init(void);
 int ra8p1_i2c_acc_main(int argc, char *argv[]);
 #endif
 
-#ifdef CONFIG_RA8P1_I2C_GY912_EXAMPLE
-int ra8p1_i2c_gy912_init(void);
-int ra8p1_i2c_gy912_main(int argc, FAR char *argv[]);
+#ifdef CONFIG_RA8P1_I2C_BARO_EXAMPLE
+int ra8p1_i2c_baro_init(void);
+int ra8p1_i2c_baro_main(int argc, FAR char *argv[]);
 #endif
 
 #ifdef CONFIG_RA8P1_RUST_EXAMPLE
 int ra8p1_rust_sample_init(void);
 #endif
 
-#ifdef CONFIG_RA8P1_SPI_GY912_EXAMPLE
+#ifdef CONFIG_RA8P1_SPI_IMU_EXAMPLE
 struct spi_dev_s;
 int gy912_register_sensors(FAR struct spi_dev_s *spi);
 #endif

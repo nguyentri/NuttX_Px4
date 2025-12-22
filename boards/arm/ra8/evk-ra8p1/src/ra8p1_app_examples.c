@@ -51,45 +51,17 @@ int ra8p1_adc_bms_example(void)
 }
 #endif
 
-#ifdef CONFIG_RA8P1_ADC_BMS_EXAMPLE
-int ra8p1_adc_example(void)
+#ifdef CONFIG_RA8P1_MRAM_EXAMPLE
+int ra8p1_mram_example(void)
 {
-  int ret = ra8p1_adc_init();
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  return ra8p1_adc_bms_main(0, NULL);
-}
-#endif
-
-#ifdef CONFIG_RA8P1_CODE_FLASH_EXAMPLE
-int ra8p1_code_flash_example(void)
-{
-  int ret = ra8p1_code_flash_init();
+  int ret = ra8p1_mram_init();
   if (ret < 0)
     {
       return ret;
     }
 
   /* Run any self-tests if available */
-  ra8p1_code_flash_test();
-  return 0;
-}
-#endif
-
-#ifdef CONFIG_RA8P1_DATA_FLASH_EXAMPLE
-int ra8p1_data_flash_example(void)
-{
-  int ret = ra8p1_data_flash_init();
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  /* Run test routine if present */
-  ra8p1_data_flash_test();
+  ra8p1_mram_test();
   return 0;
 }
 #endif
@@ -146,16 +118,16 @@ int ra8p1_i2c_acc_example(void)
 }
 #endif
 
-#ifdef CONFIG_RA8P1_I2C_GY912_EXAMPLE
-int ra8p1_i2c_gy912_example(void)
+#ifdef CONFIG_RA8P1_I2C_BARO_EXAMPLE
+int ra8p1_i2c_baro_example(void)
 {
-  int ret = ra8p1_i2c_gy912_init();
+  int ret = ra8p1_i2c_baro_init();
   if (ret < 0)
     {
       return ret;
     }
 
-  return ra8p1_i2c_gy912_main(0, NULL);
+  return ra8p1_i2c_baro_main(0, NULL);
 }
 #endif
 
@@ -230,7 +202,7 @@ int ra8p1_app_examples(void)
     }
 #endif
 
-#ifdef CONFIG_RA8P1_CODE_FLASH_EXAMPLE
+#ifdef CONFIG_RA8P1_MRAM_EXAMPLE
   ret = ra8p1_code_flash_example();
   if (ret < 0)
     {
@@ -275,8 +247,8 @@ int ra8p1_app_examples(void)
     }
 #endif
 
-#ifdef CONFIG_RA8P1_I2C_GY912_EXAMPLE
-  ret = ra8p1_i2c_gy912_example();
+#ifdef CONFIG_RA8P1_I2C_BARO_EXAMPLE
+  ret = ra8p1_i2c_baro_example();
   if (ret < 0)
     {
       syslog(LOG_ERR, "I2C GY-912 example failed: %d\n", ret);
@@ -311,7 +283,7 @@ int ra8p1_app_examples(void)
     }
 #endif
 
-#ifdef CONFIG_RA8P1_SPI_GY912_EXAMPLE
+#ifdef CONFIG_RA8P1_SPI_IMU_EXAMPLE
   ret = ra8p1_spi_gy912_init();
   if (ret < 0)
     {

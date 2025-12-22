@@ -50,7 +50,50 @@
 #include "ra_gpio.h"
 #include "ra8_usbdev.h"
 
+#ifdef CONFIG_RA_USBDEV_DMA
+#include "ra_dmac.h"
+#endif
+
 #ifdef CONFIG_RA_USBDEV
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+/* Request queue operations */
+
+static struct ra_req_s *ra_rqdequeue(struct ra_ep_s *privep);
+static bool ra_rqenqueue(struct ra_ep_s *privep, struct ra_req_s *req);
+
+/* Low level FIFO operations */
+
+static void ra_fifo_write(uint8_t pipe, const uint8_t *data, size_t len);
+static size_t ra_fifo_read(uint8_t pipe, uint8_t *data, size_t maxlen);
+
+/* Endpoint operations */
+
+static int ra_epconfigure(struct usbdev_ep_s *ep,
+                          const struct usb_epdesc_s *desc, bool last);
+static int ra_epdisable(struct usbdev_ep_s *ep);
+static struct usbdev_req_s *ra_epallocreq(struct usbdev_ep_s *ep);
+static void ra_epfreereq(struct usbdev_ep_s *ep, struct usbdev_req_s *req);
+static int ra_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req);
+static int ra_epcancel(struct usbdev_ep_s *ep, struct usbdev_req_s *req);
+static int ra_epstall(struct usbdev_ep_s *ep, bool resume);
+
+/* Device operations */
+
+static struct usbdev_ep_s *ra_allocep(struct usbdev_s *dev,
+                                      uint8_t epno, bool in, uint8_t eptype);
+static void ra_freeep(struct usbdev_s *dev, struct usbdev_ep_s *ep);
+static int ra_getframe(struct usbdev_s *dev);
+static int ra_wakeup(struct usbdev_s *dev);
+static int ra_selfpowered(struct usbdev_s *dev, bool selfpowered);
+static int ra_pullup(struct usbdev_s *dev, bool enable);
+
+/* Interrupt handling */
+
+static int ra_usbfs_interrupt(int irq, void *context, void *arg);
 
 /****************************************************************************
  * Private Data
@@ -88,6 +131,285 @@ static const struct usbdev_ops_s g_devops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+#ifdef CONFIG_RA_USBDEV_DMA
+
+/****************************************************************************
+ * Name: ra_usb_dma_d0_callback
+ *
+ * Description:
+ *   D0FIFO DMA transfer completion callback
+ *
+ ****************************************************************************/
+
+static void ra_usb_dma_d0_callback(void *handle, int event, void *arg)
+{
+  struct ra_usbdev_s *priv = (struct ra_usbdev_s *)arg;
+
+  if (event == RA_DMAC_EVENT_COMPLETE)
+    {
+      /* Signal DMA completion */
+
+      nxsem_post(&priv->dma_d0_sem);
+    }
+  else if (event == RA_DMAC_EVENT_ERROR)
+    {
+      uerr("ERROR: D0FIFO DMA transfer error\n");
+      nxsem_post(&priv->dma_d0_sem);
+    }
+}
+
+/****************************************************************************
+ * Name: ra_usb_dma_d1_callback
+ *
+ * Description:
+ *   D1FIFO DMA transfer completion callback
+ *
+ ****************************************************************************/
+
+static void ra_usb_dma_d1_callback(void *handle, int event, void *arg)
+{
+  struct ra_usbdev_s *priv = (struct ra_usbdev_s *)arg;
+
+  if (event == RA_DMAC_EVENT_COMPLETE)
+    {
+      /* Signal DMA completion */
+
+      nxsem_post(&priv->dma_d1_sem);
+    }
+  else if (event == RA_DMAC_EVENT_ERROR)
+    {
+      uerr("ERROR: D1FIFO DMA transfer error\n");
+      nxsem_post(&priv->dma_d1_sem);
+    }
+}
+
+/****************************************************************************
+ * Name: ra_usb_dma_setup
+ *
+ * Description:
+ *   Initialize DMA channels for USB FIFOs
+ *
+ ****************************************************************************/
+
+static int ra_usb_dma_setup(struct ra_usbdev_s *priv)
+{
+  ra_dmac_config_t dma_cfg;
+  int ret;
+
+  /* Initialize DMA channels from Kconfig */
+
+#ifdef CONFIG_RA_DMAC_USBFS_D0FIFO_CHANNEL
+  priv->dma_d0_channel = CONFIG_RA_DMAC_USBFS_D0FIFO_CHANNEL;
+#else
+  priv->dma_d0_channel = -1;
+#endif
+
+#ifdef CONFIG_RA_DMAC_USBFS_D1FIFO_CHANNEL
+  priv->dma_d1_channel = CONFIG_RA_DMAC_USBFS_D1FIFO_CHANNEL;
+#else
+  priv->dma_d1_channel = -1;
+#endif
+
+  /* Initialize semaphores */
+
+  nxsem_init(&priv->dma_d0_sem, 0, 0);
+  nxsem_init(&priv->dma_d1_sem, 0, 0);
+
+  /* Request D0FIFO DMA channel if configured */
+
+  if (priv->dma_d0_channel >= 0)
+    {
+      memset(&dma_cfg, 0, sizeof(dma_cfg));
+      dma_cfg.callback = ra_usb_dma_d0_callback;
+      dma_cfg.user_data = priv;
+
+      ret = ra_dmac_open_channel(&priv->dma_d0_handle, &dma_cfg,
+                                 priv->dma_d0_channel);
+      if (ret < 0)
+        {
+          uerr("ERROR: Failed to request D0FIFO DMA channel %d: %d\n",
+               priv->dma_d0_channel, ret);
+          priv->dma_d0_handle = NULL;
+          priv->dma_d0_channel = -1;
+        }
+      else
+        {
+          uinfo("D0FIFO DMA channel %d allocated\n",
+                priv->dma_d0_channel);
+        }
+    }
+
+  /* Request D1FIFO DMA channel if configured */
+
+  if (priv->dma_d1_channel >= 0)
+    {
+      memset(&dma_cfg, 0, sizeof(dma_cfg));
+      dma_cfg.callback = ra_usb_dma_d1_callback;
+      dma_cfg.user_data = priv;
+
+      ret = ra_dmac_open_channel(&priv->dma_d1_handle, &dma_cfg,
+                                 priv->dma_d1_channel);
+      if (ret < 0)
+        {
+          uerr("ERROR: Failed to request D1FIFO DMA channel %d: %d\n",
+               priv->dma_d1_channel, ret);
+          priv->dma_d1_handle = NULL;
+          priv->dma_d1_channel = -1;
+        }
+      else
+        {
+          uinfo("D1FIFO DMA channel %d allocated\n",
+                priv->dma_d1_channel);
+        }
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: ra_usb_dma_stop
+ *
+ * Description:
+ *   Stop and release DMA channels
+ *
+ ****************************************************************************/
+
+static void ra_usb_dma_stop(struct ra_usbdev_s *priv)
+{
+  /* Release D0FIFO DMA channel */
+
+  if (priv->dma_d0_handle)
+    {
+      ra_dmac_disable(priv->dma_d0_handle);
+      ra_dmac_close(priv->dma_d0_handle);
+      priv->dma_d0_handle = NULL;
+    }
+
+  /* Release D1FIFO DMA channel */
+
+  if (priv->dma_d1_handle)
+    {
+      ra_dmac_disable(priv->dma_d1_handle);
+      ra_dmac_close(priv->dma_d1_handle);
+      priv->dma_d1_handle = NULL;
+    }
+
+  /* Destroy semaphores */
+
+  nxsem_destroy(&priv->dma_d0_sem);
+  nxsem_destroy(&priv->dma_d1_sem);
+}
+
+/****************************************************************************
+ * Name: ra_usb_dma_transfer
+ *
+ * Description:
+ *   Perform DMA transfer for USB FIFO
+ *
+ ****************************************************************************/
+
+static int ra_usb_dma_transfer(struct ra_usbdev_s *priv, uint8_t pipe,
+                               void *data, size_t len, bool is_tx)
+{
+  ra_dmac_handle_t dma_handle;
+  uint32_t fifo_addr;
+  ra_dmac_config_t dma_cfg;
+  int ret;
+  sem_t *dma_sem;
+
+  /* Select DMA channel and FIFO based on pipe */
+
+  if (pipe == 1)
+    {
+      dma_handle = priv->dma_d0_handle;
+      fifo_addr = R_USBFS_DFIFO(0);
+      dma_sem = &priv->dma_d0_sem;
+    }
+  else if (pipe == 2)
+    {
+      dma_handle = priv->dma_d1_handle;
+      fifo_addr = R_USBFS_DFIFO(1);
+      dma_sem = &priv->dma_d1_sem;
+    }
+  else
+    {
+      return -EINVAL;
+    }
+
+  if (!dma_handle)
+    {
+      return -ENODEV;  /* DMA not available, use PIO */
+    }
+
+  /* Configure DMA transfer */
+
+  memset(&dma_cfg, 0, sizeof(dma_cfg));
+  dma_cfg.mode = RA_DMAC_MODE_NORMAL;
+  dma_cfg.repeat_area = RA_DMAC_REPEAT_AREA_NONE;
+  dma_cfg.size = RA_DMAC_SIZE_16BIT;        /* 16-bit FIFO access */
+  dma_cfg.trigger = RA_DMAC_TRIGGER_HW;
+  dma_cfg.transfer_count = len / 2;         /* 16-bit transfers */
+  dma_cfg.block_count = 0;
+  dma_cfg.elc_end = -1;
+  dma_cfg.elc_err = -1;
+  dma_cfg.elc_src = -1;  /* TODO: Set proper ELC event for USB FIFO */
+
+  if (is_tx)
+    {
+      /* Memory to FIFO (TX) */
+
+      dma_cfg.src_addr = (uint32_t)data;
+      dma_cfg.dest_addr = fifo_addr;
+      dma_cfg.src_addr_mode = RA_DMAC_ADDR_INCR;
+      dma_cfg.dest_addr_mode = RA_DMAC_ADDR_FIXED;
+    }
+  else
+    {
+      /* FIFO to memory (RX) */
+
+      dma_cfg.src_addr = fifo_addr;
+      dma_cfg.dest_addr = (uint32_t)data;
+      dma_cfg.src_addr_mode = RA_DMAC_ADDR_FIXED;
+      dma_cfg.dest_addr_mode = RA_DMAC_ADDR_INCR;
+    }
+
+  /* Reconfigure and enable DMA channel for this transfer */
+
+  ret = ra_dmac_reset(dma_handle, dma_cfg.src_addr, dma_cfg.dest_addr,
+                      dma_cfg.transfer_count);
+  if (ret < 0)
+    {
+      uerr("ERROR: Failed to reset DMA: %d\n", ret);
+      return ret;
+    }
+
+  ret = ra_dmac_enable(dma_handle);
+  if (ret < 0)
+    {
+      uerr("ERROR: Failed to enable DMA: %d\n", ret);
+      return ret;
+    }
+
+  /* Wait for DMA completion with timeout */
+
+  struct timespec abstime;
+  clock_gettime(CLOCK_REALTIME, &abstime);
+  abstime.tv_sec += 1;  /* 1 second timeout */
+
+  ret = nxsem_timedwait(dma_sem, &abstime);
+  if (ret < 0)
+    {
+      uerr("ERROR: DMA wait failed: %d\n", ret);
+      ra_dmac_disable(dma_handle);
+      return ret;
+    }
+
+  ra_dmac_disable(dma_handle);
+  return OK;
+}
+
+#endif /* CONFIG_RA_USBDEV_DMA */
 
 /****************************************************************************
  * Name: ra_rqdequeue
@@ -153,6 +475,7 @@ static bool ra_rqenqueue(struct ra_ep_s *privep, struct ra_req_s *req)
 static void ra_fifo_write(uint8_t pipe, const uint8_t *data, size_t len)
 {
   uint16_t fifosel;
+  struct ra_usbdev_s *priv = &g_usbdev;
 
 #ifdef CONFIG_RA_USBDEV_DMA
   /* Use DMA for bulk transfers on pipes 1-2 if data is large enough */
@@ -161,26 +484,36 @@ static void ra_fifo_write(uint8_t pipe, const uint8_t *data, size_t len)
     {
       /* Select D0/D1 FIFO for DMA transfer */
 
-      uint32_t fifo_addr = (pipe == 1) ? R_USBFS_D0FIFO : R_USBFS_D1FIFO;
-      uint16_t fifosel_reg = (pipe == 1) ? R_USBFS_D0FIFOSEL : R_USBFS_D1FIFOSEL;
+      uint16_t fifo_idx = (pipe == 1) ? 0 : 1;
+      uint32_t fifosel_reg = R_USBFS_DFIFOSEL(fifo_idx);
+      uint32_t fifoctr_reg = R_USBFS_DFIFOCTR(fifo_idx);
 
       /* Select pipe for D0/D1 FIFO access */
 
-      fifosel = (pipe & R_USBFS_D0FIFOSEL_CURPIPE_MASK);
-      fifosel |= R_USBFS_D0FIFOSEL_MBW_16BIT;  /* 16-bit access */
+      fifosel = (pipe & R_USBFS_DFIFOSEL_CURPIPE_MASK);
+      fifosel |= R_USBFS_DFIFOSEL_MBW;  /* 16-bit access */
       putreg16(fifosel, fifosel_reg);
 
       /* Wait for FIFO ready */
 
-      uint16_t fifoctr_reg = (pipe == 1) ? R_USBFS_D0FIFOCTR : R_USBFS_D1FIFOCTR;
-      while (!(getreg16(fifoctr_reg) & R_USBFS_D0FIFOCTR_FRDY))
+      while (!(getreg16(fifoctr_reg) & R_USBFS_DFIFOCTR_FRDY))
         {
           /* Busy wait */
         }
 
-      /* Configure and start DMA transfer */
-      /* TODO: Implement DMAC configuration for USB transfers */
-      /* For now, fall through to PIO mode */
+      /* Attempt DMA transfer */
+
+      if (ra_usb_dma_transfer(priv, pipe, (void *)data, len, true) == OK)
+        {
+          /* Set buffer valid flag */
+
+          modifyreg16(fifoctr_reg, 0, R_USBFS_DFIFOCTR_BVAL);
+          return;
+        }
+
+      /* DMA failed or not available, fall through to PIO mode */
+
+      uinfo("DMA transfer failed/unavailable for pipe %d, using PIO\n", pipe);
     }
 #endif
 
@@ -229,6 +562,7 @@ static size_t ra_fifo_read(uint8_t pipe, uint8_t *data, size_t maxlen)
   uint16_t fifosel;
   uint16_t fifoctr;
   size_t len;
+  struct ra_usbdev_s *priv = &g_usbdev;
 
 #ifdef CONFIG_RA_USBDEV_DMA
   /* Use DMA for bulk transfers on pipes 1-2 if buffer is large enough */
@@ -237,18 +571,19 @@ static size_t ra_fifo_read(uint8_t pipe, uint8_t *data, size_t maxlen)
     {
       /* Select D0/D1 FIFO for DMA transfer */
 
-      uint16_t fifosel_reg = (pipe == 1) ? R_USBFS_D0FIFOSEL : R_USBFS_D1FIFOSEL;
-      uint16_t fifoctr_reg = (pipe == 1) ? R_USBFS_D0FIFOCTR : R_USBFS_D1FIFOCTR;
+      uint16_t fifo_idx = (pipe == 1) ? 0 : 1;
+      uint32_t fifosel_reg = R_USBFS_DFIFOSEL(fifo_idx);
+      uint32_t fifoctr_reg = R_USBFS_DFIFOCTR(fifo_idx);
 
       /* Select pipe for D0/D1 FIFO access */
 
-      fifosel = (pipe & R_USBFS_D0FIFOSEL_CURPIPE_MASK);
-      fifosel |= R_USBFS_D0FIFOSEL_MBW_16BIT;  /* 16-bit access */
+      fifosel = (pipe & R_USBFS_DFIFOSEL_CURPIPE_MASK);
+      fifosel |= R_USBFS_DFIFOSEL_MBW;  /* 16-bit access */
       putreg16(fifosel, fifosel_reg);
 
       /* Wait for FIFO ready */
 
-      while (!(getreg16(fifoctr_reg) & R_USBFS_D0FIFOCTR_FRDY))
+      while (!(getreg16(fifoctr_reg) & R_USBFS_DFIFOCTR_FRDY))
         {
           /* Busy wait */
         }
@@ -256,11 +591,23 @@ static size_t ra_fifo_read(uint8_t pipe, uint8_t *data, size_t maxlen)
       /* Get received data length */
 
       fifoctr = getreg16(fifoctr_reg);
-      len = fifoctr & R_USBFS_D0FIFOCTR_DTLN_MASK;
+      len = fifoctr & R_USBFS_DFIFOCTR_DTLN_MASK;
 
-      /* Configure and start DMA transfer */
-      /* TODO: Implement DMAC configuration for USB transfers */
-      /* For now, fall through to PIO mode */
+      /* Only use DMA if we have enough data */
+
+      if (len >= 64)
+        {
+          /* Attempt DMA transfer */
+
+          if (ra_usb_dma_transfer(priv, pipe, data, len, false) == OK)
+            {
+              return len;
+            }
+
+          /* DMA failed, fall through to PIO mode */
+
+          uinfo("DMA transfer failed for pipe %d, using PIO\n", pipe);
+        }
     }
 #endif
 
@@ -687,7 +1034,6 @@ static int ra_usbfs_interrupt(int irq, void *context, void *arg)
 {
   struct ra_usbdev_s *priv = (struct ra_usbdev_s *)arg;
   uint16_t intsts0;
-  uint16_t intsts1;
   uint16_t brdysts;
   uint16_t bempsts;
   uint16_t dvsq;
@@ -695,7 +1041,6 @@ static int ra_usbfs_interrupt(int irq, void *context, void *arg)
   /* Read interrupt status registers */
 
   intsts0 = getreg16(R_USBFS_INTSTS0);
-  intsts1 = getreg16(R_USBFS_INTSTS1);
   brdysts = getreg16(R_USBFS_BRDYSTS);
   bempsts = getreg16(R_USBFS_BEMPSTS);
 
@@ -980,7 +1325,7 @@ static int ra_epconfigure(struct usbdev_ep_s *ep,
 
   /* Enable pipe */
 
-  putreg16((1 << 9), R_USBFS_PIPE1CTR + (pipe - 1) * 2);  /* PID=BUF */
+  putreg16((1 << 9), R_USBFS_BASE + R_USBFS_PIPECTR_OFFSET(pipe));  /* PID=BUF */
 
   privep->ep.maxpacket = maxpacket;
   privep->stalled = false;
@@ -1008,7 +1353,7 @@ static int ra_epdisable(struct usbdev_ep_s *ep)
 
   /* Disable pipe (set PID=NAK) */
 
-  putreg16(0, R_USBFS_PIPE1CTR + (pipe - 1) * 2);
+  putreg16(0, R_USBFS_BASE + R_USBFS_PIPECTR_OFFSET(pipe));
 
   /* Cancel any pending requests */
 
@@ -1048,7 +1393,6 @@ static int ra_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 {
   struct ra_req_s *privreq = (struct ra_req_s *)req;
   struct ra_ep_s *privep = (struct ra_ep_s *)ep;
-  struct ra_usbdev_s *priv = privep->dev;
   irqstate_t flags;
   uint8_t pipe;
   bool is_empty;
@@ -1179,7 +1523,7 @@ static int ra_epstall(struct usbdev_ep_s *ep, bool resume)
         {
           /* Data pipe: Clear PIDSTALL, set PID=BUF */
 
-          modifyreg16(R_USBFS_PIPE1CTR + (pipe - 1) * 2,
+          modifyreg16(R_USBFS_BASE + R_USBFS_PIPECTR_OFFSET(pipe),
                       (1 << 14), (1 << 9));
         }
     }
@@ -1199,7 +1543,7 @@ static int ra_epstall(struct usbdev_ep_s *ep, bool resume)
         {
           /* Data pipe: Set PIDSTALL */
 
-          modifyreg16(R_USBFS_PIPE1CTR + (pipe - 1) * 2, 0, (1 << 14));
+          modifyreg16(R_USBFS_BASE + R_USBFS_PIPECTR_OFFSET(pipe), 0, (1 << 14));
         }
     }
 
@@ -1294,6 +1638,22 @@ static int ra_pullup(struct usbdev_s *dev, bool enable)
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: arm_usbinitialize
+ *
+ * Description:
+ *   Initialize USB hardware. This is the standard NuttX USB initialization
+ *   interface called during system boot.
+ *
+ ****************************************************************************/
+
+void arm_usbinitialize(void)
+{
+  /* Call the RA8-specific USB initialization */
+
+  ra_usbdev_initialize();
+}
+
+/****************************************************************************
  * Name: ra_usbdev_initialize
  *
  * Description:
@@ -1370,6 +1730,17 @@ void ra_usbdev_initialize(void)
 
   up_enable_irq(priv->irq);
 
+#ifdef CONFIG_RA_USBDEV_DMA
+  /* Initialize DMA channels if available */
+
+  ret = ra_usb_dma_setup(priv);
+  if (ret < 0)
+    {
+      uwarn("WARNING: Failed to setup USB DMA: %d\n", ret);
+      /* Continue without DMA */
+    }
+#endif
+
   uinfo("USB device controller initialized successfully\n");
 }
 
@@ -1384,6 +1755,12 @@ void ra_usbdev_initialize(void)
 void ra_usbdev_uninitialize(void)
 {
   struct ra_usbdev_s *priv = &g_usbdev;
+
+#ifdef CONFIG_RA_USBDEV_DMA
+  /* Stop and release DMA channels */
+
+  ra_usb_dma_stop(priv);
+#endif
 
   /* Disable USB module */
 
@@ -1415,6 +1792,98 @@ bool ra_usbdev_connected(void)
   struct ra_usbdev_s *priv = &g_usbdev;
 
   return priv->attached && priv->configured;
+}
+
+/****************************************************************************
+ * Name: usbdev_register
+ *
+ * Description:
+ *   Register a USB device class driver. The class driver's bind() method
+ *   will be called to bind it to a USB device driver.
+ *
+ ****************************************************************************/
+
+int usbdev_register(struct usbdevclass_driver_s *driver)
+{
+  struct ra_usbdev_s *priv = &g_usbdev;
+  int ret;
+
+  usbtrace(TRACE_DEVREGISTER, 0);
+
+#ifdef CONFIG_DEBUG_FEATURES
+  if (!driver || !driver->ops->bind || !driver->ops->unbind ||
+      !driver->ops->disconnect || !driver->ops->setup)
+    {
+      usbtrace(TRACE_DEVERROR(RA_TRACEERR_INVALIDPARMS), 0);
+      return -EINVAL;
+    }
+
+  if (priv->driver)
+    {
+      usbtrace(TRACE_DEVERROR(RA_TRACEERR_DRIVERREGISTERED), 0);
+      return -EBUSY;
+    }
+#endif
+
+  /* First hook up the driver */
+
+  priv->driver = driver;
+
+  /* Then bind the class driver */
+
+  ret = CLASS_BIND(driver, &priv->usbdev);
+  if (ret < 0)
+    {
+      usbtrace(TRACE_DEVERROR(RA_TRACEERR_BINDFAILED), (uint16_t)-ret);
+      priv->driver = NULL;
+    }
+  else
+    {
+      /* Enable USB controller interrupt */
+
+      up_enable_irq(priv->irq);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: usbdev_unregister
+ *
+ * Description:
+ *   Un-register usbdev class driver. If the USB device is connected to a
+ *   USB host, it will first disconnect(). The driver is also requested to
+ *   unbind() and clean up any device state, before this procedure finally
+ *   returns.
+ *
+ ****************************************************************************/
+
+int usbdev_unregister(struct usbdevclass_driver_s *driver)
+{
+  struct ra_usbdev_s *priv = &g_usbdev;
+
+  usbtrace(TRACE_DEVUNREGISTER, 0);
+
+#ifdef CONFIG_DEBUG_FEATURES
+  if (driver != priv->driver)
+    {
+      usbtrace(TRACE_DEVERROR(RA_TRACEERR_INVALIDPARMS), 0);
+      return -EINVAL;
+    }
+#endif
+
+  /* Unbind the class driver */
+
+  CLASS_UNBIND(driver, &priv->usbdev);
+
+  /* Disable USB controller interrupt */
+
+  up_disable_irq(priv->irq);
+
+  /* Unhook the driver */
+
+  priv->driver = NULL;
+  return OK;
 }
 
 #endif /* CONFIG_RA_USBDEV */
