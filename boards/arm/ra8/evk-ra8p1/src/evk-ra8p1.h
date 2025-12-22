@@ -200,6 +200,18 @@ int board_pwm_initialize(void);
 #endif
 
 /****************************************************************************
+ * Name: ra_agt_board_initialize
+ *
+ * Description:
+ *   Initialize AGT timer and register the timer device(s).
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_RA8_AGT)
+int ra_agt_board_initialize(void);
+#endif
+
+/****************************************************************************
  * Name: board_i2c_initialize
  *
  * Description:

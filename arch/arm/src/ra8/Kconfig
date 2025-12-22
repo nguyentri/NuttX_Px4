@@ -65,6 +65,10 @@ config ARCH_CHIP_R7FA8E1AFDCFB
    select RA_HAVE_AGT
    select RA_HAVE_AGT0
    select RA_HAVE_AGT1
+   select RA_HAVE_AGT2
+   select RA_HAVE_AGT3
+   select RA_HAVE_AGT4
+   select RA_HAVE_AGT5
    select RA_HAVE_ULPT
    select RA_HAVE_ULPT0
    select RA_HAVE_ULPT1
@@ -123,6 +127,10 @@ config ARCH_CHIP_R7FA8E1AFDCFP
    select RA_HAVE_AGT
    select RA_HAVE_AGT0
    select RA_HAVE_AGT1
+   select RA_HAVE_AGT2
+   select RA_HAVE_AGT3
+   select RA_HAVE_AGT4
+   select RA_HAVE_AGT5
    select RA_HAVE_ULPT
    select RA_HAVE_ULPT0
    select RA_HAVE_ULPT1
@@ -222,6 +230,10 @@ config ARCH_CHIP_R7KA8P1KFLCAC
    select RA_HAVE_AGT
    select RA_HAVE_AGT0
    select RA_HAVE_AGT1
+   select RA_HAVE_AGT2
+   select RA_HAVE_AGT3
+   select RA_HAVE_AGT4
+   select RA_HAVE_AGT5
    select RA_HAVE_ULPT
    select RA_HAVE_ULPT0
    select RA_HAVE_ULPT1
@@ -3440,6 +3452,30 @@ config RA_USBDEV_DMA
      This improves throughput for large data transfers. Requires DMAC
      to be enabled. If disabled, uses programmed I/O (PIO) mode.
 
+if RA_USBDEV_DMA
+
+config RA_DMAC_USBFS_D0FIFO_CHANNEL
+   int "USBFS D0FIFO DMAC channel"
+   default -1
+   range -1 17
+   help
+     DMAC channel for USBFS D0FIFO (Pipe 1 Bulk IN/OUT) transfers (-1 = disabled).
+     Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.
+     Channels 8-9 are invalid.
+
+config RA_DMAC_USBFS_D1FIFO_CHANNEL
+   int "USBFS D1FIFO DMAC channel"
+   default -1
+   range -1 17
+   help
+     DMAC channel for USBFS D1FIFO (Pipe 2 Bulk IN/OUT) transfers (-1 = disabled).
+     Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.
+     Channels 8-9 are invalid.
+
+endif # RA_USBDEV_DMA
+
 endif # RA_USBDEV
 endmenu
 
@@ -3585,6 +3621,22 @@ config RA_HAVE_AGT1
    bool
    default n
 
+config RA_HAVE_AGT2
+   bool
+   default n
+
+config RA_HAVE_AGT3
+   bool
+   default n
+
+config RA_HAVE_AGT4
+   bool
+   default n
+
+config RA_HAVE_AGT5
+   bool
+   default n
+
 config RA_HAVE_ULPT
    bool
    default n
@@ -3613,6 +3665,47 @@ config RA_AGT1
    default n
    depends on RA_HAVE_AGT1
    select RA_AGT
+
+config RA_AGT2
+   bool "AGT2 - Asynchronous Timer 2"
+   default n
+   depends on RA_HAVE_AGT2
+   select RA_AGT
+
+config RA_AGT3
+   bool "AGT3 - Asynchronous Timer 3"
+   default n
+   depends on RA_HAVE_AGT3
+   select RA_AGT
+
+config RA_AGT4
+   bool "AGT4 - Asynchronous Timer 4"
+   default n
+   depends on RA_HAVE_AGT4
+   select RA_AGT
+
+config RA_AGT5
+   bool "AGT5 - Asynchronous Timer 5"
+   default n
+   depends on RA_HAVE_AGT5
+   select RA_AGT
+
+if RA_AGT
+
+menu "AGT Configuration"
+
+config RA_AGT_TIMER_INTERFACE
+   bool "Enable NuttX Timer Interface"
+   default n
+   depends on TIMER
+   ---help---
+      Enable NuttX timer lower-half driver wrapper for AGT.
+      This allows AGT timers to be accessed through the standard
+      /dev/timerX interface.
+
+endmenu # AGT Configuration
+
+endif # RA_AGT
 
 config RA_ULPT
    bool "Ultra Low Power Timer"
@@ -4489,6 +4582,26 @@ config RA_DMAC_SCI9_SPI_RX_CHANNEL
    help
      DMAC channel for SCI9_SPI receive (-1 = disabled).
      Must be unique across all peripheral assignments.
+
+config RA_DMAC_USBFS_D0FIFO_CHANNEL
+   int "USBFS D0FIFO DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_USBDEV_DMA
+   help
+     DMAC channel for USBFS D0FIFO (Pipe 1) transfers (-1 = disabled).
+     Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.
+
+config RA_DMAC_USBFS_D1FIFO_CHANNEL
+   int "USBFS D1FIFO DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_USBDEV_DMA
+   help
+     DMAC channel for USBFS D1FIFO (Pipe 2) transfers (-1 = disabled).
+     Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.
 
 config RA_DMAC_GPT0_CHANNEL
    int "GPT0 DMAC channel"
@@ -5844,3 +5957,72 @@ config RA_LINKER_C
     default y
     help
         Enable RAM initialization for RA8 family
+
+# AGT Timer Configuration
+menu "AGT Timer Configuration"
+
+config RA8_AGT
+	bool "AGT Timer Support"
+	default n
+	---help---
+		Enable Renesas RA8 AGT (Asynchronous General-purpose Timer) driver.
+		AGT provides low-power timer functionality with flexible clock sources
+		(PCLKB, LOCO, SubClock). Suitable for periodic tasks, one-shot timers,
+		and auxiliary timing functions.
+
+if RA8_AGT
+
+config RA8_AGT0
+	bool "AGT0 Timer"
+	default n
+	---help---
+		Enable AGT0 timer channel
+
+config RA8_AGT1
+	bool "AGT1 Timer"
+	default n
+	---help---
+		Enable AGT1 timer channel
+
+config RA8_AGT2
+	bool "AGT2 Timer"
+	default n
+	---help---
+		Enable AGT2 timer channel
+
+config RA8_AGT3
+	bool "AGT3 Timer"
+	default n
+	---help---
+		Enable AGT3 timer channel
+
+config RA8_AGT4
+	bool "AGT4 Timer"
+	default n
+	---help---
+		Enable AGT4 timer channel
+
+config RA8_AGT5
+	bool "AGT5 Timer"
+	default n
+	---help---
+		Enable AGT5 timer channel
+
+config RA8_AGT6
+	bool "AGT6 Timer"
+	default n
+	---help---
+		Enable AGT6 timer channel
+
+config RA8_AGT_TIMER_INTERFACE
+	bool "NuttX Timer Interface"
+	default y
+	depends on TIMER
+	---help---
+		Wrap AGT drivers with NuttX standard timer interface (/dev/timerX).
+		This allows applications to use AGT timers through the standard
+		NuttX timer API.
+
+endif # RA8_AGT
+
+endmenu # AGT Timer Configuration

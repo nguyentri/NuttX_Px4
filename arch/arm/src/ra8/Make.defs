@@ -112,6 +112,11 @@ ifeq ($(CONFIG_RA_GPT),y)
 CHIP_CSRCS += ra_gpt.c
 endif
 
+# AGT driver
+ifeq ($(CONFIG_RA8_AGT),y)
+CHIP_CSRCS += ra_agt.c
+endif
+
 # POEG driver
 ifeq ($(CONFIG_RA_POEG),y)
 CHIP_CSRCS += ra_poeg.c

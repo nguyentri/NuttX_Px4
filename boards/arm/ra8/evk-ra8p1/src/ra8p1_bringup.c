@@ -237,6 +237,19 @@ int board_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_RA8_AGT
+  /* Initialize AGT timer devices */
+  ret = ra_agt_board_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize AGT: %d\n", ret);
+    }
+  else
+    {
+      syslog(LOG_INFO, "AGT timer devices initialized successfully\n");
+    }
+#endif
+
 #ifdef CONFIG_RA_ELC
   /* Initialize Event Link Controller
    * Note: ELC should be initialized after GPT and ADC modules

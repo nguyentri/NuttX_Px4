@@ -74,6 +74,11 @@ ifeq ($(CONFIG_PWM),y)
 CSRCS += ra8p1_pwm.c
 endif
 
+# AGT Timer support
+ifeq ($(CONFIG_RA8_AGT),y)
+CSRCS += ra8p1_agt.c
+endif
+
 # POEG support
 ifeq ($(CONFIG_RA_POEG),y)
 CSRCS += ra8p1_opeg.c

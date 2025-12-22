@@ -144,7 +144,10 @@
 #define R_MSTP_MSTPCRD_GPT_PDG         R_MSTP_MSTPCRD_MSTPD6   /* GPT Port Output Disable Group */
 #define R_MSTP_MSTPCRD_AGT0            R_MSTP_MSTPCRD_MSTPD5   /* Asynchronous General Purpose Timer 0 */
 #define R_MSTP_MSTPCRD_AGT1            R_MSTP_MSTPCRD_MSTPD4   /* Asynchronous General Purpose Timer 1 */
-/* Bit 3-0: Reserved */
+#define R_MSTP_MSTPCRD_AGT2            R_MSTP_MSTPCRD_MSTPD3   /* Asynchronous General Purpose Timer 2 */
+#define R_MSTP_MSTPCRD_AGT3            R_MSTP_MSTPCRD_MSTPD2   /* Asynchronous General Purpose Timer 3 */
+#define R_MSTP_MSTPCRD_AGT4            R_MSTP_MSTPCRD_MSTPD1   /* Asynchronous General Purpose Timer 4 */
+#define R_MSTP_MSTPCRD_AGT5            R_MSTP_MSTPCRD_MSTPD0   /* Asynchronous General Purpose Timer 5 */
 
 /* MSTPCRE - Module Stop Control Register E (Bit 31 to 0) */
 #define R_MSTP_MSTPCRE_GPT0            R_MSTP_MSTPCRE_MSTPE31  /* General PWM Timer 0 */
@@ -248,6 +251,10 @@ typedef enum
   RA_MSTP_GPT_PDG,          /* MSTPD6: GPT Port Output Disable Group */
   RA_MSTP_AGT0,             /* MSTPD5: Asynchronous General Purpose Timer 0 */
   RA_MSTP_AGT1,             /* MSTPD4: Asynchronous General Purpose Timer 1 */
+  RA_MSTP_AGT2,             /* MSTPD3: Asynchronous General Purpose Timer 2 */
+  RA_MSTP_AGT3,             /* MSTPD2: Asynchronous General Purpose Timer 3 */
+  RA_MSTP_AGT4,             /* MSTPD1: Asynchronous General Purpose Timer 4 */
+  RA_MSTP_AGT5,             /* MSTPD0: Asynchronous General Purpose Timer 5 */
 
   /* MSTPCRE register modules (Bit 31 to 0) */
   RA_MSTP_GPT0,             /* MSTPE31: General PWM Timer 0 */
