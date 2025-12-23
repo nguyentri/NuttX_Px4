@@ -40,8 +40,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef BOARD_PWM0_GPIO
-#  error "BOARD_PWM0_GPIO must be defined when CONFIG_RZV_PWM is enabled"
+#ifndef BOARD_PWM_CH0_GPIO
+#  error "BOARD_PWM_CH0_GPIO must be defined when CONFIG_RZV_PWM is enabled"
 #endif
 
 /****************************************************************************
@@ -72,7 +72,7 @@ int rzv2h_pwm_setup(void)
       return OK;
     }
 
-  ret = rzv_gpioconfig(BOARD_PWM0_GPIO);
+  ret = rzv_gpioconfig(BOARD_PWM_CH0_GPIO);
   if (ret < 0)
     {
       return ret;

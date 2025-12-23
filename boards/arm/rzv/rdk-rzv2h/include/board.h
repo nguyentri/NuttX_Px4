@@ -356,7 +356,7 @@
 #define BOARD_PWM_MAX_CHANNELS      4
 
 /* PWM channel GPIO definitions (Port 7 GPT pins, Mode 1) */
-#define BOARD_PWM_CH0_GPIO      GPIO_GTIOC1A_P7_1_M1   /* Timer1 GTIOCA on P71 */
+#define BOARD_PWM_CH0_GPIO      GPIO_GTIOC0B_P7_1_M1   /* Timer1 GTIOCA on P71 */
 #define BOARD_PWM_CH1_GPIO      GPIO_GTIOC2B_P7_2_M1   /* Timer2 GTIOCB on P72 */
 #define BOARD_PWM_CH2_GPIO      GPIO_GTIOC3A_P7_5_M1   /* Timer3 GTIOCA on P75 */
 #define BOARD_PWM_CH3_GPIO      GPIO_GTIOC4B_P7_6_M1   /* Timer4 GTIOCB on P76 */
@@ -365,9 +365,6 @@
 #define BOARD_PWM_DEFAULT_PERIOD_US     20000    /* 20ms period (50Hz) */
 #define BOARD_PWM_DEFAULT_MIN_US        900      /* Minimum pulse width */
 #define BOARD_PWM_DEFAULT_MAX_US        2100     /* Maximum pulse width */
-
-/* Legacy PWM GPIO for compatibility */
-#define BOARD_PWM0_GPIO       BOARD_PWM_CH0_GPIO
 
 /* ADC Configuration ********************************************************/
 

@@ -48,8 +48,6 @@ endif
 # LED support
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += rzv2h_auto_leds.c
-else
-CSRCS += rzv2h_user_leds.c
 endif
 
 ############################################################################

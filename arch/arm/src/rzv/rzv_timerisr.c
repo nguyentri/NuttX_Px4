@@ -34,6 +34,7 @@
 
 #include "arm_internal.h"
 #include "rzv_clock.h"
+#include "rzv_icu.h"
 #include "hardware/rzv_private_timer.h"
 
 /****************************************************************************
@@ -137,7 +138,7 @@ void up_timer_initialize(void)
 
   /* Attach the timer interrupt handler */
 
-  ret = ra_icu_attach(RZV_ELC_CMTW_CH0_CMT2_ELCCMP, rzv_timerisr, NULL);
+  ret = rzv_icu_attach(RZV_ELC_CMTW_CH0_CMT2_ELCCMP, rzv_timerisr, NULL, true);
   if (ret < 0)
     {
         tmrerr("ERROR: Failed to attach timer ISR: %d\n", ret);

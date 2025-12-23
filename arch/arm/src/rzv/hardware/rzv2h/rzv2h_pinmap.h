@@ -49,22 +49,6 @@
 #define RZV_PFS_PSEL_MODE14                    (0x0E)  /* PDM, External IRQ */
 #define RZV_PFS_PSEL_MODE15                    (0x0F)  /* Reserved */
 
-/* Backward compatibility aliases */
-#define RZV_PFS_PSEL_GPT                       RZV_PFS_PSEL_MODE1
-#define RZV_PFS_PSEL_SCI                       RZV_PFS_PSEL_MODE2
-#define RZV_PFS_PSEL_SPI                       RZV_PFS_PSEL_MODE3
-#define RZV_PFS_PSEL_IIC                       RZV_PFS_PSEL_MODE4
-#define RZV_PFS_PSEL_CAN                       RZV_PFS_PSEL_MODE5
-#define RZV_PFS_PSEL_ETHERNET                  RZV_PFS_PSEL_MODE6
-#define RZV_PFS_PSEL_SSIE                      RZV_PFS_PSEL_MODE7
-#define RZV_PFS_PSEL_ADC                       RZV_PFS_PSEL_MODE8
-#define RZV_PFS_PSEL_DAC                       RZV_PFS_PSEL_MODE9
-#define RZV_PFS_PSEL_USBFS                     RZV_PFS_PSEL_MODE10
-#define RZV_PFS_PSEL_RTC                       RZV_PFS_PSEL_MODE11
-#define RZV_PFS_PSEL_CLKOUT                    RZV_PFS_PSEL_MODE12
-#define RZV_PFS_PSEL_MHU                       RZV_PFS_PSEL_MODE13
-#define RZV_PFS_PSEL_IRQ                       RZV_PFS_PSEL_MODE14
-
 /* Port Number definitions for RZV2H */
 #define PORT0                                  (0x00 << 28)
 #define PORT1                                  (0x01 << 28)
@@ -118,29 +102,6 @@
 #define MAX_GPIO_IRQS                          (16)
 
 /* Alternative Function Pin Definitions */
-
-/* GPT Timer Channels - MODE1 (Primary timer function) */
-#define GPIO_GTIOC0A_P7_0_M1                        (PORT7 | PIN0 | RZV_PFS_PSEL_MODE1)
-#define GPIO_GTIOC0B_P7_1_M1                        (PORT7 | PIN1 | RZV_PFS_PSEL_MODE1)
-#define GPIO_GTIOC1A_P7_1_M1                        (PORT7 | PIN1 | RZV_PFS_PSEL_MODE1)
-#define GPIO_GTIOC1B_P7_0_M1                        (PORT7 | PIN0 | RZV_PFS_PSEL_MODE1)
-#define GPIO_GTIOC2A_P7_2_M1                        (PORT7 | PIN2 | RZV_PFS_PSEL_MODE1)
-#define GPIO_GTIOC2B_P7_2_M1                        (PORT7 | PIN2 | RZV_PFS_PSEL_MODE1)
-#define GPIO_GTIOC3A_P7_3_M1                        (PORT7 | PIN3 | RZV_PFS_PSEL_MODE1)
-#define GPIO_GTIOC3A_P7_5_M1                        (PORT7 | PIN5 | RZV_PFS_PSEL_MODE1)
-#define GPIO_GTIOC3B_P7_3_M1                        (PORT7 | PIN3 | RZV_PFS_PSEL_MODE1)
-#define GPIO_GTIOC4A_P7_4_M1                        (PORT7 | PIN4 | RZV_PFS_PSEL_MODE1)
-#define GPIO_GTIOC4B_P7_6_M1                        (PORT7 | PIN6 | RZV_PFS_PSEL_MODE1)
-#define GPIO_GTIOC5A_P7_5_M1                        (PORT7 | PIN5 | RZV_PFS_PSEL_MODE1)
-#define GPIO_GTIOC5B_P7_7_M1                        (PORT7 | PIN7 | RZV_PFS_PSEL_MODE1)
-#define GPIO_GTIOC6A_P8_2_M1                        (PORT8 | PIN2 | RZV_PFS_PSEL_MODE1)
-#define GPIO_GTIOC6B_P8_3_M1                        (PORT8 | PIN3 | RZV_PFS_PSEL_MODE1)
-#define GPIO_GTIOC7A_P9_0_M1                        (PORT9 | PIN0 | RZV_PFS_PSEL_MODE1)
-#define GPIO_GTIOC7B_P9_1_M1                        (PORT9 | PIN1 | RZV_PFS_PSEL_MODE1)
-#define GPIO_GTIOC8A_P9_2_M1                        (PORT9 | PIN2 | RZV_PFS_PSEL_MODE1)
-#define GPIO_GTIOC8B_P9_3_M1                        (PORT9 | PIN3 | RZV_PFS_PSEL_MODE1)
-#define GPIO_GTIOC9A_P9_4_M1                        (PORT9 | PIN4 | RZV_PFS_PSEL_MODE1)
-#define GPIO_GTIOC9B_P9_5_M1                        (PORT9 | PIN5 | RZV_PFS_PSEL_MODE1)
 
 #define GPIO_AUDIO_CLK_B_P1_0_M7                        (PORT1 | PIN0 | RZV_PFS_PSEL_MODE7)
 #define GPIO_AUDIO_CLK_B_P6_0_M7                        (PORT6 | PIN0 | RZV_PFS_PSEL_MODE7)
