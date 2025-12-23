@@ -100,6 +100,7 @@ void up_timer_initialize(void)
   uint32_t periphclk;
   uint32_t load_value;
   uint32_t ctrl;
+  int ret;
 
   /* Get peripheral clock frequency */
 
@@ -136,11 +137,12 @@ void up_timer_initialize(void)
 
   /* Attach the timer interrupt handler */
 
-  irq_attach(RZV_ELC_CMTW_CH0_CMT2_ELCCMP, rzv_timerisr, NULL);
-
-  /* Enable the timer interrupt */
-
-  up_enable_irq(RZV_ELC_CMTW_CH0_CMT2_ELCCMP);
+  ret = ra_icu_attach(RZV_ELC_CMTW_CH0_CMT2_ELCCMP, rzv_timerisr, NULL);
+  if (ret < 0)
+    {
+        tmrerr("ERROR: Failed to attach timer ISR: %d\n", ret);
+        return;
+    }
 
   /* Enable the timer */
 
