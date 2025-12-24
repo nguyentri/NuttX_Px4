@@ -40,23 +40,25 @@
 
 /* Board Configuration Overview *********************************************/
 
-/* This board configuration is aligned with the PX4 FreeRTOS+FSP reference
- * implementation for the Renesas RZV2H platform. Key features:
+/* This board configuration matches the RDK-RZV2H GPIO header pin mapping.
  *
  * Sensors:
- *   - MPU9250 IMU on SPI bus 0 with DRDY on P5_0
- *   - BMP388/BMP280 barometer on I2C bus 7 at address 0x76
+ *   - MPU9250 IMU on SPI6 (P90=MOSI, P91=MISO, P92=SCK, P93=CS) with INT on P50
+ *   - ICM20948 IMU on SPI6 (P94=CS) with INT on PA0
+ *   - BMP280 barometer on I2C7 (P76=SDA, P77=SCL) at address 0x76
  *
  * Serial Ports:
- *   - SCI0 (/dev/ttyS0): RC input - Port 5 pins 0-1
- *   - SCI1 (/dev/ttyS1): MAVLink telemetry - Port 5 pins 2-3
- *   - SCI2 (/dev/ttyS2): GPS - Port 5 pins 4-5
- *   - SCI3 (/dev/ttyS3): NSH Console - Port 5 pins 6-7
+ *   - SCI3 (/dev/ttyS3): NSH Console
+ *   - SCI4 (/dev/ttyS4): TFminiPlux (P70=TXD, P71=RXD)
+ *   - SCI5 (/dev/ttyS5): Sik Telemetry (P72=TXD, P73=RXD)
+ *   - SCI6 (/dev/ttyS6): fs-a8s RC (P75=RXD)
+ *   - SCI9 (/dev/ttyS9): GPS M10 (P82=TXD, P83=RXD)
  *
- * PWM Outputs:
- *   - 4 channels using GPT timers on Port 7 (P7_1, P7_2, P7_5, P7_6)
- *
- * Pin assignments follow the FSP configuration in pin_data.c
+ * PWM Outputs (ESC channels):
+ *   - ESC1: PA4 (GPT6A) - GPIO12/PWM0
+ *   - ESC2: PA7 (GPT7B) - GPIO13/PWM1
+ *   - ESC3: P96 (GPT9A) - GPIO19
+ *   - ESC4: P53 (GPT10B) - GPIO06
  */
 
 /* Clocking *****************************************************************/
@@ -179,16 +181,14 @@
 /* Number of I2C buses defined in PX4 board_config.h */
 #define PX4_NUMBER_I2C_BUSES    1
 
-/* I2C7 pins for barometer (Port 9, Mode 2):
+/* I2C7 pins for barometer (Port 7, Mode 1):
  *
- * I2C7_SDA (RIIC7): P90 (SDA6 via SCI8_TX - Mode 2)
- * I2C7_SCL (RIIC7): P91 (SCL6 via SCI8_RX - Mode 2)
- *
- * Note: Port 9 provides I2C6 functionality via SCI8 in Mode 2
+ * I2C7_SDA (RIIC7): P76 (SDA7 - Mode 1) - BMP280 SDA (GPIO02)
+ * I2C7_SCL (RIIC7): P77 (SCL7 - Mode 1) - BMP280 SCL (GPIO03)
  */
 
-#define BOARD_I2C7_SDA_GPIO   GPIO_TXD8_MOSI8_SDA6_P9_0_M2   /* P90 = PORT9 pin 0, Mode2 */
-#define BOARD_I2C7_SCL_GPIO   GPIO_RXD8_MISO8_SCL6_P9_1_M2   /* P91 = PORT9 pin 1, Mode2 */
+#define BOARD_I2C7_SDA_GPIO   GPIO_TXD7_MOSI7_SDA7_P7_6_M1   /* P76 = PORT7 pin 6, Mode1 */
+#define BOARD_I2C7_SCL_GPIO   GPIO_RXD7_MISO7_SCL7_P7_7_M1   /* P77 = PORT7 pin 7, Mode1 */
 #define BOARD_RIIC7_SDA_GPIO  BOARD_I2C7_SDA_GPIO  /* Alias for RIIC7 */
 #define BOARD_RIIC7_SCL_GPIO  BOARD_I2C7_SCL_GPIO  /* Alias for RIIC7 */
 
@@ -271,67 +271,67 @@
 
 /* SPI bus configuration matching PX4 board setup
  *
- * SPI0 is used for the MPU9250 IMU sensor
- * This corresponds to g_spi_imu in the FSP configuration
+ * SPI6 is used for MPU9250 and ICM20948 IMU sensors
+ * Pin mapping from GPIO header table
  */
 
 /* Number of SPI buses defined in PX4 board_config.h */
 #define PX4_NUMBER_SPI_BUSES    2
 
-/* SPI0 for MPU9250 IMU (g_spi_imu):
+/* SPI6 for IMU sensors:
  *
- * SPI0_CS:    (Chip select handled by FSP configuration)
- * SPI0_MOSI:  (Configure via FSP)
- * SPI0_MISO:  (Configure via FSP)
- * SPI0_SCK:   (Configure via FSP)
- *
- * Note: Actual pin assignments are managed through FSP pin configuration
+ * SPI6_MOSI:  P90 (GPIO10/MOSI) - Mode 1
+ * SPI6_MISO:  P91 (GPIO09/MISO) - Mode 1
+ * SPI6_SCK:   P92 (GPIO11/SCK) - Mode 1
+ * SPI6_SS0:   P93 (GPIO08/CE0) - MPU9250 NCS
+ * SPI6_SS1:   P94 (GPIO07/CE1) - ICM20948 NCS
  */
 
-/* SPI0 (Pmod Type2 SPI connector CN2 - alternative configuration):
- *
- * SPI0_SSLA (CS):  PA7 (SSLC0 - Mode 5)
- * SPI0_MOSI:       PB4 (MOSI0 - Mode 5)
- * SPI0_MISO:       PB3 (MISO0 - Mode 5)
- * SPI0_SCK:        PB5 (RSPCK0 - Mode 5)
- */
-
-#define BOARD_SPI0_CS_GPIO    GPIO_SSLC0_PA_7_M5     /* PA7 = PORT10 pin 7, Mode5 */
-#define BOARD_SPI0_MOSI_GPIO  GPIO_MOSI0_PB_4_M5     /* PB4 = PORT11 pin 4, Mode5 */
-#define BOARD_SPI0_MISO_GPIO  GPIO_MISO0_PB_3_M5     /* PB3 = PORT11 pin 3, Mode5 */
-#define BOARD_SPI0_SCK_GPIO   GPIO_RSPCK0_PB_5_M5    /* PB5 = PORT11 pin 5, Mode5 */
+#define BOARD_SPI6_MOSI_GPIO  GPIO_MOSA_P9_0_M1         /* P90 = PORT9 pin 0, Mode1 */
+#define BOARD_SPI6_MISO_GPIO  GPIO_MISO4_P9_1_M1        /* P91 = PORT9 pin 1, Mode1 */
+#define BOARD_SPI6_SCK_GPIO   GPIO_RSPCK4_P9_2_M1       /* P92 = PORT9 pin 2, Mode1 */
+#define BOARD_SPI6_SS0_GPIO   GPIO_SSLA0_P9_3_M1        /* P93 = PORT9 pin 3, Mode1 - MPU9250 */
+#define BOARD_SPI6_SS1_GPIO   GPIO_SSLA1_P9_4_M1        /* P94 = PORT9 pin 4, Mode1 - ICM20948 */
 
 /* Sensor Configuration *****************************************************/
 
-/* MPU9250 IMU Sensor (SPI0)
+/* MPU9250 IMU Sensor (SPI6)
  *
- * The MPU9250 is connected via SPI bus 0 (g_spi_imu)
- * Chip select is managed internally by FSP
- * Data Ready (DRDY) interrupt on P50 (PORT5 pin 0)
- *
- * From spi.cpp: drdy_gpio = BSP_IO_PORT_05_PIN_00
- * From pin_data.c: P50 configured with TINT_ENABLE for interrupt
+ * The MPU9250 is connected via SPI bus 6
+ * Chip select: P93 (GPIO08/CE0)
+ * Data Ready (DRDY) interrupt: P50 (GPIO25)
  */
 
-#define BOARD_MPU9250_BUS           0        /* SPI bus 0 */
-#define BOARD_MPU9250_DRDY_GPIO     GPIO_P5_0_INPUT  /* P50 = PORT5 pin 0, input with IRQ */
+#define BOARD_MPU9250_BUS           6        /* SPI bus 6 */
+#define BOARD_MPU9250_CS_GPIO       GPIO_P9_3_OUTPUT_HIGH  /* P93 chip select */
+#define BOARD_MPU9250_DRDY_GPIO     GPIO_P5_0_INPUT  /* P50 = GPIO25, IRQ input */
 
-/* External IRQ configuration for MPU9250 DRDY
- * From pin_data.c: P50 has IOPORT_CFG_TINT_ENABLE set
- * This enables the external interrupt (TINT) capability
- */
+/* External IRQ configuration for MPU9250 DRDY */
 #define BOARD_MPU9250_DRDY_IRQ_ENABLE   1
 
-/* BMP388/BMP280 Barometer Sensor (I2C7)
+/* ICM20948 IMU Sensor (SPI6)
  *
- * The BMP388 (or BMP280 variant) is connected via I2C bus 7 (g_i2c_baro)
- * I2C address: 0x76 (from board_config.h: PX4_I2C_OBDEV_BMP280)
+ * The ICM20948 is connected via SPI bus 6
+ * Chip select: P94 (GPIO07/CE1)
+ * Data Ready (DRDY) interrupt: PA0 (GPIO05)
  */
 
-#define BOARD_BMP388_BUS            7        /* I2C bus 7 (RIIC7) */
-#define BOARD_BMP388_ADDR           0x76     /* I2C device address */
-#define BOARD_BMP280_BUS            BOARD_BMP388_BUS   /* Alias for BMP280 */
-#define BOARD_BMP280_ADDR           BOARD_BMP388_ADDR  /* Same address */
+#define BOARD_ICM20948_BUS          6        /* SPI bus 6 */
+#define BOARD_ICM20948_CS_GPIO      GPIO_P9_4_OUTPUT_HIGH  /* P94 chip select */
+#define BOARD_ICM20948_DRDY_GPIO    GPIO_PA_0_INPUT  /* PA0 = GPIO05, IRQ input */
+#define BOARD_ICM20948_DRDY_IRQ_ENABLE  1
+
+/* BMP280 Barometer Sensor (I2C7)
+ *
+ * The BMP280 is connected via I2C bus 7
+ * I2C address: 0x76
+ * Pins: P76 (SDA7/GPIO02), P77 (SCL7/GPIO03)
+ */
+
+#define BOARD_BMP280_BUS            7        /* I2C bus 7 (RIIC7) */
+#define BOARD_BMP280_ADDR           0x76     /* I2C device address */
+#define BOARD_BMP388_BUS            BOARD_BMP280_BUS   /* Alias for BMP388 */
+#define BOARD_BMP388_ADDR           BOARD_BMP280_ADDR  /* Same address */
 
 /* Sensor bus aliases for driver compatibility */
 #define BOARD_IMU_SPI_BUS           BOARD_MPU9250_BUS
@@ -341,25 +341,21 @@
 
 /* PWM outputs using GPT (General PWM Timer) modules
  *
- * Configuration matches PX4 board_pwm_out.cpp timer bindings:
- * - Timer1 (GTIOCA) - PWM Channel 0
- * - Timer2 (GTIOCB) - PWM Channel 1
- * - Timer3 (GTIOCA) - PWM Channel 2
- * - Timer4 (GTIOCB) - PWM Channel 3
- *
- * Pin assignments from pin_data.c (Port 7, Mode 1):
- * - P71, P72, P73 configured for GPT peripheral mode
- * - P75, P76, P77 configured for GPT peripheral mode
+ * ESC Channel Configuration (from GPIO header pin mapping):
+ * - ESC1 (PWM0): PA4 (GPIO12/PWM0) - GPT6A (Mode 11)
+ * - ESC2 (PWM1): PA7 (GPIO13/PWM1) - GPT7B (Mode 11)
+ * - ESC3 (PWM2): P96 (GPIO19)      - GPT9A (Mode 9)
+ * - ESC4 (PWM3): P53 (GPIO06)      - GPT10B (Mode 11)
  */
 
 /* Maximum number of PWM channels (from board_pwm_out.h) */
 #define BOARD_PWM_MAX_CHANNELS      4
 
-/* PWM channel GPIO definitions (Port 7 GPT pins, Mode 1) */
-#define BOARD_PWM_CH0_GPIO      GPIO_GTIOC0B_P7_1_M9   /* Timer1 GTIOCA on P71 */
-#define BOARD_PWM_CH1_GPIO      GPIO_GTIOC2A_P7_2_M9   /* Timer2 GTIOCB on P72 */
-#define BOARD_PWM_CH2_GPIO      GPIO_GTIOC4B_P7_5_M9   /* Timer3 GTIOCA on P75 */
-#define BOARD_PWM_CH3_GPIO      GPIO_GTIOC6A_P7_6_M9   /* Timer4 GTIOCB on P76 */
+/* PWM channel GPIO definitions (matching ESC pinmap) */
+#define BOARD_PWM_CH0_GPIO      GPIO_GTIOC6A_PA_4_M11  /* ESC1: GPT6A on PA4 */
+#define BOARD_PWM_CH1_GPIO      GPIO_GTIOC7B_PA_7_M11  /* ESC2: GPT7B on PA7 */
+#define BOARD_PWM_CH2_GPIO      GPIO_GTIOC9A_P9_6_M9   /* ESC3: GPT9A on P96 */
+#define BOARD_PWM_CH3_GPIO      GPIO_GTIOC10B_P5_3_M11 /* ESC4: GPT10B on P53 */
 
 /* PWM default parameters (from board_pwm_out.cpp) */
 #define BOARD_PWM_DEFAULT_PERIOD_US     20000    /* 20ms period (50Hz) */
@@ -432,22 +428,27 @@
 #define BOARD_P5_3_GPIO   GPIO_RXD1_MISO1_SCL1_P5_3_M1
 
 /* P7_0, P7_1, P7_2, P7_3 - SCI4/SCI5 UART functions (Mode 1) */
-#define BOARD_P7_0_GPIO   GPIO_TXD4_MOSI4_SDA4_P7_0_M1  /* SCI4 TX */
-#define BOARD_P7_1_GPIO   GPIO_RXD4_MISO4_SCL4_P7_1_M1  /* SCI4 RX */
-#define BOARD_P7_2_GPIO   GPIO_TXD5_MOSI5_SDA5_P7_2_M1  /* SCI5 TX */
-#define BOARD_P7_3_GPIO   GPIO_RXD5_MISO5_SCL5_P7_3_M1  /* SCI5 RX */
+#define BOARD_P7_0_GPIO   GPIO_TXD4_MOSI4_SDA4_P7_0_M1  /* SCI4 TX - TFminiPlux (GPIO22) */
+#define BOARD_P7_1_GPIO   GPIO_RXD4_MISO4_SCL4_P7_1_M1  /* SCI4 RX - TFminiPlux (GPIO27) */
+#define BOARD_P7_2_GPIO   GPIO_TXD5_MOSI5_SDA5_P7_2_M1  /* SCI5 TX - Sik Tel v3 (GPIO14) */
+#define BOARD_P7_3_GPIO   GPIO_RXD5_MISO5_SCL5_P7_3_M1  /* SCI5 RX - Sik Tel v3 (GPIO15) */
 
-/* P7_5, P7_6, P7_7 - SCI6/SCI7 UART functions (Mode 1) */
-#define BOARD_P7_5_GPIO   GPIO_RXD6_MISO6_SCL6_P7_5_M1  /* SCI6 RX */
-#define BOARD_P7_6_GPIO   GPIO_TXD7_MOSI7_SDA7_P7_6_M1  /* SCI7 TX */
-#define BOARD_P7_7_GPIO   GPIO_RXD7_MISO7_SCL7_P7_7_M1  /* SCI7 RX */
+/* P7_4, P7_5, P7_6, P7_7 - Mixed GPIO/Peripheral functions */
+#define BOARD_P7_4_GPIO   GPIO_P7_4_OUTPUT_LOW  /* GPIO17 */
+#define BOARD_P7_5_GPIO   GPIO_RXD6_MISO6_SCL6_P7_5_M1  /* SCI6 RX - fs-a8s (GPIO04) */
+#define BOARD_P7_6_GPIO   GPIO_TXD7_MOSI7_SDA7_P7_6_M1  /* I2C7 SDA - BMP280 (GPIO02) */
+#define BOARD_P7_7_GPIO   GPIO_RXD7_MISO7_SCL7_P7_7_M1  /* I2C7 SCL - BMP280 (GPIO03) */
 
-/* P8_2, P8_3 - SCI0 alternate pins (Mode 6) */
-#define BOARD_P8_2_GPIO   GPIO_TXD0_P8_2_M6     /* SCI0 TX alternate */
-#define BOARD_P8_3_GPIO   GPIO_RXD0_P8_3_M6     /* SCI0 RX alternate */
+/* P8_2, P8_3 - SCI9 UART for GPS M10 (Mode 6) */
+#define BOARD_P8_2_GPIO   GPIO_TXD9_MOSI9_SDA9_P8_2_M6  /* SCI9 TX - GPS M10 (GPIO23) */
+#define BOARD_P8_3_GPIO   GPIO_RXD9_MISO9_SCL9_P8_3_M6  /* SCI9 RX - GPS M10 (GPIO24) */
 
-/* P9_0 - I2C6/SCI8 SDA (Mode 2) */
-#define BOARD_P9_0_GPIO   GPIO_TXD8_MOSI8_SDA6_P9_0_M2  /* I2C6 SDA via SCI8 */
+/* P9_0, P9_1, P9_2, P9_3, P9_4 - SPI4 for IMU sensors (Mode 1) */
+#define BOARD_P9_0_GPIO   GPIO_MOSA_P9_0_M1   /* SPI4 MOSI - MPU9250 (GPIO10) */
+#define BOARD_P9_1_GPIO   GPIO_MISO4_P9_1_M1  /* SPI4 MISO - MPU9250 (GPIO09) */
+#define BOARD_P9_2_GPIO   GPIO_RSPCK4_P9_2_M1 /* SPI4 SCK - MPU9250 (GPIO11) */
+#define BOARD_P9_3_GPIO   GPIO_SSLA0_P9_3_M1  /* SPI4 SS0 - MPU9250 CS (GPIO08) */
+#define BOARD_P9_4_GPIO   GPIO_SSLA1_P9_4_M1  /* SPI4 SS1 - ICM20948 CS (GPIO07) */
 
 /* Legacy GPIO pin definitions (from previous configuration) */
 
