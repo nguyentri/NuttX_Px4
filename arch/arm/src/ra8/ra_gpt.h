@@ -144,22 +144,38 @@ struct ra_gpt_dma_s
 #define GPT_GTWP_WP                               (1 << 0)       /* Write protection enable */
 #define GPT_GTWP_CMNWP                            (1 << 4)       /* Common register write protect */
 
-/* GTCR Register bit definitions */
+/* GTCR Register bit definitions
+ * Validated against R7KA8P1KF_core0.h (CMSIS):
+ *   R_GPT0_GTCR_CST_Pos  = 0   (Count Start)
+ *   R_GPT0_GTCR_MD_Pos   = 16  (Mode Select, 4-bit field)
+ *   R_GPT0_GTCR_TPCS_Pos = 23  (Timer Prescaler, 4-bit field)
+ */
 #define GPT_GTCR_CST                              (1 << 0)       /* Count start */
-#define GPT_GTCR_MD_SHIFT                         (1)            /* Count mode shift */
-#define GPT_GTCR_MD_MASK                          (0x7 << GPT_GTCR_MD_SHIFT)
-#define GPT_GTCR_MD_SAW_WAVE_UP                   (0 << GPT_GTCR_MD_SHIFT)
-#define GPT_GTCR_MD_SAW_WAVE_DN                   (1 << GPT_GTCR_MD_SHIFT)
-#define GPT_GTCR_MD_TRIANGULAR_WAVE               (2 << GPT_GTCR_MD_SHIFT)
 
-#define GPT_GTCR_TPCS_SHIFT                       (4)            /* Timer prescaler shift */
-#define GPT_GTCR_TPCS_MASK                        (0x7 << GPT_GTCR_TPCS_SHIFT)
-#define GPT_GTCR_TPCS_PCLKD_1                     (0 << GPT_GTCR_TPCS_SHIFT) /* Prescaler = 1 */
-#define GPT_GTCR_TPCS_PCLKD_4                     (1 << GPT_GTCR_TPCS_SHIFT) /* Prescaler = 4 */
-#define GPT_GTCR_TPCS_PCLKD_16                    (2 << GPT_GTCR_TPCS_SHIFT) /* Prescaler = 16 */
-#define GPT_GTCR_TPCS_PCLKD_64                    (3 << GPT_GTCR_TPCS_SHIFT) /* Prescaler = 64 */
-#define GPT_GTCR_TPCS_PCLKD_256                   (4 << GPT_GTCR_TPCS_SHIFT) /* Prescaler = 256 */
-#define GPT_GTCR_TPCS_PCLKD_1024                  (5 << GPT_GTCR_TPCS_SHIFT) /* Prescaler = 1024 */
+/* Mode Select (MD) - bits [19:16] */
+#define GPT_GTCR_MD_SHIFT                         (16)           /* Mode select shift (CMSIS: R_GPT0_GTCR_MD_Pos) */
+#define GPT_GTCR_MD_MASK                          (0xf << GPT_GTCR_MD_SHIFT)  /* 4-bit field */
+#define GPT_GTCR_MD_SAW_WAVE_UP                   (0 << GPT_GTCR_MD_SHIFT)    /* Saw-wave PWM (up-count) */
+#define GPT_GTCR_MD_SAW_WAVE_ONESHOT              (1 << GPT_GTCR_MD_SHIFT)    /* Saw-wave one-shot pulse */
+#define GPT_GTCR_MD_SAW_WAVE_DN                   (2 << GPT_GTCR_MD_SHIFT)    /* Reserved (was down-count) */
+#define GPT_GTCR_MD_TRIANGULAR_WAVE               (4 << GPT_GTCR_MD_SHIFT)    /* Triangle-wave PWM mode 1 */
+#define GPT_GTCR_MD_TRIANGULAR_WAVE2              (5 << GPT_GTCR_MD_SHIFT)    /* Triangle-wave PWM mode 2 */
+#define GPT_GTCR_MD_TRIANGULAR_WAVE3              (6 << GPT_GTCR_MD_SHIFT)    /* Triangle-wave PWM mode 3 */
+
+/* Timer Prescaler Select (TPCS) - bits [26:23] */
+#define GPT_GTCR_TPCS_SHIFT                       (23)           /* Timer prescaler shift (CMSIS: R_GPT0_GTCR_TPCS_Pos) */
+#define GPT_GTCR_TPCS_MASK                        (0xf << GPT_GTCR_TPCS_SHIFT)  /* 4-bit field */
+#define GPT_GTCR_TPCS_PCLKD_1                     (0 << GPT_GTCR_TPCS_SHIFT)  /* PCLKD / 1 */
+#define GPT_GTCR_TPCS_PCLKD_2                     (1 << GPT_GTCR_TPCS_SHIFT)  /* PCLKD / 2 */
+#define GPT_GTCR_TPCS_PCLKD_4                     (2 << GPT_GTCR_TPCS_SHIFT)  /* PCLKD / 4 */
+#define GPT_GTCR_TPCS_PCLKD_8                     (3 << GPT_GTCR_TPCS_SHIFT)  /* PCLKD / 8 */
+#define GPT_GTCR_TPCS_PCLKD_16                    (4 << GPT_GTCR_TPCS_SHIFT)  /* PCLKD / 16 */
+#define GPT_GTCR_TPCS_PCLKD_32                    (5 << GPT_GTCR_TPCS_SHIFT)  /* PCLKD / 32 */
+#define GPT_GTCR_TPCS_PCLKD_64                    (6 << GPT_GTCR_TPCS_SHIFT)  /* PCLKD / 64 */
+#define GPT_GTCR_TPCS_PCLKD_128                   (7 << GPT_GTCR_TPCS_SHIFT)  /* PCLKD / 128 */
+#define GPT_GTCR_TPCS_PCLKD_256                   (8 << GPT_GTCR_TPCS_SHIFT)  /* PCLKD / 256 */
+#define GPT_GTCR_TPCS_PCLKD_512                   (9 << GPT_GTCR_TPCS_SHIFT)  /* PCLKD / 512 */
+#define GPT_GTCR_TPCS_PCLKD_1024                  (10 << GPT_GTCR_TPCS_SHIFT) /* PCLKD / 1024 */
 
 /* GTIOR Register bit definitions */
 /* GTIOA function select bits [4:0] */
@@ -236,9 +252,11 @@ struct ra_gpt_dma_s
 #define GPT_GTIOR_PWM_LOW_AB   (GPT_GTIOR_PWM_LOW_A | GPT_GTIOR_PWM_LOW_B)
 
 /* GTBER Register bit definitions (Buffer Enable Register) */
-#define GPT_GTBER_CCRA                            (1 << 16)
-#define GPT_GTBER_CCRB                            (1 << 17)
-#define GPT_GTBER_PR                              (1 << 18)
+#define GPT_GTBER_CCRA                            (1 << 16)  /* GTCCRA buffer enable */
+#define GPT_GTBER_CCRB                            (1 << 18)  /* GTCCRB buffer enable */
+#define GPT_GTBER_PR                              (1 << 20)  /* GTPR buffer enable */
+#define GPT_GTBER_CCRSWT                          (1 << 22)  /* GTCCRA/GTCCRB forcible buffer transfer */
+#define GPT_GTBER_PRSWT                           (1 << 23)  /* GTPR forcible buffer transfer */
 
 /* GTINTAD Register bit definitions (Interrupt Output Setting Register) */
 #define GPT_GTINTAD_GTINTA                        (1 << 0)  /* Compare match A interrupt enable */

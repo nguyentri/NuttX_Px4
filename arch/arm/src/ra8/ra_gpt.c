@@ -73,6 +73,26 @@
 /* Buffer enable mask for PWM mode */
 #define GPT_GTBER_PWM_ENABLE            (GPT_GTBER_CCRA | GPT_GTBER_CCRB | GPT_GTBER_PR)
 
+/* Software source select enable bit (bit 31) for GTSSR/GTPSR/GTCSR registers.
+ * When set, enables software control via GTSTR/GTSTP/GTCLR registers.
+ * Without this, external trigger sources may interfere with timer operation.
+ * Uses 0x80000000 to enable software source.
+ */
+#define GPT_SOURCE_SW_SELECT            (1ul << 31)
+
+/* GTINTAD overflow/underflow interrupt enable.
+ * For saw-wave up-counting mode, use overflow interrupt (TCFPO).
+ * The GRP (group) field selects which interrupt group triggers on overflow.
+ * Setting GRP[1:0] = 0 and enabling via ICU allows overflow interrupt.
+ * Note: The actual interrupt source is routed via ELC event, but GTINTAD
+ * must have the appropriate enable bits set for the GPT to assert the
+ * interrupt request signal.
+ */
+#define GPT_GTINTAD_GRP_SHIFT           (24)      /* Interrupt output group select shift */
+#define GPT_GTINTAD_GRP_MASK            (0x3 << GPT_GTINTAD_GRP_SHIFT)
+#define GPT_GTINTAD_GRP_A               (0 << GPT_GTINTAD_GRP_SHIFT)  /* Group A interrupt output */
+#define GPT_GTINTAD_GRPABH_OVF_UDF      (1 << 28) /* Output overflow/underflow on Group A/B high */
+
 /* Prescaler values */
 #define GPT_PRESCALER_1                 1
 #define GPT_PRESCALER_4                 4
@@ -92,9 +112,13 @@ struct ra_gpt_channel_config_s
   uint32_t base;                   /* GPT peripheral base address */
   ra_mstp_module_t mstp;           /* Module stop control bit */
   uint32_t pclkd_freq;             /* PCLKD frequency */
-  uint32_t max_period;            /* Maximum period in timer counts, 16-bit timer: 65535 and 32-bit timer: 4294967295 */
+  uint32_t max_period;             /* Maximum period in timer counts, 16-bit timer: 65535 and 32-bit timer: 4294967295 */
   uint32_t channel;                /* GPT channel (0-13) */
-  uint32_t elc;                    /* ELC event input number */
+  uint32_t elc;                    /* ELC event for timer mode interrupt.
+                                    * For timer/PWM mode: use COUNTER_OVERFLOW event.
+                                    * For input capture mode: use CAPTURE_COMPARE_A event.
+                                    * This field is used by gpt_timer_setcallback() to route
+                                    * overflow interrupts through ICU. */
 };
 
 /* GPT device state structure */
@@ -234,6 +258,10 @@ static const struct timer_ops_s g_gpt_timer_ops =
 /* GPT device configurations */
 static const struct ra_gpt_channel_config_s g_gpt_configs[] =
 {
+/* GPT channel configurations.
+ * For timer/PWM mode, use COUNTER_OVERFLOW events for periodic interrupt.
+ * For input capture, the PX4 io_timer_impl.c uses CAPTURE_COMPARE_A directly.
+ */
 #ifdef CONFIG_RA_GPT0
   {
     .base       = R_GPT32_CH_BASE(0),
@@ -241,17 +269,17 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
     .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 0,
-    .elc        = RA_ELC_GPT0_CAPTURE_COMPARE_A,  /* GPT0 capture/compare A IRQ, typically not used when control ECS */
+    .elc        = RA_ELC_GPT0_COUNTER_OVERFLOW,  /* GPT0 overflow for timer mode */
   },
 #endif
-#ifdef CONFIG_RA_GPT1 // not configured
+#ifdef CONFIG_RA_GPT1
   {
     .base       = R_GPT32_CH_BASE(1),
     .mstp       = RA_MSTP_GPT1,
     .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 1,
-    .elc        = RA_ELC_GPT1_COUNTER_OVERFLOW,  /* GPT1 overflow IRQ */
+    .elc        = RA_ELC_GPT1_COUNTER_OVERFLOW,  /* GPT1 overflow for timer mode */
   },
 #endif
 #ifdef CONFIG_RA_GPT2
@@ -261,7 +289,7 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
     .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 2,
-    .elc        = RA_ELC_GPT2_CAPTURE_COMPARE_A,  /* GPT2 capture/compare A IRQ */
+    .elc        = RA_ELC_GPT2_COUNTER_OVERFLOW,  /* GPT2 overflow for timer mode */
   },
 #endif
 #ifdef CONFIG_RA_GPT3
@@ -271,7 +299,7 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
     .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 3,
-    .elc        = RA_ELC_GPT3_CAPTURE_COMPARE_A,  /* GPT3 capture/compare A IRQ */
+    .elc        = RA_ELC_GPT3_COUNTER_OVERFLOW,  /* GPT3 overflow for timer mode */
   },
 #endif
 #ifdef CONFIG_RA_GPT4
@@ -281,7 +309,7 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
     .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 4,
-    .elc        = RA_ELC_GPT4_CAPTURE_COMPARE_A,  /* GPT4 capture/compare A IRQ */
+    .elc        = RA_ELC_GPT4_COUNTER_OVERFLOW,  /* GPT4 overflow for timer mode */
   },
 #endif
 #ifdef CONFIG_RA_GPT5
@@ -291,7 +319,7 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
     .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 5,
-    .elc        = RA_ELC_GPT5_CAPTURE_COMPARE_A,  /* GPT5 capture/compare A IRQ */
+    .elc        = RA_ELC_GPT5_COUNTER_OVERFLOW,  /* GPT5 overflow for timer mode */
   },
 #endif
 #ifdef CONFIG_RA_GPT6
@@ -301,7 +329,7 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
     .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 6,
-    .elc        = RA_ELC_GPT6_CAPTURE_COMPARE_A,  /* GPT6 capture/compare A IRQ */
+    .elc        = RA_ELC_GPT6_COUNTER_OVERFLOW,  /* GPT6 overflow for timer mode */
   },
 #endif
 #ifdef CONFIG_RA_GPT7
@@ -311,7 +339,7 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
     .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 7,
-    .elc        = RA_ELC_GPT7_CAPTURE_COMPARE_A,  /* GPT7 capture/compare A IRQ */
+    .elc        = RA_ELC_GPT7_COUNTER_OVERFLOW,  /* GPT7 overflow for timer mode */
   },
 #endif
 #ifdef CONFIG_RA_GPT8
@@ -321,7 +349,7 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
     .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 8,
-    .elc        = RA_ELC_GPT8_CAPTURE_COMPARE_A,  /* GPT8 capture/compare A IRQ */
+    .elc        = RA_ELC_GPT8_COUNTER_OVERFLOW,  /* GPT8 overflow for timer mode */
   },
 #endif
 #ifdef CONFIG_RA_GPT9
@@ -331,7 +359,7 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
     .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 9,
-    .elc        = RA_ELC_GPT9_CAPTURE_COMPARE_A,  /* GPT9 capture/compare A IRQ */
+    .elc        = RA_ELC_GPT9_COUNTER_OVERFLOW,  /* GPT9 overflow for timer mode */
   },
 #endif
 #ifdef CONFIG_RA_GPT10
@@ -341,7 +369,7 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
     .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 10,
-    .elc        = RA_ELC_GPT10_CAPTURE_COMPARE_A,  /* GPT10 capture/compare A IRQ */
+    .elc        = RA_ELC_GPT10_COUNTER_OVERFLOW,  /* GPT10 overflow for timer mode */
   },
 #endif
 #ifdef CONFIG_RA_GPT11
@@ -351,7 +379,7 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
     .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 11,
-    .elc        = RA_ELC_GPT11_CAPTURE_COMPARE_A,  /* GPT11 capture/compare A IRQ */
+    .elc        = RA_ELC_GPT11_COUNTER_OVERFLOW,  /* GPT11 overflow for timer mode */
   },
 #endif
 #ifdef CONFIG_RA_GPT12
@@ -361,7 +389,7 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
     .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 12,
-    .elc        = RA_ELC_GPT12_CAPTURE_COMPARE_A,  /* GPT12 capture/compare A IRQ */
+    .elc        = RA_ELC_GPT12_COUNTER_OVERFLOW,  /* GPT12 overflow for timer mode */
   },
 #endif
 #ifdef CONFIG_RA_GPT13
@@ -371,7 +399,7 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
     .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 13,
-    .elc        = RA_ELC_GPT13_CAPTURE_COMPARE_A,  /* GPT13 capture/compare A IRQ */
+    .elc        = RA_ELC_GPT13_COUNTER_OVERFLOW,  /* GPT13 overflow for timer mode */
   },
 #endif
 };
@@ -477,7 +505,8 @@ static void gpt_log_channel(uint8_t ch,
   uint32_t duty_us = 0;
   uint32_t duty_pct = 0;
   uint64_t timer_tick_freq = 0;
-  const uint32_t prescaler_divs[] = {1, 4, 16, 64, 256, 1024};
+  /* Full prescaler divider table - matches gpt_calculate_prescaler() */
+  static const uint32_t prescaler_divs[] = {1, 2, 4, 8, 16, 32, 64, 256, 1024};
 
   /* Validate prescaler index and pclkd */
   if (prescaler < (sizeof(prescaler_divs) / sizeof(prescaler_divs[0])) && pclkd > 0)
@@ -540,7 +569,24 @@ static void gpt_log_channel(uint8_t ch,
 
 static uint32_t gpt_calculate_prescaler(uint32_t frequency, uint32_t pclkd)
 {
-  uint32_t prescaler_divs[] = {1, 4, 16, 64, 256, 1024};
+  /* Full prescaler divider table:
+   * TPCS[3:0]  Divisor  Index
+   * 0000 (0)   1        0
+   * 0001 (1)   2        1
+   * 0010 (2)   4        2
+   * 0011 (3)   8        3
+   * 0100 (4)   16       4
+   * 0101 (5)   32       5
+   * 0110 (6)   64       6
+   * 0111 (7)   Reserved -
+   * 1000 (8)   256      7
+   * 1001 (9)   Reserved -
+   * 1010 (10)  1024     8
+   *
+   * Note: Index 7 maps to TPCS=8 (256), Index 8 maps to TPCS=10 (1024).
+   * A separate mapping table converts array index to TPCS register value.
+   */
+  static const uint32_t prescaler_divs[] = {1, 2, 4, 8, 16, 32, 64, 256, 1024};
   uint32_t i;
   uint32_t timer_freq;
   uint32_t period;
@@ -584,6 +630,12 @@ static int gpt_configure(struct ra_gpt_s *priv)
 
   pwminfo("Configuring GPT%" PRIu32 "\n", priv->config->channel);
 
+  /* Ensure the GPT module clock is enabled before accessing registers.
+   * This is critical if gpt_configure() is called without going through
+   * ra_gpt_initialize() (e.g., direct gpt_setup() call).
+   */
+  ra_mstp_start(priv->config->mstp);
+
   /* Perform the multi-register configuration atomically to avoid races */
   irqstate_t flags = enter_critical_section();
 
@@ -594,6 +646,16 @@ static int gpt_configure(struct ra_gpt_s *priv)
   regval = gpt_getreg(priv, R_GPT32_GTCR_OFFSET);
   regval &= ~GPT_GTCR_CST;
   gpt_putreg(priv, R_GPT32_GTCR_OFFSET, regval);
+
+  /* Initialize source select registers for software control.
+   * Set bit 31 (software source select enable) in GTSSR, GTPSR, GTCSR
+   * to enable software start/stop/clear via GTSTR/GTSTP/GTCLR registers.
+   * Without this, external trigger sources could interfere with timer operation.
+   * Uses 0x80000000 to enable software source.
+   */
+  gpt_putreg(priv, R_GPT32_GTSSR_OFFSET, GPT_SOURCE_SW_SELECT);
+  gpt_putreg(priv, R_GPT32_GTPSR_OFFSET, GPT_SOURCE_SW_SELECT);
+  gpt_putreg(priv, R_GPT32_GTCSR_OFFSET, GPT_SOURCE_SW_SELECT);
 
   /* Configure timer for saw-wave PWM mode (up-counting) */
   regval = GPT_GTCR_MD_SAW_WAVE_UP | GPT_GTCR_TPCS_PCLKD_1;
@@ -776,7 +838,13 @@ static int gpt_start(struct pwm_lowerhalf_s *dev,
    * truncation biases.
    */
   {
-    const uint32_t prescaler_divs[] = {1, 4, 16, 64, 256, 1024};
+    /* Full prescaler divider table - matches gpt_calculate_prescaler() */
+    static const uint32_t prescaler_divs[] = {1, 2, 4, 8, 16, 32, 64, 256, 1024};
+
+    /* Map prescaler array index to GTCR.TPCS register value.
+     * Index 0-6 map directly, index 7->TPCS=8 (256), index 8->TPCS=10 (1024).
+     */
+    static const uint32_t prescaler_to_tpcs[] = {0, 1, 2, 3, 4, 5, 6, 8, 10};
 
     if (prescaler >= (sizeof(prescaler_divs) / sizeof(prescaler_divs[0])))
       {
@@ -865,9 +933,13 @@ static int gpt_start(struct pwm_lowerhalf_s *dev,
   regval &= ~GPT_GTCR_CST;
   gpt_putreg(priv, R_GPT32_GTCR_OFFSET, regval);
 
-  /* Configure the prescaler */
-  regval = GPT_GTCR_MD_SAW_WAVE_UP | (prescaler << GPT_GTCR_TPCS_SHIFT);
-  gpt_putreg(priv, R_GPT32_GTCR_OFFSET, regval);
+  /* Configure the prescaler using TPCS mapping table */
+  {
+    static const uint32_t prescaler_to_tpcs[] = {0, 1, 2, 3, 4, 5, 6, 8, 10};
+    uint32_t tpcs = prescaler_to_tpcs[prescaler];
+    regval = GPT_GTCR_MD_SAW_WAVE_UP | (tpcs << GPT_GTCR_TPCS_SHIFT);
+    gpt_putreg(priv, R_GPT32_GTCR_OFFSET, regval);
+  }
 
   /* Set the period */
   gpt_putreg(priv, R_GPT32_GTPR_OFFSET, period - 1);
@@ -875,6 +947,14 @@ static int gpt_start(struct pwm_lowerhalf_s *dev,
   /* Set the duty cycles */
   gpt_putreg(priv, R_GPT32_GTCCRA_OFFSET, duty_a);
   gpt_putreg(priv, R_GPT32_GTCCRB_OFFSET, duty_b);
+
+  /* Force buffer transfer to ensure atomic duty cycle update.
+   * Setting CCRSWT triggers immediate transfer from buffer registers
+   * to compare registers, preventing glitches during rapid updates.
+   * This bit is write-only and auto-clears after transfer.
+   */
+  gpt_putreg(priv, R_GPT32_GTBER_OFFSET,
+             GPT_GTBER_PWM_ENABLE | GPT_GTBER_CCRSWT);
 
   /* Reset the counter */
   gpt_putreg(priv, R_GPT32_GTCNT_OFFSET, 0);
@@ -1306,7 +1386,8 @@ static int gpt_timer_getstatus(struct timer_lowerhalf_s *lower,
   uint32_t period;
   uint32_t counter;
   uint32_t timer_freq;
-  const uint32_t prescaler_divs[] = {1, 4, 16, 64, 256, 1024};
+  /* Full prescaler divider table - matches gpt_calculate_prescaler() */
+  static const uint32_t prescaler_divs[] = {1, 2, 4, 8, 16, 32, 64, 256, 1024};
 
   DEBUGASSERT(status != NULL);
 
@@ -1382,7 +1463,10 @@ static int gpt_timer_settimeout(struct timer_lowerhalf_s *lower,
   uint32_t timer_freq;
   uint32_t period;
   uint32_t regval;
-  const uint32_t prescaler_divs[] = {1, 4, 16, 64, 256, 1024};
+  /* Full prescaler divider table - matches gpt_calculate_prescaler() */
+  static const uint32_t prescaler_divs[] = {1, 2, 4, 8, 16, 32, 64, 256, 1024};
+  static const uint32_t prescaler_to_tpcs[] = {0, 1, 2, 3, 4, 5, 6, 8, 10};
+  const size_t num_prescalers = sizeof(prescaler_divs) / sizeof(prescaler_divs[0]);
 
   pwminfo("GPT%" PRIu32 " timer settimeout: %" PRIu32 " us\n",
           priv->config->channel, timeout);
@@ -1391,7 +1475,7 @@ static int gpt_timer_settimeout(struct timer_lowerhalf_s *lower,
    * First, find an appropriate prescaler.
    */
 
-  for (prescaler = 0; prescaler < 6; prescaler++)
+  for (prescaler = 0; prescaler < num_prescalers; prescaler++)
     {
       timer_freq = priv->config->pclkd_freq / prescaler_divs[prescaler];
 
@@ -1407,7 +1491,7 @@ static int gpt_timer_settimeout(struct timer_lowerhalf_s *lower,
         }
     }
 
-  if (prescaler >= 6)
+  if (prescaler >= num_prescalers)
     {
       pwmerr("ERROR: timeout %" PRIu32 " us exceeds max period\n", timeout);
       return -ERANGE;
@@ -1425,9 +1509,9 @@ static int gpt_timer_settimeout(struct timer_lowerhalf_s *lower,
   regval &= ~GPT_GTCR_CST;
   gpt_putreg(priv, R_GPT32_GTCR_OFFSET, regval);
 
-  /* Configure the prescaler */
+  /* Configure the prescaler using TPCS mapping table */
 
-  regval = GPT_GTCR_MD_SAW_WAVE_UP | (prescaler << GPT_GTCR_TPCS_SHIFT);
+  regval = GPT_GTCR_MD_SAW_WAVE_UP | (prescaler_to_tpcs[prescaler] << GPT_GTCR_TPCS_SHIFT);
   gpt_putreg(priv, R_GPT32_GTCR_OFFSET, regval);
 
   /* Set the period */
@@ -1473,6 +1557,7 @@ static void gpt_timer_setcallback(struct timer_lowerhalf_s *lower,
 {
   struct ra_gpt_s *priv = (struct ra_gpt_s *)lower;
   irqstate_t flags;
+  uint32_t regval;
   int ret;
 
   pwminfo("GPT%" PRIu32 " timer setcallback\n", priv->config->channel);
@@ -1508,14 +1593,32 @@ static void gpt_timer_setcallback(struct timer_lowerhalf_s *lower,
             }
         }
 
-      /* Enable overflow interrupt by setting appropriate GTINTAD bits
-       * Note: We use GTST_TCFPO (overflow) for timer mode
+      /* Enable overflow interrupt in GTINTAD register.
+       * For saw-wave up-counting mode (timer mode), the counter overflows
+       * when it reaches GTPR and resets to 0. This sets the TCFPO flag in
+       * GTST and generates an interrupt if enabled in GTINTAD.
+       *
+       * GTINTAD bits for overflow interrupt:
+       * - GRPABH_OVF_UDF (bit 28): Output overflow/underflow on interrupt group
+       * - GRP (bits 25:24): Select interrupt output group (0 = Group A)
+       *
+       * The ELC event (configured in config->elc) routes the interrupt to ICU.
        */
+      regval = gpt_getreg(priv, R_GPT32_GTINTAD_OFFSET);
+      regval |= GPT_GTINTAD_GRP_A | GPT_GTINTAD_GRPABH_OVF_UDF;
+      gpt_putreg(priv, R_GPT32_GTINTAD_OFFSET, regval);
 
-      /* Enable overflow interrupt in NVIC (interrupt will fire on GTST.TCFPO) */
+      pwminfo("GPT%" PRIu32 " overflow interrupt enabled, GTINTAD=%08" PRIx32 "\n",
+              priv->config->channel, regval);
     }
   else
     {
+      /* Disable overflow interrupt in GTINTAD */
+
+      regval = gpt_getreg(priv, R_GPT32_GTINTAD_OFFSET);
+      regval &= ~(GPT_GTINTAD_GRP_MASK | GPT_GTINTAD_GRPABH_OVF_UDF);
+      gpt_putreg(priv, R_GPT32_GTINTAD_OFFSET, regval);
+
       /* Disable interrupt and detach handler */
 
       if (priv->irq != 0)
