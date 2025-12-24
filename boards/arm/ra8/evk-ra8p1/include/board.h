@@ -259,12 +259,29 @@
  * Motor 3: P903 (GPT11A)
  * Motor 4: P515 (GPT13A)
  *
- * Note: Pin assignments verified from RA8P1 pinmap for ESC control
+ * GPIO Configuration Attributes for Motor Pins:
+ * -----------------------------------------------
+ * - Mode:          Peripheral function (PMR=1, PSEL=GPT)
+ * - Direction:     Output (PDR=1)
+ * - Drive:         High drive strength (DSCR=10b) for 3.3V fast switching
+ * - Pull-up:       Disabled (PCR=0) - external ESC pull-down expected
+ * - Open-drain:    Disabled (NCODR=0) - push-pull output required
+ * - Slew rate:     High speed (default for GPT outputs)
+ *
+ * Electrical Characteristics (RA8P1 @ 3.3V VCC):
+ * - High drive: IOH = 8mA sink/source typical
+ * - Rise/fall time: ~5ns at high drive
+ * - PWM frequency: 400Hz standard, up to 1.2MHz for DShot1200
+ *
+ * Note: GPIO_PERIPHERAL | GPIO_OUTPUT | GPIO_HIGH_DRIVE attributes are
+ * ORed with base pin definition to configure the PFS register correctly.
  */
-#define GPIO_TIM3_CH1OUT     GPIO_PWM_GPT3_A_2     /* P912 - GPT3A - Motor 1 */
-#define GPIO_TIM5_CH1OUT     GPIO_PWM_GPT5_A_3     /* P915 - GPT5A - Motor 2 */
-#define GPIO_TIM11_CH1OUT    GPIO_PWM_GPT11_A_4    /* P903 - GPT11A - Motor 3 */
-#define GPIO_TIM13_CH1OUT    GPIO_PWM_GPT13_A_1    /* P515 - GPT13A - Motor 4 */
+#define GPIO_MOTOR_CFG       (GPIO_PERIPHERAL | GPIO_OUTPUT | GPIO_HIGH_DRIVE)
+
+#define GPIO_TIM3_CH1OUT     (GPIO_PWM_GPT3_A_2  | GPIO_MOTOR_CFG)  /* P912 - GPT3A - Motor 1 */
+#define GPIO_TIM5_CH1OUT     (GPIO_PWM_GPT5_A_3  | GPIO_MOTOR_CFG)  /* P915 - GPT5A - Motor 2 */
+#define GPIO_TIM11_CH1OUT    (GPIO_PWM_GPT11_A_4 | GPIO_MOTOR_CFG)  /* P903 - GPT11A - Motor 3 */
+#define GPIO_TIM13_CH1OUT    (GPIO_PWM_GPT13_A_1 | GPIO_MOTOR_CFG)  /* P515 - GPT13A - Motor 4 */
 
 /****************************************************************************
  * I2C Pin Definitions

@@ -81,6 +81,12 @@
 #ifndef RZV_GPT7_BASE
 #  define RZV_GPT7_BASE               0x13010700
 #endif
+#ifndef RZV_GPT8_BASE
+#  define RZV_GPT8_BASE               0x13010800
+#endif
+#ifndef RZV_GPT9_BASE
+#  define RZV_GPT9_BASE               0x13010900
+#endif
 
 #define RZV_GPT_CHANNEL_MASK(ch)      (1u << (ch))
 
