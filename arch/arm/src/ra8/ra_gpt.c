@@ -64,12 +64,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Default PCLKD frequency - typically 120MHz for RA8E1 */
-
-#ifndef CONFIG_RA_PCLKD_FREQUENCY
-#  define CONFIG_RA_PCLKD_FREQUENCY    120000000
-#endif
-
 /* Buffer enable mask for PWM mode */
 #define GPT_GTBER_PWM_ENABLE            (GPT_GTBER_CCRA | GPT_GTBER_CCRB | GPT_GTBER_PR)
 
@@ -266,7 +260,7 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
   {
     .base       = R_GPT32_CH_BASE(0),
     .mstp       = RA_MSTP_GPT0,
-    .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
+    .pclkd_freq = RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 0,
     .elc        = RA_ELC_GPT0_COUNTER_OVERFLOW,  /* GPT0 overflow for timer mode */
@@ -276,7 +270,7 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
   {
     .base       = R_GPT32_CH_BASE(1),
     .mstp       = RA_MSTP_GPT1,
-    .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
+    .pclkd_freq = RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 1,
     .elc        = RA_ELC_GPT1_COUNTER_OVERFLOW,  /* GPT1 overflow for timer mode */
@@ -286,7 +280,7 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
   {
     .base       = R_GPT32_CH_BASE(2),
     .mstp       = RA_MSTP_GPT2,
-    .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
+    .pclkd_freq = RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 2,
     .elc        = RA_ELC_GPT2_COUNTER_OVERFLOW,  /* GPT2 overflow for timer mode */
@@ -296,7 +290,7 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
   {
     .base       = R_GPT32_CH_BASE(3),
     .mstp       = RA_MSTP_GPT3,
-    .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
+    .pclkd_freq = RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 3,
     .elc        = RA_ELC_GPT3_COUNTER_OVERFLOW,  /* GPT3 overflow for timer mode */
@@ -306,7 +300,7 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
   {
     .base       = R_GPT32_CH_BASE(4),
     .mstp       = RA_MSTP_GPT4,
-    .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
+    .pclkd_freq = RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 4,
     .elc        = RA_ELC_GPT4_COUNTER_OVERFLOW,  /* GPT4 overflow for timer mode */
@@ -316,7 +310,7 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
   {
     .base       = R_GPT32_CH_BASE(5),
     .mstp       = RA_MSTP_GPT5,
-    .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
+    .pclkd_freq = RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 5,
     .elc        = RA_ELC_GPT5_COUNTER_OVERFLOW,  /* GPT5 overflow for timer mode */
@@ -326,7 +320,7 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
   {
     .base       = R_GPT32_CH_BASE(6),
     .mstp       = RA_MSTP_GPT6,
-    .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
+    .pclkd_freq = RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 6,
     .elc        = RA_ELC_GPT6_COUNTER_OVERFLOW,  /* GPT6 overflow for timer mode */
@@ -336,7 +330,7 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
   {
     .base       = R_GPT32_CH_BASE(7),
     .mstp       = RA_MSTP_GPT7,
-    .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
+    .pclkd_freq = RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 7,
     .elc        = RA_ELC_GPT7_COUNTER_OVERFLOW,  /* GPT7 overflow for timer mode */
@@ -346,7 +340,7 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
   {
     .base       = R_GPT32_CH_BASE(8),
     .mstp       = RA_MSTP_GPT8,
-    .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
+    .pclkd_freq = RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 8,
     .elc        = RA_ELC_GPT8_COUNTER_OVERFLOW,  /* GPT8 overflow for timer mode */
@@ -356,7 +350,7 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
   {
     .base       = R_GPT32_CH_BASE(9),
     .mstp       = RA_MSTP_GPT9,
-    .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
+    .pclkd_freq = RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 9,
     .elc        = RA_ELC_GPT9_COUNTER_OVERFLOW,  /* GPT9 overflow for timer mode */
@@ -366,7 +360,7 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
   {
     .base       = R_GPT32_CH_BASE(10),
     .mstp       = RA_MSTP_GPT10,
-    .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
+    .pclkd_freq = RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 10,
     .elc        = RA_ELC_GPT10_COUNTER_OVERFLOW,  /* GPT10 overflow for timer mode */
@@ -376,7 +370,7 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
   {
     .base       = R_GPT32_CH_BASE(11),
     .mstp       = RA_MSTP_GPT11,
-    .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
+    .pclkd_freq = RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 11,
     .elc        = RA_ELC_GPT11_COUNTER_OVERFLOW,  /* GPT11 overflow for timer mode */
@@ -386,7 +380,7 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
   {
     .base       = R_GPT32_CH_BASE(12),
     .mstp       = RA_MSTP_GPT12,
-    .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
+    .pclkd_freq = RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 12,
     .elc        = RA_ELC_GPT12_COUNTER_OVERFLOW,  /* GPT12 overflow for timer mode */
@@ -396,7 +390,7 @@ static const struct ra_gpt_channel_config_s g_gpt_configs[] =
   {
     .base       = R_GPT32_CH_BASE(13),
     .mstp       = RA_MSTP_GPT13,
-    .pclkd_freq = CONFIG_RA_PCLKD_FREQUENCY,
+    .pclkd_freq = RA_PCLKD_FREQUENCY,
     .max_period = UINT32_MAX, /* 32-bit timer */
     .channel    = 13,
     .elc        = RA_ELC_GPT13_COUNTER_OVERFLOW,  /* GPT13 overflow for timer mode */
