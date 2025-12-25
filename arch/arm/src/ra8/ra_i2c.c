@@ -142,6 +142,8 @@ static int ra_i2c_dma_start_tx(struct ra_i2c_priv_s *priv, const uint8_t *buffer
 static void ra_i2c_dma_stop(struct ra_i2c_priv_s *priv);
 static void ra_i2c_dma_tx_callback(void *handle, int event, void *arg);
 static void ra_i2c_dma_rx_callback(void *handle, int event, void *arg);
+static void ra_i2c_get_dma_channels(struct ra_i2c_priv_s *priv,
+                                    int *tx_channel, int *rx_channel);
 #endif
 
 /****************************************************************************
@@ -1498,24 +1500,37 @@ static void ra_i2c_dtc_cleanup(struct ra_i2c_priv_s *priv)
 #endif /* CONFIG_RA_DTC */
 
 #ifdef CONFIG_RA_DMAC
+
 /****************************************************************************
- * Name: ra_i2c_get_dma_channel
+ * Name: ra_i2c_get_dma_channels
  *
  * Description:
- *   Get DMA channel assignment from Kconfig for the specified I2C bus
+ *   Get separate TX and RX DMA channel assignments from Kconfig.
+ *   I2C can benefit from separate channels for full-duplex-like operations
+ *   where TX setup and RX setup don't block each other.
  *
  ****************************************************************************/
 
-static void ra_i2c_get_dma_channel(struct ra_i2c_priv_s *priv, int *channel)
+static void ra_i2c_get_dma_channels(struct ra_i2c_priv_s *priv,
+                                    int *tx_channel, int *rx_channel)
 {
   /* Default to dynamic allocation */
-  *channel = -1;
+
+  *tx_channel = -1;
+  *rx_channel = -1;
 
 #ifdef CONFIG_RA_I2C0
   if (priv->config->bus == 0)
     {
-#ifdef CONFIG_RA_DMAC_I2C0_CHANNEL
-      *channel = CONFIG_RA_DMAC_I2C0_CHANNEL;
+#ifdef CONFIG_RA_DMAC_I2C0_TX_CHANNEL
+      *tx_channel = CONFIG_RA_DMAC_I2C0_TX_CHANNEL;
+#elif defined(CONFIG_RA_DMAC_I2C0_CHANNEL)
+      *tx_channel = CONFIG_RA_DMAC_I2C0_CHANNEL;
+#endif
+#ifdef CONFIG_RA_DMAC_I2C0_RX_CHANNEL
+      *rx_channel = CONFIG_RA_DMAC_I2C0_RX_CHANNEL;
+#elif defined(CONFIG_RA_DMAC_I2C0_CHANNEL)
+      *rx_channel = CONFIG_RA_DMAC_I2C0_CHANNEL;
 #endif
     }
 #endif
@@ -1523,8 +1538,15 @@ static void ra_i2c_get_dma_channel(struct ra_i2c_priv_s *priv, int *channel)
 #ifdef CONFIG_RA_I2C1
   if (priv->config->bus == 1)
     {
-#ifdef CONFIG_RA_DMAC_I2C1_CHANNEL
-      *channel = CONFIG_RA_DMAC_I2C1_CHANNEL;
+#ifdef CONFIG_RA_DMAC_I2C1_TX_CHANNEL
+      *tx_channel = CONFIG_RA_DMAC_I2C1_TX_CHANNEL;
+#elif defined(CONFIG_RA_DMAC_I2C1_CHANNEL)
+      *tx_channel = CONFIG_RA_DMAC_I2C1_CHANNEL;
+#endif
+#ifdef CONFIG_RA_DMAC_I2C1_RX_CHANNEL
+      *rx_channel = CONFIG_RA_DMAC_I2C1_RX_CHANNEL;
+#elif defined(CONFIG_RA_DMAC_I2C1_CHANNEL)
+      *rx_channel = CONFIG_RA_DMAC_I2C1_CHANNEL;
 #endif
     }
 #endif
@@ -1532,13 +1554,21 @@ static void ra_i2c_get_dma_channel(struct ra_i2c_priv_s *priv, int *channel)
 #ifdef CONFIG_RA_I2C2
   if (priv->config->bus == 2)
     {
-#ifdef CONFIG_RA_DMAC_I2C2_CHANNEL
-      *channel = CONFIG_RA_DMAC_I2C2_CHANNEL;
+#ifdef CONFIG_RA_DMAC_I2C2_TX_CHANNEL
+      *tx_channel = CONFIG_RA_DMAC_I2C2_TX_CHANNEL;
+#elif defined(CONFIG_RA_DMAC_I2C2_CHANNEL)
+      *tx_channel = CONFIG_RA_DMAC_I2C2_CHANNEL;
+#endif
+#ifdef CONFIG_RA_DMAC_I2C2_RX_CHANNEL
+      *rx_channel = CONFIG_RA_DMAC_I2C2_RX_CHANNEL;
+#elif defined(CONFIG_RA_DMAC_I2C2_CHANNEL)
+      *rx_channel = CONFIG_RA_DMAC_I2C2_CHANNEL;
 #endif
     }
 #endif
 
-  i2cinfo("I2C%d DMA channel: %d\n", priv->config->bus, *channel);
+  i2cinfo("I2C%d DMA channels: TX=%d RX=%d\n",
+          priv->config->bus, *tx_channel, *rx_channel);
 }
 
 /****************************************************************************
@@ -1636,9 +1666,9 @@ static int ra_i2c_dma_setup(struct ra_i2c_priv_s *priv)
       return ret;
     }
 
-  /* Get DMA channel assignment from Kconfig */
+  /* Get separate TX/RX DMA channel assignments from Kconfig */
 
-  ra_i2c_get_dma_channel(priv, &priv->dma_channel);
+  ra_i2c_get_dma_channels(priv, &priv->dma_tx_channel, &priv->dma_rx_channel);
 
   /* DMA active state is per-transfer, initialize to false */
 
@@ -1649,8 +1679,8 @@ static int ra_i2c_dma_setup(struct ra_i2c_priv_s *priv)
   priv->dma_rx_done = false;
   priv->use_dma = true;
 
-  i2cinfo("DMA setup completed for I2C%d (channel=%d)\n",
-          priv->config->bus, priv->dma_channel);
+  i2cinfo("DMA setup completed for I2C%d (TX ch=%d, RX ch=%d)\n",
+          priv->config->bus, priv->dma_tx_channel, priv->dma_rx_channel);
 
   return OK;
 }
@@ -1696,14 +1726,19 @@ static int ra_i2c_dma_start_tx(struct ra_i2c_priv_s *priv,
   config.elc_src = priv->config->txi_elc;      /* I2C TXI event */
   config.elc_end = -1;
   config.elc_err = -1;
+
+  /* Set high priority for sensor communication */
+
+  config.priority = RA_DMAC_CHANNEL_PRIORITY_HIGH;
+
   config.callback = ra_i2c_dma_tx_callback;
   config.user_data = priv;
 
-  /* Use assigned channel if configured, otherwise use dynamic allocation */
-  if (priv->dma_channel >= 0)
+  /* Use assigned TX channel if configured, otherwise use dynamic allocation */
+  if (priv->dma_tx_channel >= 0)
     {
-      ret = ra_dmac_open_channel(&priv->dma_tx, &config, priv->dma_channel);
-      i2cinfo("TX DMA using assigned channel %d\n", priv->dma_channel);
+      ret = ra_dmac_open_channel(&priv->dma_tx, &config, priv->dma_tx_channel);
+      i2cinfo("TX DMA using assigned channel %d\n", priv->dma_tx_channel);
     }
   else
     {
@@ -1774,14 +1809,19 @@ static int ra_i2c_dma_start_rx(struct ra_i2c_priv_s *priv,
   config.elc_src = priv->config->rxi_elc;      /* I2C RXI event */
   config.elc_end = -1;
   config.elc_err = -1;
+
+  /* Set high priority for sensor communication */
+
+  config.priority = RA_DMAC_CHANNEL_PRIORITY_HIGH;
+
   config.callback = ra_i2c_dma_rx_callback;
   config.user_data = priv;
 
-  /* Use assigned channel if configured, otherwise use dynamic allocation */
-  if (priv->dma_channel >= 0)
+  /* Use assigned RX channel if configured, otherwise use dynamic allocation */
+  if (priv->dma_rx_channel >= 0)
     {
-      ret = ra_dmac_open_channel(&priv->dma_rx, &config, priv->dma_channel);
-      i2cinfo("RX DMA using assigned channel %d\n", priv->dma_channel);
+      ret = ra_dmac_open_channel(&priv->dma_rx, &config, priv->dma_rx_channel);
+      i2cinfo("RX DMA using assigned channel %d\n", priv->dma_rx_channel);
     }
   else
     {

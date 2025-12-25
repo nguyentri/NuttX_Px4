@@ -37,6 +37,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/spinlock.h>
 
 #include <arch/board/board.h>
 
@@ -85,6 +86,14 @@ static ra_dmac_ctrl_t g_dmac_channels[DMAC_MAX_CHANNELS];
 
 /* DMAC module initialized flag */
 static bool g_dmac_initialized = false;
+
+/* Spinlock for thread-safe channel allocation/deallocation */
+static spinlock_t g_dmac_lock = SP_UNLOCKED;
+
+/* MSTP reference count - tracks number of active channels.
+ * When this drops to zero, the DMAC module can be powered down.
+ */
+static uint8_t g_dmac_refcount = 0;
 
 /****************************************************************************
  * Private Functions
@@ -262,6 +271,24 @@ static int ra_dmac_interrupt_handler(int irq, void *context, void *arg)
 
       putreg8(status & ~R_DMAC_DMSTS_ESIF, R_DMAC_DMSTS(ctrl->channel));
 
+      /* Read DMECHR to identify error channel and status.
+       * DMECHR provides:
+       *   - DMECH[3:0]: Error channel number (0-7 within unit)
+       *   - DMECHSAM[8]: Security attribution monitor
+       *   - DMESTA[16]: Error status (1 = error occurred)
+       */
+
+      uint8_t unit = DMAC_GET_UNIT(ctrl->channel);
+      uint32_t dmechr = getreg32(R_DMA_DMECHR_UNIT(unit));
+
+      if (dmechr & R_DMA_DMECHR_DMESTA)
+        {
+          uint8_t error_ch = (dmechr & R_DMA_DMECHR_DMECH_MASK) >>
+                             R_DMA_DMECHR_DMECH_SHIFT;
+          dmaerr("DMAC Unit %d error on local channel %d (global ch %d)\n",
+                 unit, error_ch, ctrl->channel);
+        }
+
       /* Call user callback with error event */
 
       if (ctrl->config && ctrl->config->callback)
@@ -284,17 +311,31 @@ static int ra_dmac_interrupt_handler(int irq, void *context, void *arg)
 
 static int ra_dmac_find_free_channel(void)
 {
+  irqstate_t flags;
   int i;
+  int ret = -ENOMEM;
 
-  for (i = 0; i < DMAC_MAX_CHANNELS; i++)
+  flags = spin_lock_irqsave(&g_dmac_lock);
+
+  for (i = 0; i <= DMAC_MAX_CHANNEL_NUM; i++)
     {
+      /* Skip invalid channels using helper macro */
+
+      if (!DMAC_IS_VALID_CHANNEL(i))
+        {
+          continue;
+        }
+
       if (!g_dmac_channels[i].in_use)
         {
-          return i;
+          g_dmac_channels[i].in_use = true;  /* Reserve immediately */
+          ret = i;
+          break;
         }
     }
 
-  return -ENOMEM;
+  spin_unlock_irqrestore(&g_dmac_lock, flags);
+  return ret;
 }
 
 /****************************************************************************
@@ -322,23 +363,89 @@ int ra_dmac_initialize(void)
 
   ra_mstp_start(RA_MSTP_DMAC);
 
-  /* Enable DMAC global operation (DMAST.DMST = 1) */
 
-  putreg32(R_DMA_DMAST_DMST, R_DMA_DMAST);
+  /* Enable DMAC global operation for both units (DMAST.DMST = 1) */
 
-  /* Initialize channel control blocks */
+  putreg32(R_DMA_DMAST_DMST, R_DMA_DMAST_UNIT(0));
+#if defined (CONFIG_RA8P1_GROUP)
+  putreg32(R_DMA_DMAST_DMST, R_DMA_DMAST_UNIT(1));
+#endif
+  /* Set default priority mode to fixed priority (channel 0 highest)
+   * This can be changed later with ra_dmac_set_priority_mode()
+   */
 
-  for (i = 0; i < DMAC_MAX_CHANNELS; i++)
+  putreg32(0, R_DMA_DMCTL_UNIT(0));  /* PR=0: Fixed priority */
+#if defined (CONFIG_RA8P1_GROUP)
+  putreg32(0, R_DMA_DMCTL_UNIT(1));  /* PR=0: Fixed priority */
+#endif
+  /* Initialize channel control blocks for all valid channels */
+
+  for (i = 0; i <= DMAC_MAX_CHANNEL_NUM; i++)
     {
+      /* Skip invalid channels in the gap */
+
+      if (!DMAC_IS_VALID_CHANNEL(i))
+        {
+          continue;
+        }
+
       memset(&g_dmac_channels[i], 0, sizeof(ra_dmac_ctrl_t));
       g_dmac_channels[i].channel = i;
       g_dmac_channels[i].irq_end = -1;
       g_dmac_channels[i].irq_err = -1;
     }
 
+  /* Initialize reference count */
+
+  g_dmac_refcount = 0;
   g_dmac_initialized = true;
 
-  dmainfo("DMAC initialized successfully\n");
+  dmainfo("DMAC initialized successfully (both units enabled)\n");
+  return OK;
+}
+
+/****************************************************************************
+ * Name: ra_dmac_set_priority_mode
+ *
+ * Description:
+ *   Set the DMAC priority mode for a specific unit.
+ *   - Fixed priority: Lower channel numbers have higher priority
+ *   - Round-robin: All channels have equal priority (rotation)
+ *
+ * Input Parameters:
+ *   unit - DMAC unit number (0 or 1)
+ *   mode - Priority mode (RA_DMAC_PRIORITY_FIXED or RA_DMAC_PRIORITY_ROUND_ROBIN)
+ *
+ * Returned Value:
+ *   OK on success, negative errno on failure
+ *
+ ****************************************************************************/
+
+int ra_dmac_set_priority_mode(int unit, ra_dmac_priority_mode_t mode)
+{
+  uint32_t dmctl;
+
+  if (unit < 0 || unit > 1)
+    {
+      return -EINVAL;
+    }
+
+  dmctl = getreg32(R_DMA_DMCTL_UNIT(unit));
+
+  if (mode == RA_DMAC_PRIORITY_ROUND_ROBIN)
+    {
+      dmctl |= R_DMA_DMCTL_PR;  /* PR=1: Round-robin */
+    }
+  else
+    {
+      dmctl &= ~R_DMA_DMCTL_PR; /* PR=0: Fixed priority */
+    }
+
+  putreg32(dmctl, R_DMA_DMCTL_UNIT(unit));
+
+  dmainfo("DMAC Unit %d priority mode set to %s\n",
+          unit, mode == RA_DMAC_PRIORITY_ROUND_ROBIN ? "round-robin" : "fixed");
+
   return OK;
 }
 
@@ -353,6 +460,7 @@ int ra_dmac_initialize(void)
 int ra_dmac_open(ra_dmac_handle_t *handle, const ra_dmac_config_t *config)
 {
   ra_dmac_ctrl_t *ctrl;
+  irqstate_t flags;
   int channel;
   int ret;
 
@@ -368,7 +476,7 @@ int ra_dmac_open(ra_dmac_handle_t *handle, const ra_dmac_config_t *config)
       return ret;
     }
 
-  /* Find free channel */
+  /* Find and reserve a free channel (thread-safe) */
   channel = ra_dmac_find_free_channel();
   if (channel < 0)
     {
@@ -381,13 +489,25 @@ int ra_dmac_open(ra_dmac_handle_t *handle, const ra_dmac_config_t *config)
   ctrl->config = kmm_zalloc(sizeof(ra_dmac_config_t));
   if (ctrl->config == NULL)
     {
+      /* Release the reserved channel on allocation failure */
+
+      flags = spin_lock_irqsave(&g_dmac_lock);
+      ctrl->in_use = false;
+      spin_unlock_irqrestore(&g_dmac_lock, flags);
       return -ENOMEM;
     }
 
   memcpy(ctrl->config, config, sizeof(ra_dmac_config_t));
 
   ctrl->open_id = DMAC_OPEN_ID;
-  ctrl->in_use = true;
+  /* in_use already set by ra_dmac_find_free_channel() */
+
+  /* Increment reference count for MSTP tracking */
+
+  flags = spin_lock_irqsave(&g_dmac_lock);
+  g_dmac_refcount++;
+  spin_unlock_irqrestore(&g_dmac_lock, flags);
+
   *handle = ctrl;
 
   dmainfo("DMAC channel %d opened successfully\n", channel);
@@ -405,6 +525,7 @@ int ra_dmac_open(ra_dmac_handle_t *handle, const ra_dmac_config_t *config)
 int ra_dmac_open_channel(ra_dmac_handle_t *handle, const ra_dmac_config_t *config, int channel)
 {
   ra_dmac_ctrl_t *ctrl;
+  irqstate_t flags;
   int ret;
 
   if (handle == NULL || config == NULL)
@@ -412,24 +533,37 @@ int ra_dmac_open_channel(ra_dmac_handle_t *handle, const ra_dmac_config_t *confi
       return -EINVAL;
     }
 
-  /* Validate channel number */
-  if (channel < 0 || channel >= DMAC_MAX_CHANNELS)
+  /* Validate channel number using helper macro */
+
+  if (!DMAC_IS_VALID_CHANNEL(channel))
     {
-      dmaerr("Invalid channel number: %d\n", channel);
+      dmaerr("Invalid channel number: %d (valid: 0-7, 10-17)\n", channel);
       return -EINVAL;
     }
 
-  /* Check if channel is already in use */
+  /* Thread-safe check and reserve channel */
+
+  flags = spin_lock_irqsave(&g_dmac_lock);
+
   if (g_dmac_channels[channel].in_use)
     {
+      spin_unlock_irqrestore(&g_dmac_lock, flags);
       dmaerr("Channel %d already in use\n", channel);
       return -EBUSY;
     }
+
+  /* Reserve the channel immediately */
+
+  g_dmac_channels[channel].in_use = true;
+  spin_unlock_irqrestore(&g_dmac_lock, flags);
 
   /* Validate configuration */
   ret = ra_dmac_validate_config(config);
   if (ret < 0)
     {
+      flags = spin_lock_irqsave(&g_dmac_lock);
+      g_dmac_channels[channel].in_use = false;
+      spin_unlock_irqrestore(&g_dmac_lock, flags);
       return ret;
     }
 
@@ -439,13 +573,23 @@ int ra_dmac_open_channel(ra_dmac_handle_t *handle, const ra_dmac_config_t *confi
   ctrl->config = kmm_zalloc(sizeof(ra_dmac_config_t));
   if (ctrl->config == NULL)
     {
+      flags = spin_lock_irqsave(&g_dmac_lock);
+      ctrl->in_use = false;
+      spin_unlock_irqrestore(&g_dmac_lock, flags);
       return -ENOMEM;
     }
 
   memcpy(ctrl->config, config, sizeof(ra_dmac_config_t));
 
   ctrl->open_id = DMAC_OPEN_ID;
-  ctrl->in_use = true;
+  /* in_use already set above */
+
+  /* Increment reference count for MSTP tracking */
+
+  flags = spin_lock_irqsave(&g_dmac_lock);
+  g_dmac_refcount++;
+  spin_unlock_irqrestore(&g_dmac_lock, flags);
+
   *handle = ctrl;
 
   dmainfo("DMAC channel %d opened successfully (explicit assignment)\n", channel);
@@ -709,11 +853,16 @@ int ra_dmac_reset(ra_dmac_handle_t handle, uint32_t src_addr,
 int ra_dmac_close(ra_dmac_handle_t handle)
 {
   ra_dmac_ctrl_t *ctrl = (ra_dmac_ctrl_t *)handle;
+  irqstate_t flags;
+  uint8_t channel;
+  bool stop_mstp = false;
 
   if (ctrl == NULL || ctrl->open_id != DMAC_OPEN_ID)
     {
       return -EINVAL;
     }
+
+  channel = ctrl->channel;
 
   /* Disable transfer first */
   ra_dmac_disable(handle);
@@ -725,7 +874,9 @@ int ra_dmac_close(ra_dmac_handle_t handle)
       ctrl->config = NULL;
     }
 
-  /* Clear control structure */
+  /* Thread-safe release of channel and refcount decrement */
+
+  flags = spin_lock_irqsave(&g_dmac_lock);
 
   ctrl->open_id = 0;
   ctrl->enabled = false;
@@ -733,7 +884,33 @@ int ra_dmac_close(ra_dmac_handle_t handle)
   ctrl->irq_end = -1;
   ctrl->irq_err = -1;
 
-  dmainfo("DMAC channel %d closed\n", ctrl->channel);
+  /* Decrement reference count and check if MSTP can be stopped */
+
+  if (g_dmac_refcount > 0)
+    {
+      g_dmac_refcount--;
+      if (g_dmac_refcount == 0)
+        {
+          stop_mstp = true;
+        }
+    }
+
+  spin_unlock_irqrestore(&g_dmac_lock, flags);
+
+  /* Stop DMAC module clock if no channels are active.
+   * This saves power when DMAC is not in use.
+   * Note: ra_mstp_stop() must be called outside the spinlock
+   * as it may involve register waits.
+   */
+
+  if (stop_mstp)
+    {
+      dmainfo("All DMAC channels closed, stopping module clock\n");
+      ra_mstp_stop(RA_MSTP_DMAC);
+      g_dmac_initialized = false;  /* Will reinitialize on next open */
+    }
+
+  dmainfo("DMAC channel %d closed (refcount=%d)\n", channel, g_dmac_refcount);
   return OK;
 }
 

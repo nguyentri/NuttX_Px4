@@ -48,8 +48,6 @@
 #define R_ICU_WUPEN1_OFFSET                       0x000001a4  /* Wake Up interrupt enable register 1 */
 /* IELSR%s Registers (0-95) */
 #define R_ICU_IELSR_OFFSET(m)                     (0x00000300 + ((m) * 0x00000004))  /* ICU Event Link Setting Register %s */
-/* DELSR[%s] Registers () */
-#define R_ICU_DELSR_OFFSET(m)                     (0x00006280 + ((m) * 0x00000004))  /* DMAC Event Link Setting Registers */
 
 /* ICU Register Addresses */
 
@@ -184,11 +182,8 @@
 
 #define R_ICU_WUPEN1_I3CWUPEN                     (1 << 11)  /* I3C Wakeup Condition Detection Interrupt Deep Sleep/Software Standby Returns Enable bit */
 
-/* DELSR Register bit definitions */
-#define R_ICU_DELSR_DELS_SHIFT                    (0)  /* DMAC Event Link Select */
-#define R_ICU_DELSR_DELS_MASK                     0x3ff
+/* NOTE: RA8E1 does NOT have DELSR in ICU - use R_DMA_DELSR from ra_dma.h */
 
-#define R_ICU_DELSR_IR                            (1 << 16)  /* DMAC Activation Request Status Flag */
 
 /* IELSR Register bit definitions */
 #define R_ICU_IELSR_IELS_SHIFT                    (0)  /* ICU Event selection to NVICSet the number for the event signal to be linked . */

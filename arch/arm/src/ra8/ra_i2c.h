@@ -138,7 +138,8 @@ struct ra_i2c_priv_s
   void    *dma_rx;        /* RX DMA handle */
   volatile bool dma_tx_done; /* TX DMA completion flag */
   volatile bool dma_rx_done; /* RX DMA completion flag */
-  int      dma_channel;   /* Assigned DMA channel (-1 = dynamic) */
+  int      dma_tx_channel;   /* Assigned TX DMA channel (-1 = dynamic) */
+  int      dma_rx_channel;   /* Assigned RX DMA channel (-1 = dynamic) */
 #endif
 };
 

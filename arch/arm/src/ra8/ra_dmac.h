@@ -454,6 +454,28 @@
  * Public Types
  ****************************************************************************/
 
+/* DMAC Priority Level
+ * Higher priority channels are serviced first when multiple channels
+ * have pending requests. Use RA_DMAC_PRIORITY_HIGH for flight-critical
+ * paths like motor control (DShot) and sensor data (IMU).
+ */
+
+typedef enum
+{
+  RA_DMAC_PRIORITY_FIXED = 0,   /* Fixed priority (channel 0 highest) */
+  RA_DMAC_PRIORITY_ROUND_ROBIN  /* Round-robin priority */
+} ra_dmac_priority_mode_t;
+
+/* Per-channel priority (0=lowest, 3=highest for conceptual use) */
+
+typedef enum
+{
+  RA_DMAC_CHANNEL_PRIORITY_LOW = 0,    /* Low priority */
+  RA_DMAC_CHANNEL_PRIORITY_MEDIUM,     /* Medium priority */
+  RA_DMAC_CHANNEL_PRIORITY_HIGH,       /* High priority - sensors */
+  RA_DMAC_CHANNEL_PRIORITY_CRITICAL    /* Critical - motor control */
+} ra_dmac_channel_priority_t;
+
 /* DMAC Transfer Mode */
 
 typedef enum
@@ -522,6 +544,8 @@ typedef struct ra_dmac_config_s
   int                  elc_err;          /* DMA Error event link */
   int                  elc_src;          /* Event link of activation source */
 
+  ra_dmac_channel_priority_t priority;   /* Channel priority level */
+
   ra_dmac_callback_t   callback;         /* Transfer callback */
   void                *user_data;        /* User data for callback */
 } ra_dmac_config_t;
@@ -537,7 +561,7 @@ extern "C"
 
 /* DMAC module functions */
 int ra_dmac_initialize(void);
-
+int ra_dmac_set_priority_mode(int unit, ra_dmac_priority_mode_t mode);
 /* DMAC transfer functions */
 int ra_dmac_open(ra_dmac_handle_t *handle, const ra_dmac_config_t *config);
 int ra_dmac_open_channel(ra_dmac_handle_t *handle, const ra_dmac_config_t *config, int channel);

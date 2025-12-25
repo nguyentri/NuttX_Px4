@@ -623,9 +623,23 @@ static int up_receive(struct uart_dev_s *dev, unsigned int *status);
 static void up_rxint(struct uart_dev_s *dev, bool enable);
 static bool up_rxavailable(struct uart_dev_s *dev);
 static void up_send(struct uart_dev_s *dev, int ch);
+#ifndef CONFIG_SERIAL_TXDMA
 static void up_txint(struct uart_dev_s *dev, bool enable);
+#endif
 static bool up_txready(struct uart_dev_s *dev);
 static bool up_txempty(struct uart_dev_s *dev);
+
+#ifdef CONFIG_SERIAL_TXDMA
+static void up_dma_send(struct uart_dev_s *dev);
+static void up_dma_txavailable(struct uart_dev_s *dev);
+static void up_dma_txint(struct uart_dev_s *dev, bool enable);
+static void up_dma_txcallback(ra_dmac_handle_t handle, int event, void *arg);
+#endif
+
+#ifdef CONFIG_SERIAL_RXDMA
+static void up_dma_rxavailable(struct uart_dev_s *dev);
+static void up_dma_rxcallback(ra_dmac_handle_t handle, int event, void *user_data);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -683,9 +697,6 @@ static const struct uart_ops_s g_uart_ops =
   .txint        = up_dma_txint,
 #else
   .txint        = up_txint,
-#endif
-#ifdef CONFIG_SERIAL_RXDMA
-  .dmarxavail   = up_dma_rxavailable,
 #endif
   .txready      = up_txready,
   .txempty      = up_txempty,
@@ -1755,16 +1766,17 @@ static int up_attach(struct uart_dev_s *dev)
       memset(&dma_cfg, 0, sizeof(dma_cfg));
 
       dma_cfg.mode = RA_DMAC_MODE_NORMAL;
-      dma_cfg.size = RA_DMAC_SIZE_BYTE;
+      dma_cfg.size = RA_DMAC_SIZE_8BIT;
       dma_cfg.src_addr_mode = RA_DMAC_ADDR_INCR;
       dma_cfg.dest_addr_mode = RA_DMAC_ADDR_FIXED;
       dma_cfg.dest_addr = (uint32_t)(priv->scibase + R_SCI_B_TDR_OFFSET);
-      dma_cfg.trigger = priv->elc_tx; /* Trigger on SCI TXI */
+      dma_cfg.trigger = RA_DMAC_TRIGGER_HW;
+      dma_cfg.elc_src = priv->elc_tx; /* ELC event for SCI TXI */
       dma_cfg.callback = up_dma_txcallback;
       dma_cfg.user_data = dev;
 
       /* Open DMAC channel */
-      ret = ra_dmac_open_channel(priv->dma_tx_chn, &priv->dma_tx_handle, &dma_cfg);
+      ret = ra_dmac_open_channel(&priv->dma_tx_handle, &dma_cfg, priv->dma_tx_chn);
       if (ret < 0)
         {
           serr("ERROR: Failed to open DMAC channel %d for SCI TX: %d\n",
@@ -1788,15 +1800,16 @@ static int up_attach(struct uart_dev_s *dev)
       dma_cfg.mode = RA_DMAC_MODE_NORMAL;
       dma_cfg.src_addr = (uint32_t)(priv->scibase + R_SCI_B_RDR_OFFSET);
       dma_cfg.dest_addr = (uint32_t)dev->recv.buffer;
-      dma_cfg.transfer_size = RA_DMAC_TRANSFER_SIZE_1BYTE;
-      dma_cfg.src_addr_mode = RA_DMAC_ADDR_MODE_FIXED;
-      dma_cfg.dest_addr_mode = RA_DMAC_ADDR_MODE_INCREMENTED;
-      dma_cfg.trigger = priv->elc_rx; /* Trigger on SCI RXI */
+      dma_cfg.size = RA_DMAC_SIZE_8BIT;
+      dma_cfg.src_addr_mode = RA_DMAC_ADDR_FIXED;
+      dma_cfg.dest_addr_mode = RA_DMAC_ADDR_INCR;
+      dma_cfg.trigger = RA_DMAC_TRIGGER_HW;
+      dma_cfg.elc_src = priv->elc_rx; /* ELC event for SCI RXI */
       dma_cfg.callback = up_dma_rxcallback;
       dma_cfg.user_data = dev;
 
       /* Open DMAC channel */
-      ret = ra_dmac_open_channel(priv->dma_rx_chn, &priv->dma_rx_handle, &dma_cfg);
+      ret = ra_dmac_open_channel(&priv->dma_rx_handle, &dma_cfg, priv->dma_rx_chn);
       if (ret < 0)
         {
           serr("ERROR: Failed to open DMAC channel %d for SCI RX: %d\n",
@@ -2108,7 +2121,7 @@ static void up_dma_rxavailable(struct uart_dev_s *dev)
 
   if (priv->dma_rx_handle)
     {
-      uint32_t remaining = ra_dmac_getcount(priv->dma_rx_handle);
+      uint32_t remaining = ra_dmac_get_remaining_count(priv->dma_rx_handle);
       uint32_t received = dev->recv.size - remaining;
 
       /* Update head. Assuming buffer starts at index 0. */
@@ -2127,13 +2140,13 @@ static void up_dma_rxavailable(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static void up_dma_rxcallback(ra_dmac_handle_t handle, uint32_t event, void *user_data)
+static void up_dma_rxcallback(ra_dmac_handle_t handle, int event, void *user_data)
 {
   struct uart_dev_s *dev = (struct uart_dev_s *)user_data;
-  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+  UNUSED(handle);
 
   /* DMAC completion event */
-  if (event == RA_DMAC_EVENT_TRANSFER_END)
+  if (event == RA_DMAC_EVENT_COMPLETE)
     {
       /* Transfer complete - update head position */
       up_dma_rxavailable(dev);
@@ -2144,12 +2157,12 @@ static void up_dma_rxcallback(ra_dmac_handle_t handle, uint32_t event, void *use
 }
 #endif
 
-static void up_dma_txcallback(ra_dmac_handle_t handle, uint32_t event, void *arg)
+static void up_dma_txcallback(ra_dmac_handle_t handle, int event, void *arg)
 {
   struct uart_dev_s *dev = (struct uart_dev_s *)arg;
-  struct up_dev_s   *priv = (struct up_dev_s *)dev->priv;
+  UNUSED(handle);
 
-  if (event & RA_DMAC_EVENT_COMPLETE)
+  if (event == RA_DMAC_EVENT_COMPLETE)
     {
       /* DMA transfer completed.
        * Notify the upper half that the transfer is done.
@@ -2210,14 +2223,14 @@ static void up_dma_send(struct uart_dev_s *dev)
   up_clean_dcache((uintptr_t)dev->dmatx.buffer,
                   (uintptr_t)dev->dmatx.buffer + dev->dmatx.length);
 
-  /* Reload DMAC configuration with new buffer */
-  ra_dmac_reload(priv->dma_tx_handle,
-                 (uint32_t)dev->dmatx.buffer,
-                 (uint32_t)(priv->scibase + R_SCI_B_TDR_OFFSET),
-                 dev->dmatx.length);
+  /* Reset DMAC configuration with new buffer */
+  ra_dmac_reset(priv->dma_tx_handle,
+                (uint32_t)dev->dmatx.buffer,
+                (uint32_t)(priv->scibase + R_SCI_B_TDR_OFFSET),
+                dev->dmatx.length);
 
-  /* Start DMAC */
-  ra_dmac_start(priv->dma_tx_handle);
+  /* Enable DMAC - hardware trigger from SCI TXI will start transfer */
+  ra_dmac_enable(priv->dma_tx_handle);
 
   /* Enable TX interrupts (TIE) to trigger DMAC?
    * On RA, the DMAC is triggered by the ELC event (SCI TXI).
@@ -2269,10 +2282,10 @@ static void up_dma_txint(struct uart_dev_s *dev, bool enable)
       regval &= ~R_SCI_B_CCR0_TIE;
       up_serialout(priv, R_SCI_B_CCR0_OFFSET, regval);
 
-      /* Also stop DMA if running? */
+      /* Also disable DMA if running */
       if (priv->dma_tx_handle)
         {
-          ra_dmac_stop(priv->dma_tx_handle);
+          ra_dmac_disable(priv->dma_tx_handle);
         }
     }
 
@@ -2307,6 +2320,7 @@ static void up_send(struct uart_dev_s *dev, int ch)
  *
  ****************************************************************************/
 
+#ifndef CONFIG_SERIAL_TXDMA
 static void up_txint(struct uart_dev_s *dev, bool enable)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
@@ -2337,6 +2351,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
 
   leave_critical_section(flags);
 }
+#endif /* !CONFIG_SERIAL_TXDMA */
 
 /****************************************************************************
  * Name: up_txready

@@ -392,6 +392,10 @@
 #define RA_ELC_DOC_INT                               (0x1BA)  /* Data operation circuit interrupt - Event 0x1BA */
 #define RA_ELC_RSIP_TADI                             (0x1BC)  /* RSIP Tamper Detection - Event 0x1BC */
 
+/* Maximum valid ELC event number for RA8E1 */
+
+#define RA_ELC_EVENT_MAX                             (0x1BC)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

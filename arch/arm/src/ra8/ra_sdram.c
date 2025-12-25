@@ -700,14 +700,14 @@ int ra_sdram_dma_write(void *dest, const void *src, size_t length,
   dma_config.src_addr = (uint32_t)src;
   dma_config.dest_addr = (uint32_t)dest;
   dma_config.transfer_count = length / 4;  /* Transfer in 32-bit words */
-  dma_config.size = RA_DMAC_SIZE_4_BYTE;
-  dma_config.src_addr_mode = RA_DMAC_ADDR_MODE_INCREMENTED;
-  dma_config.dest_addr_mode = RA_DMAC_ADDR_MODE_INCREMENTED;
+  dma_config.size = RA_DMAC_SIZE_32BIT;
+  dma_config.src_addr_mode = RA_DMAC_ADDR_INCR;
+  dma_config.dest_addr_mode = RA_DMAC_ADDR_INCR;
   dma_config.mode = RA_DMAC_MODE_NORMAL;
   dma_config.repeat_area = RA_DMAC_REPEAT_AREA_NONE;
-  dma_config.trigger = RA_DMAC_TRIGGER_SOFTWARE;
+  dma_config.trigger = RA_DMAC_TRIGGER_SW;
   dma_config.callback = ra_sdram_dma_callback;
-  dma_config.p_callback_memory = NULL;
+  dma_config.user_data = NULL;
 
   /* Save user callback */
 
@@ -811,14 +811,14 @@ int ra_sdram_dma_read(void *dest, const void *src, size_t length,
   dma_config.src_addr = (uint32_t)src;
   dma_config.dest_addr = (uint32_t)dest;
   dma_config.transfer_count = length / 4;  /* Transfer in 32-bit words */
-  dma_config.size = RA_DMAC_SIZE_4_BYTE;
-  dma_config.src_addr_mode = RA_DMAC_ADDR_MODE_INCREMENTED;
-  dma_config.dest_addr_mode = RA_DMAC_ADDR_MODE_INCREMENTED;
+  dma_config.size = RA_DMAC_SIZE_32BIT;
+  dma_config.src_addr_mode = RA_DMAC_ADDR_INCR;
+  dma_config.dest_addr_mode = RA_DMAC_ADDR_INCR;
   dma_config.mode = RA_DMAC_MODE_NORMAL;
   dma_config.repeat_area = RA_DMAC_REPEAT_AREA_NONE;
-  dma_config.trigger = RA_DMAC_TRIGGER_SOFTWARE;
+  dma_config.trigger = RA_DMAC_TRIGGER_SW;
   dma_config.callback = ra_sdram_dma_callback;
-  dma_config.p_callback_memory = NULL;
+  dma_config.user_data = NULL;
 
   /* Save user callback */
 

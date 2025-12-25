@@ -107,8 +107,11 @@
 
 /* Maximum number of channels */
 
-#define DMA_MAX_CHANNELS         16  /* Total: 8 channels per unit × 2 units */
+#define DMA_MAX_CHANNELS         8   /* Total: 8 channels per unit × 1 units */
 #define DMA_CHANNELS_PER_UNIT    8   /* Channels per DMA unit */
-#define DMA_NUM_UNITS            2   /* Number of DMA units */
+#define DMA_NUM_UNITS            1   /* Number of DMA units */
+
+/* Maximum channel number (0-7) */
+#define DMAC_MAX_CHANNEL_NUM     7
 
 #endif /* __ARCH_ARM_SRC_RA8_HARDWARE_RA8E1_DMA_H */

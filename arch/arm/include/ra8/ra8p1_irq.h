@@ -638,6 +638,10 @@
 #define RA_ELC_VIN_IRQ                               (0x395)  /* Interrupt Request - Event 0x395 */
 #define RA_ELC_VIN_ERR                               (0x396)  /* Interrupt Request for SYNC Error - Event 0x396 */
 
+/* Maximum valid ELC event number for RA8P1 */
+
+#define RA_ELC_EVENT_MAX                             (0x396)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

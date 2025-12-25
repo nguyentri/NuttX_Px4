@@ -841,11 +841,6 @@ static int gpt_start(struct pwm_lowerhalf_s *dev,
     /* Full prescaler divider table - matches gpt_calculate_prescaler() */
     static const uint32_t prescaler_divs[] = {1, 2, 4, 8, 16, 32, 64, 256, 1024};
 
-    /* Map prescaler array index to GTCR.TPCS register value.
-     * Index 0-6 map directly, index 7->TPCS=8 (256), index 8->TPCS=10 (1024).
-     */
-    static const uint32_t prescaler_to_tpcs[] = {0, 1, 2, 3, 4, 5, 6, 8, 10};
-
     if (prescaler >= (sizeof(prescaler_divs) / sizeof(prescaler_divs[0])))
       {
         pwmerr("ERROR: invalid prescaler index %" PRIu32 "\n", prescaler);

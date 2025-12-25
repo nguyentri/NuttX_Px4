@@ -2710,6 +2710,167 @@ config RA_SCI9_TXBUFSIZE
    default 256
    depends on RA_SCI9_UART
 
+# SCI UART DMA Support
+config RA_SCI0_RXDMA
+   bool "SCI0 Rx DMA support"
+   default n
+   depends on RA_SCI0_UART && RA_DMAC
+   select SERIAL_RXDMA
+   ---help---
+      Enable Rx DMA transfers on SCI0 UART
+
+config RA_SCI0_TXDMA
+   bool "SCI0 Tx DMA support"
+   default n
+   depends on RA_SCI0_UART && RA_DMAC
+   select SERIAL_TXDMA
+   ---help---
+      Enable Tx DMA transfers on SCI0 UART
+
+config RA_SCI1_RXDMA
+   bool "SCI1 Rx DMA support"
+   default n
+   depends on RA_SCI1_UART && RA_DMAC
+   select SERIAL_RXDMA
+   ---help---
+      Enable Rx DMA transfers on SCI1 UART
+
+config RA_SCI1_TXDMA
+   bool "SCI1 Tx DMA support"
+   default n
+   depends on RA_SCI1_UART && RA_DMAC
+   select SERIAL_TXDMA
+   ---help---
+      Enable Tx DMA transfers on SCI1 UART
+
+config RA_SCI2_RXDMA
+   bool "SCI2 Rx DMA support"
+   default n
+   depends on RA_SCI2_UART && RA_DMAC
+   select SERIAL_RXDMA
+   ---help---
+      Enable Rx DMA transfers on SCI2 UART
+
+config RA_SCI2_TXDMA
+   bool "SCI2 Tx DMA support"
+   default n
+   depends on RA_SCI2_UART && RA_DMAC
+   select SERIAL_TXDMA
+   ---help---
+      Enable Tx DMA transfers on SCI2 UART
+
+config RA_SCI3_RXDMA
+   bool "SCI3 Rx DMA support"
+   default n
+   depends on RA_SCI3_UART && RA_DMAC
+   select SERIAL_RXDMA
+   ---help---
+      Enable Rx DMA transfers on SCI3 UART
+
+config RA_SCI3_TXDMA
+   bool "SCI3 Tx DMA support"
+   default n
+   depends on RA_SCI3_UART && RA_DMAC
+   select SERIAL_TXDMA
+   ---help---
+      Enable Tx DMA transfers on SCI3 UART
+
+config RA_SCI4_RXDMA
+   bool "SCI4 Rx DMA support"
+   default n
+   depends on RA_SCI4_UART && RA_DMAC
+   select SERIAL_RXDMA
+   ---help---
+      Enable Rx DMA transfers on SCI4 UART
+
+config RA_SCI4_TXDMA
+   bool "SCI4 Tx DMA support"
+   default n
+   depends on RA_SCI4_UART && RA_DMAC
+   select SERIAL_TXDMA
+   ---help---
+      Enable Tx DMA transfers on SCI4 UART
+
+config RA_SCI5_RXDMA
+   bool "SCI5 Rx DMA support"
+   default n
+   depends on RA_SCI5_UART && RA_DMAC
+   select SERIAL_RXDMA
+   ---help---
+      Enable Rx DMA transfers on SCI5 UART
+
+config RA_SCI5_TXDMA
+   bool "SCI5 Tx DMA support"
+   default n
+   depends on RA_SCI5_UART && RA_DMAC
+   select SERIAL_TXDMA
+   ---help---
+      Enable Tx DMA transfers on SCI5 UART
+
+config RA_SCI6_RXDMA
+   bool "SCI6 Rx DMA support"
+   default n
+   depends on RA_SCI6_UART && RA_DMAC
+   select SERIAL_RXDMA
+   ---help---
+      Enable Rx DMA transfers on SCI6 UART
+
+config RA_SCI6_TXDMA
+   bool "SCI6 Tx DMA support"
+   default n
+   depends on RA_SCI6_UART && RA_DMAC
+   select SERIAL_TXDMA
+   ---help---
+      Enable Tx DMA transfers on SCI6 UART
+
+config RA_SCI7_RXDMA
+   bool "SCI7 Rx DMA support"
+   default n
+   depends on RA_SCI7_UART && RA_DMAC
+   select SERIAL_RXDMA
+   ---help---
+      Enable Rx DMA transfers on SCI7 UART
+
+config RA_SCI7_TXDMA
+   bool "SCI7 Tx DMA support"
+   default n
+   depends on RA_SCI7_UART && RA_DMAC
+   select SERIAL_TXDMA
+   ---help---
+      Enable Tx DMA transfers on SCI7 UART
+
+config RA_SCI8_RXDMA
+   bool "SCI8 Rx DMA support"
+   default n
+   depends on RA_SCI8_UART && RA_DMAC
+   select SERIAL_RXDMA
+   ---help---
+      Enable Rx DMA transfers on SCI8 UART
+
+config RA_SCI8_TXDMA
+   bool "SCI8 Tx DMA support"
+   default n
+   depends on RA_SCI8_UART && RA_DMAC
+   select SERIAL_TXDMA
+   ---help---
+      Enable Tx DMA transfers on SCI8 UART
+
+config RA_SCI9_RXDMA
+   bool "SCI9 Rx DMA support"
+   default n
+   depends on RA_SCI9_UART && RA_DMAC
+   select SERIAL_RXDMA
+   ---help---
+      Enable Rx DMA transfers on SCI9 UART
+
+config RA_SCI9_TXDMA
+   bool "SCI9 Tx DMA support"
+   default n
+   depends on RA_SCI9_UART && RA_DMAC
+   select SERIAL_TXDMA
+   ---help---
+      Enable Tx DMA transfers on SCI9 UART
+
 # Advanced SCI UART Features
 config RA_SCI_UART_FLOWCONTROL
    bool "Enable SCI UART flow control support"
@@ -4165,6 +4326,7 @@ config RA_DMAC
    bool "DMAC (Direct Memory Access Controller) support"
    default n
    depends on RA_HAVE_DMAC
+   select ARCH_DMA
    help
      Enable DMAC support for high-performance data transfers.
      DMAC provides hardware-accelerated memory-to-memory,

@@ -584,29 +584,46 @@ void ra_icu_disable_dtc(int icu_irq)
 void ra_icu_enable_dmac(int elc_event, int dmac_ch)
 {
   uint32_t regval;
+  uint8_t local_ch;
 
-  /* Validate DMAC channel range (0-7) */
+  /* Validate DMAC channel:
+   * - Unit 0: channels 0-7 are valid
+   * - Unit 1: channels 10-17 are valid
+   * - Channels 8-9 do not exist (hardware gap)
+   */
 
-  if (dmac_ch < 0 || dmac_ch >= DMAC_MAX_CHANNELS)
+  if (!DMAC_IS_VALID_CHANNEL(dmac_ch))
     {
+      _err("Invalid DMAC channel: %d (valid: 0-7, 10-17)\n", dmac_ch);
       return;
     }
 
   /* Validate ELC event range */
 
-  if (elc_event < 0)
+  if (elc_event < 0 || elc_event > RA_ELC_EVENT_MAX)
     {
+      _err("Invalid ELC event: %d (valid: 0-%d)\n", elc_event,
+             RA_ELC_EVENT_MAX);
       return;
     }
 
-  /* Program DELSR[dmac_ch].DELS = ELC event number
-   * This configures which ELC event activates this DMAC channel
-   */
-
-  regval = getreg32(R_ICU_DELSR(dmac_ch));
+  /* Extract unit and local channel */
+  local_ch = DMAC_GET_LOCAL_CH(dmac_ch);
+#if defined(CONFIG_RA8E1_GROUP)
+  /* RA8E1: Use R_DMA->DELSR based on DMA0 */
+  regval = getreg32(R_DMA_DELSR_UNIT(0, local_ch));
+  regval &= ~R_DMA_DELSR_DELS_MASK;
+  regval |= (elc_event & R_DMA_DELSR_DELS_MASK);
+  putreg32(regval, R_DMA_DELSR_UNIT(0, local_ch));
+#elif defined(CONFIG_RA8P1_GROUP)
+  /* RA8P1: Use R_ICU->DELSR (shared between units) */
+  regval = getreg32(R_ICU_DELSR(local_ch));
   regval &= ~R_ICU_DELSR_DELS_MASK;
   regval |= (elc_event & R_ICU_DELSR_DELS_MASK);
-  putreg32(regval, R_ICU_DELSR(dmac_ch));
+  putreg32(regval, R_ICU_DELSR(local_ch));
+#else
+#  error "Unsupported RA8 chip for DMAC DELSR"
+#endif
 }
 
 /****************************************************************************
@@ -625,28 +642,52 @@ void ra_icu_enable_dmac(int elc_event, int dmac_ch)
 void ra_icu_disable_dmac(int elc_event, int dmac_ch)
 {
   uint32_t regval;
+  uint8_t local_ch;
 
   UNUSED(elc_event);
 
   /* Validate DMAC channel */
 
-  if (dmac_ch < 0 || dmac_ch >= DMAC_MAX_CHANNELS)
+  if (!DMAC_IS_VALID_CHANNEL(dmac_ch))
     {
       return;
     }
 
-  /* Clear DELSR[dmac_ch].DELS = 0 (disable DMA activation) */
-
-  regval = getreg32(R_ICU_DELSR(dmac_ch));
+  /* Extract unit and local channel */
+  local_ch = DMAC_GET_LOCAL_CH(dmac_ch);
+#if defined(CONFIG_RA8E1_GROUP)
+  regval = getreg32(R_DMA_DELSR_UNIT(0, local_ch));
+  regval &= ~R_DMA_DELSR_DELS_MASK;
+  putreg32(regval, R_DMA_DELSR_UNIT(0, local_ch));
+#elif defined(CONFIG_RA8P1_GROUP)
+  regval = getreg32(R_ICU_DELSR(local_ch));
   regval &= ~R_ICU_DELSR_DELS_MASK;
-  putreg32(regval, R_ICU_DELSR(dmac_ch));
+  putreg32(regval, R_ICU_DELSR(local_ch));
+#endif
 }
 
 
 void ra_icu_clear_dmac_status(int dmac_ch)
 {
-  uint32_t regval = getreg32(R_ICU_DELSR(dmac_ch));
+  uint32_t regval;
+  uint8_t local_ch;
 
-  regval &= ~R_ICU_DELSR_IR;   /* Write 0 to clear */
-  putreg32(regval, R_ICU_DELSR(dmac_ch));
+  /* Validate DMAC channel */
+  if (!DMAC_IS_VALID_CHANNEL(dmac_ch))
+    {
+      return;
+    }
+
+  /* Extract local channel */
+  local_ch = DMAC_GET_LOCAL_CH(dmac_ch);
+  /* Clear IR flag (write 0 to clear) */
+#if defined(CONFIG_RA8E1_GROUP)
+  regval = getreg32(R_DMA_DELSR_UNIT(0, local_ch));
+  regval &= ~R_DMA_DELSR_IR;
+  putreg32(regval, R_DMA_DELSR_UNIT(0, local_ch));
+#elif defined(CONFIG_RA8P1_GROUP)
+  regval = getreg32(R_ICU_DELSR(local_ch));
+  regval &= ~R_ICU_DELSR_IR;
+  putreg32(regval, R_ICU_DELSR(local_ch));
+#endif
 }
