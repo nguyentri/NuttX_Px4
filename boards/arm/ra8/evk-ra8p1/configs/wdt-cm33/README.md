@@ -18,17 +18,20 @@ This test application demonstrates the Watchdog Timer (WDT) functionality on the
 ## Build Instructions
 
 1. Configure NuttX for WDT test:
+
 ```bash
 cd platforms/nuttx/NuttX/nuttx
 ./tools/configure.sh evk-ra8p1:wdt
 ```
 
 2. Build:
+
 ```bash
 make -j$(nproc)
 ```
 
 3. Flash to board:
+
 ```bash
 # Use your preferred flashing method (JLink, etc.)
 ```
@@ -47,7 +50,8 @@ make -j$(nproc)
 ## Expected Output
 
 ### Normal Operation
-```
+
+```text
 NuttX WDT Test Application (FSP-style)
 ========================================================
 This example demonstrates WDT HAL module functionality.
@@ -71,7 +75,8 @@ WDT counter refreshed (count=6, timeout=2000 ms, timeleft=1800 ms)
 ```
 
 ### After Button Press
-```
+
+```text
 *** Button SW1 pressed - Stopping WDT refresh ***
 WDT will timeout in approximately 2 seconds and reset MCU
 Timer stopped - WDT will no longer be refreshed
@@ -81,7 +86,8 @@ Waiting for WDT reset...
 ```
 
 ### After WDT Reset
-```
+
+```text
 ************************ WDT Reset detected ************************
 System was reset by watchdog timeout!
 ********************************************************************
@@ -99,7 +105,7 @@ System was reset by watchdog timeout!
 
 Key Kconfig settings in `evk-ra8p1:wdt` defconfig:
 
-```
+```text
 CONFIG_WATCHDOG=y                 # Enable watchdog framework
 CONFIG_RA_WDT=y                   # Enable RA8 WDT driver
 CONFIG_RA8P1_EXAMPLE_SUPPORT=y    # Enable board examples

@@ -20,6 +20,7 @@ make
 ```
 
 Or using PX4 build system:
+
 ```bash
 make renesas_evk-ra8p1_rtc
 ```
@@ -29,7 +30,8 @@ make renesas_evk-ra8p1_rtc
 Once booted into NSH, the `alarm` command is available:
 
 ### Set an alarm for 10 seconds from now:
-```
+
+```text
 nsh> alarm 10
 Opening /dev/rtc0
 alarm_daemon started
@@ -37,27 +39,32 @@ Alarm 0 set in 10 seconds
 ```
 
 ### Wait for alarm to trigger:
+
 After 10 seconds, you should see:
-```
+
+```text
 alarm_daemon: alarm 0 received
 ```
 
 ### Read the current alarm status:
-```
+
+```text
 nsh> alarm -r
 Opening /dev/rtc0
 Alarm 0 is active with 5 seconds to expiration
 ```
 
 ### Cancel an alarm:
-```
+
+```text
 nsh> alarm -c
 Opening /dev/rtc0
 Alarm 0 has been canceled
 ```
 
 ### Command help:
-```
+
+```text
 nsh> alarm
 USAGE:
         alarm [-a <alarmid>] [-cr] [<seconds>]
@@ -89,6 +96,7 @@ Key options enabled in this defconfig:
 ## Debug Output
 
 RTC debug output is enabled. Use RTT or serial console to view:
+
 - `rtcinfo()` - Informational messages
 - `rtcwarn()` - Warning messages
 - `rtcerr()` - Error messages

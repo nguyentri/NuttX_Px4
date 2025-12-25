@@ -15,14 +15,17 @@ This configuration demonstrates LED and button functionality on the Renesas EVK-
 ## Hardware Setup
 
 ### LEDs
+
 - **LED1 (Blue)**: P600 - Active HIGH
 - **LED2 (Red)**: PA07 - Active HIGH
 - **LED3 (Green)**: P303 - Active HIGH (auto-blinks at 1Hz)
 
 ### Button
+
 - **SW1**: P009 - IRQ13, falling edge interrupt, 50ms debounce, toggles LED1
 
 ### Console
+
 - **SCI0 UART**: P602 (RX), P603 (TX) at 115200 baud
 
 ## NSH LED Commands
@@ -32,6 +35,7 @@ The userled driver provides the following commands for LED1 and LED2:
 **Note**: LED3 (Green) auto-blinks in the background and cannot be controlled via NSH commands.
 
 ### List Available LEDs
+
 ```bash
 nsh> leds list
 Supported LEDs: 0 1
@@ -39,6 +43,7 @@ LED set: 00
 ```
 
 ### Get LED Status
+
 ```bash
 nsh> leds get 0     # Get status of LED1 (Blue)
 LED 0: OFF
@@ -48,6 +53,7 @@ LED 1: OFF
 ```
 
 ### Turn LED On/Off
+
 ```bash
 nsh> leds set 0 on   # Turn on LED1 (Blue)
 nsh> leds set 0 off  # Turn off LED1 (Blue)
@@ -57,6 +63,7 @@ nsh> leds set 1 off  # Turn off LED2 (Red)
 ```
 
 ### Control Multiple LEDs at Once
+
 ```bash
 nsh> leds setall 0   # Turn off LED1 and LED2 (bit pattern: 00)
 nsh> leds setall 1   # Turn on LED1 only (bit pattern: 01)
@@ -67,6 +74,7 @@ nsh> leds setall 3   # Turn on both LED1 and LED2 (bit pattern: 11)
 ## Button Functionality
 
 Pressing SW1 will:
+
 1. Toggle LED1 (Blue) on/off
 2. Print a message via syslog: `SW1 pressed! LED1 (Blue) is now ON/OFF`
 
@@ -104,7 +112,7 @@ make
 
 ## Example Session
 
-```
+```text
 NuttShell (NSH) NuttX-12.x.x
 nsh> leds list
 Supported LEDs: 0 1
@@ -143,12 +151,14 @@ nsh> # LED2 (Red) now on
 ## Runtime Behavior
 
 On boot:
+
 1. All LEDs initialize to OFF
 2. LED3 starts auto-blinking at 1Hz immediately
 3. SW1 button interrupt is configured
 4. NSH prompt appears
 
 During operation:
+
 - LED3 blinks continuously (independent of user actions)
 - SW1 press toggles LED1 instantly
 - NSH commands provide fine-grained control of LED1 and LED2
