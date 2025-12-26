@@ -15,7 +15,11 @@ This configuration builds NuttX NSH with support for **PWM (Pulse Width Modulati
 ## Hardware Setup
 
 - Signal: PWM Output
-- EVK-RA8P1 Pin: Check `src/ra8p1_pwm.c` for configured pins (typically P400/P401 etc.)
+- EVK-RA8P1 Pins:
+  - Motor 1: P912 (GPT3A)
+  - Motor 2: P915 (GPT5A)
+  - Motor 3: P903 (GPT11A)
+  - Motor 4: P515 (GPT13A)
 - External device: LED or Oscilloscope
 
 ## Build
@@ -47,13 +51,39 @@ Connect USB-serial:
 
 ## NSH Test Commands
 
-Run the following commands to verify functionality:
+Run the following commands to verify functionality for each motor:
+
+**Motor 1 (GPT3 - P912):**
 
 ```bash
-nsh> pwm -f 1000 -d 50
+nsh> pwm -p /dev/pwm0 -f 1000 -d 50
 ```
 
-(Sets 1kHz frequency, 50% duty cycle)
+**Motor 2 (GPT5 - P915):**
+
+```bash
+nsh> pwm -p /dev/pwm1 -f 1000 -d 50
+```
+
+**Motor 3 (GPT11 - P903):**
+
+```bash
+nsh> pwm -p /dev/pwm2 -f 1000 -d 50
+```
+
+**Motor 4 (GPT13 - P515):**
+
+```bash
+nsh> pwm -p /dev/pwm3 -f 1000 -d 50
+```
+
+(Sets 1kHz frequency, 50% duty cycle for 5 seconds)
+
+To run all motors sequentially:
+
+```bash
+nsh> pwm -p /dev/pwm0 -f 1000 -d 50; pwm -p /dev/pwm1 -f 1000 -d 50; pwm -p /dev/pwm2 -f 1000 -d 50; pwm -p /dev/pwm3 -f 1000 -d 50
+```
 
 ## Files of Interest
 
