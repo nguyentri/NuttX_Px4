@@ -107,8 +107,6 @@ CONFIG_RA_DMAC=y
 
 # DTC (Data Transfer Controller) Support
 CONFIG_RA_DTC=n
-CONFIG_RA_DTC_CHANNELS=8
-CONFIG_RA_DTC_IRQ_PRIORITY=3
 
 # DMAC Configuration
 CONFIG_RA_DMAC=n

@@ -78,8 +78,11 @@
 /* Transfer info structure size (must be 16 bytes) */
 #define RA_DTC_TRANSFER_INFO_SIZE   (16)
 
-/* Vector table size for DTC */
-#define RA_DTC_VECTOR_TABLE_ENTRIES  (32)
+/* Vector table size for DTC.
+ * Must match RA_IRQ_IELSR_SIZE (96 for RA8P1) since DTC vector table
+ * is indexed by ICU slot number. The slot numbers can be 0 to 95.
+ */
+#define RA_DTC_VECTOR_TABLE_ENTRIES  (96)
 
 /* DTC Events */
 #define RA_DTC_EVENT_END         (0)  /* Transfer complete */

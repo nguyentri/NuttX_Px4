@@ -85,7 +85,7 @@ struct spi_loopback_s
  * Private Data
  ****************************************************************************/
 
-static struct spi_loopback_s g_spi_loopback;
+struct spi_loopback_s g_spi_loopback;
 
 /****************************************************************************
  * Private Functions

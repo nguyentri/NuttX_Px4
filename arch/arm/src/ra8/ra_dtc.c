@@ -863,7 +863,7 @@ int ra_dtc_set_vector(int icu_slot, ra_dtc_info_t *transfer_info)
     }
 
   /* Disable read-skip (RRS) before updating vector table */
-  putreg8(DTC_DTCCR_RRS_DISABLE, R_DTC_DTCCR_SEC);
+  putreg8(DTC_DTCCR_RRS_DISABLE, RA_DTC_DTCCR);
 
   g_dtc_vector_table[icu_slot] = transfer_info;
 
@@ -895,13 +895,13 @@ int ra_dtc_set_vector(int icu_slot, ra_dtc_info_t *transfer_info)
         serr("ra_dtc_set_vector: failed to verify vector write for slot %d\n", icu_slot);
 
         /* Re-enable read-skip before returning error */
-        putreg8(DTC_DTCCR_RRS_ENABLE, R_DTC_DTCCR_SEC);
+        putreg8(DTC_DTCCR_RRS_ENABLE, RA_DTC_DTCCR);
         return -EIO;
       }
   }
 
   /* Re-enable read-skip */
-  putreg8(DTC_DTCCR_RRS_ENABLE, R_DTC_DTCCR_SEC);
+  putreg8(DTC_DTCCR_RRS_ENABLE, RA_DTC_DTCCR);
 
   return OK;
 }
@@ -927,8 +927,26 @@ int ra_dtc_clear_vector(int icu_slot)
       return -EINVAL;
     }
 
+  /* Wait for any in-progress DTC transfer on this slot to complete.
+   * This prevents clearing the vector while DTC is mid-transfer.
+   */
+  int wret = ra_dtc_wait_for_completion(icu_slot);
+  if (wret != OK)
+    {
+      swarn("DTC clear_vector: timeout waiting for slot %d\n", icu_slot);
+      /* Continue anyway - the transfer may have completed */
+    }
+
+  /* Disable read-skip (RRS) before clearing vector table for safe update.
+   * This matches the protection used in ra_dtc_set_vector().
+   */
+  putreg8(DTC_DTCCR_RRS_DISABLE, RA_DTC_DTCCR);
+
   /* Clear vector table entry */
   g_dtc_vector_table[icu_slot] = NULL;
+
+  /* Re-enable read-skip */
+  putreg8(DTC_DTCCR_RRS_ENABLE, RA_DTC_DTCCR);
 
   return OK;
 }

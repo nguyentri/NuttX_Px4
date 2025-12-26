@@ -314,9 +314,17 @@ static const struct ra_spi_config_s ra_spi0_config =
 
   .num_cs = 0,        /* Number of external device configurations will be set at runtime */
 
+#ifdef CONFIG_RA_SPI0_USE_DMAC
+  .use_dma = true,
+#else
   .use_dma = false,
+#endif
 
+#ifdef CONFIG_RA_SPI0_USE_DTC
+  .use_dtc = true
+#else
   .use_dtc = false
+#endif
 };
 
 static struct ra_spi_priv_s ra_spi0_priv =
@@ -351,9 +359,17 @@ static const struct ra_spi_config_s ra_spi1_config =
 
   .num_cs      = 0,        /* Number of external device configurations will be set at runtime */
 
+#ifdef CONFIG_RA_SPI1_USE_DMAC
+  .use_dma = true,
+#else
   .use_dma = false,
+#endif
 
+#ifdef CONFIG_RA_SPI1_USE_DTC
+  .use_dtc = true
+#else
   .use_dtc = false
+#endif
 };
 
 static struct ra_spi_priv_s ra_spi1_priv =
@@ -529,12 +545,13 @@ static void ra_spi_transmit(struct ra_spi_priv_s *priv)
 static void ra_spi_start_transfer(struct ra_spi_priv_s *priv)
 {
   uint32_t spcr;
+  uint32_t clear_flags;
 
   spiinfo("Transfer start for SPI%d - TX IRQ=%d, RX IRQ=%d, TEI IRQ=%d, ERI IRQ=%d\n",
           priv->config->bus, priv->txi_irq, priv->rxi_irq, priv->tei_irq, priv->eri_irq);
 
   /* Clear any existing interrupt flags before enabling interrupts */
-  ra_spi_putreg32(priv, R_SPI_B_SPSRC_OFFSET, R_SPI_B_SPSRC_ALL_CLEAR);
+  //ra_spi_putreg32(priv, R_SPI_B_SPSRC_OFFSET, R_SPI_B_SPSRC_ALL_CLEAR);
 
   /* Clear FIFOs to ensure a clean start */
   ra_spi_putreg32(priv, R_SPI_B_SPFCR_OFFSET, R_SPI_B_SPFCR_SPFRST);
@@ -683,9 +700,12 @@ static int ra_spi_dtc_configure_transfer(struct ra_spi_priv_s *priv,
   /* Configure TX DTC if transmit buffer provided */
   if (txbuffer)
     {
-      /* Configure TX DTC: source increment, dest fixed, normal mode */
+      /* Configure TX DTC: source increment, dest fixed, normal mode
+       * DISEL=0: Interrupt only at END of all DTC transfers
+       */
       priv->dtc_tx_info.mra = RA_DTC_MRA_MD_NORMAL | transfer_size | RA_DTC_MRA_SM_INCREMENT;
-      priv->dtc_tx_info.mrb = RA_DTC_MRB_DM_FIXED | RA_DTC_MRB_DISEL; /* IRQ at end */
+      //priv->dtc_tx_info.mrb = RA_DTC_MRB_DM_FIXED | RA_DTC_MRB_DISEL; /* IRQ at end */
+      priv->dtc_tx_info.mrb = RA_DTC_MRB_DM_FIXED; /* DISEL=0: IRQ at end of all transfers */
       priv->dtc_tx_info.sar = (uint32_t)txbuffer;
       priv->dtc_tx_info.dar = priv->config->base + R_SPI_B_SPDR_OFFSET;
       priv->dtc_tx_info.cra = (uint16_t)nwords;
@@ -699,9 +719,12 @@ static int ra_spi_dtc_configure_transfer(struct ra_spi_priv_s *priv,
   /* Configure RX DTC if receive buffer provided */
   if (rxbuffer)
     {
-      /* Configure RX DTC: source fixed, dest increment, normal mode */
+      /* Configure RX DTC: source fixed, dest increment, normal mode
+       * DISEL=0: Interrupt only at END of all DTC transfers
+       */
       priv->dtc_rx_info.mra = RA_DTC_MRA_MD_NORMAL | transfer_size | RA_DTC_MRA_SM_FIXED;
-      priv->dtc_rx_info.mrb = RA_DTC_MRB_DM_INCREMENT | RA_DTC_MRB_DISEL; /* IRQ at end */
+      //priv->dtc_rx_info.mrb = RA_DTC_MRB_DM_INCREMENT | RA_DTC_MRB_DISEL; /* IRQ at end */
+      priv->dtc_rx_info.mrb = RA_DTC_MRB_DM_INCREMENT; /* DISEL=0: IRQ at end of all transfers */
       priv->dtc_rx_info.sar = priv->config->base + R_SPI_B_SPDR_OFFSET;
       priv->dtc_rx_info.dar = (uint32_t)rxbuffer;
       priv->dtc_rx_info.cra = (uint16_t)nwords;
@@ -755,19 +778,41 @@ static int ra_spi_dtc_reconfigure(struct ra_spi_priv_s *priv)
       spiinfo("Committed RX DTC vector for slot %d (IRQ %d)\n", slot, priv->rxi_irq);
     }
 
-  /* Disable CPU ISRs when DTC is active to prevent per-byte interrupts */
-  if (priv->txi_irq >= 0)
+  /* Enable DTC triggers for buffers that exist.
+   *
+   * IMPORTANT: With DISEL=0, DTC generates an interrupt through the normal
+   * SPI IRQ vector (TXI/RXI) after the LAST transfer completes. This means
+   * the NVIC must have TXI/RXI interrupts enabled for the completion
+   * interrupt to reach the CPU.
+   *
+   * The flow is:
+   * 1. DTCE=1 routes TXI/RXI events to trigger DTC hardware
+   * 2. DTC handles each data transfer without CPU involvement
+   * 3. After the last transfer, DISEL=0 causes DTC to generate an IRQ
+   *    through the normal SPI interrupt vector (not a DTC-specific vector)
+   * 4. CPU receives IRQ through NVIC and RXI/TXI ISR runs to signal completion
+   *
+   */
+  if (priv->txbuffer && priv->txi_irq >= 0)
     {
-      up_disable_irq(priv->txi_irq);
+      /* Ensure TXI is enabled in NVIC before enabling DTC trigger.
+       * Clear pending first like FSP's R_BSP_IrqEnable() does.
+       */
+      ra_icu_clear_irq(priv->txi_irq);
+      up_enable_irq(priv->txi_irq);
       ra_icu_enable_dtc(priv->txi_irq);
-      spiinfo("Enabled DTC trigger and disabled CPU ISR for TXI IRQ %d\n", priv->txi_irq);
+      spiinfo("Enabled DTC trigger for TXI IRQ %d (NVIC enabled for DISEL=0 completion)\n", priv->txi_irq);
     }
 
-  if (priv->rxi_irq >= 0)
+  if (priv->rxbuffer && priv->rxi_irq >= 0)
     {
-      up_disable_irq(priv->rxi_irq);
+      /* Ensure RXI is enabled in NVIC before enabling DTC trigger.
+       * Clear pending first like FSP's R_BSP_IrqEnable() does.
+       */
+      ra_icu_clear_irq(priv->rxi_irq);
+      up_enable_irq(priv->rxi_irq);
       ra_icu_enable_dtc(priv->rxi_irq);
-      spiinfo("Enabled DTC trigger and disabled CPU ISR for RXI IRQ %d\n", priv->rxi_irq);
+      spiinfo("Enabled DTC trigger for RXI IRQ %d (NVIC enabled for DISEL=0 completion)\n", priv->rxi_irq);
     }
 
   /* Mark DTC as active with the current transfer */
@@ -815,6 +860,13 @@ static void ra_spi_dtc_stop(struct ra_spi_priv_s *priv)
         }
 
       ra_icu_disable_dtc(priv->txi_irq);
+
+      /* Clear vector table entry to prevent stale pointer access.
+       * This ensures the DTC vector table doesn't point to potentially
+       * invalid transfer_info structures between transfers.
+       */
+      ra_dtc_clear_vector(slot);
+
       up_enable_irq(priv->txi_irq);  /* Re-enable CPU ISR for next transfer */
       spiinfo("Disabled DTC trigger and re-enabled CPU ISR for TXI IRQ %d\n", priv->txi_irq);
     }
@@ -841,6 +893,10 @@ static void ra_spi_dtc_stop(struct ra_spi_priv_s *priv)
         }
 
       ra_icu_disable_dtc(priv->rxi_irq);
+
+      /* Clear vector table entry for RX as well */
+      ra_dtc_clear_vector(slot);
+
       up_enable_irq(priv->rxi_irq);  /* Re-enable CPU ISR for next transfer */
       spiinfo("Disabled DTC trigger and re-enabled CPU ISR for RXI IRQ %d\n", priv->rxi_irq);
     }
@@ -1244,12 +1300,47 @@ static int ra_spi_rxi_interrupt(int irq, void *context, void *arg)
   DEBUGASSERT(priv != NULL);
 
 #ifdef CONFIG_RA_DTC
-  /* In DTC mode, this ISR should not be called per-byte since CPU IRQ is disabled.
-   * It will only be called once when DTC completes (DISEL=1 causes final interrupt).
-   * Enable TEI to detect final transfer completion.
+  /* When DTC is active with DISEL=0 (TRANSFER_IRQ_END), this ISR is called
+   * only ONCE after DTC completes ALL RX transfers. The DTCE bit in ICU routes
+   * RXI events to DTC hardware. With DISEL=0, the DTC hardware generates a
+   * CPU interrupt through this normal SPI RXI vector (not a special DTC vector)
+   * after the final transfer completes.
+   * Enable TEI to detect final SPI transfer completion (shift register empty).
    */
   if (priv->dtc_active)
     {
+      /* Wait for DTC to finish any in-progress transfer before proceeding.
+       * This ensures all data has been transferred before enabling TEI.
+       */
+      int slot = priv->rxi_irq - RA_IRQ_FIRST;
+      int timeout = 1000;  /* 1ms timeout at ~1us per iteration */
+
+      while (timeout-- > 0)
+        {
+          uint32_t dtcsts = getreg16(R_DTC_DTCSTS);
+          if (!(dtcsts & R_DTC_DTCSTS_ACT) ||
+              ((dtcsts & R_DTC_DTCSTS_VECN_MASK) != (uint32_t)slot))
+            {
+              break;
+            }
+          up_udelay(1);
+        }
+
+      /* Clear D-cache for RX buffer after DTC completes.
+       * This is critical on Cortex-M85 with D-cache to ensure CPU sees
+       * the data written by DTC to SRAM.
+       * Use priv->rxbuffer which stores the original buffer address.
+       * Note: priv->dtc_rx_info.dar gets modified by DTC hardware during
+       * transfer (incremented with each byte), so we cannot use it here.
+       */
+      if (priv->rxbuffer != NULL)
+        {
+          int transfer_size = ra_spi_get_transfer_size(priv);
+          size_t total_bytes = priv->nrxwords * transfer_size;
+          uintptr_t start = (uintptr_t)priv->rxbuffer;
+          up_invalidate_dcache(start, start + total_bytes);
+        }
+
       /* DTC transfer complete for RX - enable TEI to signal completion */
       up_enable_irq(priv->tei_irq);
       return OK;
@@ -1310,8 +1401,10 @@ static int ra_spi_txi_interrupt(int irq, void *context, void *arg)
   DEBUGASSERT(priv != NULL);
 
 #ifdef CONFIG_RA_DTC
-  /* In DTC mode, this ISR should not be called per-byte since CPU IRQ is disabled.
-   * It will only be called once when DTC completes (DISEL=1 causes final interrupt).
+  /* When DTC is active with DISEL=0 (TRANSFER_IRQ_END), this ISR is called
+   * only ONCE after DTC completes ALL transfers. The DTCE bit in ICU routes
+   * events to DTC, which handles each transfer. With DISEL=0, DTC generates
+   * an interrupt through this normal SPI TXI vector after the final transfer.
    * For TX-only transfers, enable TEI when DTC completes.
    */
   if (priv->dtc_active)
@@ -1396,6 +1489,17 @@ static int ra_spi_tei_interrupt(int irq, void *context, void *arg)
   /* Clear pending and re-enable TXI IRQ */
   ra_icu_clear_irq(priv->txi_irq);
   up_enable_irq(priv->txi_irq);
+
+#ifdef CONFIG_RA_DTC
+  /* Clean up DTC in normal completion path.
+   * This was previously only done in the error handler, leaving dtc_active
+   * stuck at true and DTC triggers enabled between transfers.
+   */
+  if (priv->dtc_active)
+    {
+      ra_spi_dtc_stop(priv);
+    }
+#endif
 
   /* Signal completion to waiting thread */
   nxsem_post(&priv->waitsem);
@@ -1810,14 +1914,11 @@ static void ra_spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                            void *rxbuffer, size_t nwords)
 {
   struct ra_spi_priv_s *priv = (struct ra_spi_priv_s *)dev;
-#if defined(CONFIG_RA_DMAC) || defined(CONFIG_RA_DTC)
-  const struct ra_spi_ext_dev_config_s *dev_config;
-#endif
 #ifdef CONFIG_RA_DMAC
-  bool use_dma = false;
+  bool use_dma = priv->config->use_dma;
 #endif
 #ifdef CONFIG_RA_DTC
-  bool use_dtc = false;
+  bool use_dtc = priv->config->use_dtc;
 #endif
 
   DEBUGASSERT(priv != NULL);
@@ -1829,53 +1930,6 @@ static void ra_spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
     {
       return;
     }
-
-#if defined(CONFIG_RA_DMAC) || defined(CONFIG_RA_DTC)
-  /* Determine DMA/DTC usage based on device config and bus config.
-   * Priority: device config (if available) > bus config.
-   * DMA and DTC are mutually exclusive - DMA takes priority if both set.
-   */
-
-  dev_config = ra_spi_get_dev_config(dev, priv->devid);
-
-  if (dev_config != NULL)
-    {
-      /* Use device-specific configuration */
-
-#ifdef CONFIG_RA_DMAC
-      if (dev_config->use_dma && priv->config->use_dma)
-        {
-          use_dma = true;
-        }
-      else
-#endif
-#ifdef CONFIG_RA_DTC
-      if (dev_config->use_dtc && priv->config->use_dtc)
-        {
-          use_dtc = true;
-        }
-#endif
-        {
-          /* Neither DMA nor DTC enabled for this device */
-        }
-
-      /* Note: DMA and DTC are mutually exclusive.
-       * If ext_dev_config sets both, DMA takes priority.
-       */
-    }
-  else
-    {
-      /* No device config - both DMA and DTC are disabled per user request */
-
-#ifdef CONFIG_RA_DMAC
-      use_dma = false;
-#endif
-#ifdef CONFIG_RA_DTC
-      use_dtc = false;
-#endif
-    }
-#endif /* CONFIG_RA_DMAC || CONFIG_RA_DTC */
-
   /* Setup the transfer */
   priv->txbuffer = txbuffer;
   priv->rxbuffer = rxbuffer;
@@ -1884,8 +1938,12 @@ static void ra_spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   priv->error = false;
 
 #ifdef CONFIG_RA_DMAC
-  /* Use DMAC if enabled and transfer size is large enough (>= 8 words) */
-  if (use_dma && nwords >= 8)
+  /* Use DMAC if enabled and transfer size meets configured threshold.
+   */
+#ifndef CONFIG_RA_SPI_DMAC_THRESHOLD
+#  define CONFIG_RA_SPI_DMAC_THRESHOLD 8
+#endif
+  if (use_dma && nwords >= CONFIG_RA_SPI_DMAC_THRESHOLD)
     {
       int ret;
 
@@ -1897,11 +1955,6 @@ static void ra_spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
         {
           spierr("SPI%d DMA setup failed: %d, falling back to DTC/PIO\n",
                  priv->config->bus, ret);
-          /* Fall through to DTC or PIO mode */
-          use_dma = false;
-#ifdef CONFIG_RA_DTC
-          use_dtc = priv->config->use_dtc && (dev_config != NULL && dev_config->use_dtc);
-#endif
         }
       else
         {
@@ -1924,8 +1977,12 @@ static void ra_spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 #endif /* CONFIG_RA_DMAC */
 
 #ifdef CONFIG_RA_DTC
-  /* Use DTC if enabled and transfer size is large enough (>= 4 words) */
-  if (use_dtc && nwords >= 4)
+  /* Use DTC if enabled and transfer size meets configured threshold.
+   */
+#ifndef CONFIG_RA_SPI_DTC_THRESHOLD
+#  define CONFIG_RA_SPI_DTC_THRESHOLD 4
+#endif
+  if (use_dtc && nwords >= CONFIG_RA_SPI_DTC_THRESHOLD)
     {
       /* Prepare DTC transfer_info structures */
       ra_spi_dtc_configure_transfer(priv, txbuffer, rxbuffer, nwords);
@@ -2276,7 +2333,7 @@ struct spi_dev_s *ra_spibus_initialize(int bus)
           return NULL;
         }
       priv->eri_irq = ret; /* Store the assigned IRQ number */
-      spiinfo("SPI%d interrupts attached: RXI=%d TXI=%d TEI=%d ERI=%d (all disabled until transfer)\n",
+      spiinfo("SPI%d interrupts attached: RXI=%d TXI=%d TEI=%d ERI=%d\n",
               priv->config->bus, priv->rxi_irq, priv->txi_irq, priv->tei_irq, priv->eri_irq);
     }
 

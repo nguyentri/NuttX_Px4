@@ -3360,6 +3360,74 @@ config RA_SPI2
    depends on RA_HAVE_SPI2
    select RA_SPI
 
+if RA_SPI
+
+comment "SPI DTC/DMAC Transfer Options"
+
+config RA_SPI0_USE_DTC
+   bool "SPI0 use DTC for transfers"
+   default n
+   depends on RA_SPI0 && RA_DTC
+   help
+     Enable DTC (Data Transfer Controller) for SPI0 transfers.
+     DTC provides hardware-assisted data transfers with lower
+     CPU overhead. When enabled, transfers >= threshold words
+     will use DTC instead of PIO mode.
+
+config RA_SPI1_USE_DTC
+   bool "SPI1 use DTC for transfers"
+   default n
+   depends on RA_SPI1 && RA_DTC
+   help
+     Enable DTC (Data Transfer Controller) for SPI1 transfers.
+     DTC provides hardware-assisted data transfers with lower
+     CPU overhead. When enabled, transfers >= threshold words
+     will use DTC instead of PIO mode.
+
+config RA_SPI0_USE_DMAC
+   bool "SPI0 use DMAC for transfers"
+   default n
+   depends on RA_SPI0 && RA_DMAC
+   help
+     Enable DMAC (Direct Memory Access Controller) for SPI0 transfers.
+     DMAC provides hardware-assisted data transfers with the lowest
+     CPU overhead but requires channel allocation. When enabled,
+     transfers >= threshold words will use DMAC instead of PIO/DTC.
+     DMAC takes priority over DTC if both are enabled.
+
+config RA_SPI1_USE_DMAC
+   bool "SPI1 use DMAC for transfers"
+   default n
+   depends on RA_SPI1 && RA_DMAC
+   help
+     Enable DMAC (Direct Memory Access Controller) for SPI1 transfers.
+     DMAC provides hardware-assisted data transfers with the lowest
+     CPU overhead but requires channel allocation. When enabled,
+     transfers >= threshold words will use DMAC instead of PIO/DTC.
+     DMAC takes priority over DTC if both are enabled.
+
+config RA_SPI_DTC_THRESHOLD
+   int "Minimum words for DTC transfer"
+   default 4
+   range 1 256
+   depends on RA_SPI0_USE_DTC || RA_SPI1_USE_DTC
+   help
+     Minimum number of words required to use DTC for SPI transfers.
+     Transfers smaller than this threshold will use PIO mode.
+     Higher values reduce DTC overhead for small transfers.
+
+config RA_SPI_DMAC_THRESHOLD
+   int "Minimum words for DMAC transfer"
+   default 8
+   range 1 256
+   depends on RA_SPI0_USE_DMAC || RA_SPI1_USE_DMAC
+   help
+     Minimum number of words required to use DMAC for SPI transfers.
+     Transfers smaller than this threshold will use DTC or PIO mode.
+     Higher values reduce DMAC overhead for small transfers.
+
+endif # RA_SPI
+
 endmenu
 
 menu "SCI_SPI (Simple SPI using SCI)"
