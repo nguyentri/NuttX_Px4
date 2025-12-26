@@ -554,38 +554,31 @@ static void ra_spi_start_transfer(struct ra_spi_priv_s *priv)
       spcr |= R_SPI_B_SPCR_SPRIE;
     }
 
+  /* For non-DTC transfers with TX buffer, preload FIFO before enabling IRQs.
+   * This fills both the shift register and TX buffer, keeping the pipeline full.
+   */
 #ifdef CONFIG_RA_DTC
-  /* For DTC mode, preload TX buffer if not using DTC */
   if (!priv->dtc_active && priv->txbuffer)
 #else
-  /* For non-DTC mode, always check if we should preload */
   if (priv->txbuffer)
 #endif
     {
-      /* Use critical section to prevent race with TXI ISR */
-      irqstate_t flags = enter_critical_section();
+      /* Temporarily disable TXI IRQ so we can preload without racing the ISR */
+      up_disable_irq(priv->txi_irq);
 
       /* Enable SPI transfer */
       ra_spi_putreg32(priv, R_SPI_B_SPCR_OFFSET, spcr | R_SPI_B_SPCR_SPE);
 
-      /* Prefill transmit buffer with first word */
+      /* Prefill up to two transmit words to start the pipeline */
+      ra_spi_transmit(priv);
       if (priv->ntxwords > 0)
         {
           ra_spi_transmit(priv);
         }
 
-      /* Prefill second word to improve performance */
-      if (priv->ntxwords > 0)
-        {
-          ra_spi_transmit(priv);
-        }
-
-      /* Don't clear TXI flag - let naturally pending TXI interrupt fire.
-       * Just ensure IRQ is enabled.
-       */
+      /* Clear pending TXI and re-enable the IRQ */
+      ra_icu_clear_irq(priv->txi_irq);
       up_enable_irq(priv->txi_irq);
-
-      leave_critical_section(flags);
     }
   else
     {
@@ -1340,10 +1333,8 @@ static int ra_spi_txi_interrupt(int irq, void *context, void *arg)
         /* Transmit next word */
         ra_spi_transmit(priv);
 
-        /* For TX-only mode, enable TEI when last byte is written.
-         * For full-duplex, RXI ISR will enable TEI.
-         */
-        if (priv->ntxwords == 0 && priv->rxbuffer == NULL)
+        /* Enable TEI when last byte is written */
+        if (priv->ntxwords == 0)
           {
             up_enable_irq(priv->tei_irq);
           }

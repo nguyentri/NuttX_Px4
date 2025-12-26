@@ -5,17 +5,10 @@
 #
 if ARCH_BOARD_EVK_RA8P1
 
-config BOARD_EVK_RA8P1
-    bool "EVK-RA8P1 Board Support"
-    help
-      Enable support for the EVK-RA8P1 board based on the RA8P1 MPU.
-
-endif
-
 config RA8P1_EXAMPLE_SUPPORT
     bool "EVK-RA8P1 Example Support"
     default y
-    depends on BOARD_EVK_RA8P1
+    depends on ARCH_BOARD_EVK_RA8P1
     help
       Enable support for various application examples for the EVK-RA8P1 board.
       Disable when building with PX4 firmware.
@@ -99,3 +92,5 @@ config RA8P1_IPC_TEST
 
 		Build and flash this application on BOTH cores (CM85 and CM33)
 		to test inter-processor communication.
+
+endif

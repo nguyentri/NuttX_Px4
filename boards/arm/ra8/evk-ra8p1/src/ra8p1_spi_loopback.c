@@ -172,7 +172,7 @@ static int spi_verify_loopback_data(void)
   int errors = 0;
 
   syslog(LOG_INFO, "Verifying SPI loopback data...\n");
-
+#ifdef CONFIG_RA_SPI0
   /* Check SPI0: TX data should equal RX data (loopback) */
   for (i = 0; i < SPI_BUFF_LEN; i++)
     {
@@ -189,7 +189,9 @@ static int spi_verify_loopback_data(void)
          up_mdelay(10); /* Small delay to avoid flooding syslog */
         }
     }
+#endif
 
+#ifdef CONFIG_RA_SPI1
   /* Check SPI1: TX data should equal RX data (loopback) */
   for (i = 0; i < SPI_BUFF_LEN; i++)
     {
@@ -205,12 +207,16 @@ static int spi_verify_loopback_data(void)
          up_mdelay(10); /* Small delay to avoid flooding syslog */
         }
     }
-
+#endif
   if (errors == 0)
     {
       syslog(LOG_INFO, "✓ SPI loopback test PASSED - all data verified successfully\n");
+#ifdef CONFIG_RA_SPI0
       syslog(LOG_INFO, "  SPI0: %d bytes looped back correctly\n", SPI_BUFF_LEN);
+#endif
+#ifdef CONFIG_RA_SPI1
       syslog(LOG_INFO, "  SPI1: %d bytes looped back correctly\n", SPI_BUFF_LEN);
+#endif
       return OK;
     }
   else
@@ -230,22 +236,26 @@ static int spi_verify_loopback_data(void)
 
 static int spi_configure_devices(void)
 {
+#ifdef CONFIG_RA_SPI0
   /* Configure SPI0 as master */
   SPI_LOCK(g_spi_loopback.spi0, true);
   SPI_SETMODE(g_spi_loopback.spi0, SPI_MODE);
   SPI_SETBITS(g_spi_loopback.spi0, 8 * SPI_BYTE_SIZE);
   SPI_SETFREQUENCY(g_spi_loopback.spi0, SPI_FREQUENCY);
   SPI_LOCK(g_spi_loopback.spi0, false);
-
+  syslog(LOG_INFO, "SPI devices configured: SPI0=%p as master\n",
+          g_spi_loopback.spi0);
+#endif
+#ifdef CONFIG_RA_SPI1
   /* Configure SPI1 as master */
   SPI_LOCK(g_spi_loopback.spi1, true);
   SPI_SETMODE(g_spi_loopback.spi1, SPI_MODE);
   SPI_SETBITS(g_spi_loopback.spi1, 8 * SPI_BYTE_SIZE);
   SPI_SETFREQUENCY(g_spi_loopback.spi1, SPI_FREQUENCY);
   SPI_LOCK(g_spi_loopback.spi1, false);
-
-  syslog(LOG_INFO, "SPI devices configured: SPI0=%p, SPI1=%p (both as masters)\n",
-          g_spi_loopback.spi0, g_spi_loopback.spi1);
+  syslog(LOG_INFO, "SPI devices configured: SPI1=%p as master\n",
+          g_spi_loopback.spi1);
+#endif
 
   return OK;
 }
@@ -261,7 +271,7 @@ static int spi_configure_devices(void)
 static int spi_test_loopback(void)
 {
   syslog(LOG_INFO, "Starting SPI loopback test...\n");
-
+#ifdef CONFIG_RA_SPI0
   /* Test SPI0 loopback */
   syslog(LOG_INFO, "Testing Internal SPI0 loopback ...\n");
   SPI_LOCK(g_spi_loopback.spi0, true);
@@ -270,7 +280,8 @@ static int spi_test_loopback(void)
                g_spi_loopback.spi0_rx_buff, SPI_BUFF_LEN);
   ra_spi_set_loopback(g_spi_loopback.spi0, false, false, false); /* Disable loopback on SPI0 */
   SPI_LOCK(g_spi_loopback.spi0, false);
-
+#endif
+#ifdef CONFIG_RA_SPI1
   /* Test SPI1 loopback */
   syslog(LOG_INFO, "Testing Internal SPI1 loopback ...\n");
   SPI_LOCK(g_spi_loopback.spi1, true);
@@ -279,7 +290,7 @@ static int spi_test_loopback(void)
                g_spi_loopback.spi1_rx_buff, SPI_BUFF_LEN);
   ra_spi_set_loopback(g_spi_loopback.spi1, false, false, false); /* Disable loopback on SPI1 */
   SPI_LOCK(g_spi_loopback.spi1, false);
-
+#endif
   syslog(LOG_INFO, "Loopback transfers completed\n");
   return OK;
 }
@@ -305,6 +316,7 @@ int ra8p1_spi_loopback_init(void)
   /* Clear the demo structure */
   memset(&g_spi_loopback, 0, sizeof(g_spi_loopback));
 
+#ifdef CONFIG_RA_SPI0
   /* Get SPI0 as master */
   g_spi_loopback.spi0 = ra_spibus_initialize(0);
   if (!g_spi_loopback.spi0)
@@ -312,7 +324,9 @@ int ra8p1_spi_loopback_init(void)
       syslog(LOG_ERR, "Failed to initialize SPI0\n");
       return -ENODEV;
     }
+#endif
 
+#ifdef CONFIG_RA_SPI1
   /* Get SPI1 as master */
   g_spi_loopback.spi1 = ra_spibus_initialize(1);
   if (!g_spi_loopback.spi1)
@@ -320,6 +334,7 @@ int ra8p1_spi_loopback_init(void)
       syslog(LOG_ERR, "Failed to initialize SPI1\n");
       return -ENODEV;
     }
+#endif
 
   /* Configure both SPI devices */
   ret = spi_configure_devices();
@@ -347,7 +362,7 @@ int ra8p1_spi_loopback_test(void)
 
   syslog(LOG_INFO, "=== Starting SPI Loopback Test ===\n");
 
-  if (!g_spi_loopback.spi0 || !g_spi_loopback.spi1)
+  if (!g_spi_loopback.spi0 && !g_spi_loopback.spi1)
     {
       syslog(LOG_ERR, "SPI devices not initialized. Call ra8p1_spi_loopback_init() first.\n");
       return -EINVAL;
@@ -390,7 +405,6 @@ int ra8p1_spi_loopback_main(int argc, char *argv[])
   syslog(LOG_INFO, "RA8P1 SPI Loopback Test\n");
   syslog(LOG_INFO, "=======================\n");
   syslog(LOG_INFO, "This test verifies SPI loopback functionality:\n");
-  syslog(LOG_INFO, "- SPI0 and SPI1 both configured as masters\n");
 
   /* Run the test */
   ret = ra8p1_spi_loopback_test();

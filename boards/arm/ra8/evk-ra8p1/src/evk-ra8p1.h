@@ -367,7 +367,7 @@ int board_sdhi_init(void);
 /****************************************************************************
  * Example application interfaces
  ****************************************************************************/
-#ifdef RA8P1_EXAMPLE_SUPPORT
+#ifdef CONFIG_RA8P1_EXAMPLE_SUPPORT
 /* Run all enabled application examples (used by board_bringup()) */
 int ra8p1_app_examples(void);
 #endif
