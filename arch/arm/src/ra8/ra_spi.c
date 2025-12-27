@@ -545,7 +545,7 @@ static void ra_spi_transmit(struct ra_spi_priv_s *priv)
 static void ra_spi_start_transfer(struct ra_spi_priv_s *priv)
 {
   uint32_t spcr;
-  uint32_t clear_flags;
+ //uint32_t clear_flags;
 
   spiinfo("Transfer start for SPI%d - TX IRQ=%d, RX IRQ=%d, TEI IRQ=%d, ERI IRQ=%d\n",
           priv->config->bus, priv->txi_irq, priv->rxi_irq, priv->tei_irq, priv->eri_irq);

@@ -6182,11 +6182,11 @@ config RA_IDLE_LOG_STATE
      Enable logging of idle state for performance monitoring.
      Useful for debugging and optimizing power consumption.
 
-config RA_LINKER_C
-    bool "RA memory initialization"
-    default y
+config RA_FSP_LINKER_STYPE
+    bool "RA memory using similar to FSP"
+    default n
     help
-        Enable RAM initialization for RA8 family
+        Enable RAM memory using similar to FSP for RA8 family
 
 # AGT Timer Configuration
 menu "AGT Timer Configuration"

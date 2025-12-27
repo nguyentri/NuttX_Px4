@@ -22,7 +22,7 @@ include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/arch/arm/src/armv8-m/Toolchain.defs
 
-# Determine linker script based on build type
+# Determine linker script based on build type and configuration
 #ifeq ($(CONFIG_RA_CPU_CORE), 0)
 #  LDSCRIPT = cm85/cm85_user_defs.ld
 #else ifeq ($(CONFIG_RA_CPU_CORE),1)
@@ -31,7 +31,13 @@ include $(TOPDIR)/arch/arm/src/armv8-m/Toolchain.defs
 ## No core clarified
 #  LDSCRIPT = evk-ra8p1.ld
 #endif
-LDSCRIPT = evk-ra8p1.ld
+ifeq ($(CONFIG_RA_FSP_LINKER_STYPE),y)
+  # Legacy FSP-style linker script with g_init_info tables
+  LDSCRIPT = evk-ra8p1.ld
+else
+  # Optimized NuttX-standard linker script
+  LDSCRIPT = evk-ra8p1_non_ospi.ld
+endif
 
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 

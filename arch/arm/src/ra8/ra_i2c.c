@@ -135,7 +135,6 @@ static void ra_i2c_dtc_cleanup(struct ra_i2c_priv_s *priv);
 
 /* DMA functions */
 #ifdef CONFIG_RA_DMAC
-static void ra_i2c_get_dma_channel(struct ra_i2c_priv_s *priv, int *channel);
 static int ra_i2c_dma_setup(struct ra_i2c_priv_s *priv);
 static int ra_i2c_dma_start_rx(struct ra_i2c_priv_s *priv, uint8_t *buffer, uint32_t len);
 static int ra_i2c_dma_start_tx(struct ra_i2c_priv_s *priv, const uint8_t *buffer, uint32_t len);

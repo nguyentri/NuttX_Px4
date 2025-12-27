@@ -78,8 +78,6 @@ typedef enum
  ****************************************************************************/
 
 void ra_board_initialize(void);
-void ra_trustzone_init(void);
-void ra_ram_init (const uint32_t external);
 
 /****************************************************************************
  * Name: ra_register_protect_enable
@@ -100,19 +98,5 @@ void ra_register_protect_enable(ra_reg_protect_t regs_to_protect);
  ****************************************************************************/
 
 void ra_register_protect_disable(ra_reg_protect_t regs_to_unprotect);
-
-
-/****************************************************************************
- * Name: ra_gpio_security_init
- *
- * Description:
- *   Initialize PMSAR and PSCU registers to their default values.
- *   Sets all port pins to secure mode (0)
- *   Must be called before configuring any port pins.
- *
- ****************************************************************************/
-
-void ra_gpio_security_init(void);
-
 
 #endif /* __ARCH_ARM_SRC_RA_START_H */

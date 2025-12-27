@@ -37,6 +37,7 @@
 #include "arm_internal.h"
 #include "ram_vectors.h"
 #include "nvic.h"
+#include "barriers.h"
 #include "chip.h"
 #include "ra_clock.h"
 #include "ra_start.h"
@@ -63,8 +64,8 @@
  * The idle thread stack is allocated in the .bss section, so it will be
  * zero initialized.
  */
-extern uint32_t __ram_thread_stack$$Limit;
-const uintptr_t g_idle_topstack = (uintptr_t)&__ram_thread_stack$$Limit + CONFIG_IDLETHREAD_STACKSIZE;
+extern uint32_t _ebss;
+const uintptr_t g_idle_topstack = (uintptr_t)&_ebss + CONFIG_IDLETHREAD_STACKSIZE;
 
 extern uint32_t _vectors[]; /* See arm_vectors.S */
 
@@ -227,7 +228,7 @@ RA_DONT_REMOVE static const uint32_t RA_PLACE_IN_SECTION(".option_setting_otp_zh
 
 #endif /* CONFIG_RA_OPTION_SETTING_ENABLE */
 
-#if defined (CONFIG_RA_LINKER_C)
+#if defined (CONFIG_RA_FSP_LINKER_STYPE)
 /***********************************************************************************************************************
  * Typedef definitions
  **********************************************************************************************************************/
@@ -401,7 +402,7 @@ const ra_init_info_t g_init_info =
     .p_nocache_list = nocache_list
 };
 
-#endif /* CONFIG_RA_LINKER_C */
+#endif /* CONFIG_RA_FSP_LINKER_STYPE */
 
 /* Register protection counters */
 static volatile uint16_t g_register_protect_counters[4] = {0};
@@ -487,121 +488,6 @@ static void ra_earlyserialinit(void)
 }
 #endif /* USE_EARLYSERIALINIT */
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: ra_cortex_m85_init
- *
- * Description:
- *   Initialize Cortex-M85 specific features following Renesas SystemInit
- *
- ****************************************************************************/
-static void ra_cortex_m85_init(void)
-{
-#ifdef CONFIG_ARCH_RAMVECTORS
-  /* Initialize RAM vectors and set VTOR */
-  arm_ramvec_initialize();
-#else
-  /* Set VTOR to point to the vector table using NuttX symbol */
-#if defined(__ICCARM__)
-  putreg32((uint32_t)__vector_table, NVIC_VECTAB);
-#else
-  putreg32((uint32_t)_vectors, NVIC_VECTAB);
-#endif
-#endif
-#if defined(R_FCACHE_FCACHEIV) && defined(R_FCACHE_FCACHEE)
-  /* Enable flash cache and wait for it to be ready */
-  putreg16(1U, R_FCACHE_FCACHEIV);
-  RA_HARDWARE_WAIT(getreg16(R_FCACHE_FCACHEIV), 0U);
-  putreg16(1U, R_FCACHE_FCACHEE);
-#endif
-}
-
-/* Main entry point */
-int main(void){
-
-  /* Cortex-M85 Initialization */
-  ra_cortex_m85_init();
-
-  /*TrustZone Configuration - early security setup */
-#if CONFIG_RA_TZ_SECURE_BUILD || CONFIG_RA_TZ_NONSECURE_BUILD
-  ra_trustzone_init();
-#endif
-
-  /* Initialize internal RAM Sections (BSS, data, TCM) */
-  ra_ram_init(0);
-
-  /* Initialize external RAM Sections (BSS, data, TCM) */
-  ra_ram_init(1);
-
-  /* Setup System Clocks */
-  ra_clock();
-
-#ifdef CONFIG_ARCH_FPU
-   arm_fpuconfig();
-#endif
-
-  /* TCM Initialization */
-#ifdef CONFIG_ARMV8M_ICACHE
-  up_enable_icache();
-#endif
-#ifdef CONFIG_ARMV8M_DCACHE
-  up_enable_dcache();
-#endif
-
-  /* Initialize GPIO security attribution */
-  ra_gpio_security_init();
-
-  /* Perform early serial initialization */
-#ifdef USE_EARLYSERIALINIT
-  /* Low-level Hardware Setup */
-  /* Configure the uart pins for arm_earlyserialinit */
-  ra_earlyserialinit();
-
-  /* The 'A' character is not displayed because the UART hardware is not fully ready */
-  showprogress('A');
-  arm_earlyserialinit();
-#else
-  /* No early serial initialization - console will be set up later */
-  showprogress('A');
-#endif
-
-  showprogress('B');
-
-  /* Board-level Initialization */
-  /* Initialize onboard resources */
-  ra_board_initialize();
-  showprogress('C');
-
-  /* Start NuttX */
-  /* Then start NuttX main initialization */
-  showprogress('\r');
-  showprogress('\n');
-
-  nx_start();
-
-  return 0;
-}
-
-/****************************************************************************
- * Name: __start
- *
- * Description:
- *   This is the reset entry point.
- *
- ****************************************************************************/
-
-void __start(void)
-{
-  /* Main entry point */
-  main();
-  /* Shouldn't get here */
-  for (; ; )
-    {
-    }
-}
 
 /****************************************************************************
  * Name: ra_trustzone_init
@@ -610,8 +496,8 @@ void __start(void)
  *   Initialize ARM TrustZone features following Renesas SystemInit
  *
  ****************************************************************************/
-
-void ra_trustzone_init(void)
+#if CONFIG_RA_TZ_SECURE_BUILD || CONFIG_RA_TZ_NONSECURE_BUILD
+static void ra_trustzone_init(void)
 {
 #if defined(CONFIG_RA_TZ_SECURE_BUILD)
   /* Enable TrustZone Secure settings following Renesas SystemInit */
@@ -628,48 +514,24 @@ void ra_trustzone_init(void)
   /* Non-secure VTOR is set by secure project, skip here */
 #endif
 }
+#endif /* CONFIG_RA_TZ_SECURE_BUILD || CONFIG_RA_TZ_NONSECURE_BUILD */
 
+#if defined(CONFIG_RA_FSP_LINKER_STYPE)
 /****************************************************************************
- * Name: ra_ram_init
+ * Name: ra_mem_init
  *
  * Description:
- *   Initialize RAM sections following standard NuttX ARM startup
+ *   Initialize RAM sections following standard NuttX ARM startup.
+ *
+ *   When CONFIG_RA_FSP_LINKER_STYPE is defined, uses FSP-style g_init_info tables
+ *   with legacy linker script (evk-ra8p1.ld) that defines $$ symbols.
+ *
  *
  ****************************************************************************/
-void ra_ram_init (const uint32_t external)
+static void ra_mem_init_fsp (const uint32_t external)
 {
-#if !defined (CONFIG_RA_LINKER_C) // Disable standard NuttX RAM initialization
-    const register uint32_t *src;
-    register uint32_t *dest;
-
-    /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
-     * certain that there are no issues with the state of global variables.
-     */
-    extern uint32_t _sbss;
-    extern uint32_t _ebss;
-
-    for (dest = (uint32_t *)&_sbss; dest < (uint32_t *)&_ebss; )
-    {
-      *dest++ = 0;
-    }
-
-    /* Move the initialized data section from his temporary holding spot in
-     * FLASH into the correct place in RAM.  The correct place in RAM is
-     * given by _sdata and _edata.  The temporary location is in FLASH at the
-     * end of all of the other read-only data (.text, .rodata) at _eronly.
-     */
-    extern const uint32_t _eronly;  // Flash location (const)
-    extern uint32_t _sdata;         // RAM location
-    extern uint32_t _edata;         // RAM location
-
-    for (src = (const uint32_t *)&_eronly,
-         dest = (uint32_t *)&_sdata; dest < (uint32_t *)&_edata;
-      )
-    {
-      *dest++ = *src++;  // CRITICAL: Copy initialized .data from flash!
-    }
-#else
-    /* Use custom memory sections */
+ /* FSP-style initialization using g_init_info tables from legacy linker */
+    /* 'external' selects: 0 = internal memory, 1 = external memory (OSPI/SDRAM) */
     for (uint32_t i = 0; i < g_init_info.zero_count; i++)
     {
         if (external == g_init_info.p_zero_list[i].type.external)
@@ -687,8 +549,107 @@ void ra_ram_init (const uint32_t external)
                    ((uintptr_t) g_init_info.p_copy_list[i].p_limit - (uintptr_t) g_init_info.p_copy_list[i].p_base));
         }
     }
-#endif
 }
+#else
+/****************************************************************************
+ * Name: ra_mem_init_nuttx
+ *
+ * Description:
+ *   Initialize RAM sections following standard NuttX ARM startup.
+ *
+ *   When CONFIG_RA_FSP_LINKER_STYPE is defined, uses FSP-style g_init_info tables
+ *   with legacy linker script (evk-ra8p1.ld) that defines $$ symbols.
+ *
+ *   Otherwise uses standard NuttX initialization with _sbss/_ebss/_sdata/_edata
+ *   symbols from optimized linker script (evk-ra8p1_non_ospi.ld).
+ *
+ ****************************************************************************/
+static void ra_mem_init_nuttx (void)
+{
+    /* Standard NuttX RAM initialization - uses evk-ra8p1_non_ospi.ld symbols */
+    const uint32_t *src;
+    uint32_t *dest;
+
+    /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
+     * certain that there are no issues with the state of global variables.
+     */
+    extern uint32_t _sbss;
+    extern uint32_t _ebss;
+
+    for (dest = (uint32_t *)&_sbss; dest < (uint32_t *)&_ebss; )
+    {
+      *dest++ = 0;
+    }
+
+    /* Move the initialized data section from his temporary holding spot in
+     * FLASH into the correct place in SRAM.  The correct place in SRAM is
+     * given by _sdata and _edata.  The temporary location is in FLASH at the
+     * end of all of the other read-only data (.text, .rodata) at _eronly.
+     */
+    extern const uint32_t _eronly;
+    extern uint32_t _sdata;
+    extern uint32_t _edata;
+
+    for (src = (const uint32_t *)&_eronly,
+         dest = (uint32_t *)&_sdata; dest < (uint32_t *)&_edata; )
+    {
+      *dest++ = *src++;
+    }
+
+    /* Copy .ramfunc section from flash to SRAM for RAM-executed functions */
+    extern uint32_t _sramfuncs;
+    extern uint32_t _eramfuncs;
+    extern uint32_t _framfuncs;
+
+    for (src = (const uint32_t *)&_framfuncs,
+         dest = (uint32_t *)&_sramfuncs; dest < (uint32_t *)&_eramfuncs; )
+    {
+      *dest++ = *src++;
+    }
+
+#ifdef CONFIG_RA_CM33_SUPPORT
+    /* Copy CM33 code from flash to CM33 ITCM (CM85 loads CM33 firmware) */
+    extern uint32_t _scm33_text;
+    extern uint32_t _ecm33_text;
+    extern uint32_t _fcm33_text;
+
+    for (src = (const uint32_t *)&_fcm33_text,
+         dest = (uint32_t *)&_scm33_text; dest < (uint32_t *)&_ecm33_text; )
+    {
+      *dest++ = *src++;
+    }
+
+    /* Copy CM33 data from flash to CM33 DTCM */
+    extern uint32_t _scm33_data;
+    extern uint32_t _ecm33_data;
+    extern uint32_t _fcm33_data;
+
+    for (src = (const uint32_t *)&_fcm33_data,
+         dest = (uint32_t *)&_scm33_data; dest < (uint32_t *)&_ecm33_data; )
+    {
+      *dest++ = *src++;
+    }
+
+    /* Zero CM33 BSS in CM33 DTCM */
+    extern uint32_t _scm33_bss;
+    extern uint32_t _ecm33_bss;
+
+    for (dest = (uint32_t *)&_scm33_bss; dest < (uint32_t *)&_ecm33_bss; )
+    {
+      *dest++ = 0;
+    }
+#endif /* CONFIG_RA_CM33_SUPPORT */
+
+    /* Memory barrier to ensure all copies complete before execution */
+    __asm__ __volatile__ ("dsb sy" ::: "memory");
+    __asm__ __volatile__ ("isb sy" ::: "memory");
+}
+
+#endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 
 /****************************************************************************
@@ -760,7 +721,6 @@ void ra_register_protect_disable(ra_reg_protect_t regs_to_unprotect)
   leave_critical_section(flags);
 }
 
-
 /****************************************************************************
  * Name: ra_gpio_security_init
  *
@@ -771,7 +731,7 @@ void ra_register_protect_disable(ra_reg_protect_t regs_to_unprotect)
  *
  ****************************************************************************/
 
-void ra_gpio_security_init(void)
+static void ra_gpio_security_init(void)
 {
   uint32_t i;
 
@@ -792,4 +752,146 @@ void ra_gpio_security_init(void)
 
   /* Re-enable register protection for SAR */
   ra_register_protect_enable(RA_REG_PROTECT_SAR);
+}
+
+/****************************************************************************
+ * Name: ra_cortex_m85_init
+ *
+ * Description:
+ *   Initialize Cortex-M85 specific features following Renesas SystemInit.
+ *   Note: I-cache invalidation and initial VTOR setup already done in __start().
+ *
+ ****************************************************************************/
+static void ra_cortex_m85_init(void)
+{
+#ifdef CONFIG_ARCH_RAMVECTORS
+  /* Initialize RAM vectors - this copies flash vectors to RAM and
+   * updates VTOR to point to RAM vector table.
+   * This must be done before any interrupt handlers are attached.
+   */
+
+  arm_ramvec_initialize();
+#endif
+
+#if defined(R_FCACHE_FCACHEIV) && defined(R_FCACHE_FCACHEE)
+  /* Enable flash cache and wait for it to be ready */
+
+  putreg16(1U, R_FCACHE_FCACHEIV);
+  RA_HARDWARE_WAIT(getreg16(R_FCACHE_FCACHEIV), 0U);
+  putreg16(1U, R_FCACHE_FCACHEE);
+#endif
+}
+
+/* Main entry point */
+int main(void){
+
+  /* Cortex-M85 Initialization */
+  ra_cortex_m85_init();
+
+  /*TrustZone Configuration - early security setup */
+#if CONFIG_RA_TZ_SECURE_BUILD || CONFIG_RA_TZ_NONSECURE_BUILD
+  ra_trustzone_init();
+#endif
+
+  /* Initialize RAM Sections (BSS, data, TCM, ramfunc) */
+#if defined(CONFIG_RA_FSP_LINKER_STYPE)
+  /* FSP-style: Initialize internal memory regions */
+  ra_mem_init_fsp(0);
+  /* FSP-style: Initialize external memory regions (OSPI/SDRAM) */
+  ra_mem_init_fsp(1);
+#else
+  /* Standard NuttX initialization */
+  ra_mem_init_nuttx();
+#endif
+
+  /* Setup System Clocks */
+  ra_clock();
+
+#ifdef CONFIG_ARCH_FPU
+   arm_fpuconfig();
+#endif
+
+  /* TCM Initialization */
+#ifdef CONFIG_ARMV8M_ICACHE
+  up_enable_icache();
+#endif
+#ifdef CONFIG_ARMV8M_DCACHE
+  up_enable_dcache();
+#endif
+
+  /* Initialize GPIO security attribution */
+  ra_gpio_security_init();
+
+  /* Perform early serial initialization */
+#ifdef USE_EARLYSERIALINIT
+  /* Low-level Hardware Setup */
+  /* Configure the uart pins for arm_earlyserialinit */
+  ra_earlyserialinit();
+
+  /* The 'A' character is not displayed because the UART hardware is not fully ready */
+  showprogress('A');
+  arm_earlyserialinit();
+#else
+  /* No early serial initialization - console will be set up later */
+  showprogress('A');
+#endif
+
+  showprogress('B');
+
+  /* Board-level Initialization */
+  /* Initialize onboard resources */
+  ra_board_initialize();
+  showprogress('C');
+
+  /* Start NuttX */
+  /* Then start NuttX main initialization */
+  showprogress('\r');
+  showprogress('\n');
+
+  nx_start();
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: __start
+ *
+ * Description:
+ *   This is the reset entry point.
+ *
+ ****************************************************************************/
+
+void __start(void)
+{
+  /* Make sure that interrupts are disabled */
+
+  __asm__ __volatile__ ("\tcpsid  i\n");
+
+  /* Invalidate instruction cache FIRST before any code/vector changes.
+   * This is critical after debugger flash programming where the CPU
+   * might have stale instructions cached.
+   */
+
+#ifdef CONFIG_ARMV8M_ICACHE
+  putreg32(0, NVIC_ICIALLU);
+  ARM_DSB();
+  ARM_ISB();
+#endif
+
+  /* Make sure VECTAB is set to NuttX vector table
+   * and not the one from the boot ROM and have consistency
+   * with debugger that automatically set the VECTAB.
+   */
+
+  putreg32((uint32_t)_vectors, NVIC_VECTAB);
+
+  /* Main entry point */
+
+  main();
+
+  /* Shouldn't get here */
+
+  for (; ; )
+    {
+    }
 }
