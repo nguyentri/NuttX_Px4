@@ -454,6 +454,54 @@ config ARMV8M_HAVE_CORESIGHT
    help
      CoreSight ETM-M85 trace present.
 
+config ARMV8M_USEBASEPRI
+   bool
+   default y if BUILD_FLAT
+   default y if ARCH_HIPRI_INTERRUPT
+   help
+     Force BASEPRI-based interrupt masking for RA8 Cortex-M85.
+     This is REQUIRED for BUILD_FLAT to avoid hardfaults on SVC instructions
+     during context switches. When using PRIMASK (default without BASEPRI),
+     SVC calls will escalate to hardfaults, which are handled but cause
+     debugging issues and potential instability.
+
+     For RA8 MCUs with Cortex-M85, BASEPRI is strongly recommended for:
+     - BUILD_FLAT configurations
+     - High-priority interrupt scenarios
+     - Reliable SVC handling without hardfault escalation
+
+config ARMV8M_ICACHE
+   bool
+   default y
+   help
+     Enable Cortex-M85 Instruction Cache (16KB with ECC).
+     Strongly recommended for performance.
+
+config ARMV8M_DCACHE
+   bool
+   default y
+   help
+     Enable Cortex-M85 Data Cache (16KB with ECC).
+     Strongly recommended for performance.
+
+config ARMV8M_ITCM
+   bool
+   default y
+   help
+     Enable Instruction Tightly Coupled Memory.
+     RA8E1: Part of 32KB total TCM
+     RA8P1: 128KB dedicated ITCM @ 0x00000000
+     Zero-wait-state memory for critical code.
+
+config ARMV8M_DTCM
+   bool
+   default y
+   help
+     Enable Data Tightly Coupled Memory.
+     RA8E1: Part of 32KB total TCM
+     RA8P1: 128KB dedicated DTCM @ 0x20000000
+     Zero-wait-state memory for critical data.
+
 config ARCH_HAVE_CODE_FLASH
    bool
    default y
@@ -667,6 +715,52 @@ config ARMV8M_HAVE_CORESIGHT
    default y
    help
      CoreSight ETM-M85 trace present.
+
+config ARMV8M_USEBASEPRI
+   bool
+   default y if BUILD_FLAT
+   default y if ARCH_HIPRI_INTERRUPT
+   help
+     Force BASEPRI-based interrupt masking for RA8 Cortex-M33.
+     This is REQUIRED for BUILD_FLAT to avoid hardfaults on SVC instructions
+     during context switches. When using PRIMASK (default without BASEPRI),
+     SVC calls will escalate to hardfaults, which are handled but cause
+     debugging issues and potential instability.
+
+     For RA8 MCUs with Cortex-M33, BASEPRI is strongly recommended for:
+     - BUILD_FLAT configurations
+     - High-priority interrupt scenarios
+     - Reliable SVC handling without hardfault escalation
+
+config ARMV8M_ICACHE
+   bool
+   default y
+   help
+     Enable Cortex-M33 Code-bus Cache (16KB with ECC).
+     Renesas custom implementation - strongly recommended for performance.
+
+config ARMV8M_DCACHE
+   bool
+   default y
+   help
+     Enable Cortex-M33 System-bus Cache (16KB with ECC).
+     Renesas custom implementation - strongly recommended for performance.
+
+config ARMV8M_ITCM
+   bool
+   default y
+   help
+     Enable Code Tightly Coupled Memory (CTCM).
+     RA8P1 CM33: 64KB CTCM @ 0x00000000
+     Zero-wait-state memory for critical code.
+
+config ARMV8M_DTCM
+   bool
+   default y
+   help
+     Enable System Tightly Coupled Memory (STCM).
+     RA8P1 CM33: 64KB STCM @ 0x20000000
+     Zero-wait-state memory for critical data.
 
 config ARCH_HAVE_CODE_FLASH
     bool
