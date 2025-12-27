@@ -2184,8 +2184,19 @@ static void ra_spi_bus_initialize(struct ra_spi_priv_s *priv)
                ((hold & 0x07) << R_SPI_B_SPDECR_SPNDL_SHIFT);
       ra_spi_putreg32(priv, R_SPI_B_SPDECR_OFFSET, spdecr);
 
-      /* SPCMD0 default: 8-bit, BRDV=1 (no div), use SSL0 and enable delays */
-      spcmd0 = R_SPI_B_SPCMD_SPB_8 | R_SPI_B_SPCMD_BRDV_1 | R_SPI_B_SPCMD_SSLA_0 |
+      /* SPCMD0 default: 8-bit, BRDV=1 (no div), enable delays
+       * SSL select: Use ssl_select from device config for hardware CS,
+       * otherwise default to SSL0.
+       */
+      uint32_t ssla = R_SPI_B_SPCMD_SSLA_0;  /* Default to SSL0 */
+      if (priv->config->dev_config && priv->config->num_cs > 0 &&
+          priv->config->dev_config[0].cs_type == R_SPI_B_CS_HARDWARE &&
+          priv->config->dev_config[0].ssl_select < 4)
+        {
+          ssla = (priv->config->dev_config[0].ssl_select & 0x7) << R_SPI_B_SPCMD_SSLA_SHIFT;
+        }
+
+      spcmd0 = R_SPI_B_SPCMD_SPB_8 | R_SPI_B_SPCMD_BRDV_1 | ssla |
                R_SPI_B_SPCMD_SCKDEN | R_SPI_B_SPCMD_SLNDEN | R_SPI_B_SPCMD_SPNDEN;
       ra_spi_putreg32(priv, R_SPI_B_SPCMD0_OFFSET, spcmd0);
     }

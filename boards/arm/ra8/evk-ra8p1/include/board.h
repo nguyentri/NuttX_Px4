@@ -127,14 +127,14 @@
 #define GPIO_SPI0_MOSI  GPIO_MOSI0_B_2         /* P603 - Pmod 2 MOSI ⚠️ Conflicts: TXD0 */
 #define GPIO_SPI0_CS0   GPIO_SSLB0_A_1         /* P604 - Pmod 2 CS ✓ SAFE */
 
-/* SPI1 (Pmod 1): P803=SCK2, P802=MISO2, P801=MOSI2, P804=SS2
+/* SCI SPI2 (Pmod 1): P803=SCK2, P802=MISO2, P801=MOSI2, P804=SS2
  * ⚠️  SEVERE CONFLICT: P801/P802 conflict with SCI2 console UART!
  * ⚠️  SEVERE CONFLICT: All pins conflict with OSPI flash signals!
  */
-#define GPIO_SPI1_SCK   GPIO_RSPCKA_C_1        /* P803 - Pmod 1 SCK ⚠️ Conflicts: OSPI_SIO1 */
-#define GPIO_SPI1_MISO  GPIO_MISO2_A_1         /* P802 - Pmod 1 MISO ⚠️ Conflicts: RXD2, OSPI_SIO6 */
-#define GPIO_SPI1_MOSI  GPIO_MOSI2_A_1         /* P801 - Pmod 1 MOSI ⚠️ Conflicts: TXD2, OSPI_DQS */
-#define GPIO_SPI1_CS0   GPIO_SSLE2_A_1         /* P804 - Pmod 1 CS ⚠️ Conflicts: OSPI_SIO7 */
+#define GPIO_SCI_SPI2_SCK   GPIO_SCK2_A_1           /* P803 - Pmod 1 SCI_SPI SCK  ⚠️ Conflicts: OSPI_SIO1 */
+#define GPIO_SCI_SPI2_MISO  GPIO_MISO2_A_1          /* P802 - Pmod 1 SCI_SPI MISO ⚠️ Conflicts: RXD2, OSPI_SIO6 */
+#define GPIO_SCI_SPI2_MOSI  GPIO_MOSI2_A_1          /* P801 - Pmod 1 SCI_SPI MOSI ⚠️ Conflicts: TXD2, OSPI_DQS */
+#define GPIO_SCI_SPI2_CS0   GPIO_SS2_A_1            /* P804 - Pmod 1 SCI_SPI CS   ⚠️ Conflicts: OSPI_SIO7 */
 
 /* Arduino SPI (P100=MISOB, P101=MOSIB, P102=RSPCKB, P103=SSLB0)
  * ⚠️  SEVERE CONFLICT: These pins conflict with OSPI Flash!
@@ -145,10 +145,10 @@
  *   P103: CS0  (D10) ⚡ OSPI_SIO2 ⚡ GPT2A
  *   P110: CS1  (D9)  ⚡  GPT9B
  */
-#define GPIO_ARDUINO_SPI_SCK   GPIO_RSPCKA_B_1      /* P102 - Arduino D13 ⚠️ Conflicts: OSPI_SIO4, GPT2B */
-#define GPIO_ARDUINO_SPI_MISO  GPIO_MISOB_A_1       /* P100 - Arduino D12 ⚠️ Conflicts: OSPI_SIO0, GPT8B */
-#define GPIO_ARDUINO_SPI_MOSI  GPIO_MOSIB_A_1       /* P101 - Arduino D11 ⚠️ Conflicts: OSPI_SIO3, GPT8A */
-#define GPIO_ARDUINO_SPI_CS0   GPIO_SSLB0_A_1       /* P103 - Arduino D10 ⚠️ Conflicts: OSPI_SIO2, GPT2A */
+#define GPIO_ARDUINO_SPI_SCK   GPIO_RSPCKB_A_1          /* P102 - Arduino D13 ⚠️ Conflicts: OSPI_SIO4, GPT2B */
+#define GPIO_ARDUINO_SPI_MISO  GPIO_MISOB_A_1           /* P100 - Arduino D12 ⚠️ Conflicts: OSPI_SIO0, GPT8B */
+#define GPIO_ARDUINO_SPI_MOSI  GPIO_MOSIB_A_1           /* P101 - Arduino D11 ⚠️ Conflicts: OSPI_SIO3, GPT8A */
+#define GPIO_ARDUINO_SPI_CS0   GPIO_SSLB0_A_1           /* P103 - Arduino D10 ⚠️ Conflicts: OSPI_SIO2, GPT2A */
 #define GPIO_ARDUINO_SPI_CS1   GPIO_P110_OUTPUT_HIGH    /* P110 - repurposed for another CS   ⚠️ Conflicts: GPT9B */
 
 /****************************************************************************
