@@ -925,7 +925,26 @@
 #  define R_GPT32_GTIOR_NFCSB_10                          (2 << R_GPT32_GTIOR_NFCSB_SHIFT)  /* GTCLK/16 */
 #  define R_GPT32_GTIOR_NFCSB_11                          (3 << R_GPT32_GTIOR_NFCSB_SHIFT)  /* GTCLK/64 */
 
-/* GTINTAD Register bit definitions */
+/* GTINTAD Register bit definitions - Interrupt Output Setting Register
+ * Bits 0-5: Compare match interrupt enables
+ * Bits 7:6: Period match (overflow/underflow) interrupt enable
+ * Bits 8-15: Synchronous clear enables
+ * Bits 16-19: A/D conversion start request enables
+ * Bits 25:24: Group select
+ * Bits 28-30: Output disable enables
+ * Bit 31: Period count finish interrupt enable
+ */
+#define R_GPT32_GTINTAD_GTINTA                    (1 << 0)  /* GTCCRA Compare Match/Input Capture Interrupt Enable */
+#define R_GPT32_GTINTAD_GTINTB                    (1 << 1)  /* GTCCRB Compare Match/Input Capture Interrupt Enable */
+#define R_GPT32_GTINTAD_GTINTC                    (1 << 2)  /* GTCCRC Compare Match Interrupt Enable */
+#define R_GPT32_GTINTAD_GTINTD                    (1 << 3)  /* GTCCRD Compare Match Interrupt Enable */
+#define R_GPT32_GTINTAD_GTINTE                    (1 << 4)  /* GTCCRE Compare Match Interrupt Enable */
+#define R_GPT32_GTINTAD_GTINTF                    (1 << 5)  /* GTCCRF Compare Match Interrupt Enable */
+#define R_GPT32_GTINTAD_GTINTPR_SHIFT             (6)       /* GTPR Period Match Interrupt Enable shift */
+#define R_GPT32_GTINTAD_GTINTPR_MASK              (3 << 6)  /* GTPR Period Match Interrupt Enable mask */
+#define R_GPT32_GTINTAD_GTINTPR_OVF               (1 << 6)  /* Overflow Interrupt Enable */
+#define R_GPT32_GTINTAD_GTINTPR_UDF               (1 << 7)  /* Underflow Interrupt Enable */
+
 #define R_GPT32_GTINTAD_SCFA                      (1 << 8)  /* GTCCRA Register Compare Match/Input Capture Source Synchronous Clear Enable */
 
 #define R_GPT32_GTINTAD_SCFB                      (1 << 9)  /* GTCCRB Register Compare Match/Input Capture Source Synchronous Clear Enable */
