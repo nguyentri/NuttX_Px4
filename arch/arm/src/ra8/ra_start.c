@@ -764,18 +764,34 @@ static void ra_gpio_security_init(void)
  ****************************************************************************/
 static void ra_cortex_m85_init(void)
 {
+  /* Make sure that interrupts are disabled */
+  __asm__ __volatile__ ("\tcpsid  i\n");
+
+  /* Invalidate instruction cache FIRST before any code/vector changes.
+   * This is critical after debugger flash programming where the CPU
+   * might have stale instructions cached.
+   */
+#ifdef CONFIG_ARMV8M_ICACHE
+  putreg32(0, NVIC_ICIALLU);
+  ARM_DSB();
+  ARM_ISB();
+#endif
+
 #ifdef CONFIG_ARCH_RAMVECTORS
   /* Initialize RAM vectors - this copies flash vectors to RAM and
    * updates VTOR to point to RAM vector table.
    * This must be done before any interrupt handlers are attached.
    */
-
   arm_ramvec_initialize();
+#else
+  /* Make sure VECTAB is set to NuttX vector table
+   * and not the one from the boot ROM or bootloader.
+   */
+  putreg32((uint32_t)_vectors, NVIC_VECTAB);
 #endif
 
 #if defined(R_FCACHE_FCACHEIV) && defined(R_FCACHE_FCACHEE)
   /* Enable flash cache and wait for it to be ready */
-
   putreg16(1U, R_FCACHE_FCACHEIV);
   RA_HARDWARE_WAIT(getreg16(R_FCACHE_FCACHEIV), 0U);
   putreg16(1U, R_FCACHE_FCACHEE);
@@ -863,28 +879,6 @@ int main(void){
 
 void __start(void)
 {
-  /* Make sure that interrupts are disabled */
-
-  __asm__ __volatile__ ("\tcpsid  i\n");
-
-  /* Invalidate instruction cache FIRST before any code/vector changes.
-   * This is critical after debugger flash programming where the CPU
-   * might have stale instructions cached.
-   */
-
-#ifdef CONFIG_ARMV8M_ICACHE
-  putreg32(0, NVIC_ICIALLU);
-  ARM_DSB();
-  ARM_ISB();
-#endif
-
-  /* Make sure VECTAB is set to NuttX vector table
-   * and not the one from the boot ROM and have consistency
-   * with debugger that automatically set the VECTAB.
-   */
-
-  putreg32((uint32_t)_vectors, NVIC_VECTAB);
-
   /* Main entry point */
 
   main();
