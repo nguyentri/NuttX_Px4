@@ -90,6 +90,10 @@
 /* Max frequency (8 MHz) */
 #define R_SPI_B_MAX_FREQUENCY            20000000
 #define R_SPI_B_DEFAULT_FREQUENCY         1000000
+/* Check if divider is out of range */
+#define R_SPI_B_CLK_MAX_DIV (4096U)
+#define R_SPI_B_CLK_MIN_DIV (2U)
+#define R_SPI_B_CLK_N_DIV_MULTIPLIER (512U)
 
 /* All clear flags for SPSRC register */
 #define R_SPI_B_SPSRC_ALL_CLEAR          (R_SPI_B_SPSRC_SPDRFC | R_SPI_B_SPSRC_OVRFC | \
@@ -1638,12 +1642,11 @@ static int ra_spi_lock(struct spi_dev_s *dev, bool lock)
  *   Returns the actual frequency selected
  *
  ****************************************************************************/
-
 static uint32_t ra_spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
 {
   struct ra_spi_priv_s *priv = (struct ra_spi_priv_s *)dev;
   uint32_t src_clk = ra_get_peripheral_clock(RA_PCLK_SPICLK);
-  uint32_t divisor;
+  uint32_t desired_divider;
   uint8_t spbr;
   uint8_t brdv = 0;
   uint32_t actual;
@@ -1653,7 +1656,8 @@ static uint32_t ra_spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
   /* Skip reprogramming if requested frequency equals current setting */
   if (priv && priv->frequency == frequency)
     {
-      spiinfo("SPI%d frequency unchanged (%lu) - skip\n", priv->config->bus, (unsigned long)frequency);
+      spiinfo("SPI%d frequency unchanged (%lu) - skip\n",
+              priv->config->bus, (unsigned long)frequency);
       return priv->frequency;
     }
 
@@ -1663,38 +1667,68 @@ static uint32_t ra_spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
       frequency = R_SPI_B_MAX_FREQUENCY;
     }
 
-  /* Calculate the best divisor */
-  /* The SPI bit rate is calculated as:
-   * Bit rate = PCLKA / (2 * (SPBR + 1) * 2^BRDV)
+  /* Calculate desired divider (round up to ensure we don't exceed requested frequency)
+   * The SPI bit rate is calculated as:
+   * Bit rate = src_clk / (2 * (SPBR + 1) * 2^BRDV)
+   * Therefore: desired_divider = src_clk / frequency
    */
+  desired_divider = (src_clk + frequency - 1) / frequency;
 
-  divisor = (src_clk + frequency - 1) / frequency;
-
-  /* Find best BRDV and SPBR combination */
-  for (brdv = 0; brdv < 4; brdv++)
+  if (desired_divider > R_SPI_B_CLK_MAX_DIV)
     {
-      uint32_t div_factor = 2 << brdv;  /* 2^(brdv+1) */
-      uint32_t spbr_calc = (divisor + div_factor - 1) / (2 * div_factor) - 1;
+      /* Can't achieve bitrate slower than maximum divider allows */
+      desired_divider = R_SPI_B_CLK_MAX_DIV;
+    }
 
-      if (spbr_calc <= 255)
+  if (desired_divider < R_SPI_B_CLK_MIN_DIV)
+    {
+      /* Configure max bitrate (src_clk / 2) */
+      brdv = 0;
+      spbr = 0;
+    }
+  else
+    {
+      /* Find the smallest value for BRDV (N) possible
+       * Possible dividers for values of BRDV:
+       *   BRDV = 0; div = [2,4,6,..,512]
+       *   BRDV = 1; div = [4,8,12,..,1024]
+       *   BRDV = 2; div = [8,16,24,..,2048]
+       *   BRDV = 3; div = [16,32,48,..,4096]
+       */
+      uint8_t i;
+      for (i = 0; i < 4; i++)
         {
-          spbr = (uint8_t)spbr_calc;
-          break;
+          if (desired_divider <= (R_SPI_B_CLK_N_DIV_MULTIPLIER << i))
+            {
+              break;
+            }
+        }
+
+      brdv = i & 0x03U;
+
+      /* Calculate SPBR value
+       * desired_divider = 2 * (spbr + 1) * 2^brdv
+       * Therefore: spbr = (desired_divider / (2 * 2^brdv)) - 1
+       */
+      uint32_t spbr_divisor = (2U * (1U << brdv));
+
+      /* Round up to ensure we don't exceed requested frequency */
+      spbr = (uint8_t)(((desired_divider + spbr_divisor - 1U) / spbr_divisor) - 1U);
+
+      /* Ensure SPBR doesn't overflow */
+      if (spbr > 255)
+        {
+          spbr = 255;
         }
     }
 
-  if (brdv >= 4)
-    {
-      /* Use maximum divisor */
-      brdv = 3;
-      spbr = 255;
-    }
-
-  /* Calculate actual frequency */
-  actual = src_clk / (2 * (spbr + 1) * (2 << brdv));
+  /* Calculate actual frequency based on the selected SPBR and BRDV
+   * Bit rate = src_clk / (2 * (SPBR + 1) * 2^BRDV)
+   */
+  actual = src_clk / (2 * (spbr + 1) * (1U << brdv));
 
   spiinfo("SPI%d SPBR=%d BRDV=%d actual=%lu\n",
-    priv->config->bus, spbr, brdv, (unsigned long)actual);
+          priv->config->bus, spbr, brdv, (unsigned long)actual);
 
   /* Write to SPCR3 register (bit rate) */
   uint32_t spcr3 = ra_spi_getreg32(priv, R_SPI_B_SPCR3_OFFSET);
@@ -1709,9 +1743,10 @@ static uint32_t ra_spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
   ra_spi_putreg32(priv, R_SPI_B_SPCMD0_OFFSET, spcmd0);
 
   /* Update current configured frequency */
-  if (priv) {
-    priv->frequency = actual;
-  }
+  if (priv)
+    {
+      priv->frequency = actual;
+    }
 
   return actual;
 }
