@@ -661,6 +661,13 @@
 /* Camera GPIO Control Pins (from earlier GPIO section) */
 /* GPIO_CAM_RST and GPIO_CAM_PWDN were already defined in GPIO Definitions section */
 
+/* Board LED Definitions */
+#define LED_1         		0
+#define LED_2         		1
+#define LED_3         		2
+#define NLEDS         		3
+#define INVALID_LED         NLEDS
+
 /* These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
  * defined. In that case, the usage by the board port is defined in
  * include/board.h and src/ra8p1_auto_leds.c. The LEDs are used to encode
@@ -670,24 +677,20 @@
  *                                                      	 LED1   LED2
  *  -----------------------  --------------------------  ----  ----
  */
-#define LED_STARTED       	0  /* NuttX has been started     OFF   OFF  */
-#define LED_HEAPALLOCATE  	0  /* Heap has been allocated    OFF   OFF  */
-#define LED_IRQSENABLED   	0  /* Interrupts enabled         OFF   OFF  */
-#define LED_STACKCREATED  	1  /* Idle stack created         ON    OFF  */
-#define LED_INIRQ         	2  /* In an interrupt            N/C   ON   */
-#define LED_SIGNAL        	2  /* In a signal handler        N/C   ON   */
-#define LED_ASSERTION     	2  /* An assertion failed        N/C   ON   */
-#define LED_PANIC         	3  /* The system has crashed     N/C   BLINK */
-#define LED_IDLE          	3  /* MCU is in sleep mode       ----  Not used ---- */
-
-/* Board LED Definitions */
-#define LED_1         		0
-#define LED_2         		1
-#define NLEDS         		2
+#define LED_STARTED       	LED_2  /* NuttX has been started     OFF   OFF  */
+#define LED_HEAPALLOCATE  	LED_2  /* Heap has been allocated    OFF   OFF  */
+#define LED_IRQSENABLED   	LED_2  /* Interrupts enabled         OFF   OFF  */
+#define LED_STACKCREATED  	LED_2  /* Idle stack created         ON    OFF  */
+#define LED_INIRQ         	INVALID_LED  /* In an interrupt      N/C   ON   */
+#define LED_SIGNAL        	INVALID_LED  /* In a signal handler  N/C   ON   */
+#define LED_ASSERTION     	LED_3  /* An assertion failed        N/C   ON   */
+#define LED_PANIC         	LED_3  /* The system has crashed     N/C   BLINK */
+#define LED_IDLE          	LED_1  /* MCU is in idle mode        BLINK */
 
 /* LED bits for use with board_userled_all() */
 #define LED_1_BIT    		(1 << LED_1)
 #define LED_2_BIT    		(1 << LED_2)
+#define LED_3_BIT    		(1 << LED_3)
 
 /* GPIO initialization list pattern */
 #if (0)

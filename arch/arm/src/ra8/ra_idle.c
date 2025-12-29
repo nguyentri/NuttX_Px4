@@ -24,7 +24,6 @@
  * Included Files
  ****************************************************************************/
 
-#include <arch/board/board.h>
 #include <nuttx/config.h>
 
 #include <debug.h>
@@ -38,8 +37,9 @@
 #include <syslog.h>
 
 #include "chip.h"
-#include "hardware/ra_memorymap.h"
 #include "arm_internal.h"
+
+#include <arch/board/board.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -50,8 +50,9 @@
  */
 
 #if defined(CONFIG_ARCH_LEDS) && defined(LED_IDLE)
-#  define BEGIN_IDLE() board_autoled_on(LED_IDLE)
-#  define END_IDLE()   board_autoled_off(LED_IDLE)
+#  define BEGIN_IDLE()
+#  define END_IDLE()
+#  define HEART_BEAT_IDLE board_autoled_toggle(LED_IDLE)
 #else
 #  define BEGIN_IDLE()
 #  define END_IDLE()
@@ -61,7 +62,7 @@
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_RA_IDLE_LOG_STATE
+#ifdef CONFIG_RA_UP_IDLE_CALL_BACK
 static clock_t g_last_log_time = 0;
 #endif
 
@@ -147,6 +148,23 @@ static void up_idlepm(void)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+#ifdef CONFIG_RA_UP_IDLE_CALL_BACK
+void up_idle_callback(void)
+{
+    /* Perform IDLE mode power management */
+     /* Check if n seconds have passed and log with timestamp */
+    clock_t current_time = clock();
+    if ((current_time - g_last_log_time) >= (CLOCKS_PER_SEC))
+    {
+        struct timespec ts;
+        clock_gettime(CLOCK_REALTIME, &ts);
+        board_autoled_toggle(LED_IDLE);
+        //syslog(LOG_INFO, "[C Idle State] Time:%ld.%06ld, CPU entering low power mode (WFI)...\n",
+        //        (long)ts.tv_sec, (long)(ts.tv_nsec / 1000));
+        g_last_log_time = current_time;
+    }
+}
+#endif
 
 /****************************************************************************
  * Name: up_idle
@@ -170,18 +188,10 @@ void up_idle(void)
 
   nxsched_process_timer();
 #else
-#ifdef CONFIG_RA_IDLE_LOG_STATE
-  /* Check if 5 seconds have passed and log with timestamp */
-  clock_t current_time = clock();
-  if ((current_time - g_last_log_time) >= 5*CLOCKS_PER_SEC)
-    {
-      struct timespec ts;
-      clock_gettime(CLOCK_REALTIME, &ts);
+#ifdef CONFIG_RA_UP_IDLE_CALL_BACK
+    /* Call user idle callback function */
 
-      syslog(LOG_INFO, "[C Idle State] Time:%ld.%06ld, CPU entering low power mode (WFI)...\n",
-             (long)ts.tv_sec, (long)(ts.tv_nsec / 1000));
-      g_last_log_time = current_time;
-    }
+    up_idle_callback();
 #endif
   /* Perform IDLE mode power management */
 

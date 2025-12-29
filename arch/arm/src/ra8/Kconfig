@@ -6269,12 +6269,12 @@ config RA_VBATT_SWITCH
      Enable VBATT switch functionality.
      VCC can switch to VBAT if the voltage drops too low.
 
-config RA_IDLE_LOG_STATE
-   bool "Idle Log State"
+config RA_UP_IDLE_CALL_BACK
+   bool "Custom Idle callback function"
    default n
    help
-     Enable logging of idle state for performance monitoring.
-     Useful for debugging and optimizing power consumption.
+     Enable custom idle callback function support.
+     This allows user-defined actions during CPU idle time.
 
 config RA_FSP_LINKER_STYPE
     bool "RA memory using similar to FSP"
