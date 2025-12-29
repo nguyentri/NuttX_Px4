@@ -1636,7 +1636,7 @@ static int ra_spi_lock(struct spi_dev_s *dev, bool lock)
 static uint32_t ra_spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
 {
   struct ra_spi_priv_s *priv = (struct ra_spi_priv_s *)dev;
-  uint32_t src_clk = RA_PCLKA_FREQUENCY;
+  uint32_t src_clk = ra_get_peripheral_clock(RA_PCLK_SPICLK);
   uint32_t divisor;
   uint8_t spbr;
   uint8_t brdv = 0;
@@ -2247,7 +2247,7 @@ static void ra_spi_bus_initialize(struct ra_spi_priv_s *priv)
 
   /* Set default bit rate to 1MHz and mode 0 with 8 bits */
   ra_spi_setfrequency(&priv->spidev, 1000000);
-  ra_spi_setmode(&priv->spidev, SPIDEV_MODE0);
+  ra_spi_setmode(&priv->spidev, SPIDEV_MODE3);
   ra_spi_setbits(&priv->spidev, 8);
 
 #ifdef CONFIG_RA_DTC
