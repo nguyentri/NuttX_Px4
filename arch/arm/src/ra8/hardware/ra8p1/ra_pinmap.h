@@ -80,22 +80,24 @@
 #define IRQ13                                  (13)
 #define IRQ14                                  (14)
 #define IRQ15                                  (15)
-#define IRQ16                                  (16)
-#define IRQ17                                  (17)
-#define IRQ18                                  (18)
-#define IRQ19                                  (19)
-#define IRQ20                                  (20)
-#define IRQ21                                  (21)
-#define IRQ22                                  (22)
-#define IRQ23                                  (23)
-#define IRQ24                                  (24)
-#define IRQ25                                  (25)
-#define IRQ26                                  (26)
-#define IRQ27                                  (27)
-#define IRQ28                                  (28)
-#define IRQ29                                  (29)
-#define IRQ30                                  (30)
-#define IRQ31                                  (31)
+/* IRQ16-31: Encoded as (0x20 | (irq - 16)) to avoid bit 4 conflict with R_PFS_PCR */
+/* GPIO_IRQ_MASK = 0x2F uses bits {5, 3, 2, 1, 0}, skipping bit 4 */
+#define IRQ16                                  (0x20)  /* bit 5 + 0 */
+#define IRQ17                                  (0x21)  /* bit 5 + 1 */
+#define IRQ18                                  (0x22)  /* bit 5 + 2 */
+#define IRQ19                                  (0x23)  /* bit 5 + 3 */
+#define IRQ20                                  (0x24)  /* bit 5 + 4 */
+#define IRQ21                                  (0x25)  /* bit 5 + 5 */
+#define IRQ22                                  (0x26)  /* bit 5 + 6 */
+#define IRQ23                                  (0x27)  /* bit 5 + 7 */
+#define IRQ24                                  (0x28)  /* bit 5 + 8 */
+#define IRQ25                                  (0x29)  /* bit 5 + 9 */
+#define IRQ26                                  (0x2A)  /* bit 5 + 10 */
+#define IRQ27                                  (0x2B)  /* bit 5 + 11 */
+#define IRQ28                                  (0x2C)  /* bit 5 + 12 */
+#define IRQ29                                  (0x2D)  /* bit 5 + 13 */
+#define IRQ30                                  (0x2E)  /* bit 5 + 14 */
+#define IRQ31                                  (0x2F)  /* bit 5 + 15 */
 #define MAX_GPIO_IRQS                          (32)
 
 /* PSEL configuration Bit Field position in gpio_pinset_t.cfg */

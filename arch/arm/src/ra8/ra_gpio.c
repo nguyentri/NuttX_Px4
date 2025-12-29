@@ -274,6 +274,13 @@ static uint32_t ra_gpio_get_pfs_config(gpio_pinset_t cfgset)
 static int ra_gpio_find_irq(gpio_pinset_t pinset)
 {
   uint32_t cfg = GPIO_GET_CFG(pinset);
+  /* Get encoded IRQ value from pinset.
+   * IRQ 0-15: stored directly in bits 0-3
+   * IRQ 16-31: stored as (0x20 | (irq - 16)) in bits 5 + 0-3
+   * GPIO_IRQ_MASK = 0x2F uses bits {5, 3, 2, 1, 0}, skipping bit 4 (R_PFS_PCR)
+   */
+  int encoded = GPIO_GET_IRQ_NUM(pinset);
+  int irq;
 
   /* Check if this pin is configured for IRQ/input-selection */
   if (!(cfg & R_PFS_ISEL))
@@ -282,8 +289,16 @@ static int ra_gpio_find_irq(gpio_pinset_t pinset)
       return -1;
     }
 
-  /* Get IRQ number from cfg*/
-  int irq = GPIO_GET_IRQ_NUM(pinset);
+  if (encoded & 0x20)
+    {
+      /* IRQ 16-31: decode from (0x20 | (irq - 16)) */
+      irq = 16 + (encoded & 0x0F);
+    }
+  else
+    {
+      /* IRQ 0-15: direct value */
+      irq = encoded;
+    }
 
   return irq;
 }
@@ -810,26 +825,39 @@ int ra_gpiosetevent(uint32_t pinset, bool rising, bool falling,
       irq_mode = RA_ICU_IRQ_EDGE_BOTH;
     }
 
-  ret = ra_icu_filter_config(irq_num, irq_mode, false, RA_ICU_FILTER_PCLK_DIV_1);
-  if (ret < 0)
-    {
-      return ret; /* ICU filter configuration failed */
-    }
-
-  /* Set up ICU interrupt link */
+  /* Set up ICU interrupt link FIRST (this allocates and clears IELSR slot)
+   * The IELSR must be cleared before configuring IRQCR per hardware manual.
+   * Pass irq_enable=false to avoid enabling before IRQCR is configured.
+   */
   icu_irq = ra_icu_attach(icu_event, ra_gpio_irq_handler,
-                          &g_gpio_irqs[slot], true);
+                          &g_gpio_irqs[slot], false);
   if (icu_irq < 0)
     {
       return icu_irq; /* ICU attach failed */
     }
 
-  /* Store interrupt information */
+  /* Store interrupt information BEFORE enabling the interrupt!
+   * This prevents a race condition where an interrupt fires before
+   * the callback/arg are set, causing an invalid function call.
+   */
   g_gpio_irqs[slot].pinset = pinset;
   g_gpio_irqs[slot].callback = func;
   g_gpio_irqs[slot].arg = arg;
   g_gpio_irqs[slot].icu_slot = icu_irq;
   g_gpio_irqs[slot].allocated = true;
+
+  /* Now configure IRQCR (edge detection mode) - IELSR is already cleared */
+  ret = ra_icu_filter_config(irq_num, irq_mode, false, RA_ICU_FILTER_PCLK_DIV_1);
+  if (ret < 0)
+    {
+      ra_icu_detach(icu_irq);
+      g_gpio_irqs[slot].allocated = false;
+      g_gpio_irqs[slot].callback = NULL;
+      return ret; /* ICU filter configuration failed */
+    }
+
+  /* Now enable the interrupt - callback/arg are already set */
+  up_enable_irq(icu_irq);
 
   return OK;
 }

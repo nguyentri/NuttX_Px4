@@ -176,6 +176,9 @@ int ra_icu_attach(int event, xcpt_t handler, void *arg, bool irq_enable)
 
   slot = g_icu_slot++;
 
+  /* Clear the IELSR slot first (required before setting event link) */
+  putreg32(0, R_ICU_IELSR(slot));
+
   /* Set up the ICU event link */
   ra_icu_set_event(slot, event);
 
@@ -379,8 +382,12 @@ int ra_icu_filter_config(int icu_irq, uint8_t mode, bool filter_enable,
       return -EINVAL;
     }
 
-  /* IELSR Must be zero when modifying the IRQCR bits. */
-  putreg32(0, R_ICU_IELSR(icu_irq));
+  /* NOTE: Do NOT write to IELSR here!
+   * IELSR slots are dynamically allocated by ra_icu_attach().
+   * The icu_irq parameter here is the external IRQ number (0-31),
+   * which is used to select the IRQCR register, NOT the IELSR slot.
+   * The IELSR event link is configured separately in ra_icu_attach().
+   */
 
   /* Set interrupt detection mode */
 #if defined(CONFIG_RA8E1_GROUP)
