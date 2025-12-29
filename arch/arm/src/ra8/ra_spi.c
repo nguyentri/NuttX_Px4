@@ -88,7 +88,8 @@
 #define R_SPI_B_CS_HARDWARE              2    /* Use hardware SSx pin for chip select */
 
 /* Max frequency (8 MHz) */
-#define R_SPI_B_MAX_FREQUENCY            8000000
+#define R_SPI_B_MAX_FREQUENCY            20000000
+#define R_SPI_B_DEFAULT_FREQUENCY         1000000
 
 /* All clear flags for SPSRC register */
 #define R_SPI_B_SPSRC_ALL_CLEAR          (R_SPI_B_SPSRC_SPDRFC | R_SPI_B_SPSRC_OVRFC | \
@@ -160,6 +161,11 @@ struct ra_spi_priv_s
   size_t                   ntxwords;   /* Number of words to transfer */
   size_t                   nrxwords;   /* Number of words to receive */
   bool                     error;      /* Transfer error flag */
+
+  /* Current transfer parameters */
+  uint32_t                 frequency;  /* Requested clock frequency */
+  enum spi_mode_e          mode;       /* Current SPI mode */
+  int                      nbits;      /* Number of bits per word */
 
 #ifdef CONFIG_RA_DTC
   /* DTC transfer state */
@@ -1644,6 +1650,13 @@ static uint32_t ra_spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
 
   spiinfo("SPI%d frequency %lu\n", priv->config->bus, (unsigned long)frequency);
 
+  /* Skip reprogramming if requested frequency equals current setting */
+  if (priv && priv->frequency == frequency)
+    {
+      spiinfo("SPI%d frequency unchanged (%lu) - skip\n", priv->config->bus, (unsigned long)frequency);
+      return priv->frequency;
+    }
+
   /* Limit to maximum frequency */
   if (frequency > R_SPI_B_MAX_FREQUENCY)
     {
@@ -1695,7 +1708,12 @@ static uint32_t ra_spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
   spcmd0 |= (brdv << R_SPI_B_SPCMD_BRDV_SHIFT);
   ra_spi_putreg32(priv, R_SPI_B_SPCMD0_OFFSET, spcmd0);
 
-    return actual;
+  /* Update current configured frequency */
+  if (priv) {
+    priv->frequency = actual;
+  }
+
+  return actual;
 }
 
 /****************************************************************************
@@ -1720,6 +1738,13 @@ static void ra_spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
   uint8_t cpha = 0;
 
   spiinfo("SPI%d mode %d\n", priv->config->bus, mode);
+
+  /* Skip reprogramming if mode unchanged */
+  if (priv && priv->mode == mode)
+    {
+      spiinfo("SPI%d mode unchanged (%d) - skip\n", priv->config->bus, mode);
+      return;
+    }
 
   switch (mode)
     {
@@ -1766,6 +1791,11 @@ static void ra_spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
     }
 
   ra_spi_putreg32(priv, R_SPI_B_SPCMD0_OFFSET, spcmd0);
+
+  /* Cache current mode */
+  if (priv) {
+    priv->mode = mode;
+  }
 }
 
 /****************************************************************************
@@ -1789,6 +1819,13 @@ static void ra_spi_setbits(struct spi_dev_s *dev, int nbits)
   uint32_t spb_bits;
 
   spiinfo("SPI%d nbits %d\n", priv->config->bus, nbits);
+
+  /* Skip reprogramming if bit width unchanged */
+  if (priv && priv->nbits == nbits)
+    {
+      spiinfo("SPI%d nbits unchanged (%d) - skip\n", priv->config->bus, nbits);
+      return;
+    }
 
   /* Convert nbits to SPB field value */
   switch (nbits)
@@ -1824,6 +1861,11 @@ static void ra_spi_setbits(struct spi_dev_s *dev, int nbits)
   spcmd0 &= ~R_SPI_B_SPCMD_SPB_MASK;
   spcmd0 |= spb_bits;
   ra_spi_putreg32(priv, R_SPI_B_SPCMD0_OFFSET, spcmd0);
+
+  /* Cache current bits-per-word */
+  if (priv) {
+    priv->nbits = nbits;
+  }
 }
 
 #ifdef CONFIG_SPI_HWFEATURES
@@ -2245,10 +2287,15 @@ static void ra_spi_bus_initialize(struct ra_spi_priv_s *priv)
   /* Configure SPDCR default */
   ra_spi_putreg32(priv, R_SPI_B_SPDCR_OFFSET, spdcr);
 
-  /* Set default bit rate to 1MHz and mode 0 with 8 bits */
-  ra_spi_setfrequency(&priv->spidev, 1000000);
+  /* Set default bit rate to 1MHz and mode 3 with 8 bits */
+  ra_spi_setfrequency(&priv->spidev, R_SPI_B_DEFAULT_FREQUENCY);
   ra_spi_setmode(&priv->spidev, SPIDEV_MODE3);
   ra_spi_setbits(&priv->spidev, 8);
+
+  /* Current transfer parameters */
+  priv->frequency = R_SPI_B_DEFAULT_FREQUENCY;  /* Requested clock frequency */
+  priv->mode = SPIDEV_MODE3;       /* Current SPI mode */
+  priv->nbits = 8;      /* Number of bits per word */
 
 #ifdef CONFIG_RA_DTC
   /* Setup DTC if bus config enables it */
