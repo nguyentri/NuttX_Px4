@@ -36,10 +36,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* SPI Configuration */
-#define RA_SPI_MAX_FREQUENCY     8000000  /* Maximum SPI frequency */
-#define RA_SPI_MIN_FREQUENCY     1000     /* Minimum SPI frequency */
-
 /* SPI Bus numbers */
 #define RA_SPI_BUS_0             0
 #define RA_SPI_BUS_1             1
@@ -69,31 +65,6 @@ typedef enum {
   RA_SPI_DIR_MSB_FIRST = 0,  /* MSB first */
   RA_SPI_DIR_LSB_FIRST = 1   /* LSB first */
 } ra_spi_dir_type;
-
-/* SPI Device external device configuration with runtime state
- * It is used to write to SPCMDm : SPI Command Register (m = 0 to 7) if multiple devices are on the same spi bus
- * If GPIO CS is used, the CS pin is configured in ra_spi_select() function and SPCMD0
- * Note: This structure extends ra_spi_ext_dev_config_s
- */
-struct ra_spi_ext_dev_config_s
-{
-  uint32_t devid;           /* Device ID */
-  uint32_t max_frequency;   /* Maximum frequency for this device */
-  uint8_t  cur_mode;            /* SPI mode */
-  uint8_t  cur_bits;            /* Data bits per transfer */
-  ra_spi_dir_type    cur_dir;       /* Data direction */
-  gpio_pinset_t      cs_gpio;    /* GPIO Chip Select and Slave Select pin definitions */
-  ra_spi_cs_type     cs_type;   /* Use hardware SS0 or GPIO */
-
-  uint8_t  ssl_select;      /* SSL select value (0-3) */
-  uint8_t  setup_delay;     /* CS setup delay */
-  uint8_t  hold_delay;      /* CS hold delay */
-  uint8_t  negation_delay;  /* CS negation delay */
-  bool     active_low;      /* CS active low */
-  const char *name;         /* Device name for debugging */
-  int use_dma;
-  int use_dtc;
-};
 
 /****************************************************************************
  * Public Function Prototypes
@@ -175,6 +146,17 @@ const struct ra_spi_ext_dev_config_s *ra_spi_get_dev_config(struct spi_dev_s *de
  * @param lsbfirst true for LSB-first, false for MSB-first
  */
 void ra_spi_setbitorder(struct spi_dev_s *dev, bool lsbfirst);
+
+/****************************************************************************
+ * Name: ra_spi_setssl
+ *
+ * Description:
+ *   Set the hardware chip select (SSL) for the SPI device.
+ *   This function updates the SSLA field in SPCMD0 to select which
+ *   hardware SSL pin (SSL0-SSL3) to use for the current transfer.
+ *
+ ****************************************************************************/
+void ra_spi_setssl(struct spi_dev_s *dev, uint8_t ssl_select);
 
 /**
  * Enable/disable SPI loopback features on the given SPI device.
