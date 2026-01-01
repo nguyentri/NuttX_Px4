@@ -311,7 +311,197 @@ static struct ra_sci_spi_priv_s ra_sci1_spi_priv =
 };
 #endif
 
-/* Additional SCI channels 2-9 would follow the same pattern */
+#ifdef CONFIG_RA_SCI2_SPI
+static const struct ra_sci_spi_config_s ra_sci2_spi_config =
+{
+  .base     = R_SCI_B_CH_BASE(2),
+  .channel  = 2,
+  .rxi_elc  = RA_ELC_SCI2_RXI,
+  .txi_elc  = RA_ELC_SCI2_TXI,
+  .tei_elc  = RA_ELC_SCI2_TEI,
+  .eri_elc  = RA_ELC_SCI2_ERI,
+  .mstp     = RA_MSTP_SCI2,
+};
+
+static struct ra_sci_spi_priv_s ra_sci2_spi_priv =
+{
+  .spidev =
+  {
+    .ops = &ra_sci_spi_ops,
+  },
+  .config = &ra_sci2_spi_config,
+  .devid = 0xffffffff,
+  .initialized = false,
+};
+#endif
+
+#ifdef CONFIG_RA_SCI3_SPI
+static const struct ra_sci_spi_config_s ra_sci3_spi_config =
+{
+  .base     = R_SCI_B_CH_BASE(3),
+  .channel  = 3,
+  .rxi_elc  = RA_ELC_SCI3_RXI,
+  .txi_elc  = RA_ELC_SCI3_TXI,
+  .tei_elc  = RA_ELC_SCI3_TEI,
+  .eri_elc  = RA_ELC_SCI3_ERI,
+  .mstp     = RA_MSTP_SCI3,
+};
+
+static struct ra_sci_spi_priv_s ra_sci3_spi_priv =
+{
+  .spidev =
+  {
+    .ops = &ra_sci_spi_ops,
+  },
+  .config = &ra_sci3_spi_config,
+  .devid = 0xffffffff,
+  .initialized = false,
+};
+#endif
+
+#ifdef CONFIG_RA_SCI4_SPI
+static const struct ra_sci_spi_config_s ra_sci4_spi_config =
+{
+  .base     = R_SCI_B_CH_BASE(4),
+  .channel  = 4,
+  .rxi_elc  = RA_ELC_SCI4_RXI,
+  .txi_elc  = RA_ELC_SCI4_TXI,
+  .tei_elc  = RA_ELC_SCI4_TEI,
+  .eri_elc  = RA_ELC_SCI4_ERI,
+  .mstp     = RA_MSTP_SCI4,
+};
+
+static struct ra_sci_spi_priv_s ra_sci4_spi_priv =
+{
+  .spidev =
+  {
+    .ops = &ra_sci_spi_ops,
+  },
+  .config = &ra_sci4_spi_config,
+  .devid = 0xffffffff,
+  .initialized = false,
+};
+#endif
+
+#ifdef CONFIG_RA_SCI5_SPI
+static const struct ra_sci_spi_config_s ra_sci5_spi_config =
+{
+  .base     = R_SCI_B_CH_BASE(5),
+  .channel  = 5,
+  .rxi_elc  = RA_ELC_SCI5_RXI,
+  .txi_elc  = RA_ELC_SCI5_TXI,
+  .tei_elc  = RA_ELC_SCI5_TEI,
+  .eri_elc  = RA_ELC_SCI5_ERI,
+  .mstp     = RA_MSTP_SCI5,
+};
+
+static struct ra_sci_spi_priv_s ra_sci5_spi_priv =
+{
+  .spidev =
+  {
+    .ops = &ra_sci_spi_ops,
+  },
+  .config = &ra_sci5_spi_config,
+  .devid = 0xffffffff,
+  .initialized = false,
+};
+#endif
+
+#ifdef CONFIG_RA_SCI6_SPI
+static const struct ra_sci_spi_config_s ra_sci6_spi_config =
+{
+  .base     = R_SCI_B_CH_BASE(6),
+  .channel  = 6,
+  .rxi_elc  = RA_ELC_SCI6_RXI,
+  .txi_elc  = RA_ELC_SCI6_TXI,
+  .tei_elc  = RA_ELC_SCI6_TEI,
+  .eri_elc  = RA_ELC_SCI6_ERI,
+  .mstp     = RA_MSTP_SCI6,
+};
+
+static struct ra_sci_spi_priv_s ra_sci6_spi_priv =
+{
+  .spidev =
+  {
+    .ops = &ra_sci_spi_ops,
+  },
+  .config = &ra_sci6_spi_config,
+  .devid = 0xffffffff,
+  .initialized = false,
+};
+#endif
+
+#ifdef CONFIG_RA_SCI7_SPI
+static const struct ra_sci_spi_config_s ra_sci7_spi_config =
+{
+  .base     = R_SCI_B_CH_BASE(7),
+  .channel  = 7,
+  .rxi_elc  = RA_ELC_SCI7_RXI,
+  .txi_elc  = RA_ELC_SCI7_TXI,
+  .tei_elc  = RA_ELC_SCI7_TEI,
+  .eri_elc  = RA_ELC_SCI7_ERI,
+  .mstp     = RA_MSTP_SCI7,
+};
+
+static struct ra_sci_spi_priv_s ra_sci7_spi_priv =
+{
+  .spidev =
+  {
+    .ops = &ra_sci_spi_ops,
+  },
+  .config = &ra_sci7_spi_config,
+  .devid = 0xffffffff,
+  .initialized = false,
+};
+#endif
+
+#ifdef CONFIG_RA_SCI8_SPI
+static const struct ra_sci_spi_config_s ra_sci8_spi_config =
+{
+  .base     = R_SCI_B_CH_BASE(8),
+  .channel  = 8,
+  .rxi_elc  = RA_ELC_SCI8_RXI,
+  .txi_elc  = RA_ELC_SCI8_TXI,
+  .tei_elc  = RA_ELC_SCI8_TEI,
+  .eri_elc  = RA_ELC_SCI8_ERI,
+  .mstp     = RA_MSTP_SCI8,
+};
+
+static struct ra_sci_spi_priv_s ra_sci8_spi_priv =
+{
+  .spidev =
+  {
+    .ops = &ra_sci_spi_ops,
+  },
+  .config = &ra_sci8_spi_config,
+  .devid = 0xffffffff,
+  .initialized = false,
+};
+#endif
+
+#ifdef CONFIG_RA_SCI9_SPI
+static const struct ra_sci_spi_config_s ra_sci9_spi_config =
+{
+  .base     = R_SCI_B_CH_BASE(9),
+  .channel  = 9,
+  .rxi_elc  = RA_ELC_SCI9_RXI,
+  .txi_elc  = RA_ELC_SCI9_TXI,
+  .tei_elc  = RA_ELC_SCI9_TEI,
+  .eri_elc  = RA_ELC_SCI9_ERI,
+  .mstp     = RA_MSTP_SCI9,
+};
+
+static struct ra_sci_spi_priv_s ra_sci9_spi_priv =
+{
+  .spidev =
+  {
+    .ops = &ra_sci_spi_ops,
+  },
+  .config = &ra_sci9_spi_config,
+  .devid = 0xffffffff,
+  .initialized = false,
+};
+#endif
 
 /* DTC initialization flag */
 #ifdef CONFIG_RA_DTC
@@ -1760,6 +1950,54 @@ struct spi_dev_s *ra_sci_spibus_initialize(int bus)
 #ifdef CONFIG_RA_SCI1_SPI
       case 1:
         priv = &ra_sci1_spi_priv;
+        break;
+#endif
+
+#ifdef CONFIG_RA_SCI2_SPI
+      case 2:
+        priv = &ra_sci2_spi_priv;
+        break;
+#endif
+
+#ifdef CONFIG_RA_SCI3_SPI
+      case 3:
+        priv = &ra_sci3_spi_priv;
+        break;
+#endif
+
+#ifdef CONFIG_RA_SCI4_SPI
+      case 4:
+        priv = &ra_sci4_spi_priv;
+        break;
+#endif
+
+#ifdef CONFIG_RA_SCI5_SPI
+      case 5:
+        priv = &ra_sci5_spi_priv;
+        break;
+#endif
+
+#ifdef CONFIG_RA_SCI6_SPI
+      case 6:
+        priv = &ra_sci6_spi_priv;
+        break;
+#endif
+
+#ifdef CONFIG_RA_SCI7_SPI
+      case 7:
+        priv = &ra_sci7_spi_priv;
+        break;
+#endif
+
+#ifdef CONFIG_RA_SCI8_SPI
+      case 8:
+        priv = &ra_sci8_spi_priv;
+        break;
+#endif
+
+#ifdef CONFIG_RA_SCI9_SPI
+      case 9:
+        priv = &ra_sci9_spi_priv;
         break;
 #endif
 

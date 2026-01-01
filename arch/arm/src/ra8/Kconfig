@@ -22,18 +22,18 @@ config ARCH_CHIP_R7FA8E1AFDCFB
    select RA8_CM85_FAMILY
    select RA8E1_GROUP
    # Serial Communication - 6 SCI UART channels
-   select RA_HAVE_SCI0_UART
-   select RA_HAVE_SCI1_UART
-   select RA_HAVE_SCI2_UART
-   select RA_HAVE_SCI3_UART
-   select RA_HAVE_SCI4_UART
-   select RA_HAVE_SCI9_UART
-   # I2C - 2 channels only (removed incorrect I2C2)
+   select RA_HAVE_SCI0
+   select RA_HAVE_SCI1
+   select RA_HAVE_SCI2
+   select RA_HAVE_SCI3
+   select RA_HAVE_SCI4
+   select RA_HAVE_SCI9
+   # I2C - 3 channels
    select RA_HAVE_I2C0
    select RA_HAVE_I2C1
    # DMA
    select RA_HAVE_DMAC
-   # SPI - 2 channels only (removed incorrect SPI2)
+   # SPI - 2 channels
    select RA_HAVE_SPI0
    select RA_HAVE_SPI1
    # CANFD - 2 channels
@@ -97,13 +97,13 @@ config ARCH_CHIP_R7FA8E1AFDCFP
    select RA8_CM85_FAMILY
    select RA8E1_GROUP
    # Serial Communication - 6 SCI UART channels
-   select RA_HAVE_SCI0_UART
-   select RA_HAVE_SCI1_UART
-   select RA_HAVE_SCI2_UART
-   select RA_HAVE_SCI3_UART
-   select RA_HAVE_SCI4_UART
-   select RA_HAVE_SCI9_UART
-   # I2C - 2 channels only
+   select RA_HAVE_SCI0
+   select RA_HAVE_SCI1
+   select RA_HAVE_SCI2
+   select RA_HAVE_SCI3
+   select RA_HAVE_SCI4
+   select RA_HAVE_SCI9
+   # I2C - 2 channels
    select RA_HAVE_I2C0
    select RA_HAVE_I2C1
    # DMA
@@ -158,16 +158,16 @@ config ARCH_CHIP_R7KA8P1KFLCAC
    bool "R7KA8P1KFLCAC"
    select RA8P1_GROUP
    # Serial Communication - 10 SCI UART channels
-   select RA_HAVE_SCI0_UART
-   select RA_HAVE_SCI1_UART
-   select RA_HAVE_SCI2_UART
-   select RA_HAVE_SCI3_UART
-   select RA_HAVE_SCI4_UART
-   select RA_HAVE_SCI5_UART
-   select RA_HAVE_SCI6_UART
-   select RA_HAVE_SCI7_UART
-   select RA_HAVE_SCI8_UART
-   select RA_HAVE_SCI9_UART
+   select RA_HAVE_SCI0
+   select RA_HAVE_SCI1
+   select RA_HAVE_SCI2
+   select RA_HAVE_SCI3
+   select RA_HAVE_SCI4
+   select RA_HAVE_SCI5
+   select RA_HAVE_SCI6
+   select RA_HAVE_SCI7
+   select RA_HAVE_SCI8
+   select RA_HAVE_SCI9
    # I2C and I3C interfaces
    select RA_HAVE_I2C0
    select RA_HAVE_I2C1
@@ -175,7 +175,7 @@ config ARCH_CHIP_R7KA8P1KFLCAC
    select RA_HAVE_I3C
    # DMA
    select RA_HAVE_DMAC
-   # SPI - 2 channels only
+   # SPI - 2 channels
    select RA_HAVE_SPI0
    select RA_HAVE_SPI1
    # CANFD - 2 channels
@@ -278,16 +278,16 @@ config ARCH_CHIP_R7JA8P1JRLSAJ
    bool "R7JA8P1JRLSAJ"
    select RA8P1_GROUP
    # Serial Communication - 10 SCI UART channels
-   select RA_HAVE_SCI0_UART
-   select RA_HAVE_SCI1_UART
-   select RA_HAVE_SCI2_UART
-   select RA_HAVE_SCI3_UART
-   select RA_HAVE_SCI4_UART
-   select RA_HAVE_SCI5_UART
-   select RA_HAVE_SCI6_UART
-   select RA_HAVE_SCI7_UART
-   select RA_HAVE_SCI8_UART
-   select RA_HAVE_SCI9_UART
+   select RA_HAVE_SCI0
+   select RA_HAVE_SCI1
+   select RA_HAVE_SCI2
+   select RA_HAVE_SCI3
+   select RA_HAVE_SCI4
+   select RA_HAVE_SCI5
+   select RA_HAVE_SCI6
+   select RA_HAVE_SCI7
+   select RA_HAVE_SCI8
+   select RA_HAVE_SCI9
    # I2C and I3C interfaces
    select RA_HAVE_I2C0
    select RA_HAVE_I2C1
@@ -295,7 +295,7 @@ config ARCH_CHIP_R7JA8P1JRLSAJ
    select RA_HAVE_I3C
    # DMA
    select RA_HAVE_DMAC
-   # SPI - 2 channels only
+   # SPI - 2 channels
    select RA_HAVE_SPI0
    select RA_HAVE_SPI1
    # CANFD - 2 channels
@@ -2690,43 +2690,43 @@ endif # RA_FLASH
 endmenu
 
 menu "SCI UARTs"
-config RA_HAVE_SCI0_UART
+config RA_HAVE_SCI0
    bool
    default n
 
-config RA_HAVE_SCI1_UART
+config RA_HAVE_SCI1
    bool
    default n
 
-config RA_HAVE_SCI2_UART
+config RA_HAVE_SCI2
    bool
    default n
 
-config RA_HAVE_SCI3_UART
+config RA_HAVE_SCI3
    bool
    default n
 
-config RA_HAVE_SCI4_UART
+config RA_HAVE_SCI4
    bool
    default n
 
-config RA_HAVE_SCI5_UART
+config RA_HAVE_SCI5
    bool
    default n
 
-config RA_HAVE_SCI6_UART
+config RA_HAVE_SCI6
    bool
    default n
 
-config RA_HAVE_SCI7_UART
+config RA_HAVE_SCI7
    bool
    default n
 
-config RA_HAVE_SCI8_UART
+config RA_HAVE_SCI8
    bool
    default n
 
-config RA_HAVE_SCI9_UART
+config RA_HAVE_SCI9
    bool
    default n
 
@@ -2738,7 +2738,7 @@ config RA_SCI
 config RA_SCI0_UART
    bool "SCI0 UART support"
    default n
-   depends on RA_HAVE_SCI0_UART
+   depends on RA_HAVE_SCI0
    select RA_SCI
    select SCI0_SERIALDRIVER
    ---help---
@@ -2747,7 +2747,7 @@ config RA_SCI0_UART
 config RA_SCI1_UART
    bool "SCI1 UART support"
    default n
-   depends on RA_HAVE_SCI1_UART
+   depends on RA_HAVE_SCI1
    select RA_SCI
    select SCI1_SERIALDRIVER
    ---help---
@@ -2756,7 +2756,7 @@ config RA_SCI1_UART
 config RA_SCI2_UART
    bool "SCI2 UART support"
    default n
-   depends on RA_HAVE_SCI2_UART
+   depends on RA_HAVE_SCI2
    select RA_SCI
    select SCI2_SERIALDRIVER
    ---help---
@@ -2765,7 +2765,7 @@ config RA_SCI2_UART
 config RA_SCI3_UART
    bool "SCI3 UART support"
    default n
-   depends on RA_HAVE_SCI3_UART
+   depends on RA_HAVE_SCI3
    select RA_SCI
    select SCI3_SERIALDRIVER
    ---help---
@@ -2774,7 +2774,7 @@ config RA_SCI3_UART
 config RA_SCI4_UART
    bool "SCI4 UART support"
    default n
-   depends on RA_HAVE_SCI4_UART
+   depends on RA_HAVE_SCI4
    select RA_SCI
    select SCI4_SERIALDRIVER
    ---help---
@@ -2783,7 +2783,7 @@ config RA_SCI4_UART
 config RA_SCI5_UART
    bool "SCI5 UART support"
    default n
-   depends on RA_HAVE_SCI5_UART
+   depends on RA_HAVE_SCI5
    select RA_SCI
    select SCI5_SERIALDRIVER
    ---help---
@@ -2792,7 +2792,7 @@ config RA_SCI5_UART
 config RA_SCI6_UART
    bool "SCI6 UART support"
    default n
-   depends on RA_HAVE_SCI6_UART
+   depends on RA_HAVE_SCI6
    select RA_SCI
    select SCI6_SERIALDRIVER
    ---help---
@@ -2801,7 +2801,7 @@ config RA_SCI6_UART
 config RA_SCI7_UART
    bool "SCI7 UART support"
    default n
-   depends on RA_HAVE_SCI7_UART
+   depends on RA_HAVE_SCI7
    select RA_SCI
    select SCI7_SERIALDRIVER
    ---help---
@@ -2810,7 +2810,7 @@ config RA_SCI7_UART
 config RA_SCI8_UART
    bool "SCI8 UART support"
    default n
-   depends on RA_HAVE_SCI8_UART
+   depends on RA_HAVE_SCI8
    select RA_SCI
    select SCI8_SERIALDRIVER
    ---help---
@@ -2819,7 +2819,7 @@ config RA_SCI8_UART
 config RA_SCI9_UART
    bool "SCI9 UART support"
    default n
-   depends on RA_HAVE_SCI9_UART
+   depends on RA_HAVE_SCI9
    select RA_SCI
    select SCI9_SERIALDRIVER
    ---help---
@@ -3656,7 +3656,7 @@ config RA_SCI_SPI
 config RA_SCI0_SPI
    bool "SCI0 Simple SPI"
    default n
-   depends on RA_HAVE_SCI0_UART
+   depends on RA_HAVE_SCI0
    select RA_SCI_SPI
    ---help---
       Enable SCI0 in Simple SPI mode. Cannot be used simultaneously with SCI0 UART.
@@ -3664,7 +3664,7 @@ config RA_SCI0_SPI
 config RA_SCI1_SPI
    bool "SCI1 Simple SPI"
    default n
-   depends on RA_HAVE_SCI1_UART
+   depends on RA_HAVE_SCI1
    select RA_SCI_SPI
    ---help---
       Enable SCI1 in Simple SPI mode. Cannot be used simultaneously with SCI1 UART.
@@ -3672,7 +3672,7 @@ config RA_SCI1_SPI
 config RA_SCI2_SPI
    bool "SCI2 Simple SPI"
    default n
-   depends on RA_HAVE_SCI2_UART
+   depends on RA_HAVE_SCI2
    select RA_SCI_SPI
    ---help---
       Enable SCI2 in Simple SPI mode. Cannot be used simultaneously with SCI2 UART.
@@ -3680,7 +3680,7 @@ config RA_SCI2_SPI
 config RA_SCI3_SPI
    bool "SCI3 Simple SPI"
    default n
-   depends on RA_HAVE_SCI3_UART
+   depends on RA_HAVE_SCI3
    select RA_SCI_SPI
    ---help---
       Enable SCI3 in Simple SPI mode. Cannot be used simultaneously with SCI3 UART.
@@ -3688,7 +3688,7 @@ config RA_SCI3_SPI
 config RA_SCI4_SPI
    bool "SCI4 Simple SPI"
    default n
-   depends on RA_HAVE_SCI4_UART
+   depends on RA_HAVE_SCI4
    select RA_SCI_SPI
    ---help---
       Enable SCI4 in Simple SPI mode. Cannot be used simultaneously with SCI4 UART.
@@ -3696,7 +3696,7 @@ config RA_SCI4_SPI
 config RA_SCI5_SPI
    bool "SCI5 Simple SPI"
    default n
-   depends on RA_HAVE_SCI5_UART
+   depends on RA_HAVE_SCI5
    select RA_SCI_SPI
    ---help---
       Enable SCI5 in Simple SPI mode. Cannot be used simultaneously with SCI5 UART.
@@ -3704,7 +3704,7 @@ config RA_SCI5_SPI
 config RA_SCI6_SPI
    bool "SCI6 Simple SPI"
    default n
-   depends on RA_HAVE_SCI6_UART
+   depends on RA_HAVE_SCI6
    select RA_SCI_SPI
    ---help---
       Enable SCI6 in Simple SPI mode. Cannot be used simultaneously with SCI6 UART.
@@ -3712,7 +3712,7 @@ config RA_SCI6_SPI
 config RA_SCI7_SPI
    bool "SCI7 Simple SPI"
    default n
-   depends on RA_HAVE_SCI7_UART
+   depends on RA_HAVE_SCI7
    select RA_SCI_SPI
    ---help---
       Enable SCI7 in Simple SPI mode. Cannot be used simultaneously with SCI7 UART.
@@ -3720,7 +3720,7 @@ config RA_SCI7_SPI
 config RA_SCI8_SPI
    bool "SCI8 Simple SPI"
    default n
-   depends on RA_HAVE_SCI8_UART
+   depends on RA_HAVE_SCI8
    select RA_SCI_SPI
    ---help---
       Enable SCI8 in Simple SPI mode. Cannot be used simultaneously with SCI8 UART.
@@ -3728,11 +3728,165 @@ config RA_SCI8_SPI
 config RA_SCI9_SPI
    bool "SCI9 Simple SPI"
    default n
-   depends on RA_HAVE_SCI9_UART
+   depends on RA_HAVE_SCI9
    select RA_SCI_SPI
    ---help---
       Enable SCI9 in Simple SPI mode. Cannot be used simultaneously with SCI9 UART.
 
+
+config RA_SCI_I2C
+   bool
+   default n
+   select I2C
+   ---help---
+      Enable SCI peripheral in Simple I2C mode. Each SCIn channel appears as
+      /dev/i2cn (e.g., SCI0 → /dev/i2c0, SCI1 → /dev/i2c1). The channel-to-bus
+      mapping is direct: SCIn maps to I2C bus number n.
+
+if RA_SCI_I2C
+
+config RA_SCI_I2C_DTC
+   bool "Use DTC for SCI I2C transfers"
+   default n
+   depends on RA_DTC
+   ---help---
+      Use Data Transfer Controller (DTC) for high-performance I2C transfers.
+      This reduces CPU overhead for multi-byte transfers.
+
+      NOTE: DTC support is not yet implemented. This option is reserved for
+      future use.
+
+config RA_SCI_I2C_DMAC
+   bool "Use DMAC for SCI I2C transfers"
+   default n
+   depends on RA_DMAC
+   ---help---
+      Use DMA Controller (DMAC) for high-performance I2C transfers. DMAC provides
+      better performance than DTC for large transfers.
+
+      NOTE: DMAC support is not yet implemented. This option is reserved for
+      future use.
+
+endif # RA_SCI_I2C
+
+config RA_SCI0_I2C
+   bool "SCI0 Simple I2C"
+   default n
+   depends on RA_HAVE_SCI0
+   select RA_SCI_I2C
+   ---help---
+      Enable SCI0 in Simple I2C mode. Cannot be used simultaneously with SCI0 UART or SPI.
+      Creates /dev/i2c0 device node.
+
+config RA_SCI1_I2C
+   bool "SCI1 Simple I2C"
+   default n
+   depends on RA_HAVE_SCI1
+   select RA_SCI_I2C
+   ---help---
+      Enable SCI1 in Simple I2C mode. Cannot be used simultaneously with SCI1 UART or SPI.
+      Creates /dev/i2c1 device node.
+
+if RA_SCI1_I2C
+
+choice
+   prompt "SCI1 I2C Pin Selection"
+   default RA_SCI1_I2C_PINS_P400_P401
+   ---help---
+      Select the pin group for SCI1 I2C. Different MCU packages may have
+      different pin options available.
+
+config RA_SCI1_I2C_PINS_P400_P401
+   bool "P400 (SDA) / P401 (SCL) - Group A"
+   ---help---
+      Use pin group A for SCI1 I2C:
+        - P400: SDA (TXD1_A)
+        - P401: SCL (RXD1_A)
+      This is the default and most common pin assignment.
+
+config RA_SCI1_I2C_PINS_P512_P511
+   bool "P512 (SDA) / P511 (SCL) - Group B"
+   ---help---
+      Use pin group B for SCI1 I2C:
+        - P512: SDA (TXD1_B)
+        - P511: SCL (RXD1_B)
+      Check your MCU datasheet to verify these pins are available.
+
+endchoice
+
+endif # RA_SCI1_I2C
+
+config RA_SCI2_I2C
+   bool "SCI2 Simple I2C"
+   default n
+   depends on RA_HAVE_SCI2
+   select RA_SCI_I2C
+   ---help---
+      Enable SCI2 in Simple I2C mode. Cannot be used simultaneously with SCI2 UART or SPI.
+      Creates /dev/i2c2 device node.
+
+config RA_SCI3_I2C
+   bool "SCI3 Simple I2C"
+   default n
+   depends on RA_HAVE_SCI3
+   select RA_SCI_I2C
+   ---help---
+      Enable SCI3 in Simple I2C mode. Cannot be used simultaneously with SCI3 UART or SPI.
+      Creates /dev/i2c3 device node.
+
+config RA_SCI4_I2C
+   bool "SCI4 Simple I2C"
+   default n
+   depends on RA_HAVE_SCI4
+   select RA_SCI_I2C
+   ---help---
+      Enable SCI4 in Simple I2C mode. Cannot be used simultaneously with SCI4 UART or SPI.
+      Creates /dev/i2c4 device node.
+
+config RA_SCI5_I2C
+   bool "SCI5 Simple I2C"
+   default n
+   depends on RA_HAVE_SCI5
+   select RA_SCI_I2C
+   ---help---
+      Enable SCI5 in Simple I2C mode. Cannot be used simultaneously with SCI5 UART or SPI.
+      Creates /dev/i2c5 device node.
+
+config RA_SCI6_I2C
+   bool "SCI6 Simple I2C"
+   default n
+   depends on RA_HAVE_SCI6
+   select RA_SCI_I2C
+   ---help---
+      Enable SCI6 in Simple I2C mode. Cannot be used simultaneously with SCI6 UART or SPI.
+      Creates /dev/i2c6 device node.
+
+config RA_SCI7_I2C
+   bool "SCI7 Simple I2C"
+   default n
+   depends on RA_HAVE_SCI7
+   select RA_SCI_I2C
+   ---help---
+      Enable SCI7 in Simple I2C mode. Cannot be used simultaneously with SCI7 UART or SPI.
+      Creates /dev/i2c7 device node.
+
+config RA_SCI8_I2C
+   bool "SCI8 Simple I2C"
+   default n
+   depends on RA_HAVE_SCI8
+   select RA_SCI_I2C
+   ---help---
+      Enable SCI8 in Simple I2C mode. Cannot be used simultaneously with SCI8 UART or SPI.
+      Creates /dev/i2c8 device node.
+
+config RA_SCI9_I2C
+   bool "SCI9 Simple I2C"
+   default n
+   depends on RA_HAVE_SCI9
+   select RA_SCI_I2C
+   ---help---
+      Enable SCI9 in Simple I2C mode. Cannot be used simultaneously with SCI9 UART or SPI.
+      Creates /dev/i2c9 device node.
 
 endmenu
 

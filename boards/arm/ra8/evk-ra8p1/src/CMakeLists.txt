@@ -50,6 +50,10 @@ if(CONFIG_RA8P1_SPI_LOOPBACK_EXAMPLE)
   list(APPEND SRCS ra8p1_spi_loopback.c)
 endif()
 
+if(CONFIG_RA_SCI_I2C)
+  list(APPEND SRCS ra8p1_sci_i2c.c)
+endif()
+
 if(CONFIG_RA_SCI_SPI)
   list(APPEND SRCS ra8p1_sci_spi.c)
 endif()

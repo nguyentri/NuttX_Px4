@@ -187,7 +187,7 @@ int board_bringup(void)
 #endif
 
 #if defined(CONFIG_RA_I2C0) || defined(CONFIG_RA_I2C1)
-  /* Initialize I2C buses */
+  /* Initialize hardware I2C buses (IIC peripheral) */
 #ifdef CONFIG_RA_I2C0
   if (board_i2c_initialize(0) != NULL)
     {
@@ -207,6 +207,31 @@ int board_bringup(void)
   else
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize I2C1\n");
+    }
+#endif
+#endif
+
+#if defined(CONFIG_RA_SCI_I2C)
+  /* Initialize SCI I2C buses (SCI peripheral in Simple I2C mode) */
+#ifdef CONFIG_RA_SCI0_I2C
+  if (board_sci_i2c_initialize(0) != NULL)
+    {
+      syslog(LOG_INFO, "SCI0 I2C initialized successfully\n");
+    }
+  else
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SCI0 I2C\n");
+    }
+#endif
+
+#ifdef CONFIG_RA_SCI1_I2C
+  if (board_sci_i2c_initialize(1) != NULL)
+    {
+      syslog(LOG_INFO, "SCI1 I2C initialized successfully\n");
+    }
+  else
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SCI1 I2C\n");
     }
 #endif
 #endif

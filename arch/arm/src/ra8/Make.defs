@@ -102,6 +102,14 @@ ifeq ($(CONFIG_RA_SCI_SPI),y)
 CHIP_CSRCS += ra_sci_spi.c
 endif
 
+# SCI_I2C driver (Simple I2C using SCI)
+ifeq ($(CONFIG_RA_SCI_I2C),y)
+CHIP_CSRCS += ra_sci_i2c.c
+endif
+ifeq ($(CONFIG_RA_SCI_SPI),y)
+CHIP_CSRCS += ra_sci_spi.c
+endif
+
 # OSPI driver
 ifeq ($(CONFIG_RA_OSPI),y)
 CHIP_CSRCS += ra_ospi_b.c

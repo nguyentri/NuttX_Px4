@@ -139,6 +139,11 @@ ifeq ($(CONFIG_RA8P1_SPI_LOOPBACK_EXAMPLE),y)
 CSRCS += ra8p1_spi_loopback.c
 endif
 
+# SCI_I2C support
+ifeq ($(CONFIG_RA_SCI_I2C),y)
+CSRCS += ra8p1_sci_i2c.c
+endif
+
 # SCI_SPI support
 ifeq ($(CONFIG_RA_SCI_SPI),y)
 CSRCS += ra8p1_sci_spi.c

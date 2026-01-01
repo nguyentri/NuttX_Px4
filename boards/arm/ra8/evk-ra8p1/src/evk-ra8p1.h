@@ -232,6 +232,26 @@ int board_i2c_uninitialize(int bus);
 #endif
 
 /****************************************************************************
+ * Name: board_sci_i2c_initialize
+ *
+ * Description:
+ *   Initialize SCI I2C bus for EVK-RA8P1 board.
+ *   This uses SCI peripheral in Simple I2C mode (not hardware IIC).
+ *
+ * Input Parameters:
+ *   bus - SCI channel number configured for I2C (0-9)
+ *
+ * Returned Value:
+ *   Pointer to I2C device structure on success; NULL on failure
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_RA_SCI_I2C)
+struct i2c_master_s *board_sci_i2c_initialize(int bus);
+int board_sci_i2c_uninitialize(int bus);
+#endif
+
+/****************************************************************************
  * Name: board_i3c_initialize
  *
  * Description:
