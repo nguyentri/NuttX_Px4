@@ -119,9 +119,9 @@ CONFIG_I2C=y
 CONFIG_I2C_TRANSFER=y
 CONFIG_I2C_RESET=y
 
-# Enable SCI I2C driver (SCI1 since SCI0 is used for UART console)
+# Enable SCI I2C driver (SCI2 since SCI0 is used for UART console)
 CONFIG_RA_SCI_I2C=y
-CONFIG_RA_SCI1_I2C=y
+CONFIG_RA_SCI2_I2C=y
 
 # Enable DMA/DTC support for better performance
 CONFIG_RA_DMAC=y

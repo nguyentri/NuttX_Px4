@@ -110,7 +110,7 @@ static const struct i2c_ops_s ra_sci_i2c_ops =
 #ifdef CONFIG_RA_SCI0_I2C
 static const struct ra_sci_i2c_config_s ra_sci0_i2c_config =
 {
-  .base     = R_SCI_B_BASE + (0 * R_SCI_B_CH_STRIDE),
+  .base     = R_SCI_B_CH_BASE(0),
   .channel  = 0,
   .bus      = 0,
   .rxi_elc  =  RA_ELC_SCI0_RXI,
@@ -135,7 +135,7 @@ static struct ra_sci_i2c_priv_s ra_sci0_i2c_priv =
 #ifdef CONFIG_RA_SCI1_I2C
 static const struct ra_sci_i2c_config_s ra_sci1_i2c_config =
 {
-  .base     = R_SCI_B_BASE + (1 * R_SCI_B_CH_STRIDE),
+  .base     = R_SCI_B_CH_BASE(1),
   .channel  = 1,
   .bus      = 1,
   .rxi_elc  = RA_ELC_SCI1_RXI,
@@ -160,7 +160,7 @@ static struct ra_sci_i2c_priv_s ra_sci1_i2c_priv =
 #ifdef CONFIG_RA_SCI2_I2C
 static const struct ra_sci_i2c_config_s ra_sci2_i2c_config =
 {
-  .base     = R_SCI_B_BASE + (2 * R_SCI_B_CH_STRIDE),
+  .base     = R_SCI_B_CH_BASE(2),
   .channel  = 2,
   .bus      = 2,
   .rxi_elc  = RA_ELC_SCI2_RXI,
@@ -185,7 +185,7 @@ static struct ra_sci_i2c_priv_s ra_sci2_i2c_priv =
 #ifdef CONFIG_RA_SCI3_I2C
 static const struct ra_sci_i2c_config_s ra_sci3_i2c_config =
 {
-  .base     = R_SCI_B_BASE + (3 * R_SCI_B_CH_STRIDE),
+  .base     = R_SCI_B_CH_BASE(3),
   .channel  = 3,
   .bus      = 3,
   .rxi_elc  = RA_ELC_SCI3_RXI,
@@ -210,7 +210,7 @@ static struct ra_sci_i2c_priv_s ra_sci3_i2c_priv =
 #ifdef CONFIG_RA_SCI4_I2C
 static const struct ra_sci_i2c_config_s ra_sci4_i2c_config =
 {
-  .base     = R_SCI_B_BASE + (4 * R_SCI_B_CH_STRIDE),
+  .base     = R_SCI_B_CH_BASE(4),
   .channel  = 4,
   .bus      = 4,
   .rxi_elc  = RA_ELC_SCI4_RXI,
@@ -235,7 +235,7 @@ static struct ra_sci_i2c_priv_s ra_sci4_i2c_priv =
 #ifdef CONFIG_RA_SCI5_I2C
 static const struct ra_sci_i2c_config_s ra_sci5_i2c_config =
 {
-  .base     = R_SCI_B_BASE + (5 * R_SCI_B_CH_STRIDE),
+  .base     = R_SCI_B_CH_BASE(5),
   .channel  = 5,
   .bus      = 5,
   .rxi_elc  = RA_ELC_SCI5_RXI,
@@ -260,7 +260,7 @@ static struct ra_sci_i2c_priv_s ra_sci5_i2c_priv =
 #ifdef CONFIG_RA_SCI6_I2C
 static const struct ra_sci_i2c_config_s ra_sci6_i2c_config =
 {
-  .base     = R_SCI_B_BASE + (6 * R_SCI_B_CH_STRIDE),
+  .base     = R_SCI_B_CH_BASE(6),
   .channel  = 6,
   .bus      = 6,
   .rxi_elc  = RA_ELC_SCI6_RXI,
@@ -285,7 +285,7 @@ static struct ra_sci_i2c_priv_s ra_sci6_i2c_priv =
 #ifdef CONFIG_RA_SCI7_I2C
 static const struct ra_sci_i2c_config_s ra_sci7_i2c_config =
 {
-  .base     = R_SCI_B_BASE + (7 * R_SCI_B_CH_STRIDE),
+  .base     = R_SCI_B_CH_BASE(7),
   .channel  = 7,
   .bus      = 7,
   .rxi_elc  = RA_ELC_SCI7_RXI,
@@ -310,7 +310,7 @@ static struct ra_sci_i2c_priv_s ra_sci7_i2c_priv =
 #ifdef CONFIG_RA_SCI8_I2C
 static const struct ra_sci_i2c_config_s ra_sci8_i2c_config =
 {
-  .base     = R_SCI_B_BASE + (8 * R_SCI_B_CH_STRIDE),
+  .base     = R_SCI_B_CH_BASE(8),
   .channel  = 8,
   .bus      = 8,
   .rxi_elc  = RA_ELC_SCI8_RXI,
@@ -335,7 +335,7 @@ static struct ra_sci_i2c_priv_s ra_sci8_i2c_priv =
 #ifdef CONFIG_RA_SCI9_I2C
 static const struct ra_sci_i2c_config_s ra_sci9_i2c_config =
 {
-  .base     = R_SCI_B_BASE + (9 * R_SCI_B_CH_STRIDE),
+  .base     = R_SCI_B_CH_BASE(9),
   .channel  = 9,
   .bus      = 9,
   .rxi_elc  = RA_ELC_SCI9_RXI,

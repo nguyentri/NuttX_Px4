@@ -174,6 +174,14 @@
 #define GPIO_SCI2_SPI_MOSI  GPIO_TXD2_A           /* P801 - SCI2 MOSI/TXD ⚠️ Conflicts: Console, OSPI_DQS */
 #define GPIO_SCI2_SPI_CS    GPIO_P804_OUTPUT_LOW  /* P804 - SCI2 CS (GPIO) ⚠️ Conflicts: OSPI_SIO7 */
 
+/* SCI2_I2C (Pmod 1): P802=SCL, P801=SDA
+ * ⚠️  SEVERE CONFLICT: P802/P801 shared with SCI2 console UART or SCI2_SPI!
+ * ⚠️  SEVERE CONFLICT: All pins conflict with OSPI flash signals!
+ * Resolution: Redirect console to SCI0 or SCI7 before using SCI2_I2C
+ * Note: These use RXD2/TXD2 pins in SCI Simple I2C mode with open-drain + pullup
+ */
+#define GPIO_SCI2_I2C_SCL  (GPIO_RXD2_A | GPIO_OPENDRAIN | GPIO_PULLUP)  /* P802 - SCI2 SCL (RXD2) ⚠️ Conflicts: Console, SCI2_SPI, OSPI_SIO6 */
+#define GPIO_SCI2_I2C_SDA  (GPIO_TXD2_A | GPIO_OPENDRAIN | GPIO_PULLUP)  /* P801 - SCI2 SDA (TXD2) ⚠️ Conflicts: Console, SCI2_SPI, OSPI_DQS */
 
 /****************************************************************************
  * PWM/GPT Pin Definitions

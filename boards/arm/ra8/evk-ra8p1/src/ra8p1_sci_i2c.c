@@ -40,40 +40,17 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* SCI I2C Pin Definitions for EVK-RA8P1
+/* SCI I2C pin definitions are in board.h:
  *
- * SCI1 I2C Mode:
- *   - SDA: P400 (TXD1_A) - requires open-drain, pull-up
- *   - SCL: P401 (RXD1_A) - requires open-drain, pull-up
+ * For SCI2_I2C:
+ *   GPIO_SCI2_I2C_SDA - P801 (TXD2_A with open-drain + pullup)
+ *   GPIO_SCI2_I2C_SCL - P802 (RXD2_A with open-drain + pullup)
  *
- * For SCI Simple I2C mode, TXD becomes SDA and RXD becomes SCL.
- * Both pins must be configured as:
- *   - Peripheral mode (PMR=1)
- *   - PSEL = SCI1_3_5_7_9 (0x05)
- *   - Open-drain (NCODR=1)
- *   - Internal pull-up (PCR=1) or external pull-ups required
+ * For SCI Simple I2C mode:
+ *   - TXD pin becomes SDA (data line)
+ *   - RXD pin becomes SCL (clock line)
+ *   - Both configured as peripheral with open-drain and internal pull-up
  */
-
-#define GPIO_SCI1_I2C_SDA  (PORT4 | PIN0 | GPIO_PERIPHERAL | \
-                            PFS_PSEL_SCI1_3_5_7_9 | \
-                            GPIO_OPENDRAIN | GPIO_PULLUP)
-
-#define GPIO_SCI1_I2C_SCL  (PORT4 | PIN1 | GPIO_PERIPHERAL | \
-                            PFS_PSEL_SCI1_3_5_7_9 | \
-                            GPIO_OPENDRAIN | GPIO_PULLUP)
-
-/* SCI0 I2C Mode (if needed):
- *   - SDA: P102 (TXD0_A) or other available TXD0 pin
- *   - SCL: P103 (RXD0_A) or other available RXD0 pin
- */
-
-#define GPIO_SCI0_I2C_SDA  (PORT1 | PIN2 | GPIO_PERIPHERAL | \
-                            PFS_PSEL_SCI0_2_4_6_8 | \
-                            GPIO_OPENDRAIN | GPIO_PULLUP)
-
-#define GPIO_SCI0_I2C_SCL  (PORT1 | PIN3 | GPIO_PERIPHERAL | \
-                            PFS_PSEL_SCI0_2_4_6_8 | \
-                            GPIO_OPENDRAIN | GPIO_PULLUP)
 
 /****************************************************************************
  * Private Data
@@ -83,8 +60,8 @@
 static struct i2c_master_s *g_sci_i2c0_dev = NULL;
 #endif
 
-#ifdef CONFIG_RA_SCI1_I2C
-static struct i2c_master_s *g_sci_i2c1_dev = NULL;
+#ifdef CONFIG_RA_SCI2_I2C
+static struct i2c_master_s *g_sci_i2c2_dev = NULL;
 #endif
 
 /****************************************************************************
@@ -146,13 +123,13 @@ struct i2c_master_s *board_sci_i2c_initialize(int bus)
         break;
 #endif
 
-#ifdef CONFIG_RA_SCI1_I2C
+#ifdef CONFIG_RA_SCI2_I2C
       case 1:
         /* Initialize SCI1 in Simple I2C mode
-         * Pins: P400 (SDA), P401 (SCL)
+         * Pins: P801 (SDA), P802 (SCL)
          */
 
-        if (g_sci_i2c1_dev == NULL)
+        if (g_sci_i2c2_dev == NULL)
           {
             /* Configure GPIO pins for SCI1 I2C
              * Both SDA and SCL need:
@@ -161,11 +138,11 @@ struct i2c_master_s *board_sci_i2c_initialize(int bus)
              * - Pull-up enabled (or use external pull-ups)
              */
 
-            ra_gpioconfig(GPIO_SCI1_I2C_SDA);
-            ra_gpioconfig(GPIO_SCI1_I2C_SCL);
+            ra_gpioconfig(GPIO_SCI2_I2C_SDA);
+            ra_gpioconfig(GPIO_SCI2_I2C_SCL);
 
-            g_sci_i2c1_dev = ra_sci_i2cbus_initialize(1);
-            if (g_sci_i2c1_dev == NULL)
+            g_sci_i2c2_dev = ra_sci_i2cbus_initialize(1);
+            if (g_sci_i2c2_dev == NULL)
               {
                 i2cerr("ERROR: Failed to initialize SCI1 I2C\n");
                 return NULL;
@@ -174,7 +151,7 @@ struct i2c_master_s *board_sci_i2c_initialize(int bus)
             i2cinfo("SCI1 I2C initialized successfully\n");
           }
 
-        dev = g_sci_i2c1_dev;
+        dev = g_sci_i2c2_dev;
         break;
 #endif
 
@@ -216,10 +193,10 @@ int board_sci_i2c_uninitialize(int bus)
         break;
 #endif
 
-#ifdef CONFIG_RA_SCI1_I2C
-      case 1:
-        dev = g_sci_i2c1_dev;
-        g_sci_i2c1_dev = NULL;
+#ifdef CONFIG_RA_SCI2_I2C
+      case 2:
+        dev = g_sci_i2c2_dev;
+        g_sci_i2c2_dev = NULL;
         break;
 #endif
 
