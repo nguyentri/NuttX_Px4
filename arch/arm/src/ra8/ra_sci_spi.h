@@ -36,10 +36,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* SCI_SPI Configuration */
-#define RA_SCI_SPI_MAX_FREQUENCY     50000000  /* Maximum SPI frequency (50 MHz) */
-#define RA_SCI_SPI_MIN_FREQUENCY     1000      /* Minimum SPI frequency */
-
 /* SCI_SPI Bus numbers */
 #define RA_SCI_SPI_BUS_0             0
 #define RA_SCI_SPI_BUS_1             1
@@ -51,6 +47,11 @@
 #define RA_SCI_SPI_BUS_7             7
 #define RA_SCI_SPI_BUS_8             8
 #define RA_SCI_SPI_BUS_9             9
+#define RA_SCI_SPI_BUS_MAX           10
+
+/* SCI_SPI Configuration */
+#define RA_SCI_SPI_MAX_FREQUENCY     10000000  /* Maximum SPI frequency (10 MHz) */
+#define RA_SCI_SPI_MIN_FREQUENCY     1000      /* Minimum SPI frequency */
 
 /****************************************************************************
  * Public Types

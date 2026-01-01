@@ -48,13 +48,26 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+ /* SCI_I2C Bus numbers */
+#define RA_SCI_I2C_BUS_0             0
+#define RA_SCI_I2C_BUS_1             1
+#define RA_SCI_I2C_BUS_2             2
+#define RA_SCI_I2C_BUS_3             3
+#define RA_SCI_I2C_BUS_4             4
+#define RA_SCI_I2C_BUS_5             5
+#define RA_SCI_I2C_BUS_6             6
+#define RA_SCI_I2C_BUS_7             7
+#define RA_SCI_I2C_BUS_8             8
+#define RA_SCI_I2C_BUS_9             9
+#define RA_SCI_I2C_BUS_MAX           10
+
 /* Configuration ************************************************************/
 
 /* SCI I2C Rate Modes */
 
 #define RA_SCI_I2C_RATE_STANDARD       100000   /* 100 kHz Standard mode */
 #define RA_SCI_I2C_RATE_FAST           400000   /* 400 kHz Fast mode */
-#define RA_SCI_I2C_RATE_FASTPLUS       1000000  /* 1 MHz Fast-mode Plus */
+#define RA_SCI_I2C_RATE_FASTPLUS       1000000  /* 1 MHz Fast-mode Plus, not supported */
 
 /* SCI I2C Timeout values */
 

@@ -55,18 +55,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
- /* SCI_I2C Bus numbers */
-#define RA_SCI_I2C_BUS_0             0
-#define RA_SCI_I2C_BUS_1             1
-#define RA_SCI_I2C_BUS_2             2
-#define RA_SCI_I2C_BUS_3             3
-#define RA_SCI_I2C_BUS_4             4
-#define RA_SCI_I2C_BUS_5             5
-#define RA_SCI_I2C_BUS_6             6
-#define RA_SCI_I2C_BUS_7             7
-#define RA_SCI_I2C_BUS_8             8
-#define RA_SCI_I2C_BUS_9             9
-
 /* Register access helpers */
 #define sci_getreg32(p, o)      getreg32((p)->config->base + (o))
 #define sci_putreg32(p, o, v)   putreg32((v), (p)->config->base + (o))
@@ -720,7 +708,7 @@ static int ra_sci_i2c_bus_reset(struct ra_sci_i2c_priv_s *priv)
 
   /* Toggle SCL 9 times to release any stuck slave */
 
-  for (i = 0; i < 9; i++)
+  for (i = 0; i < RA_SCI_I2C_BUS_MAX; i++)
     {
       /* SCL Low */
 
@@ -1038,6 +1026,119 @@ static int ra_sci_i2c_isr_rxi(int irq, void *context, void *arg)
 }
 
 /****************************************************************************
+ * Name: ra_sci_i2c_wait_event_polled
+ *
+ * Description:
+ *   Wait for I2C event using polling (for CONFIG_I2C_POLLED mode).
+ *   Busy-waits by checking status registers and handles state machine
+ *   transitions inline (no interrupts).
+ *
+ * Input Parameters:
+ *   priv       - Private SCI I2C device structure
+ *   timeout_us - Timeout in microseconds
+ *
+ * Returned Value:
+ *   OK on success, -ETIMEDOUT on timeout, -EIO on error
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_I2C_POLLED
+static int ra_sci_i2c_wait_event_polled(struct ra_sci_i2c_priv_s *priv,
+                                        uint32_t timeout_us)
+{
+  uint32_t timeout = timeout_us;
+  uint32_t isr;
+  uint32_t csr;
+
+  /* Poll for events and handle state machine inline */
+
+  while (timeout--)
+    {
+      isr = sci_getreg32(priv, R_SCI_B_ISR_OFFSET);
+      csr = sci_getreg32(priv, R_SCI_B_CSR_OFFSET);
+
+      /* Check for errors first */
+
+      if (csr & (R_SCI_B_CSR_ORER | R_SCI_B_CSR_FER | R_SCI_B_CSR_PER))
+        {
+          i2cerr("SCI I2C Polled: Error CSR=0x%08x\n", csr);
+          priv->error = true;
+          priv->status = csr;
+          return -EIO;
+        }
+
+      /* Check state-specific conditions */
+
+      switch (priv->state)
+        {
+          case SCI_I2CSTATE_START:
+          case SCI_I2CSTATE_RESTART:
+            /* Wait for TEND (transmit end) after start/restart */
+            if (csr & R_SCI_B_CSR_TEND)
+              {
+                return OK;
+              }
+            break;
+
+          case SCI_I2CSTATE_ADDR_SEND:
+          case SCI_I2CSTATE_WRITE:
+            /* Wait for TDRE (transmit data empty) */
+            if (csr & R_SCI_B_CSR_TDRE)
+              {
+                return OK;
+              }
+            break;
+
+          case SCI_I2CSTATE_READ:
+            /* Wait for RDRF (receive data full) */
+            if (csr & R_SCI_B_CSR_RDRF)
+              {
+                return OK;
+              }
+            break;
+
+          case SCI_I2CSTATE_WAIT_ACK:
+            /* Wait for ACK/NACK */
+            if (isr & R_SCI_B_ISR_IICACKR)
+              {
+                /* NACK received */
+                i2cwarn("SCI I2C Polled: NACK received\n");
+                priv->error = true;
+                return -ENXIO;
+              }
+            if (csr & R_SCI_B_CSR_TEND)
+              {
+                /* ACK received (TEND set after ACK) */
+                return OK;
+              }
+            break;
+
+          case SCI_I2CSTATE_STOP:
+            /* Wait for STOP completion flag */
+            if (isr & R_SCI_B_ISR_IICSTIF)
+              {
+                sci_putreg32(priv, R_SCI_B_ICFCLR_OFFSET,
+                             R_SCI_B_ICFCLR_IICSTIFC);
+                priv->state = SCI_I2CSTATE_IDLE;
+                return OK;
+              }
+            break;
+
+          case SCI_I2CSTATE_IDLE:
+          case SCI_I2CSTATE_ERROR:
+          default:
+            return OK;
+        }
+
+      up_udelay(1);
+    }
+
+  i2cerr("SCI I2C Polled: Timeout in state %d\n", priv->state);
+  return -ETIMEDOUT;
+}
+#endif /* CONFIG_I2C_POLLED */
+
+/****************************************************************************
  * Name: ra_sci_i2c_transfer
  ****************************************************************************/
 
@@ -1102,8 +1203,14 @@ static int ra_sci_i2c_transfer(struct i2c_master_s *dev,
 
       /* Wait for completion */
 
+#ifdef CONFIG_I2C_POLLED
+      /* Polled mode: busy-wait by checking registers */
+      ret = ra_sci_i2c_wait_event_polled(priv, RA_SCI_I2C_TIMEOUT_US);
+#else
+      /* Interrupt mode: wait on semaphore */
       ret = nxsem_tickwait_uninterruptible(&priv->sem_isr,
                                            USEC2TICK(RA_SCI_I2C_TIMEOUT_US));
+#endif
 
       if (ret < 0)
         {
@@ -1274,7 +1381,9 @@ struct i2c_master_s *ra_sci_i2cbus_initialize(int port)
 
       ra_sci_i2c_init_hw(priv);
 
+#ifndef CONFIG_I2C_POLLED
       /* Attach Interrupts (M3 fix: include ERI for error handling) */
+      /* In polled mode, interrupts are not used */
 
       priv->rxi_irq = ra_icu_attach(priv->config->rxi_elc,
                                     ra_sci_i2c_isr_rxi, priv, true);
@@ -1291,6 +1400,7 @@ struct i2c_master_s *ra_sci_i2cbus_initialize(int port)
       up_enable_irq(priv->txi_irq);
       up_enable_irq(priv->tei_irq);
       up_enable_irq(priv->eri_irq);
+#endif /* !CONFIG_I2C_POLLED */
 
       priv->initialized = true;
     }
