@@ -7,13 +7,14 @@
 #    - 1MB Code Flash + 12KB Data Flash
 #  - RA8P1: Dual Cortex-M85 @ 1GHz + Cortex-M33 @ 250MHz
 #    - 2MB SRAM with ECC + dedicated TCM per core
-#    - 1MB MRAM (no separate data flash)
+#    - 1MB MRAM
+#    - 4MB/8MB SiP FLASH (R7JA8P1JRLSAJ)
 
 comment "RA8 Family MCU Selection"
 
 choice
    prompt "RA8 Chip Selection"
-   default ARCH_CHIP_R7FA8E1AFDCFB
+   default ARCH_CHIP_R7KA8P1KFLCAC
    depends on ARCH_CHIP_RA8
 
 config ARCH_CHIP_R7FA8E1AFDCFB
@@ -154,7 +155,7 @@ config ARCH_CHIP_R7FA8E1AFDCFP
    select RA_HAVE_POEG
 
 config ARCH_CHIP_R7KA8P1KFLCAC
-   bool "R7KA8P1KFLCAC (PLBG0289JA)"
+   bool "R7KA8P1KFLCAC"
    select RA8P1_GROUP
    # Serial Communication - 10 SCI UART channels
    select RA_HAVE_SCI0_UART
@@ -273,6 +274,126 @@ config ARCH_CHIP_R7KA8P1KFLCAC
 
 endchoice
 
+config ARCH_CHIP_R7JA8P1JRLSAJ
+   bool "R7JA8P1JRLSAJ"
+   select RA8P1_GROUP
+   # Serial Communication - 10 SCI UART channels
+   select RA_HAVE_SCI0_UART
+   select RA_HAVE_SCI1_UART
+   select RA_HAVE_SCI2_UART
+   select RA_HAVE_SCI3_UART
+   select RA_HAVE_SCI4_UART
+   select RA_HAVE_SCI5_UART
+   select RA_HAVE_SCI6_UART
+   select RA_HAVE_SCI7_UART
+   select RA_HAVE_SCI8_UART
+   select RA_HAVE_SCI9_UART
+   # I2C and I3C interfaces
+   select RA_HAVE_I2C0
+   select RA_HAVE_I2C1
+   select RA_HAVE_I2C2
+   select RA_HAVE_I3C
+   # DMA
+   select RA_HAVE_DMAC
+   # SPI - 2 channels only
+   select RA_HAVE_SPI0
+   select RA_HAVE_SPI1
+   # CANFD - 2 channels
+   select RA_HAVE_CANFD0
+   select RA_HAVE_CANFD1
+   # Ethernet - MII, RMII, GMII, RGMII support
+   select RA_HAVE_ETHERC_MII
+   select RA_HAVE_ETHERC_RMII
+   select RA_HAVE_ETHERC_GMII
+   select RA_HAVE_ETHERC_RGMII
+   select RA_HAVE_ETHERCAT
+   select RA_HAVE_ETHSW
+   select RA_HAVE_GPTP
+   # USB - Full Speed and High Speed
+   select RA_HAVE_USBFS
+   select RA_HAVE_USBHS
+   # Storage - Octal SPI (2 channels) and SD Host (2 channels)
+   select RA_HAVE_OSPI
+   select RA_HAVE_OSPI0
+   select RA_HAVE_OSPI1
+   select RA_HAVE_SDHI
+   select RA_HAVE_SDHI0
+   select RA_HAVE_SDHI1
+   # Audio - Serial Sound Interface (2 channels) and PDM
+   select RA_HAVE_SSIE
+   select RA_HAVE_SSIE0
+   select RA_HAVE_SSIE1
+   select RA_HAVE_PDMIF
+   # Graphics and Display
+   select RA_HAVE_GLCDC
+   select RA_HAVE_DRW
+   select RA_HAVE_MIPI_DSI
+   select RA_HAVE_MIPI_CSI
+   select RA_HAVE_CEU
+   select RA_HAVE_VIN
+   # General Purpose Timers - 14 channels (GPT0-GPT13)
+   select RA_HAVE_GPT
+   select RA_HAVE_GPT0
+   select RA_HAVE_GPT1
+   select RA_HAVE_GPT2
+   select RA_HAVE_GPT3
+   select RA_HAVE_GPT4
+   select RA_HAVE_GPT5
+   select RA_HAVE_GPT6
+   select RA_HAVE_GPT7
+   select RA_HAVE_GPT8
+   select RA_HAVE_GPT9
+   select RA_HAVE_GPT10
+   select RA_HAVE_GPT11
+   select RA_HAVE_GPT12
+   select RA_HAVE_GPT13
+   # Low Power Timers
+   select RA_HAVE_AGT
+   select RA_HAVE_AGT0
+   select RA_HAVE_AGT1
+   select RA_HAVE_AGT2
+   select RA_HAVE_AGT3
+   select RA_HAVE_AGT4
+   select RA_HAVE_AGT5
+   select RA_HAVE_ULPT
+   select RA_HAVE_ULPT0
+   select RA_HAVE_ULPT1
+   # RTC
+   select RA_HAVE_RTC
+   # Analog - ADC-B (Advanced ADC with FIFO), DAC, and 4 High-Speed Comparators
+   select RA_HAVE_ADC_B
+   select RA_HAVE_ADC0
+   select RA_HAVE_ADC1
+   select RA_HAVE_DAC12
+   select RA_HAVE_ACMPHS
+   select RA_HAVE_ACMPHS0
+   select RA_HAVE_ACMPHS1
+   select RA_HAVE_ACMPHS2
+   select RA_HAVE_ACMPHS3
+   # Security Features
+   select RA_HAVE_DOTF
+   select RA_HAVE_CPSCU
+   select RA_HAVE_PSCU
+   select RA_HAVE_ECC
+   # System Utilities
+   select RA_HAVE_CRC
+   select RA_HAVE_CAC
+   select RA_HAVE_DOC
+   select RA_HAVE_ELC
+   # PDG - 4 channels
+   select RA_HAVE_PDG
+   select RA_HAVE_PDG0
+   select RA_HAVE_PDG1
+   select RA_HAVE_PDG2
+   select RA_HAVE_PDG3
+   select RA_HAVE_POEG
+   # Inter-Processor Communication
+   select RA_HAVE_IPC
+   # External Bus - SDRAM Controller
+   select RA_HAVE_SDRAM
+   # Select SiP Flash
+   select RA_HAVE_SIP_FLASH
+
 # CPU Core Selection for Dual-Core RA8P1
 choice
    prompt "CPU Core Selection"
@@ -329,7 +450,8 @@ config RA8P1_GROUP
        - CM85 (CPU0): 1GHz, 128KB ITCM + 128KB DTCM, 16KB I-Cache + 16KB D-Cache
        - CM33 (CPU1): 250MHz, 64KB CTCM + 64KB STCM, 16KB C-Cache + 16KB S-Cache
        - 2 MB Shared SRAM with ECC
-       - 1 MB MRAM (no separate data flash)
+       - 1 MB MRAM
+       - 4 MB or 8MB Flash (R7JA8P1JRLSAJ)
        - Each core has dedicated TCM at same virtual addresses
        - Requires CPU core selection in "CPU Core Selection" menu
 
