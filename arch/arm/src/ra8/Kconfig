@@ -464,6 +464,7 @@ config RA8_CM85_FAMILY
     select ARCH_HAVE_FPU
     select ARCH_HAVE_THUMB
     select ARCH_HAVE_DPFPU
+    select ARCH_HAVE_SERIAL_TERMIOS
     select ARMV8M_HAVE_ICACHE
     select ARMV8M_HAVE_DCACHE
     select ARMV8M_HAVE_ITCM
