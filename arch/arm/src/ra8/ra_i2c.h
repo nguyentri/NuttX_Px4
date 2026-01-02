@@ -69,6 +69,8 @@ struct ra_i2c_config_s
   uint32_t txi_elc;       /* TX event/ELC */
   uint32_t tei_elc;       /* TE event/ELC */
   uint32_t eri_elc;       /* ER event/ELC */
+  bool     use_dtc;       /* DTC enable flag */
+  bool     use_dma;       /* DMA enable flag */
 };
 
 /* I2C Device Private Data */
@@ -102,8 +104,14 @@ struct ra_i2c_priv_s
   uint32_t dcnt;          /* Current message length */
   uint16_t flags;         /* Current message flags */
 
-  /* I2C address */
-  uint8_t  addr;          /* Current message address */
+  /* I2C address - uint16_t to support 10-bit addressing */
+  uint16_t addr;          /* Current message address */
+
+#ifdef CONFIG_RA_I2C_10BIT_ADDRESS
+  /* 10-bit addressing support */
+  uint8_t  addr_low;      /* Low byte of 10-bit address (A7:A0) */
+  bool     addr_pending;  /* True if low byte still needs to be sent */
+#endif
 
   /* Interrupt numbers assigned at runtime */
   int      rxi_irq;       /* RX interrupt number */
@@ -128,6 +136,10 @@ struct ra_i2c_priv_s
   bool     dtc_active;    /* DTC transfer in progress */
   ra_dtc_info_t dtc_tx_info; /* TX DTC transfer info */
   ra_dtc_info_t dtc_rx_info; /* RX DTC transfer info */
+#ifndef CONFIG_I2C_POLLED
+  volatile bool dtc_tx_done; /* TX DTC completion flag */
+  volatile bool dtc_rx_done; /* RX DTC completion flag */
+#endif
 #endif
 
 #ifdef CONFIG_RA_DMAC
@@ -146,15 +158,19 @@ struct ra_i2c_priv_s
 /* I2C State Machine States */
 enum ra_i2cstate_e
 {
-  I2CSTATE_IDLE = 0,      /* No I2C activity */
-  I2CSTATE_START,         /* START condition sent */
-  I2CSTATE_ADDR_WRITE,    /* Address sent, wait for ACK in write mode */
-  I2CSTATE_ADDR_READ,     /* Address sent, wait for ACK in read mode */
-  I2CSTATE_WRITE,         /* Transmitting data */
-  I2CSTATE_READ,          /* Receiving data */
-  I2CSTATE_STOP,          /* STOP condition sent */
-  I2CSTATE_ERROR,         /* Error occurred */
-  I2CSTATE_FINISH         /* Transfer finished */
+  I2CSTATE_IDLE = 0,            /* No I2C activity */
+  I2CSTATE_START,               /* START condition sent */
+  I2CSTATE_ADDR_WRITE,          /* Address sent, wait for ACK in write mode */
+  I2CSTATE_ADDR_READ,           /* Address sent, wait for ACK in read mode */
+#ifdef CONFIG_RA_I2C_10BIT_ADDRESS
+  I2CSTATE_ADDR_10BIT_HIGH,     /* 10-bit high byte sent, waiting for ACK */
+  I2CSTATE_ADDR_10BIT_READ_RESTART, /* Waiting for restart for 10-bit read */
+#endif
+  I2CSTATE_WRITE,               /* Transmitting data */
+  I2CSTATE_READ,                /* Receiving data */
+  I2CSTATE_STOP,                /* STOP condition sent */
+  I2CSTATE_ERROR,               /* Error occurred */
+  I2CSTATE_FINISH               /* Transfer finished */
 };
 
 /****************************************************************************

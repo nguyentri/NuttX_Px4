@@ -2624,6 +2624,38 @@ config RA_SDRAM_DEBUG_INFO
 
 endmenu
 
+comment "SDRAM DTC/DMAC Transfer Options"
+
+config RA_SDRAM_USE_DTC
+   bool "SDRAM use DTC for transfers"
+   default n
+   depends on RA_DTC
+   help
+     Enable DTC (Data Transfer Controller) for SDRAM transfers.
+     DTC provides hardware-assisted data transfers with lower
+     CPU overhead for memory operations.
+
+config RA_SDRAM_USE_DMAC
+   bool "SDRAM use DMAC for transfers"
+   default n
+   depends on RA_DMAC
+   help
+     Enable DMAC (Direct Memory Access Controller) for SDRAM transfers.
+     DMAC provides hardware-assisted data transfers with the lowest
+     CPU overhead for high-speed SDRAM access. This is recommended
+     for large block transfers and framebuffer operations.
+     DMAC takes priority over DTC if both are enabled.
+
+config RA_SDRAM_DMAC_THRESHOLD
+   int "Minimum bytes for SDRAM DMAC transfer"
+   default 256
+   range 1 16384
+   depends on RA_SDRAM_USE_DMAC
+   help
+     Minimum number of bytes required to use DMAC for SDRAM transfers.
+     Transfers smaller than this threshold will use DTC or PIO mode.
+     Default is 256 bytes for optimal performance/overhead balance.
+
 endif # RA_SDRAM
 
 endmenu
@@ -3209,6 +3241,180 @@ config RA_I2C2_SLAVE
    default n
    depends on RA_I2C2 && RA_I2C_SLAVE
 
+if RA_I2C
+
+comment "I2C DTC/DMAC Transfer Options"
+
+config RA_I2C0_USE_DTC
+   bool "I2C0 use DTC for transfers"
+   default n
+   depends on RA_I2C0 && RA_DTC
+   help
+     Enable DTC (Data Transfer Controller) for I2C0 transfers.
+     DTC provides hardware-assisted data transfers with lower
+     CPU overhead. When enabled, transfers >= threshold bytes
+     will use DTC instead of PIO mode.
+
+config RA_I2C1_USE_DTC
+   bool "I2C1 use DTC for transfers"
+   default n
+   depends on RA_I2C1 && RA_DTC
+   help
+     Enable DTC (Data Transfer Controller) for I2C1 transfers.
+     DTC provides hardware-assisted data transfers with lower
+     CPU overhead. When enabled, transfers >= threshold bytes
+     will use DTC instead of PIO mode.
+
+config RA_I2C2_USE_DTC
+   bool "I2C2 use DTC for transfers"
+   default n
+   depends on RA_I2C2 && RA_DTC
+   help
+     Enable DTC (Data Transfer Controller) for I2C2 transfers.
+     DTC provides hardware-assisted data transfers with lower
+     CPU overhead. When enabled, transfers >= threshold bytes
+     will use DTC instead of PIO mode.
+
+config RA_I2C0_USE_DMAC
+   bool "I2C0 use DMAC for transfers"
+   default n
+   depends on RA_I2C0 && RA_DMAC
+   help
+     Enable DMAC (Direct Memory Access Controller) for I2C0 transfers.
+     DMAC provides hardware-assisted data transfers with the lowest
+     CPU overhead but requires channel allocation. When enabled,
+     transfers >= threshold bytes will use DMAC instead of PIO/DTC.
+     DMAC takes priority over DTC if both are enabled.
+
+config RA_I2C1_USE_DMAC
+   bool "I2C1 use DMAC for transfers"
+   default n
+   depends on RA_I2C1 && RA_DMAC
+   help
+     Enable DMAC (Direct Memory Access Controller) for I2C1 transfers.
+     DMAC provides hardware-assisted data transfers with the lowest
+     CPU overhead but requires channel allocation. When enabled,
+     transfers >= threshold bytes will use DMAC instead of PIO/DTC.
+     DMAC takes priority over DTC if both are enabled.
+
+config RA_I2C2_USE_DMAC
+   bool "I2C2 use DMAC for transfers"
+   default n
+   depends on RA_I2C2 && RA_DMAC
+   help
+     Enable DMAC (Direct Memory Access Controller) for I2C2 transfers.
+     DMAC provides hardware-assisted data transfers with the lowest
+     CPU overhead but requires channel allocation. When enabled,
+     transfers >= threshold bytes will use DMAC instead of PIO/DTC.
+     DMAC takes priority over DTC if both are enabled.
+
+config RA_I2C_DTC_THRESHOLD
+   int "Minimum bytes for I2C DTC transfer"
+   default 8
+   range 1 256
+   depends on RA_I2C0_USE_DTC || RA_I2C1_USE_DTC || RA_I2C2_USE_DTC
+   help
+     Minimum number of bytes required to use DTC for I2C transfers.
+     Transfers smaller than this threshold will use PIO mode.
+     Higher values reduce DTC overhead for small transfers.
+
+config RA_I2C_DMAC_THRESHOLD
+   int "Minimum bytes for I2C DMAC transfer"
+   default 16
+   range 1 256
+   depends on RA_I2C0_USE_DMAC || RA_I2C1_USE_DMAC || RA_I2C2_USE_DMAC
+   help
+     Minimum number of bytes required to use DMAC for I2C transfers.
+     Transfers smaller than this threshold will use DTC or PIO mode.
+     Higher values reduce DMAC overhead for small transfers.
+
+comment "I2C Advanced Features"
+
+config RA_I2C_10BIT_ADDRESS
+   bool "Enable 10-bit I2C addressing"
+   default n
+   depends on RA_I2C
+   help
+     Enable support for 10-bit I2C slave addressing. When enabled,
+     the driver will handle I2C_M_TEN flag in transfer messages and
+     properly format 10-bit addresses per I2C specification.
+     10-bit addressing uses two address bytes: 11110XX (high bits)
+     followed by the low 8 bits of the address.
+
+config RA_I2C0_FAST_MODE_PLUS
+   bool "I2C0 Fast Mode Plus (1 MHz)"
+   default n
+   depends on RA_I2C0
+   help
+     Enable Fast Mode Plus for I2C0, allowing up to 1 MHz operation.
+     This sets the FMPE bit in ICFER register. Only I2C0 supports
+     Fast Mode Plus on most RA8 devices. Requires appropriate
+     pull-up resistors for the higher speed.
+
+config RA_I2C_SMBUS
+   bool "Enable SMBus timing mode"
+   default n
+   depends on RA_I2C
+   help
+     Enable SMBus timing mode instead of standard I2C timing.
+     This sets the SMBS bit in ICMR3 register for SMBus-compliant
+     timing. Use this when communicating with SMBus devices that
+     require specific timing characteristics.
+
+choice
+   prompt "SDA Output Delay"
+   default RA_I2C_SDA_DELAY_1
+   depends on RA_I2C
+   help
+     Select the SDA output delay for I2C hold time compliance.
+     This configures the SDDL field in ICMR2 register. Higher
+     delay values provide more margin for I2C hold time but
+     may limit maximum frequency.
+
+config RA_I2C_SDA_DELAY_0
+   bool "No delay"
+   help
+     No SDA output delay (fastest, minimum hold time).
+
+config RA_I2C_SDA_DELAY_1
+   bool "1 fIIC cycle"
+   help
+     1 fIIC cycle SDA output delay (recommended default).
+
+config RA_I2C_SDA_DELAY_2
+   bool "2 fIIC cycles"
+   help
+     2 fIIC cycles SDA output delay.
+
+config RA_I2C_SDA_DELAY_3
+   bool "3 fIIC cycles"
+   help
+     3 fIIC cycles SDA output delay.
+
+config RA_I2C_SDA_DELAY_4
+   bool "4 fIIC cycles"
+   help
+     4 fIIC cycles SDA output delay.
+
+config RA_I2C_SDA_DELAY_5
+   bool "5 fIIC cycles"
+   help
+     5 fIIC cycles SDA output delay.
+
+config RA_I2C_SDA_DELAY_6
+   bool "6 fIIC cycles"
+   help
+     6 fIIC cycles SDA output delay.
+
+config RA_I2C_SDA_DELAY_7
+   bool "7 fIIC cycles"
+   help
+     7 fIIC cycles SDA output delay (slowest, maximum hold time).
+
+endchoice
+
+endif # RA_I2C
+
 config RA_I3C
    bool "I3C Interface"
    default n
@@ -3733,6 +3939,122 @@ config RA_SCI9_SPI
    ---help---
       Enable SCI9 in Simple SPI mode. Cannot be used simultaneously with SCI9 UART.
 
+if RA_SCI_SPI
+
+comment "SCI_SPI DTC/DMAC Transfer Options"
+
+config RA_SCI0_SPI_USE_DTC
+   bool "SCI0_SPI use DTC for transfers"
+   default n
+   depends on RA_SCI0_SPI && RA_DTC
+   help
+     Enable DTC (Data Transfer Controller) for SCI0_SPI transfers.
+     DTC provides hardware-assisted data transfers with lower
+     CPU overhead. When enabled, transfers >= threshold words
+     will use DTC instead of PIO mode.
+
+config RA_SCI1_SPI_USE_DTC
+   bool "SCI1_SPI use DTC for transfers"
+   default n
+   depends on RA_SCI1_SPI && RA_DTC
+   help
+     Enable DTC (Data Transfer Controller) for SCI1_SPI transfers.
+
+config RA_SCI2_SPI_USE_DTC
+   bool "SCI2_SPI use DTC for transfers"
+   default n
+   depends on RA_SCI2_SPI && RA_DTC
+   help
+     Enable DTC (Data Transfer Controller) for SCI2_SPI transfers.
+
+config RA_SCI3_SPI_USE_DTC
+   bool "SCI3_SPI use DTC for transfers"
+   default n
+   depends on RA_SCI3_SPI && RA_DTC
+   help
+     Enable DTC (Data Transfer Controller) for SCI3_SPI transfers.
+
+config RA_SCI4_SPI_USE_DTC
+   bool "SCI4_SPI use DTC for transfers"
+   default n
+   depends on RA_SCI4_SPI && RA_DTC
+   help
+     Enable DTC (Data Transfer Controller) for SCI4_SPI transfers.
+
+config RA_SCI9_SPI_USE_DTC
+   bool "SCI9_SPI use DTC for transfers"
+   default n
+   depends on RA_SCI9_SPI && RA_DTC
+   help
+     Enable DTC (Data Transfer Controller) for SCI9_SPI transfers.
+
+config RA_SCI0_SPI_USE_DMAC
+   bool "SCI0_SPI use DMAC for transfers"
+   default n
+   depends on RA_SCI0_SPI && RA_DMAC
+   help
+     Enable DMAC (Direct Memory Access Controller) for SCI0_SPI transfers.
+     DMAC provides hardware-assisted data transfers with the lowest
+     CPU overhead but requires channel allocation. When enabled,
+     transfers >= threshold words will use DMAC instead of PIO/DTC.
+     DMAC takes priority over DTC if both are enabled.
+
+config RA_SCI1_SPI_USE_DMAC
+   bool "SCI1_SPI use DMAC for transfers"
+   default n
+   depends on RA_SCI1_SPI && RA_DMAC
+   help
+     Enable DMAC for SCI1_SPI transfers.
+
+config RA_SCI2_SPI_USE_DMAC
+   bool "SCI2_SPI use DMAC for transfers"
+   default n
+   depends on RA_SCI2_SPI && RA_DMAC
+   help
+     Enable DMAC for SCI2_SPI transfers.
+
+config RA_SCI3_SPI_USE_DMAC
+   bool "SCI3_SPI use DMAC for transfers"
+   default n
+   depends on RA_SCI3_SPI && RA_DMAC
+   help
+     Enable DMAC for SCI3_SPI transfers.
+
+config RA_SCI4_SPI_USE_DMAC
+   bool "SCI4_SPI use DMAC for transfers"
+   default n
+   depends on RA_SCI4_SPI && RA_DMAC
+   help
+     Enable DMAC for SCI4_SPI transfers.
+
+config RA_SCI9_SPI_USE_DMAC
+   bool "SCI9_SPI use DMAC for transfers"
+   default n
+   depends on RA_SCI9_SPI && RA_DMAC
+   help
+     Enable DMAC for SCI9_SPI transfers.
+
+config RA_SCI_SPI_DTC_THRESHOLD
+   int "Minimum words for SCI_SPI DTC transfer"
+   default 4
+   range 1 256
+   depends on RA_SCI0_SPI_USE_DTC || RA_SCI1_SPI_USE_DTC || RA_SCI2_SPI_USE_DTC || \
+              RA_SCI3_SPI_USE_DTC || RA_SCI4_SPI_USE_DTC || RA_SCI9_SPI_USE_DTC
+   help
+     Minimum number of words required to use DTC for SCI_SPI transfers.
+     Transfers smaller than this threshold will use PIO mode.
+
+config RA_SCI_SPI_DMAC_THRESHOLD
+   int "Minimum words for SCI_SPI DMAC transfer"
+   default 8
+   range 1 256
+   depends on RA_SCI0_SPI_USE_DMAC || RA_SCI1_SPI_USE_DMAC || RA_SCI2_SPI_USE_DMAC || \
+              RA_SCI3_SPI_USE_DMAC || RA_SCI4_SPI_USE_DMAC || RA_SCI9_SPI_USE_DMAC
+   help
+     Minimum number of words required to use DMAC for SCI_SPI transfers.
+     Transfers smaller than this threshold will use DTC or PIO mode.
+
+endif # RA_SCI_SPI
 
 config RA_SCI_I2C
    bool
@@ -4099,6 +4421,40 @@ config RA_OSPI
    default n
    depends on RA_HAVE_OSPI
 
+if RA_OSPI
+
+comment "OSPI DTC/DMAC Transfer Options"
+
+config RA_OSPI_USE_DTC
+   bool "OSPI use DTC for transfers"
+   default n
+   depends on RA_DTC
+   help
+     Enable DTC (Data Transfer Controller) for OSPI transfers.
+     DTC provides hardware-assisted data transfers with lower
+     CPU overhead for flash memory operations.
+
+config RA_OSPI_USE_DMAC
+   bool "OSPI use DMAC for transfers"
+   default n
+   depends on RA_DMAC
+   help
+     Enable DMAC (Direct Memory Access Controller) for OSPI transfers.
+     DMAC provides hardware-assisted data transfers with the lowest
+     CPU overhead for high-speed flash memory access.
+     DMAC takes priority over DTC if both are enabled.
+
+config RA_OSPI_DMAC_THRESHOLD
+   int "Minimum bytes for OSPI DMAC transfer"
+   default 64
+   range 1 4096
+   depends on RA_OSPI_USE_DMAC
+   help
+     Minimum number of bytes required to use DMAC for OSPI transfers.
+     Transfers smaller than this threshold will use DTC or PIO mode.
+
+endif # RA_OSPI
+
 comment "SD Host Interface"
 
 config RA_HAVE_SDHI
@@ -4140,6 +4496,57 @@ config RA_SDHI1
    select RA_SDHI
    help
      Enable SD Host Interface 1 for SD/SDIO/MMC card support.
+
+if RA_SDHI
+
+comment "SDHI DTC/DMAC Transfer Options"
+
+config RA_SDHI0_USE_DTC
+   bool "SDHI0 use DTC for transfers"
+   default n
+   depends on RA_SDHI0 && RA_DTC
+   help
+     Enable DTC (Data Transfer Controller) for SDHI0 transfers.
+     DTC provides hardware-assisted data transfers with lower
+     CPU overhead for SD card operations.
+
+config RA_SDHI1_USE_DTC
+   bool "SDHI1 use DTC for transfers"
+   default n
+   depends on RA_SDHI1 && RA_DTC
+   help
+     Enable DTC (Data Transfer Controller) for SDHI1 transfers.
+
+config RA_SDHI0_USE_DMAC
+   bool "SDHI0 use DMAC for transfers"
+   default n
+   depends on RA_SDHI0 && RA_DMAC
+   help
+     Enable DMAC (Direct Memory Access Controller) for SDHI0 transfers.
+     DMAC provides hardware-assisted data transfers with the lowest
+     CPU overhead for high-speed SD card access.
+     DMAC takes priority over DTC if both are enabled.
+
+config RA_SDHI1_USE_DMAC
+   bool "SDHI1 use DMAC for transfers"
+   default n
+   depends on RA_SDHI1 && RA_DMAC
+   help
+     Enable DMAC (Direct Memory Access Controller) for SDHI1 transfers.
+     DMAC provides hardware-assisted data transfers with the lowest
+     CPU overhead for high-speed SD card access.
+
+config RA_SDHI_DMAC_THRESHOLD
+   int "Minimum bytes for SDHI DMAC transfer"
+   default 512
+   range 1 4096
+   depends on RA_SDHI0_USE_DMAC || RA_SDHI1_USE_DMAC
+   help
+     Minimum number of bytes required to use DMAC for SDHI transfers.
+     Transfers smaller than this threshold will use DTC or PIO mode.
+     Default is 512 (one block) for optimal SD card performance.
+
+endif # RA_SDHI
 
 comment "External Bus Controller - SDRAM"
 
@@ -4856,35 +5263,65 @@ config RA_DMAC_SPI1_RX_CHANNEL
        Must be unique across all peripheral assignments.
          Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.  (Channels 8-9 are invalid.)
 
-config RA_DMAC_I2C0_CHANNEL
-   int "I2C0 DMAC channel"
+config RA_DMAC_I2C0_TX_CHANNEL
+   int "I2C0 TX DMAC channel"
    default -1
    range -1 17
-   depends on RA_I2C0
-    help
-       DMAC channel for I2C0 transfers (-1 = disabled).
-       Must be unique across all peripheral assignments.
-         Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.  (Channels 8-9 are invalid.)
+   depends on RA_I2C0_USE_DMAC
+   help
+     DMAC channel for I2C0 transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.
 
-config RA_DMAC_I2C1_CHANNEL
-   int "I2C1 DMAC channel"
+config RA_DMAC_I2C0_RX_CHANNEL
+   int "I2C0 RX DMAC channel"
    default -1
    range -1 17
-   depends on RA_I2C1
-    help
-       DMAC channel for I2C1 transfers (-1 = disabled).
-       Must be unique across all peripheral assignments.
-         Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.  (Channels 8-9 are invalid.)
+   depends on RA_I2C0_USE_DMAC
+   help
+     DMAC channel for I2C0 receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.
 
-config RA_DMAC_I2C2_CHANNEL
-   int "I2C2 DMAC channel"
+config RA_DMAC_I2C1_TX_CHANNEL
+   int "I2C1 TX DMAC channel"
    default -1
    range -1 17
-   depends on RA_I2C2
-    help
-       DMAC channel for I2C2 transfers (-1 = disabled).
-       Must be unique across all peripheral assignments.
-         Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.  (Channels 8-9 are invalid.)
+   depends on RA_I2C1_USE_DMAC
+   help
+     DMAC channel for I2C1 transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.
+
+config RA_DMAC_I2C1_RX_CHANNEL
+   int "I2C1 RX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_I2C1_USE_DMAC
+   help
+     DMAC channel for I2C1 receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.
+
+config RA_DMAC_I2C2_TX_CHANNEL
+   int "I2C2 TX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_I2C2_USE_DMAC
+   help
+     DMAC channel for I2C2 transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.
+
+config RA_DMAC_I2C2_RX_CHANNEL
+   int "I2C2 RX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_I2C2_USE_DMAC
+   help
+     DMAC channel for I2C2 receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.
 
 config RA_DMAC_ADC_CHANNEL
    int "ADC DMAC channel"
@@ -5079,25 +5516,27 @@ config RA_DMAC_SCI0_SPI_TX_CHANNEL
    int "SCI0_SPI TX DMAC channel"
    default -1
    range -1 17
-   depends on RA_SCI0_SPI
+   depends on RA_SCI0_SPI_USE_DMAC
    help
      DMAC channel for SCI0_SPI transmit (-1 = disabled).
      Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.
 
 config RA_DMAC_SCI0_SPI_RX_CHANNEL
    int "SCI0_SPI RX DMAC channel"
    default -1
    range -1 17
-   depends on RA_SCI0_SPI
+   depends on RA_SCI0_SPI_USE_DMAC
    help
      DMAC channel for SCI0_SPI receive (-1 = disabled).
      Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.
 
 config RA_DMAC_SCI1_SPI_TX_CHANNEL
    int "SCI1_SPI TX DMAC channel"
    default -1
    range -1 17
-   depends on RA_SCI1_SPI
+   depends on RA_SCI1_SPI_USE_DMAC
    help
      DMAC channel for SCI1_SPI transmit (-1 = disabled).
      Must be unique across all peripheral assignments.
@@ -5106,7 +5545,7 @@ config RA_DMAC_SCI1_SPI_RX_CHANNEL
    int "SCI1_SPI RX DMAC channel"
    default -1
    range -1 17
-   depends on RA_SCI1_SPI
+   depends on RA_SCI1_SPI_USE_DMAC
    help
      DMAC channel for SCI1_SPI receive (-1 = disabled).
      Must be unique across all peripheral assignments.
@@ -5115,7 +5554,7 @@ config RA_DMAC_SCI2_SPI_TX_CHANNEL
    int "SCI2_SPI TX DMAC channel"
    default -1
    range -1 17
-   depends on RA_SCI2_SPI
+   depends on RA_SCI2_SPI_USE_DMAC
    help
      DMAC channel for SCI2_SPI transmit (-1 = disabled).
      Must be unique across all peripheral assignments.
@@ -5124,7 +5563,7 @@ config RA_DMAC_SCI2_SPI_RX_CHANNEL
    int "SCI2_SPI RX DMAC channel"
    default -1
    range -1 17
-   depends on RA_SCI2_SPI
+   depends on RA_SCI2_SPI_USE_DMAC
    help
      DMAC channel for SCI2_SPI receive (-1 = disabled).
      Must be unique across all peripheral assignments.
@@ -5133,7 +5572,7 @@ config RA_DMAC_SCI3_SPI_TX_CHANNEL
    int "SCI3_SPI TX DMAC channel"
    default -1
    range -1 17
-   depends on RA_SCI3_SPI
+   depends on RA_SCI3_SPI_USE_DMAC
    help
      DMAC channel for SCI3_SPI transmit (-1 = disabled).
      Must be unique across all peripheral assignments.
@@ -5142,7 +5581,7 @@ config RA_DMAC_SCI3_SPI_RX_CHANNEL
    int "SCI3_SPI RX DMAC channel"
    default -1
    range -1 17
-   depends on RA_SCI3_SPI
+   depends on RA_SCI3_SPI_USE_DMAC
    help
      DMAC channel for SCI3_SPI receive (-1 = disabled).
      Must be unique across all peripheral assignments.
@@ -5151,7 +5590,7 @@ config RA_DMAC_SCI4_SPI_TX_CHANNEL
    int "SCI4_SPI TX DMAC channel"
    default -1
    range -1 17
-   depends on RA_SCI4_SPI
+   depends on RA_SCI4_SPI_USE_DMAC
    help
      DMAC channel for SCI4_SPI transmit (-1 = disabled).
      Must be unique across all peripheral assignments.
@@ -5160,7 +5599,7 @@ config RA_DMAC_SCI4_SPI_RX_CHANNEL
    int "SCI4_SPI RX DMAC channel"
    default -1
    range -1 17
-   depends on RA_SCI4_SPI
+   depends on RA_SCI4_SPI_USE_DMAC
    help
      DMAC channel for SCI4_SPI receive (-1 = disabled).
      Must be unique across all peripheral assignments.
@@ -5169,7 +5608,7 @@ config RA_DMAC_SCI9_SPI_TX_CHANNEL
    int "SCI9_SPI TX DMAC channel"
    default -1
    range -1 17
-   depends on RA_SCI9_SPI
+   depends on RA_SCI9_SPI_USE_DMAC
    help
      DMAC channel for SCI9_SPI transmit (-1 = disabled).
      Must be unique across all peripheral assignments.
@@ -5178,7 +5617,7 @@ config RA_DMAC_SCI9_SPI_RX_CHANNEL
    int "SCI9_SPI RX DMAC channel"
    default -1
    range -1 17
-   depends on RA_SCI9_SPI
+   depends on RA_SCI9_SPI_USE_DMAC
    help
      DMAC channel for SCI9_SPI receive (-1 = disabled).
      Must be unique across all peripheral assignments.
@@ -5303,45 +5742,60 @@ config RA_DMAC_GPT13_CHANNEL
      Used for timer/PWM capture or compare match operations.
      Must be unique across all peripheral assignments.
 
-config RA_DMAC_SDHI_CHANNEL
-   int "SDHI DMAC channel"
+config RA_DMAC_SDHI0_CHANNEL
+   int "SDHI0 DMAC channel"
    default -1
    range -1 17
-   depends on RA_SDHI
+   depends on RA_SDHI0_USE_DMAC
    help
-     DMAC channel for SDHI (SD/MMC Host Interface) transfers (-1 = disabled).
+     DMAC channel for SDHI0 (SD/MMC Host Interface 0) transfers (-1 = disabled).
      Used for high-speed SD card data transfers.
      Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.
+
+config RA_DMAC_SDHI1_CHANNEL
+   int "SDHI1 DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SDHI1_USE_DMAC
+   help
+     DMAC channel for SDHI1 (SD/MMC Host Interface 1) transfers (-1 = disabled).
+     Used for high-speed SD card data transfers.
+     Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.
 
 config RA_DMAC_SDRAM_CHANNEL
    int "SDRAM DMAC channel"
    default -1
    range -1 17
-   depends on RA_SDRAM
+   depends on RA_SDRAM_USE_DMAC
    help
      DMAC channel for SDRAM controller transfers (-1 = disabled).
      Used for high-speed SDRAM data transfers and memory operations.
      Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.
 
-config RA_DMAC_QSPI0_CHANNEL
-   int "QSPI0 DMAC channel"
+config RA_DMAC_OSPI0_CHANNEL
+   int "OSPI0 DMAC channel"
    default -1
    range -1 17
-   depends on RA_OSPI
+   depends on RA_OSPI_USE_DMAC
    help
-     DMAC channel for QSPI0 (Quad SPI 0) transfers (-1 = disabled).
-     Used for high-speed flash memory access via QSPI interface.
+     DMAC channel for OSPI0 (Octal SPI 0) transfers (-1 = disabled).
+     Used for high-speed flash memory access via OSPI interface.
      Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.
 
-config RA_DMAC_QSPI1_CHANNEL
-   int "QSPI1 DMAC channel"
+config RA_DMAC_OSPI1_CHANNEL
+   int "OSPI1 DMAC channel"
    default -1
    range -1 17
-   depends on RA_OSPI
+   depends on RA_OSPI_USE_DMAC
    help
-     DMAC channel for QSPI1 (Quad SPI 1) transfers (-1 = disabled).
-     Used for high-speed flash memory access via QSPI interface.
+     DMAC channel for OSPI1 (Octal SPI 1) transfers (-1 = disabled).
+     Used for high-speed flash memory access via OSPI interface.
      Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.
 
 endmenu
 

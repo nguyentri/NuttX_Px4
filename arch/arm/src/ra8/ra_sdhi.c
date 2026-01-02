@@ -576,7 +576,20 @@ static int ra_sdhi_dma_setup(struct ra_sdhi_dev_s *priv)
   /* Get DMA channel assignment from Kconfig */
   ra_sdhi_get_dma_channel(priv, &priv->dma_channel);
 
+#if (defined(CONFIG_RA_SDHI0_USE_DMAC) && priv->channel == 0) || \\
+    (defined(CONFIG_RA_SDHI1_USE_DMAC) && priv->channel == 1)
   priv->dma_enabled = true;
+#else
+  priv->dma_enabled = false;
+#endif
+
+  /* If DMA is not enabled for this instance, return early */
+  if (!priv->dma_enabled)
+    {
+      mcinfo("SDHI%d DMA disabled by Kconfig\n", priv->channel);
+      return OK;
+    }
+
   priv->dma_tx = NULL;
   priv->dma_rx = NULL;
   priv->dma_tx_done = false;

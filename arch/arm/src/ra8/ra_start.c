@@ -845,19 +845,19 @@ int main(void){
   ra_earlyserialinit();
 
   /* The 'A' character is not displayed because the UART hardware is not fully ready */
-  showprogress('A');
+  //showprogress('A');
   arm_earlyserialinit();
 #else
   /* No early serial initialization - console will be set up later */
   showprogress('A');
 #endif
 
-  showprogress('B');
+  //showprogress('B');
 
   /* Board-level Initialization */
   /* Initialize onboard resources */
   ra_board_initialize();
-  showprogress('C');
+  //showprogress('C');
 
   /* Start NuttX */
   /* Then start NuttX main initialization */

@@ -78,6 +78,37 @@
 /* I2C State timeout */
 #define I2C_STATE_TIMEOUT_US    100000
 
+/* 10-bit addressing constants per I2C specification */
+
+#define I2C_10BIT_ADDR_PREFIX   0xF0   /* 11110xx0 prefix for 10-bit addr */
+#define I2C_10BIT_ADDR_MASK     0x06   /* Bits 9:8 go in prefix byte */
+#define I2C_10BIT_ADDR_HIGH(a)  (I2C_10BIT_ADDR_PREFIX | (((a) >> 7) & I2C_10BIT_ADDR_MASK))
+#define I2C_10BIT_ADDR_LOW(a)   ((a) & 0xFF)
+
+/* SDA output delay selection from Kconfig */
+
+#if defined(CONFIG_RA_I2C_SDA_DELAY_0)
+#  define RA_I2C_SDA_DELAY_VALUE  R_IIC_ICMR2_SDDL_000
+#elif defined(CONFIG_RA_I2C_SDA_DELAY_2)
+#  define RA_I2C_SDA_DELAY_VALUE  R_IIC_ICMR2_SDDL_010
+#elif defined(CONFIG_RA_I2C_SDA_DELAY_3)
+#  define RA_I2C_SDA_DELAY_VALUE  R_IIC_ICMR2_SDDL_011
+#elif defined(CONFIG_RA_I2C_SDA_DELAY_4)
+#  define RA_I2C_SDA_DELAY_VALUE  R_IIC_ICMR2_SDDL_100
+#elif defined(CONFIG_RA_I2C_SDA_DELAY_5)
+#  define RA_I2C_SDA_DELAY_VALUE  R_IIC_ICMR2_SDDL_101
+#elif defined(CONFIG_RA_I2C_SDA_DELAY_6)
+#  define RA_I2C_SDA_DELAY_VALUE  R_IIC_ICMR2_SDDL_110
+#elif defined(CONFIG_RA_I2C_SDA_DELAY_7)
+#  define RA_I2C_SDA_DELAY_VALUE  R_IIC_ICMR2_SDDL_111
+#else
+#  define RA_I2C_SDA_DELAY_VALUE  R_IIC_ICMR2_SDDL_001  /* Default: 1 cycle */
+#endif
+
+/* DTC/DMA RX last bytes  */
+
+#define IIC_RX_DMA_LAST_BYTES   3  /* Handles last 3 bytes manually */
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -106,7 +137,12 @@ static int ra_i2c_reset(struct i2c_master_s *dev);
 /* I2C helper functions */
 static int ra_i2c_start(struct ra_i2c_priv_s *priv);
 static int ra_i2c_stop(struct ra_i2c_priv_s *priv);
-static int ra_i2c_sendaddr(struct ra_i2c_priv_s *priv, uint8_t addr, bool readmode);
+static int ra_i2c_sendaddr(struct ra_i2c_priv_s *priv, uint16_t addr,
+                           bool readmode, bool tenbit);
+#ifdef CONFIG_RA_I2C_10BIT_ADDRESS
+static int ra_i2c_sendaddr_10bit_low(struct ra_i2c_priv_s *priv, bool readmode);
+static int ra_i2c_sendaddr_10bit_read(struct ra_i2c_priv_s *priv, uint16_t addr);
+#endif
 static int ra_i2c_senddata(struct ra_i2c_priv_s *priv);
 static int ra_i2c_readdata(struct ra_i2c_priv_s *priv);
 static int ra_i2c_wait_event(struct ra_i2c_priv_s *priv, uint32_t timeout_us);
@@ -131,6 +167,10 @@ static int ra_i2c_dtc_start_rx(struct ra_i2c_priv_s *priv, uint8_t *buffer, uint
 static int ra_i2c_dtc_start_tx(struct ra_i2c_priv_s *priv, const uint8_t *buffer, uint32_t len);
 static void ra_i2c_dtc_stop(struct ra_i2c_priv_s *priv);
 static void ra_i2c_dtc_cleanup(struct ra_i2c_priv_s *priv);
+#ifndef CONFIG_I2C_POLLED
+static void ra_i2c_dtc_tx_callback(void *handle, int event, void *arg);
+static void ra_i2c_dtc_rx_callback(void *handle, int event, void *arg);
+#endif
 #endif
 
 /* DMA functions */
@@ -202,6 +242,16 @@ static const struct ra_i2c_config_s ra_i2c0_config =
   .txi_elc      = RA_ELC_IIC0_TXI,  /* EVENT_IIC0_TXI */
   .tei_elc      = RA_ELC_IIC0_TEI,  /* EVENT_IIC0_TEI */
   .eri_elc      = RA_ELC_IIC0_ERI,  /* EVENT_IIC0_ERI */
+#ifdef CONFIG_RA_I2C0_USE_DTC
+  .use_dtc      = true,
+#else
+  .use_dtc      = false,
+#endif
+#ifdef CONFIG_RA_I2C0_USE_DMAC
+  .use_dma      = true,
+#else
+  .use_dma      = false,
+#endif
 };
 
 static struct ra_i2c_priv_s ra_i2c0_priv =
@@ -215,7 +265,7 @@ static struct ra_i2c_priv_s ra_i2c0_priv =
 #endif
   .state        = I2CSTATE_IDLE,
 };
-#endif
+#endif /* CONFIG_RA_I2C0 */
 
 #ifdef CONFIG_RA_I2C1
 static const struct ra_i2c_config_s ra_i2c1_config =
@@ -228,6 +278,16 @@ static const struct ra_i2c_config_s ra_i2c1_config =
   .txi_elc      = RA_ELC_IIC1_TXI,  /* EVENT_IIC1_TXI */
   .tei_elc      = RA_ELC_IIC1_TEI,  /* EVENT_IIC1_TEI */
   .eri_elc      = RA_ELC_IIC1_ERI,  /* EVENT_IIC1_ERI */
+#ifdef CONFIG_RA_I2C1_USE_DTC
+  .use_dtc      = true,
+#else
+  .use_dtc      = false,
+#endif
+#ifdef CONFIG_RA_I2C1_USE_DMAC
+  .use_dma      = true,
+#else
+  .use_dma      = false,
+#endif
 };
 
 static struct ra_i2c_priv_s ra_i2c1_priv =
@@ -241,7 +301,43 @@ static struct ra_i2c_priv_s ra_i2c1_priv =
 #endif
   .state        = I2CSTATE_IDLE,
 };
+#endif /* CONFIG_RA_I2C1 */
+
+#ifdef CONFIG_RA_I2C2
+static const struct ra_i2c_config_s ra_i2c2_config =
+{
+  .base         = R_IIC_CH_BASE(2),
+  .mstp         = RA_MSTP_IIC2,
+  .clk_freq     = RA_PCLKB_FREQUENCY,
+  .bus          = 2,
+  .rxi_elc      = RA_ELC_IIC2_RXI,  /* EVENT_IIC2_RXI */
+  .txi_elc      = RA_ELC_IIC2_TXI,  /* EVENT_IIC2_TXI */
+  .tei_elc      = RA_ELC_IIC2_TEI,  /* EVENT_IIC2_TEI */
+  .eri_elc      = RA_ELC_IIC2_ERI,  /* EVENT_IIC2_ERI */
+#ifdef CONFIG_RA_I2C2_USE_DTC
+  .use_dtc      = true,
+#else
+  .use_dtc      = false,
 #endif
+#ifdef CONFIG_RA_I2C2_USE_DMAC
+  .use_dma      = true,
+#else
+  .use_dma      = false,
+#endif
+};
+
+static struct ra_i2c_priv_s ra_i2c2_priv =
+{
+  .ops          = &ra_i2c_ops,
+  .config       = &ra_i2c2_config,
+  .refs         = 0,
+  .lock         = NXMUTEX_INITIALIZER,
+#ifndef CONFIG_I2C_POLLED
+  .sem_isr      = SEM_INITIALIZER(0),
+#endif
+  .state        = I2CSTATE_IDLE,
+};
+#endif /* CONFIG_RA_I2C2 */
 
 /****************************************************************************
  * Private Functions
@@ -291,82 +387,134 @@ static inline void ra_i2c_modifyreg(struct ra_i2c_priv_s *priv, uint8_t offset,
  * Name: ra_i2c_setfrequency
  *
  * Description:
- *   Set the I2C frequency
+ *   Set the I2C frequency.
+ *   Formula: SCL freq = IICCLK / (2^(CKS+1) * (BRH + BRL + 2))
+ *   Reserved bits 7-5 in ICBRH/ICBRL must be set to 1.
  *
  ****************************************************************************/
+
+
+
+#define IIC_BUS_RATE_REG_RESERVED_BITS  0xE0
 
 static uint32_t ra_i2c_setfrequency(struct i2c_master_s *dev, uint32_t frequency)
 {
   struct ra_i2c_priv_s *priv = (struct ra_i2c_priv_s *)dev;
-  uint32_t pclkb_freq;
+  uint32_t iic_clk_freq;
   uint32_t cks;
-  uint32_t brh, brl;
+  uint32_t brh;
+  uint32_t brl;
   uint32_t actual_freq;
+  bool found = false;
 
   DEBUGASSERT(priv != NULL);
 
   /* Check if frequency has changed */
+
   if (frequency == priv->frequency)
     {
       return priv->frequency;
     }
 
-  /* Get PCLKB frequency */
-  pclkb_freq = priv->config->clk_freq;
-
-  /* Calculate clock source divider and bit rate registers
-   * I2C frequency = PCLKB / (2^(CKS+1) * (BRH + BRL + 2))
+  /* Get actual IIC clock frequency from clock subsystem.
+   * This accounts for any clock source configuration (PLL1P, HOCO, etc.)
    */
 
-  /* Start with CKS = 0 (PCLKB/1) */
-  for (cks = 0; cks <= 7; cks++)
+  iic_clk_freq = ra_get_peripheral_clock(RA_PCLK_IICCLK);
+  if (iic_clk_freq == 0)
     {
-      uint32_t divisor = 1 << (cks + 1);
-      uint32_t scl_freq = pclkb_freq / divisor;
-      uint32_t total_count = scl_freq / frequency;
+      /* Fallback to configured PCLKB if peripheral clock not available */
 
-      if (total_count >= 4 && total_count <= 514) /* BRH + BRL + 2 can be 4 to 514 */
+      iic_clk_freq = priv->config->clk_freq;
+      i2cwarn("I2C%d: Using fallback clock %lu Hz\n",
+              priv->config->bus, iic_clk_freq);
+    }
+
+  /* Calculate clock source divider (CKS) and bit rate registers (BRH, BRL)
+   * per the below formula:
+   *   fIIC = IICCLK / 2^CKS
+   *   SCL period = (BRL + BRH + 2) / fIIC
+   *   SCL freq = fIIC / (BRL + BRH + 2)
+   *
+   * BRH and BRL are 5-bit values (0-31, though register is 8-bit)
+   * Uses max values of ~31 for standard calculations
+   */
+
+  for (cks = 0; cks <= 7 && !found; cks++)
+    {
+      uint32_t fiic = iic_clk_freq >> cks;  /* fIIC = IICCLK / 2^CKS */
+      uint32_t total_count;
+
+      if (fiic < frequency)
         {
-          /* Split total count between BRH and BRL */
+          /* fIIC too low, try higher CKS */
+
+          continue;
+        }
+
+      total_count = fiic / frequency;
+
+      /* total_count = BRH + BRL + 2, so BRH + BRL = total_count - 2 */
+
+      if (total_count >= 4 && total_count <= 66)
+        {
+          /* BRH + BRL range: 2 to 64 (each 0-31 for 5-bit values) */
+
           uint32_t bit_rate = total_count - 2;
+
+          /* Split evenly between BRH and BRL for ~50% duty cycle */
+
           brh = bit_rate / 2;
           brl = bit_rate - brh;
 
-          /* Ensure BRH and BRL are in valid range (0-255) */
-          if (brh <= 255 && brl <= 255)
+          /* uses 5-bit values (0-31) for BRH/BRL */
+
+          if (brh <= 31 && brl <= 31)
             {
+              found = true;
               break;
             }
         }
     }
 
-  if (cks > 7)
+  if (!found)
     {
-      /* Cannot achieve requested frequency, use minimum */
+      /* Cannot achieve requested frequency, use slowest settings */
+
       cks = 7;
-      brh = 255;
-      brl = 255;
+      brh = 31;
+      brl = 31;
+      i2cwarn("I2C%d: Cannot achieve %lu Hz, using minimum\n",
+              priv->config->bus, frequency);
     }
 
-  /* Calculate actual frequency */
-  actual_freq = pclkb_freq / ((1 << (cks + 1)) * (brh + brl + 2));
+  /* Calculate actual frequency achieved */
 
-  i2cinfo("I2C%d frequency: requested=%lu, actual=%lu, cks=%lu, brh=%lu, brl=%lu\n",
-          priv->config->bus, frequency, actual_freq, cks, brh, brl);
+  actual_freq = (iic_clk_freq >> cks) / (brh + brl + 2);
+
+  i2cinfo("I2C%d frequency: requested=%lu, actual=%lu Hz, "
+          "iic_clk=%lu, cks=%lu, brh=%lu, brl=%lu\n",
+          priv->config->bus, frequency, actual_freq,
+          iic_clk_freq, cks, brh, brl);
 
   /* Disable I2C while changing settings */
+
   ra_i2c_modifyreg(priv, R_IIC_ICCR1_OFFSET, R_IIC_ICCR1_ICE, 0);
 
-  /* Set clock source */
-  ra_i2c_modifyreg(priv, R_IIC_ICMR1_OFFSET, R_IIC_ICMR1_CKS_MASK,
-                  (cks << R_IIC_ICMR1_CKS_SHIFT) & R_IIC_ICMR1_CKS_MASK);
+  /* Set clock source divider in ICMR1 */
 
-  /* Set bit rate registers */
-  /* Mask bit-rate fields with their valid-bit masks */
-  ra_i2c_putreg(priv, R_IIC_ICBRH_OFFSET, (uint8_t)(brh & R_IIC_ICBRH_BRH_MASK));
-  ra_i2c_putreg(priv, R_IIC_ICBRL_OFFSET, (uint8_t)(brl & R_IIC_ICBRL_BRL_MASK));
+  ra_i2c_modifyreg(priv, R_IIC_ICMR1_OFFSET, R_IIC_ICMR1_CKS_MASK,
+                   (cks << R_IIC_ICMR1_CKS_SHIFT) & R_IIC_ICMR1_CKS_MASK);
+
+  /* Set bit rate registers with the reserved bits (bits 7-5 = 1) */
+
+  ra_i2c_putreg(priv, R_IIC_ICBRH_OFFSET,
+                IIC_BUS_RATE_REG_RESERVED_BITS | (uint8_t)(brh & 0x1f));
+  ra_i2c_putreg(priv, R_IIC_ICBRL_OFFSET,
+                IIC_BUS_RATE_REG_RESERVED_BITS | (uint8_t)(brl & 0x1f));
 
   /* Re-enable I2C */
+
   ra_i2c_modifyreg(priv, R_IIC_ICCR1_OFFSET, 0, R_IIC_ICCR1_ICE);
 
   priv->frequency = actual_freq;
@@ -565,24 +713,139 @@ static int ra_i2c_stop(struct ra_i2c_priv_s *priv)
  * Name: ra_i2c_sendaddr
  *
  * Description:
- *   Send I2C address
+ *   Send I2C address (7-bit or 10-bit).
+ *
+ *   For 7-bit addressing:
+ *     Single byte: [A6:A0 | R/W]
+ *
+ *   For 10-bit addressing (I2C specification):
+ *     First byte:  [1 1 1 1 0 A9 A8 R/W]
+ *     Second byte: [A7:A0]
+ *
+ *   Note: For 10-bit read, after the second address byte, a repeated
+ *   start and first address byte with R/W=1 must be sent. This is
+ *   handled in the transfer function for 10-bit reads.
  *
  ****************************************************************************/
 
-static int ra_i2c_sendaddr(struct ra_i2c_priv_s *priv, uint8_t addr, bool readmode)
+static int ra_i2c_sendaddr(struct ra_i2c_priv_s *priv, uint16_t addr,
+                           bool readmode, bool tenbit)
 {
   uint8_t addr_byte;
 
-  /* Prepare address byte */
-  addr_byte = (addr << 1) | (readmode ? 1 : 0);
+#ifdef CONFIG_RA_I2C_10BIT_ADDRESS
+  if (tenbit)
+    {
+      /* 10-bit addressing: send first byte with upper 2 bits of address
+       * Format: 11110 A9 A8 R/W
+       * For write: R/W = 0
+       * For read first phase: R/W = 0 (we send full address first)
+       */
 
-  /* Send address */
-  ra_i2c_putreg(priv, R_IIC_ICDRT_OFFSET, addr_byte);
+      addr_byte = I2C_10BIT_ADDR_HIGH(addr);
 
-  priv->state = readmode ? I2CSTATE_ADDR_READ : I2CSTATE_ADDR_WRITE;
+      /* For 10-bit write or first phase of read, R/W = 0 */
+
+      if (!readmode)
+        {
+          addr_byte &= ~0x01;  /* Clear R/W bit for write */
+        }
+      else
+        {
+          /* For 10-bit read, first phase always has R/W = 0.
+           * The read bit is set after restart with just the high byte.
+           * We'll handle this in the transfer state machine.
+           */
+
+          addr_byte &= ~0x01;
+        }
+
+      ra_i2c_putreg(priv, R_IIC_ICDRT_OFFSET, addr_byte);
+
+      /* Store low byte for sending after first byte ACK */
+
+      priv->addr_low = I2C_10BIT_ADDR_LOW(addr);
+      priv->addr_pending = true;
+
+      priv->state = I2CSTATE_ADDR_10BIT_HIGH;
+
+      i2cinfo("10-bit addr: high=0x%02x low=0x%02x read=%d\n",
+              addr_byte, priv->addr_low, readmode);
+    }
+  else
+#endif /* CONFIG_RA_I2C_10BIT_ADDRESS */
+    {
+      UNUSED(tenbit);
+
+      /* 7-bit addressing: single byte [A6:A0 | R/W] */
+
+      addr_byte = (addr << 1) | (readmode ? 1 : 0);
+      ra_i2c_putreg(priv, R_IIC_ICDRT_OFFSET, addr_byte);
+
+      priv->state = readmode ? I2CSTATE_ADDR_READ : I2CSTATE_ADDR_WRITE;
+    }
 
   return OK;
 }
+
+#ifdef CONFIG_RA_I2C_10BIT_ADDRESS
+/****************************************************************************
+ * Name: ra_i2c_sendaddr_10bit_low
+ *
+ * Description:
+ *   Send the low byte of a 10-bit address after the high byte was ACKed.
+ *
+ ****************************************************************************/
+
+static int ra_i2c_sendaddr_10bit_low(struct ra_i2c_priv_s *priv, bool readmode)
+{
+  /* Send the low 8 bits of the 10-bit address */
+
+  ra_i2c_putreg(priv, R_IIC_ICDRT_OFFSET, priv->addr_low);
+  priv->addr_pending = false;
+
+  if (readmode)
+    {
+      /* For 10-bit read, after low byte ACK we need:
+       * 1. Repeated start
+       * 2. High byte with R/W = 1
+       * This will be handled by the state machine
+       */
+
+      priv->state = I2CSTATE_ADDR_10BIT_READ_RESTART;
+    }
+  else
+    {
+      /* For write, proceed to data phase */
+
+      priv->state = I2CSTATE_ADDR_WRITE;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: ra_i2c_sendaddr_10bit_read
+ *
+ * Description:
+ *   Send the 10-bit address high byte with R/W=1 after repeated start.
+ *
+ ****************************************************************************/
+
+static int ra_i2c_sendaddr_10bit_read(struct ra_i2c_priv_s *priv, uint16_t addr)
+{
+  uint8_t addr_byte;
+
+  /* Send high byte with R/W = 1 for read */
+
+  addr_byte = I2C_10BIT_ADDR_HIGH(addr) | 0x01;
+  ra_i2c_putreg(priv, R_IIC_ICDRT_OFFSET, addr_byte);
+
+  priv->state = I2CSTATE_ADDR_READ;
+
+  return OK;
+}
+#endif /* CONFIG_RA_I2C_10BIT_ADDRESS */
 
 /****************************************************************************
  * Name: ra_i2c_senddata
@@ -609,7 +872,16 @@ static int ra_i2c_senddata(struct ra_i2c_priv_s *priv)
  * Name: ra_i2c_readdata
  *
  * Description:
- *   Read data byte
+ *   Read data byte with  WAIT and NACK handling.
+ *
+ *   RX state machine for proper I2C master receive:
+ *   - When 3 bytes remain: Set WAIT=1 to hold SCL low after next byte
+ *   - When 2 bytes remain: Set NACK (ACKBT=1) for second-to-last byte
+ *   - When 1 byte remains: Issue STOP/RESTART before reading last byte
+ *   - After reading last byte: Clear WAIT
+ *
+ *   This ensures the slave sees NACK on its last transmitted byte and
+ *   the master properly terminates the transfer.
  *
  ****************************************************************************/
 
@@ -617,15 +889,49 @@ static int ra_i2c_readdata(struct ra_i2c_priv_s *priv)
 {
   if (priv->dcnt > 0)
     {
-      /* Read data byte */
-  *priv->ptr++ = ra_i2c_getreg(priv, R_IIC_ICDRR_OFFSET);
+      /* Set WAIT when 3 bytes remain to hold SCL after next read.
+       * This gives us time to set NACK before the slave clocks out
+       * the second-to-last byte.
+       */
+
+      if (priv->dcnt == 3)
+        {
+          ra_i2c_modifyreg(priv, R_IIC_ICMR3_OFFSET, 0, R_IIC_ICMR3_WAIT);
+        }
+
+      /* Set NACK when 2 bytes remain.
+       * The ACKBT bit controls the ACK/NACK sent AFTER reading the
+       * current byte. Setting it when dcnt==2 means the slave will
+       * see NACK after we read the second-to-last byte (when dcnt
+       * becomes 1), which tells it to stop transmitting.
+       */
+
+      if (priv->dcnt == 2)
+        {
+          /* Enable ACKBT write and set NACK */
+
+          ra_i2c_modifyreg(priv, R_IIC_ICMR3_OFFSET, 0,
+                           R_IIC_ICMR3_ACKWP | R_IIC_ICMR3_ACKBT);
+        }
+
+      /* Read data byte from receive register */
+
+      *priv->ptr++ = ra_i2c_getreg(priv, R_IIC_ICDRR_OFFSET);
       priv->dcnt--;
       priv->state = I2CSTATE_READ;
 
-      /* If this is the last byte, send NACK */
-      if (priv->dcnt == 1)
+      /* Clear WAIT after reading the last byte.
+       * This releases SCL so the STOP condition can be generated.
+       */
+
+      if (priv->dcnt == 0)
         {
-          ra_i2c_modifyreg(priv, R_IIC_ICMR3_OFFSET, 0, R_IIC_ICMR3_ACKBT);
+          ra_i2c_modifyreg(priv, R_IIC_ICMR3_OFFSET, R_IIC_ICMR3_WAIT, 0);
+
+          /* Clear NACK setting for next transfer */
+
+          ra_i2c_modifyreg(priv, R_IIC_ICMR3_OFFSET,
+                           R_IIC_ICMR3_ACKWP | R_IIC_ICMR3_ACKBT, 0);
         }
     }
 
@@ -740,6 +1046,12 @@ static int ra_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgs, int
 #if defined(CONFIG_RA_DTC) || defined(CONFIG_RA_DMAC)
   bool use_dma_transfer = false;
 #endif
+#ifdef CONFIG_RA_DMAC
+  bool use_dma = priv->config->use_dma;
+#endif
+#ifdef CONFIG_RA_DTC
+  bool use_dtc = priv->config->use_dtc;
+#endif
 
   DEBUGASSERT(priv != NULL && msgs != NULL && count > 0);
 
@@ -750,6 +1062,18 @@ static int ra_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgs, int
     {
       return ret;
     }
+
+#ifndef CONFIG_I2C_POLLED
+  /* Clear any pending error flags before starting transfer */
+  ra_i2c_modifyreg(priv, R_IIC_ICSR2_OFFSET,
+                  R_IIC_ICSR2_AL | R_IIC_ICSR2_TMOF | R_IIC_ICSR2_NACKF, 0);
+
+  /* Re-enable error interrupts in case they were disabled
+   * by previous error condition
+   */
+  ra_i2c_modifyreg(priv, R_IIC_ICIER_OFFSET, 0,
+                  R_IIC_ICIER_ALIE | R_IIC_ICIER_TMOIE | R_IIC_ICIER_NAKIE);
+#endif
 
   /* Set the frequency if it has changed */
 
@@ -777,13 +1101,13 @@ static int ra_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgs, int
       use_dma_transfer = false;
 
 #ifdef CONFIG_RA_DMAC
-      if (priv->use_dma && msgs[i].length >= RA_I2C_DMA_THRESHOLD)
+      if (use_dma && msgs[i].length >= RA_I2C_DMA_THRESHOLD)
         {
           use_dma_transfer = true;
         }
 #endif
 #ifdef CONFIG_RA_DTC
-      if (!use_dma_transfer && priv->use_dtc &&
+      if (!use_dma_transfer && use_dtc &&
           msgs[i].length >= RA_I2C_DTC_THRESHOLD)
         {
           use_dma_transfer = true;
@@ -807,14 +1131,65 @@ static int ra_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgs, int
           break;
         }
 
-      /* Send address */
+      /* Send address (supports both 7-bit and 10-bit addressing) */
 
       ret = ra_i2c_sendaddr(priv, msgs[i].addr,
-                            (msgs[i].flags & I2C_M_READ) != 0);
+                            (msgs[i].flags & I2C_M_READ) != 0,
+                            (msgs[i].flags & I2C_M_TEN) != 0);
       if (ret != OK)
         {
           break;
         }
+
+#ifdef CONFIG_RA_I2C_10BIT_ADDRESS
+      /* For 10-bit addressing, wait for high byte ACK and send low byte */
+
+      if (msgs[i].flags & I2C_M_TEN)
+        {
+          /* Wait for high byte ACK */
+
+          ret = ra_i2c_wait_event(priv, I2C_STATE_TIMEOUT_US);
+          if (ret != OK)
+            {
+              break;
+            }
+
+          /* Send low byte */
+
+          ra_i2c_sendaddr_10bit_low(priv,
+                                    (msgs[i].flags & I2C_M_READ) != 0);
+
+          /* For 10-bit read, we need additional restart sequence */
+
+          if (msgs[i].flags & I2C_M_READ)
+            {
+              /* Wait for low byte ACK */
+
+              ret = ra_i2c_wait_event(priv, I2C_STATE_TIMEOUT_US);
+              if (ret != OK)
+                {
+                  break;
+                }
+
+              /* Issue repeated start */
+
+              ra_i2c_modifyreg(priv, R_IIC_ICCR2_OFFSET,
+                               0, R_IIC_ICCR2_RS);
+
+              /* Wait for restart condition */
+
+              ret = ra_i2c_wait_event(priv, I2C_STATE_TIMEOUT_US);
+              if (ret != OK)
+                {
+                  break;
+                }
+
+              /* Send high byte with read bit */
+
+              ra_i2c_sendaddr_10bit_read(priv, msgs[i].addr);
+            }
+        }
+#endif /* CONFIG_RA_I2C_10BIT_ADDRESS */
 
       /* Wait for address ACK */
 
@@ -839,50 +1214,72 @@ static int ra_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgs, int
 #if defined(CONFIG_RA_DMAC) || defined(CONFIG_RA_DTC)
           if (use_dma_transfer)
             {
-              /* Use DMA/DTC for bulk read */
+              /* Use DMA/DTC for bulk read.
+               *
+               * Pattern: Transfer all bytes EXCEPT the last 3 via DMA.
+               * The last 3 bytes must be received using PIO to properly
+               * handle the WAIT (at N-3) and NACK (at N-2) timing for
+               * I2C master reception.
+               *
+               * DMA transfers: length - IIC_RX_DMA_LAST_BYTES bytes
+               * PIO transfers: IIC_RX_DMA_LAST_BYTES bytes (last 3)
+               */
+
+              uint32_t dma_len = msgs[i].length;
+              uint32_t pio_len = 0;
+
+              if (msgs[i].length > IIC_RX_DMA_LAST_BYTES)
+                {
+                  dma_len = msgs[i].length - IIC_RX_DMA_LAST_BYTES;
+                  pio_len = IIC_RX_DMA_LAST_BYTES;
+                }
 
 #ifdef CONFIG_RA_DMAC
-              if (priv->use_dma)
+              if (use_dma)
                 {
-                  ret = ra_i2c_dma_start_rx(priv, msgs[i].buffer,
-                                            msgs[i].length);
+                  ret = ra_i2c_dma_start_rx(priv, msgs[i].buffer, dma_len);
                   if (ret == OK)
                     {
                       /* Wait for DMA completion */
 
                       ret = ra_i2c_wait_event(priv,
-                              I2C_STATE_TIMEOUT_US * msgs[i].length);
+                              I2C_STATE_TIMEOUT_US * dma_len);
                       ra_i2c_dma_stop(priv);
 
-                      /* Invalidate cache for RX buffer */
+                      /* Invalidate cache for DMA-received portion */
 
                       up_invalidate_dcache((uintptr_t)msgs[i].buffer,
-                          (uintptr_t)msgs[i].buffer + msgs[i].length);
+                          (uintptr_t)msgs[i].buffer + dma_len);
 
-                      priv->dcnt = 0;
+                      /* Update buffer pointer and count for remaining PIO */
+
+                      priv->ptr = msgs[i].buffer + dma_len;
+                      priv->dcnt = pio_len;
                     }
                 }
               else
 #endif
 #ifdef CONFIG_RA_DTC
-              if (priv->use_dtc)
+              if (use_dtc)
                 {
-                  ret = ra_i2c_dtc_start_rx(priv, msgs[i].buffer,
-                                            msgs[i].length);
+                  ret = ra_i2c_dtc_start_rx(priv, msgs[i].buffer, dma_len);
                   if (ret == OK)
                     {
                       /* Wait for DTC completion */
 
                       ret = ra_i2c_wait_event(priv,
-                              I2C_STATE_TIMEOUT_US * msgs[i].length);
+                              I2C_STATE_TIMEOUT_US * dma_len);
                       ra_i2c_dtc_stop(priv);
 
-                      /* Invalidate cache for RX buffer */
+                      /* Invalidate cache for DTC-received portion */
 
                       up_invalidate_dcache((uintptr_t)msgs[i].buffer,
-                          (uintptr_t)msgs[i].buffer + msgs[i].length);
+                          (uintptr_t)msgs[i].buffer + dma_len);
 
-                      priv->dcnt = 0;
+                      /* Update buffer pointer and count for remaining PIO */
+
+                      priv->ptr = msgs[i].buffer + dma_len;
+                      priv->dcnt = pio_len;
                     }
                 }
               else
@@ -891,6 +1288,20 @@ static int ra_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgs, int
                   /* Fall through to polled transfer */
 
                   use_dma_transfer = false;
+                }
+
+              /* Handle remaining bytes (last 3) via PIO with WAIT/NACK */
+
+              if (use_dma_transfer && ret == OK && pio_len > 0)
+                {
+                  while (priv->dcnt > 0 && ret == OK)
+                    {
+                      ret = ra_i2c_wait_event(priv, I2C_STATE_TIMEOUT_US);
+                      if (ret == OK)
+                        {
+                          ret = ra_i2c_readdata(priv);
+                        }
+                    }
                 }
             }
 
@@ -919,7 +1330,7 @@ static int ra_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgs, int
               /* Use DMA/DTC for bulk write */
 
 #ifdef CONFIG_RA_DMAC
-              if (priv->use_dma)
+              if (use_dma)
                 {
                   ret = ra_i2c_dma_start_tx(priv, msgs[i].buffer,
                                             msgs[i].length);
@@ -936,7 +1347,7 @@ static int ra_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgs, int
               else
 #endif
 #ifdef CONFIG_RA_DTC
-              if (priv->use_dtc)
+              if (use_dtc)
                 {
                   ret = ra_i2c_dtc_start_tx(priv, msgs[i].buffer,
                                             msgs[i].length);
@@ -1055,74 +1466,152 @@ static int ra_i2c_reset(struct i2c_master_s *dev)
  * Name: ra_i2c_init
  *
  * Description:
- *   Initialize the I2C hardware
+ *   Initialize the I2C hardware following initialization sequence.
+ *   This ensures proper peripheral reset and configuration timing.
  *
  ****************************************************************************/
+
+/* ICCR1 value to release reset with outputs enabled */
+
+#define IIC_ICCR1_RELEASE_RESET  (R_IIC_ICCR1_ICE | R_IIC_ICCR1_SOWP | \
+                                  R_IIC_ICCR1_SCLO | R_IIC_ICCR1_SDAO)
+
+/* ICFER function enable settings for master mode */
+
+#define IIC_ICFER_MASTER_INIT    (R_IIC_ICFER_TMOE | R_IIC_ICFER_MALE | \
+                                  R_IIC_ICFER_NALE | R_IIC_ICFER_SALE | \
+                                  R_IIC_ICFER_NACKE | R_IIC_ICFER_NFE | \
+                                  R_IIC_ICFER_SCLE)
+
+/* ICIER initial interrupt enable mask */
+
+#define IIC_ICIER_INIT_MASK      (R_IIC_ICIER_TMOIE | R_IIC_ICIER_ALIE | \
+                                  R_IIC_ICIER_NAKIE | R_IIC_ICIER_RIE | \
+                                  R_IIC_ICIER_TIE)
 
 static int ra_i2c_init(struct ra_i2c_priv_s *priv)
 {
   const struct ra_i2c_config_s *config = priv->config;
+  uint32_t timeout;
 
   /* Enable I2C module clock */
 
   ra_mstp_start(config->mstp);
 
-  /* Reset I2C peripheral */
+  /* Step 1: Disable peripheral and set SCL/SDA to inactive */
 
-  ra_i2c_modifyreg(priv, R_IIC_ICCR1_OFFSET, 0, R_IIC_ICCR1_IICRST);
-  up_udelay(10);
-  ra_i2c_modifyreg(priv, R_IIC_ICCR1_OFFSET, R_IIC_ICCR1_IICRST, 0);
+  ra_i2c_putreg(priv, R_IIC_ICCR1_OFFSET, 0x00);
 
-  /* Configure I2C mode registers */
+  /* Step 2: Initiate internal reset */
 
-  /* ICMR1: Set internal reference clock select and bit counter */
+  ra_i2c_putreg(priv, R_IIC_ICCR1_OFFSET, R_IIC_ICCR1_IICRST);
 
-  ra_i2c_putreg(priv, R_IIC_ICMR1_OFFSET, 0);
+  /* Step 3: Wait for IICRST bit to be set (register write to take effect)
+   * uses IIC_MASTER_HARDWARE_REGISTER_WAIT with max 0x40 * 3 cycles
+   */
 
-  /* ICMR2: Configure delays and timeout */
+  timeout = 200;  /* ~200us max wait */
+  while (!(ra_i2c_getreg(priv, R_IIC_ICCR1_OFFSET) & R_IIC_ICCR1_IICRST) &&
+         timeout--)
+    {
+      up_udelay(1);
+    }
 
-  ra_i2c_putreg(priv, R_IIC_ICMR2_OFFSET, 0);
+  if (timeout == 0)
+    {
+      i2cerr("I2C%d: Reset timeout\n", config->bus);
+    }
 
-  /* ICMR3: Configure SMBus/I2C selection and noise filter */
+  /* Step 4: Enable peripheral with reset still active (internal reset) */
 
-  ra_i2c_putreg(priv, R_IIC_ICMR3_OFFSET, R_IIC_ICMR3_NF_MASK); /* Enable noise filter */
+  ra_i2c_putreg(priv, R_IIC_ICCR1_OFFSET,
+                R_IIC_ICCR1_ICE | R_IIC_ICCR1_IICRST);
 
-  /* ICFER: Configure function enables */
+  /* Step 5: Configure peripheral registers while in reset state */
 
-  ra_i2c_putreg(priv, R_IIC_ICFER_OFFSET,
-                R_IIC_ICFER_TMOE |    /* Enable timeout */
-                R_IIC_ICFER_MALE |    /* Enable master arbitration-lost detection */
-                R_IIC_ICFER_NALE |    /* Enable NACK arbitration-lost detection */
-                R_IIC_ICFER_SALE |    /* Enable slave arbitration-lost detection */
-                R_IIC_ICFER_NACKE |   /* Enable NACK transmission arbitration-lost detection */
-                R_IIC_ICFER_NFE |     /* Enable digital noise filter */
-                R_IIC_ICFER_SCLE);    /* Enable SCL synchronous circuit */
+  /* ICMR1: Set internal reference clock (CKS will be set by setfrequency) */
 
-  /* ICSER: Disable slave address detection */
+  ra_i2c_putreg(priv, R_IIC_ICMR1_OFFSET, R_IIC_ICMR1_BCWP);
+
+  /* ICMR2: Configure timeout mode and SDA output delay
+   * SDA delay is configurable via Kconfig (default 1 fIIC cycle)
+   */
+
+  ra_i2c_putreg(priv, R_IIC_ICMR2_OFFSET,
+                RA_I2C_SDA_DELAY_VALUE |  /* Configurable SDA delay */
+                R_IIC_ICMR2_TMOL);        /* Enable SCL low timeout */
+
+  /* ICMR3: Configure noise filter (4-stage filter for robustness) */
+
+  {
+    uint8_t icmr3 = R_IIC_ICMR3_NF_11;  /* 4-stage noise filter */
+
+#ifdef CONFIG_RA_I2C_SMBUS
+    /* Enable SMBus mode if configured */
+
+    icmr3 |= R_IIC_ICMR3_SMBS;
+#endif
+
+    ra_i2c_putreg(priv, R_IIC_ICMR3_OFFSET, icmr3);
+  }
+
+  /* ICFER: Configure function enables per master mode */
+
+  {
+    uint8_t icfer = IIC_ICFER_MASTER_INIT;
+
+#ifdef CONFIG_RA_I2C0_FAST_MODE_PLUS
+    /* Enable Fast Mode Plus (Fm+) for IIC0 - supports up to 1MHz
+     * Note: Fast Mode Plus is only available on IIC0 and requires
+     * SDA/SCL pins with Fm+ capability
+     */
+
+    if (config->bus == 0)
+      {
+        icfer |= R_IIC_ICFER_FMPE;
+      }
+#endif
+
+    ra_i2c_putreg(priv, R_IIC_ICFER_OFFSET, icfer);
+  }
+
+  /* ICSER: Disable slave address detection (master mode only) */
 
   ra_i2c_putreg(priv, R_IIC_ICSER_OFFSET, 0);
 
-  /* Enable I2C peripheral */
+  /* ICIER: Set initial interrupt enable mask per */
 
-  ra_i2c_modifyreg(priv, R_IIC_ICCR1_OFFSET, 0, R_IIC_ICCR1_ICE);
+  ra_i2c_putreg(priv, R_IIC_ICIER_OFFSET, IIC_ICIER_INIT_MASK);
 
-  /* Set default frequency */
+  /* Step 6: Release reset with outputs enabled */
+
+  ra_i2c_putreg(priv, R_IIC_ICCR1_OFFSET, IIC_ICCR1_RELEASE_RESET);
+
+  /* Set default frequency (this will configure ICBRH/ICBRL with reserved bits) */
 
   priv->frequency = 0;  /* Force frequency setting */
   ra_i2c_setfrequency((struct i2c_master_s *)priv, I2C_SPEED_STANDARD);
 
 #ifndef CONFIG_I2C_POLLED
-  /* Configure and enable interrupts AFTER peripheral is configured */
+  /* Clear any pending status/error flags before enabling interrupts */
+
+  ra_i2c_putreg(priv, R_IIC_ICSR2_OFFSET, 0);
+
+  /* Configure and enable interrupts AFTER peripheral is configured.
+   *
+   * IMPORTANT: Do NOT enable error interrupts (NAKIE, ALIE, TMOIE) here!
+   * These will be enabled at the start of each transfer in ra_i2c_transfer().
+   * Enabling them during init causes infinite interrupt loops when no device
+   * is present on the bus, as error conditions immediately trigger.
+   */
 
   ra_i2c_putreg(priv, R_IIC_ICIER_OFFSET,
                 R_IIC_ICIER_TIE |     /* Transmit data empty interrupt */
                 R_IIC_ICIER_TEIE |    /* Transmit end interrupt */
                 R_IIC_ICIER_RIE |     /* Receive data full interrupt */
-                R_IIC_ICIER_NAKIE |   /* NACK detection interrupt */
                 R_IIC_ICIER_SPIE |    /* Stop condition detection interrupt */
-                R_IIC_ICIER_STIE |    /* Start condition detection interrupt */
-                R_IIC_ICIER_ALIE |    /* Arbitration-lost detection interrupt */
-                R_IIC_ICIER_TMOIE);   /* Timeout detection interrupt */
+                R_IIC_ICIER_STIE);    /* Start condition detection interrupt */
+                /* Note: NAKIE, ALIE, TMOIE enabled per-transfer */
 
   /* Attach interrupt handlers */
 
@@ -1133,15 +1622,21 @@ static int ra_i2c_init(struct ra_i2c_priv_s *priv)
 #endif
 
 #ifdef CONFIG_RA_DTC
-  /* Setup DTC if enabled */
+  /* Setup DTC only when this instance requests it */
 
-  ra_i2c_dtc_setup(priv);
+  if (config->use_dtc)
+    {
+      ra_i2c_dtc_setup(priv);
+    }
 #endif
 
 #ifdef CONFIG_RA_DMAC
-  /* Setup DMA if enabled */
+  /* Setup DMA only when this instance requests it */
 
-  ra_i2c_dma_setup(priv);
+  if (config->use_dma)
+    {
+      ra_i2c_dma_setup(priv);
+    }
 #endif
 
   return OK;
@@ -1173,16 +1668,22 @@ static int ra_i2c_deinit(struct ra_i2c_priv_s *priv)
 #endif
 
 #ifdef CONFIG_RA_DTC
-  /* Cleanup DTC */
+  /* Cleanup DTC only if this instance was using it */
 
-  ra_i2c_dtc_cleanup(priv);
+  if (config->use_dtc)
+    {
+      ra_i2c_dtc_cleanup(priv);
+    }
 #endif
 
 #ifdef CONFIG_RA_DMAC
-  /* Cleanup DMA */
+  /* Cleanup DMA only if this instance was using it */
 
-  ra_i2c_dma_stop(priv);
-  priv->use_dma = false;
+  if (config->use_dma)
+    {
+      ra_i2c_dma_stop(priv);
+      priv->use_dma = false;
+    }
 #endif
 
   /* Disable I2C module clock */
@@ -1276,6 +1777,13 @@ static int ra_i2c_isr_eri(int irq, void *context, void *arg)
   ra_i2c_modifyreg(priv, R_IIC_ICSR2_OFFSET,
                   R_IIC_ICSR2_AL | R_IIC_ICSR2_TMOF | R_IIC_ICSR2_NACKF, 0);
 
+  /* Disable error interrupts to prevent runaway interrupts.
+   * They will be re-enabled at the start of the next transfer.
+   * This is critical when a device is not present on the bus.
+   */
+  ra_i2c_modifyreg(priv, R_IIC_ICIER_OFFSET,
+                  R_IIC_ICIER_ALIE | R_IIC_ICIER_TMOIE | R_IIC_ICIER_NAKIE, 0);
+
   /* Signal semaphore to wake up waiting thread */
   nxsem_post(&priv->sem_isr);
 
@@ -1325,6 +1833,13 @@ static int ra_i2c_dtc_setup(struct ra_i2c_priv_s *priv)
 
   priv->dtc_active = false;
   priv->use_dtc = true;
+
+#ifndef CONFIG_I2C_POLLED
+  /* Initialize completion flags for interrupt-driven mode */
+
+  priv->dtc_tx_done = false;
+  priv->dtc_rx_done = false;
+#endif
 
   /* Clear DTC transfer info structures */
 
@@ -1480,6 +1995,56 @@ static void ra_i2c_dtc_stop(struct ra_i2c_priv_s *priv)
 
   priv->dtc_active = false;
 }
+
+#ifndef CONFIG_I2C_POLLED
+/****************************************************************************
+ * Name: ra_i2c_dtc_tx_callback
+ *
+ * Description:
+ *   DTC TX completion callback for non-polled mode.
+ *   Called when DTC completes a TX transfer.
+ *
+ ****************************************************************************/
+
+static void ra_i2c_dtc_tx_callback(void *handle, int event, void *arg)
+{
+  struct ra_i2c_priv_s *priv = (struct ra_i2c_priv_s *)arg;
+
+  UNUSED(handle);
+
+  i2cinfo("DTC TX callback: event=%d\n", event);
+
+  priv->dtc_tx_done = true;
+
+  /* Signal completion to waiting task */
+
+  nxsem_post(&priv->sem_isr);
+}
+
+/****************************************************************************
+ * Name: ra_i2c_dtc_rx_callback
+ *
+ * Description:
+ *   DTC RX completion callback for non-polled mode.
+ *   Called when DTC completes an RX transfer.
+ *
+ ****************************************************************************/
+
+static void ra_i2c_dtc_rx_callback(void *handle, int event, void *arg)
+{
+  struct ra_i2c_priv_s *priv = (struct ra_i2c_priv_s *)arg;
+
+  UNUSED(handle);
+
+  i2cinfo("DTC RX callback: event=%d\n", event);
+
+  priv->dtc_rx_done = true;
+
+  /* Signal completion to waiting task */
+
+  nxsem_post(&priv->sem_isr);
+}
+#endif /* !CONFIG_I2C_POLLED */
 
 /****************************************************************************
  * Name: ra_i2c_dtc_cleanup

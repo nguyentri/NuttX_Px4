@@ -231,7 +231,11 @@ static struct ra_ospi_priv_s g_ra_ospi0_priv =
 #ifdef CONFIG_RA_DMAC
   .dma_rx     = NULL,
   .dma_tx     = NULL,
+#ifdef CONFIG_RA_OSPI_USE_DMAC
   .use_dma    = true,
+#else
+  .use_dma    = false,
+#endif
   .dma_complete = false,
 #endif
 };
@@ -263,7 +267,11 @@ static struct ra_ospi_priv_s g_ra_ospi1_priv =
 #ifdef CONFIG_RA_DMAC
   .dma_rx     = NULL,
   .dma_tx     = NULL,
+#ifdef CONFIG_RA_OSPI_USE_DMAC
   .use_dma    = true,
+#else
+  .use_dma    = false,
+#endif
   .dma_complete = false,
 #endif
 };
