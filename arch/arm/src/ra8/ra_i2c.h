@@ -153,6 +153,11 @@ struct ra_i2c_priv_s
   int      dma_tx_channel;   /* Assigned TX DMA channel (-1 = dynamic) */
   int      dma_rx_channel;   /* Assigned RX DMA channel (-1 = dynamic) */
 #endif
+
+#if defined(CONFIG_RA_DMAC) || defined(CONFIG_RA_DTC)
+  bool     activation_on_rxi; /* DMA/DTC activated on RXI - ISR ignores interrupt */
+  bool     activation_on_txi; /* DMA/DTC activated on TXI - ISR ignores interrupt */
+#endif
 };
 
 /* I2C State Machine States */

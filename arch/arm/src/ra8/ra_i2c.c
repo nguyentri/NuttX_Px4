@@ -109,6 +109,18 @@
 
 #define IIC_RX_DMA_LAST_BYTES   3  /* Handles last 3 bytes manually */
 
+/* ICIER interrupt enable masks */
+
+#define IIC_ICIER_INIT_MASK      (R_IIC_ICIER_TMOIE | R_IIC_ICIER_ALIE | \
+                                  R_IIC_ICIER_NAKIE | R_IIC_ICIER_RIE | \
+                                  R_IIC_ICIER_TIE)
+
+/* Error interrupts enabled per-transfer only */
+
+#define IIC_ICIER_ERROR_MASK     (R_IIC_ICIER_TMOIE | R_IIC_ICIER_ALIE | \
+                                  R_IIC_ICIER_NAKIE)
+
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -168,8 +180,8 @@ static int ra_i2c_dtc_start_tx(struct ra_i2c_priv_s *priv, const uint8_t *buffer
 static void ra_i2c_dtc_stop(struct ra_i2c_priv_s *priv);
 static void ra_i2c_dtc_cleanup(struct ra_i2c_priv_s *priv);
 #ifndef CONFIG_I2C_POLLED
-static void ra_i2c_dtc_tx_callback(void *handle, int event, void *arg);
-static void ra_i2c_dtc_rx_callback(void *handle, int event, void *arg);
+//static void ra_i2c_dtc_tx_callback(void *handle, int event, void *arg);
+//static void ra_i2c_dtc_rx_callback(void *handle, int event, void *arg);
 #endif
 #endif
 
@@ -1071,8 +1083,21 @@ static int ra_i2c_transfer(struct i2c_master_s *dev, struct i2c_msg_s *msgs, int
   /* Re-enable error interrupts in case they were disabled
    * by previous error condition
    */
-  ra_i2c_modifyreg(priv, R_IIC_ICIER_OFFSET, 0,
-                  R_IIC_ICIER_ALIE | R_IIC_ICIER_TMOIE | R_IIC_ICIER_NAKIE);
+  ra_i2c_modifyreg(priv, R_IIC_ICIER_OFFSET, 0, IIC_ICIER_ERROR_MASK);
+
+  /* Enable interrupts in NVIC for this transfer.
+   * They were attached with enable=false during init to prevent
+   * spurious interrupts when no device is present.
+   */
+  ra_icu_clear_irq(priv->rxi_irq);
+  ra_icu_clear_irq(priv->txi_irq);
+  ra_icu_clear_irq(priv->tei_irq);
+  ra_icu_clear_irq(priv->eri_irq);
+
+  up_enable_irq(priv->rxi_irq);
+  up_enable_irq(priv->txi_irq);
+  up_enable_irq(priv->tei_irq);
+  up_enable_irq(priv->eri_irq);
 #endif
 
   /* Set the frequency if it has changed */
@@ -1483,12 +1508,6 @@ static int ra_i2c_reset(struct i2c_master_s *dev)
                                   R_IIC_ICFER_NACKE | R_IIC_ICFER_NFE | \
                                   R_IIC_ICFER_SCLE)
 
-/* ICIER initial interrupt enable mask */
-
-#define IIC_ICIER_INIT_MASK      (R_IIC_ICIER_TMOIE | R_IIC_ICIER_ALIE | \
-                                  R_IIC_ICIER_NAKIE | R_IIC_ICIER_RIE | \
-                                  R_IIC_ICIER_TIE)
-
 static int ra_i2c_init(struct ra_i2c_priv_s *priv)
 {
   const struct ra_i2c_config_s *config = priv->config;
@@ -1597,28 +1616,16 @@ static int ra_i2c_init(struct ra_i2c_priv_s *priv)
 
   ra_i2c_putreg(priv, R_IIC_ICSR2_OFFSET, 0);
 
-  /* Configure and enable interrupts AFTER peripheral is configured.
-   *
-   * IMPORTANT: Do NOT enable error interrupts (NAKIE, ALIE, TMOIE) here!
-   * These will be enabled at the start of each transfer in ra_i2c_transfer().
-   * Enabling them during init causes infinite interrupt loops when no device
-   * is present on the bus, as error conditions immediately trigger.
-   */
+  /* Configure and enable interrupts AFTER peripheral is configured. */
 
-  ra_i2c_putreg(priv, R_IIC_ICIER_OFFSET,
-                R_IIC_ICIER_TIE |     /* Transmit data empty interrupt */
-                R_IIC_ICIER_TEIE |    /* Transmit end interrupt */
-                R_IIC_ICIER_RIE |     /* Receive data full interrupt */
-                R_IIC_ICIER_SPIE |    /* Stop condition detection interrupt */
-                R_IIC_ICIER_STIE);    /* Start condition detection interrupt */
-                /* Note: NAKIE, ALIE, TMOIE enabled per-transfer */
+  ra_i2c_putreg(priv, R_IIC_ICIER_OFFSET, IIC_ICIER_INIT_MASK);
 
   /* Attach interrupt handlers */
 
-  priv->rxi_irq = ra_icu_attach(config->rxi_elc, ra_i2c_isr_rxi, priv, true);
-  priv->txi_irq = ra_icu_attach(config->txi_elc, ra_i2c_isr_txi, priv, true);
-  priv->tei_irq = ra_icu_attach(config->tei_elc, ra_i2c_isr_tei, priv, true);
-  priv->eri_irq = ra_icu_attach(config->eri_elc, ra_i2c_isr_eri, priv, true);
+  priv->rxi_irq = ra_icu_attach(config->rxi_elc, ra_i2c_isr_rxi, priv, false);
+  priv->txi_irq = ra_icu_attach(config->txi_elc, ra_i2c_isr_txi, priv, false);
+  priv->tei_irq = ra_icu_attach(config->tei_elc, ra_i2c_isr_tei, priv, false);
+  priv->eri_irq = ra_icu_attach(config->eri_elc, ra_i2c_isr_eri, priv, false);
 #endif
 
 #ifdef CONFIG_RA_DTC
@@ -1708,6 +1715,17 @@ static int ra_i2c_isr_rxi(int irq, void *context, void *arg)
 
   DEBUGASSERT(priv != NULL);
 
+#if defined(CONFIG_RA_DTC) || defined(CONFIG_RA_DMAC)
+  /* If this is the interrupt that fired after DMA/DTC transfer,
+   * ignore it as the DMA/DTC has already taken care of the data transfer.
+   */
+  if (priv->activation_on_rxi)
+    {
+      priv->activation_on_rxi = false;
+      return OK;
+    }
+#endif
+
   /* Signal semaphore to wake up waiting thread */
   nxsem_post(&priv->sem_isr);
 
@@ -1727,6 +1745,17 @@ static int ra_i2c_isr_txi(int irq, void *context, void *arg)
   struct ra_i2c_priv_s *priv = (struct ra_i2c_priv_s *)arg;
 
   DEBUGASSERT(priv != NULL);
+
+#if defined(CONFIG_RA_DTC) || defined(CONFIG_RA_DMAC)
+  /* If this is the interrupt that fired after DMA/DTC transfer,
+   * ignore it as the DMA/DTC has already taken care of the data transfer.
+   */
+  if (priv->activation_on_txi)
+    {
+      priv->activation_on_txi = false;
+      return OK;
+    }
+#endif
 
   /* Signal semaphore to wake up waiting thread */
   nxsem_post(&priv->sem_isr);
@@ -1899,6 +1928,7 @@ static int ra_i2c_dtc_start_rx(struct ra_i2c_priv_s *priv,
   ra_icu_enable_dtc(priv->rxi_irq);
 
   priv->dtc_active = true;
+  priv->activation_on_rxi = true;  /* Signal ISR to ignore interrupt */
 
   i2cinfo("RX DTC configured: SAR=0x%08lx DAR=0x%08lx CRA=%d slot=%d\n",
           (unsigned long)priv->dtc_rx_info.sar,
@@ -1960,6 +1990,7 @@ static int ra_i2c_dtc_start_tx(struct ra_i2c_priv_s *priv,
   ra_icu_enable_dtc(priv->txi_irq);
 
   priv->dtc_active = true;
+  priv->activation_on_txi = true;  /* Signal ISR to ignore interrupt */
 
   i2cinfo("TX DTC configured: SAR=0x%08lx DAR=0x%08lx CRA=%d slot=%d\n",
           (unsigned long)priv->dtc_tx_info.sar,
@@ -1997,6 +2028,7 @@ static void ra_i2c_dtc_stop(struct ra_i2c_priv_s *priv)
 }
 
 #ifndef CONFIG_I2C_POLLED
+#if (0)
 /****************************************************************************
  * Name: ra_i2c_dtc_tx_callback
  *
@@ -2044,6 +2076,7 @@ static void ra_i2c_dtc_rx_callback(void *handle, int event, void *arg)
 
   nxsem_post(&priv->sem_isr);
 }
+#endif
 #endif /* !CONFIG_I2C_POLLED */
 
 /****************************************************************************
@@ -2327,6 +2360,7 @@ static int ra_i2c_dma_start_tx(struct ra_i2c_priv_s *priv,
 
   priv->dma_tx_done = false;
   priv->dma_active = true;
+  priv->activation_on_txi = true;  /* Signal ISR to ignore interrupt */
 
   i2cinfo("TX DMA configured: src=0x%08lx dst=0x%08lx count=%lu\n",
           (unsigned long)buffer,
@@ -2410,6 +2444,7 @@ static int ra_i2c_dma_start_rx(struct ra_i2c_priv_s *priv,
 
   priv->dma_rx_done = false;
   priv->dma_active = true;
+  priv->activation_on_rxi = true;  /* Signal ISR to ignore interrupt */
 
   i2cinfo("RX DMA configured: src=0x%08lx dst=0x%08lx count=%lu\n",
           (unsigned long)(priv->config->base + R_IIC_ICDRR_OFFSET),

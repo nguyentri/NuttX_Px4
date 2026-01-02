@@ -1536,6 +1536,29 @@ static void up_disableallints(struct up_dev_s *priv, uint32_t *ie)
 }
 
 /****************************************************************************
+ * Name: up_restoreuartint
+ ****************************************************************************/
+
+static void up_restoreuartint(struct up_dev_s *priv, uint32_t ie)
+{
+  irqstate_t flags;
+  uint32_t regval;
+
+  /* The following must be atomic */
+
+  flags = enter_critical_section();
+
+  /* Restore the interrupt enables */
+
+  regval = up_serialin(priv, R_SCI_B_CCR0_OFFSET);
+  regval &= ~(R_SCI_B_CCR0_TIE | R_SCI_B_CCR0_RIE | R_SCI_B_CCR0_TEIE);
+  regval |= (ie & (R_SCI_B_CCR0_TIE | R_SCI_B_CCR0_RIE | R_SCI_B_CCR0_TEIE));
+  up_serialout(priv, R_SCI_B_CCR0_OFFSET, regval);
+
+  leave_critical_section(flags);
+}
+
+/****************************************************************************
  * Name: up_sci_config
  *
  * Description:
@@ -1998,7 +2021,155 @@ static int up_erinterrupt(int irq, void *context, void *arg)
 
 static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
-  int ret = -ENOTTY;
+#if defined(CONFIG_SERIAL_TERMIOS)
+  struct inode *inode = filep->f_inode;
+  struct uart_dev_s *dev = inode->i_private;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+  irqstate_t flags;
+#endif
+  int ret = OK;
+
+  switch (cmd)
+    {
+#ifdef CONFIG_SERIAL_TERMIOS
+    case TCGETS:
+      {
+        struct termios *termiosp = (struct termios *)arg;
+
+        if (!termiosp)
+          {
+            ret = -EINVAL;
+            break;
+          }
+
+        /* Initialize termios structure */
+
+        memset(termiosp, 0, sizeof(struct termios));
+
+        /* Return parity */
+
+        termiosp->c_cflag = ((priv->parity != 0) ? PARENB : 0) |
+                            ((priv->parity == 1) ? PARODD : 0);
+
+        /* Return stop bits */
+
+        termiosp->c_cflag |= (priv->stopbits2) ? CSTOPB : 0;
+
+        /* Return baud */
+
+        cfsetispeed(termiosp, priv->baud);
+        cfsetospeed(termiosp, priv->baud);
+
+        /* Return number of bits */
+
+        switch (priv->bits)
+          {
+          case 5:
+            termiosp->c_cflag |= CS5;
+            break;
+
+          case 6:
+            termiosp->c_cflag |= CS6;
+            break;
+
+          case 7:
+            termiosp->c_cflag |= CS7;
+            break;
+
+          default:
+          case 8:
+            termiosp->c_cflag |= CS8;
+            break;
+          }
+      }
+      break;
+
+    case TCSETS:
+      {
+        struct termios *termiosp = (struct termios *)arg;
+        uint32_t baud;
+        uint32_t ie;
+        uint8_t parity;
+        uint8_t nbits;
+        bool stop2;
+
+        if (!termiosp)
+          {
+            ret = -EINVAL;
+            break;
+          }
+
+        /* Decode baud */
+
+        baud = cfgetispeed(termiosp);
+
+        /* Decode number of bits */
+
+        switch (termiosp->c_cflag & CSIZE)
+          {
+          case CS5:
+            nbits = 5;
+            break;
+
+          case CS6:
+            nbits = 6;
+            break;
+
+          case CS7:
+            nbits = 7;
+            break;
+
+          case CS8:
+          default:
+            nbits = 8;
+            break;
+          }
+
+        /* Decode parity */
+
+        if ((termiosp->c_cflag & PARENB) != 0)
+          {
+            parity = (termiosp->c_cflag & PARODD) ? 1 : 2;
+          }
+        else
+          {
+            parity = 0;
+          }
+
+        /* Decode stop bits */
+
+        stop2 = (termiosp->c_cflag & CSTOPB) != 0;
+
+        /* Commit the configuration */
+
+        priv->baud      = baud;
+        priv->parity    = parity;
+        priv->bits      = nbits;
+        priv->stopbits2 = stop2;
+
+        /* Effect the changes immediately - disable interrupts,
+         * reconfigure, and restore interrupts
+         */
+
+        flags = enter_critical_section();
+        up_disableallints(priv, &ie);
+
+        /* Re-run setup to apply new configuration */
+
+        ret = dev->ops->setup(dev);
+
+        /* Restore the interrupt state */
+
+        up_restoreuartint(priv, ie);
+        leave_critical_section(flags);
+      }
+      break;
+#endif /* CONFIG_SERIAL_TERMIOS */
+
+    default:
+      ret = -ENOTTY;
+      break;
+    }
 
   return ret;
 }
