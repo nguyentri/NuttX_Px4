@@ -1535,6 +1535,7 @@ static void up_disableallints(struct up_dev_s *priv, uint32_t *ie)
   leave_critical_section(flags);
 }
 
+#ifdef CONFIG_SERIAL_TERMIOS
 /****************************************************************************
  * Name: up_restoreuartint
  ****************************************************************************/
@@ -1557,6 +1558,7 @@ static void up_restoreuartint(struct up_dev_s *priv, uint32_t ie)
 
   leave_critical_section(flags);
 }
+#endif
 
 /****************************************************************************
  * Name: up_sci_config

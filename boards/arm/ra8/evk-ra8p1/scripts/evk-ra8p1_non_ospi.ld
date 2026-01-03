@@ -61,7 +61,7 @@ INCLUDE common/renesas_ofs_defs.ld
 MEMORY
 {
   /* Internal Code MRAM - 1MB */
-  flash (rx)   : ORIGIN = 0x02000000, LENGTH = 1M
+  mram (rx)   : ORIGIN = 0x02000000, LENGTH = 1M
 
   /* User SRAM - 1664KB total */
   sram (rwx)   : ORIGIN = 0x22000000, LENGTH = 1664K
@@ -113,7 +113,7 @@ ENTRY(_stext)
 
 SECTIONS
 {
-  /* Vector table must be at start of flash, 512-byte aligned for Cortex-M85 */
+  /* Vector table must be at start of mram, 512-byte aligned for Cortex-M85 */
   .text : ALIGN(512)
   {
     _stext = ABSOLUTE(.);
@@ -130,7 +130,7 @@ SECTIONS
     *(.gcc_except_table)
     *(.gnu.linkonce.r.*)
     _etext = ABSOLUTE(.);
-  } > flash
+  } > mram
 
   /* C++ Static constructors/destructors */
   .init_section :
@@ -138,24 +138,24 @@ SECTIONS
     _sinit = ABSOLUTE(.);
     KEEP(*(.init_array .init_array.*))
     _einit = ABSOLUTE(.);
-  } > flash
+  } > mram
 
   /* ARM exception handling */
   .ARM.extab :
   {
     *(.ARM.extab*)
-  } > flash
+  } > mram
 
   __exidx_start = ABSOLUTE(.);
   .ARM.exidx :
   {
     *(.ARM.exidx*)
-  } > flash
+  } > mram
   __exidx_end = ABSOLUTE(.);
 
   _eronly = ABSOLUTE(.);
 
-  /* Initialized data section - loaded from flash to SRAM */
+  /* Initialized data section - loaded from mram to SRAM */
   .data :
   {
     _sdata = ABSOLUTE(.);
@@ -164,7 +164,7 @@ SECTIONS
     CONSTRUCTORS
     . = ALIGN(4);
     _edata = ABSOLUTE(.);
-  } > sram AT > flash
+  } > sram AT > mram
 
   /* Functions to be executed from RAM for performance */
   .ramfunc ALIGN(4):
@@ -172,7 +172,7 @@ SECTIONS
     _sramfuncs = ABSOLUTE(.);
     *(.ramfunc .ramfunc.*)
     _eramfuncs = ABSOLUTE(.);
-  } > sram AT > flash
+  } > sram AT > mram
 
   _framfuncs = LOADADDR(.ramfunc);
 
@@ -210,7 +210,7 @@ SECTIONS
     *(.cm33_rodata .cm33_rodata.*)
     . = ALIGN(4);
     _ecm33_text = ABSOLUTE(.);
-  } > cm33_itcm AT > flash
+  } > cm33_itcm AT > mram
 
   _fcm33_text = LOADADDR(.cm33_text);  /* Flash location of CM33 code */
 
@@ -221,7 +221,7 @@ SECTIONS
     *(.cm33_data .cm33_data.*)
     . = ALIGN(4);
     _ecm33_data = ABSOLUTE(.);
-  } > cm33_dtcm AT > flash
+  } > cm33_dtcm AT > mram
 
   _fcm33_data = LOADADDR(.cm33_data);  /* Flash location of CM33 data */
 
