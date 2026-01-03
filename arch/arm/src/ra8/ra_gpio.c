@@ -847,7 +847,7 @@ int ra_gpiosetevent(uint32_t pinset, bool rising, bool falling,
   g_gpio_irqs[slot].allocated = true;
 
   /* Now configure IRQCR (edge detection mode) - IELSR is already cleared */
-  ret = ra_icu_filter_config(irq_num, irq_mode, false, RA_ICU_FILTER_PCLK_DIV_1);
+  ret = ra_icu_filter_config(irq_num, irq_mode, true, RA_ICU_FILTER_PCLK_DIV_64);
   if (ret < 0)
     {
       ra_icu_detach(icu_irq);
