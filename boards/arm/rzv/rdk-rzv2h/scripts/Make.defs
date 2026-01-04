@@ -20,7 +20,13 @@
 
 include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
-include $(TOPDIR)/arch/arm/src/armv7-r/Toolchain.defs
+
+# Include appropriate toolchain definitions based on build type
+ifeq ($(CONFIG_RZV2H_BUILD_CM33),y)
+  include $(TOPDIR)/arch/arm/src/armv8-m/Toolchain.defs
+else
+  include $(TOPDIR)/arch/arm/src/armv7-r/Toolchain.defs
+endif
 
 # Determine linker script based on build type
 ifeq ($(CONFIG_RZV2H_BUILD_CR8_0),y)

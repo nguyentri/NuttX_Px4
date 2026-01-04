@@ -31,7 +31,27 @@
  * Pre-processor Prototypes
  ****************************************************************************/
 
-/* GIC priority levels *****************************************************/
+#ifdef CONFIG_RZV2H_BUILD_CM33
+
+/* NVIC priority levels for Cortex-M33 (ARMv8-M) **************************/
+
+/* Each priority field holds a priority value, 0-255. The lower the value, the
+ * greater the priority of the corresponding interrupt. The Cortex-M33
+ * implements bits[7:4] of each field, bits[3:0] read as zero.
+ */
+
+#define NVIC_SYSH_PRIORITY_MIN      0xf0 /* All bits[7:4] set is minimum priority */
+#define NVIC_SYSH_PRIORITY_DEFAULT  0x80 /* Midpoint is the default */
+#define NVIC_SYSH_PRIORITY_MAX      0x00 /* Zero is maximum priority */
+#define NVIC_SYSH_PRIORITY_STEP     0x10 /* Four bits of interrupt priority used */
+
+#define NVIC_SYSH_DISABLE_PRIORITY  (NVIC_SYSH_PRIORITY_MAX + NVIC_SYSH_PRIORITY_STEP)
+#define NVIC_SYSH_SVCALL_PRIORITY   NVIC_SYSH_PRIORITY_DEFAULT
+#define ARMV8M_PERIPHERAL_INTERRUPTS  RZV_IRQ_NEXTINT
+
+#else
+
+/* GIC priority levels for Cortex-R8 (ARMv7-R) ****************************/
 
 /* Each priority field holds a priority value, 0-255. The lower the value, the
  * greater the priority of the corresponding interrupt. For ARMv7-R Cortex-R8,
@@ -43,6 +63,8 @@
 #define GIC_IRQ_PRIORITY_DEFAULT    0x80 /* Midpoint is the default */
 #define GIC_IRQ_PRIORITY_MAX        0x00 /* Zero is maximum priority */
 #define GIC_IRQ_PRIORITY_STEP       0x08 /* Five bits of interrupt priority used */
+
+#endif /* CONFIG_RZV2H_BUILD_CM33 */
 
 /****************************************************************************
  * Public Types

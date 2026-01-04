@@ -77,35 +77,97 @@ config RZV2H_GROUP
 config RZV_FAMILY
    bool
    default y
+   ---help---
+     RZV family of Renesas MPUs
+
+if !RZV2H_BUILD_CM33
+# Cortex-R8 configuration (CR8_0/CR8_1 cores)
+
+config ARCH_CORTEXR8_SELECTED
+   bool
+   default y
    select ARCH_CORTEXR8
    select ARCH_HAVE_FPU
    select ARCH_HAVE_THUMB
    select ARCH_HAVE_DPFPU
    select ARCH_HAVE_MPU
    select ARMV7R_HAVE_GICv2
-   ---help---
-     RZV family of Renesas MPUs
+
+endif # !RZV2H_BUILD_CM33
+
+if RZV2H_BUILD_CM33
+# Cortex-M33 configuration
+
+config ARCH_CORTEXM33_SELECTED
+   bool
+   default y
+   select ARCH_CORTEXM33
+   select ARCH_HAVE_FPU
+   select ARCH_HAVE_DPFPU
+   select ARMV8M_HAVE_ICACHE
+   select ARMV8M_HAVE_DCACHE
+   select ARM_HAVE_MPU_UNIFIED
+
+endif # RZV2H_BUILD_CM33
+
+# Core Selection (must be choice block for mutual exclusion)
+choice
+    prompt "RZV2H Core Selection"
+    default RZV2H_BUILD_CR8_0
 
 config RZV2H_BUILD_CR8_0
     bool "Build for CR8_0 core"
-    default y
     help
       Build for the CR8_0 core of the RZV2H.
       This is the default core for the RDK-RZV2H board.
+      Uses Cortex-R8 (ARMv7-R) architecture.
 
 config RZV2H_BUILD_CR8_1
     bool "Build for CR8_1 core"
-    default n
     help
       Build for the CR8_1 core of the RZV2H.
       This is the secondary core for the RDK-RZV2H board.
+      Uses Cortex-R8 (ARMv7-R) architecture.
 
 config RZV2H_BUILD_CM33
     bool "Build for CM33 core"
-    default n
     help
       Build for the CM33 core of the RZV2H.
-      This core is used for TrustZone security features. It is currently not supported.
+      This core is used for TrustZone security features and real-time control.
+      Uses Cortex-M33 (ARMv8-M) architecture with optional FPU and DSP.
+
+endchoice
+
+if RZV2H_BUILD_CM33
+
+config RZV2H_CM33_ATCM_SIZE
+   int "CM33 ATCM size (KB)"
+   default 128
+   help
+     Size of CM33 Tightly-Coupled Memory A (ATCM) in KB.
+     RZV2H CM33 has 128KB ATCM at 0x00000000.
+
+config RZV2H_CM33_BTCM_SIZE
+   int "CM33 BTCM size (KB)"
+   default 128
+   help
+     Size of CM33 Tightly-Coupled Memory B (BTCM) in KB.
+     RZV2H CM33 has 128KB BTCM at 0x20000000.
+
+config RZV2H_CM33_SRAM_BASE
+   hex "CM33 System RAM base address"
+   default 0x22000000
+   help
+     Base address of CM33 system RAM.
+     RZV2H allocates 512KB RAM for CM33 at 0x22000000.
+
+config RZV2H_CM33_SRAM_SIZE
+   int "CM33 System RAM size (KB)"
+   default 512
+   help
+     Size of CM33 system RAM in KB.
+
+endif # RZV2H_BUILD_CM33
 
 # Clock Configuration
 

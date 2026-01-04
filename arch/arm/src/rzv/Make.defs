@@ -20,9 +20,14 @@
 
 # The start-up, "head", file
 
-# Common ARM and Cortex-R8 files
-
+# Common ARM files - different for CM33 vs CR8
+ifeq ($(CONFIG_RZV2H_BUILD_CM33),y)
+# Cortex-M33 (ARMv8-M) files
+include armv8-m/Make.defs
+else
+# Cortex-R8 (ARMv7-R) files
 include armv7-r/Make.defs
+endif
 
 # Add RZV-specific include paths
 
@@ -30,11 +35,21 @@ EXTRAINCDIRS += $(ARCH_SRCDIR)$(DELIM)rzv
 EXTRAINCDIRS += $(ARCH_SRCDIR)$(DELIM)rzv$(DELIM)hardware
 EXTRAINCDIRS += $(ARCH_SRCDIR)$(DELIM)rzv$(DELIM)hardware$(DELIM)rzv2h
 
-# Required RZV files
+# Required RZV files - core-specific startup and IRQ handling
+ifeq ($(CONFIG_RZV2H_BUILD_CM33),y)
+# CM33-specific startup and IRQ files
+CHIP_CSRCS += rzv_start_cm33.c
+CHIP_CSRCS += rzv_irq_cm33.c
+CHIP_CSRCS += rzv_icu_cm33.c
+else
+# CR8-specific startup and IRQ files (default)
 CHIP_CSRCS += rzv_start.c
-CHIP_CSRCS += rzv_clock.c
 CHIP_CSRCS += rzv_irq.c
 CHIP_CSRCS += rzv_icu.c
+endif
+
+# Common RZV files (used by all cores)
+CHIP_CSRCS += rzv_clock.c
 CHIP_CSRCS += rzv_gpio.c
 CHIP_CSRCS += rzv_lowputc.c
 CHIP_CSRCS += rzv_memmng.c

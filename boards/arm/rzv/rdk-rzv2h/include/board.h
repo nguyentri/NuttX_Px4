@@ -504,8 +504,6 @@
 /* Board UUID for PX4 identification (matching board_config.h) */
 #define BOARD_OVERRIDE_UUID   "RZV2H0000000000"  /* 16 characters */
 
-/* System architecture ID */
-#define PX4_SOC_ARCH_ID       0  /* PX4_SOC_ARCH_ID_UNUSED */
 
 /* Battery monitoring configuration (no ADC battery monitoring) */
 #define ADC_BATTERY_VOLTAGE_CHANNEL    -1

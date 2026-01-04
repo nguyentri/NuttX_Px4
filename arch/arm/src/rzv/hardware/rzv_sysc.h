@@ -413,13 +413,13 @@
 /* SYSC SYS_PCIE_ACK_CH Register Bit Definitions (Parameterized) ***********/
 
 #define SYSC_SYS_PCIE_ACK_CH_TURN_OFF_EVENT_ACK(m)        (1 << 0)  /* Turn Off Event Ack */
-#define SYSC_SYS_PCIE_ACK_CH_D3_ECENT_ACK_F(m)            (1 << 8)  /* D3 Ecent Ack F0 */
-#define SYSC_SYS_PCIE_ACK_CH_D3_ECENT_ACK_F(m)            (1 << 9)  /* D3 Ecent Ack F1 */
+#define SYSC_SYS_PCIE_ACK_CH_D3_ECENT_ACK_F0(m)           (1 << 8)  /* D3 Ecent Ack F0 */
+#define SYSC_SYS_PCIE_ACK_CH_D3_ECENT_ACK_F1(m)           (1 << 9)  /* D3 Ecent Ack F1 */
 
 /* SYSC SYS_PCIE_INTX_CH Register Bit Definitions (Parameterized) **********/
 
-#define SYSC_SYS_PCIE_INTX_CH_INTX_EP_F(m)                (1 << 0)  /* Intx Ep F0 */
-#define SYSC_SYS_PCIE_INTX_CH_INTX_EP_F(m)                (1 << 1)  /* Intx Ep F1 */
+#define SYSC_SYS_PCIE_INTX_CH_INTX_EP_F0(m)               (1 << 0)  /* Intx Ep F0 */
+#define SYSC_SYS_PCIE_INTX_CH_INTX_EP_F1(m)               (1 << 1)  /* Intx Ep F1 */
 
 /* SYSC SYS_PCIE_MISC_CH Register Bit Definitions (Parameterized) **********/
 
@@ -438,8 +438,8 @@
 /* SYSC SYS_PCIE_PME_CH Register Bit Definitions (Parameterized) ***********/
 
 #define SYSC_SYS_PCIE_PME_CH_PME_TIM(m)                   (1 << 0)  /* Pme Tim */
-#define SYSC_SYS_PCIE_PME_CH_CFG_PMCSR_PME_STATUS_F(m)    (1 << 8)  /* Cfg Pmcsr Pme Status F0 */
-#define SYSC_SYS_PCIE_PME_CH_CFG_PMCSR_PME_STATUS_F(m)    (1 << 9)  /* Cfg Pmcsr Pme Status F1 */
+#define SYSC_SYS_PCIE_PME_CH_CFG_PMCSR_PME_STATUS_F0(m)   (1 << 8)  /* Cfg Pmcsr Pme Status F0 */
+#define SYSC_SYS_PCIE_PME_CH_CFG_PMCSR_PME_STATUS_F1(m)   (1 << 9)  /* Cfg Pmcsr Pme Status F1 */
 
 /* SYSC SYS_RCPU_CONFIG Register Bit Definitions (Parameterized) ***********/
 

@@ -111,7 +111,7 @@ ENTRY(_VECTORS)
 
 SECTIONS
 {
-    .itcm_load_section0 0x00000000 :
+    .itcm_load_section0 ITCM_PRV_START :
     {
         _itcm_load_start = .;
         /* vector */
