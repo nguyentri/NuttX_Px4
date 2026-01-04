@@ -87,6 +87,9 @@ MEMORY
     INIT_WAIT_AREA_OTHER_CORE(rw) : ORIGIN = INIT_WAIT_AREA_OTHER_CORE_START, LENGTH = INIT_WAIT_AREA_LENGTH
 
     DUMMY : ORIGIN = DUMMY_START, LENGTH = DUMMY_LENGTH
+
+    /* IPC RAM for CR8-0 <-> CR8-1 <-> M33 communication (non-cacheable) */
+    IPC_RAM (rw) : ORIGIN = 0x70000000, LENGTH = 64K
 }
 
 PHDRS
@@ -502,6 +505,18 @@ SECTIONS
         . += OPENAMP_VRING_LENGTH;
         PROVIDE(__vring_end = .);
     } > OPENAMP_VRING : openamp_ph
+
+    /* IPC RAM Section for CR8-0 <-> CR8-1 communication (non-cacheable) */
+    .ipc_ram (NOLOAD) :
+    {
+        . = ALIGN(0x40);
+        PROVIDE(__ipc_ram_start = .);
+        PROVIDE(__ipc_cr8_cr8_base = .);
+        *(.ipc_ram)
+        *(.ipc_ram.*)
+        . = ALIGN(0x40);
+        PROVIDE(__ipc_ram_end = .);
+    } > IPC_RAM
 
     _itcm_load_addr = FLASH_DATA_START;
     _itcm_load_size = _itcm_load_end - _itcm_load_start;
