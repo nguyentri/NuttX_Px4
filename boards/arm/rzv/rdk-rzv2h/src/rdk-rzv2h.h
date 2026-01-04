@@ -178,6 +178,18 @@ int board_timer_initialize(void);
 #endif
 
 /****************************************************************************
+ * Name: rzv2h_ether_initialize
+ *
+ * Description:
+ *   Initialize the Ethernet (GBETH) driver
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RZV_ETHERNET
+int rzv2h_ether_initialize(void);
+#endif
+
+/****************************************************************************
  * Name: rzv2h_app_examples
  *
  * Description:

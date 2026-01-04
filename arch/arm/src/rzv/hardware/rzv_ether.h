@@ -1,0 +1,166 @@
+/****************************************************************************
+ * arch/arm/src/rzv/hardware/rzv_ether.h
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+#ifndef __ARCH_ARM_SRC_RZV_HARDWARE_RZV_ETHER_H
+#define __ARCH_ARM_SRC_RZV_HARDWARE_RZV_ETHER_H
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Register Base Addresses */
+
+#define RZV_ETHER0_BASE             0x15C30000
+#define RZV_ETHER1_BASE             0x15C40000
+
+/* Register Offsets */
+
+/* MAC Registers */
+#define RZV_ETH_MAC_CONF            0x0000 /* MAC Configuration */
+#define RZV_ETH_MAC_EXT_CONF        0x0004 /* MAC Extended Configuration */
+#define RZV_ETH_MAC_PKT_FILT        0x0008 /* MAC Packet Filter */
+#define RZV_ETH_MAC_WD_TO           0x000C /* MAC Watchdog Timeout */
+#define RZV_ETH_MAC_HASH_HI         0x0010 /* MAC Hash Table High */
+#define RZV_ETH_MAC_HASH_LO         0x0014 /* MAC Hash Table Low */
+#define RZV_ETH_MAC_MII_ADDR        0x0200 /* MAC MDIO Address */
+#define RZV_ETH_MAC_MII_DATA        0x0204 /* MAC MDIO Data */
+#define RZV_ETH_MAC_FLOW_CTRL       0x0090 /* MAC Flow Control */
+#define RZV_ETH_MAC_INT_STAT        0x00B0 /* MAC Interrupt Status */
+#define RZV_ETH_MAC_INT_EN          0x00B4 /* MAC Interrupt Enable */
+#define RZV_ETH_MAC_ADDR0_HI        0x0300 /* MAC Address 0 High */
+#define RZV_ETH_MAC_ADDR0_LO        0x0304 /* MAC Address 0 Low */
+
+/* DMA Registers (Channel 0) */
+#define RZV_ETH_DMA_CH0_CTRL        0x1100 /* DMA Channel 0 Control */
+#define RZV_ETH_DMA_CH0_TX_CTRL     0x1104 /* DMA Channel 0 TX Control */
+#define RZV_ETH_DMA_CH0_RX_CTRL     0x1108 /* DMA Channel 0 RX Control */
+#define RZV_ETH_DMA_CH0_TXDESC_LIST 0x1114 /* DMA Channel 0 TX Descriptor List Address */
+#define RZV_ETH_DMA_CH0_RXDESC_LIST 0x111C /* DMA Channel 0 RX Descriptor List Address */
+#define RZV_ETH_DMA_CH0_TXDESC_TAIL 0x1120 /* DMA Channel 0 TX Descriptor Tail Pointer */
+#define RZV_ETH_DMA_CH0_RXDESC_TAIL 0x1128 /* DMA Channel 0 RX Descriptor Tail Pointer */
+#define RZV_ETH_DMA_CH0_TXDESC_RING 0x1130 /* DMA Channel 0 TX Descriptor Ring Length */
+#define RZV_ETH_DMA_CH0_RXDESC_RING 0x1134 /* DMA Channel 0 RX Descriptor Ring Length */
+#define RZV_ETH_DMA_CH0_INT_EN      0x1138 /* DMA Channel 0 Interrupt Enable */
+#define RZV_ETH_DMA_CH0_RX_INT_WD   0x113C /* DMA Channel 0 RX Interrupt Watchdog Timer */
+#define RZV_ETH_DMA_CH0_SLOT_CTRL   0x1140 /* DMA Channel 0 Slot Function Control Status */
+#define RZV_ETH_DMA_CH0_CUR_TXDESC  0x1144 /* DMA Channel 0 Current Host Transmit Descriptor */
+#define RZV_ETH_DMA_CH0_CUR_RXDESC  0x114C /* DMA Channel 0 Current Host Receive Descriptor */
+#define RZV_ETH_DMA_CH0_CUR_TXBUF   0x1154 /* DMA Channel 0 Current Host Transmit Buffer Address */
+#define RZV_ETH_DMA_CH0_CUR_RXBUF   0x115C /* DMA Channel 0 Current Host Receive Buffer Address */
+#define RZV_ETH_DMA_CH0_STATUS      0x1160 /* DMA Channel 0 Status */
+
+/* Bit Definitions */
+
+/* MAC Configuration Register */
+#define MAC_CONF_RE                 (1 << 0)  /* Receiver Enable */
+#define MAC_CONF_TE                 (1 << 1)  /* Transmitter Enable */
+#define MAC_CONF_DC                 (1 << 2)  /* Deferral Check */
+#define MAC_CONF_BL_SHIFT           (4)       /* Back-Off Limit */
+#define MAC_CONF_BL_MASK            (3 << MAC_CONF_BL_SHIFT)
+#define MAC_CONF_ACS                (1 << 7)  /* Automatic Pad/CRC Stripping */
+#define MAC_CONF_DR                 (1 << 9)  /* Disable Retry */
+#define MAC_CONF_IPC                (1 << 10) /* Checksum Offload */
+#define MAC_CONF_DM                 (1 << 11) /* Duplex Mode */
+#define MAC_CONF_LM                 (1 << 12) /* Loopback Mode */
+#define MAC_CONF_DO                 (1 << 13) /* Disable Receive Own */
+#define MAC_CONF_FES                (1 << 14) /* Speed */
+#define MAC_CONF_PS                 (1 << 15) /* Port Select */
+#define MAC_CONF_JE                 (1 << 16) /* Jumbo Frame Enable */
+#define MAC_CONF_JD                 (1 << 17) /* Jabber Disable */
+#define MAC_CONF_WD                 (1 << 23) /* Watchdog Disable */
+#define MAC_CONF_CST                (1 << 25) /* CRC Stripping for Type frames */
+
+/* DMA Channel 0 Control Register */
+#define DMA_CH0_CTRL_SWR            (1 << 0)  /* Software Reset */
+
+/* DMA Channel 0 Status Register */
+#define DMA_CH0_STATUS_TI           (1 << 0)  /* Transmit Interrupt */
+#define DMA_CH0_STATUS_TPS          (1 << 1)  /* Transmit Process Stopped */
+#define DMA_CH0_STATUS_TBU          (1 << 2)  /* Transmit Buffer Unavailable */
+#define DMA_CH0_STATUS_RI           (1 << 6)  /* Receive Interrupt */
+#define DMA_CH0_STATUS_RBU          (1 << 7)  /* Receive Buffer Unavailable */
+#define DMA_CH0_STATUS_RPS          (1 << 8)  /* Receive Process Stopped */
+#define DMA_CH0_STATUS_AIS          (1 << 15) /* Abnormal Interrupt Summary */
+#define DMA_CH0_STATUS_NIS          (1 << 16) /* Normal Interrupt Summary */
+
+/* DMA Channel 0 Interrupt Enable Register */
+#define DMA_CH0_INT_EN_TIE          (1 << 0)  /* Transmit Interrupt Enable */
+#define DMA_CH0_INT_EN_TBUE         (1 << 2)  /* Transmit Buffer Unavailable Enable */
+#define DMA_CH0_INT_EN_RIE          (1 << 6)  /* Receive Interrupt Enable */
+#define DMA_CH0_INT_EN_RBUE         (1 << 7)  /* Receive Buffer Unavailable Enable */
+#define DMA_CH0_INT_EN_AISE         (1 << 15) /* Abnormal Interrupt Summary Enable */
+#define DMA_CH0_INT_EN_NISE         (1 << 16) /* Normal Interrupt Summary Enable */
+
+/* MAC MDIO Address Register */
+#define MAC_MII_ADDR_GB             (1 << 0)  /* GMII Busy */
+#define MAC_MII_ADDR_GW             (1 << 1)  /* GMII Write */
+#define MAC_MII_ADDR_CR_SHIFT       (2)       /* CSR Clock Range */
+#define MAC_MII_ADDR_CR_MASK        (0xF << MAC_MII_ADDR_CR_SHIFT)
+#define MAC_MII_ADDR_GR_SHIFT       (6)       /* GMII Register */
+#define MAC_MII_ADDR_GR_MASK        (0x1F << MAC_MII_ADDR_GR_SHIFT)
+#define MAC_MII_ADDR_PA_SHIFT       (11)      /* Physical Layer Address */
+#define MAC_MII_ADDR_PA_MASK        (0x1F << MAC_MII_ADDR_PA_SHIFT)
+
+/* Descriptors */
+
+/* TDES0 (Read Format) */
+#define TDES0_BUF1AP                (0xFFFFFFFF) /* Buffer 1 Address Pointer */
+
+/* TDES1 (Read Format) */
+#define TDES1_BUF2AP                (0xFFFFFFFF) /* Buffer 2 Address Pointer */
+
+/* TDES2 (Read Format) */
+#define TDES2_B1L_SHIFT             (0)
+#define TDES2_B1L_MASK              (0x3FFF << TDES2_B1L_SHIFT) /* Buffer 1 Length */
+#define TDES2_VTIR_SHIFT            (14)
+#define TDES2_VTIR_MASK             (0x3 << TDES2_VTIR_SHIFT) /* VLAN Tag Insertion/Replacement */
+#define TDES2_B2L_SHIFT             (16)
+#define TDES2_B2L_MASK              (0x3FFF << TDES2_B2L_SHIFT) /* Buffer 2 Length */
+#define TDES2_TTSE                  (1 << 30) /* Transmit Timestamp Enable */
+#define TDES2_IOC                   (1 << 31) /* Interrupt on Completion */
+
+/* TDES3 (Read Format) */
+#define TDES3_FL_SHIFT              (0)
+#define TDES3_FL_MASK               (0x7FFF << TDES3_FL_SHIFT) /* Frame Length */
+#define TDES3_CIC_SHIFT             (16)
+#define TDES3_CIC_MASK              (0x3 << TDES3_CIC_SHIFT) /* Checksum Insertion Control */
+#define TDES3_TSE                   (1 << 18) /* TCP Segmentation Enable */
+#define TDES3_SLOTNUM_SHIFT         (19)
+#define TDES3_SLOTNUM_MASK          (0xF << TDES3_SLOTNUM_SHIFT) /* Slot Number Control */
+#define TDES3_SAIC_SHIFT            (23)
+#define TDES3_SAIC_MASK             (0x7 << TDES3_SAIC_SHIFT) /* SA Insertion Control */
+#define TDES3_CPC_SHIFT             (26)
+#define TDES3_CPC_MASK              (0x3 << TDES3_CPC_SHIFT) /* CRC Pad Control */
+#define TDES3_LD                    (1 << 28) /* Last Descriptor */
+#define TDES3_FD                    (1 << 29) /* First Descriptor */
+#define TDES3_CTXT                  (1 << 30) /* Context Type */
+#define TDES3_OWN                   (1 << 31) /* Own Bit */
+
+/* RDES3 (Read Format) */
+#define RDES3_BUF1V                 (1 << 24) /* Buffer 1 Valid */
+#define RDES3_BUF2V                 (1 << 25) /* Buffer 2 Valid */
+#define RDES3_IOC                   (1 << 30) /* Interrupt on Completion */
+#define RDES3_OWN                   (1 << 31) /* Own Bit */
+
+#endif /* __ARCH_ARM_SRC_RZV_HARDWARE_RZV_ETHER_H */

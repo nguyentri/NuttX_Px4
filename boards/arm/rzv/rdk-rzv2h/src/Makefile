@@ -99,6 +99,11 @@ ifeq ($(CONFIG_RZV_WDT),y)
 CSRCS += rzv2h_wdt.c
 endif
 
+# Ethernet support
+ifeq ($(CONFIG_RZV_ETHERNET),y)
+CSRCS += rzv2h_ether.c
+endif
+
 # WDT test application
 ifeq ($(CONFIG_RZV2H_WDT_TEST),y)
 CSRCS += rzv2h_wdt_test.c

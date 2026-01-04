@@ -1095,11 +1095,68 @@ config RZV_DAC
    default n
    depends on RZV_HAVE_DAC12
 
-config RZV_ETHERNET
-   bool "Ethernet support"
+menuconfig RZV_ETHERNET
+   bool "Ethernet (GBETH) Driver"
    default n
    depends on RZV_HAVE_ETHERC_MII || RZV_HAVE_ETHERC_RMII
    select NETDEVICES
+   select ARCH_HAVE_NETDEV_STATISTICS
+   ---help---
+     Enable support for the RZV2H Gigabit Ethernet (GBETH) driver.
+     The RZV2H has two Ethernet ports (GBETH0, GBETH1) using a
+     DesignWare MAC (DWMAC) compatible architecture.
+
+if RZV_ETHERNET
+
+config RZV_ETHER0
+   bool "Enable Ethernet Port 0 (GBETH0)"
+   default y
+   ---help---
+     Enable Ethernet port 0 (GBETH0) at base address 0x15C30000.
+
+config RZV_ETHER1
+   bool "Enable Ethernet Port 1 (GBETH1)"
+   default n
+   ---help---
+     Enable Ethernet port 1 (GBETH1) at base address 0x15C40000.
+
+config RZV_ETHER_TXDESC
+   int "Number of TX Descriptors"
+   default 8
+   range 4 64
+   ---help---
+     Number of TX DMA descriptors in the ring buffer.
+     More descriptors allow higher throughput but use more memory.
+
+config RZV_ETHER_RXDESC
+   int "Number of RX Descriptors"
+   default 8
+   range 4 64
+   ---help---
+     Number of RX DMA descriptors in the ring buffer.
+     More descriptors allow higher throughput but use more memory.
+
+config RZV_ETHER_BUFSIZE
+   int "Ethernet Buffer Size"
+   default 1536
+   ---help---
+     Size of each TX/RX buffer. Should be at least MTU + headers + FCS.
+
+config RZV_ETHER_PHY_ADDR
+   int "PHY Address"
+   default 0
+   range 0 31
+   ---help---
+     MDIO address of the PHY connected to the Ethernet port.
+
+config RZV_ETHER_PHY_RGMII
+   bool "Use RGMII PHY Interface"
+   default y
+   ---help---
+     Select RGMII (Reduced Gigabit MII) PHY interface.
+     If not selected, MII or RMII will be used based on board configuration.
+
+endif # RZV_ETHERNET
 
 # Watchdog Timer (WDT)
 

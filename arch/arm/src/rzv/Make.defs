@@ -101,6 +101,11 @@ ifeq ($(CONFIG_RZV_GTM),y)
 CHIP_CSRCS += rzv_gtm.c
 endif
 
+# Ethernet driver
+ifeq ($(CONFIG_RZV_ETHERNET),y)
+CHIP_CSRCS += rzv_ether.c rzv_ether_phy.c
+endif
+
 # Watchdog Timer driver
 ifeq ($(CONFIG_RZV_WDT),y)
 CHIP_CSRCS += rzv_wdt.c

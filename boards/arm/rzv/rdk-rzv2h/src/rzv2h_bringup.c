@@ -241,6 +241,20 @@ int board_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_RZV_ETHERNET
+  /* Initialize Ethernet (GBETH) driver */
+
+  ret = rzv2h_ether_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize Ethernet: %d\n", ret);
+    }
+  else
+    {
+      syslog(LOG_INFO, "Ethernet (GBETH) initialized successfully\n");
+    }
+#endif
+
 #ifdef CONFIG_PWM
   /* Initialize GPT PWM devices */
 
