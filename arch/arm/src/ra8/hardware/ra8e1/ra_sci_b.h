@@ -47,6 +47,7 @@
 #define R_SCI_B_RDR_OFFSET                        0x00000000  /* Receive Data Register */
 #define R_SCI_B_RDR_BY_OFFSET                     0x00000000  /* Receive Data Register */
 #define R_SCI_B_TDR_OFFSET                        0x00000004  /* Transmit Data Register */
+#define R_SCI_B_TDR_BY_OFFSET                     0x00000004  /* Transmit Data Register (byte access) */
 #define R_SCI_B_TDRLL_OFFSET                      0x00000004  /* Transmit Data Register */
 #define R_SCI_B_TDRLH_OFFSET                      0x00000005  /* Transmit Data Register */
 #define R_SCI_B_CCR0_OFFSET                       0x00000008  /* Common Control Register 0 */

@@ -416,8 +416,8 @@ static int gtm_timer_settimeout(FAR struct timer_lowerhalf_s *lower,
       return -EINVAL;
     }
 
-  tmrinfo("GTM%d: Setting timeout to %u microseconds\n",
-          priv->channel, timeout);
+  tmrinfo("GTM%d: Setting timeout to %lu microseconds\n",
+          priv->channel, (unsigned long)timeout);
 
   /* Convert microseconds to timer ticks */
 
@@ -437,8 +437,8 @@ static int gtm_timer_settimeout(FAR struct timer_lowerhalf_s *lower,
 
   gtm_putreg32(priv, RZV_GTM_OSTMCMP_OFFSET, (uint32_t)ticks);
 
-  tmrinfo("GTM%d: Set compare value to %u ticks\n",
-          priv->channel, (uint32_t)ticks);
+  tmrinfo("GTM%d: Set compare value to %lu ticks\n",
+          priv->channel, (unsigned long)(uint32_t)ticks);
 
   return OK;
 }
@@ -497,8 +497,8 @@ static int gtm_timer_maxtimeout(FAR struct timer_lowerhalf_s *lower,
       *maxtimeout = (uint32_t)max_us;
     }
 
-  tmrinfo("GTM%d: Maximum timeout is %u microseconds\n",
-          priv->channel, *maxtimeout);
+  tmrinfo("GTM%d: Maximum timeout is %lu microseconds\n",
+          priv->channel, (unsigned long)*maxtimeout);
 
   return OK;
 }
@@ -616,7 +616,7 @@ FAR struct timer_lowerhalf_s *rzv_gtm_timer_initialize(int channel)
       goto errout_with_priv;
     }
 
-  tmrinfo("GTM%d: Clock enabled (ID: 0x%08x)\n", channel, clk_id);
+  tmrinfo("GTM%d: Clock enabled (ID: 0x%08lx)\n", channel, (unsigned long)clk_id);
 
   /* Stop timer before configuration */
 
@@ -660,8 +660,8 @@ FAR struct timer_lowerhalf_s *rzv_gtm_timer_initialize(int channel)
 
   /* Timer is now initialized but not started */
 
-  tmrinfo("GTM%d: Initialization complete (frequency: %u Hz)\n",
-          channel, priv->frequency);
+  tmrinfo("GTM%d: Initialization complete (frequency: %lu Hz)\n",
+          channel, (unsigned long)priv->frequency);
 
   return (FAR struct timer_lowerhalf_s *)priv;
 

@@ -74,10 +74,13 @@ static inline void rzv_adc_modifyreg(struct rzv_adc_priv_s *priv,
                                      uint16_t clearbits, uint16_t setbits);
 
 /* ADC Helpers (forward) */
+#if defined(CONFIG_RZV_ADC0) || defined(CONFIG_RZV_ADC1)
 static void rzv_adc_reset(struct rzv_adc_priv_s *priv);
 static int rzv_adc_interrupt(int irq, void *context, void *arg);
+#endif
 
 /* ADC Operations (forward) */
+#if defined(CONFIG_RZV_ADC0) || defined(CONFIG_RZV_ADC1)
 static int rzv_adc_bind(struct adc_dev_s *dev,
                         const struct adc_callback_s *callback);
 static void rzv_adc_reset_dev(struct adc_dev_s *dev);
@@ -85,6 +88,8 @@ static int rzv_adc_setup(struct adc_dev_s *dev);
 static void rzv_adc_shutdown(struct adc_dev_s *dev);
 static void rzv_adc_rxint(struct adc_dev_s *dev, bool enable);
 static int rzv_adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg);
+#endif
+
 
 #ifdef CONFIG_RZV_ADC
 
@@ -96,6 +101,8 @@ static int rzv_adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg);
 #  define RZV_ADC1_BASE         RZV_ADC_E_BASE
 #endif
 
+/* Define operations only if at least one ADC instance is enabled */
+#if defined(CONFIG_RZV_ADC0) || defined(CONFIG_RZV_ADC1)
 static const struct adc_ops_s g_adc_ops =
 {
   .ao_bind     = rzv_adc_bind,
@@ -105,7 +112,9 @@ static const struct adc_ops_s g_adc_ops =
   .ao_rxint    = rzv_adc_rxint,
   .ao_ioctl    = rzv_adc_ioctl,
 };
+#endif
 
+#ifdef CONFIG_RZV_ADC0
 /* ADC0 */
 static const struct rzv_adc_config_s g_adc0_config =
 {
@@ -127,6 +136,7 @@ static struct adc_dev_s g_adc0_dev =
   .ad_ops  = &g_adc_ops,
   .ad_priv = &g_adc0_priv,
 };
+#endif
 
 /* ADC1 Configuration */
 
@@ -193,6 +203,7 @@ static inline void rzv_adc_modifyreg(struct rzv_adc_priv_s *priv,
   rzv_adc_putreg(priv, offset, regval);
 }
 
+#if defined(CONFIG_RZV_ADC0) || defined(CONFIG_RZV_ADC1)
 /****************************************************************************
  * Name: rzv_adc_reset
  ****************************************************************************/
@@ -243,7 +254,9 @@ static int rzv_adc_interrupt(int irq, void *context, void *arg)
 
   return OK;
 }
+#endif
 
+#if defined(CONFIG_RZV_ADC0) || defined(CONFIG_RZV_ADC1)
 static int rzv_adc_bind(struct adc_dev_s *dev,
                         const struct adc_callback_s *callback)
 {
@@ -394,6 +407,7 @@ static int rzv_adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
 
   return ret;
 }
+#endif
 
 int rzv_adc_initialize(const char *devpath, const uint8_t *chanlist,
                       int nchannels)
