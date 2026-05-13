@@ -1287,6 +1287,20 @@ void rzv_clock_config(void)
 
   rzv_clock_verify_frequencies();
 
+  /* FIX-104: emit FSP-aligned summary so the bring-up trace can be
+   * cross-checked against bsp_clock_cfg.h with a scope.
+   */
+
+  clkinfo("Clock summary (FSP-aligned): "
+          "CR8/I6=%u Hz, SYS/I7=%u Hz, "
+          "P0=%u Hz, P1=%u Hz, P5=%u Hz, AT=%u Hz\n",
+          (unsigned)g_clock_freq[RZV_CLOCK_I6CLK],
+          (unsigned)g_clock_freq[RZV_CLOCK_I7CLK],
+          (unsigned)g_clock_freq[RZV_CLOCK_P0CLK],
+          (unsigned)g_clock_freq[RZV_CLOCK_P1CLK],
+          (unsigned)g_clock_freq[RZV_CLOCK_P5CLK],
+          (unsigned)g_clock_freq[RZV_CLOCK_ATCLK]);
+
   clkinfo("Clock configuration complete\n");
 }
 

@@ -53,59 +53,15 @@
  *   This function is called early during board initialization to set up
  *   the UART pins before the serial driver is initialized.
  *
- *   SCI1 is used as the default NSH console interface.
+ *   The PX4 RDK-RZV2H port uses sparse SCI numbering so each channel keeps
+ *   its hardware-aligned /dev/ttySN name.
  *
  ****************************************************************************/
 
 void rzv2h_serial_setup(void)
 {
-#if defined(CONFIG_RZV_SCI0)
-  /* Configure SCI0 pins for UART operation (RC input)
-   * SCI0_TXD: P5_0 (Mode 1)
-   * SCI0_RXD: P5_1 (Mode 1)
-   */
-
-  sinfo("Configuring SCI0 pins for UART (RC input)\n");
-
-  rzv_gpioconfig(BOARD_SCI0_TXD_GPIO);
-  rzv_gpioconfig(BOARD_SCI0_RXD_GPIO);
-
-  sinfo("SCI0 UART pins configured\n");
-#endif
-
-#if defined(CONFIG_RZV_SCI1) || defined(CONFIG_SCI1_SERIAL_CONSOLE)
-  /* Configure SCI1 pins for UART operation (MAVLink)
-   * SCI1_TXD: P5_2 (Mode 1)
-   * SCI1_RXD: P5_3 (Mode 1)
-   */
-
-  sinfo("Configuring SCI1 pins for UART (MAVLink)\n");
-
-  rzv_gpioconfig(BOARD_SCI1_TXD_GPIO);
-  rzv_gpioconfig(BOARD_SCI1_RXD_GPIO);
-
-  sinfo("SCI1 UART pins configured\n");
-#endif
-
-#if defined(CONFIG_RZV_SCI2)
-  /* Configure SCI2 pins for UART operation (GPS)
-   * SCI2_TXD: P5_4 (Mode 1)
-   * SCI2_RXD: P5_5 (Mode 1)
-   */
-
-  sinfo("Configuring SCI2 pins for UART (GPS)\n");
-
-  rzv_gpioconfig(BOARD_SCI2_TXD_GPIO);
-  rzv_gpioconfig(BOARD_SCI2_RXD_GPIO);
-
-  sinfo("SCI2 UART pins configured\n");
-#endif
-
 #if defined(CONFIG_RZV_SCI3) || defined(CONFIG_SCI3_SERIAL_CONSOLE)
-  /* Configure SCI3 pins for UART operation (NSH Console)
-   * SCI3_TXD: P5_6 (Mode 1)
-   * SCI3_RXD: P5_7 (Mode 1)
-   */
+  /* SCI3: NSH console on P3_4/P3_5 per FSP RDK pinconfig. */
 
   sinfo("Configuring SCI3 pins for UART (NSH Console)\n");
 
@@ -113,6 +69,49 @@ void rzv2h_serial_setup(void)
   rzv_gpioconfig(BOARD_SCI3_RXD_GPIO);
 
   sinfo("SCI3 UART pins configured\n");
+#endif
+
+#if defined(CONFIG_RZV_SCI4)
+  /* SCI4: TFminiPlus on P7_0/P7_1. */
+
+  sinfo("Configuring SCI4 pins for UART (TFminiPlus)\n");
+
+  rzv_gpioconfig(BOARD_P7_0_GPIO);
+  rzv_gpioconfig(BOARD_P7_1_GPIO);
+
+  sinfo("SCI4 UART pins configured\n");
+#endif
+
+#if defined(CONFIG_RZV_SCI5)
+  /* SCI5: MAVLink telemetry on P7_2/P7_3. */
+
+  sinfo("Configuring SCI5 pins for UART (MAVLink)\n");
+
+  rzv_gpioconfig(BOARD_P7_2_GPIO);
+  rzv_gpioconfig(BOARD_P7_3_GPIO);
+
+  sinfo("SCI5 UART pins configured\n");
+#endif
+
+#if defined(CONFIG_RZV_SCI6)
+  /* SCI6: SBUS RC input uses RX only on P7_5. */
+
+  sinfo("Configuring SCI6 RX pin for UART (RC input)\n");
+
+  rzv_gpioconfig(BOARD_P7_5_GPIO);
+
+  sinfo("SCI6 UART RX pin configured\n");
+#endif
+
+#if defined(CONFIG_RZV_SCI9)
+  /* SCI9: GPS M10 on P8_2/P8_3. */
+
+  sinfo("Configuring SCI9 pins for UART (GPS)\n");
+
+  rzv_gpioconfig(BOARD_P8_2_GPIO);
+  rzv_gpioconfig(BOARD_P8_3_GPIO);
+
+  sinfo("SCI9 UART pins configured\n");
 #endif
 }
 

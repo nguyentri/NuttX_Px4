@@ -260,6 +260,42 @@ void rzv_register_protect_enable(rzv_reg_protect_t regs_to_protect)
     }
 }
 
+extern uint32_t _vectors;  /* from arm_vectortab.S, placed by linker @ ITCM 0 */
+
+static inline void rzv_set_vbar(void)
+{
+  uint32_t vbar = (uint32_t)(uintptr_t)&_vectors;
+  uint32_t sctlr;
+
+  DEBUGASSERT((vbar & 0x1F) == 0);
+  __asm__ __volatile__
+  (
+    "mcr p15, 0, %0, c12, c0, 0\n"   /* VBAR */
+    :: "r" (vbar) : "memory"
+  );
+
+  __asm__ __volatile__
+  (
+    "mrc p15, 0, %0, c1, c0, 0"
+    : "=r" (sctlr)
+    :
+    : "memory"
+  );
+
+  sctlr &= ~SCTLR_V;
+
+  __asm__ __volatile__
+  (
+    "mcr p15, 0, %0, c1, c0, 0"
+    :
+    : "r" (sctlr)
+    : "memory"
+  );
+
+  ARM_DSB();
+  ARM_ISB();
+}
+
 /****************************************************************************
  * Name: arm_boot
  *
@@ -273,6 +309,9 @@ void arm_boot(void)
 {
   /* Disable interrupts during early boot */
   __asm__ __volatile__ ("cpsid i" : : : "memory");
+
+  /* Route exceptions to linker-placed _vectors at ITCM 0 */
+  rzv_set_vbar();
 
   showprogress('A');
 

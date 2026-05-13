@@ -114,6 +114,11 @@ ifeq ($(CONFIG_RZV_GTM),y)
 CSRCS += rzv2h_timer.c
 endif
 
+# XSPI LittleFS parameter storage
+ifeq ($(CONFIG_RDK_RZV2H_XSPI_PARAMFS),y)
+CSRCS += rzv2h_xspi_paramfs.c
+endif
+
 ############################################################################
 # Example applications
 ############################################################################

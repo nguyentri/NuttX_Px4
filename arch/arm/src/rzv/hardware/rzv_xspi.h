@@ -59,8 +59,9 @@
 #define RZV_XSPI_BMCFG_OFFSET                            0x0048  /* BMCFG */
 #define RZV_XSPI_BMCFGCH1_OFFSET                         0x004C  /* BMCFGCH1 */
 #define RZV_XSPI_BMCTL0_OFFSET                           0x0078  /* BMCTL0 */
-#define RZV_XSPI_CMCTL_OFFSET                            0x007C  /* CMCTL */
-#define RZV_XSPI_CMCTLCH1_OFFSET                         0x0080  /* CMCTLCH1 */
+#define RZV_XSPI_BMCTL1_OFFSET                           0x007C  /* BMCTL1 */
+#define RZV_XSPI_CMCTL_OFFSET                            0x0080  /* CMCTL */
+#define RZV_XSPI_CMCTLCH1_OFFSET                         0x0084  /* CMCTLCH1 */
 #define RZV_XSPI_LIOCTL_OFFSET                           0x00DC  /* LIOCTL */
 #define RZV_XSPI_VERSTT_OFFSET                           0x0114  /* VERSTT */
 #define RZV_XSPI_COMSTT_OFFSET                           0x0118  /* COMSTT */
@@ -81,6 +82,7 @@
 #define RZV_XSPI_BMCFG                               (RZV_XSPI_BASE + RZV_XSPI_BMCFG_OFFSET)
 #define RZV_XSPI_BMCFGCH1                            (RZV_XSPI_BASE + RZV_XSPI_BMCFGCH1_OFFSET)
 #define RZV_XSPI_BMCTL0                              (RZV_XSPI_BASE + RZV_XSPI_BMCTL0_OFFSET)
+#define RZV_XSPI_BMCTL1                              (RZV_XSPI_BASE + RZV_XSPI_BMCTL1_OFFSET)
 #define RZV_XSPI_CMCTL                               (RZV_XSPI_BASE + RZV_XSPI_CMCTL_OFFSET)
 #define RZV_XSPI_CMCTLCH1                            (RZV_XSPI_BASE + RZV_XSPI_CMCTLCH1_OFFSET)
 #define RZV_XSPI_LIOCTL                              (RZV_XSPI_BASE + RZV_XSPI_LIOCTL_OFFSET)

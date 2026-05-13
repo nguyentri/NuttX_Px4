@@ -84,9 +84,12 @@
 #define RZV_CPG_CLK_GPT5            (4 << 16 | 5)   /* GPT5 clock */
 #define RZV_CPG_CLK_GPT6            (4 << 16 | 6)   /* GPT6 clock */
 #define RZV_CPG_CLK_GPT7            (4 << 16 | 7)   /* GPT7 clock */
-#define RZV_CPG_CLK_OSTM0           (4 << 16 | 8)   /* OSTM0 clock */
-#define RZV_CPG_CLK_OSTM1           (4 << 16 | 9)   /* OSTM1 clock */
-#define RZV_CPG_CLK_OSTM2           (4 << 16 | 10)  /* OSTM2 clock */
+#define RZV_CPG_CLK_GPT8            (4 << 16 | 8)   /* GPT8 clock */
+#define RZV_CPG_CLK_GPT9            (4 << 16 | 9)   /* GPT9 clock */
+#define RZV_CPG_CLK_GPT10           (4 << 16 | 10)  /* GPT10 clock */
+#define RZV_CPG_CLK_OSTM0           (4 << 16 | 11)  /* OSTM0 clock */
+#define RZV_CPG_CLK_OSTM1           (4 << 16 | 12)  /* OSTM1 clock */
+#define RZV_CPG_CLK_OSTM2           (4 << 16 | 13)  /* OSTM2 clock */
 
 /* GTM (OSTM) clocks - aliases for compatibility */
 #define RZV_CPG_CLK_GTM0            RZV_CPG_CLK_OSTM0  /* GTM0 = OSTM0 */

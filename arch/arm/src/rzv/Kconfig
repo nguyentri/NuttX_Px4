@@ -63,6 +63,9 @@ config ARCH_CHIP_R9A09G057
    select RZV_HAVE_GPT5
    select RZV_HAVE_GPT6
    select RZV_HAVE_GPT7
+   select RZV_HAVE_GPT8
+   select RZV_HAVE_GPT9
+   select RZV_HAVE_GPT10
 
 endchoice
 
@@ -394,6 +397,18 @@ config RZV_HAVE_GPT6
    default n
 
 config RZV_HAVE_GPT7
+   bool
+   default n
+
+config RZV_HAVE_GPT8
+   bool
+   default n
+
+config RZV_HAVE_GPT9
+   bool
+   default n
+
+config RZV_HAVE_GPT10
    bool
    default n
 
@@ -1084,6 +1099,27 @@ config RZV_GPT7
    depends on RZV_HAVE_GPT7 && RZV_GPT
    ---help---
      Enable GPT7 channel.
+
+config RZV_GPT8
+   bool "GPT8"
+   default n
+   depends on RZV_HAVE_GPT8 && RZV_GPT
+   ---help---
+     Enable GPT8 channel.
+
+config RZV_GPT9
+   bool "GPT9"
+   default n
+   depends on RZV_HAVE_GPT9 && RZV_GPT
+   ---help---
+     Enable GPT9 channel.
+
+config RZV_GPT10
+   bool "GPT10"
+   default n
+   depends on RZV_HAVE_GPT10 && RZV_GPT
+   ---help---
+     Enable GPT10 channel.
 
 config RZV_ADC
    bool "ADC support"

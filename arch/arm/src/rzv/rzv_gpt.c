@@ -158,6 +158,9 @@ static const uintptr_t g_rzv_gpt_base[RZV_GPT_MAX_CHANNELS] =
   RZV_GPT5_BASE,
   RZV_GPT6_BASE,
   RZV_GPT7_BASE,
+  RZV_GPT8_BASE,
+  RZV_GPT9_BASE,
+  RZV_GPT10_BASE,
 };
 
 static const uint32_t g_rzv_gpt_clkid[RZV_GPT_MAX_CHANNELS] =
@@ -170,6 +173,9 @@ static const uint32_t g_rzv_gpt_clkid[RZV_GPT_MAX_CHANNELS] =
   RZV_CPG_CLK_GPT5,
   RZV_CPG_CLK_GPT6,
   RZV_CPG_CLK_GPT7,
+  RZV_CPG_CLK_GPT8,
+  RZV_CPG_CLK_GPT9,
+  RZV_CPG_CLK_GPT10,
 };
 
 static const struct rzv_gpt_divider_s g_rzv_gpt_dividers[] =
@@ -201,6 +207,9 @@ static const uint16_t g_rzv_gpt_overflow_event[RZV_GPT_MAX_CHANNELS] =
   RZV_ELC_GPT_U0_GPT_ELCOVF_5,
   RZV_ELC_GPT_U0_GPT_ELCOVF_6,
   RZV_ELC_GPT_U0_GPT_ELCOVF_7,
+  RZV_ELC_GPT_U1_GPT_ELCOVF_0,
+  RZV_ELC_GPT_U1_GPT_ELCOVF_1,
+  RZV_ELC_GPT_U1_GPT_ELCOVF_2,
 };
 #endif
 
@@ -251,6 +260,15 @@ static struct rzv_gpt_lowerhalf_s g_rzv_gpt6 = RZV_GPT_LOWER_INIT(6);
 #endif
 #ifdef CONFIG_RZV_GPT7
 static struct rzv_gpt_lowerhalf_s g_rzv_gpt7 = RZV_GPT_LOWER_INIT(7);
+#endif
+#ifdef CONFIG_RZV_GPT8
+static struct rzv_gpt_lowerhalf_s g_rzv_gpt8 = RZV_GPT_LOWER_INIT(8);
+#endif
+#ifdef CONFIG_RZV_GPT9
+static struct rzv_gpt_lowerhalf_s g_rzv_gpt9 = RZV_GPT_LOWER_INIT(9);
+#endif
+#ifdef CONFIG_RZV_GPT10
+static struct rzv_gpt_lowerhalf_s g_rzv_gpt10 = RZV_GPT_LOWER_INIT(10);
 #endif
 
 /****************************************************************************
@@ -395,6 +413,11 @@ static uint32_t gpt_compose_gtior(uint32_t duty_a_counts,
 #ifdef CONFIG_PWM_PULSECOUNT
 static int rzv_gpt_attach_irq(FAR struct rzv_gpt_lowerhalf_s *priv)
 {
+  if (g_rzv_gpt_overflow_event[priv->channel] == 0)
+    {
+      return -ENOTSUP;
+    }
+
   if (priv->irq >= 0)
     {
       return OK;
@@ -706,6 +729,18 @@ FAR struct pwm_lowerhalf_s *rzv_gpt_initialize(int channel)
 #ifdef CONFIG_RZV_GPT7
       case 7:
         return &g_rzv_gpt7.dev;
+#endif
+#ifdef CONFIG_RZV_GPT8
+      case 8:
+        return &g_rzv_gpt8.dev;
+#endif
+#ifdef CONFIG_RZV_GPT9
+      case 9:
+        return &g_rzv_gpt9.dev;
+#endif
+#ifdef CONFIG_RZV_GPT10
+      case 10:
+        return &g_rzv_gpt10.dev;
 #endif
       default:
         return NULL;

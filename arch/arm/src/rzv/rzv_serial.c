@@ -69,7 +69,7 @@
 #  define CONFIG_RZV_SCI_FIFO_RX_TRIGGER 1  /* Default: trigger on 1 byte */
 #endif
 #ifndef CONFIG_RZV_SCI_FIFO_TX_TRIGGER
-#  define CONFIG_RZV_SCI_FIFO_TX_TRIGGER 15 /* Default: trigger when ≤15 in FIFO */
+#  define CONFIG_RZV_SCI_FIFO_TX_TRIGGER 15 /* Default: trigger when <=15 in FIFO */
 #endif
 #endif
 
@@ -1691,7 +1691,7 @@ static int rzv_setup(struct uart_dev_s *dev)
 
   for (volatile int i = 0; i < 1000; i++)
     {
-      /* Delay ~10 μs at typical CPU frequencies */
+      /* Delay ~10 us at typical CPU frequencies */
     }
 
   /* Disable transmit and receive */
@@ -1795,7 +1795,7 @@ static int rzv_setup(struct uart_dev_s *dev)
 
   while ((rzv_sci_getreg(priv, RZV_SCI_CESR_OFFSET) & SCI_CESR_RIST) == 0)
     {
-      /* Polling loop - typically completes in 1-2 μs */
+      /* Polling loop - typically completes in 1-2 us */
     }
 
   /* Configure FIFO if supported (RZV2H SCI-B has 16-byte FIFOs) */
@@ -2353,38 +2353,74 @@ void arm_earlyserialinit(void)
 
 void arm_serialinit(void)
 {
+#ifdef CONFIG_ARCH_BOARD_RDK_RZV2H
 #ifdef CONSOLE_DEV
   uart_register("/dev/console", &CONSOLE_DEV);
 #endif
-#ifdef TTYS0_DEV
+#ifdef CONFIG_RZV_SCI0
+  uart_register("/dev/ttyS0", &g_sci0port);
+#endif
+#ifdef CONFIG_RZV_SCI1
+  uart_register("/dev/ttyS1", &g_sci1port);
+#endif
+#ifdef CONFIG_RZV_SCI2
+  uart_register("/dev/ttyS2", &g_sci2port);
+#endif
+#ifdef CONFIG_RZV_SCI3
+  uart_register("/dev/ttyS3", &g_sci3port);
+#endif
+#ifdef CONFIG_RZV_SCI4
+  uart_register("/dev/ttyS4", &g_sci4port);
+#endif
+#ifdef CONFIG_RZV_SCI5
+  uart_register("/dev/ttyS5", &g_sci5port);
+#endif
+#ifdef CONFIG_RZV_SCI6
+  uart_register("/dev/ttyS6", &g_sci6port);
+#endif
+#ifdef CONFIG_RZV_SCI7
+  uart_register("/dev/ttyS7", &g_sci7port);
+#endif
+#ifdef CONFIG_RZV_SCI8
+  uart_register("/dev/ttyS8", &g_sci8port);
+#endif
+#ifdef CONFIG_RZV_SCI9
+  uart_register("/dev/ttyS9", &g_sci9port);
+#endif
+#else
+#  ifdef CONSOLE_DEV
+  uart_register("/dev/console", &CONSOLE_DEV);
+#  endif
+#  ifdef TTYS0_DEV
   uart_register("/dev/ttyS0", &TTYS0_DEV);
-#endif
-#ifdef TTYS1_DEV
+#  endif
+#  ifdef TTYS1_DEV
   uart_register("/dev/ttyS1", &TTYS1_DEV);
-#endif
-#ifdef TTYS2_DEV
+#  endif
+#  ifdef TTYS2_DEV
   uart_register("/dev/ttyS2", &TTYS2_DEV);
-#endif
-#ifdef TTYS3_DEV
+#  endif
+#  ifdef TTYS3_DEV
   uart_register("/dev/ttyS3", &TTYS3_DEV);
-#endif
-#ifdef TTYS4_DEV
+#  endif
+#  ifdef TTYS4_DEV
   uart_register("/dev/ttyS4", &TTYS4_DEV);
-#endif
-#ifdef TTYS5_DEV
+#  endif
+#  ifdef TTYS5_DEV
   uart_register("/dev/ttyS5", &TTYS5_DEV);
-#endif
-#ifdef TTYS6_DEV
+#  endif
+#  ifdef TTYS6_DEV
   uart_register("/dev/ttyS6", &TTYS6_DEV);
-#endif
-#ifdef TTYS7_DEV
+#  endif
+#  ifdef TTYS7_DEV
   uart_register("/dev/ttyS7", &TTYS7_DEV);
-#endif
-#ifdef TTYS8_DEV
+#  endif
+#  ifdef TTYS8_DEV
   uart_register("/dev/ttyS8", &TTYS8_DEV);
-#endif
-#ifdef TTYS9_DEV
+#  endif
+#  ifdef TTYS9_DEV
   uart_register("/dev/ttyS9", &TTYS9_DEV);
+#  endif
 #endif
 }
 

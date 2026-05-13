@@ -70,6 +70,10 @@ if(CONFIG_RZV_ADC)
   list(APPEND SRCS rzv2h_adc.c)
 endif()
 
+if(CONFIG_RDK_RZV2H_XSPI_PARAMFS)
+  list(APPEND SRCS rzv2h_xspi_paramfs.c)
+endif()
+
 # Example applications
 if(CONFIG_RZV2H_SPI_LOOPBACK_EXAMPLE)
   list(APPEND SRCS rzv2h_spi_loopback.c)

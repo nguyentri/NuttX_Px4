@@ -53,6 +53,15 @@ config RZV2H_PWM_ONESHOT_EXAMPLE
       Enable GPT PWM oneshot mode example for verifying oneshot
       functionality on RDK-RZV2H board.
 
+config RDK_RZV2H_XSPI_PARAMFS
+    bool "RDK-RZV2H XSPI LittleFS parameter storage"
+    default n
+    depends on ARCH_BOARD_RDK_RZV2H && FS_LITTLEFS
+    select MTD
+    ---help---
+      Enable the CR8-owned XSPI parameter MTD and mount it as LittleFS at
+      /fs. PX4 stores parameters at /fs/params when this option is enabled.
+
 config RZV2H_ADC_EXAMPLE
     bool "ADC test example"
     default n

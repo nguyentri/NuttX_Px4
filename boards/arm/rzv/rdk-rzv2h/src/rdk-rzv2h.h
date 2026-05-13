@@ -178,6 +178,18 @@ int board_timer_initialize(void);
 #endif
 
 /****************************************************************************
+ * Name: rzv2h_xspi_paramfs_initialize
+ *
+ * Description:
+ *   Initialize XSPI-backed LittleFS parameter storage.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RDK_RZV2H_XSPI_PARAMFS
+int rzv2h_xspi_paramfs_initialize(void);
+#endif
+
+/****************************************************************************
  * Name: rzv2h_ether_initialize
  *
  * Description:

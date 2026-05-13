@@ -213,6 +213,16 @@ int board_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_RDK_RZV2H_XSPI_PARAMFS
+  /* Mount CR8-owned XSPI parameter storage at /fs. */
+
+  ret = rzv2h_xspi_paramfs_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize XSPI paramfs: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_RZV_SCI_SPI
   /* Initialize SCI_B SPI buses */
 

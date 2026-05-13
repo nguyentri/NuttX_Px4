@@ -40,9 +40,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef BOARD_PWM_CH0_GPIO
-#  error "BOARD_PWM_CH0_GPIO must be defined when CONFIG_RZV_PWM is enabled"
-#endif
+#define RZV2H_PWM_CHANNEL_COUNT 4
+
+struct rzv2h_pwm_channel_s
+{
+  const char *devpath;
+  int         gpt_channel;
+  uint32_t    gpio;
+};
 
 /****************************************************************************
  * Private Data
@@ -63,31 +68,43 @@
 
 int rzv2h_pwm_setup(void)
 {
+  static const struct rzv2h_pwm_channel_s channels[RZV2H_PWM_CHANNEL_COUNT] =
+  {
+    { "/dev/pwm0", 6,  BOARD_PWM_CH0_GPIO },
+    { "/dev/pwm1", 7,  BOARD_PWM_CH1_GPIO },
+    { "/dev/pwm2", 9,  BOARD_PWM_CH2_GPIO },
+    { "/dev/pwm3", 10, BOARD_PWM_CH3_GPIO },
+  };
+
   static bool initialized;
   FAR struct pwm_lowerhalf_s *pwm;
   int ret;
+  int i;
 
   if (initialized)
     {
       return OK;
     }
 
-  ret = rzv_gpioconfig(BOARD_PWM_CH0_GPIO);
-  if (ret < 0)
+  for (i = 0; i < RZV2H_PWM_CHANNEL_COUNT; i++)
     {
-      return ret;
-    }
+      ret = rzv_gpioconfig(channels[i].gpio);
+      if (ret < 0)
+        {
+          return ret;
+        }
 
-  pwm = rzv_gpt_initialize(0);
-  if (pwm == NULL)
-    {
-      return -ENODEV;
-    }
+      pwm = rzv_gpt_initialize(channels[i].gpt_channel);
+      if (pwm == NULL)
+        {
+          return -ENODEV;
+        }
 
-  ret = pwm_register("/dev/pwm0", pwm);
-  if (ret < 0)
-    {
-      return ret;
+      ret = pwm_register(channels[i].devpath, pwm);
+      if (ret < 0)
+        {
+          return ret;
+        }
     }
 
   initialized = true;

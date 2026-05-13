@@ -1063,6 +1063,6 @@
 #define RZV_GPT_CHANNEL_7          7
 
 /* Maximum number of GPT channels */
-#define RZV_GPT_MAX_CHANNELS       16
+#define RZV_GPT_MAX_CHANNELS       11
 
 #endif /* __ARCH_ARM_SRC_RZV_HARDWARE_RZV_GPT_H */
