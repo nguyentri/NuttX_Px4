@@ -194,7 +194,6 @@ static inline void rzv_enable_caches(void)
 
 void rzv_ram_init(void)
 {
-  const uint32_t *src;
   uint32_t *dest;
 
   /* Clear .bss section - zero-initialized data */
@@ -203,14 +202,10 @@ void rzv_ram_init(void)
       *dest++ = 0;
     }
 
-  /* Copy .data section from flash to RAM
-   * Note: For RZV2H, data may already be in ITCM/DTCM from loader.
-   * The linker script handles the load/run addresses properly.
+  /* The CR8 linker script emits Renesas loader metadata for ITCM/SRAM/DDR
+   * copy ranges.  Those ranges are loaded before __start; _sdata/_edata are
+   * image metadata addresses, not a single RAM .data run range.
    */
-  for (src = &_eronly, dest = (uint32_t *)&_sdata; dest < (uint32_t *)&_edata; )
-    {
-      *dest++ = *src++;
-    }
 
   ARM_DSB();
 }

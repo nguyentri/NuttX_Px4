@@ -490,10 +490,13 @@
 #define RZV_ELC_DRP_AI_ELCO                           (0x1C6)  /* DRP-AI Interrupt signal for ELC - Event 0x1C6 */
 #define RZV_ELC_DRP_AI_MAC_ELCO                       (0x1C7)  /* DRP-AI Interrupt signal for ELC - Event 0x1C7 */
 
-/* INTC INTR8SEL registers provide 96 configurable slots (0-95)
- * mapping to GIC SPI interrupts 32-127 */
-#define RZV_IRQ_ICU_SLOTS                             (96)      /* Hardware-limited INTR8SEL slots */
-#define RZV_IRQ_GIC_SIZE                              (224)     /* Number of interrupts for RZ/V2H */
+/* INTC INTR8SEL0-42 provide 129 configurable event-select fields.
+ * Keep the IRQ table large enough for the CR8 vector IDs used by Renesas FSP
+ * generated vector_data.c, which currently reaches IRQ 455.
+ */
+
+#define RZV_IRQ_ICU_SLOTS                             (129)
+#define RZV_IRQ_GIC_SIZE                              (480)
 
 /* Total number of IRQ numbers */
 #define RZV_IRQ_NEXTINT                             RZV_IRQ_GIC_SIZE

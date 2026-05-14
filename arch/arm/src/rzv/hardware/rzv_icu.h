@@ -18,15 +18,16 @@
  *
  ****************************************************************************/
 
-/* RZV2H ICU (Interrupt Control Unit) Register Definitions
+/* RZV2H external interrupt register definitions
  *
- * The ICU module handles external interrupt signal conditioning:
+ * RZ/V2H keeps these external interrupt status/configuration registers in
+ * the INTC block.  Keep the historical RZV_ICU_* names for existing callers,
+ * but use the CMSIS/FSP R_INTC base address.
+ *
+ * The registers handle external interrupt signal conditioning:
  * - NMI: Non-Maskable Interrupt
  * - IRQ0-15: External interrupt pins with configurable detection
  * - TINT0-31: External trigger input pins
- *
- * This is separate from INTC (Interrupt Controller) which handles
- * event routing to the GIC via INTR8SEL/INTM33SEL registers.
  */
 
 #ifndef __ARCH_ARM_SRC_RZV_HARDWARE_RZV_ICU_H
@@ -42,9 +43,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* ICU Base Address */
+/* INTC Base Address */
 
-#define RZV_ICU_BASE                0x10410000
+#define RZV_ICU_BASE                0x10400000
 
 /* NMI Status and Control Registers */
 

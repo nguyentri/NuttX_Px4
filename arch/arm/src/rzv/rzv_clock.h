@@ -124,6 +124,7 @@
 
 #define RZV_CPG_MAX_CLKON     24    /* CLKON0-CLKON24 */
 #define RZV_CPG_MAX_RST       17    /* RST0-RST17 */
+#define RZV_CPG_MAX_RSTMON    8     /* RSTMON0-RSTMON8 */
 
 /* Board-specific clock frequencies (Hz) ************************************/
 /* These values are derived from the Renesas FSP clock configuration tool

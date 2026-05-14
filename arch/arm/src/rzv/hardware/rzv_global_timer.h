@@ -31,10 +31,34 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* GLOBAL_TIMETYPE Register Offsets ***************************************/
+/* GLOBAL_TIMER Base Address **********************************************/
 
-#define RZV_GLOBAL_TIMETYPE_GTCTLR_OFFSET                0x0000  /* Global Timer Control Register */
-#define RZV_GLOBAL_TIMETYPE_GTISR_OFFSET                 0x0004  /* Global Timer Interrupt Status Register */
+#ifndef RZV_GLOBAL_TIMER_BASE
+#  define RZV_GLOBAL_TIMER_BASE                         0x12C10200
+#endif
+
+/* GLOBAL_TIMER Register Offsets ******************************************/
+
+#define RZV_GLOBAL_TIMER_GTCR_L_OFFSET                  0x0000  /* Counter low */
+#define RZV_GLOBAL_TIMER_GTCR_H_OFFSET                  0x0004  /* Counter high */
+#define RZV_GLOBAL_TIMER_GTCTLR_OFFSET                  0x0008  /* Control */
+#define RZV_GLOBAL_TIMER_GTISR_OFFSET                   0x000C  /* Interrupt status */
+#define RZV_GLOBAL_TIMER_CVR_L_OFFSET                   0x0010  /* Compare low */
+#define RZV_GLOBAL_TIMER_CVR_H_OFFSET                   0x0014  /* Compare high */
+#define RZV_GLOBAL_TIMER_AUTO_INCR_OFFSET               0x0018  /* Auto increment */
+
+#define RZV_GLOBAL_TIMER_GTCR_L                         (RZV_GLOBAL_TIMER_BASE + RZV_GLOBAL_TIMER_GTCR_L_OFFSET)
+#define RZV_GLOBAL_TIMER_GTCR_H                         (RZV_GLOBAL_TIMER_BASE + RZV_GLOBAL_TIMER_GTCR_H_OFFSET)
+#define RZV_GLOBAL_TIMER_GTCTLR                         (RZV_GLOBAL_TIMER_BASE + RZV_GLOBAL_TIMER_GTCTLR_OFFSET)
+#define RZV_GLOBAL_TIMER_GTISR                          (RZV_GLOBAL_TIMER_BASE + RZV_GLOBAL_TIMER_GTISR_OFFSET)
+#define RZV_GLOBAL_TIMER_CVR_L                          (RZV_GLOBAL_TIMER_BASE + RZV_GLOBAL_TIMER_CVR_L_OFFSET)
+#define RZV_GLOBAL_TIMER_CVR_H                          (RZV_GLOBAL_TIMER_BASE + RZV_GLOBAL_TIMER_CVR_H_OFFSET)
+#define RZV_GLOBAL_TIMER_AUTO_INCR                      (RZV_GLOBAL_TIMER_BASE + RZV_GLOBAL_TIMER_AUTO_INCR_OFFSET)
+
+/* Backward-compatible names. */
+
+#define RZV_GLOBAL_TIMETYPE_GTCTLR_OFFSET               RZV_GLOBAL_TIMER_GTCTLR_OFFSET
+#define RZV_GLOBAL_TIMETYPE_GTISR_OFFSET                RZV_GLOBAL_TIMER_GTISR_OFFSET
 
 /* GLOBAL_TIMETYPE GTCTLR Register Bit Definitions *******************/
 

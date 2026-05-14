@@ -293,9 +293,13 @@ static void rzv_cpg_dump_registers(uint32_t domain, const char *context)
   if (domain <= RZV_CPG_MAX_RST)
     {
       rst = rzv_cpg_getreg(RZV_CPG_RST(domain));
-      rstmon = rzv_cpg_getreg(RZV_CPG_RSTMON(domain));
       clkerr("  RST%u    = 0x%08x\n", domain, rst);
-      clkerr("  RSTMON%u = 0x%08x\n", domain, rstmon);
+
+      if (domain <= RZV_CPG_MAX_RSTMON)
+        {
+          rstmon = rzv_cpg_getreg(RZV_CPG_RSTMON(domain));
+          clkerr("  RSTMON%u = 0x%08x\n", domain, rstmon);
+        }
     }
 }
 

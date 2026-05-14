@@ -312,6 +312,11 @@ int rzv_icu_set_event(int icu_slot, int event)
       return -EINVAL;
     }
 
+  if (event < 0 || event > RZV_INTC_INTR8SEL_MASK)
+    {
+      return -EINVAL;
+    }
+
   /* Calculate which INTR8SEL register and which slot within it
    * Each INTR8SEL register has 3 slots of 10 bits each
    */

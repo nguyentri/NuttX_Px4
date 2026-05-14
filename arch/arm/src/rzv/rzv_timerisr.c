@@ -34,7 +34,6 @@
 
 #include "arm_internal.h"
 #include "rzv_clock.h"
-#include "rzv_icu.h"
 #include "hardware/rzv_private_timer.h"
 
 /****************************************************************************
@@ -48,8 +47,15 @@
 #  define TIMER_PRESCALER 0
 #endif
 
-/* TIMER_FREQ will be computed at runtime from peripheral clock */
-#define TIMER_FREQ_RUNTIME() rzv_get_pclk_frequency()
+/* The CR8 private timer is a GIC private peripheral interrupt (PPI[2],
+ * INTID 29).  It is not routed through the RZ/V2H INTC INTR8SEL slots.
+ */
+
+#define RZV_IRQ_PRIVATE_TIMER 29
+
+/* The private timer is in the CR8 private peripheral block, not on P0CLK. */
+
+#define TIMER_FREQ_RUNTIME() rzv_get_cpu_frequency()
 
 /****************************************************************************
  * Private Data
@@ -138,12 +144,14 @@ void up_timer_initialize(void)
 
   /* Attach the timer interrupt handler */
 
-  ret = rzv_icu_attach(RZV_ELC_CMTW_CH0_CMT2_ELCCMP, rzv_timerisr, NULL, true);
+  ret = irq_attach(RZV_IRQ_PRIVATE_TIMER, rzv_timerisr, NULL);
   if (ret < 0)
     {
         tmrerr("ERROR: Failed to attach timer ISR: %d\n", ret);
         return;
     }
+
+  up_enable_irq(RZV_IRQ_PRIVATE_TIMER);
 
   /* Enable the timer */
 

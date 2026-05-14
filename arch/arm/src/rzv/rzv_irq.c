@@ -29,7 +29,6 @@
 #include <debug.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include "gic.h"
 #include "chip.h"
 #include "arm_internal.h"
 
@@ -49,11 +48,16 @@ volatile uint32_t *g_current_regs[1];
 #define GIC_NUM_SGI           16
 #define GIC_NUM_PPI           16
 #define GIC_NUM_SPI           (GIC_NUM_INTERRUPTS - GIC_NUM_SGI - GIC_NUM_PPI)
+#define GIC_SPURIOUS_INTID    1023
 
 /* Default priority for all interrupts */
 #ifndef RZV_GIC_DEFAULT_PRIORITY
 #  define RZV_GIC_DEFAULT_PRIORITY  0xa0
 #endif
+
+#define RZV_GIC_REG_INDEX1(irq)  ((irq) >> 5)
+#define RZV_GIC_REG_INDEX4(irq)  ((irq) >> 2)
+#define RZV_GIC_REG_INDEX16(irq) ((irq) >> 4)
 
 /****************************************************************************
  * Private Functions
@@ -75,7 +79,8 @@ static void rzv_gic_initialize(void)
   putreg32(0, RZV_INTC_GIC_GICD_ICDDCR);
 
   /* Get number of interrupt lines */
-  num_interrupts = ((getreg32(GIC_ICDICTR) & INTC_GIC_GICD_ICDICTR_IT_MASK) + 1) * 32;
+  num_interrupts = ((getreg32(RZV_INTC_GIC_GICD_ICDICTR) &
+                     INTC_GIC_GICD_ICDICTR_IT_MASK) + 1) * 32;
 
   if (num_interrupts > GIC_NUM_INTERRUPTS)
     {
@@ -85,8 +90,8 @@ static void rzv_gic_initialize(void)
   /* Disable all interrupts and clear all pending bits */
   for (i = 0; i < num_interrupts; i += 32)
     {
-      putreg32(0xffffffff, GIC_ICDICER(i / 32));
-      putreg32(0xffffffff, GIC_ICDICPR(i / 32));
+      putreg32(0xffffffff, RZV_INTC_GIC_GICD_ICDICER(RZV_GIC_REG_INDEX1(i)));
+      putreg32(0xffffffff, RZV_INTC_GIC_GICD_ICDICPR(RZV_GIC_REG_INDEX1(i)));
     }
 
   /* Set all interrupts to default priority */
@@ -96,34 +101,34 @@ static void rzv_gic_initialize(void)
                RZV_GIC_DEFAULT_PRIORITY << 16 |
                RZV_GIC_DEFAULT_PRIORITY << 8 |
                RZV_GIC_DEFAULT_PRIORITY,
-               GIC_ICDIPR(i / 4));
+               RZV_INTC_GIC_GICD_ICDIPR(RZV_GIC_REG_INDEX4(i)));
     }
 
   /* Set all interrupts to target CPU0 */
   for (i = 32; i < num_interrupts; i += 4)
     {
-      putreg32(0x01010101, GIC_ICDIPTR(i / 4));
+      putreg32(0x01010101, RZV_INTC_GIC_GICD_ICDIPTR(RZV_GIC_REG_INDEX4(i)));
     }
 
   /* Set all interrupts to level-sensitive */
   for (i = 32; i < num_interrupts; i += 16)
     {
-      putreg32(0, GIC_ICDICFR(i / 16));
+      putreg32(0, RZV_INTC_GIC_GICD_ICDICFR(RZV_GIC_REG_INDEX16(i)));
     }
 
   /* Enable distributor */
-  putreg32(GIC_ICCICR_ENABLE, RZV_INTC_GIC_GICD_ICDDCR);
+  putreg32(INTC_GIC_GICD_ICDDCR_EN, RZV_INTC_GIC_GICD_ICDDCR);
 
   /* Initialize CPU interface */
 
   /* Set priority mask to allow all interrupts */
-  putreg32(0xff, GIC_ICCPMR);
+  putreg32(0xff, RZV_INTC_GIC_GICC_ICCPMR);
 
   /* Set binary point to 0 (no preemption grouping) */
-  putreg32(0, GIC_ICCBPR);
+  putreg32(0, RZV_INTC_GIC_GICC_ICCBPR);
 
   /* Enable CPU interface */
-  putreg32(GIC_ICCICR_ENABLE, GIC_ICCICR);
+  putreg32(INTC_GIC_GICC_ICCICR_EN, RZV_INTC_GIC_GICC_ICCICR);
 }
 
 /****************************************************************************
@@ -173,7 +178,7 @@ void up_disable_irq(int irq)
   if (irq >= 0 && irq < GIC_NUM_INTERRUPTS)
     {
       /* Calculate register address and bit position */
-      regaddr = GIC_ICDICER(irq / 32);
+      regaddr = RZV_INTC_GIC_GICD_ICDICER(RZV_GIC_REG_INDEX1(irq));
       bit = 1 << (irq % 32);
 
       /* Disable the interrupt */
@@ -200,7 +205,7 @@ void up_enable_irq(int irq)
   if (irq >= 0 && irq < GIC_NUM_INTERRUPTS)
     {
       /* Calculate register address and bit position */
-      regaddr = GIC_ICDISER(irq / 32);
+      regaddr = RZV_INTC_GIC_GICD_ICDISER(RZV_GIC_REG_INDEX1(irq));
       bit = 1 << (irq % 32);
 
       /* Enable the interrupt */
@@ -227,7 +232,7 @@ void up_ack_irq(int irq)
    */
   if (irq >= 0 && irq < GIC_NUM_INTERRUPTS)
     {
-      putreg32(irq, GIC_ICCEOIR);
+      putreg32(irq, RZV_INTC_GIC_GICC_ICCEOIR);
     }
 }
 
@@ -249,7 +254,7 @@ int up_prioritize_irq(int irq, int priority)
   if (irq >= 0 && irq < GIC_NUM_INTERRUPTS)
     {
       /* Calculate register address and bit shift */
-      regaddr = GIC_ICDIPR(irq / 4);
+      regaddr = RZV_INTC_GIC_GICD_ICDIPR(RZV_GIC_REG_INDEX4(irq));
       shift = (irq % 4) * 8;
 
       /* Validate priority (GIC uses 8 bits, but typically only top bits
@@ -294,17 +299,17 @@ uint32_t *arm_decodeirq(uint32_t *regs)
   int irq;
 
   /* Read the interrupt acknowledge register and extract the IRQ number */
-  regval = getreg32(GIC_ICCIAR);
+  regval = getreg32(RZV_INTC_GIC_GICC_ICCIAR);
   irq = regval & INTC_GIC_GICC_ICCIAR_ACKINTID_MASK;
 
   /* Check for spurious interrupt */
-  if (irq < GIC_NUM_INTERRUPTS)
+  if (irq < GIC_NUM_INTERRUPTS && irq != GIC_SPURIOUS_INTID)
     {
       /* Dispatch the interrupt */
       regs = arm_doirq(irq, regs);
 
       /* Write to end of interrupt register */
-      putreg32(regval, GIC_ICCEOIR);
+      putreg32(regval, RZV_INTC_GIC_GICC_ICCEOIR);
     }
 
   return regs;
