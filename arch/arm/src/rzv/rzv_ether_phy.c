@@ -26,6 +26,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <inttypes.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
@@ -42,22 +43,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* MDIO Address Register Bits */
-
-#define MDIO_ADDR_BUSY              (1 << 0)   /* MII Busy */
-#define MDIO_ADDR_WRITE             (1 << 2)   /* MII Write */
-#define MDIO_ADDR_READ              (1 << 3)   /* MII Read */
-#define MDIO_ADDR_CLK_SHIFT         8
-#define MDIO_ADDR_CLK_MASK          (0xf << MDIO_ADDR_CLK_SHIFT)
-#define MDIO_ADDR_REG_SHIFT         16
-#define MDIO_ADDR_REG_MASK          (0x1f << MDIO_ADDR_REG_SHIFT)
-#define MDIO_ADDR_PHY_SHIFT         21
-#define MDIO_ADDR_PHY_MASK          (0x1f << MDIO_ADDR_PHY_SHIFT)
-
-/* MDIO Clock Range for 150-250 MHz */
-
-#define MDIO_CLK_150_250MHZ         (1 << MDIO_ADDR_CLK_SHIFT)
 
 /* Timeout values */
 
@@ -85,7 +70,7 @@ static int rzv_phy_mdio_wait(uintptr_t base)
   while (timeout > 0)
     {
       regval = getreg32(base + RZV_ETH_MAC_MII_ADDR);
-      if ((regval & MDIO_ADDR_BUSY) == 0)
+      if ((regval & MAC_MII_ADDR_GB) == 0)
         {
           return OK;
         }
@@ -126,11 +111,11 @@ int rzv_phy_read(uintptr_t base, uint8_t phyaddr, uint8_t regaddr,
 
   /* Build MDIO address register value for read operation */
 
-  regval = MDIO_ADDR_BUSY |
-           MDIO_ADDR_READ |
-           MDIO_CLK_150_250MHZ |
-           ((phyaddr << MDIO_ADDR_PHY_SHIFT) & MDIO_ADDR_PHY_MASK) |
-           ((regaddr << MDIO_ADDR_REG_SHIFT) & MDIO_ADDR_REG_MASK);
+  regval = MAC_MII_ADDR_GB |
+           MAC_MII_ADDR_GR |
+           MAC_MII_ADDR_CR_150_250MHZ |
+           ((phyaddr << MAC_MII_ADDR_PA_SHIFT) & MAC_MII_ADDR_PA_MASK) |
+           ((regaddr << MAC_MII_ADDR_GR_SHIFT) & MAC_MII_ADDR_GR_MASK);
 
   /* Write to MDIO address register to start read operation */
 
@@ -179,11 +164,11 @@ int rzv_phy_write(uintptr_t base, uint8_t phyaddr, uint8_t regaddr,
 
   /* Build MDIO address register value for write operation */
 
-  regval = MDIO_ADDR_BUSY |
-           MDIO_ADDR_WRITE |
-           MDIO_CLK_150_250MHZ |
-           ((phyaddr << MDIO_ADDR_PHY_SHIFT) & MDIO_ADDR_PHY_MASK) |
-           ((regaddr << MDIO_ADDR_REG_SHIFT) & MDIO_ADDR_REG_MASK);
+  regval = MAC_MII_ADDR_GB |
+           MAC_MII_ADDR_GW |
+           MAC_MII_ADDR_CR_150_250MHZ |
+           ((phyaddr << MAC_MII_ADDR_PA_SHIFT) & MAC_MII_ADDR_PA_MASK) |
+           ((regaddr << MAC_MII_ADDR_GR_SHIFT) & MAC_MII_ADDR_GR_MASK);
 
   /* Write to MDIO address register to start write operation */
 
@@ -248,6 +233,64 @@ int rzv_phy_reset(uintptr_t base, uint8_t phyaddr)
 
   nerr("ERROR: PHY reset timeout\n");
   return -ETIMEDOUT;
+}
+
+/****************************************************************************
+ * Name: rzv_phy_probe
+ *
+ * Description:
+ *   Probe a PHY address or scan the MDIO bus for a valid PHY ID.
+ *
+ ****************************************************************************/
+
+int rzv_phy_probe(uintptr_t base, int fixed_phyaddr, uint8_t *phyaddr,
+                  uint32_t *phyid)
+{
+  uint16_t id1;
+  uint16_t id2;
+  int start;
+  int end;
+  int addr;
+  int ret;
+
+  if (fixed_phyaddr >= 0 && fixed_phyaddr <= 31)
+    {
+      start = fixed_phyaddr;
+      end = fixed_phyaddr;
+    }
+  else
+    {
+      start = 0;
+      end = 31;
+    }
+
+  for (addr = start; addr <= end; addr++)
+    {
+      ret = rzv_phy_read(base, addr, PHY_REG_PHYID1, &id1);
+      if (ret < 0)
+        {
+          continue;
+        }
+
+      ret = rzv_phy_read(base, addr, PHY_REG_PHYID2, &id2);
+      if (ret < 0)
+        {
+          continue;
+        }
+
+      if ((id1 == 0xffff && id2 == 0xffff) || (id1 == 0 && id2 == 0))
+        {
+          continue;
+        }
+
+      *phyaddr = addr;
+      *phyid = ((uint32_t)id1 << 16) | id2;
+      ninfo("PHY found: addr=%d id=%08" PRIx32 "\n", addr, *phyid);
+      return OK;
+    }
+
+  nerr("ERROR: no valid PHY found\n");
+  return -ENODEV;
 }
 
 /****************************************************************************
@@ -321,12 +364,23 @@ int rzv_phy_autonegotiate(uintptr_t base, uint8_t phyaddr)
 int rzv_phy_linkstatus(uintptr_t base, uint8_t phyaddr)
 {
   uint16_t status;
+  uint16_t anar;
   uint16_t anlpar;
+  uint16_t ability;
   uint16_t btsr;
   int ret;
   int linkstatus = PHY_LINK_DOWN;
 
-  /* Read PHY status register */
+  /* Read PHY status register twice.  The link bit is latch-low on many
+   * PHYs, so the second read reflects current state.
+   */
+
+  ret = rzv_phy_read(base, phyaddr, PHY_REG_STATUS, &status);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to read PHY status: %d\n", ret);
+      return ret;
+    }
 
   ret = rzv_phy_read(base, phyaddr, PHY_REG_STATUS, &status);
   if (ret < 0)
@@ -352,7 +406,16 @@ int rzv_phy_linkstatus(uintptr_t base, uint8_t phyaddr)
       return PHY_LINK_1000FD;
     }
 
-  /* Read auto-negotiation link partner ability register */
+  /* Read local and link-partner auto-negotiation abilities.  The BMSR
+   * capability bits are not laid out like ANAR/ANLPAR.
+   */
+
+  ret = rzv_phy_read(base, phyaddr, PHY_REG_ANAR, &anar);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to read ANAR: %d\n", ret);
+      return ret;
+    }
 
   ret = rzv_phy_read(base, phyaddr, PHY_REG_ANLPAR, &anlpar);
   if (ret < 0)
@@ -361,24 +424,26 @@ int rzv_phy_linkstatus(uintptr_t base, uint8_t phyaddr)
       return ret;
     }
 
-  /* Determine link speed and duplex based on link partner ability */
+  /* Determine link speed and duplex from common advertised capability. */
 
-  if (anlpar & PHY_STAT_100BASE_TX_FD)
+  ability = anar & anlpar;
+
+  if (ability & PHY_AN_100BASE_TX_FD)
     {
       linkstatus = PHY_LINK_100FD;
       ninfo("Link is up: 100 Mbps Full Duplex\n");
     }
-  else if (anlpar & PHY_STAT_100BASE_TX_HD)
+  else if (ability & PHY_AN_100BASE_TX_HD)
     {
       linkstatus = PHY_LINK_100HD;
       ninfo("Link is up: 100 Mbps Half Duplex\n");
     }
-  else if (anlpar & PHY_STAT_10BASE_T_FD)
+  else if (ability & PHY_AN_10BASE_T_FD)
     {
       linkstatus = PHY_LINK_10FD;
       ninfo("Link is up: 10 Mbps Full Duplex\n");
     }
-  else if (anlpar & PHY_STAT_10BASE_T_HD)
+  else if (ability & PHY_AN_10BASE_T_HD)
     {
       linkstatus = PHY_LINK_10HD;
       ninfo("Link is up: 10 Mbps Half Duplex\n");

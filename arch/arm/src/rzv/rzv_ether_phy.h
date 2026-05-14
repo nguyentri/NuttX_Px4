@@ -93,6 +93,14 @@
 #define PHY_STAT_JABBER             (1 << 1)   /* Jabber Detect */
 #define PHY_STAT_EXTENDED           (1 << 0)   /* Extended Capabilities */
 
+/* Auto-Negotiation Advertisement / Link Partner Ability Register Bits */
+
+#define PHY_AN_100BASE_T4           (1 << 9)   /* 100BASE-T4 */
+#define PHY_AN_100BASE_TX_FD        (1 << 8)   /* 100BASE-TX Full Duplex */
+#define PHY_AN_100BASE_TX_HD        (1 << 7)   /* 100BASE-TX Half Duplex */
+#define PHY_AN_10BASE_T_FD          (1 << 6)   /* 10BASE-T Full Duplex */
+#define PHY_AN_10BASE_T_HD          (1 << 5)   /* 10BASE-T Half Duplex */
+
 /* 1000BASE-T Control Register Bits */
 
 #define PHY_1000BTCR_TEST_MODE      (7 << 13)  /* Test Mode */
@@ -181,6 +189,26 @@ int rzv_phy_read(uintptr_t base, uint8_t phyaddr, uint8_t regaddr,
 
 int rzv_phy_write(uintptr_t base, uint8_t phyaddr, uint8_t regaddr,
                   uint16_t data);
+
+/****************************************************************************
+ * Name: rzv_phy_probe
+ *
+ * Description:
+ *   Probe a fixed PHY address or scan the MDIO bus for a valid PHY ID.
+ *
+ * Input Parameters:
+ *   base          - Ethernet controller base address
+ *   fixed_phyaddr - PHY address 0-31, or negative to scan all addresses
+ *   phyaddr       - Pointer to receive discovered PHY address
+ *   phyid         - Pointer to receive combined PHY ID registers
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+int rzv_phy_probe(uintptr_t base, int fixed_phyaddr, uint8_t *phyaddr,
+                  uint32_t *phyid);
 
 /****************************************************************************
  * Name: rzv_phy_reset

@@ -45,7 +45,8 @@
 #  define CONFIG_RZV_ETHER_RXDESC 8
 #endif
 
-#define RZV_ETHER_BUFSIZE 1536 /* MTU + Header + FCS */
+#define RZV_ETHER_BUFSIZE CONFIG_RZV_ETHER_BUFSIZE /* MTU + Header + FCS */
+#define RZV_ETHER_DMA_ALIGN 64
 
 /****************************************************************************
  * Public Types
@@ -77,7 +78,8 @@ struct rzv_eth_s
 
   /* Hardware resources */
   uintptr_t base;           /* Base address of the controller */
-  int irq;                  /* Interrupt number */
+  int event;                /* INTC event selector */
+  int irq;                  /* Allocated NuttX IRQ number */
   int intf;                 /* Interface number (0 or 1) */
 
   /* Descriptors and buffers */
@@ -85,16 +87,20 @@ struct rzv_eth_s
   struct rzv_eth_desc_s *rxdesc; /* RX descriptor list */
   uint8_t *txbuffer;             /* TX buffers */
   uint8_t *rxbuffer;             /* RX buffers */
+  uint8_t *pktbuf;               /* Network stack packet buffer */
 
   unsigned int txhead;      /* Next TX descriptor to use */
   unsigned int txtail;      /* Next TX descriptor to clean */
+  unsigned int txinflight;   /* Number of TX descriptors owned by DMA */
   unsigned int rxndx;       /* Next RX descriptor to check */
+  uint32_t intpending;       /* Deferred DMA interrupt status */
 
   /* PHY state */
   int phy_addr;             /* PHY address */
+  uint32_t phy_id;          /* PHY identifier */
   bool linkup;              /* Link status */
-  bool duplex;              /* Duplex mode */
-  bool speed;               /* Speed (100/1000) */
+  bool duplex;              /* true: full duplex */
+  int speed;                /* Link speed in Mbps */
 };
 
 /****************************************************************************

@@ -28,6 +28,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <errno.h>
 #include <debug.h>
 #include <syslog.h>
 
@@ -121,16 +122,32 @@ static void rzv2h_ether_pinconfig(int port)
  *
  ****************************************************************************/
 
-static void rzv2h_ether_clockconfig(int port)
+static int rzv2h_ether_clockconfig(int port)
 {
-  /* TODO: Enable GBETH clocks via CPG
-   * The GBETH module requires:
-   * - GBETH AXI clock
-   * - GBETH reference clock
-   * - PHY interface clock (125MHz for RGMII gigabit)
-   */
+  int ret;
 
-  syslog(LOG_INFO, "GBETH%d: Clock configuration (placeholder)\n", port);
+  if (port != 0)
+    {
+      nwarn("WARNING: GBETH%d clock ID is not defined yet\n", port);
+      return -ENODEV;
+    }
+
+  ret = rzv_clock_enable(RZV_CPG_CLK_ETH0);
+  if (ret < 0)
+    {
+      nerr("ERROR: failed to enable GBETH0 clock: %d\n", ret);
+      return ret;
+    }
+
+  ret = rzv_module_unreset(RZV_CPG_CLK_ETH0);
+  if (ret < 0)
+    {
+      nerr("ERROR: failed to release GBETH0 reset: %d\n", ret);
+      return ret;
+    }
+
+  syslog(LOG_INFO, "GBETH%d: clock enabled and reset released\n", port);
+  return OK;
 }
 
 /****************************************************************************
@@ -208,7 +225,11 @@ int rzv2h_ether_initialize(void)
 
   /* Step 1: Enable clocks */
 
-  rzv2h_ether_clockconfig(0);
+  ret = rzv2h_ether_clockconfig(0);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Step 2: Configure pins */
 
@@ -237,7 +258,11 @@ int rzv2h_ether_initialize(void)
 
   /* Step 1: Enable clocks */
 
-  rzv2h_ether_clockconfig(1);
+  ret = rzv2h_ether_clockconfig(1);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Step 2: Configure pins */
 

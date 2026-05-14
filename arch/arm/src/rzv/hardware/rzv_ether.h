@@ -51,17 +51,29 @@
 #define RZV_ETH_MAC_ADDR0_HI        0x0300 /* MAC Address 0 High */
 #define RZV_ETH_MAC_ADDR0_LO        0x0304 /* MAC Address 0 Low */
 
+/* MTL Registers (Queue 0) */
+
+#define RZV_ETH_MTL_OPERATION_MODE  0x0C00 /* MTL Operation Mode */
+#define RZV_ETH_MTL_RXQ_DMA_MAP0    0x0C30 /* MTL RX Queue DMA Map 0 */
+#define RZV_ETH_MTL_TXQ0_OP_MODE    0x0D00 /* MTL TX Queue 0 Operation Mode */
+#define RZV_ETH_MTL_RXQ0_OP_MODE    0x0D30 /* MTL RX Queue 0 Operation Mode */
+
 /* DMA Registers (Channel 0) */
+#define RZV_ETH_DMA_MODE            0x1000 /* DMA Mode */
+#define RZV_ETH_DMA_SYSBUS_MODE     0x1004 /* DMA System Bus Mode */
+#define RZV_ETH_DMA_INT_STATUS      0x1008 /* DMA Interrupt Status */
 #define RZV_ETH_DMA_CH0_CTRL        0x1100 /* DMA Channel 0 Control */
 #define RZV_ETH_DMA_CH0_TX_CTRL     0x1104 /* DMA Channel 0 TX Control */
 #define RZV_ETH_DMA_CH0_RX_CTRL     0x1108 /* DMA Channel 0 RX Control */
+#define RZV_ETH_DMA_CH0_TXDESC_HI   0x1110 /* DMA Channel 0 TX Descriptor High Address */
 #define RZV_ETH_DMA_CH0_TXDESC_LIST 0x1114 /* DMA Channel 0 TX Descriptor List Address */
+#define RZV_ETH_DMA_CH0_RXDESC_HI   0x1118 /* DMA Channel 0 RX Descriptor High Address */
 #define RZV_ETH_DMA_CH0_RXDESC_LIST 0x111C /* DMA Channel 0 RX Descriptor List Address */
 #define RZV_ETH_DMA_CH0_TXDESC_TAIL 0x1120 /* DMA Channel 0 TX Descriptor Tail Pointer */
 #define RZV_ETH_DMA_CH0_RXDESC_TAIL 0x1128 /* DMA Channel 0 RX Descriptor Tail Pointer */
-#define RZV_ETH_DMA_CH0_TXDESC_RING 0x1130 /* DMA Channel 0 TX Descriptor Ring Length */
-#define RZV_ETH_DMA_CH0_RXDESC_RING 0x1134 /* DMA Channel 0 RX Descriptor Ring Length */
-#define RZV_ETH_DMA_CH0_INT_EN      0x1138 /* DMA Channel 0 Interrupt Enable */
+#define RZV_ETH_DMA_CH0_TXDESC_RING 0x112C /* DMA Channel 0 TX Descriptor Ring Length */
+#define RZV_ETH_DMA_CH0_RX_CTRL2    0x1130 /* DMA Channel 0 RX Control 2 */
+#define RZV_ETH_DMA_CH0_INT_EN      0x1134 /* DMA Channel 0 Interrupt Enable */
 #define RZV_ETH_DMA_CH0_RX_INT_WD   0x113C /* DMA Channel 0 RX Interrupt Watchdog Timer */
 #define RZV_ETH_DMA_CH0_SLOT_CTRL   0x1140 /* DMA Channel 0 Slot Function Control Status */
 #define RZV_ETH_DMA_CH0_CUR_TXDESC  0x1144 /* DMA Channel 0 Current Host Transmit Descriptor */
@@ -91,8 +103,11 @@
 #define MAC_CONF_WD                 (1 << 23) /* Watchdog Disable */
 #define MAC_CONF_CST                (1 << 25) /* CRC Stripping for Type frames */
 
-/* DMA Channel 0 Control Register */
-#define DMA_CH0_CTRL_SWR            (1 << 0)  /* Software Reset */
+/* DMA Mode Register */
+#define DMA_MODE_SWR                (1 << 0)  /* Software Reset */
+
+/* DMA System Bus Mode Register */
+#define DMA_SYSBUS_MODE_AAL         (1 << 12) /* Address-aligned beats */
 
 /* DMA Channel 0 Status Register */
 #define DMA_CH0_STATUS_TI           (1 << 0)  /* Transmit Interrupt */
@@ -112,15 +127,32 @@
 #define DMA_CH0_INT_EN_AISE         (1 << 15) /* Abnormal Interrupt Summary Enable */
 #define DMA_CH0_INT_EN_NISE         (1 << 16) /* Normal Interrupt Summary Enable */
 
+/* DMA Channel TX/RX Control Registers */
+#define DMA_CH0_TX_CTRL_ST          (1 << 0)  /* Start/Stop Transmission */
+#define DMA_CH0_TX_CTRL_OSP         (1 << 4)  /* Operate on Second Packet */
+#define DMA_CH0_TX_CTRL_TXPBL_SHIFT (16)
+#define DMA_CH0_TX_CTRL_TXPBL_MASK  (0x3f << DMA_CH0_TX_CTRL_TXPBL_SHIFT)
+#define DMA_CH0_TX_CTRL_TXPBL(n)    ((n) << DMA_CH0_TX_CTRL_TXPBL_SHIFT)
+
+#define DMA_CH0_RX_CTRL_SR          (1 << 0)  /* Start/Stop Receive */
+#define DMA_CH0_RX_CTRL_RBSZ_SHIFT  (1)
+#define DMA_CH0_RX_CTRL_RBSZ_MASK   (0x3fff << DMA_CH0_RX_CTRL_RBSZ_SHIFT)
+#define DMA_CH0_RX_CTRL_RBSZ(n)     ((n) << DMA_CH0_RX_CTRL_RBSZ_SHIFT)
+#define DMA_CH0_RX_CTRL_RXPBL_SHIFT (16)
+#define DMA_CH0_RX_CTRL_RXPBL_MASK  (0x3f << DMA_CH0_RX_CTRL_RXPBL_SHIFT)
+#define DMA_CH0_RX_CTRL_RXPBL(n)    ((n) << DMA_CH0_RX_CTRL_RXPBL_SHIFT)
+
 /* MAC MDIO Address Register */
 #define MAC_MII_ADDR_GB             (1 << 0)  /* GMII Busy */
-#define MAC_MII_ADDR_GW             (1 << 1)  /* GMII Write */
-#define MAC_MII_ADDR_CR_SHIFT       (2)       /* CSR Clock Range */
+#define MAC_MII_ADDR_GW             (1 << 2)  /* GMII Write */
+#define MAC_MII_ADDR_GR             (1 << 3)  /* GMII Read */
+#define MAC_MII_ADDR_CR_SHIFT       (8)       /* CSR Clock Range */
 #define MAC_MII_ADDR_CR_MASK        (0xF << MAC_MII_ADDR_CR_SHIFT)
-#define MAC_MII_ADDR_GR_SHIFT       (6)       /* GMII Register */
+#define MAC_MII_ADDR_GR_SHIFT       (16)      /* GMII Register */
 #define MAC_MII_ADDR_GR_MASK        (0x1F << MAC_MII_ADDR_GR_SHIFT)
-#define MAC_MII_ADDR_PA_SHIFT       (11)      /* Physical Layer Address */
+#define MAC_MII_ADDR_PA_SHIFT       (21)      /* Physical Layer Address */
 #define MAC_MII_ADDR_PA_MASK        (0x1F << MAC_MII_ADDR_PA_SHIFT)
+#define MAC_MII_ADDR_CR_150_250MHZ  (4 << MAC_MII_ADDR_CR_SHIFT)
 
 /* Descriptors */
 
@@ -158,8 +190,12 @@
 #define TDES3_OWN                   (1 << 31) /* Own Bit */
 
 /* RDES3 (Read Format) */
+#define RDES3_FL_SHIFT              (0)
+#define RDES3_FL_MASK               (0x7FFF << RDES3_FL_SHIFT) /* Frame Length */
+#define RDES3_OWN_WRBACK            (1 << 31) /* Descriptor owned by DMA */
 #define RDES3_BUF1V                 (1 << 24) /* Buffer 1 Valid */
 #define RDES3_BUF2V                 (1 << 25) /* Buffer 2 Valid */
+#define RDES3_OSTC                  (1 << 27) /* One-step timestamp control */
 #define RDES3_IOC                   (1 << 30) /* Interrupt on Completion */
 #define RDES3_OWN                   (1 << 31) /* Own Bit */
 
