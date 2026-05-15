@@ -53,9 +53,14 @@
 
 #define RZV_IRQ_PRIVATE_TIMER 29
 
-/* The private timer is in the CR8 private peripheral block, not on P0CLK. */
+/* The CR8 ARM private timer is clocked by PERIPHCLK = CPU_CLK / 2.
+ * This is an ARM Cortex-R8 MPCore architecture invariant (TRM §3.2):
+ * the private peripheral (MPCore) clock is always CPU_CLK / 2.
+ * Do NOT use P0CLK here — that is the bus peripheral clock, not the
+ * MPCore peripheral clock.
+ */
 
-#define TIMER_FREQ_RUNTIME() rzv_get_cpu_frequency()
+#define TIMER_PERIPHCLK_RUNTIME() (rzv_get_cpu_frequency() / 2)
 
 /****************************************************************************
  * Private Data
@@ -109,12 +114,16 @@ void up_timer_initialize(void)
   uint32_t ctrl;
   int ret;
 
-  /* Get peripheral clock frequency */
+  /* Get CR8 MPCore PERIPHCLK = CPU_CLK / 2 (ARM Cortex-R8 TRM §3.2).
+   * Do NOT use rzv_get_pclk_frequency() here — that returns P0CLK (bus
+   * peripheral clock, 100 MHz) which is unrelated to the MPCore timer.
+   * Using P0CLK would produce a ~4x tick-rate error when CPU=800 MHz.
+   */
 
-  periphclk = rzv_get_pclk_frequency();
+  periphclk = TIMER_PERIPHCLK_RUNTIME();
 
   /* Calculate load value for desired tick rate
-   * Load value = (Clock Frequency / (Prescaler + 1) / Tick Rate) - 1
+   * Load value = (PERIPHCLK / (Prescaler + 1) / CLOCKS_PER_SEC) - 1
    */
 
   load_value = (periphclk / (TIMER_PRESCALER + 1) / CLOCKS_PER_SEC) - 1;
@@ -211,7 +220,7 @@ int up_timer_gettime(struct timespec *ts)
    */
 
   usec = (uint64_t)(load - counter) * USEC_PER_SEC /
-    (TIMER_FREQ_RUNTIME() / (TIMER_PRESCALER + 1));
+    (TIMER_PERIPHCLK_RUNTIME() / (TIMER_PRESCALER + 1));
 
   /* Add the accumulated tick count */
 
@@ -251,5 +260,5 @@ uint32_t up_timer_getcounter(void)
 
 uint32_t up_timer_getfreq(void)
 {
-  return TIMER_FREQ_RUNTIME() / (TIMER_PRESCALER + 1);
+  return TIMER_PERIPHCLK_RUNTIME() / (TIMER_PRESCALER + 1);
 }

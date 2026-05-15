@@ -1,6 +1,16 @@
 /****************************************************************************
  * boards/arm/rzv/rdk-rzv2h/src/rzv2h_sci_i2c.c
  *
+ * Board-level bringup wrapper for SCI-B Simple-I2C master driver.
+ * Calls rzv_sci_i2c_initialize() for each Kconfig-enabled SCI I2C channel
+ * and registers the resulting i2c_master_s with the NuttX I2C framework.
+ *
+ * Bus numbering: SCI0→10, SCI1→11, SCI2→12, SCI3→13
+ * (RIIC buses 0..2 already taken; 10+ avoids collisions)
+ *
+ * Audit: Phase 04 — board glue / defconfig / smoke
+ * Ref: boards/arm/rzv/rdk-rzv2h/src/rzv2h_bringup.c (RIIC pattern)
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -24,174 +34,81 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdbool.h>
 #include <errno.h>
 #include <debug.h>
+#include <syslog.h>
 
 #include <nuttx/i2c/i2c_master.h>
-#include <arch/board/board.h>
 
-#include "arm_internal.h"
-#include "rzv_gpio.h"
 #include "rzv_sci_i2c.h"
-
-#ifdef CONFIG_RZV_SCI_I2C
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#include "rzv2h_sci_i2c.h"
 
 /****************************************************************************
- * Private Functions
+ * Private Macros
  ****************************************************************************/
 
-/****************************************************************************
- * Name: rzv2h_sci_i2c_configure_pins
- *
- * Description:
- *   Configure GPIO pins for SCI I2C operation
- *
- ****************************************************************************/
+/* Register one SCI channel as I2C, log result, return on fatal error */
 
-static void rzv2h_sci_i2c_configure_pins(int channel)
-{
-  switch (channel)
-    {
-#ifdef CONFIG_RZV_SCI0_I2C
-    case 0:
-      /* Configure SCI0 pins for I2C mode (SDA/SCL) */
-      rzv_gpioconfig(BOARD_SCI0_SDA_GPIO);
-      rzv_gpioconfig(BOARD_SCI0_SCL_GPIO);
-      i2cinfo("Configured SCI0 I2C pins\n");
-      break;
-#endif
-
-#ifdef CONFIG_RZV_SCI1_I2C
-    case 1:
-      /* Configure SCI1 pins for I2C mode (SDA/SCL) */
-      rzv_gpioconfig(BOARD_SCI1_SDA_GPIO);
-      rzv_gpioconfig(BOARD_SCI1_SCL_GPIO);
-      i2cinfo("Configured SCI1 I2C pins\n");
-      break;
-#endif
-
-#ifdef CONFIG_RZV_SCI2_I2C
-    case 2:
-      /* Configure SCI2 pins for I2C mode (SDA/SCL) */
-      rzv_gpioconfig(BOARD_SCI2_SDA_GPIO);
-      rzv_gpioconfig(BOARD_SCI2_SCL_GPIO);
-      i2cinfo("Configured SCI2 I2C pins\n");
-      break;
-#endif
-
-#ifdef CONFIG_RZV_SCI3_I2C
-    case 3:
-      /* Configure SCI3 pins for I2C mode (SDA/SCL) */
-      rzv_gpioconfig(BOARD_SCI3_SDA_GPIO);
-      rzv_gpioconfig(BOARD_SCI3_SCL_GPIO);
-      i2cinfo("Configured SCI3 I2C pins\n");
-      break;
-#endif
-
-    default:
-      i2cerr("ERROR: Invalid SCI I2C channel %d\n", channel);
-      break;
-    }
-}
+#define SETUP_CHANNEL(ch) \
+  do { \
+    struct i2c_master_s *dev_ = rzv_sci_i2c_initialize(ch); \
+    if (dev_ == NULL) \
+      { \
+        syslog(LOG_ERR, "ERROR: SCI%d I2C init failed\n", (ch)); \
+        return -ENODEV; \
+      } \
+    int ret_ = i2c_register(dev_, BOARD_SCI_I2C_BUS_BASE + (ch)); \
+    if (ret_ < 0) \
+      { \
+        syslog(LOG_ERR, "ERROR: SCI%d I2C register failed: %d\n", \
+               (ch), ret_); \
+        return ret_; \
+      } \
+    syslog(LOG_INFO, "SCI%d I2C initialized (bus %d)\n", \
+           (ch), BOARD_SCI_I2C_BUS_BASE + (ch)); \
+  } while (0)
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_sci_i2c_initialize
+ * Name: rzv2h_sci_i2c_setup
  *
  * Description:
- *   Initialize and register the SCI I2C bus for the specified channel
+ *   Initialize all SCI-I2C master channels enabled by Kconfig and register
+ *   them with the NuttX I2C driver framework. Called from rzv2h_bringup.c.
  *
- * Input Parameters:
- *   channel - SCI channel number (0-3)
+ *   Pin configuration is handled inside rzv_sci_i2c_initialize() via the
+ *   BOARD_SCIn_I2C_SDA_GPIO / BOARD_SCIn_I2C_SCL_GPIO macros from board.h.
+ *
+ *   Schematic note (audit dim 15): RDK-RZV2H GY-912 connector routes to
+ *   RIIC2, NOT to any SCI channel. The sci-i2c-gy912 defconfig therefore
+ *   exercises SCI3 as a synthetic smoke target (no slave expected on bus);
+ *   i2c_probe will return empty or -ENXIO, which is acceptable.
  *
  * Returned Value:
- *   Pointer to the I2C master device structure on success; NULL on failure
+ *   0 on success; negative errno on first channel failure.
  *
  ****************************************************************************/
 
-struct i2c_master_s *board_sci_i2c_initialize(int channel)
+int rzv2h_sci_i2c_setup(void)
 {
-  struct i2c_master_s *i2c;
-
-  i2cinfo("Initializing SCI%d I2C\n", channel);
-
-  /* Configure GPIO pins for I2C */
-
-  rzv2h_sci_i2c_configure_pins(channel);
-
-  /* Initialize the SCI I2C driver */
-
-  i2c = rzv_sci_i2c_initialize(channel);
-  if (i2c == NULL)
-    {
-      i2cerr("ERROR: Failed to initialize SCI%d I2C\n", channel);
-      return NULL;
-    }
-
-  i2cinfo("SCI%d I2C initialized successfully\n", channel);
-
-  return i2c;
-}
-
-/****************************************************************************
- * Name: rzv2h_sci_i2c_initialize
- *
- * Description:
- *   Initialize all configured SCI I2C buses
- *
- * Returned Value:
- *   OK on success; a negated errno on failure
- *
- ****************************************************************************/
-
-int rzv2h_sci_i2c_initialize(void)
-{
-  int ret = OK;
-
-  i2cinfo("Initializing SCI I2C buses\n");
-
 #ifdef CONFIG_RZV_SCI0_I2C
-  if (board_sci_i2c_initialize(0) == NULL)
-    {
-      i2cerr("ERROR: Failed to initialize SCI0 I2C\n");
-      ret = -ENODEV;
-    }
+  SETUP_CHANNEL(0);
 #endif
 
 #ifdef CONFIG_RZV_SCI1_I2C
-  if (board_sci_i2c_initialize(1) == NULL)
-    {
-      i2cerr("ERROR: Failed to initialize SCI1 I2C\n");
-      ret = -ENODEV;
-    }
+  SETUP_CHANNEL(1);
 #endif
 
 #ifdef CONFIG_RZV_SCI2_I2C
-  if (board_sci_i2c_initialize(2) == NULL)
-    {
-      i2cerr("ERROR: Failed to initialize SCI2 I2C\n");
-      ret = -ENODEV;
-    }
+  SETUP_CHANNEL(2);
 #endif
 
 #ifdef CONFIG_RZV_SCI3_I2C
-  if (board_sci_i2c_initialize(3) == NULL)
-    {
-      i2cerr("ERROR: Failed to initialize SCI3 I2C\n");
-      ret = -ENODEV;
-    }
+  SETUP_CHANNEL(3);
 #endif
 
-  return ret;
+  return OK;
 }
-
-#endif /* CONFIG_RZV_SCI_I2C */

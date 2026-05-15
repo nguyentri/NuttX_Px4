@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/rzv/hardware/rzv_global_timetype.h
+ * arch/arm/src/rzv/hardware/rzv_global_timer.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,15 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RZV_HARDWARE_RZV_GLOBAL_TIMETYPE_H
-#define __ARCH_ARM_SRC_RZV_HARDWARE_RZV_GLOBAL_TIMETYPE_H
+/* DORMANT — DO NOT USE in rdk-rzv2h builds.
+ * The ARM Cortex-R8 global timer is not used as a clock source in this port.
+ * The NuttX scheduler tick uses the CR8 ARM private timer (rzv_timerisr.c).
+ * HRT uses GTM7 (rzv_hrt.c).  This header is kept for reference; do not
+ * wire it into any driver without a deliberate design decision.
+ */
+
+#ifndef __ARCH_ARM_SRC_RZV_HARDWARE_RZV_GLOBAL_TIMER_H
+#define __ARCH_ARM_SRC_RZV_HARDWARE_RZV_GLOBAL_TIMER_H
 
 /****************************************************************************
  * Included Files
@@ -96,4 +103,4 @@
 #define GLOBAL_TIMETYPE_TIMER_AUTO_INCR_SHIFT   (0)      /* Bits 0-31: Incr */
 #define GLOBAL_TIMETYPE_TIMER_AUTO_INCR_MASK    (0xffffffff << GLOBAL_TIMETYPE_TIMER_AUTO_INCR_SHIFT)
 
-#endif /* __ARCH_ARM_SRC_RZV_HARDWARE_RZV_GLOBAL_TIMETYPE_H */
+#endif /* __ARCH_ARM_SRC_RZV_HARDWARE_RZV_GLOBAL_TIMER_H */

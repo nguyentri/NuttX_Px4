@@ -26,11 +26,14 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
+#include <assert.h>
 #include <debug.h>
 #include <errno.h>
 
 #include <nuttx/irq.h>
 
+#include "hardware/rzv_dmac.h"
 #include "rzv_dmac.h"
 #include "rdk-rzv2h.h"
 
@@ -40,111 +43,200 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Channel allocation map - matches Kconfig assignments */
-
 #define DMAC_CHANNEL_UNASSIGNED  (-1)
+
+/* Collision detection (H4): every Kconfig-assigned channel must be unique.
+ * We cannot use static_assert with Kconfig values (they may be -1 for
+ * "disabled"), so we use runtime panic in rzv2h_dmac_initialize.
+ * Build-time check is possible only when all channels are known non-negative.
+ *
+ * The CHECK_PAIR macro evaluates two assigned channels for equality; both
+ * must be >= 0 for a collision to exist.
+ */
+
+#define DMAC_COLLISION_CHECK(a, b, na, nb)                    \
+  do                                                          \
+    {                                                         \
+      if ((a) >= 0 && (b) >= 0 && (a) == (b))                \
+        {                                                     \
+          _alert("DMAC channel collision: %s and %s both on " \
+                 "channel %d — fix Kconfig\n", na, nb, (a)); \
+          PANIC();                                            \
+        }                                                     \
+    }                                                         \
+  while (0)
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/* Peripheral identifier enum replaces runtime strcmp lookup (M7).
+ * Compile-time table: g_dmac_channel_map[] indexed by this enum.
+ */
+
+typedef enum
+{
+  DMAC_PERIPH_UART0_RX = 0,
+  DMAC_PERIPH_UART0_TX,
+  DMAC_PERIPH_UART1_RX,
+  DMAC_PERIPH_UART1_TX,
+  DMAC_PERIPH_UART2_RX,
+  DMAC_PERIPH_UART2_TX,
+  DMAC_PERIPH_I2C0,
+  DMAC_PERIPH_I2C1,
+  DMAC_PERIPH_I2C2,
+  DMAC_PERIPH_SPI0_RX,
+  DMAC_PERIPH_SPI0_TX,
+  DMAC_PERIPH_SPI1_RX,
+  DMAC_PERIPH_SPI1_TX,
+  DMAC_PERIPH_ADC,
+  DMAC_PERIPH_SDHI,
+  DMAC_PERIPH_COUNT  /* sentinel — keep last */
+} rzv2h_dmac_periph_t;
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/* Channel assignment tracking */
+/* Channel assignment table indexed by rzv2h_dmac_periph_t.
+ * Populated from Kconfig at init time; -1 means unassigned.
+ */
 
-static struct
-{
-  int uart0_rx;
-  int uart0_tx;
-  int uart1_rx;
-  int uart1_tx;
-  int uart2_rx;
-  int uart2_tx;
-  int i2c0;
-  int i2c1;
-  int i2c2;
-  int spi0_rx;
-  int spi0_tx;
-  int spi1_rx;
-  int spi1_tx;
-  int adc;
-  int sdhi;
-} g_dmac_channels =
+static int g_dmac_channel_map[DMAC_PERIPH_COUNT] =
 {
 #ifdef CONFIG_RZV_DMAC_UART0_RX_CHANNEL
-  .uart0_rx = CONFIG_RZV_DMAC_UART0_RX_CHANNEL,
+  [DMAC_PERIPH_UART0_RX] = CONFIG_RZV_DMAC_UART0_RX_CHANNEL,
 #else
-  .uart0_rx = DMAC_CHANNEL_UNASSIGNED,
+  [DMAC_PERIPH_UART0_RX] = DMAC_CHANNEL_UNASSIGNED,
 #endif
 #ifdef CONFIG_RZV_DMAC_UART0_TX_CHANNEL
-  .uart0_tx = CONFIG_RZV_DMAC_UART0_TX_CHANNEL,
+  [DMAC_PERIPH_UART0_TX] = CONFIG_RZV_DMAC_UART0_TX_CHANNEL,
 #else
-  .uart0_tx = DMAC_CHANNEL_UNASSIGNED,
+  [DMAC_PERIPH_UART0_TX] = DMAC_CHANNEL_UNASSIGNED,
 #endif
 #ifdef CONFIG_RZV_DMAC_UART1_RX_CHANNEL
-  .uart1_rx = CONFIG_RZV_DMAC_UART1_RX_CHANNEL,
+  [DMAC_PERIPH_UART1_RX] = CONFIG_RZV_DMAC_UART1_RX_CHANNEL,
 #else
-  .uart1_rx = DMAC_CHANNEL_UNASSIGNED,
+  [DMAC_PERIPH_UART1_RX] = DMAC_CHANNEL_UNASSIGNED,
 #endif
 #ifdef CONFIG_RZV_DMAC_UART1_TX_CHANNEL
-  .uart1_tx = CONFIG_RZV_DMAC_UART1_TX_CHANNEL,
+  [DMAC_PERIPH_UART1_TX] = CONFIG_RZV_DMAC_UART1_TX_CHANNEL,
 #else
-  .uart1_tx = DMAC_CHANNEL_UNASSIGNED,
+  [DMAC_PERIPH_UART1_TX] = DMAC_CHANNEL_UNASSIGNED,
 #endif
 #ifdef CONFIG_RZV_DMAC_UART2_RX_CHANNEL
-  .uart2_rx = CONFIG_RZV_DMAC_UART2_RX_CHANNEL,
+  [DMAC_PERIPH_UART2_RX] = CONFIG_RZV_DMAC_UART2_RX_CHANNEL,
 #else
-  .uart2_rx = DMAC_CHANNEL_UNASSIGNED,
+  [DMAC_PERIPH_UART2_RX] = DMAC_CHANNEL_UNASSIGNED,
 #endif
 #ifdef CONFIG_RZV_DMAC_UART2_TX_CHANNEL
-  .uart2_tx = CONFIG_RZV_DMAC_UART2_TX_CHANNEL,
+  [DMAC_PERIPH_UART2_TX] = CONFIG_RZV_DMAC_UART2_TX_CHANNEL,
 #else
-  .uart2_tx = DMAC_CHANNEL_UNASSIGNED,
+  [DMAC_PERIPH_UART2_TX] = DMAC_CHANNEL_UNASSIGNED,
 #endif
 #ifdef CONFIG_RZV_DMAC_I2C0_CHANNEL
-  .i2c0 = CONFIG_RZV_DMAC_I2C0_CHANNEL,
+  [DMAC_PERIPH_I2C0]     = CONFIG_RZV_DMAC_I2C0_CHANNEL,
 #else
-  .i2c0 = DMAC_CHANNEL_UNASSIGNED,
+  [DMAC_PERIPH_I2C0]     = DMAC_CHANNEL_UNASSIGNED,
 #endif
 #ifdef CONFIG_RZV_DMAC_I2C1_CHANNEL
-  .i2c1 = CONFIG_RZV_DMAC_I2C1_CHANNEL,
+  [DMAC_PERIPH_I2C1]     = CONFIG_RZV_DMAC_I2C1_CHANNEL,
 #else
-  .i2c1 = DMAC_CHANNEL_UNASSIGNED,
+  [DMAC_PERIPH_I2C1]     = DMAC_CHANNEL_UNASSIGNED,
 #endif
 #ifdef CONFIG_RZV_DMAC_I2C2_CHANNEL
-  .i2c2 = CONFIG_RZV_DMAC_I2C2_CHANNEL,
+  [DMAC_PERIPH_I2C2]     = CONFIG_RZV_DMAC_I2C2_CHANNEL,
 #else
-  .i2c2 = DMAC_CHANNEL_UNASSIGNED,
+  [DMAC_PERIPH_I2C2]     = DMAC_CHANNEL_UNASSIGNED,
 #endif
 #ifdef CONFIG_RZV_DMAC_SPI0_RX_CHANNEL
-  .spi0_rx = CONFIG_RZV_DMAC_SPI0_RX_CHANNEL,
+  [DMAC_PERIPH_SPI0_RX]  = CONFIG_RZV_DMAC_SPI0_RX_CHANNEL,
 #else
-  .spi0_rx = DMAC_CHANNEL_UNASSIGNED,
+  [DMAC_PERIPH_SPI0_RX]  = DMAC_CHANNEL_UNASSIGNED,
 #endif
 #ifdef CONFIG_RZV_DMAC_SPI0_TX_CHANNEL
-  .spi0_tx = CONFIG_RZV_DMAC_SPI0_TX_CHANNEL,
+  [DMAC_PERIPH_SPI0_TX]  = CONFIG_RZV_DMAC_SPI0_TX_CHANNEL,
 #else
-  .spi0_tx = DMAC_CHANNEL_UNASSIGNED,
+  [DMAC_PERIPH_SPI0_TX]  = DMAC_CHANNEL_UNASSIGNED,
 #endif
 #ifdef CONFIG_RZV_DMAC_SPI1_RX_CHANNEL
-  .spi1_rx = CONFIG_RZV_DMAC_SPI1_RX_CHANNEL,
+  [DMAC_PERIPH_SPI1_RX]  = CONFIG_RZV_DMAC_SPI1_RX_CHANNEL,
 #else
-  .spi1_rx = DMAC_CHANNEL_UNASSIGNED,
+  [DMAC_PERIPH_SPI1_RX]  = DMAC_CHANNEL_UNASSIGNED,
 #endif
 #ifdef CONFIG_RZV_DMAC_SPI1_TX_CHANNEL
-  .spi1_tx = CONFIG_RZV_DMAC_SPI1_TX_CHANNEL,
+  [DMAC_PERIPH_SPI1_TX]  = CONFIG_RZV_DMAC_SPI1_TX_CHANNEL,
 #else
-  .spi1_tx = DMAC_CHANNEL_UNASSIGNED,
+  [DMAC_PERIPH_SPI1_TX]  = DMAC_CHANNEL_UNASSIGNED,
 #endif
 #ifdef CONFIG_RZV_DMAC_ADC_CHANNEL
-  .adc = CONFIG_RZV_DMAC_ADC_CHANNEL,
+  [DMAC_PERIPH_ADC]      = CONFIG_RZV_DMAC_ADC_CHANNEL,
 #else
-  .adc = DMAC_CHANNEL_UNASSIGNED,
+  [DMAC_PERIPH_ADC]      = DMAC_CHANNEL_UNASSIGNED,
 #endif
 #ifdef CONFIG_RZV_DMAC_SDHI_CHANNEL
-  .sdhi = CONFIG_RZV_DMAC_SDHI_CHANNEL,
+  [DMAC_PERIPH_SDHI]     = CONFIG_RZV_DMAC_SDHI_CHANNEL,
 #else
-  .sdhi = DMAC_CHANNEL_UNASSIGNED,
+  [DMAC_PERIPH_SDHI]     = DMAC_CHANNEL_UNASSIGNED,
 #endif
 };
+
+/* Peripheral name table for debug messages — indexed by rzv2h_dmac_periph_t */
+
+static const char * const g_dmac_periph_names[DMAC_PERIPH_COUNT] =
+{
+  [DMAC_PERIPH_UART0_RX] = "uart0_rx",
+  [DMAC_PERIPH_UART0_TX] = "uart0_tx",
+  [DMAC_PERIPH_UART1_RX] = "uart1_rx",
+  [DMAC_PERIPH_UART1_TX] = "uart1_tx",
+  [DMAC_PERIPH_UART2_RX] = "uart2_rx",
+  [DMAC_PERIPH_UART2_TX] = "uart2_tx",
+  [DMAC_PERIPH_I2C0]     = "i2c0",
+  [DMAC_PERIPH_I2C1]     = "i2c1",
+  [DMAC_PERIPH_I2C2]     = "i2c2",
+  [DMAC_PERIPH_SPI0_RX]  = "spi0_rx",
+  [DMAC_PERIPH_SPI0_TX]  = "spi0_tx",
+  [DMAC_PERIPH_SPI1_RX]  = "spi1_rx",
+  [DMAC_PERIPH_SPI1_TX]  = "spi1_tx",
+  [DMAC_PERIPH_ADC]      = "adc",
+  [DMAC_PERIPH_SDHI]     = "sdhi",
+};
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: rzv2h_dmac_check_collisions
+ *
+ * Description:
+ *   Runtime channel collision detection (H4). Panics if any two peripherals
+ *   are assigned the same DMAC channel number.  O(n²) but called once at
+ *   board init so cost is negligible.
+ *
+ ****************************************************************************/
+
+static void rzv2h_dmac_check_collisions(void)
+{
+  int i;
+  int j;
+
+  for (i = 0; i < DMAC_PERIPH_COUNT; i++)
+    {
+      if (g_dmac_channel_map[i] < 0)
+        {
+          continue;
+        }
+
+      for (j = i + 1; j < DMAC_PERIPH_COUNT; j++)
+        {
+          DMAC_COLLISION_CHECK(g_dmac_channel_map[i],
+                               g_dmac_channel_map[j],
+                               g_dmac_periph_names[i],
+                               g_dmac_periph_names[j]);
+        }
+    }
+}
 
 /****************************************************************************
  * Public Functions
@@ -154,159 +246,67 @@ static struct
  * Name: rzv2h_dmac_setup
  *
  * Description:
- *   Initialize the DMAC for the RDK-RZV2H board. This function initializes
- *   all DMAC units that have channels assigned via Kconfig.
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
+ *   Initialize the DMAC for the RDK-RZV2H board.
+ *   1. Check for channel collisions (panics on conflict).
+ *   2. Initialize each DMAC unit that has at least one assigned channel.
  *
  ****************************************************************************/
 
 int rzv2h_dmac_setup(void)
 {
-  int ret;
-  bool units_used[5] = { false, false, false, false, false };
+  bool units_used[RZV_DMAC_NUM_UNITS];
+  int  i;
+  int  ret;
 
-  dmainfo("RDK-RZV2H: Initializing DMAC\n");
+  dmainfo("RDK-RZV2H: initializing DMAC\n");
 
-  /* Determine which DMAC units are in use based on channel assignments */
+  /* Step 1: collision detection */
 
-  if (g_dmac_channels.uart0_rx >= 0)
+  rzv2h_dmac_check_collisions();
+
+  /* Step 2: determine which units are needed */
+
+  memset(units_used, 0, sizeof(units_used));
+
+  for (i = 0; i < DMAC_PERIPH_COUNT; i++)
     {
-      units_used[g_dmac_channels.uart0_rx / 16] = true;
-    }
-
-  if (g_dmac_channels.uart0_tx >= 0)
-    {
-      units_used[g_dmac_channels.uart0_tx / 16] = true;
-    }
-
-  if (g_dmac_channels.uart1_rx >= 0)
-    {
-      units_used[g_dmac_channels.uart1_rx / 16] = true;
-    }
-
-  if (g_dmac_channels.uart1_tx >= 0)
-    {
-      units_used[g_dmac_channels.uart1_tx / 16] = true;
-    }
-
-  if (g_dmac_channels.uart2_rx >= 0)
-    {
-      units_used[g_dmac_channels.uart2_rx / 16] = true;
-    }
-
-  if (g_dmac_channels.uart2_tx >= 0)
-    {
-      units_used[g_dmac_channels.uart2_tx / 16] = true;
-    }
-
-  if (g_dmac_channels.i2c0 >= 0)
-    {
-      units_used[g_dmac_channels.i2c0 / 16] = true;
-    }
-
-  if (g_dmac_channels.i2c1 >= 0)
-    {
-      units_used[g_dmac_channels.i2c1 / 16] = true;
-    }
-
-  if (g_dmac_channels.i2c2 >= 0)
-    {
-      units_used[g_dmac_channels.i2c2 / 16] = true;
-    }
-
-  if (g_dmac_channels.spi0_rx >= 0)
-    {
-      units_used[g_dmac_channels.spi0_rx / 16] = true;
-    }
-
-  if (g_dmac_channels.spi0_tx >= 0)
-    {
-      units_used[g_dmac_channels.spi0_tx / 16] = true;
-    }
-
-  if (g_dmac_channels.spi1_rx >= 0)
-    {
-      units_used[g_dmac_channels.spi1_rx / 16] = true;
-    }
-
-  if (g_dmac_channels.spi1_tx >= 0)
-    {
-      units_used[g_dmac_channels.spi1_tx / 16] = true;
-    }
-
-  if (g_dmac_channels.adc >= 0)
-    {
-      units_used[g_dmac_channels.adc / 16] = true;
-    }
-
-  if (g_dmac_channels.sdhi >= 0)
-    {
-      units_used[g_dmac_channels.sdhi / 16] = true;
-    }
-
-  /* Initialize units that are in use */
-
-  for (int i = 0; i < 5; i++)
-    {
-      if (units_used[i])
+      int ch = g_dmac_channel_map[i];
+      if (ch >= 0 && ch < RZV_DMAC_MAX_CHANNELS)
         {
-          /* Initialize first channel of each unit to trigger unit init */
-
-          ret = rzv_dmac_channel_initialize(i * 16);
-          if (ret < 0)
-            {
-              dmaerr("Failed to initialize DMAC unit %d: %d\n", i, ret);
-              return ret;
-            }
-
-          dmainfo("DMAC unit %d initialized\n", i);
+          units_used[ch / RZV_DMAC_CHANNELS_PER_UNIT] = true;
         }
     }
 
-  /* Print channel allocation summary */
+  /* Step 3: initialize units that are in use */
+
+  for (i = 0; i < RZV_DMAC_NUM_UNITS; i++)
+    {
+      if (!units_used[i])
+        {
+          continue;
+        }
+
+      /* Pass first channel of the unit to trigger unit init */
+
+      ret = rzv_dmac_channel_initialize(i * RZV_DMAC_CHANNELS_PER_UNIT);
+      if (ret < 0)
+        {
+          dmaerr("Failed to initialize DMAC unit %d: %d\n", i, ret);
+          return ret;
+        }
+
+      dmainfo("DMAC unit %d initialized\n", i);
+    }
 
 #ifdef CONFIG_RZV_DMAC_DEBUG
-  dmainfo("DMAC Channel Assignments:\n");
-  if (g_dmac_channels.uart0_rx >= 0)
+  dmainfo("DMAC channel assignments:\n");
+  for (i = 0; i < DMAC_PERIPH_COUNT; i++)
     {
-      dmainfo("  UART0 RX: Channel %d\n", g_dmac_channels.uart0_rx);
-    }
-
-  if (g_dmac_channels.uart0_tx >= 0)
-    {
-      dmainfo("  UART0 TX: Channel %d\n", g_dmac_channels.uart0_tx);
-    }
-
-  if (g_dmac_channels.uart1_rx >= 0)
-    {
-      dmainfo("  UART1 RX: Channel %d\n", g_dmac_channels.uart1_rx);
-    }
-
-  if (g_dmac_channels.uart1_tx >= 0)
-    {
-      dmainfo("  UART1 TX: Channel %d\n", g_dmac_channels.uart1_tx);
-    }
-
-  if (g_dmac_channels.spi0_rx >= 0)
-    {
-      dmainfo("  SPI0 RX: Channel %d\n", g_dmac_channels.spi0_rx);
-    }
-
-  if (g_dmac_channels.spi0_tx >= 0)
-    {
-      dmainfo("  SPI0 TX: Channel %d\n", g_dmac_channels.spi0_tx);
-    }
-
-  if (g_dmac_channels.i2c0 >= 0)
-    {
-      dmainfo("  I2C0: Channel %d\n", g_dmac_channels.i2c0);
-    }
-
-  if (g_dmac_channels.sdhi >= 0)
-    {
-      dmainfo("  SDHI: Channel %d\n", g_dmac_channels.sdhi);
+      if (g_dmac_channel_map[i] >= 0)
+        {
+          dmainfo("  %-12s: channel %d\n",
+                  g_dmac_periph_names[i], g_dmac_channel_map[i]);
+        }
     }
 #endif
 
@@ -317,85 +317,29 @@ int rzv2h_dmac_setup(void)
  * Name: rzv2h_dmac_get_channel
  *
  * Description:
- *   Get the DMA channel assigned to a specific peripheral.
+ *   Get the DMA channel assigned to a peripheral by enum ID.
+ *   Replaces the old runtime strcmp loop (M7).
  *
  * Input Parameters:
- *   peripheral - Peripheral identifier (e.g., "uart0_rx", "spi0_tx")
+ *   periph - Peripheral identifier (rzv2h_dmac_periph_t enum value).
  *
  * Returned Value:
- *   Channel number (0-79) on success; -1 if not assigned or invalid.
+ *   Channel number (0-79) on success; -1 if unassigned.
  *
  ****************************************************************************/
 
-int rzv2h_dmac_get_channel(const char *peripheral)
+int rzv2h_dmac_get_channel(rzv2h_dmac_periph_t periph)
 {
-  if (peripheral == NULL)
+  /* D17-fix: rzv2h_dmac_periph_t is an unsigned enum; `periph < 0` is
+   * always false.  Cast to unsigned to make the comparison explicit and
+   * suppress any compiler warning about mixed signed/unsigned comparison. */
+
+  if ((unsigned int)periph >= (unsigned int)DMAC_PERIPH_COUNT)
     {
-      return -1;
+      return DMAC_CHANNEL_UNASSIGNED;
     }
 
-  if (strcmp(peripheral, "uart0_rx") == 0)
-    {
-      return g_dmac_channels.uart0_rx;
-    }
-  else if (strcmp(peripheral, "uart0_tx") == 0)
-    {
-      return g_dmac_channels.uart0_tx;
-    }
-  else if (strcmp(peripheral, "uart1_rx") == 0)
-    {
-      return g_dmac_channels.uart1_rx;
-    }
-  else if (strcmp(peripheral, "uart1_tx") == 0)
-    {
-      return g_dmac_channels.uart1_tx;
-    }
-  else if (strcmp(peripheral, "uart2_rx") == 0)
-    {
-      return g_dmac_channels.uart2_rx;
-    }
-  else if (strcmp(peripheral, "uart2_tx") == 0)
-    {
-      return g_dmac_channels.uart2_tx;
-    }
-  else if (strcmp(peripheral, "i2c0") == 0)
-    {
-      return g_dmac_channels.i2c0;
-    }
-  else if (strcmp(peripheral, "i2c1") == 0)
-    {
-      return g_dmac_channels.i2c1;
-    }
-  else if (strcmp(peripheral, "i2c2") == 0)
-    {
-      return g_dmac_channels.i2c2;
-    }
-  else if (strcmp(peripheral, "spi0_rx") == 0)
-    {
-      return g_dmac_channels.spi0_rx;
-    }
-  else if (strcmp(peripheral, "spi0_tx") == 0)
-    {
-      return g_dmac_channels.spi0_tx;
-    }
-  else if (strcmp(peripheral, "spi1_rx") == 0)
-    {
-      return g_dmac_channels.spi1_rx;
-    }
-  else if (strcmp(peripheral, "spi1_tx") == 0)
-    {
-      return g_dmac_channels.spi1_tx;
-    }
-  else if (strcmp(peripheral, "adc") == 0)
-    {
-      return g_dmac_channels.adc;
-    }
-  else if (strcmp(peripheral, "sdhi") == 0)
-    {
-      return g_dmac_channels.sdhi;
-    }
-
-  return -1;
+  return g_dmac_channel_map[periph];
 }
 
 #endif /* CONFIG_RZV_DMAC */

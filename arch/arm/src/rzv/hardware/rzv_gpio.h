@@ -394,7 +394,28 @@
 #define RZV_GPIO_ELC_DPTC_OFFSET                         0x37E8  /* ELC_DPTC */
 #define RZV_GPIO_PFC_ELC_ELSR2_OFFSET                    0x37E9  /* PFC_ELC_ELSR2 */
 #define RZV_GPIO_PFC_OSCBYPS_OFFSET                      0x3BD8  /* PFC_OSCBYPS */
-#define RZV_GPIO_PWPR_OFFSET                             0x3BDC  /* PWPR */
+#define RZV_GPIO_PWPR_OFFSET                             0x3BDC  /* PWPR (32-bit) */
+
+/* PWPR Register bit definitions for RZV2H.
+ * Phase-03 fix [High-5, audit §2, §8]: RZV2H uses REGWE_A/REGWE_B semantics,
+ * NOT RA-style BOWI/PFSWE. PWPR is a 32-bit register (8-bit writes may be
+ * silently dropped on AXI bus). Always use 32-bit RMW.
+ *
+ * Source: FSP bsp_feature.h (rzv2h/cr):
+ *   BSP_FEATURE_IOPORT_PFC_PWPR_REGWE_A_OFFSET = 6U
+ *   BSP_FEATURE_IOPORT_PFC_PWPR_REGWE_A_MASK   = 0xFFFFFFBF  (clears bit 6)
+ *   BSP_FEATURE_IOPORT_PFC_PWPR_REGWE_B_OFFSET = 5U
+ *   BSP_FEATURE_IOPORT_PFC_PWPR_REGWE_B_MASK   = 0xFFFFFFDF  (clears bit 5)
+ *
+ * Enable  PFC/PMC write: *pwpr = (*pwpr & REGWE_A_MASK) | REGWE_A_BIT
+ * Disable PFC/PMC write: *pwpr = (*pwpr & REGWE_A_MASK)
+ */
+#define RZV_GPIO_PWPR_REGWE_A_OFFSET  6U
+#define RZV_GPIO_PWPR_REGWE_A_BIT     (1U << RZV_GPIO_PWPR_REGWE_A_OFFSET)
+#define RZV_GPIO_PWPR_REGWE_A_MASK    (0xFFFFFFBFU)  /* preserve all except bit6 */
+#define RZV_GPIO_PWPR_REGWE_B_OFFSET  5U
+#define RZV_GPIO_PWPR_REGWE_B_BIT     (1U << RZV_GPIO_PWPR_REGWE_B_OFFSET)
+#define RZV_GPIO_PWPR_REGWE_B_MASK    (0xFFFFFFDFU)  /* preserve all except bit5 */
 #define RZV_GPIO_PFC_FILONOFF_IRQ_OFFSET                 0x3BE0  /* PFC_FILONOFF_IRQ */
 #define RZV_GPIO_PFC_FILNUM_IRQ_OFFSET                   0x3BE4  /* PFC_FILNUM_IRQ */
 #define RZV_GPIO_PFC_FILCLKSEL_IRQ_OFFSET                0x3BE8  /* PFC_FILCLKSEL_IRQ */
@@ -402,6 +423,52 @@
 #define RZV_GPIO_PFC_FILNUM_DMAC_REQ_OFFSET              0x3BF0  /* PFC_FILNUM_DMAC_REQ */
 #define RZV_GPIO_PFC_FILCLKSEL_DMAC_REQ_OFFSET           0x3BF4  /* PFC_FILCLKSEL_DMAC_REQ */
 #define RZV_GPIO_PFC_OEN_OFFSET                          0x3C18  /* PFC_OEN */
+
+/* GP-group register offset macros for NuttX ports 0-11 (= HW ports 20-2B).
+ *
+ * Phase-03 fix [High-6, High-7, High-8, audit §2]: Replace hand-rolled
+ * IOLH/PUPD formulas in rzv_gpio.c with these lookup macros.
+ *
+ * FSP source (bsp_feature.h rzv2h/cr):
+ *   BSP_FEATURE_IOPORT_GP_REG_BASE_NUM = 20  (FSP GP group base = port 0x20)
+ *   FSP IOLH GP formula: offset = IOLH20_L + port*8  (port is 0-based in GP)
+ *   FSP PUPD GP formula: offset = PUPD20_L + port*8
+ *   FSP ISEL GP formula: offset = ISEL20_L + port*8
+ *
+ * For NuttX port N (0-11), pin P (0-7 → _L, 8-15 → _H):
+ *   IOLH_L offset = RZV_GPIO_IOLH20_L_OFFSET + N*8
+ *   IOLH_H offset = RZV_GPIO_IOLH20_L_OFFSET + N*8 + 4
+ *   PUPD_L offset = RZV_GPIO_PUPD20_L_OFFSET + N*8
+ *   PUPD_H offset = RZV_GPIO_PUPD20_L_OFFSET + N*8 + 4
+ *   ISEL_L offset = RZV_GPIO_ISEL20_L_OFFSET + N*8
+ *   ISEL_H offset = RZV_GPIO_ISEL20_L_OFFSET + N*8 + 4
+ *
+ * These macros replace the old formulas:
+ *   OLD (wrong): iolh_offset = 0x0FFC + (port+3)*8  — used SP-group base
+ *   OLD (wrong): pupd_offset = 0x1C10 + (port-5)*8  — missing ports 0-4
+ *   OLD (wrong): isel_offset = 0x2CE8 + port*8      — formula was coincidentally
+ *                                                      correct but unsourced
+ */
+#define RZV_GPIO_GP_IOLH_L_OFFSET(port) \
+    (RZV_GPIO_IOLH20_L_OFFSET + (uint32_t)(port) * 8U)
+#define RZV_GPIO_GP_IOLH_H_OFFSET(port) \
+    (RZV_GPIO_IOLH20_L_OFFSET + (uint32_t)(port) * 8U + 4U)
+#define RZV_GPIO_GP_PUPD_L_OFFSET(port) \
+    (RZV_GPIO_PUPD20_L_OFFSET + (uint32_t)(port) * 8U)
+#define RZV_GPIO_GP_PUPD_H_OFFSET(port) \
+    (RZV_GPIO_PUPD20_L_OFFSET + (uint32_t)(port) * 8U + 4U)
+#define RZV_GPIO_GP_ISEL_L_OFFSET(port) \
+    (RZV_GPIO_ISEL20_L_OFFSET + (uint32_t)(port) * 8U)
+#define RZV_GPIO_GP_ISEL_H_OFFSET(port) \
+    (RZV_GPIO_ISEL20_L_OFFSET + (uint32_t)(port) * 8U + 4U)
+#define RZV_GPIO_GP_SR_L_OFFSET(port) \
+    (RZV_GPIO_SR20_L_OFFSET + (uint32_t)(port) * 8U)
+#define RZV_GPIO_GP_SR_H_OFFSET(port) \
+    (RZV_GPIO_SR20_L_OFFSET + (uint32_t)(port) * 8U + 4U)
+#define RZV_GPIO_GP_NOD_L_OFFSET(port) \
+    (RZV_GPIO_NOD20_L_OFFSET + (uint32_t)(port) * 8U)
+#define RZV_GPIO_GP_NOD_H_OFFSET(port) \
+    (RZV_GPIO_NOD20_L_OFFSET + (uint32_t)(port) * 8U + 4U)
 
 /* GPIO Register Addresses *************************************************/
 

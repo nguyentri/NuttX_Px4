@@ -39,6 +39,8 @@
 #include <arch/board/board.h>
 #include "arm_internal.h"
 #include "rdk-rzv2h.h"
+#include "rzv_gpio.h"
+#include "rzv2h_sci_i2c.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -71,8 +73,22 @@
 int board_bringup(void)
 {
   int ret = 0;
+  int first_error = 0;  /* audit finding #10: preserve first failure; ret is
+                         * overwritten by each subsystem so errors are swallowed.
+                         * first_error captures the earliest non-zero status. */
 
   syslog(LOG_INFO, "NuttX: RDK-RZV2H Board bring-up starting...\n");
+
+#ifdef CONFIG_RZV_GPIO_IRQ
+  /* Phase-03 [High-12, audit §4]: Initialize GPIO IRQ slot table.
+   * Sets icu_slot sentinel to -1 in all entries. BSS zero-init leaves
+   * icu_slot=0, which equals a valid NuttX IRQ causing false "attached" state.
+   * Must be called before any rzv_gpiosetevent() invocation.
+   * Source: rzv_gpio.h rzv_gpio_irq_initialize().
+   */
+  rzv_gpio_irq_initialize();
+  syslog(LOG_INFO, "GPIO IRQ subsystem initialized\n");
+#endif
 
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
@@ -81,6 +97,7 @@ int board_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
+      if (first_error == 0) first_error = ret;
     }
   else
     {
@@ -99,6 +116,7 @@ int board_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+      if (first_error == 0) first_error = ret;
     }
   else
     {
@@ -150,53 +168,15 @@ int board_bringup(void)
 #endif
 #endif
 
-#if defined(CONFIG_RZV_SCI0_I2C) || defined(CONFIG_RZV_SCI1_I2C) || \
-    defined(CONFIG_RZV_SCI2_I2C) || defined(CONFIG_RZV_SCI3_I2C)
-  /* Initialize SCI I2C buses (Simple I2C mode) */
+#ifdef CONFIG_RZV_SCI_I2C
+  /* Initialize SCI-B Simple-I2C master channels */
 
-#ifdef CONFIG_RZV_SCI0_I2C
-  if (board_sci_i2c_initialize(0) != NULL)
+  ret = rzv2h_sci_i2c_setup();
+  if (ret < 0)
     {
-      syslog(LOG_INFO, "SCI0 I2C initialized successfully\n");
+      syslog(LOG_ERR, "ERROR: Failed to initialize SCI I2C: %d\n", ret);
+      if (first_error == 0) first_error = ret;
     }
-  else
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize SCI0 I2C\n");
-    }
-#endif
-
-#ifdef CONFIG_RZV_SCI1_I2C
-  if (board_sci_i2c_initialize(1) != NULL)
-    {
-      syslog(LOG_INFO, "SCI1 I2C initialized successfully\n");
-    }
-  else
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize SCI1 I2C\n");
-    }
-#endif
-
-#ifdef CONFIG_RZV_SCI2_I2C
-  if (board_sci_i2c_initialize(2) != NULL)
-    {
-      syslog(LOG_INFO, "SCI2 I2C initialized successfully\n");
-    }
-  else
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize SCI2 I2C\n");
-    }
-#endif
-
-#ifdef CONFIG_RZV_SCI3_I2C
-  if (board_sci_i2c_initialize(3) != NULL)
-    {
-      syslog(LOG_INFO, "SCI3 I2C initialized successfully\n");
-    }
-  else
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize SCI3 I2C\n");
-    }
-#endif
 #endif
 
 #ifdef CONFIG_RZV_SPI
@@ -206,6 +186,7 @@ int board_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SPI: %d\n", ret);
+      if (first_error == 0) first_error = ret;
     }
   else
     {
@@ -220,6 +201,7 @@ int board_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize XSPI paramfs: %d\n", ret);
+      if (first_error == 0) first_error = ret;
     }
 #endif
 
@@ -230,6 +212,7 @@ int board_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SCI SPI: %d\n", ret);
+      if (first_error == 0) first_error = ret;
     }
   else
     {
@@ -244,6 +227,7 @@ int board_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize ADC: %d\n", ret);
+      if (first_error == 0) first_error = ret;
     }
   else
     {
@@ -258,6 +242,7 @@ int board_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize Ethernet: %d\n", ret);
+      if (first_error == 0) first_error = ret;
     }
   else
     {
@@ -272,6 +257,7 @@ int board_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize GPT PWM: %d\n", ret);
+      if (first_error == 0) first_error = ret;
     }
   else
     {
@@ -286,6 +272,7 @@ int board_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize WDT: %d\n", ret);
+      if (first_error == 0) first_error = ret;
     }
   else
     {
@@ -300,6 +287,7 @@ int board_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize GTM timers: %d\n", ret);
+      if (first_error == 0) first_error = ret;
     }
   else
     {
@@ -314,7 +302,10 @@ int board_bringup(void)
 #endif
 
   syslog(LOG_INFO, "NuttX: RDK-RZV2H Board bring-up complete\n");
-  return ret;
+
+  /* audit finding #10: return first error seen, not the last subsystem's ret */
+
+  return first_error;
 }
 
 /****************************************************************************

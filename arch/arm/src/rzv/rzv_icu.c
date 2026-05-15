@@ -49,13 +49,24 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* SELECT interrupt GIC SPI base.
+ * FSP bsp_feature.h: BSP_FEATURE_ICU_FIXED_INTSEL_COUNT = 353.
+ * INTR8SEL slot N routes to GIC SPI INTID (353 + N).
+ * NuttX IRQ number == GIC INTID (RZV_IRQ_FIRST=32 is GIC SPI 0 offset,
+ * so irq index = 32 + slot_gic_spi_offset = 32 + (353-32) + N = 353 + N).
+ * Do NOT add RZV_IRQ_FIRST again — it is already baked into the INTID.
+ * Fix: CRIT-1 — drop RZV_IRQ_FIRST from irq computation.
+ */
+
+#define RZV_INTC_SEL_SPI_BASE   (353)
+
 /****************************************************************************
  * Type Definitions
  ****************************************************************************/
 
 typedef struct
 {
-  int el;           /* Event Link number */
+  /* audit Medium-17: removed unused 'el' field — never consulted after set */
   xcpt_t handler;   /* Handler function */
   void *arg;        /* Argument for handler */
 } rzv_icu_handler_t;
@@ -117,9 +128,37 @@ static int rzv_icu_interrupt(int irq, void *context, void *arg)
 
 void rzv_icu_clear_irq(int irq)
 {
-  if (irq >= RZV_ELC_IRQ0 && irq <= RZV_ELC_IRQ15) {
-    rzv_icu_clear_irq_status(1 << (irq - RZV_ELC_IRQ0));
-  }
+  /* CRIT-3 fix: caller passes GIC INTID (353..481 for SEL slots).
+   * rzv_icu_clear_irq_status clears ISCLR bits 0-15 for external IRQ0-15.
+   * External IRQ pins are routed via ELC event IDs 0-15 which map to
+   * GIC INTID = ELC_IRQ0_INTID + irq_line. We cannot safely reverse-map
+   * a generic SEL slot back to an ELC IRQ line here without a table lookup,
+   * so we skip ISCLR for SEL-routed IRQs (GIC EOI handles level clearing).
+   * Only write ISCLR when the GIC INTID falls in the direct ELC IRQ0-15
+   * SPI range. RZV_ELC_IRQ_SPI_BASE is the GIC INTID for ELC IRQ0.
+   *
+   * Note: for edge-triggered external IRQ pins the GIC line deasserts
+   * automatically on EOI; ISCLR write is required only for level-triggered
+   * external IRQ pins to drop the ICU sticky flag.
+   * Until RZV_ELC_IRQ_SPI_BASE is confirmed from the UM, guard this path
+   * so it is a no-op rather than writing to a random GIC line.
+   */
+
+#ifdef RZV_ELC_IRQ_SPI_BASE
+  if (irq >= RZV_ELC_IRQ_SPI_BASE &&
+      irq < (RZV_ELC_IRQ_SPI_BASE + 16))
+    {
+      rzv_icu_clear_irq_status(
+        (uint16_t)(1u << (unsigned)(irq - RZV_ELC_IRQ_SPI_BASE)));
+    }
+#else
+  /* Without a confirmed GIC INTID base for ELC IRQ0-15, suppress ISCLR
+   * write. Edge-triggered external IRQs will work; level-triggered will
+   * re-fire until the source deasserts.  Define RZV_ELC_IRQ_SPI_BASE in
+   * rzv_icu.h once confirmed from RZ/V2H UM Table 12.x.
+   */
+  (void)irq;
+#endif
 }
 
 /****************************************************************************
@@ -138,7 +177,6 @@ void rzv_icu_initialize(void)
 
   for (i = 0; i < RZV_IRQ_ICU_SLOTS; i++)
     {
-      g_icu_handlers[i].el = -1;
       g_icu_handlers[i].handler = NULL;
       g_icu_handlers[i].arg = NULL;
     }
@@ -162,12 +200,11 @@ int rzv_icu_attach(int event, xcpt_t handler, void *arg, bool irq_enable)
 {
   irqstate_t flags;
   int slot;
+  int irq;
 
-  /* Critical section to prevent race condition in slot allocation */
+  /* Critical section: slot allocation only */
 
   flags = enter_critical_section();
-
-  /* Find next available slot */
 
   if (g_icu_slot >= RZV_IRQ_ICU_SLOTS)
     {
@@ -179,29 +216,55 @@ int rzv_icu_attach(int event, xcpt_t handler, void *arg, bool irq_enable)
 
   leave_critical_section(flags);
 
-  /* Set up the ICU event link */
+  /* CRIT-1 fix: INTR8SEL slot N maps to GIC SPI INTID (353 + N).
+   * NuttX IRQ number == GIC INTID directly (irq table index == INTID).
+   * Do NOT add RZV_IRQ_FIRST; that would double-offset to 385+N where
+   * no handler is registered in the GIC distributor.
+   */
 
-  rzv_icu_set_event(slot, event);
+  irq = RZV_INTC_SEL_SPI_BASE + slot;
 
-  /* Store the handler information */
+  /* MED-11 / M15 fix: Correct attach order to close handler-NULL race.
+   * If the event line is already asserted (level pin held active), the GIC
+   * may dispatch immediately between set_event and irq_attach → NULL deref.
+   *
+   * Safe order:
+   *   1. Store handler ptr FIRST (before any routing that could fire)
+   *   2. Register with NuttX irq_attach (installs GIC handler shim)
+   *   3. Clear any stale GIC pending bit
+   *   4. Program INTR8SEL slot → event (last — enables routing)
+   *   5. Enable GIC line (only if irq_enable requested)
+   */
 
-  g_icu_handlers[slot].el = event;
+  /* 1. Store handler before any HW routing can cause dispatch */
+
   g_icu_handlers[slot].handler = handler;
   g_icu_handlers[slot].arg = arg;
 
-  /* Attach the common interrupt handler */
+  /* 2. Register NuttX IRQ handler shim */
 
-  irq_attach(RZV_IRQ_FIRST + slot, rzv_icu_interrupt,
-             (void *)(uintptr_t)slot);
+  irq_attach(irq, rzv_icu_interrupt, (void *)(uintptr_t)slot);
 
-  /* Enable the interrupt */
+  /* 3. Clear any stale pending bit at GIC distributor */
+
+  putreg32(1u << (irq % 32),
+           RZV_INTC_GIC_GICD_ICDICPR(irq >> 5));
+
+  /* 4. Program INTR8SEL (critical section inside rzv_icu_set_event).
+   *    After this, a pending event will route to the GIC line. The handler
+   *    is already installed so no NULL window exists.
+   */
+
+  rzv_icu_set_event(slot, event);
+
+  /* 5. Enable GIC line if requested */
 
   if (irq_enable)
     {
-      up_enable_irq(RZV_IRQ_FIRST + slot);
+      up_enable_irq(irq);
     }
 
-  return RZV_IRQ_FIRST + slot;
+  return irq;
 }
 
 /****************************************************************************
@@ -215,70 +278,62 @@ int rzv_icu_attach(int event, xcpt_t handler, void *arg, bool irq_enable)
 
 int rzv_icu_detach(int icu_irq)
 {
+  irqstate_t flags;
   int slot;
   int i;
+  int highest_used;
 
-  /* Validate IRQ range */
+  /* CRIT-1 fix: IRQ base is SEL_SPI_BASE (not RZV_IRQ_FIRST + SEL_SPI_BASE) */
 
-  if (icu_irq < RZV_IRQ_FIRST ||
-      icu_irq >= (RZV_IRQ_FIRST + RZV_IRQ_ICU_SLOTS))
+  if (icu_irq < RZV_INTC_SEL_SPI_BASE ||
+      icu_irq >= (RZV_INTC_SEL_SPI_BASE + RZV_IRQ_ICU_SLOTS))
     {
       return -EINVAL;
     }
 
-  slot = icu_irq - RZV_IRQ_FIRST;
-
-  /* Validate slot range */
+  slot = icu_irq - RZV_INTC_SEL_SPI_BASE;
 
   if (slot < 0 || slot >= RZV_IRQ_ICU_SLOTS)
     {
       return -EINVAL;
     }
 
-  /* Check if slot is actually in use */
-
   if (g_icu_handlers[slot].handler == NULL)
     {
       return -ENOENT;
     }
 
-  /* Disable the interrupt */
+  /* Disable and detach before clearing handler */
 
   up_disable_irq(icu_irq);
-
-  /* Detach the interrupt handler */
-
   irq_detach(icu_irq);
 
-  /* Clear the handler information */
-
-  g_icu_handlers[slot].el = -1;
-  g_icu_handlers[slot].handler = NULL;
-  g_icu_handlers[slot].arg = NULL;
-
-  /* Clear the ICU event link */
+  /* Clear the INTR8SEL routing slot */
 
   rzv_icu_set_event(slot, 0);
 
-  /* Compact the slot allocation if this was the last allocated slot */
+  g_icu_handlers[slot].handler = NULL;
+  g_icu_handlers[slot].arg = NULL;
 
-  if (slot == (g_icu_slot - 1))
+  /* audit High-10: slot compaction under critical section.
+   * Always re-scan all slots to find true highest-used; never regress
+   * g_icu_slot while a higher-numbered slot is still live.
+   */
+
+  flags = enter_critical_section();
+
+  highest_used = -1;
+  for (i = 0; i < (int)RZV_IRQ_ICU_SLOTS; i++)
     {
-      /* Find the highest used slot */
-
-      int highest_used = -1;
-      for (i = 0; i < g_icu_slot; i++)
+      if (g_icu_handlers[i].handler != NULL)
         {
-          if (g_icu_handlers[i].handler != NULL)
-            {
-              highest_used = i;
-            }
+          highest_used = i;
         }
-
-      /* Update g_icu_slot to the next available slot after highest used */
-
-      g_icu_slot = highest_used + 1;
     }
+
+  g_icu_slot = highest_used + 1;
+
+  leave_critical_section(flags);
 
   return OK;
 }
@@ -301,6 +356,7 @@ int rzv_icu_detach(int icu_irq)
 
 int rzv_icu_set_event(int icu_slot, int event)
 {
+  irqstate_t flags;
   uint32_t regaddr;
   uint32_t regval;
   int reg_num;
@@ -317,8 +373,9 @@ int rzv_icu_set_event(int icu_slot, int event)
       return -EINVAL;
     }
 
-  /* Calculate which INTR8SEL register and which slot within it
-   * Each INTR8SEL register has 3 slots of 10 bits each
+  /* Each INTR8SEL register holds 3 x 10-bit slot fields.
+   * audit High-9: RMW must be under critical section — concurrent writes
+   * to different slots sharing the same 32-bit register would clobber each.
    */
 
   reg_num = RZV_INTC_INTR8SEL_REG(icu_slot);
@@ -326,17 +383,15 @@ int rzv_icu_set_event(int icu_slot, int event)
   shift = RZV_INTC_INTR8SEL_SHIFT(slot_idx);
 
   regaddr = RZV_INTC_INTR8SEL(reg_num);
+
+  flags = enter_critical_section();
+
   regval = getreg32(regaddr);
-
-  /* Clear the event field for this slot */
-
   regval &= ~(RZV_INTC_INTR8SEL_MASK << shift);
-
-  /* Set the new event number */
-
   regval |= ((event & RZV_INTC_INTR8SEL_MASK) << shift);
-
   putreg32(regval, regaddr);
+
+  leave_critical_section(flags);
 
   return OK;
 }
@@ -416,6 +471,15 @@ int rzv_icu_set_irq_detect(int irq_num, uint8_t mode)
 
   putreg32(regval, RZV_ICU_IITSR);
 
+  /* MED-9 fix: propagate edge/level config to GIC ICDICFR.
+   * External IRQ0-15 pins route through ELC; the GIC SPI for each external
+   * IRQ line is at a fixed INTID.  We only know the ICU IRQ line number
+   * (0-15) here, not the GIC INTID — that mapping requires the UM Table 12.x
+   * which is UNVERIFIED.  The call site (rzv_gpio.c) should call
+   * rzv_gic_set_irq_type(icu_irq_gic_intid, edge) after rzv_icu_attach()
+   * returns the GIC INTID. See rzv_gpiosetevent() for the correct call point.
+   */
+
   return OK;
 }
 
@@ -487,37 +551,15 @@ uint16_t rzv_icu_get_irq_status(void)
 
 int rzv_icu_set_irq_filter(int irq_num, uint8_t filter_clock)
 {
-  uint32_t regval;
-  uint32_t shift;
+  /* CRIT-4 fix: IFLTC at 0x1C is RESERVED in INTC block.
+   * IRQ digital filter lives in GPIO peripheral (FILONOFF/FILNUM/FILCLKSEL).
+   * This function is a no-op stub; filter must be configured via GPIO driver.
+   * Return -ENOSYS to signal that the operation is not available here.
+   */
 
-  if (irq_num < 0 || irq_num > 15)
-    {
-      return -EINVAL;
-    }
-
-  if (filter_clock > ICU_FCLKSEL_PCLKL_DIV64)
-    {
-      return -EINVAL;
-    }
-
-  /* Read current IFLTC value */
-
-  regval = getreg32(RZV_ICU_IFLTC);
-
-  /* Clear the filter clock bits for this IRQ */
-
-  shift = irq_num * 2;
-  regval &= ~(0x3 << shift);
-
-  /* Set new filter clock */
-
-  regval |= (filter_clock << shift);
-
-  /* Write back to register */
-
-  putreg32(regval, RZV_ICU_IFLTC);
-
-  return OK;
+  (void)irq_num;
+  (void)filter_clock;
+  return -ENOSYS;
 }
 
 /****************************************************************************
@@ -529,7 +571,7 @@ int rzv_icu_set_irq_filter(int irq_num, uint8_t filter_clock)
  *   to provide a consistent ICU-level API.
  *
  * Input Parameters:
- *   icu_irq  - ICU IRQ number (RZV_IRQ_FIRST + slot)
+ *   icu_irq  - ICU IRQ number returned by rzv_icu_attach() (GIC INTID)
  *   priority - Priority level (0-31 for GIC, 0 = highest, 31 = lowest)
  *              GIC uses bits[7:3] for 5-bit priority control
  *              Typical values: 0-7 (high), 8-15 (medium), 16-31 (low)
@@ -547,10 +589,10 @@ int rzv_icu_set_irq_filter(int irq_num, uint8_t filter_clock)
 
 int rzv_icu_set_priority(int icu_irq, int priority)
 {
-  /* Validate IRQ range */
+  /* Validate IRQ range — CRIT-1: SEL IRQs start at 353 (no RZV_IRQ_FIRST) */
 
-  if (icu_irq < RZV_IRQ_FIRST ||
-      icu_irq >= (RZV_IRQ_FIRST + RZV_IRQ_ICU_SLOTS))
+  if (icu_irq < RZV_INTC_SEL_SPI_BASE ||
+      icu_irq >= (RZV_INTC_SEL_SPI_BASE + RZV_IRQ_ICU_SLOTS))
     {
       return -EINVAL;
     }
@@ -633,7 +675,9 @@ int rzv_icu_filter_config(int icu_irq, uint8_t mode, bool filter_enable,
 
 void rzv_icu_enable_wakeup(uint32_t mask)
 {
-  /* TODO: Implement wakeup enable if supported by RZV2H */
+  /* audit Low-19: wakeup not implemented on RZV2H CR8 target */
+
+  (void)mask;
 }
 
 /****************************************************************************
@@ -651,7 +695,9 @@ void rzv_icu_enable_wakeup(uint32_t mask)
 
 void rzv_icu_disable_wakeup(uint32_t mask)
 {
-  /* TODO: Implement wakeup disable if supported by RZV2H */
+  /* audit Low-19: wakeup not implemented on RZV2H CR8 target */
+
+  (void)mask;
 }
 
 /****************************************************************************
@@ -682,9 +728,15 @@ void rzv_icu_disable_wakeup(uint32_t mask)
 
 void rzv_icu_clear_nmi_status(uint16_t mask)
 {
-  /* Write 1 to clear NMI status bit */
+  /* audit Low-18: honor mask parameter.
+   * RZV2H NSCLR bit 0 = NCLR (write-1-to-clear).  The NMI is single-bit
+   * on this SoC, so only bit 0 of mask is relevant.
+   */
 
-  putreg32(1, RZV_ICU_NSCLR);
+  if (mask & 0x1u)
+    {
+      putreg32(INTC_NSCLR_NCLR, RZV_ICU_NSCLR);
+    }
 }
 
 /****************************************************************************
@@ -720,35 +772,16 @@ bool rzv_icu_get_nmi_status(void)
 
 int rzv_icu_set_nmi_filter(bool filter_enable, uint8_t filter_clock)
 {
-  uint32_t regval;
+  /* CRIT-4 fix: NMIFLTC at 0x0C is RESERVED in INTC block.
+   * NMI digital filter lives in GPIO peripheral (FILONOFF/FILNUM/FILCLKSEL).
+   * Only NMITR (0x08) is valid here — NMI trigger edge selection (NFLTEN
+   * bit in NMITR is NOT a filter-enable but a rising/falling edge select).
+   * This function is a no-op stub; NMI filter must be configured via GPIO.
+   */
 
-  if (filter_clock > ICU_FCLKSEL_PCLKL_DIV64)
-    {
-      return -EINVAL;
-    }
-
-  /* Configure filter clock */
-
-  regval = getreg32(RZV_ICU_NMIFLTC);
-  regval &= ~ICU_NMIFLTC_FCLKSEL_MASK;
-  regval |= (filter_clock << ICU_NMIFLTC_FCLKSEL_SHIFT);
-  putreg32(regval, RZV_ICU_NMIFLTC);
-
-  /* Enable/disable filter */
-
-  regval = getreg32(RZV_ICU_NMITR);
-  if (filter_enable)
-    {
-      regval |= ICU_NMITR_NFLTEN;
-    }
-  else
-    {
-      regval &= ~ICU_NMITR_NFLTEN;
-    }
-
-  putreg32(regval, RZV_ICU_NMITR);
-
-  return OK;
+  (void)filter_enable;
+  (void)filter_clock;
+  return -ENOSYS;
 }
 
 /****************************************************************************
@@ -765,7 +798,10 @@ int rzv_icu_set_nmi_filter(bool filter_enable, uint8_t filter_clock)
 
 void rzv_icu_enable_nmi(uint16_t mask)
 {
-  /* TODO: Implement NMI enable if needed */
+  /* audit Low-19: NMI enable unimplemented on RZV2H CR8 (single-bit NMI,
+   * always enabled by hardware at reset). No register write needed. */
+
+  (void)mask;
 }
 
 /****************************************************************************
@@ -782,5 +818,7 @@ void rzv_icu_enable_nmi(uint16_t mask)
 
 void rzv_icu_disable_nmi(uint16_t mask)
 {
-  /* TODO: Implement NMI disable if needed */
+  /* audit Low-19: NMI disable not supported on RZV2H (NMI is non-maskable). */
+
+  (void)mask;
 }

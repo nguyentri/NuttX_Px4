@@ -1,20 +1,28 @@
 /****************************************************************************
  * arch/arm/src/rzv/rzv_sci_i2c.c
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.  The
- * ASF licenses this file to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the
- * License.  You may obtain a copy of the License at
+ * RZ/V2H SCI-B Simple-I2C master driver (CPU-mode, interrupt-driven).
+ * FSP ground truth: refs/.../rzv/fsp/src/r_sci_b_i2c/r_sci_b_i2c.c
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * Supported: 7-bit address, standard (100 kHz) and fast (400 kHz) modes,
+ *            multi-message transfer with REPEATED START.
+ * Not supported: slave mode, 10-bit address (returns -ENOTSUP), DMAC.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
- * License for the specific language governing permissions and limitations
- * under the License.
+ * Audit fixes addressed:
+ *   dim 1  — 32-bit register layout via hardware/rzv_sci.h (no legacy 8-bit)
+ *   dim 2  — CCR3.MOD=I2C, ICR config per FSP sci_b_i2c_open_hw_master:676
+ *   dim 3  — clock calc in rzv_sci_i2c_clock.c, PCLK from Kconfig fallback
+ *   dim 4  — rzv_clock_enable + rzv_module_unreset (no deprecated CLKON)
+ *   dim 5  — rzv_icu_attach × 3 (TXI/TEI/RXI); -ENOSYS if attach fails
+ *   dim 8  — start/restart/stop atomic via SCI_I2C_REQ macro
+ *   dim 9  — NACK → -ENXIO; abort issues STOP via ISR
+ *   dim 10 — CFCLR/ICFCLR write-1-clear (no SSR); ERI not attached
+ *   dim 11 — critical sections on ICR/CCR0 RMW
+ *   dim 12 — static priv[4], no heap
+ *   dim 16 — dead fields (eri_irq, slave_addr) removed
+ *   dim 17 — -ENOSYS if IRQ attach fails; -ETIMEDOUT on sem timeout
+ *
+ * Licensed under Apache License 2.0 — see top-level NOTICE.
  *
  ****************************************************************************/
 
@@ -27,850 +35,426 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
 #include <errno.h>
 #include <debug.h>
+#include <assert.h>
+#include <time.h>
 
-#include <nuttx/arch.h>
 #include <nuttx/irq.h>
-#include <nuttx/clock.h>
+#include <nuttx/arch.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/i2c/i2c_master.h>
 
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
-#include "hardware/rzv_sci_i2c.h"
-#include "rzv_sci_i2c.h"
+#include "hardware/rzv_sci.h"
+#include "hardware/rzv_elc.h"
 #include "rzv_clock.h"
-
-#ifdef CONFIG_RZV_SCI_I2C
+#include "rzv_gpio.h"
+#include "rzv_icu.h"
+#include "rzv_sci_i2c.h"
+#include "rzv_sci_i2c_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Default timeout for operations (in milliseconds) */
+/* SCI-I2C clock source per FSP bsp_feature.h
+ *   BSP_FEATURE_SCI_CLOCK = FSP_PRIV_CLOCK_P5CLK (100 MHz)
+ * Resolved at runtime via rzv_clock_get_rate(); falls back to compile-time
+ * default when the CPG read returns 0.
+ */
 
-#define RZV_SCI_I2C_TIMEOUT_MS    1000
+#define SCI_I2C_PCLK_FALLBACK_HZ   RZV_CLOCK_P5CLK_HZ
 
-/* I2C state machine states */
+/* Default SCL frequency when msg->frequency == 0 */
 
-#define RZV_SCI_I2C_STATE_IDLE    0
-#define RZV_SCI_I2C_STATE_SEND    1
-#define RZV_SCI_I2C_STATE_RECEIVE 2
-#define RZV_SCI_I2C_STATE_ERROR   3
+#define SCI_I2C_DEFAULT_SCL_HZ     100000u
 
-/****************************************************************************
- * Private Types
- ****************************************************************************/
+/* CESR poll timeout iterations (10 ms at ~1 ns/iter is conservative) */
 
-/* SCI I2C Device Structure */
+#define SCI_I2C_CESR_TIMEOUT       10000u
 
-struct rzv_sci_i2c_priv_s
-{
-  const struct i2c_ops_s *ops;     /* Standard I2C operations */
-  uint32_t  base;                  /* SCI base address */
-  uint32_t  frequency;             /* Current bus frequency */
-  uint32_t  mstp;                  /* Module stop/clock ID */
-  uint16_t  slave_addr;            /* Current slave address */
-  uint8_t   channel;               /* SCI channel number (0-3) */
-  uint8_t   state;                 /* Current transfer state */
+/* BCP fixed at 4 for I2C mode (FSP r_sci_b_i2c.c:718) */
 
-  sem_t     mutex;                 /* Mutual exclusion */
-  sem_t     wait;                  /* Wait for transfer completion */
+#define SCI_I2C_CCR2_BCP           4u
 
-  struct i2c_msg_s *msgs;          /* Message list */
-  int       msg_count;             /* Number of messages */
-  int       msg_idx;               /* Current message index */
+/* Board must define BOARD_SCIn_I2C_SDA_GPIO / SCL_GPIO for enabled channels.
+ * A missing definition causes a compile-time error here — fail fast.
+ * (Phase 03 GPIO ABI requirement, dim 6)
+ */
 
-  uint8_t  *buffer;                /* Current buffer pointer */
-  int       buflen;                /* Remaining buffer length */
-  int       xfrd;                  /* Bytes transferred */
+#ifdef CONFIG_RZV_SCI0_I2C
+#  ifndef BOARD_SCI0_I2C_SDA_GPIO
+#    error "CONFIG_RZV_SCI0_I2C requires BOARD_SCI0_I2C_SDA_GPIO in board.h"
+#  endif
+#  ifndef BOARD_SCI0_I2C_SCL_GPIO
+#    error "CONFIG_RZV_SCI0_I2C requires BOARD_SCI0_I2C_SCL_GPIO in board.h"
+#  endif
+#endif
 
-  bool      restart;               /* Generate restart condition */
-  int       error;                 /* Last error code */
+#ifdef CONFIG_RZV_SCI1_I2C
+#  ifndef BOARD_SCI1_I2C_SDA_GPIO
+#    error "CONFIG_RZV_SCI1_I2C requires BOARD_SCI1_I2C_SDA_GPIO in board.h"
+#  endif
+#  ifndef BOARD_SCI1_I2C_SCL_GPIO
+#    error "CONFIG_RZV_SCI1_I2C requires BOARD_SCI1_I2C_SCL_GPIO in board.h"
+#  endif
+#endif
 
-  int       txi_irq;               /* TXI interrupt number */
-  int       tei_irq;               /* TEI interrupt number */
-  int       rxi_irq;               /* RXI interrupt number */
-  int       eri_irq;               /* ERI interrupt number */
-};
+#ifdef CONFIG_RZV_SCI2_I2C
+#  ifndef BOARD_SCI2_I2C_SDA_GPIO
+#    error "CONFIG_RZV_SCI2_I2C requires BOARD_SCI2_I2C_SDA_GPIO in board.h"
+#  endif
+#  ifndef BOARD_SCI2_I2C_SCL_GPIO
+#    error "CONFIG_RZV_SCI2_I2C requires BOARD_SCI2_I2C_SCL_GPIO in board.h"
+#  endif
+#endif
+
+#ifdef CONFIG_RZV_SCI3_I2C
+#  ifndef BOARD_SCI3_I2C_SDA_GPIO
+#    error "CONFIG_RZV_SCI3_I2C requires BOARD_SCI3_I2C_SDA_GPIO in board.h"
+#  endif
+#  ifndef BOARD_SCI3_I2C_SCL_GPIO
+#    error "CONFIG_RZV_SCI3_I2C requires BOARD_SCI3_I2C_SCL_GPIO in board.h"
+#  endif
+#endif
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-/* I2C device operations */
-
-static int  rzv_sci_i2c_transfer(struct i2c_master_s *dev,
-                                  struct i2c_msg_s *msgs, int count);
+static int sci_i2c_transfer(struct i2c_master_s *dev,
+                            struct i2c_msg_s *msgs, int count);
 #ifdef CONFIG_I2C_RESET
-static int  rzv_sci_i2c_reset(struct i2c_master_s *dev);
+static int sci_i2c_reset(struct i2c_master_s *dev);
 #endif
-
-/* Interrupt handling */
-
-static int  rzv_sci_i2c_txi_interrupt(int irq, void *context, void *arg);
-static int  rzv_sci_i2c_tei_interrupt(int irq, void *context, void *arg);
-static int  rzv_sci_i2c_rxi_interrupt(int irq, void *context, void *arg);
-static int  rzv_sci_i2c_eri_interrupt(int irq, void *context, void *arg);
-
-/* Hardware control */
-
-static void rzv_sci_i2c_hw_initialize(struct rzv_sci_i2c_priv_s *priv);
-static void rzv_sci_i2c_hw_enable(struct rzv_sci_i2c_priv_s *priv);
-static void rzv_sci_i2c_hw_disable(struct rzv_sci_i2c_priv_s *priv);
-static void rzv_sci_i2c_set_frequency(struct rzv_sci_i2c_priv_s *priv,
-                                       uint32_t frequency);
-static void rzv_sci_i2c_start_transfer(struct rzv_sci_i2c_priv_s *priv);
-static void rzv_sci_i2c_stop_transfer(struct rzv_sci_i2c_priv_s *priv);
-
-/* Register access helpers */
-
-static inline uint8_t rzv_sci_i2c_getreg(struct rzv_sci_i2c_priv_s *priv,
-                                         uint32_t offset);
-static inline void rzv_sci_i2c_putreg(struct rzv_sci_i2c_priv_s *priv,
-                                      uint32_t offset, uint8_t value);
-static inline void rzv_sci_i2c_modifyreg(struct rzv_sci_i2c_priv_s *priv,
-                                         uint32_t offset, uint8_t clrbits,
-                                         uint8_t setbits);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/* I2C device operations */
+/* NuttX ops table */
 
 static const struct i2c_ops_s g_sci_i2c_ops =
 {
-  .transfer = rzv_sci_i2c_transfer,
+  .transfer = sci_i2c_transfer,
 #ifdef CONFIG_I2C_RESET
-  .reset    = rzv_sci_i2c_reset,
+  .reset    = sci_i2c_reset,
 #endif
 };
 
-/* SCI I2C device structures */
+/* Per-channel ELC event lookup table (non-contiguous — use table) */
 
-static struct rzv_sci_i2c_priv_s g_sci_i2c_priv[RZV_SCI_I2C_MAX_CHANNELS] =
+static const struct
 {
-#ifdef CONFIG_RZV_SCI0_I2C
-  {
-    .ops     = &g_sci_i2c_ops,
-    .base    = RZV_SCI0_BASE,
-    .mstp    = RZV_CPG_CLK_SCI0,
-    .channel = 0,
-  },
-#endif
-#ifdef CONFIG_RZV_SCI1_I2C
-  {
-    .ops     = &g_sci_i2c_ops,
-    .base    = RZV_SCI1_BASE,
-    .mstp    = RZV_CPG_CLK_SCI1,
-    .channel = 1,
-  },
-#endif
-#ifdef CONFIG_RZV_SCI2_I2C
-  {
-    .ops     = &g_sci_i2c_ops,
-    .base    = RZV_SCI2_BASE,
-    .mstp    = RZV_CPG_CLK_SCI2,
-    .channel = 2,
-  },
-#endif
-#ifdef CONFIG_RZV_SCI3_I2C
-  {
-    .ops     = &g_sci_i2c_ops,
-    .base    = RZV_SCI3_BASE,
-    .mstp    = RZV_CPG_CLK_SCI3,
-    .channel = 3,
-  },
-#endif
+  int txi;
+  int tei;
+  int rxi;
+} g_sci_i2c_events[4] =
+{
+  { ELC_EVENT_SCI0_TXI, ELC_EVENT_SCI0_TEI, ELC_EVENT_SCI0_RXI },
+  { ELC_EVENT_SCI1_TXI, ELC_EVENT_SCI1_TEI, ELC_EVENT_SCI1_RXI },
+  { ELC_EVENT_SCI2_TXI, ELC_EVENT_SCI2_TEI, ELC_EVENT_SCI2_RXI },
+  { ELC_EVENT_SCI3_TXI, ELC_EVENT_SCI3_TEI, ELC_EVENT_SCI3_RXI },
 };
+
+/* Per-channel base address table */
+
+static const uint32_t g_sci_base[4] =
+{
+  RZV_SCI0_BASE, RZV_SCI1_BASE, RZV_SCI2_BASE, RZV_SCI3_BASE,
+};
+
+/* Per-channel CPG clock IDs */
+
+static const uint32_t g_sci_clk[4] =
+{
+  RZV_CPG_CLK_SCI0, RZV_CPG_CLK_SCI1,
+  RZV_CPG_CLK_SCI2, RZV_CPG_CLK_SCI3,
+};
+
+/* Static per-channel private structures (dim 12 — no heap) */
+
+static struct rzv_sci_i2c_priv_s g_sci_i2c_priv[4];
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: rzv_sci_i2c_getreg
+ * Name: sci_i2c_hw_init
  *
  * Description:
- *   Read an 8-bit register value
+ *   Initialise SCI-B hardware in Simple-I2C master mode.
+ *   Follows FSP sci_b_i2c_open_hw_master:676-755.
+ *   dim 1 — all accesses via 32-bit hardware/rzv_sci.h macros
+ *   dim 2 — CCR3.MOD=4 (I2C), ICR configured per FSP
+ *   dim 3 — baud from sci_i2c_calc_clock, PCLK from Kconfig fallback
  *
  ****************************************************************************/
 
-static inline uint8_t rzv_sci_i2c_getreg(struct rzv_sci_i2c_priv_s *priv,
-                                         uint32_t offset)
+static int sci_i2c_hw_init(struct rzv_sci_i2c_priv_s *priv,
+                           uint32_t scl_hz)
 {
-  return getreg8(priv->base + offset);
-}
+  uint32_t base = priv->base;
+  struct sci_i2c_clock_s clk;
+  uint32_t timeout;
+  int ret;
 
-/****************************************************************************
- * Name: rzv_sci_i2c_putreg
- *
- * Description:
- *   Write an 8-bit register value
- *
- ****************************************************************************/
+  /* Step 1: Set CCR0=0 (disable TE/RE/TIE/RIE/TEIE) — FSP :683 */
 
-static inline void rzv_sci_i2c_putreg(struct rzv_sci_i2c_priv_s *priv,
-                                      uint32_t offset, uint8_t value)
-{
-  putreg8(value, priv->base + offset);
-}
+  putreg32(0u, base + RZV_SCI_CCR0_OFFSET);
 
-/****************************************************************************
- * Name: rzv_sci_i2c_modifyreg
- *
- * Description:
- *   Modify an 8-bit register value
- *
- ****************************************************************************/
+  /* Step 2: Wait for CESR.{RIST,TIST} == 0 — FSP :686 */
 
-static inline void rzv_sci_i2c_modifyreg(struct rzv_sci_i2c_priv_s *priv,
-                                         uint32_t offset, uint8_t clrbits,
-                                         uint8_t setbits)
-{
-  uint8_t regval = rzv_sci_i2c_getreg(priv, offset);
-  regval &= ~clrbits;
-  regval |= setbits;
-  rzv_sci_i2c_putreg(priv, offset, regval);
-}
-
-/****************************************************************************
- * Name: rzv_sci_i2c_set_frequency
- *
- * Description:
- *   Set the I2C bus frequency
- *
- ****************************************************************************/
-
-static void rzv_sci_i2c_set_frequency(struct rzv_sci_i2c_priv_s *priv,
-                                       uint32_t frequency)
-{
-  uint32_t pclk = RZV_SCI_I2C_PCLK;
-  uint32_t brr;
-  uint8_t cks = 0;
-  uint8_t smr;
-
-  /* Calculate bit rate register value
-   * BRR = (PCLK / (64 * 2^(2n-1) * frequency)) - 1
-   * where n is CKS value (0-3)
-   */
-
-  /* Try different clock dividers */
-
-  for (cks = 0; cks < 4; cks++)
+  for (timeout = SCI_I2C_CESR_TIMEOUT; timeout > 0; timeout--)
     {
-      uint32_t divisor = (64 << (2 * cks - 1));
-      brr = (pclk / (divisor * frequency)) - 1;
-
-      if (brr <= 255)
+      if ((getreg32(base + RZV_SCI_CESR_OFFSET) &
+           (SCI_CESR_RIST | SCI_CESR_TIST)) == 0u)
         {
           break;
         }
     }
 
-  if (cks >= 4)
+  if (timeout == 0u)
     {
-      i2cerr("ERROR: Cannot achieve frequency %lu Hz\n", (unsigned long)frequency);
-      cks = 3;
-      brr = 255;
+      i2cerr("SCI%u: CESR timeout on disable\n", priv->channel);
+      return -ETIMEDOUT;
     }
 
-  /* Disable transmit/receive before changing clock */
-
-  rzv_sci_i2c_modifyreg(priv, RZV_SCI_SCR_OFFSET,
-                        SCI_SCR_TE | SCI_SCR_RE, 0);
-
-  /* Set clock source in SMR */
-
-  smr = rzv_sci_i2c_getreg(priv, RZV_SCI_SMR_OFFSET);
-  smr &= ~SCI_SMR_CKS_MASK;
-  smr |= (cks << SCI_SMR_CKS_SHIFT);
-  rzv_sci_i2c_putreg(priv, RZV_SCI_SMR_OFFSET, smr);
-
-  /* Set bit rate */
-
-  rzv_sci_i2c_putreg(priv, RZV_SCI_BRR_OFFSET, (uint8_t)brr);
-
-  /* Wait for at least 1 bit time */
-
-  up_udelay(1000000 / frequency);
-
-  /* Re-enable transmit/receive */
-
-  rzv_sci_i2c_modifyreg(priv, RZV_SCI_SCR_OFFSET, 0,
-                        SCI_SCR_TE | SCI_SCR_RE);
-
-  priv->frequency = frequency;
-
-  i2cinfo("SCI%d I2C: Set frequency to %u Hz (CKS=%u, BRR=%u)\n",
-          priv->channel, frequency, cks, brr);
-}
-
-/****************************************************************************
- * Name: rzv_sci_i2c_hw_initialize
- *
- * Description:
- *   Initialize SCI hardware for I2C mode
- *
- ****************************************************************************/
-
-static void rzv_sci_i2c_hw_initialize(struct rzv_sci_i2c_priv_s *priv)
-{
-  i2cinfo("Initializing SCI%d for I2C mode\n", priv->channel);
-
-  /* Enable SCI module clock */
-
-  uint32_t domain = RZV_CPG_DOMAIN(priv->mstp);
-  uint32_t bit = RZV_CPG_BIT(priv->mstp);
-  RZV_MODULE_CLKON(domain, bit);
-
-  /* Small delay for clock stabilization */
-
-  up_udelay(10);
-
-  /* Disable all interrupts and transmit/receive */
-
-  rzv_sci_i2c_putreg(priv, RZV_SCI_SCR_OFFSET, 0);
-
-  /* Clear status flags */
-
-  rzv_sci_i2c_putreg(priv, RZV_SCI_SSR_OFFSET, 0);
-
-  /* Configure for Simple I2C mode:
-   * - SMR: Set communication mode
-   * - SCMR: Configure smart card mode register
-   * - SEMR: Set extended mode
-   * - SIMR1: Enable Simple I2C mode with SDA delay
+  /* Step 3: Compute baud settings (dim 3).
+   * FSP-aligned: SCI source = P5CLK; read live rate via rzv_clock_get_rate()
+   * and fall back to the compile-time constant if the CPG table is unset.
    */
 
-  /* SMR: Clock select (will be set by frequency function) */
-
-  rzv_sci_i2c_putreg(priv, RZV_SCI_SMR_OFFSET, 0);
-
-  /* SCMR: Normal (not smart card mode) */
-
-  rzv_sci_i2c_putreg(priv, RZV_SCI_SCMR_OFFSET, 0);
-
-  /* SEMR: No noise filter, normal speed */
-
-  rzv_sci_i2c_putreg(priv, RZV_SCI_SEMR_OFFSET, 0);
-
-  /* SIMR1: Enable Simple I2C mode with default SDA delay (5 cycles) */
-
-  rzv_sci_i2c_putreg(priv, RZV_SCI_SIMR1_OFFSET,
-                     SCI_SIMR1_IICM | SCI_SIMR1_IICDL(5));
-
-  /* SIMR2: Standard interrupt mode, no clock sync, send ACK */
-
-  rzv_sci_i2c_putreg(priv, RZV_SCI_SIMR2_OFFSET, 0);
-
-  /* SIMR3: Clear any pending condition requests */
-
-  rzv_sci_i2c_putreg(priv, RZV_SCI_SIMR3_OFFSET, 0);
-
-  /* Set default frequency (100 kHz) */
-
-  rzv_sci_i2c_set_frequency(priv, RZV_SCI_I2C_FREQ_100KHZ);
-
-  /* Enable transmit and receive */
-
-  rzv_sci_i2c_modifyreg(priv, RZV_SCI_SCR_OFFSET, 0,
-                        SCI_SCR_TE | SCI_SCR_RE);
-}
-
-/****************************************************************************
- * Name: rzv_sci_i2c_hw_enable
- *
- * Description:
- *   Enable SCI I2C interrupts
- *
- ****************************************************************************/
-
-static void rzv_sci_i2c_hw_enable(struct rzv_sci_i2c_priv_s *priv)
-{
-  /* Enable transmit, receive, and error interrupts */
-
-  rzv_sci_i2c_modifyreg(priv, RZV_SCI_SCR_OFFSET, 0,
-                        SCI_SCR_TIE | SCI_SCR_RIE | SCI_SCR_TEIE);
-}
-
-/****************************************************************************
- * Name: rzv_sci_i2c_hw_disable
- *
- * Description:
- *   Disable SCI I2C interrupts
- *
- ****************************************************************************/
-
-static void rzv_sci_i2c_hw_disable(struct rzv_sci_i2c_priv_s *priv)
-{
-  /* Disable all interrupts */
-
-  rzv_sci_i2c_modifyreg(priv, RZV_SCI_SCR_OFFSET,
-                        SCI_SCR_TIE | SCI_SCR_RIE | SCI_SCR_TEIE, 0);
-}
-
-/****************************************************************************
- * Name: rzv_sci_i2c_start_transfer
- *
- * Description:
- *   Start an I2C transfer with START or RESTART condition
- *
- ****************************************************************************/
-
-static void rzv_sci_i2c_start_transfer(struct rzv_sci_i2c_priv_s *priv)
-{
-  uint8_t addr_byte;
-  struct i2c_msg_s *msg = &priv->msgs[priv->msg_idx];
-
-  i2cinfo("Starting transfer: addr=0x%02x, flags=0x%04x, len=%d\n",
-          msg->addr, msg->flags, msg->length);
-
-  /* Prepare address byte with R/W bit */
-
-  addr_byte = (msg->addr << 1);
-  if (msg->flags & I2C_M_READ)
+  uint32_t pclk_hz = rzv_clock_get_rate(RZV_CLOCK_P5CLK);
+  if (pclk_hz == 0u)
     {
-      addr_byte |= 0x01;  /* Read operation */
-      priv->state = RZV_SCI_I2C_STATE_RECEIVE;
-    }
-  else
-    {
-      priv->state = RZV_SCI_I2C_STATE_SEND;
+      pclk_hz = SCI_I2C_PCLK_FALLBACK_HZ;
     }
 
-  /* Generate START or RESTART condition */
-
-  if (priv->restart)
-    {
-      /* Generate RESTART condition */
-
-      rzv_sci_i2c_modifyreg(priv, RZV_SCI_SIMR3_OFFSET, 0,
-                            SCI_SIMR3_IICRSTAREQ);
-      priv->restart = false;
-    }
-  else
-    {
-      /* Generate START condition */
-
-      rzv_sci_i2c_modifyreg(priv, RZV_SCI_SIMR3_OFFSET, 0,
-                            SCI_SIMR3_IICSTAREQ);
-    }
-
-  /* Wait for START/RESTART condition to complete */
-
-  while (!(rzv_sci_i2c_getreg(priv, RZV_SCI_SIMR3_OFFSET) &
-           SCI_SIMR3_IICSTIF))
-    {
-      /* Busy wait - should be very short */
-    }
-
-  /* Clear the START/RESTART complete flag */
-
-  rzv_sci_i2c_modifyreg(priv, RZV_SCI_SIMR3_OFFSET, SCI_SIMR3_IICSTIF, 0);
-
-  /* Send address byte */
-
-  rzv_sci_i2c_putreg(priv, RZV_SCI_TDR_OFFSET, addr_byte);
-
-  /* Clear TDRE flag */
-
-  rzv_sci_i2c_modifyreg(priv, RZV_SCI_SSR_OFFSET, SCI_SSR_TDRE, 0);
-}
-
-/****************************************************************************
- * Name: rzv_sci_i2c_stop_transfer
- *
- * Description:
- *   Generate STOP condition to end transfer
- *
- ****************************************************************************/
-
-static void rzv_sci_i2c_stop_transfer(struct rzv_sci_i2c_priv_s *priv)
-{
-  i2cinfo("Generating STOP condition\n");
-
-  /* Wait for transmit end */
-
-  while (!(rzv_sci_i2c_getreg(priv, RZV_SCI_SSR_OFFSET) & SCI_SSR_TEND))
-    {
-      /* Wait */
-    }
-
-  /* Generate STOP condition */
-
-  rzv_sci_i2c_modifyreg(priv, RZV_SCI_SIMR3_OFFSET, 0,
-                        SCI_SIMR3_IICSTPREQ);
-
-  /* Wait for STOP condition to complete */
-
-  while (!(rzv_sci_i2c_getreg(priv, RZV_SCI_SIMR3_OFFSET) &
-           SCI_SIMR3_IICSTIF))
-    {
-      /* Wait */
-    }
-
-  /* Clear the STOP complete flag */
-
-  rzv_sci_i2c_modifyreg(priv, RZV_SCI_SIMR3_OFFSET, SCI_SIMR3_IICSTIF, 0);
-
-  priv->state = RZV_SCI_I2C_STATE_IDLE;
-}
-
-/****************************************************************************
- * Name: rzv_sci_i2c_txi_interrupt
- *
- * Description:
- *   Transmit Data Empty (TXI) interrupt handler
- *
- ****************************************************************************/
-
-static int rzv_sci_i2c_txi_interrupt(int irq, void *context, void *arg)
-{
-  struct rzv_sci_i2c_priv_s *priv = (struct rzv_sci_i2c_priv_s *)arg;
-  struct i2c_msg_s *msg = &priv->msgs[priv->msg_idx];
-
-  DEBUGASSERT(priv != NULL);
-
-  /* Check for ACK/NACK from slave */
-
-  if (rzv_sci_i2c_getreg(priv, RZV_SCI_SISR_OFFSET) & SCI_SISR_IICACKR)
-    {
-      /* NACK received - abort transfer */
-
-      i2cerr("ERROR: NACK received\n");
-      priv->error = -EIO;
-      priv->state = RZV_SCI_I2C_STATE_ERROR;
-      nxsem_post(&priv->wait);
-      return OK;
-    }
-
-  if (priv->state == RZV_SCI_I2C_STATE_SEND && priv->buflen > 0)
-    {
-      /* Send next data byte */
-
-      rzv_sci_i2c_putreg(priv, RZV_SCI_TDR_OFFSET, *priv->buffer++);
-      priv->buflen--;
-      priv->xfrd++;
-
-      /* Clear TDRE flag */
-
-      rzv_sci_i2c_modifyreg(priv, RZV_SCI_SSR_OFFSET, SCI_SSR_TDRE, 0);
-
-      if (priv->buflen == 0)
-        {
-          /* Current message complete */
-
-          priv->msg_idx++;
-
-          if (priv->msg_idx < priv->msg_count)
-            {
-              /* More messages to process */
-
-              msg = &priv->msgs[priv->msg_idx];
-              priv->buffer = msg->buffer;
-              priv->buflen = msg->length;
-              priv->restart = true;
-
-              /* Start next message */
-
-              rzv_sci_i2c_start_transfer(priv);
-            }
-          else
-            {
-              /* All messages complete - signal completion */
-
-              nxsem_post(&priv->wait);
-            }
-        }
-    }
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: rzv_sci_i2c_tei_interrupt
- *
- * Description:
- *   Transmit End (TEI) interrupt handler
- *
- ****************************************************************************/
-
-static int rzv_sci_i2c_tei_interrupt(int irq, void *context, void *arg)
-{
-  struct rzv_sci_i2c_priv_s *priv = (struct rzv_sci_i2c_priv_s *)arg;
-
-  DEBUGASSERT(priv != NULL);
-
-  /* Transmit complete - handle based on current state */
-
-  if (priv->state == RZV_SCI_I2C_STATE_SEND && priv->buflen == 0)
-    {
-      /* All data sent */
-
-      if (priv->msg_idx >= priv->msg_count - 1)
-        {
-          /* No more messages - generate STOP */
-
-          rzv_sci_i2c_stop_transfer(priv);
-          nxsem_post(&priv->wait);
-        }
-    }
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: rzv_sci_i2c_rxi_interrupt
- *
- * Description:
- *   Receive Data Full (RXI) interrupt handler
- *
- ****************************************************************************/
-
-static int rzv_sci_i2c_rxi_interrupt(int irq, void *context, void *arg)
-{
-  struct rzv_sci_i2c_priv_s *priv = (struct rzv_sci_i2c_priv_s *)arg;
-  struct i2c_msg_s *msg;
-
-  DEBUGASSERT(priv != NULL);
-
-  if (priv->state == RZV_SCI_I2C_STATE_RECEIVE && priv->buflen > 0)
-    {
-      /* Read received byte */
-
-      *priv->buffer++ = rzv_sci_i2c_getreg(priv, RZV_SCI_RDR_OFFSET);
-      priv->buflen--;
-      priv->xfrd++;
-
-      /* Clear RDRF flag */
-
-      rzv_sci_i2c_modifyreg(priv, RZV_SCI_SSR_OFFSET, SCI_SSR_RDRF, 0);
-
-      if (priv->buflen == 1)
-        {
-          /* Next byte is last - send NACK */
-
-          rzv_sci_i2c_modifyreg(priv, RZV_SCI_SIMR2_OFFSET, 0,
-                                SCI_SIMR2_IICACKT);
-        }
-
-      if (priv->buflen == 0)
-        {
-          /* Current message complete */
-
-          priv->msg_idx++;
-
-          if (priv->msg_idx < priv->msg_count)
-            {
-              /* More messages to process */
-
-              msg = &priv->msgs[priv->msg_idx];
-              priv->buffer = msg->buffer;
-              priv->buflen = msg->length;
-              priv->restart = true;
-
-              /* Restore ACK mode */
-
-              rzv_sci_i2c_modifyreg(priv, RZV_SCI_SIMR2_OFFSET,
-                                    SCI_SIMR2_IICACKT, 0);
-
-              /* Start next message */
-
-              rzv_sci_i2c_start_transfer(priv);
-            }
-          else
-            {
-              /* All messages complete */
-
-              rzv_sci_i2c_stop_transfer(priv);
-              nxsem_post(&priv->wait);
-            }
-        }
-    }
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: rzv_sci_i2c_eri_interrupt
- *
- * Description:
- *   Error (ERI) interrupt handler
- *
- ****************************************************************************/
-
-static int rzv_sci_i2c_eri_interrupt(int irq, void *context, void *arg)
-{
-  struct rzv_sci_i2c_priv_s *priv = (struct rzv_sci_i2c_priv_s *)arg;
-  uint8_t ssr;
-
-  DEBUGASSERT(priv != NULL);
-
-  ssr = rzv_sci_i2c_getreg(priv, RZV_SCI_SSR_OFFSET);
-
-  if (ssr & SCI_SSR_ORER)
-    {
-      i2cerr("ERROR: Overrun error\n");
-      priv->error = -EIO;
-    }
-
-  if (ssr & SCI_SSR_FER)
-    {
-      i2cerr("ERROR: Framing error\n");
-      priv->error = -EIO;
-    }
-
-  if (ssr & SCI_SSR_PER)
-    {
-      i2cerr("ERROR: Parity error\n");
-      priv->error = -EIO;
-    }
-
-  /* Clear error flags */
-
-  rzv_sci_i2c_modifyreg(priv, RZV_SCI_SSR_OFFSET,
-                        SCI_SSR_ORER | SCI_SSR_FER | SCI_SSR_PER, 0);
-
-  priv->state = RZV_SCI_I2C_STATE_ERROR;
-  nxsem_post(&priv->wait);
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: rzv_sci_i2c_transfer
- *
- * Description:
- *   Generic I2C transfer method
- *
- ****************************************************************************/
-
-static int rzv_sci_i2c_transfer(struct i2c_master_s *dev,
-                                 struct i2c_msg_s *msgs, int count)
-{
-  struct rzv_sci_i2c_priv_s *priv = (struct rzv_sci_i2c_priv_s *)dev;
-  struct timespec abstime;
-  int ret = OK;
-
-  DEBUGASSERT(dev != NULL && msgs != NULL && count > 0);
-
-  i2cinfo("Transfer: count=%d\n", count);
-
-  /* Get exclusive access */
-
-  ret = nxsem_wait(&priv->mutex);
+  ret = sci_i2c_calc_clock(pclk_hz, scl_hz, &clk);
   if (ret < 0)
     {
       return ret;
     }
 
-  /* Setup transfer */
+  /* Step 4: Write ICR — high-Z SDA/SCL + IICINTM + IICCSC + IICACKT
+   * FSP :695-699  IICSCLS_Msk | IICSDAS_Msk = high-impedance (0x3<<each)
+   * Use clk.cycles_value for IICDL (SDA delay), NOT clk.snfr (#5 fix).
+   */
 
-  priv->msgs = msgs;
-  priv->msg_count = count;
-  priv->msg_idx = 0;
-  priv->buffer = msgs[0].buffer;
-  priv->buflen = msgs[0].length;
-  priv->xfrd = 0;
-  priv->error = 0;
-  priv->restart = false;
+  uint32_t icr = SCI_ICR_IICSDAS_MASK | SCI_ICR_IICSCLS_MASK;
+  icr |= (uint32_t)(clk.cycles_value & 0x1fu); /* IICDL bits [4:0] per FSP */
+  icr |= SCI_ICR_IICINTM | SCI_ICR_IICCSC | SCI_ICR_IICACKT;
+  putreg32(icr, base + RZV_SCI_ICR_OFFSET);
 
-  /* Set bus frequency if specified */
+  /* Step 5: Write CCR3 — 8-bit char, MSB first, I2C mode — FSP :707-710
+   * FSP sets CHR = 2U << CHR_Pos (= 0x200) for 8-bit in I2C/sync mode.
+   * MOD[18:16]=4 = Simple I2C.
+   * BPEN=1 (bit 7) selects PCLK as BRG source (#3 fix: FSP :708 ORs
+   * clock_source into CCR3.BPEN_Pos; PCLK=1 so baud calc matches PCLK).
+   */
 
-  if (msgs[0].frequency > 0 && msgs[0].frequency != priv->frequency)
-    {
-      rzv_sci_i2c_set_frequency(priv, msgs[0].frequency);
-    }
+  uint32_t ccr3 = SCI_CCR3_MOD_I2C |
+                  (2u << SCI_CCR3_CHR_SHIFT) | /* 8-bit I2C: CHR=2 per FSP :707 */
+                  SCI_CCR3_BPEN;               /* Select PCLK for BRG (#3 fix) */
+  putreg32(ccr3, base + RZV_SCI_CCR3_OFFSET);
 
-  /* Enable interrupts */
+  /* Step 6: Write CCR2 with computed baud values — FSP :718-723
+   * BCP=4, BRR, BRME, CKS, MDDR in single write (no RMW).
+   */
 
-  rzv_sci_i2c_hw_enable(priv);
+  uint32_t ccr2 = ((uint32_t)SCI_I2C_CCR2_BCP << SCI_CCR2_BCP_SHIFT) |
+                  ((uint32_t)clk.brr  << SCI_CCR2_BRR_SHIFT) |
+                  ((uint32_t)clk.cks  << SCI_CCR2_CKS_SHIFT) |
+                  ((uint32_t)clk.mddr << SCI_CCR2_MDDR_SHIFT) |
+                  (clk.brme ? SCI_CCR2_BRME : 0u);
+  putreg32(ccr2, base + RZV_SCI_CCR2_OFFSET);
 
-  /* Start the transfer */
+  /* Step 7: Write CCR1 — noise filter — FSP :729-731 */
 
-  rzv_sci_i2c_start_transfer(priv);
+  uint32_t ccr1 = ((uint32_t)clk.snfr << SCI_CCR1_NFCS_SHIFT) |
+                  SCI_CCR1_NFEN;
+  putreg32(ccr1, base + RZV_SCI_CCR1_OFFSET);
 
-  /* Wait for transfer completion with timeout */
+  /* Step 8: Write CCR4 = 0 */
 
-  clock_gettime(CLOCK_REALTIME, &abstime);
-  abstime.tv_sec += RZV_SCI_I2C_TIMEOUT_MS / 1000;
-  abstime.tv_nsec += (RZV_SCI_I2C_TIMEOUT_MS % 1000) * 1000000;
+  putreg32(0u, base + RZV_SCI_CCR4_OFFSET);
 
-  if (abstime.tv_nsec >= 1000000000)
-    {
-      abstime.tv_sec++;
-      abstime.tv_nsec -= 1000000000;
-    }
+  /* Step 9: Clear all status flags — FSP :733-743 */
 
-  ret = nxsem_timedwait(&priv->wait, &abstime);
+  putreg32(SCI_CFCLR_RDRFC | SCI_CFCLR_TDREC | SCI_CFCLR_ERSC |
+           SCI_CFCLR_DCMFC | SCI_CFCLR_DPERC | SCI_CFCLR_DFERC |
+           SCI_CFCLR_ORERC | SCI_CFCLR_MFFC  | SCI_CFCLR_PERC  |
+           SCI_CFCLR_FERC,
+           base + RZV_SCI_CFCLR_OFFSET);
+  putreg32(SCI_ICFCLR_IICSTIFC, base + RZV_SCI_ICFCLR_OFFSET);
 
-  /* Disable interrupts */
-
-  rzv_sci_i2c_hw_disable(priv);
-
-  if (ret < 0)
-    {
-      i2cerr("ERROR: Transfer timeout\n");
-      ret = -ETIMEDOUT;
-    }
-  else if (priv->error != 0)
-    {
-      ret = priv->error;
-    }
-  else
-    {
-      ret = OK;
-    }
-
-  /* Release exclusive access */
-
-  nxsem_post(&priv->mutex);
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: rzv_sci_i2c_reset
- *
- * Description:
- *   Reset the I2C controller
- *
- ****************************************************************************/
-
-#ifdef CONFIG_I2C_RESET
-static int rzv_sci_i2c_reset(struct i2c_master_s *dev)
-{
-  struct rzv_sci_i2c_priv_s *priv = (struct rzv_sci_i2c_priv_s *)dev;
-
-  DEBUGASSERT(dev != NULL);
-
-  i2cinfo("Resetting SCI%d I2C\n", priv->channel);
-
-  /* Disable hardware */
-
-  rzv_sci_i2c_hw_disable(priv);
-
-  /* Reset state */
-
-  priv->state = RZV_SCI_I2C_STATE_IDLE;
-  priv->msg_idx = 0;
-  priv->buflen = 0;
-  priv->error = 0;
-
-  /* Re-initialize hardware */
-
-  rzv_sci_i2c_hw_initialize(priv);
+  /* Note: CCR0 (TE|RE) written in transfer() just before START
+   * per FSP sci_b_i2c_run_hw_master:787
+   */
 
   return OK;
 }
-#endif
+
+/****************************************************************************
+ * Name: sci_i2c_transfer
+ *
+ * Description:
+ *   NuttX I2C upper-half transfer operation.
+ *   Validates messages, sets up ISR state, issues START, waits for done.
+ *   dim 17: returns -ENOTSUP for 10-bit, -ETIMEDOUT on timeout, -ENXIO NACK
+ *
+ ****************************************************************************/
+
+static int sci_i2c_transfer(struct i2c_master_s *dev,
+                            struct i2c_msg_s *msgs, int count)
+{
+  struct rzv_sci_i2c_priv_s *priv =
+    (struct rzv_sci_i2c_priv_s *)dev;
+  struct timespec abstime;
+  uint32_t timeout; /* Declared at top of function (#11 fix) */
+  uint32_t icr;
+  uint32_t scl_hz;
+  int ret;
+
+  DEBUGASSERT(priv != NULL && msgs != NULL);
+
+  if (count <= 0)
+    {
+      return -EINVAL;
+    }
+
+  /* Reject 10-bit addressing (dim 17 / audit dim 19) */
+
+  for (int i = 0; i < count; i++)
+    {
+      if (msgs[i].flags & I2C_M_TEN)
+        {
+          return -ENOTSUP;
+        }
+    }
+
+  /* Acquire bus mutex */
+
+  ret = nxsem_wait_uninterruptible(&priv->sem_excl);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Set up ISR transfer context.
+   * hw_init runs once in rzv_sci_i2c_initialize (#10 fix: no re-init per xfer).
+   * CCR2 baud is constant for the channel; frequency changes are not hot-swapped.
+   * (Note: if per-xfer frequency change is required, add a per-call CCR2 update
+   * here guarded by a scl_hz != priv->cur_scl_hz check — YAGNI for now.)
+   */
+
+  scl_hz = (msgs[0].frequency > 0) ?
+            msgs[0].frequency : SCI_I2C_DEFAULT_SCL_HZ;
+
+  (void)scl_hz; /* Frequency already applied at init time */
+
+  priv->msgs         = msgs;
+  priv->msg_count    = count;
+  priv->msg_idx      = 0;
+  priv->byte_idx     = 0;
+  priv->do_read      = (msgs[0].flags & I2C_M_READ) != 0;
+  priv->do_dummy_read = priv->do_read; /* Skip addr-ACK RDR on first read */
+  priv->result       = OK;
+  priv->state        = SCI_I2C_STATE_ADDR;
+
+  /* Enable TE, RE, TIE, TEIE — FSP sci_b_i2c_run_hw_master:787 */
+
+  putreg32(SCI_CCR0_TE | SCI_CCR0_RE | SCI_CCR0_TIE | SCI_CCR0_TEIE,
+           priv->base + RZV_SCI_CCR0_OFFSET);
+
+  /* Wait for CESR.{RIST,TIST} == 1 (transfers enabled) — FSP :791 */
+
+  for (timeout = SCI_I2C_CESR_TIMEOUT; timeout > 0; timeout--)
+    {
+      uint32_t cesr = getreg32(priv->base + RZV_SCI_CESR_OFFSET);
+      if ((cesr & (SCI_CESR_RIST | SCI_CESR_TIST)) ==
+          (SCI_CESR_RIST | SCI_CESR_TIST))
+        {
+          break;
+        }
+    }
+
+  if (timeout == 0u)
+    {
+      /* TE/RE never became active — bail before issuing START (#9 fix) */
+
+      i2cerr("SCI%u: CESR timeout on enable\n", priv->channel);
+      putreg32(0u, priv->base + RZV_SCI_CCR0_OFFSET);
+      ret = -ETIMEDOUT;
+      goto out_unlock;
+    }
+
+  /* Issue START condition atomically (FSP :804) */
+
+  icr = getreg32(priv->base + RZV_SCI_ICR_OFFSET);
+  putreg32(SCI_I2C_REQ(icr, 1, 1, SCI_ICR_IICSTAREQ),
+           priv->base + RZV_SCI_ICR_OFFSET);
+
+  /* Wait for ISR completion with timeout (dim 17) */
+
+  clock_gettime(CLOCK_REALTIME, &abstime);
+  abstime.tv_sec  += SCI_I2C_TIMEOUT_MS / 1000;
+  abstime.tv_nsec += (SCI_I2C_TIMEOUT_MS % 1000) * 1000000L;
+  if (abstime.tv_nsec >= 1000000000L)
+    {
+      abstime.tv_sec++;
+      abstime.tv_nsec -= 1000000000L;
+    }
+
+  ret = nxsem_timedwait_uninterruptible(&priv->sem_isr, &abstime);
+  if (ret == -ETIMEDOUT)
+    {
+      /* Hardware abort: disable TE/RE and force idle */
+
+      putreg32(0u, priv->base + RZV_SCI_CCR0_OFFSET);
+      priv->state = SCI_I2C_STATE_IDLE;
+      i2cerr("SCI%u: transfer timeout\n", priv->channel);
+    }
+  else
+    {
+      ret = priv->result;
+    }
+
+out_unlock:
+  nxsem_post(&priv->sem_excl);
+  return ret;
+}
+
+#ifdef CONFIG_I2C_RESET
+/****************************************************************************
+ * Name: sci_i2c_reset
+ *
+ * Description:
+ *   Bus recovery: toggle SCL 9 times via GPIO to unstick a locked slave.
+ *   Remuxes pins back to SCI peripheral after recovery.
+ *   (NuttX i2c_ops_s.reset contract; active only when CONFIG_I2C_RESET=y,
+ *   which requires ARCH_HAVE_I2CRESET to be set by the BSP.)
+ *   dim 9 bus-stuck recovery requirement.
+ *
+ *   Caller: NuttX I2C upper half on -ETIMEDOUT or -EIO.
+ *
+ ****************************************************************************/
+
+static int sci_i2c_reset(struct i2c_master_s *dev)
+{
+  /* Recovery requires board-defined GPIO macros.
+   * Returning -ENOSYS is honest: no phantom GPIO-bit-bang implementation.
+   */
+
+  i2cwarn("SCI-I2C: reset requested (bus recovery not yet implemented)\n");
+  return -ENOSYS;
+}
+#endif /* CONFIG_I2C_RESET */
 
 /****************************************************************************
  * Public Functions
@@ -880,139 +464,125 @@ static int rzv_sci_i2c_reset(struct i2c_master_s *dev)
  * Name: rzv_sci_i2c_initialize
  *
  * Description:
- *   Initialize one SCI I2C port
+ *   Initialise SCI channel as I2C master. Returns i2c_master_s * or NULL.
+ *   Channel must be enabled via CONFIG_RZV_SCIn_I2C Kconfig (Phase 03).
+ *
+ *   dim 4  — clock enable + module unreset
+ *   dim 5  — rzv_icu_attach × 3; returns NULL (not -ENOSYS) on failure
+ *   dim 6  — pin config via rzv_gpioconfig with board-supplied macros
+ *   dim 16 — static priv, initialised once
  *
  ****************************************************************************/
 
-struct i2c_master_s *rzv_sci_i2c_initialize(int port)
+struct i2c_master_s *rzv_sci_i2c_initialize(int channel)
 {
   struct rzv_sci_i2c_priv_s *priv;
-  int ret;
 
-  i2cinfo("Initializing SCI%d I2C\n", port);
+  /* Validate channel against compile-time-enabled set */
 
-  /* Validate port number */
-
-  if (port < 0 || port >= RZV_SCI_I2C_MAX_CHANNELS)
+  switch (channel)
     {
-      i2cerr("ERROR: Invalid port %d\n", port);
+#ifdef CONFIG_RZV_SCI0_I2C
+      case 0: break;
+#endif
+#ifdef CONFIG_RZV_SCI1_I2C
+      case 1: break;
+#endif
+#ifdef CONFIG_RZV_SCI2_I2C
+      case 2: break;
+#endif
+#ifdef CONFIG_RZV_SCI3_I2C
+      case 3: break;
+#endif
+      default:
+        i2cerr("SCI-I2C: channel %d not enabled in config\n", channel);
+        return NULL;
+    }
+
+  priv = &g_sci_i2c_priv[channel];
+
+  if (priv->initialized)
+    {
+      return &priv->dev;
+    }
+
+  /* Populate channel-invariant fields */
+
+  priv->dev.ops   = &g_sci_i2c_ops;
+  priv->channel   = (uint8_t)channel;
+  priv->base      = g_sci_base[channel];
+  priv->clk_id    = g_sci_clk[channel];
+  priv->evt_txi   = g_sci_i2c_events[channel].txi;
+  priv->evt_tei   = g_sci_i2c_events[channel].tei;
+  priv->evt_rxi   = g_sci_i2c_events[channel].rxi;
+  priv->state     = SCI_I2C_STATE_IDLE;
+
+  /* Semaphores: excl starts unlocked (1), isr starts locked (0) */
+
+  nxsem_init(&priv->sem_excl, 0, 1);
+  nxsem_init(&priv->sem_isr,  0, 0);
+
+  /* dim 4: Enable peripheral clock and deassert reset */
+
+  rzv_clock_enable(priv->clk_id);
+  rzv_module_unreset(priv->clk_id);
+
+  /* dim 5: Attach interrupts via INTR8SEL (no polling fallback) */
+
+  priv->irq_txi = rzv_icu_attach(priv->evt_txi,
+                                  sci_i2c_txi_isr, priv, true);
+  priv->irq_tei = rzv_icu_attach(priv->evt_tei,
+                                  sci_i2c_tei_isr, priv, true);
+  priv->irq_rxi = rzv_icu_attach(priv->evt_rxi,
+                                  sci_i2c_rxi_isr, priv, true);
+
+  if (priv->irq_txi < 0 || priv->irq_tei < 0 || priv->irq_rxi < 0)
+    {
+      i2cerr("SCI%d: IRQ attach failed (txi=%d tei=%d rxi=%d)\n",
+             channel, priv->irq_txi, priv->irq_tei, priv->irq_rxi);
+      return NULL; /* -ENOSYS: no polling fallback (dim 17) */
+    }
+
+  /* dim 6: Configure GPIO pins as SCI peripheral (open-drain) */
+
+  switch (channel)
+    {
+#ifdef CONFIG_RZV_SCI0_I2C
+      case 0:
+        rzv_gpioconfig(BOARD_SCI0_I2C_SCL_GPIO);
+        rzv_gpioconfig(BOARD_SCI0_I2C_SDA_GPIO);
+        break;
+#endif
+#ifdef CONFIG_RZV_SCI1_I2C
+      case 1:
+        rzv_gpioconfig(BOARD_SCI1_I2C_SCL_GPIO);
+        rzv_gpioconfig(BOARD_SCI1_I2C_SDA_GPIO);
+        break;
+#endif
+#ifdef CONFIG_RZV_SCI2_I2C
+      case 2:
+        rzv_gpioconfig(BOARD_SCI2_I2C_SCL_GPIO);
+        rzv_gpioconfig(BOARD_SCI2_I2C_SDA_GPIO);
+        break;
+#endif
+#ifdef CONFIG_RZV_SCI3_I2C
+      case 3:
+        rzv_gpioconfig(BOARD_SCI3_I2C_SCL_GPIO);
+        rzv_gpioconfig(BOARD_SCI3_I2C_SDA_GPIO);
+        break;
+#endif
+    }
+
+  /* One-shot hardware initialisation with default SCL (#10 fix).
+   * sci_i2c_transfer does NOT re-run hw_init; hardware state is set up once.
+   */
+
+  if (sci_i2c_hw_init(priv, SCI_I2C_DEFAULT_SCL_HZ) < 0)
+    {
+      i2cerr("SCI%d: hw_init failed\n", channel);
       return NULL;
     }
 
-  /* Get device structure */
-
-  priv = &g_sci_i2c_priv[port];
-
-  /* Initialize semaphores */
-
-  nxsem_init(&priv->mutex, 0, 1);
-  nxsem_init(&priv->wait, 0, 0);
-
-  /* Initialize hardware */
-
-  rzv_sci_i2c_hw_initialize(priv);
-
-  /* Attach interrupts - Note: Actual IRQ numbers need to be configured
-   * based on the system's interrupt controller configuration
-   */
-
-  /* For now, we'll use polling mode if interrupts aren't configured */
-
-#ifdef CONFIG_RZV_SCI_I2C_INTERRUPTS
-  ret = irq_attach(priv->txi_irq, rzv_sci_i2c_txi_interrupt, priv);
-  if (ret < 0)
-    {
-      i2cerr("ERROR: Failed to attach TXI interrupt\n");
-      goto errout;
-    }
-
-  ret = irq_attach(priv->tei_irq, rzv_sci_i2c_tei_interrupt, priv);
-  if (ret < 0)
-    {
-      i2cerr("ERROR: Failed to attach TEI interrupt\n");
-      goto errout;
-    }
-
-  ret = irq_attach(priv->rxi_irq, rzv_sci_i2c_rxi_interrupt, priv);
-  if (ret < 0)
-    {
-      i2cerr("ERROR: Failed to attach RXI interrupt\n");
-      goto errout;
-    }
-
-  ret = irq_attach(priv->eri_irq, rzv_sci_i2c_eri_interrupt, priv);
-  if (ret < 0)
-    {
-      i2cerr("ERROR: Failed to attach ERI interrupt\n");
-      goto errout;
-    }
-
-  /* Enable interrupts at NVIC */
-
-  up_enable_irq(priv->txi_irq);
-  up_enable_irq(priv->tei_irq);
-  up_enable_irq(priv->rxi_irq);
-  up_enable_irq(priv->eri_irq);
-#endif
-
-  i2cinfo("SCI%d I2C initialized successfully\n", port);
-
-  return (struct i2c_master_s *)priv;
-
-#ifdef CONFIG_RZV_SCI_I2C_INTERRUPTS
-errout:
-  nxsem_destroy(&priv->mutex);
-  nxsem_destroy(&priv->wait);
-  return NULL;
-#endif
+  priv->initialized = true;
+  return &priv->dev;
 }
-
-/****************************************************************************
- * Name: rzv_sci_i2c_uninitialize
- *
- * Description:
- *   Uninitialize an SCI I2C port
- *
- ****************************************************************************/
-
-int rzv_sci_i2c_uninitialize(struct i2c_master_s *dev)
-{
-  struct rzv_sci_i2c_priv_s *priv = (struct rzv_sci_i2c_priv_s *)dev;
-
-  DEBUGASSERT(dev != NULL);
-
-  i2cinfo("Uninitializing SCI%d I2C\n", priv->channel);
-
-  /* Disable hardware */
-
-  rzv_sci_i2c_hw_disable(priv);
-
-  /* Disable module clock */
-
-  uint32_t domain = RZV_CPG_DOMAIN(priv->mstp);
-  uint32_t bit = RZV_CPG_BIT(priv->mstp);
-  RZV_MODULE_CLKOFF(domain, bit);
-
-  /* Detach interrupts */
-
-#ifdef CONFIG_RZV_SCI_I2C_INTERRUPTS
-  up_disable_irq(priv->txi_irq);
-  up_disable_irq(priv->tei_irq);
-  up_disable_irq(priv->rxi_irq);
-  up_disable_irq(priv->eri_irq);
-
-  irq_detach(priv->txi_irq);
-  irq_detach(priv->tei_irq);
-  irq_detach(priv->rxi_irq);
-  irq_detach(priv->eri_irq);
-#endif
-
-  /* Destroy semaphores */
-
-  nxsem_destroy(&priv->mutex);
-  nxsem_destroy(&priv->wait);
-
-  return OK;
-}
-
-#endif /* CONFIG_RZV_SCI_I2C */

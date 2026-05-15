@@ -81,14 +81,16 @@
 #ifndef RZV_GPT7_BASE
 #  define RZV_GPT7_BASE               0x13010700
 #endif
-#ifndef RZV_GPT8_BASE
-#  define RZV_GPT8_BASE               0x13010800
-#endif
-#ifndef RZV_GPT9_BASE
-#  define RZV_GPT9_BASE               0x13010900
-#endif
+/* GPT8 and GPT9 do NOT exist on R9A09G057H (RZ/V2H).
+ * R9A09G057H has GPT0-7 (unit0, 0x13010000) and GPT10-17 (unit1, 0x13020000).
+ * DO NOT define RZV_GPT8_BASE / RZV_GPT9_BASE — accessing 0x13010800/0x13010900
+ * causes a bus fault. Phantom channels removed per FSP gpt_iodefine.h:788-795.
+ */
 
-#define RZV_GPT_CHANNEL_MASK(ch)      (1u << (ch))
+/* RZV_GPT_UNIT_BIT: produce a single-bit mask for a unit-local hw channel.
+ * Input hw_ch MUST be 0-7 (unit-local, NOT the logical driver channel 0-15).
+ * Used for GTSTR/GTSTP/GTCLR — FSP r_gpt.c:262: 1U << (channel % 8). */
+#define RZV_GPT_UNIT_BIT(hw_ch)       (1u << (hw_ch))
 
 /* GPT Register Offsets ***************************************************/
 
@@ -1042,7 +1044,10 @@
 #define GPT_GTWP_PRKEY_MASK                     (0xff << GPT_GTWP_PRKEY_SHIFT)
 #define GPT_GTWP_PRKEY                          (0xA5u << GPT_GTWP_PRKEY_SHIFT)
 #define GPT_GTWP_UNLOCK                         (GPT_GTWP_PRKEY)
-#define GPT_GTWP_LOCK                           (GPT_GTWP_PRKEY | GPT_GTWP_WP | GPT_GTWP_CMNWP)
+/* Lock without CMNWP — matches FSP GPT_PRV_GTWP_WRITE_PROTECT = 0xA501.
+ * Old value 0xA511 set CMNWP (bit4) which blocks cross-channel GTSTR/GTSTP writes.
+ * FSP r_gpt.c:24 uses 0xA501 (WP only, no CMNWP). */
+#define GPT_GTWP_LOCK                           (GPT_GTWP_PRKEY | GPT_GTWP_WP)
 
 /* GPT Channel definitions */
 #define RZV_GPT_CHANNEL_0          0
@@ -1062,7 +1067,23 @@
 #define RZV_GPT_CHANNEL_6          6
 #define RZV_GPT_CHANNEL_7          7
 
-/* Maximum number of GPT channels */
-#define RZV_GPT_MAX_CHANNELS       11
+/* Maximum number of GPT channels.
+ * Physical hardware: GPT0-7 (unit0) + GPT10-17 (unit1) = 16 real channels.
+ * NuttX driver maps: logical 0-7 → GPT0-7, logical 8-15 → GPT10-17.
+ * Phantom GPT8/9 removed; this count reflects the driver table size (0-10 valid
+ * after removal of phantom entries, but only indices 0-7 and 8+=GPT10+). */
+#define RZV_GPT_MAX_CHANNELS       16
+
+/* GTBER double-buffering value: force-transfer CCRA/CCRB/PR buffers at overflow.
+ * CCRA_BITS[17:16]=01, CCRB_BITS[19:18]=01, PR_BITS[21:20]=01 → 0x00150000 normal
+ * CCRSWT[22]=0 for auto-transfer. Force mode: CCRA=10,CCRB=10,PR=10 → 0x00550000
+ * Source: FSP r_gpt.c:34 GPT_PRV_GTBER_BUFFER_ENABLE_FORCE_TRANSFER = 0x550000U */
+#define GPT_GTBER_FORCE_TRANSFER    (0x00550000u)
+
+/* GTUDDTYC OADTY/OBDTY values for 0%/100% duty cycle.
+ * Source: FSP r_gpt.c:52-54 GPT_DUTY_CYCLE_MODE_* enum */
+#define GPT_UDDTYC_DTY_REGISTER     (0u)  /* Normal compare-match mode */
+#define GPT_UDDTYC_DTY_0_PERCENT    (2u)  /* Force output LOW  */
+#define GPT_UDDTYC_DTY_100_PERCENT  (3u)  /* Force output HIGH */
 
 #endif /* __ARCH_ARM_SRC_RZV_HARDWARE_RZV_GPT_H */

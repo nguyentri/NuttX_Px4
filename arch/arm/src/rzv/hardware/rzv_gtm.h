@@ -31,7 +31,17 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* GTM Base Addresses ****************************************************/
+/* GTM has NO prescaler — counter runs directly from the GTM source clock
+ * (P1CLK = 100 MHz on RZ/V2H, confirmed via FSP BSP_FEATURE_GTM_SOURCE_CLOCK
+ * = FSP_PRIV_CLOCK_P1CLK in bsp_feature.h).  Do not add prescaler divider
+ * stubs; they are not backed by hardware registers.
+ */
+
+/* GTM Base Addresses — each GTM instance has its own 4 KiB region.
+ * Addresses verified against FSP R9A09G057H/cr/iodefines/gtm_iodefine.h.
+ * Use the per-instance base table (g_gtm_base[] in rzv_gtm.c) — do NOT
+ * compute addresses via stride arithmetic from a single base.
+ ************************************************************************/
 
 #ifndef RZV_GTM0_BASE
 #  define RZV_GTM0_BASE               0x11800000
@@ -71,26 +81,20 @@
 /* Maximum number of GTM channels */
 #define RZV_GTM_MAX_CHANNELS       8
 
-/* Convenience/compatibility aliases used by driver code */
-/* Offsets derived from the Renesas OSTM I/O layout (per-channel) */
-#define RZV_GTM_OSTMCMP_OFFSET    (0x00) /* OSTMnCMP */
-#define RZV_GTM_OSTMCNT_OFFSET    (0x04) /* OSTMnCNT */
-#define RZV_GTM_OSTMTE_OFFSET     (0x10) /* OSTMnTE */
-#define RZV_GTM_OSTMTS_OFFSET     (0x14) /* OSTMnTS */
-#define RZV_GTM_OSTMTT_OFFSET     (0x18) /* OSTMnTT */
-#define RZV_GTM_OSTMCTL_OFFSET    (0x20) /* OSTMnCTL */
+/* Register Offsets within each GTM instance (verified vs gtm_iodefine.h) */
 
-/* Parameterized offsets: per-OSTM channel. Use these when computing
- * addresses for a given channel index 'n'. The per-channel stride
- * follows the Renesas OSTM layout (0x24 bytes per channel).
+#define RZV_GTM_OSTMCMP_OFFSET    (0x00) /* OSTMnCMP: compare/period (RW 32-bit) */
+#define RZV_GTM_OSTMCNT_OFFSET    (0x04) /* OSTMnCNT: counter (RO 32-bit) */
+#define RZV_GTM_OSTMTE_OFFSET     (0x10) /* OSTMnTE:  timer enable status (RO 8-bit) */
+#define RZV_GTM_OSTMTS_OFFSET     (0x14) /* OSTMnTS:  timer start (WO 8-bit) */
+#define RZV_GTM_OSTMTT_OFFSET     (0x18) /* OSTMnTT:  timer stop  (WO 8-bit) */
+#define RZV_GTM_OSTMCTL_OFFSET    (0x20) /* OSTMnCTL: control     (RW 8-bit) */
+
+/* NOTE: Stride-based macros (*_OFFSET_N(n)) are intentionally removed.
+ * Each GTM has its own 4 KiB base; stride arithmetic is WRONG across
+ * channels.  Always use per-channel base from g_gtm_base[] + the offsets
+ * above.
  */
-#define RZV_GTM_OSTM_CHANNEL_STRIDE    (0x24)
-#define RZV_GTM_OSTMCMP_OFFSET_N(n)    (0x00 + ((n) * RZV_GTM_OSTM_CHANNEL_STRIDE))
-#define RZV_GTM_OSTMCNT_OFFSET_N(n)    (0x04 + ((n) * RZV_GTM_OSTM_CHANNEL_STRIDE))
-#define RZV_GTM_OSTMTE_OFFSET_N(n)     (0x10 + ((n) * RZV_GTM_OSTM_CHANNEL_STRIDE))
-#define RZV_GTM_OSTMTS_OFFSET_N(n)     (0x14 + ((n) * RZV_GTM_OSTM_CHANNEL_STRIDE))
-#define RZV_GTM_OSTMTT_OFFSET_N(n)     (0x18 + ((n) * RZV_GTM_OSTM_CHANNEL_STRIDE))
-#define RZV_GTM_OSTMCTL_OFFSET_N(n)    (0x20 + ((n) * RZV_GTM_OSTM_CHANNEL_STRIDE))
 
 /* Register Bit Definitions */
 
@@ -111,8 +115,8 @@
 #define GTM_OSTMCMP_MASK        (0xffffffffu)  /* 32-bit compare value */
 
 /* Timer Modes */
-#define GTM_MODE_INTERVAL       (0)                      /* Stops at compare */
-#define GTM_MODE_FREERUN        (GTM_OSTMCTL_MD1)       /* Continuous */
+#define GTM_MODE_INTERVAL       (0)                      /* MD1=0: interval — auto-reload OSTMCMP, periodic IRQ */
+#define GTM_MODE_FREERUN        (GTM_OSTMCTL_MD1)        /* MD1=1: free-run — compare fires once, counter continues */
 
 
 #endif /* __ARCH_ARM_SRC_RZV_HARDWARE_RZV_GTM_H */

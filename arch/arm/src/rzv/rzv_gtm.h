@@ -37,9 +37,15 @@ extern "C"
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Default clock frequency for GTM (200 MHz typical for RZV2H) */
-#ifndef CONFIG_RZV_GTM_CLOCK_FREQUENCY
-#  define CONFIG_RZV_GTM_CLOCK_FREQUENCY  200000000
+/* GTM source clock is P1CLK on RZ/V2H (FSP: BSP_FEATURE_GTM_SOURCE_CLOCK =
+ * FSP_PRIV_CLOCK_P1CLK = 100 MHz).  The compile-time fallback below is used
+ * only when rzv_clock_get_rate() returns 0 (clock table not yet populated).
+ * Prefer the runtime query via rzv_gtm_get_frequency() over this constant.
+ *
+ * NOTE: GTM has NO prescaler register — the counter ticks directly at P1CLK.
+ */
+#ifndef RZV_GTM_FALLBACK_CLOCK_HZ
+#  define RZV_GTM_FALLBACK_CLOCK_HZ  100000000U  /* P1CLK = 100 MHz */
 #endif
 
 /****************************************************************************

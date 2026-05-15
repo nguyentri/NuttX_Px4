@@ -135,12 +135,12 @@
 #define SCI_CCR_TE(m)                                     (1 << 4)  /* Te */
 #define SCI_CCR_MPIE(m)                                   (1 << 8)  /* Mpie */
 #define SCI_CCR_DCME(m)                                   (1 << 9)  /* Dcme */
-#define SCI_CCR_IDSEL(m)                                  (1 << 10)  /* Idsel */
-#define SCI_CCR3_IDSEL                                    (1 << 10)  /* Idsel for CCR3 */
-#define SCI_CCR_RIE(m)                                    (1 << 16)  /* Rie */
-#define SCI_CCR_TIE(m)                                    (1 << 20)  /* Tie */
-#define SCI_CCR_TEIE(m)                                   (1 << 21)  /* Teie */
-#define SCI_CCR_SSE(m)                                    (1 << 24)  /* Sse */
+#define SCI_CCR_IDSEL(m)                                  (1 << 10) /* Idsel (CCR0 bit 10) */
+/* NOTE: SCI_CCR3_IDSEL removed — IDSEL lives in CCR0 bit 10, not CCR3 (P0-3 fix) */
+#define SCI_CCR_RIE(m)                                    (1 << 16) /* Rie */
+#define SCI_CCR_TIE(m)                                    (1 << 20) /* Tie */
+#define SCI_CCR_TEIE(m)                                   (1 << 21) /* Teie */
+#define SCI_CCR_SSE(m)                                    (1 << 24) /* Sse */
 
 /* SCI XCR Register Bit Definitions (Parameterized) ************************/
 
@@ -248,61 +248,118 @@
 #define SCI_CCR0_CKE_MASK       (0x3 << SCI_CCR0_CKE_SHIFT)
 
 /* SCI Common Control Register 1 (CCR1) ************************************/
+/* P0-4 fix: corrected all bit positions to match FSP sci_b_iodefine.h CCR1_b
+ * STOP, LSBF removed (live in CCR3.STP=14, CCR3.LSBF=12)
+ * CTSINV, RTSINV removed (not present in RZ/V2H SCI-B CCR1)
+ */
 
 #define SCI_CCR1_CTSE           (1 << 0)  /* CTS Enable */
-#define SCI_CCR1_CTSIE          (1 << 1)  /* CTS Interrupt Enable */
-#define SCI_CCR1_RTSE           (1 << 4)  /* RTS Output Enable */
-#define SCI_CCR1_RTSDT          (1 << 5)  /* RTS Output Data */
-#define SCI_CCR1_SPB2DT         (1 << 8)  /* Serial Port Break Data 2 */
-#define SCI_CCR1_SPB2IO         (1 << 9)  /* Serial Port Break I/O */
-#define SCI_CCR1_PE             (1 << 16) /* Parity Enable */
-#define SCI_CCR1_PM             (1 << 17) /* Parity Mode */
-#define SCI_CCR1_STOP           (1 << 18) /* Stop Bit Length */
-#define SCI_CCR1_LSBF           (1 << 19) /* LSB First */
-#define SCI_CCR1_TINV           (1 << 20) /* TXD Inversion */
-#define SCI_CCR1_RINV           (1 << 21) /* RXD Inversion */
-#define SCI_CCR1_CTSINV         (1 << 24) /* CTS Signal Inversion */
-#define SCI_CCR1_RTSINV         (1 << 25) /* RTS Signal Inversion */
+#define SCI_CCR1_CTSPEN         (1 << 1)  /* CTS Pin Enable (was CTSIE — wrong name) */
+#define SCI_CCR1_SPB2DT         (1 << 4)  /* Serial Port Break 2 Data (output) */
+#define SCI_CCR1_SPB2IO         (1 << 5)  /* Serial Port Break 2 I/O direction */
+#define SCI_CCR1_PE             (1 << 8)  /* Parity Enable */
+#define SCI_CCR1_PM             (1 << 9)  /* Parity Mode (0=even, 1=odd) */
+#define SCI_CCR1_TINV           (1 << 12) /* TXD Inversion */
+#define SCI_CCR1_RINV           (1 << 13) /* RXD Inversion */
+#define SCI_CCR1_SPLP           (1 << 16) /* Simple Loopback (was misnamed PE at bit16) */
+#define SCI_CCR1_SHARPS         (1 << 20) /* SHARPS mode enable */
+#define SCI_CCR1_NFCS_SHIFT     (24)      /* Bits 24-26: Noise Filter Clock Select */
+#define SCI_CCR1_NFCS_MASK      (0x7 << SCI_CCR1_NFCS_SHIFT)
+#define SCI_CCR1_NFEN           (1 << 28) /* Noise Filter Enable */
 
 /* SCI Common Control Register 2 (CCR2) ************************************/
+/* P0-1 fix: complete rewrite to match FSP sci_b_iodefine.h CCR2_b layout.
+ * Old NuttX layout was entirely wrong — BRR at bits[0:7], CKS at bits[8:9],
+ * MDDR at [16:23], ABCSE/ABCS/BGDM at 24/25/26, BFME at 27.
+ * Correct (FSP) layout: BCP=[2:0], BGDM=4, ABCS=5, ABCSE=6, BRR=[15:8],
+ * BRME=16, CKS=[18:17], MDDR=[31:24].
+ * Build CCR2 value with single write per pseudocode in phase plan.
+ */
 
-#define SCI_CCR2_BRR_SHIFT      (0)       /* Bits 0-7: Bit Rate Register Setting */
+#define SCI_CCR2_BCP_SHIFT      (0)       /* Bits 0-2: Base Clock Period */
+#define SCI_CCR2_BCP_MASK       (0x7 << SCI_CCR2_BCP_SHIFT)
+#define SCI_CCR2_BGDM           (1 << 4)  /* Baud Rate Generator Double-Speed Mode */
+#define SCI_CCR2_ABCS           (1 << 5)  /* Async Base Clock Select */
+#define SCI_CCR2_ABCSE          (1 << 6)  /* Async Base Clock Select Extended */
+#define SCI_CCR2_BRR_SHIFT      (8)       /* Bits 8-15: Bit Rate Register */
 #define SCI_CCR2_BRR_MASK       (0xff << SCI_CCR2_BRR_SHIFT)
-#define SCI_CCR2_CKS_SHIFT      (8)       /* Bits 8-9: Clock Select */
+#define SCI_CCR2_BRME           (1 << 16) /* Bit Rate Modulation Enable */
+#define SCI_CCR2_CKS_SHIFT      (17)      /* Bits 17-18: Clock Select (n) */
 #define SCI_CCR2_CKS_MASK       (0x3 << SCI_CCR2_CKS_SHIFT)
-#define SCI_CCR2_MDDR_SHIFT     (16)      /* Bits 16-23: Modulation Duty Register Setting */
-#define SCI_CCR2_MDDR_MASK      (0xff << SCI_CCR2_MDDR_SHIFT)
-#define SCI_CCR2_ABCSE          (1 << 24) /* Asynchronous Base Clock Select Enable */
-#define SCI_CCR2_ABCS           (1 << 25) /* Asynchronous Base Clock Select */
-#define SCI_CCR2_BGDM           (1 << 26) /* Baud Rate Generator Double-Speed Mode Select */
-#define SCI_CCR2_BFME           (1 << 27) /* Bit Rate Modulation Enable */
+#define SCI_CCR2_MDDR_SHIFT     (24)      /* Bits 24-31: Modulation Duty Register */
+#define SCI_CCR2_MDDR_MASK      (0xffu << SCI_CCR2_MDDR_SHIFT)
+
+/* Helper macro: build full CCR2 value in a single write (avoids RMW on baud fields).
+ * Usage: SCI_CCR2_BUILD(mddr, cks, brme, brr, abcse, abcs, bgdm, bcp)
+ */
+#define SCI_CCR2_BUILD(mddr, cks, brme, brr, abcse, abcs, bgdm, bcp) \
+  (((uint32_t)(mddr)  << SCI_CCR2_MDDR_SHIFT) | \
+   ((uint32_t)(cks)   << SCI_CCR2_CKS_SHIFT)  | \
+   ((uint32_t)(brme)  << 16)                   | \
+   ((uint32_t)(brr)   << SCI_CCR2_BRR_SHIFT)   | \
+   ((abcse) ? SCI_CCR2_ABCSE : 0)              | \
+   ((abcs)  ? SCI_CCR2_ABCS  : 0)              | \
+   ((bgdm)  ? SCI_CCR2_BGDM  : 0)              | \
+   ((uint32_t)(bcp)   & SCI_CCR2_BCP_MASK))
+
+/* Clear mask covering all baud-rate fields (use before OR-in new values) */
+#define SCI_CCR2_BAUD_MASK \
+  (SCI_CCR2_MDDR_MASK | SCI_CCR2_CKS_MASK | SCI_CCR2_BRME | \
+   SCI_CCR2_BRR_MASK  | SCI_CCR2_ABCSE    | SCI_CCR2_ABCS  | \
+   SCI_CCR2_BGDM      | SCI_CCR2_BCP_MASK)
 
 /* SCI Common Control Register 3 (CCR3) ************************************/
+/* P0-3, P0-5, Low-17 fixes: corrected bit positions per FSP CCR3_b.
+ * BPEN moved from bit 0 to bit 7 (Low-17).
+ * FM (FIFO mode enable) added at bit 20 — was missing entirely (P0-5).
+ * LSBF added at bit 12 (removed from CCR1 where it was wrong).
+ * SINV, RXDESEL, MP, DEN, CKE, GM, BLK added per FSP.
+ */
 
-#define SCI_CCR3_BPEN           (1 << 0)  /* Base Pointer Enable */
+#define SCI_CCR3_CPHA           (1 << 0)  /* SPI clock phase */
+#define SCI_CCR3_CPOL           (1 << 1)  /* SPI clock polarity */
+#define SCI_CCR3_BPEN           (1 << 7)  /* Base Pointer Enable (Low-17 fix: was bit 0) */
 #define SCI_CCR3_CHR_SHIFT      (8)       /* Bits 8-9: Character Length */
 #define SCI_CCR3_CHR_MASK       (0x3 << SCI_CCR3_CHR_SHIFT)
 #  define SCI_CCR3_CHR_7BIT     (0x3 << SCI_CCR3_CHR_SHIFT)  /* 7-bit data */
 #  define SCI_CCR3_CHR_8BIT     (0x0 << SCI_CCR3_CHR_SHIFT)  /* 8-bit data */
 #  define SCI_CCR3_CHR_9BIT     (0x1 << SCI_CCR3_CHR_SHIFT)  /* 9-bit data */
+#define SCI_CCR3_LSBF           (1 << 12) /* LSB First (moved from CCR1 where it was wrong) */
+#define SCI_CCR3_SINV           (1 << 13) /* Signal Inversion */
 #define SCI_CCR3_STP            (1 << 14) /* Stop Bit Length */
 #  define SCI_CCR3_STP_1BIT     (0 << 14)                    /* 1 stop bit */
 #  define SCI_CCR3_STP_2BIT     (1 << 14)                    /* 2 stop bits */
+#define SCI_CCR3_RXDESEL        (1 << 15) /* RX Deselect in synchronous mode */
 #define SCI_CCR3_MOD_SHIFT      (16)      /* Bits 16-18: Mode Select */
 #define SCI_CCR3_MOD_MASK       (0x7 << SCI_CCR3_MOD_SHIFT)
 #  define SCI_CCR3_MOD_ASYNC    (0x0 << SCI_CCR3_MOD_SHIFT)  /* Asynchronous mode */
 #  define SCI_CCR3_MOD_SYNC     (0x1 << SCI_CCR3_MOD_SHIFT)  /* Synchronous mode */
 #  define SCI_CCR3_MOD_SPI      (0x3 << SCI_CCR3_MOD_SHIFT)  /* Simple SPI mode */
 #  define SCI_CCR3_MOD_I2C      (0x4 << SCI_CCR3_MOD_SHIFT)  /* Simple I2C mode */
+#define SCI_CCR3_MP             (1 << 19) /* Multi-Processor mode */
+#define SCI_CCR3_FM             (1 << 20) /* FIFO Mode Enable (P0-5 fix: was FCR bit 7 — wrong) */
+#define SCI_CCR3_DEN            (1 << 21) /* Driver Enable (RS-485 DE signal) */
+#define SCI_CCR3_CKE_SHIFT      (24)      /* Bits 24-25: Clock Enable for synchronous */
+#define SCI_CCR3_CKE_MASK       (0x3 << SCI_CCR3_CKE_SHIFT)
+#define SCI_CCR3_GM             (1 << 28) /* GSM mode */
+#define SCI_CCR3_BLK            (1 << 29) /* Block transfer mode */
 
 /* SCI Common Control Register 4 (CCR4) ************************************/
+/* Low-16 fix: corrected all CCR4 bit names to match FSP CCR4_b.
+ * CPHA/CPOL/MFF/MSS do NOT live here — they are CCR3 fields in SCI-B.
+ * CCR4 is used for auto-baud detection and compare-data features.
+ */
 
-#define SCI_CCR4_CPHA           (1 << 0)  /* Clock Phase Select */
-#define SCI_CCR4_CPOL           (1 << 1)  /* Clock Polarity Select */
-#define SCI_CCR4_MFF            (1 << 2)  /* Mode Fault Flag */
-#define SCI_CCR4_MSS            (1 << 4)  /* Master Slave Select */
-#define SCI_CCR4_ASEN           (1 << 8)  /* Auto SS Enable */
-#define SCI_CCR4_ATEN           (1 << 9)  /* Auto Transmit Enable */
+#define SCI_CCR4_CMPD_SHIFT     (0)       /* Bits 0-8: Compare Data */
+#define SCI_CCR4_CMPD_MASK      (0x1ff << SCI_CCR4_CMPD_SHIFT)
+#define SCI_CCR4_ASEN           (1 << 16) /* Auto-baud Sync Enable */
+#define SCI_CCR4_ATEN           (1 << 17) /* Auto-baud Timing Enable */
+#define SCI_CCR4_AST_SHIFT      (24)      /* Bits 24-26: Auto-baud Sync Threshold */
+#define SCI_CCR4_AST_MASK       (0x7 << SCI_CCR4_AST_SHIFT)
+#define SCI_CCR4_AJD            (1 << 27) /* Auto-baud Judgment */
+#define SCI_CCR4_ATT_SHIFT      (28)      /* Bits 28-30: Auto-baud Timing Threshold */
+#define SCI_CCR4_ATT_MASK       (0x7 << SCI_CCR4_ATT_SHIFT)
+#define SCI_CCR4_AET            (1 << 31) /* Auto-baud Error Threshold */
 /* SCI CESR Register Bit Definitions *********************************/
 
 #define SCI_CESR_RIST                           (1 << 0)  /* Rist */
@@ -346,9 +403,12 @@
 #define SCI_DCR_DENGT_MASK                      (0x1f << SCI_DCR_DENGT_SHIFT)
 
 /* SCI FCR Register Bit Definitions **********************************/
+/* P0-5 fix: SCI_FCR_FM (bit 7) removed — bit 7 is RESERVED in FCR for SCI-B.
+ * FIFO mode enable lives in CCR3.FM (bit 20). Use SCI_CCR3_FM instead.
+ */
 
-#define SCI_FCR_DRES                            (1 << 0)  /* Dres */
-#define SCI_FCR_FM                              (1 << 7)  /* FIFO Mode Enable */
+#define SCI_FCR_DRES                            (1 << 0)  /* Data Receive Error Select */
+/* Bit 7: RESERVED — do not set. FM enable is CCR3.FM bit 20. */
 
 #define SCI_FCR_TTRG_SHIFT                      (8)      /* Bits 8-12: Ttrg */
 #define SCI_FCR_TTRG_MASK                       (0x1f << SCI_FCR_TTRG_SHIFT)
@@ -414,6 +474,29 @@
 
 #define SCI_ISR_IICSTIF                         (1 << 3)  /* Iicstif */
 
+/* =========================================================================
+ * I2C-mode helper macro (FSP r_sci_b_i2c.c line 62-64)
+ *
+ * SCI_I2C_REQ - Build an ICR request word atomically.
+ *
+ * Per FSP SCI_B_I2C_PRV_GENERATE_REQUEST: IICSDAS and IICSCLS must be
+ * written in the same store as the request bit (STAREQ/RSTAREQ/STPREQ).
+ * This macro clears the SDAS and SCLS fields, then ORs in new values + req.
+ *
+ *   base - current ICR value (preserves IICDL, IICINTM, IICCSC, IICACKT)
+ *   sdas - IICSDAS value (0=output, 3=high-Z); use 1 when issuing a request
+ *   scls - IICSCLS value (0=output, 3=high-Z); use 1 when issuing a request
+ *   req  - request bit: SCI_ICR_IICSTAREQ / IICRSTAREQ / IICSTPREQ
+ *
+ * Usage: putreg32(SCI_I2C_REQ(icr, 1, 1, SCI_ICR_IICSTAREQ), base+ICR_OFF)
+ * =========================================================================
+ */
+#define SCI_I2C_REQ(base, sdas, scls, req) \
+  (((base) & ~(SCI_ICR_IICSDAS_MASK | SCI_ICR_IICSCLS_MASK)) | \
+   (((uint32_t)(sdas)) << SCI_ICR_IICSDAS_SHIFT) | \
+   (((uint32_t)(scls)) << SCI_ICR_IICSCLS_SHIFT) | \
+   (req))
+
 /* SCI RDR Register Bit Definitions **********************************/
 
 #define SCI_RDR_RDAT_SHIFT                      (0)      /* Bits 0-8: Rdat */
@@ -433,7 +516,9 @@
 
 #define SCI_RDR_FER                             (1 << 28)  /* Fer */
 
-#define SCI_RDR_BY_RDAT                         (1 << 28)  /* By Rdat */
+/* L3 fix: SCI_RDR_BY_RDAT is the same bit as SCI_RDR_FER (both bit 28).
+ * They are aliases; BY_RDAT is removed to avoid misleading code. Use SCI_RDR_FER. */
+/* #define SCI_RDR_BY_RDAT (1 << 28) -- alias of SCI_RDR_FER, removed (L3) */
 
 /* SCI TDR Register Bit Definitions **********************************/
 

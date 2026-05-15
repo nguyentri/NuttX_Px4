@@ -49,9 +49,12 @@
 
 #define ARMV7R_PERIPHERAL_INTERRUPTS  RZV_IRQ_NEXTINT
 
-/* ARM Cortex-R52 MPCore GIC (Generic Interrupt Controller) base address
- * For RZV2H, the GIC distributor is at 0xF1000000 and CPU interface at 0xF1002000
- * The MPCORE base is the GIC distributor base minus the ICD offset (0x1000)
+/* CHIP_MPCORE_VBASE — required by armv7-r/mpcore.h / gic.h framework.
+ * audit Critical-1: CR8 has no MMU so there is no virtual→physical mapping
+ * for 0xF1000000. rzv_irq.c does NOT use MPCORE_ICD/ICC_VBASE — it uses
+ * RZV_INTC_GIC_* macros at physical 0x12C10100 directly.  This definition
+ * is retained only to satisfy the armv7-r header chain that includes mpcore.h.
+ * Do NOT add code that dereferences MPCORE_ICD_VBASE or MPCORE_ICC_VBASE.
  */
 
 #define CHIP_MPCORE_VBASE            0xF1000000UL

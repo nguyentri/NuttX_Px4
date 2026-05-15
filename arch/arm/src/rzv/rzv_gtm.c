@@ -245,7 +245,9 @@ static uint32_t gtm_get_clk_id(int channel)
       return g_gtm_clocks[channel];
     }
 
-  return 0;
+  /* Return UINT32_MAX as invalid sentinel — 0 could collide with a valid
+   * clock ID in domain 0 bit 0 encoding. */
+  return UINT32_MAX;
 }
 
 /****************************************************************************
@@ -406,6 +408,7 @@ static int gtm_timer_settimeout(FAR struct timer_lowerhalf_s *lower,
                                  uint32_t timeout)
 {
   struct rzv_gtm_lowerhalf_s *priv = (struct rzv_gtm_lowerhalf_s *)lower;
+  irqstate_t flags;
   uint64_t ticks;
 
   DEBUGASSERT(priv != NULL);
@@ -429,13 +432,20 @@ static int gtm_timer_settimeout(FAR struct timer_lowerhalf_s *lower,
       return -ERANGE;
     }
 
-  /* Store timeout value */
+  /* Stop timer, update compare value, restart — under critical section to
+   * prevent a concurrent settimeout from racing the stop/start sequence.
+   * Interval mode auto-reloads OSTMCMP after each match so this sequence
+   * is safe: stop → write CMP → restart.
+   */
 
+  flags = enter_critical_section();
+
+  gtm_putreg8(priv, RZV_GTM_OSTMTT_OFFSET, GTM_OSTMTT_OSTMTT);  /* stop */
   priv->timeout = timeout;
-
-  /* Set compare register (OSTMnCMP) */
-
   gtm_putreg32(priv, RZV_GTM_OSTMCMP_OFFSET, (uint32_t)ticks);
+  gtm_putreg8(priv, RZV_GTM_OSTMTS_OFFSET, GTM_OSTMTS_OSTMTS);  /* start */
+
+  leave_critical_section(flags);
 
   tmrinfo("GTM%d: Set compare value to %lu ticks\n",
           priv->channel, (unsigned long)(uint32_t)ticks);
@@ -523,16 +533,27 @@ static int gtm_timer_maxtimeout(FAR struct timer_lowerhalf_s *lower,
 
 uint32_t rzv_gtm_get_frequency(int channel)
 {
-  /* For now, return configured frequency
-   * TODO: Query actual frequency from CPG if dynamic clock control is used
-   */
+  uint32_t freq;
 
-  if (channel >= 0 && channel < RZV_GTM_MAX_CHANNELS)
+  if (channel < 0 || channel >= RZV_GTM_MAX_CHANNELS)
     {
-      return CONFIG_RZV_GTM_CLOCK_FREQUENCY;
+      return 0;
     }
 
-  return 0;
+  /* GTM source clock is P1CLK on RZ/V2H (FSP BSP_FEATURE_GTM_SOURCE_CLOCK).
+   * Query the runtime clock table first; fall back to compile-time constant
+   * if the table has not yet been populated (early boot).
+   */
+
+  freq = rzv_clock_get_rate(RZV_CLOCK_P1CLK);
+  if (freq == 0)
+    {
+      freq = RZV_GTM_FALLBACK_CLOCK_HZ;
+      tmrwarn("GTM%d: P1CLK not in clock table, using fallback %lu Hz\n",
+              channel, (unsigned long)freq);
+    }
+
+  return freq;
 }
 
 /****************************************************************************
@@ -602,7 +623,7 @@ FAR struct timer_lowerhalf_s *rzv_gtm_timer_initialize(int channel)
   /* Enable GTM clock via CPG */
 
   clk_id = gtm_get_clk_id(channel);
-  if (clk_id == 0)
+  if (clk_id == UINT32_MAX)
     {
       tmrerr("ERROR: Failed to get clock ID for GTM%d\n", channel);
       goto errout_with_priv;
@@ -618,25 +639,36 @@ FAR struct timer_lowerhalf_s *rzv_gtm_timer_initialize(int channel)
 
   tmrinfo("GTM%d: Clock enabled (ID: 0x%08lx)\n", channel, (unsigned long)clk_id);
 
-  /* Stop timer before configuration */
+  /* Initialization sequence per RZ/V2H hardware reference:
+   * 1. CPG clock enable + unreset (done above)
+   * 2. Stop (idempotent)
+   * 3. Set OSTMCTL = interval mode (MD1:MD0 = 00, no interrupt-on-start)
+   * 4. Set OSTMCMP = compare value (default 1 s)
+   * 5. Clear OSTMCNT defensively (write not supported on OSTM; counter
+   *    resets at start — documented here for clarity)
+   * 6. Attach IRQ
+   * 7. Start is deferred to gtm_timer_start()
+   *
+   * Interval mode (MD1=0): counter reloads from OSTMCMP on each match,
+   * IRQ fires every period.  Free-run (MD1=1) is for HRT only (GTM7).
+   */
+
+  /* Step 2: stop timer (idempotent if already stopped) */
 
   gtm_putreg8(priv, RZV_GTM_OSTMTT_OFFSET, GTM_OSTMTT_OSTMTT);
 
-  /* Configure timer for free-running mode (required for HRT)
-   * OSTMnMD1 = 1: Free-running mode (counter continues after compare)
-   * OSTMnMD0 = 0: No interrupt on start
-   */
+  /* Step 3: interval mode, no interrupt-on-start */
 
-  gtm_putreg8(priv, RZV_GTM_OSTMCTL_OFFSET, GTM_MODE_FREERUN);
+  gtm_putreg8(priv, RZV_GTM_OSTMCTL_OFFSET, GTM_MODE_INTERVAL);
 
-  tmrinfo("GTM%d: Configured for free-running mode\n", channel);
+  tmrinfo("GTM%d: Configured for interval mode\n", channel);
 
-  /* Set initial compare value (1 second timeout as default) */
+  /* Step 4: default compare value = 1 second */
 
   gtm_putreg32(priv, RZV_GTM_OSTMCMP_OFFSET, priv->frequency);
   priv->timeout = 1000000;  /* 1 second in microseconds */
 
-  /* Attach interrupt handler via ICU */
+  /* Step 6: attach interrupt handler via ICU */
 
   evt = gtm_get_elc_event(channel);
   if (evt < 0)
@@ -658,7 +690,7 @@ FAR struct timer_lowerhalf_s *rzv_gtm_timer_initialize(int channel)
   tmrinfo("GTM%d: Interrupt attached (IRQ slot: %d, ELC event: 0x%02x)\n",
           channel, priv->irq, evt);
 
-  /* Timer is now initialized but not started */
+  /* Step 7: timer starts only when gtm_timer_start() is called */
 
   tmrinfo("GTM%d: Initialization complete (frequency: %lu Hz)\n",
           channel, (unsigned long)priv->frequency);

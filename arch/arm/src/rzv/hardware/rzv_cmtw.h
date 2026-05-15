@@ -18,6 +18,14 @@
  *
  ****************************************************************************/
 
+/* DORMANT — DO NOT USE in rdk-rzv2h builds.
+ * CMTW is present on some RZ variants but is not wired into the
+ * RZ/V2H (R9A09G057H) NuttX port.  The GTM channels (rzv_gtm.c)
+ * and ARM private timer (rzv_timerisr.c) are the active timer paths.
+ * This header is retained so future RZ variants that require CMTW can
+ * extend it without losing register layout knowledge from the FSP.
+ */
+
 #ifndef __ARCH_ARM_SRC_RZV_HARDWARE_RZV_CMTW_H
 #define __ARCH_ARM_SRC_RZV_HARDWARE_RZV_CMTW_H
 

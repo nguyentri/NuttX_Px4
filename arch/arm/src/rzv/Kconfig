@@ -63,9 +63,8 @@ config ARCH_CHIP_R9A09G057
    select RZV_HAVE_GPT5
    select RZV_HAVE_GPT6
    select RZV_HAVE_GPT7
-   select RZV_HAVE_GPT8
-   select RZV_HAVE_GPT9
    select RZV_HAVE_GPT10
+   select RZV_HAVE_GPT11
 
 endchoice
 
@@ -228,6 +227,68 @@ config RZV_CLOCK_DEBUG
    ---help---
      Enable detailed debug logging for clock operations including register
      dumps on failures. Useful for diagnosing clock configuration issues.
+
+config RZV_XTAL_FREQ
+   int "Main oscillator (XTAL/OSC) frequency override (Hz)"
+   default 24000000
+   ---help---
+     Main oscillator frequency in Hz.  Default is 24 MHz for RDK-RZV2H.
+     Override if your board uses a different crystal.
+     Consumed by RZV_MAIN_CLOCK_HZ in rzv_clock.h.
+     audit Low-14.
+
+config RZV_CPU_CLOCK_HZ
+   int "CR8 CPU clock frequency override (Hz)"
+   default 800000000
+   ---help---
+     Expected CR8 (I6CLK) frequency in Hz after bootloader configures
+     dividers.  Used as compile-time fallback when CDDIV readback is not
+     yet decoded.  PX4 HRT and USEC_PER_TICK depend on this being accurate.
+     Default: 800 MHz (I6CLK from PLLCLN/2).
+     audit Low-14 / High PX4 compatibility.
+
+config RZV_PCLK_0_HZ
+   int "P0CLK peripheral bus 0 frequency override (Hz)"
+   default 100000000
+   ---help---
+     Expected P0CLK frequency in Hz.  Used for SCI/SPI/I2C baud divisor
+     calculations.  Default: 100 MHz.
+     audit Low-14.
+
+config RZV_PCLK_5_HZ
+   int "P5CLK peripheral bus 5 frequency override (Hz)"
+   default 100000000
+   ---help---
+     Expected P5CLK frequency in Hz.  Default: 100 MHz.
+     audit Low-14.
+
+config RZV_CLOCK_RESET_ASSERT_TIMEOUT
+   int "Reset assert timeout (10us units)"
+   default 500
+   range 50 5000
+   ---help---
+     Timeout for reset assert operations in 10-microsecond units.
+     Default is 500 (5ms).
+     audit Medium-11 per-op timeouts.
+
+config RZV_CLOCK_RESET_RELEASE_TIMEOUT
+   int "Reset release timeout (10us units)"
+   default 1000
+   range 100 10000
+   ---help---
+     Timeout for reset release (deassert) operations in 10-microsecond units.
+     Default is 1000 (10ms).
+     audit Medium-11 per-op timeouts.
+
+config RZV_INIT_PLLDDR
+   bool "Initialize PLLDDR0/1 from NuttX (expert)"
+   default n
+   ---help---
+     Enable NuttX-side initialization of PLLDDR0 and PLLDDR1.
+     WARNING: DDR PLLs are normally initialized by TF-A before NuttX boots.
+     Enabling this when TF-A already initialized the DDR PLLs will cause
+     DDR instability.  Only enable on platforms where TF-A does NOT init DDR.
+     audit Low-13.
 
 endmenu
 
@@ -400,13 +461,6 @@ config RZV_HAVE_GPT7
    bool
    default n
 
-config RZV_HAVE_GPT8
-   bool
-   default n
-
-config RZV_HAVE_GPT9
-   bool
-   default n
 
 config RZV_HAVE_GPT10
    bool
@@ -649,47 +703,6 @@ config RZV_I2C3
    depends on RZV_HAVE_I2C3
    select RZV_I2C
 
-config RZV_SCI_I2C
-   bool
-   default n
-   select I2C
-
-config RZV_SCI0_I2C
-   bool "SCI0 Simple I2C"
-   default n
-   depends on RZV_HAVE_SCI0
-   select RZV_SCI_I2C
-   ---help---
-      Enable Simple I2C mode on SCI0. Note: SCI0 can be used as UART or I2C,
-      but not both simultaneously.
-
-config RZV_SCI1_I2C
-   bool "SCI1 Simple I2C"
-   default n
-   depends on RZV_HAVE_SCI1
-   select RZV_SCI_I2C
-   ---help---
-      Enable Simple I2C mode on SCI1. Note: SCI1 can be used as UART or I2C,
-      but not both simultaneously.
-
-config RZV_SCI2_I2C
-   bool "SCI2 Simple I2C"
-   default n
-   depends on RZV_HAVE_SCI2
-   select RZV_SCI_I2C
-   ---help---
-      Enable Simple I2C mode on SCI2. Note: SCI2 can be used as UART or I2C,
-      but not both simultaneously.
-
-config RZV_SCI3_I2C
-   bool "SCI3 Simple I2C"
-   default n
-   depends on RZV_HAVE_SCI3
-   select RZV_SCI_I2C
-   ---help---
-      Enable Simple I2C mode on SCI3. Note: SCI3 can be used as UART or I2C,
-      but not both simultaneously.
-
 config RZV_SPI
    bool
    default n
@@ -753,6 +766,59 @@ config RZV_SCI3_SPI
    ---help---
       Enable SPI mode on SCI3. Note: SCI3 can be used as UART, I2C, or SPI,
       but not multiple modes simultaneously.
+
+# Serial Communication Interface (SCI) - Simple I2C mode
+
+menuconfig RZV_SCI_I2C
+   bool "SCI-as-I2C master driver"
+   default n
+   select I2C
+   ---help---
+     Enables RZ/V2H SCI-B block in Simple-I2C master mode.
+     FSP ground truth: r_sci_b_i2c.c (Renesas FSP r_sci_b_i2c port).
+     Each channel is mutually exclusive with UART (RZV_SCIn) and
+     SPI (RZV_SCIn_SPI) — enforced at config time via depends on.
+     CPU-mode only (no DMAC). Slave mode not supported.
+
+if RZV_SCI_I2C
+
+config RZV_SCI0_I2C
+   bool "SCI0 as I2C master"
+   default n
+   depends on !RZV_SCI0 && !RZV_SCI0_SPI
+   ---help---
+     Enable SCI0 in Simple-I2C master mode.
+     Mutually exclusive with RZV_SCI0 (UART) and RZV_SCI0_SPI.
+     Board must define BOARD_SCI0_I2C_SDA_GPIO / BOARD_SCI0_I2C_SCL_GPIO.
+
+config RZV_SCI1_I2C
+   bool "SCI1 as I2C master"
+   default n
+   depends on !RZV_SCI1 && !RZV_SCI1_SPI
+   ---help---
+     Enable SCI1 in Simple-I2C master mode.
+     Mutually exclusive with RZV_SCI1 (UART) and RZV_SCI1_SPI.
+     Board must define BOARD_SCI1_I2C_SDA_GPIO / BOARD_SCI1_I2C_SCL_GPIO.
+
+config RZV_SCI2_I2C
+   bool "SCI2 as I2C master"
+   default n
+   depends on !RZV_SCI2 && !RZV_SCI2_SPI
+   ---help---
+     Enable SCI2 in Simple-I2C master mode.
+     Mutually exclusive with RZV_SCI2 (UART) and RZV_SCI2_SPI.
+     Board must define BOARD_SCI2_I2C_SDA_GPIO / BOARD_SCI2_I2C_SCL_GPIO.
+
+config RZV_SCI3_I2C
+   bool "SCI3 as I2C master"
+   default n
+   depends on !RZV_SCI3 && !RZV_SCI3_SPI
+   ---help---
+     Enable SCI3 in Simple-I2C master mode.
+     Mutually exclusive with RZV_SCI3 (UART) and RZV_SCI3_SPI.
+     Board must define BOARD_SCI3_I2C_SDA_GPIO / BOARD_SCI3_I2C_SCL_GPIO.
+
+endif # RZV_SCI_I2C
 
 config RZV_DMA
    bool "DMA support"
@@ -905,15 +971,11 @@ config RZV_DMAC_SDHI_CHANNEL
 
 endif # RZV_DMAC
 
-config RZV_DTC
-   bool "Data Transfer Controller (DTC)"
-   default n
-   depends on RZV_HAVE_DMAC
-   ---help---
-     Enable support for the RZV2H Data Transfer Controller (DTC/XDTC).
-     The DTC provides hardware-triggered data transfers without CPU
-     intervention. It supports normal, repeat, and block transfer modes
-     with configurable source and destination address modes.
+# CONFIG_RZV_DTC intentionally removed.
+# DTC peripheral does NOT exist on RZ/V2H (R9A09G057H). There is no
+# r_dtc* source under the FSP rzv/ tree and no DTC iodefine under
+# R9A09G057H/. The old RZV_DTC_BASE (0x11400400) overlapped DMAC0 group-1
+# registers and would have caused silent register corruption.
 
 config RZV_TIMER
    bool
@@ -1008,9 +1070,20 @@ config RZV_GTM6_TIMER
 config RZV_GTM7_TIMER
    bool "GTM7 Timer"
    default n
-   depends on RZV_HAVE_GTM7 && RZV_GTM
+   depends on RZV_HAVE_GTM7 && RZV_GTM && !RZV_HRT
    ---help---
      Enable GTM7 as a timer device.
+     Cannot be enabled together with RZV_HRT (GTM7 channel conflict).
+
+config RZV_HRT
+   bool "PX4 High-Resolution Timer (HRT) via GTM7"
+   default n
+   depends on RZV_HAVE_GTM7 && !RZV_GTM7_TIMER
+   ---help---
+     Enable the PX4 HRT shim backed by GTM7 in free-running mode.
+     GTM7 is reserved exclusively for HRT; do not enable RZV_GTM7_TIMER
+     at the same time (channel conflict).  P1CLK (100 MHz) gives 10 ns
+     resolution and ~42.9 s monotonic range per overflow epoch.
 
 config RZV_GPT
    bool "General PWM Timer (GPT)"
@@ -1043,6 +1116,18 @@ config RZV_GPT_ONESHOT
    select PWM_PULSECOUNT
    ---help---
      Enable One-shot mode for the RZV GPT PWM driver.
+
+config RZV_POEG
+   bool "POEG (Port Output Enable for GPT) driver"
+   default n
+   depends on RZV_PWM
+   ---help---
+     Enable the POEG driver for GPT output protection.
+     POEG forces GTIOCA/GTIOCB outputs to inactive state within < 1 PWM
+     cycle when a hardware fault (port input, I/O short-circuit) or a
+     software stop is triggered.  Required for PX4 arming safety.
+     Addresses phase-08 spec High-4 (POEG output disable on fault).
+     Default is n (opt-in) — spurious fault inputs can disarm ESCs.
 
 config RZV_GPT0
    bool "GPT0"
@@ -1100,26 +1185,26 @@ config RZV_GPT7
    ---help---
      Enable GPT7 channel.
 
-config RZV_GPT8
-   bool "GPT8"
-   default n
-   depends on RZV_HAVE_GPT8 && RZV_GPT
-   ---help---
-     Enable GPT8 channel.
-
-config RZV_GPT9
-   bool "GPT9"
-   default n
-   depends on RZV_HAVE_GPT9 && RZV_GPT
-   ---help---
-     Enable GPT9 channel.
 
 config RZV_GPT10
-   bool "GPT10"
+   bool "GPT10 (physical GPT10 = logical channel 8)"
    default n
    depends on RZV_HAVE_GPT10 && RZV_GPT
    ---help---
-     Enable GPT10 channel.
+     Enable physical GPT10 (unit1 channel 0, base 0x13020000).
+     Accessed via rzv_gpt_initialize(8) after phantom GPT8/9 removal.
+
+config RZV_HAVE_GPT11
+   bool
+   default n
+
+config RZV_GPT11
+   bool "GPT11 (physical GPT11 = logical channel 9)"
+   default n
+   depends on RZV_HAVE_GPT11 && RZV_GPT
+   ---help---
+     Enable physical GPT11 (unit1 channel 1, base 0x13020100).
+     Accessed via rzv_gpt_initialize(9) after phantom GPT8/9 removal.
 
 config RZV_ADC
    bool "ADC support"

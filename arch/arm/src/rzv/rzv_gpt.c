@@ -79,7 +79,10 @@ struct rzv_gpt_lowerhalf_s
   uint32_t               clkid;
   uint32_t               pclk;
   uint32_t               period;
-  uint8_t                channel;
+  uint8_t                channel;   /* Logical channel index (0-15) */
+  uint8_t                hw_ch;     /* HW channel within unit (channel % 8).
+                                     * Used for GTSTR/GTSTP/GTCLR channel mask.
+                                     * FSP r_gpt.c:262 confirms ch%8 for unit1. */
   uint8_t                divsel;
   bool                   initialized;
   bool                   running;
@@ -115,6 +118,9 @@ static uint32_t gpt_duty_to_counts(uint32_t period, ub16_t duty);
 static uint32_t gpt_compose_gtior(uint32_t duty_a_counts,
                                   uint32_t duty_b_counts,
                                   uint32_t period_counts);
+static uint32_t gpt_compute_gtuddtyc(uint32_t duty_a_counts,
+                                     uint32_t duty_b_counts,
+                                     uint32_t period_counts);
 
 static int rzv_gpt_setup(FAR struct pwm_lowerhalf_s *dev);
 static int rzv_gpt_shutdown(FAR struct pwm_lowerhalf_s *dev);
@@ -148,34 +154,54 @@ static const struct pwm_ops_s g_rzv_gpt_ops =
   .ioctl    = rzv_gpt_ioctl,
 };
 
+/* Base address table: logical channels 0-7 → GPT0-7 (unit0, 0x13010xxx),
+ *                     logical channels 8-15 → GPT10-17 (unit1, 0x13020xxx).
+ * GPT8/9 do NOT exist on R9A09G057H — removed to prevent bus faults.
+ * FSP gpt_iodefine.h:788-795 confirms only GPT0-7 in unit0. */
 static const uintptr_t g_rzv_gpt_base[RZV_GPT_MAX_CHANNELS] =
 {
-  RZV_GPT0_BASE,
-  RZV_GPT1_BASE,
-  RZV_GPT2_BASE,
-  RZV_GPT3_BASE,
-  RZV_GPT4_BASE,
-  RZV_GPT5_BASE,
-  RZV_GPT6_BASE,
-  RZV_GPT7_BASE,
-  RZV_GPT8_BASE,
-  RZV_GPT9_BASE,
-  RZV_GPT10_BASE,
+  /* Unit 0: GPT0-7, base 0x13010000, stride 0x100 */
+  RZV_GPT0_BASE,   /* logical 0  = physical GPT0  */
+  RZV_GPT1_BASE,   /* logical 1  = physical GPT1  */
+  RZV_GPT2_BASE,   /* logical 2  = physical GPT2  */
+  RZV_GPT3_BASE,   /* logical 3  = physical GPT3  */
+  RZV_GPT4_BASE,   /* logical 4  = physical GPT4  */
+  RZV_GPT5_BASE,   /* logical 5  = physical GPT5  */
+  RZV_GPT6_BASE,   /* logical 6  = physical GPT6  */
+  RZV_GPT7_BASE,   /* logical 7  = physical GPT7  */
+  /* Unit 1: GPT10-17, base 0x13020000, stride 0x100 */
+  RZV_GPT10_BASE,  /* logical 8  = physical GPT10 */
+  RZV_GPT11_BASE,  /* logical 9  = physical GPT11 */
+  RZV_GPT12_BASE,  /* logical 10 = physical GPT12 */
+  RZV_GPT13_BASE,  /* logical 11 = physical GPT13 */
+  RZV_GPT14_BASE,  /* logical 12 = physical GPT14 */
+  RZV_GPT15_BASE,  /* logical 13 = physical GPT15 */
+  RZV_GPT16_BASE,  /* logical 14 = physical GPT16 */
+  RZV_GPT17_BASE,  /* logical 15 = physical GPT17 */
 };
 
+/* Clock-enable IDs for each logical channel.
+ * GPT0-7 (unit0) share CPG gate at domain 4 bits 0-7 (UNVERIFIED).
+ * GPT10-17 (unit1) assumed same domain, bits 8-15 as placeholder.
+ * Actual mapping requires RZ/V2H UM Table 9.x confirmation. */
 static const uint32_t g_rzv_gpt_clkid[RZV_GPT_MAX_CHANNELS] =
 {
-  RZV_CPG_CLK_GPT0,
-  RZV_CPG_CLK_GPT1,
-  RZV_CPG_CLK_GPT2,
-  RZV_CPG_CLK_GPT3,
-  RZV_CPG_CLK_GPT4,
-  RZV_CPG_CLK_GPT5,
-  RZV_CPG_CLK_GPT6,
-  RZV_CPG_CLK_GPT7,
-  RZV_CPG_CLK_GPT8,
-  RZV_CPG_CLK_GPT9,
-  RZV_CPG_CLK_GPT10,
+  RZV_CPG_CLK_GPT0,  /* logical 0  = physical GPT0  */
+  RZV_CPG_CLK_GPT1,  /* logical 1  = physical GPT1  */
+  RZV_CPG_CLK_GPT2,  /* logical 2  = physical GPT2  */
+  RZV_CPG_CLK_GPT3,  /* logical 3  = physical GPT3  */
+  RZV_CPG_CLK_GPT4,  /* logical 4  = physical GPT4  */
+  RZV_CPG_CLK_GPT5,  /* logical 5  = physical GPT5  */
+  RZV_CPG_CLK_GPT6,  /* logical 6  = physical GPT6  */
+  RZV_CPG_CLK_GPT7,  /* logical 7  = physical GPT7  */
+  RZV_CPG_CLK_GPT10, /* logical 8  = physical GPT10 */
+  RZV_CPG_CLK_GPT11, /* logical 9  = physical GPT11 */
+  RZV_CPG_CLK_GPT12, /* logical 10 = physical GPT12 */
+  RZV_CPG_CLK_GPT13, /* logical 11 = physical GPT13 (UNVERIFIED clk id) */
+  RZV_CPG_CLK_GPT14, /* logical 12 = physical GPT14 (UNVERIFIED clk id) */
+  RZV_CPG_CLK_GPT15, /* logical 13 = physical GPT15 (UNVERIFIED clk id) */
+  RZV_CPG_CLK_GPT16, /* logical 14 = physical GPT16 (UNVERIFIED clk id) */
+  RZV_CPG_CLK_GPT17, /* logical 15 = physical GPT17 (UNVERIFIED clk id) */
 };
 
 static const struct rzv_gpt_divider_s g_rzv_gpt_dividers[] =
@@ -197,19 +223,27 @@ static const struct rzv_gpt_divider_s g_rzv_gpt_dividers[] =
 };
 
 #ifdef CONFIG_PWM_PULSECOUNT
+/* Overflow ELC event IDs per logical channel.
+ * Unit0 (logical 0-7) → U0 events; Unit1 (logical 8-15) → U1 events.
+ * U1 events for GPT10-17 are indexed 0-7 within unit1. */
 static const uint16_t g_rzv_gpt_overflow_event[RZV_GPT_MAX_CHANNELS] =
 {
-  RZV_ELC_GPT_U0_GPT_ELCOVF_0,
-  RZV_ELC_GPT_U0_GPT_ELCOVF_1,
-  RZV_ELC_GPT_U0_GPT_ELCOVF_2,
-  RZV_ELC_GPT_U0_GPT_ELCOVF_3,
-  RZV_ELC_GPT_U0_GPT_ELCOVF_4,
-  RZV_ELC_GPT_U0_GPT_ELCOVF_5,
-  RZV_ELC_GPT_U0_GPT_ELCOVF_6,
-  RZV_ELC_GPT_U0_GPT_ELCOVF_7,
-  RZV_ELC_GPT_U1_GPT_ELCOVF_0,
-  RZV_ELC_GPT_U1_GPT_ELCOVF_1,
-  RZV_ELC_GPT_U1_GPT_ELCOVF_2,
+  RZV_ELC_GPT_U0_GPT_ELCOVF_0,  /* logical 0  */
+  RZV_ELC_GPT_U0_GPT_ELCOVF_1,  /* logical 1  */
+  RZV_ELC_GPT_U0_GPT_ELCOVF_2,  /* logical 2  */
+  RZV_ELC_GPT_U0_GPT_ELCOVF_3,  /* logical 3  */
+  RZV_ELC_GPT_U0_GPT_ELCOVF_4,  /* logical 4  */
+  RZV_ELC_GPT_U0_GPT_ELCOVF_5,  /* logical 5  */
+  RZV_ELC_GPT_U0_GPT_ELCOVF_6,  /* logical 6  */
+  RZV_ELC_GPT_U0_GPT_ELCOVF_7,  /* logical 7  */
+  RZV_ELC_GPT_U1_GPT_ELCOVF_0,  /* logical 8  = physical GPT10 */
+  RZV_ELC_GPT_U1_GPT_ELCOVF_1,  /* logical 9  = physical GPT11 */
+  RZV_ELC_GPT_U1_GPT_ELCOVF_2,  /* logical 10 = physical GPT12 */
+  RZV_ELC_GPT_U1_GPT_ELCOVF_3,  /* logical 11 = physical GPT13 */
+  RZV_ELC_GPT_U1_GPT_ELCOVF_4,  /* logical 12 = physical GPT14 */
+  RZV_ELC_GPT_U1_GPT_ELCOVF_5,  /* logical 13 = physical GPT15 */
+  RZV_ELC_GPT_U1_GPT_ELCOVF_6,  /* logical 14 = physical GPT16 */
+  RZV_ELC_GPT_U1_GPT_ELCOVF_7,  /* logical 15 = physical GPT17 */
 };
 #endif
 
@@ -223,12 +257,16 @@ static const uint16_t g_rzv_gpt_overflow_event[RZV_GPT_MAX_CHANNELS] =
 #  define RZV_GPT_PULSE_INIT
 #endif
 
+/* hw_ch: hardware channel within the GPT unit (ch % 8).
+ * Used for GTSTR/GTSTP/GTCLR channel mask bits (unit-local bit index).
+ * FSP r_gpt.c:262: channel_mask = 1U << (channel % 8) for unit1 channels. */
 #define RZV_GPT_LOWER_INIT(ch)                                 \
   {                                                             \
     .dev       = { .ops = &g_rzv_gpt_ops },                     \
     .base      = g_rzv_gpt_base[ch],                            \
     .clkid     = g_rzv_gpt_clkid[ch],                           \
     .channel   = (ch),                                          \
+    .hw_ch     = ((ch) % 8u),                                   \
     .pclk      = 0,                                             \
     .period    = 0,                                             \
     .divsel    = 0,                                             \
@@ -261,14 +299,16 @@ static struct rzv_gpt_lowerhalf_s g_rzv_gpt6 = RZV_GPT_LOWER_INIT(6);
 #ifdef CONFIG_RZV_GPT7
 static struct rzv_gpt_lowerhalf_s g_rzv_gpt7 = RZV_GPT_LOWER_INIT(7);
 #endif
-#ifdef CONFIG_RZV_GPT8
-static struct rzv_gpt_lowerhalf_s g_rzv_gpt8 = RZV_GPT_LOWER_INIT(8);
-#endif
-#ifdef CONFIG_RZV_GPT9
-static struct rzv_gpt_lowerhalf_s g_rzv_gpt9 = RZV_GPT_LOWER_INIT(9);
-#endif
+/* GPT8 and GPT9 are NOT defined — phantom channels removed.
+ * CONFIG_RZV_GPT8 / CONFIG_RZV_GPT9 are kept in Kconfig for backward-compat
+ * but must NOT be selected; selecting them would silently access wrong HW. */
+/* logical 8 = physical GPT10 (unit1, channel 0) */
 #ifdef CONFIG_RZV_GPT10
-static struct rzv_gpt_lowerhalf_s g_rzv_gpt10 = RZV_GPT_LOWER_INIT(10);
+static struct rzv_gpt_lowerhalf_s g_rzv_gpt10 = RZV_GPT_LOWER_INIT(8);
+#endif
+/* logical 9 = physical GPT11 (unit1, channel 1) */
+#ifdef CONFIG_RZV_GPT11
+static struct rzv_gpt_lowerhalf_s g_rzv_gpt11 = RZV_GPT_LOWER_INIT(9);
 #endif
 
 /****************************************************************************
@@ -310,6 +350,28 @@ static int gpt_compute_period(FAR struct rzv_gpt_lowerhalf_s *priv,
   if (frequency == 0)
     {
       return -EINVAL;
+    }
+
+  /* Frequency range check (Step Low-10):
+   * Maximum: clk / (div1 * 2) — minimum 2-count period, div=1.
+   * Minimum: clk / (div8192 * UINT32_MAX) — largest possible period.
+   * Both limits checked implicitly by the best_period==0 sentinel below,
+   * but return -ERANGE explicitly for cleaner error propagation. */
+  uint64_t clk_hz = (uint64_t)clk;
+  uint64_t freq_u  = (uint64_t)frequency;
+
+  /* Max achievable: clk / (div1 * 2) = clk/2 */
+  if (freq_u > clk_hz / 2u)
+    {
+      return -ERANGE;
+    }
+
+  /* Min achievable: clk / (div8192 * 0xFFFFFFFF) */
+  uint64_t min_freq_num = clk_hz;
+  uint64_t min_freq_den = (uint64_t)8192u * (uint64_t)UINT32_MAX;
+  if (min_freq_den > 0 && freq_u < ((min_freq_num + min_freq_den - 1u) / min_freq_den))
+    {
+      return -ERANGE;
     }
 
   for (unsigned int i = 0; i < nitems(g_rzv_gpt_dividers); i++)
@@ -375,39 +437,97 @@ static uint32_t gpt_duty_to_counts(uint32_t period, ub16_t duty)
   return (uint32_t)tmp;
 }
 
+/* Compute GTIOR value for standard PWM output (high at start, low at compare).
+ * 0%/100% duty is handled separately via GTUDDTYC, not by disabling output here.
+ * Output enable bits (OAE/OBE) remain set regardless of duty so POEG can track
+ * the output state. Source: FSP r_gpt.c:1443-1445, r_gpt.c:619-636. */
 static uint32_t gpt_compose_gtior(uint32_t duty_a_counts,
                                   uint32_t duty_b_counts,
                                   uint32_t period_counts)
 {
   uint32_t gtior = 0;
 
+  UNUSED(duty_a_counts);  /* duty 0%/100% handled by GTUDDTYC, not GTIOR */
+
   if (period_counts == 0)
     {
       return 0;
     }
 
+  /* GTIOCA: initial high, compare-match low (saw-wave PWM normal polarity).
+   * OAE always set — 0%/100% forced via GTUDDTYC.OADTY instead of disabling. */
   gtior |= GPT_GTIOR_GTIOA_HIGH_CMP_LOW | GPT_GTIOR_OAE;
 
-  if (duty_a_counts == 0)
-    {
-      gtior &= ~GPT_GTIOR_OAE;
-      gtior |= GPT_GTIOR_GTIOA_DISABLE;
-    }
-
 #ifdef CONFIG_PWM_MULTICHAN
-  if (duty_b_counts > 0)
-    {
-      gtior |= GPT_GTIOR_GTIOB_HIGH_CMP_LOW | GPT_GTIOR_OBE;
-    }
-  else
-    {
-      gtior |= GPT_GTIOR_GTIOB_DISABLE;
-    }
+  /* GTIOCB: same configuration when B channel is used. */
+  UNUSED(duty_b_counts);
+  gtior |= GPT_GTIOR_GTIOB_HIGH_CMP_LOW | GPT_GTIOR_OBE;
 #else
   UNUSED(duty_b_counts);
 #endif
 
   return gtior;
+}
+
+/* Compute GTUDDTYC value to enforce 0%/100% duty or return to compare mode.
+ * Per FSP r_gpt.c:619-636, OADTY/OBDTY fields:
+ *   0 = normal compare-match (register value), 2 = force 0%, 3 = force 100%. */
+static uint32_t gpt_compute_gtuddtyc(uint32_t duty_a_counts,
+                                     uint32_t duty_b_counts,
+                                     uint32_t period_counts)
+{
+  uint32_t gtuddtyc;
+  uint32_t oadty;
+
+  /* Base value: count up direction. UDF=0 (software not required). */
+  gtuddtyc = GPT_GTUDDTYC_UD;
+
+  /* OADTY: forced duty for GTIOCA */
+  if (period_counts == 0 || duty_a_counts == 0)
+    {
+      /* 0% duty: force pin low.
+       * GTIOR_GTIOA_HIGH_CMP_LOW means pin starts high, so 0 counts → force low. */
+      oadty = GPT_UDDTYC_DTY_0_PERCENT;
+    }
+  else if (duty_a_counts >= period_counts)
+    {
+      /* 100% duty: force pin high. */
+      oadty = GPT_UDDTYC_DTY_100_PERCENT;
+    }
+  else
+    {
+      /* Normal compare-match: use register value. */
+      oadty = GPT_UDDTYC_DTY_REGISTER;
+    }
+
+  gtuddtyc |= (oadty << GPT_GTUDDTYC_OADTY_SHIFT) & GPT_GTUDDTYC_OADTY_MASK;
+
+#ifdef CONFIG_PWM_MULTICHAN
+  /* OBDTY: forced duty for GTIOCB */
+  uint32_t obdty;
+
+  if (period_counts == 0 || duty_b_counts == 0)
+    {
+      obdty = GPT_UDDTYC_DTY_0_PERCENT;
+    }
+  else if (duty_b_counts >= period_counts)
+    {
+      obdty = GPT_UDDTYC_DTY_100_PERCENT;
+    }
+  else
+    {
+      obdty = GPT_UDDTYC_DTY_REGISTER;
+    }
+
+  gtuddtyc |= (obdty << GPT_GTUDDTYC_OBDTY_SHIFT) & GPT_GTUDDTYC_OBDTY_MASK;
+#else
+  UNUSED(duty_b_counts);
+  /* Single-channel mode: OBDTY = 0% (B output unused). */
+  gtuddtyc |= (GPT_UDDTYC_DTY_0_PERCENT << GPT_GTUDDTYC_OBDTY_SHIFT) &
+              GPT_GTUDDTYC_OBDTY_MASK;
+#endif
+
+  return gtuddtyc;
 }
 
 #ifdef CONFIG_PWM_PULSECOUNT
@@ -462,12 +582,25 @@ static int rzv_gpt_setup(FAR struct pwm_lowerhalf_s *dev)
       return ret;
     }
 
-  priv->pclk = rzv_get_pclk_frequency();
+  /* Deassert reset so module exits reset state before register programming.
+   * Mirror HRT pattern (rzv_hrt.c:274): reset pulse = assert + deassert.
+   * Without unreset, all register writes after this point are no-ops. */
+  ret = rzv_module_unreset(priv->clkid);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Use dedicated GPT clock accessor — P0CLK on R9A09G057H (100 MHz default).
+   * Separating from generic pclk allows future update if GPTCK differs. */
+  priv->pclk = rzv_get_gpt_clock_hz();
 
   irqstate_t flags = enter_critical_section();
   gpt_unlock(priv);
-  gpt_putreg(priv, RZV_GPT_GTSTP_OFFSET, RZV_GPT_CHANNEL_MASK(priv->channel));
-  gpt_putreg(priv, RZV_GPT_GTCLR_OFFSET, RZV_GPT_CHANNEL_MASK(priv->channel));
+  /* Use hw_ch (unit-local channel 0-7) for GTSTR/GTSTP/GTCLR channel mask.
+   * FSP r_gpt.c:262: channel_mask = 1U << (channel % 8) for unit1. */
+  gpt_putreg(priv, RZV_GPT_GTSTP_OFFSET, RZV_GPT_UNIT_BIT(priv->hw_ch));
+  gpt_putreg(priv, RZV_GPT_GTCLR_OFFSET, RZV_GPT_UNIT_BIT(priv->hw_ch));
   gpt_putreg(priv, RZV_GPT_GTST_OFFSET, 0);
   gpt_putreg(priv, RZV_GPT_GTINTAD_OFFSET, 0);
   gpt_putreg(priv, RZV_GPT_GTITC_OFFSET, 0);
@@ -569,18 +702,51 @@ static int rzv_gpt_start(FAR struct pwm_lowerhalf_s *dev,
 
   irqstate_t flags = enter_critical_section();
   gpt_unlock(priv);
-  gpt_putreg(priv, RZV_GPT_GTSTP_OFFSET, RZV_GPT_CHANNEL_MASK(priv->channel));
-  gpt_putreg(priv, RZV_GPT_GTCLR_OFFSET, RZV_GPT_CHANNEL_MASK(priv->channel));
+
+  /* Stop and clear counter before reconfiguration. Use hw_ch (unit-local bit)
+   * for GTSTR/GTSTP/GTCLR — FSP r_gpt.c:262: 1U << (channel % 8). */
+  gpt_putreg(priv, RZV_GPT_GTSTP_OFFSET, RZV_GPT_UNIT_BIT(priv->hw_ch));
+  gpt_putreg(priv, RZV_GPT_GTCLR_OFFSET, RZV_GPT_UNIT_BIT(priv->hw_ch));
+
+  /* Set mode: saw-wave up-count, prescaler. */
   gpt_putreg(priv, RZV_GPT_GTCR_OFFSET,
              GPT_GTCR_MD_SAW |
              ((uint32_t)tpcs << GPT_GTCR_TPCS_SHIFT));
+
+  /* Set period register directly (used immediately since counter is stopped). */
   gpt_putreg(priv, RZV_GPT_GTPR_OFFSET, period - 1u);
+
+  /* Set compare registers for duty cycle (active registers for initial values). */
   gpt_putreg(priv, RZV_GPT_GTCCRA_OFFSET, duty_a_counts);
 #ifdef CONFIG_PWM_MULTICHAN
   gpt_putreg(priv, RZV_GPT_GTCCRB_OFFSET, duty_b_counts);
 #endif
+
+  /* Set up GTBER double-buffering for glitch-free live duty updates.
+   * GTBER = 0x550000: CCRA_BITS[17:16]=01, CCRB_BITS[19:18]=01, PR_BITS[21:20]=01
+   * with force-transfer mode.  New values written to GTCCRC/GTCCRE/GTPBR
+   * are latched into GTCCRA/GTCCRB/GTPR at next overflow — no mid-cycle glitch.
+   * Source: FSP r_gpt.c:34 GPT_PRV_GTBER_BUFFER_ENABLE_FORCE_TRANSFER = 0x550000U
+   * and FSP r_gpt.c:497 p_instance_ctrl->p_reg->GTBER = GPT_PRV_GTBER... */
+  gpt_putreg(priv, RZV_GPT_GTPBR_OFFSET, period - 1u);
+  gpt_putreg(priv, RZV_GPT_GTCCRC_OFFSET, duty_a_counts);
+#ifdef CONFIG_PWM_MULTICHAN
+  gpt_putreg(priv, RZV_GPT_GTCCRE_OFFSET, duty_b_counts);
+#else
+  gpt_putreg(priv, RZV_GPT_GTCCRE_OFFSET, duty_a_counts);
+#endif
+  gpt_putreg(priv, RZV_GPT_GTBER_OFFSET, GPT_GTBER_FORCE_TRANSFER);
+
+  /* Configure IO control register: output mode and enable. */
   gpt_putreg(priv, RZV_GPT_GTIOR_OFFSET,
              gpt_compose_gtior(duty_a_counts, duty_b_counts, period));
+
+  /* Set GTUDDTYC to handle 0%/100% duty via forced static levels.
+   * Replaces old GTIOA_DISABLE hack which disabled the output buffer.
+   * Source: FSP r_gpt.c:619-636, GPT_DUTY_CYCLE_MODE_0/100_PERCENT. */
+  gpt_putreg(priv, RZV_GPT_GTUDDTYC_OFFSET,
+             gpt_compute_gtuddtyc(duty_a_counts, duty_b_counts, period));
+
   gpt_putreg(priv, RZV_GPT_GTST_OFFSET, 0);
 
 #ifdef CONFIG_PWM_PULSECOUNT
@@ -612,7 +778,7 @@ static int rzv_gpt_start(FAR struct pwm_lowerhalf_s *dev,
 #endif
 
   gpt_lock(priv);
-  gpt_putreg(priv, RZV_GPT_GTSTR_OFFSET, RZV_GPT_CHANNEL_MASK(priv->channel));
+  gpt_putreg(priv, RZV_GPT_GTSTR_OFFSET, RZV_GPT_UNIT_BIT(priv->hw_ch));
   leave_critical_section(flags);
 
   priv->running = true;
@@ -628,7 +794,7 @@ static int rzv_gpt_stop(FAR struct pwm_lowerhalf_s *dev)
 
   irqstate_t flags = enter_critical_section();
   gpt_unlock(priv);
-  gpt_putreg(priv, RZV_GPT_GTSTP_OFFSET, RZV_GPT_CHANNEL_MASK(priv->channel));
+  gpt_putreg(priv, RZV_GPT_GTSTP_OFFSET, RZV_GPT_UNIT_BIT(priv->hw_ch));
   gpt_putreg(priv, RZV_GPT_GTINTAD_OFFSET, 0);
   gpt_lock(priv);
 
@@ -674,7 +840,7 @@ static int rzv_gpt_irq(int irq, FAR void *context, FAR void *arg)
     {
       irqstate_t flags = enter_critical_section();
       gpt_putreg(priv, RZV_GPT_GTSTP_OFFSET,
-                 RZV_GPT_CHANNEL_MASK(priv->channel));
+                 RZV_GPT_UNIT_BIT(priv->hw_ch));
       gpt_putreg(priv, RZV_GPT_GTINTAD_OFFSET, 0);
       priv->running = false;
       priv->oneshot = false;
@@ -730,17 +896,16 @@ FAR struct pwm_lowerhalf_s *rzv_gpt_initialize(int channel)
       case 7:
         return &g_rzv_gpt7.dev;
 #endif
-#ifdef CONFIG_RZV_GPT8
-      case 8:
-        return &g_rzv_gpt8.dev;
-#endif
-#ifdef CONFIG_RZV_GPT9
-      case 9:
-        return &g_rzv_gpt9.dev;
-#endif
+  /* GPT8 and GPT9 cases intentionally absent — phantom channels removed.
+   * Logical 8 = physical GPT10 (unit1 ch0), logical 9 = physical GPT11 (unit1 ch1).
+   * Board code (rzv2h_pwm.c) uses logical 8 and 9 after fix. */
 #ifdef CONFIG_RZV_GPT10
-      case 10:
+      case 8:  /* logical 8 = physical GPT10 (unit1, hw_ch=0) */
         return &g_rzv_gpt10.dev;
+#endif
+#ifdef CONFIG_RZV_GPT11
+      case 9:  /* logical 9 = physical GPT11 (unit1, hw_ch=1) */
+        return &g_rzv_gpt11.dev;
 #endif
       default:
         return NULL;

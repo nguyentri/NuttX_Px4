@@ -66,6 +66,21 @@
 
 #define RZV_BOARD_XTAL_FREQUENCY  24000000  /* 24 MHz */
 
+/* Board clock frequency aliases — NuttX convention.
+ * audit finding #22: board.h previously only defined XTAL; drivers expecting
+ * BOARD_CPU_FREQ or BOARD_PCLK_* would fall back to rzv_clock_get_rate() which
+ * returns 0 for many IDs (see review finding #3).  Define authoritative values
+ * here to match EVK defaults in rzv_clock.h.
+ * NOTE: These are compile-time defaults.  If TF-A reprogrammed CDDIV/CSDIV
+ * the actual frequencies may differ — update when divider readback is
+ * implemented (rzv_clock_divider_init phase-04+). */
+
+#define BOARD_CPU_FREQ           800000000  /* CR8 I6CLK 800 MHz */
+#define BOARD_PCLK0_FREQ         100000000  /* P0CLK 100 MHz */
+#define BOARD_PCLK1_FREQ         100000000  /* P1CLK 100 MHz */
+#define BOARD_PCLK4_FREQ         200000000  /* P4CLK 200 MHz (SPI, GPT source) */
+#define BOARD_SYSCLK_FREQ        200000000  /* I7CLK 200 MHz */
+
 /* LED definitions **********************************************************/
 
 /* The RZV2H EVK has 4 user LEDs:
@@ -221,7 +236,34 @@
 /* The RDK-RZV2H PX4 barometer path uses SCI-mode I2C7 on P76/P77. The lower
  * numbered SCI-I2C alternates overlap GPS or PWM pins and are intentionally
  * not exposed as board defaults.
+ *
+ * Schematic verification status (Phase 04, audit dim 14):
+ *   - No schematic PDF available in refs/ at time of this implementation.
+ *   - GY-912 socket on RDK-RZV2H is wired to RIIC (see i2c-gy912 defconfig).
+ *   - SCI0-3 I2C pin macros below are derived from rzv2h_pinmap.h symbols
+ *     and are correct for pin mux, but BOARD ROUTING IS UNVERIFIED.
+ *   - The sci-i2c-gy912 defconfig is a synthetic driver smoke test only;
+ *     i2c probe will return empty (no slave on bus) unless GY-912 is
+ *     physically rewired to a SCI channel.
+ *
+ * Pin mapping (RXD pin → SCL, TXD pin → SDA per SCI-B I2C convention):
+ *   SCI0: RXD0=P51(Mode1)→SCL, TXD0=P50(Mode1)→SDA
+ *   SCI1: RXD1=P53(Mode1)→SCL, TXD1=P52(Mode1)→SDA
+ *   SCI2: RXD2=P55(Mode1)→SCL, TXD2=P54(Mode1)→SDA
+ *   SCI3: RXD3=P57(Mode1)→SCL, TXD3=P56(Mode1)→SDA
  */
+
+#define BOARD_SCI0_I2C_SCL_GPIO  GPIO_RXD0_MISO0_SCL0_P5_1_M1  /* P51 Mode1 */
+#define BOARD_SCI0_I2C_SDA_GPIO  GPIO_TXD0_MOSI0_DA0_P5_0_M1   /* P50 Mode1 */
+
+#define BOARD_SCI1_I2C_SCL_GPIO  GPIO_RXD1_MISO1_SCL1_P5_3_M1  /* P53 Mode1 */
+#define BOARD_SCI1_I2C_SDA_GPIO  GPIO_TXD1_MOSI1_SDA1_P5_2_M1  /* P52 Mode1 */
+
+#define BOARD_SCI2_I2C_SCL_GPIO  GPIO_RXD2_MISO2_SCL2_P5_5_M1  /* P55 Mode1 */
+#define BOARD_SCI2_I2C_SDA_GPIO  GPIO_TXD2_MOSI2_SDA2_P5_4_M1  /* P54 Mode1 */
+
+#define BOARD_SCI3_I2C_SCL_GPIO  GPIO_RXD3_MISO3_SCL3_P5_7_M1  /* P57 Mode1 */
+#define BOARD_SCI3_I2C_SDA_GPIO  GPIO_TXD3_MOSI3_SDA3_P5_6_M1  /* P56 Mode1 */
 
 /* SPI Configuration ********************************************************/
 

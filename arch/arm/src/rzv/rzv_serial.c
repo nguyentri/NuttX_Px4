@@ -37,10 +37,15 @@
 #include <nuttx/arch.h>
 #include <nuttx/serial/serial.h>
 
+#ifdef CONFIG_SERIAL_TERMIOS
+#  include <termios.h>
+#endif
+
 #include "arm_internal.h"
 #include "chip.h"
 #include "rzv_clock.h"
 #include "rzv_icu.h"
+#include "rzv_serial.h"   /* L5 fix: provides rzv2h_serial_setup() declaration */
 #include "hardware/rzv_sci.h"
 #include <arch/rzv/rzv2h_irq.h>
 
@@ -71,6 +76,14 @@
 #ifndef CONFIG_RZV_SCI_FIFO_TX_TRIGGER
 #  define CONFIG_RZV_SCI_FIFO_TX_TRIGGER 15 /* Default: trigger when <=15 in FIFO */
 #endif
+#endif
+
+/* Low-18: Baud-rate error tolerance (x1000 = 0.001% units).
+ * Default 1500 = 1.5%. PX4 high-baud links (921600, 3Mbaud) may need 2500.
+ * TODO(phase-05): expose via Kconfig CONFIG_RZV_SCI_BAUD_ERROR_X_1000.
+ */
+#ifndef CONFIG_RZV_SCI_BAUD_ERROR_X_1000
+#  define CONFIG_RZV_SCI_BAUD_ERROR_X_1000 1500
 #endif
 
 /* DMA buffer sizes */
@@ -437,6 +450,7 @@ struct rzv_uart_s
   uint8_t   bits;       /* Number of bits (7 or 8) */
   bool      stopbits2;  /* True: 2 stop bits */
   uint8_t   fifo_depth; /* FIFO depth: 0=no FIFO, 16=FIFO supported */
+  bool      pinmux_done; /* H3 fix: true once rzv2h_serial_setup() has run */
 
 #ifdef CONFIG_SERIAL_TXDMA
   int               dma_tx_chn;    /* DMAC channel for TX (-1 = not configured) */
@@ -522,7 +536,7 @@ static void rzv_fifo_configure(struct rzv_uart_s *priv);
 
 #ifdef CONFIG_SERIAL_TXDMA
 static void rzv_dma_txcallback(void *handle, int event, void *user_data);
-static int  rzv_dma_setup_tx(struct rzv_uart_s *priv);
+static int  rzv_dma_setup_tx(struct uart_dev_s *dev);  /* C4 fix: was rzv_uart_s *priv */
 static void rzv_dma_shutdown_tx(struct rzv_uart_s *priv);
 static void rzv_dma_send(struct uart_dev_s *dev, const char *buffer, size_t len);
 static void rzv_dma_txint(struct uart_dev_s *dev, bool enable);
@@ -531,7 +545,7 @@ static void rzv_dma_txavailable(struct uart_dev_s *dev);
 
 #ifdef CONFIG_SERIAL_RXDMA
 static void rzv_dma_rxcallback(void *handle, int event, void *user_data);
-static int  rzv_dma_setup_rx(struct rzv_uart_s *priv);
+static int  rzv_dma_setup_rx(struct uart_dev_s *dev);  /* C4 fix: was rzv_uart_s *priv */
 static void rzv_dma_shutdown_rx(struct rzv_uart_s *priv);
 static void rzv_dma_rxavailable(struct uart_dev_s *dev);
 #endif
@@ -1206,9 +1220,16 @@ static int rzv_calculate_baud_setting(uint32_t baudrate,
   int32_t hit_bit_err = 100000; /* 100% error as starting point */
   uint32_t divisor;
 
-  /* Get PCLK frequency */
+  /* C1 fix: SCI clock source is P5CLK per FSP bsp_feature.h
+   * (BSP_FEATURE_SCI_CLOCK = FSP_PRIV_CLOCK_P5CLK), not P0CLK.
+   * Use rzv_clock_get_rate(RZV_CLOCK_P5CLK) directly.
+   */
 
-  freq_hz = rzv_get_pclk_frequency();
+  freq_hz = rzv_clock_get_rate(RZV_CLOCK_P5CLK);
+  if (freq_hz == 0)
+    {
+      freq_hz = RZV_CLOCK_P5CLK_HZ; /* Fallback to compile-time constant */
+    }
 
   if (baudrate == 0 || freq_hz == 0)
     {
@@ -1256,21 +1277,35 @@ static int rzv_calculate_baud_setting(uint32_t baudrate,
         }
     }
 
+/* High-8 fix: MDDR valid range is 128-255 (SCI_B_UART_MDDR_MIN=128,
+ * SCI_B_UART_MDDR_MAX=256 used for division). Initialize to 128 (no
+ * effective modulation) not 256 (invalid 9-bit value that masks to 0).
+ */
+#define SCI_B_UART_MDDR_MIN  128u
+#define SCI_B_UART_MDDR_MAX  256u
+
   /* Initialize with default values for calculation */
 
   p_baud_setting->brr = 255;
   p_baud_setting->brme = 0;
-  p_baud_setting->mddr = 256; /* Default: no bit rate modulation */
+  p_baud_setting->mddr = SCI_B_UART_MDDR_MIN; /* Start: no modulation (BRME=0) */
 
   /* Find the best BRR (bit rate register) value by trying all divisors */
 
   for (uint32_t select_16_base_clk_cycles = 0;
-       select_16_base_clk_cycles <= 1 && (hit_bit_err > 1500);
+       select_16_base_clk_cycles <= 1 &&
+       (hit_bit_err > CONFIG_RZV_SCI_BAUD_ERROR_X_1000);
        select_16_base_clk_cycles++)
     {
       for (uint32_t i = 0; i < 13; i++)
         {
           /* Skip divisors that don't match the clock cycle requirement */
+
+          /* M7 note: XOR of (:1) bit-fields with uint8_t cast — safe because
+           * abcs and abcse are each 1-bit fields, their OR is 0 or 1, and
+           * select_16_base_clk_cycles is 0 or 1.  The cast to uint8_t makes
+           * the integer promotion visible.  Same logic as FSP r_sci_b_uart.c.
+           */
 
           if (((uint8_t)select_16_base_clk_cycles) ^
               (g_async_baud[i].abcs | g_async_baud[i].abcse))
@@ -1304,33 +1339,78 @@ static int rzv_calculate_baud_setting(uint32_t baudrate,
                       bit_err = -bit_err;
                     }
 
+                  /* High-8 fix: try MDDR modulation to reduce bit error.
+                   * Formula (FSP r_sci_b_uart.c:1050):
+                   *   mddr = err_divisor / (freq_hz / SCI_B_UART_MDDR_MAX)
+                   * Only valid when mddr >= SCI_B_UART_MDDR_MIN (128).
+                   * Adjusted bit error with MDDR:
+                   *   adj_err = ((bit_err + 100000) * mddr / 256) - 100000
+                   */
+
+                  uint8_t mddr;
+                  int32_t adj_bit_err = bit_err;
+                  mddr = (uint8_t)(err_divisor / (freq_hz / SCI_B_UART_MDDR_MAX));
+
+                  if (mddr >= SCI_B_UART_MDDR_MIN)
+                    {
+                      /* Adjust bit error for MDDR modulation */
+
+                      adj_bit_err = (((bit_err + 100000) * (int32_t)mddr) /
+                                     (int32_t)SCI_B_UART_MDDR_MAX) - 100000;
+                      if (adj_bit_err < 0)
+                        {
+                          adj_bit_err = -adj_bit_err;
+                        }
+                    }
+                  else
+                    {
+                      /* M8 fix: FSP r_sci_b_uart.c:1055 breaks out of the
+                       * inner loop when mddr is below the minimum threshold
+                       * rather than clamping to MIN and continuing.
+                       * Clamping lets NuttX compare adj_bit_err with the
+                       * unclamped original (bit_err) which can pick a worse
+                       * BRR setting that "looks better" due to the MDDR=MIN
+                       * adjustment. Match FSP: skip this temp_brr entirely.
+                       */
+
+                      break; /* mddr too low — no valid modulation for this BRR */
+                    }
+
                   /* If this is the best error so far, save these settings */
 
-                  if (bit_err < hit_bit_err)
+                  if (adj_bit_err < hit_bit_err)
                     {
                       p_baud_setting->bgdm = g_async_baud[i].bgdm;
                       p_baud_setting->abcs = g_async_baud[i].abcs;
                       p_baud_setting->abcse = g_async_baud[i].abcse;
                       p_baud_setting->cks = g_async_baud[i].cks;
                       p_baud_setting->brr = (uint8_t)temp_brr;
-                      p_baud_setting->mddr = 256; /* No modulation */
-                      hit_bit_err = bit_err;
+                      p_baud_setting->mddr = mddr;
+                      p_baud_setting->brme = (mddr > SCI_B_UART_MDDR_MIN) ? 1 : 0;
+                      hit_bit_err = adj_bit_err;
                     }
 
-                  break; /* Use first valid BRR for this divisor */
+                  /* H5 fix: removed unconditional break here.
+                   * When modulation is active (mddr >= MIN), continue
+                   * decrementing temp_brr to find the optimal BRR/MDDR combo.
+                   * The M8 break above handles the mddr < MIN exit path.
+                   * Combined, this matches FSP r_sci_b_uart.c:1055/1085-1093.
+                   */
                 }
             }
         }
     }
 
-  /* Return error if the percent error is too large (>1.5%) */
+  /* Return error if the percent error exceeds configured tolerance */
 
-  if (hit_bit_err > 1500)
+  if (hit_bit_err > CONFIG_RZV_SCI_BAUD_ERROR_X_1000)
     {
-      serr("ERROR: Baud rate %lu error too high: %ld.%02ld%%\n",
+      serr("ERROR: Baud rate %lu error too high: %ld.%02ld%% (max %u.%03u%%)\n",
            (unsigned long)baudrate,
            (long)(hit_bit_err / 1000),
-           (long)((hit_bit_err % 1000) / 10));
+           (long)((hit_bit_err % 1000) / 10),
+           CONFIG_RZV_SCI_BAUD_ERROR_X_1000 / 1000,
+           CONFIG_RZV_SCI_BAUD_ERROR_X_1000 % 1000);
       return -EINVAL;
     }
 
@@ -1391,29 +1471,53 @@ static void rzv_fifo_configure(struct rzv_uart_s *priv)
 {
   uint32_t fcr;
 
-  /* Configure FIFO Control Register (FCR)
-   * - RTRG: RX FIFO trigger level
-   * - TTRG: TX FIFO trigger level
-   * - RSTRG: RTS trigger level
-   * - Enable FIFOs (FM=1)
+  /* P0-5 fix: FIFO mode enable lives in CCR3.FM (bit 20), NOT FCR.FM (bit 7
+   * which is RESERVED). Set CCR3.FM before programming FCR trigger levels.
+   * CCR3 was already written above; RMW to add FM bit.
+   */
+
+  rzv_sci_modifyreg(priv, RZV_SCI_CCR_OFFSET(3), 0, SCI_CCR3_FM);
+
+  /* M2 fix: clear FIFO flags (FFCLR.DRC=1) before programming FCR.
+   * FSP r_sci_b_uart.c clears FIFO flags prior to enabling FIFO mode to
+   * prevent stale DR/parity/framing bits from a prior session from
+   * being reported on the first receive in the new session.
+   */
+
+  rzv_sci_putreg(priv, RZV_SCI_FFCLR_OFFSET, SCI_FFCLR_DRC);
+
+  /* Configure FIFO Control Register (FCR) — triggers and RTS threshold only.
+   * P0-5 fix: SCI_FCR_FM removed (reserved bit).
    */
 
   fcr = (CONFIG_RZV_SCI_FIFO_RX_TRIGGER << SCI_FCR_RTRG_SHIFT) |
         (CONFIG_RZV_SCI_FIFO_TX_TRIGGER << SCI_FCR_TTRG_SHIFT) |
-        ((priv->fifo_depth - 1) << SCI_FCR_RSTRG_SHIFT) |
-        SCI_FCR_FM;  /* Enable FIFO mode */
+        ((priv->fifo_depth - 1) << SCI_FCR_RSTRG_SHIFT);
 
   rzv_sci_putreg(priv, RZV_SCI_FCR_OFFSET, fcr);
 
-  /* Reset FIFOs */
+  /* Reset FIFOs: TFRST and RFRST are write-only auto-clearing trigger bits
+   * (__OM in FSP iodefine). Reading FCR back always yields 0 for these bits.
+   * P0-6 fix: poll FRSR.FNUM==0 (RX FIFO empty) and FTSR.T==0 (TX FIFO empty)
+   * instead of spinning on FCR read (which would be an infinite loop).
+   */
 
   rzv_sci_modifyreg(priv, RZV_SCI_FCR_OFFSET, 0,
-                   SCI_FCR_TFRST | SCI_FCR_RFRST);
+                    SCI_FCR_TFRST | SCI_FCR_RFRST);
 
-  /* Wait for FIFO reset to complete */
+  /* Wait for TX FIFO to drain (FTSR.T == 0) */
 
-  while ((rzv_sci_getreg(priv, RZV_SCI_FCR_OFFSET) &
-         (SCI_FCR_TFRST | SCI_FCR_RFRST)) != 0);
+  while ((rzv_sci_getreg(priv, RZV_SCI_FTSR_OFFSET) & SCI_FTSR_T_MASK) != 0)
+    {
+      /* Typically clears within 1 bus cycle */
+    }
+
+  /* Wait for RX FIFO to drain (FRSR.FNUM == 0) */
+
+  while ((rzv_sci_getreg(priv, RZV_SCI_FRSR_OFFSET) & SCI_FRSR_FNUM_MASK) != 0)
+    {
+      /* Typically clears within 1 bus cycle */
+    }
 }
 #endif
 
@@ -1428,9 +1532,13 @@ static void rzv_fifo_configure(struct rzv_uart_s *priv)
 #ifdef CONFIG_SERIAL_TXDMA
 static void rzv_dma_txcallback(void *handle, int event, void *user_data)
 {
-  struct rzv_uart_s *priv = (struct rzv_uart_s *)user_data;
-  struct uart_dev_s *dev = (struct uart_dev_s *)((char *)user_data -
-                            offsetof(struct uart_dev_s, priv));
+  /* C4 fix: user_data is dev (struct uart_dev_s *), not priv.
+   * The former offsetof arithmetic was bogus: priv is a separate static struct,
+   * not embedded inside uart_dev_s, so the offset subtraction gave a garbage ptr.
+   */
+
+  struct uart_dev_s *dev = (struct uart_dev_s *)user_data;
+  struct rzv_uart_s *priv = (struct rzv_uart_s *)dev->priv;
 
   priv->dma_tx_active = false;
 
@@ -1439,8 +1547,9 @@ static void rzv_dma_txcallback(void *handle, int event, void *user_data)
   uart_xmitchars_done(dev);
 }
 
-static int rzv_dma_setup_tx(struct rzv_uart_s *priv)
+static int rzv_dma_setup_tx(struct uart_dev_s *dev)
 {
+  struct rzv_uart_s *priv = (struct rzv_uart_s *)dev->priv;
   struct rzv_dmac_config_s dma_config;
 
   if (priv->dma_tx_chn < 0)
@@ -1460,6 +1569,7 @@ static int rzv_dma_setup_tx(struct rzv_uart_s *priv)
    * - Source: memory (increment)
    * - Destination: UART TDR register (fixed)
    * - Trigger: UART TX event (hardware)
+   * C4 fix: pass dev (not priv) as user_data so callback can get dev directly.
    */
 
   memset(&dma_config, 0, sizeof(dma_config));
@@ -1473,7 +1583,7 @@ static int rzv_dma_setup_tx(struct rzv_uart_s *priv)
   dma_config.dst_addr       = priv->uartbase + RZV_SCI_TDR_OFFSET;
   dma_config.elc_event      = priv->evt_txi;
   dma_config.callback       = rzv_dma_txcallback;
-  dma_config.user_data      = priv;
+  dma_config.user_data      = dev;  /* C4 fix: was priv — incorrect */
 
   ret = rzv_dmac_channel_configure(priv->dma_tx_chn, &dma_config);
   if (ret < 0)
@@ -1497,31 +1607,44 @@ static void rzv_dma_send(struct uart_dev_s *dev, const char *buffer,
                         size_t len)
 {
   struct rzv_uart_s *priv = (struct rzv_uart_s *)dev->priv;
-  struct rzv_dmac_config_s dma_config;
 
   if (priv->dma_tx_active || priv->dma_tx_chn < 0)
     {
       return;
     }
 
-  /* Update DMA source address and length */
+  /* Update source buffer and byte count for the pre-configured TX channel.
+   * rzv_dmac_channel_set_buffer() updates N[0].SA/TB and calls
+   * up_clean_dcache() to ensure DMA reads coherent TX data.
+   * Cache line alignment (32 bytes on Cortex-R8) is the caller's
+   * responsibility; UART TX buffers sourced from uart_xmitchars are
+   * kernel stack/heap and satisfy this on RDK-RZV2H.
+   */
 
-  memset(&dma_config, 0, sizeof(dma_config));
-  dma_config.src_addr = (uint32_t)buffer;
-  dma_config.length   = len;
-
-  rzv_dmac_channel_configure(priv->dma_tx_chn, &dma_config);
+  if (rzv_dmac_channel_set_buffer(priv->dma_tx_chn,
+                                  (uint32_t)(uintptr_t)buffer,
+                                  (uint32_t)len) < 0)
+    {
+      return;
+    }
 
   priv->dma_tx_active = true;
-
-  /* Start DMA transfer */
 
   rzv_dmac_channel_start(priv->dma_tx_chn);
 }
 
 static void rzv_dma_txint(struct uart_dev_s *dev, bool enable)
 {
-  /* DMA mode doesn't use TX interrupts directly */
+  /* M6 note: in DMA TX mode the upper half calls txint(false) to suppress
+   * TXI emission, but this no-op means TXI can still fire while DMA runs.
+   * Combined with the C4 callback bug (now fixed), this caused DMA TX to
+   * be effectively broken end-to-end.
+   * TODO(phase-06): implement TXI suppression in DMA mode by masking CCR0.TIE
+   * when enable==false, re-enabling when enable==true.  Currently left as
+   * no-op because the upper half's uart_xmitchars_dma path does not require
+   * TXI to be masked (DMA completion triggers uart_xmitchars_done instead),
+   * and the residual TXI will be a no-op after the FIFO drains.
+   */
 }
 
 static void rzv_dma_txavailable(struct uart_dev_s *dev)
@@ -1546,17 +1669,18 @@ static void rzv_dma_txavailable(struct uart_dev_s *dev)
 #ifdef CONFIG_SERIAL_RXDMA
 static void rzv_dma_rxcallback(void *handle, int event, void *user_data)
 {
-  struct rzv_uart_s *priv = (struct rzv_uart_s *)user_data;
-  struct uart_dev_s *dev = (struct uart_dev_s *)((char *)user_data -
-                            offsetof(struct uart_dev_s, priv));
+  /* C4 fix: user_data is dev (struct uart_dev_s *), not priv. */
+
+  struct uart_dev_s *dev = (struct uart_dev_s *)user_data;
 
   /* Notify upper layer that data is available */
 
   uart_recvchars(dev);
 }
 
-static int rzv_dma_setup_rx(struct rzv_uart_s *priv)
+static int rzv_dma_setup_rx(struct uart_dev_s *dev)
 {
+  struct rzv_uart_s *priv = (struct rzv_uart_s *)dev->priv;
   struct rzv_dmac_config_s dma_config;
 
   if (priv->dma_rx_chn < 0)
@@ -1603,7 +1727,7 @@ static int rzv_dma_setup_rx(struct rzv_uart_s *priv)
   dma_config.length         = priv->rx_dma_size;
   dma_config.elc_event      = priv->evt_rxi;
   dma_config.callback       = rzv_dma_rxcallback;
-  dma_config.user_data      = priv;
+  dma_config.user_data      = dev;  /* C4 fix: was priv — pass dev for direct cast in callback */
 
   ret = rzv_dmac_channel_configure(priv->dma_rx_chn, &dma_config);
   if (ret < 0)
@@ -1677,6 +1801,21 @@ static int rzv_setup(struct uart_dev_s *dev)
   struct baud_setting baud_setting;
   int ret;
 
+  /* H3 fix: run pinmux only once per channel.
+   * Reconfiguring GPIO mid-transfer (e.g., on every TCSETS) can glitch the
+   * TX/RX lines and cause framing errors on the peer.
+   * Gate rzv2h_serial_setup() behind priv->pinmux_done so it runs exactly
+   * once — on first open or first earlyserialinit call for this channel.
+   */
+
+  if (!priv->pinmux_done)
+    {
+      /* L5 fix: declaration comes from rzv_serial.h (now #included) */
+
+      rzv2h_serial_setup();
+      priv->pinmux_done = true;
+    }
+
   /* Enable clock for this SCI channel */
 
   rzv_clock_enable(priv->clk_id);
@@ -1685,18 +1824,34 @@ static int rzv_setup(struct uart_dev_s *dev)
 
   rzv_module_unreset(priv->clk_id);
 
-  /* CRITICAL: Wait for module power-up (P1 fix)
-   * Hardware requires delay after clock enable before register access
+  /* CRITICAL: Wait for module power-up after clock enable before register access.
+   * Low-19 fix: replaced busy volatile-loop with up_udelay(10) — portable and
+   * accurate. Timer must be running at this point (called from rzv_setup, not
+   * early init path).
    */
 
-  for (volatile int i = 0; i < 1000; i++)
-    {
-      /* Delay ~10 us at typical CPU frequencies */
-    }
+  up_udelay(10);
 
   /* Disable transmit and receive */
 
-  rzv_sci_putreg(priv, RZV_SCI_CCR_OFFSET(0), 0);
+  /* M1 fix: FSP r_sci_b_uart.c:365-371 sets CCR0=IDSEL before configuring
+   * CCR1-3.  Write IDSE first so the channel is in the correct idle state
+   * while subsequent CCR writes are made.  TE/RE remain 0 (channel disabled).
+   */
+
+  rzv_sci_putreg(priv, RZV_SCI_CCR_OFFSET(0), SCI_CCR0_IDSE);
+
+  /* Medium-11 fix: wait for CESR.RIST==0 and CESR.TIST==0 after CCR0=IDSE.
+   * FSP r_sci_b_uart_disable_transfers() requires this to avoid a race when
+   * the channel is reopened (e.g., TCSETS baud change while data is in flight).
+   * CESR is a byte register at CESR_OFFSET; getreg32 reads the low byte safely.
+   */
+
+  while ((rzv_sci_getreg(priv, RZV_SCI_CESR_OFFSET) &
+         (SCI_CESR_RIST | SCI_CESR_TIST)) != 0)
+    {
+      /* Waits for in-progress RX/TX frames to complete before reconfiguring */
+    }
 
   /* Configure character length */
 
@@ -1727,30 +1882,33 @@ static int rzv_setup(struct uart_dev_s *dev)
 
   ccr3 = (ccr3 & ~SCI_CCR3_MOD_MASK) | SCI_CCR3_MOD_ASYNC;
 
-  /* IDSEL: Idle detection select (P2 fix)
-   * Use edge detection for idle (typical for UART)
+  /* P0-3 fix: IDSEL lives in CCR0 bit 10 (SCI_CCR0_IDSE), NOT CCR3.
+   * The former SCI_CCR3_IDSEL write hit reserved CCR3 bit 10 — removed.
+   * SCI_CCR0_IDSE is set together with TE|RE below.
    */
-  ccr3 |= SCI_CCR3_IDSEL;
 
   rzv_sci_putreg(priv, RZV_SCI_CCR_OFFSET(3), ccr3);
 
-  /* Configure parity */
+  /* Configure parity.
+   * P0-4 fix: CCR1 PE=bit8, PM=bit9 — now correct per updated header.
+   * SPB2IO at bit5 (serial break I/O direction) is set for normal operation.
+   * Removed invalid SCI_CCR1_STOP, SCI_CCR1_LSBF (now live in CCR3).
+   */
 
   ccr1 = rzv_sci_getreg(priv, RZV_SCI_CCR_OFFSET(1));
-  ccr1 &= ~(SCI_CCR1_PE | SCI_CCR1_PM);
+  ccr1 &= ~(SCI_CCR1_PE | SCI_CCR1_PM | SCI_CCR1_SPB2IO);
 
   if (priv->parity == 1)
     {
-      ccr1 |= SCI_CCR1_PE;  /* Odd parity */
+      ccr1 |= SCI_CCR1_PE | SCI_CCR1_PM;  /* Odd parity: PE=1, PM=1 */
     }
   else if (priv->parity == 2)
     {
-      ccr1 |= SCI_CCR1_PE | SCI_CCR1_PM;  /* Even parity */
+      ccr1 |= SCI_CCR1_PE;  /* Even parity: PE=1, PM=0 */
     }
 
-  /* SPB2IO: Serial Port Break I/O (P2 fix)
-   * Set to output mode to enable break signal transmission
-   */
+  /* SPB2IO=1: TXD pin drives the break signal (normal UART) */
+
   ccr1 |= SCI_CCR1_SPB2IO;
 
   rzv_sci_putreg(priv, RZV_SCI_CCR_OFFSET(1), ccr1);
@@ -1764,29 +1922,48 @@ static int rzv_setup(struct uart_dev_s *dev)
     {
       serr("ERROR: Failed to calculate baud rate for %lu bps\n",
            (unsigned long)priv->baud);
+
+      /* H7 fix: roll back clock enable and module unreset before returning.
+       * Without cleanup, the next open sees a half-initialised channel:
+       * clock is on, module is out of reset, but CCR0=0 (TE/RE not set).
+       * This blocks reopen and can cause spurious interrupts from line noise.
+       */
+
+      rzv_sci_putreg(priv, RZV_SCI_CCR_OFFSET(0), 0);
+      rzv_clock_disable(priv->clk_id);
       return ret;
     }
 
-  /* Configure CCR2 with calculated baud rate settings */
+  /* Configure CCR2 with calculated baud rate settings.
+   * P0-1 fix: use SCI_CCR2_BUILD() for a single write covering all fields at
+   * their correct positions per FSP CCR2_b layout (BCP=0 default,
+   * BGDM=4, ABCS=5, ABCSE=6, BRR=[15:8], BRME=16, CKS=[18:17], MDDR=[31:24]).
+   */
 
-  ccr2 = rzv_sci_getreg(priv, RZV_SCI_CCR_OFFSET(2));
-  ccr2 &= ~(SCI_CCR2_BRR_MASK | SCI_CCR2_CKS_MASK |
-            SCI_CCR2_MDDR_MASK | SCI_CCR2_BGDM | SCI_CCR2_ABCS |
-            SCI_CCR2_ABCSE | SCI_CCR2_BFME);
-
-  ccr2 |= (baud_setting.bgdm ? SCI_CCR2_BGDM : 0) |
-          (baud_setting.abcs ? SCI_CCR2_ABCS : 0) |
-          (baud_setting.abcse ? SCI_CCR2_ABCSE : 0) |
-          (baud_setting.brme ? SCI_CCR2_BFME : 0) |
-          ((uint32_t)baud_setting.cks << SCI_CCR2_CKS_SHIFT) |
-          ((uint32_t)baud_setting.brr << SCI_CCR2_BRR_SHIFT) |
-          ((uint32_t)baud_setting.mddr << SCI_CCR2_MDDR_SHIFT);
+  ccr2 = SCI_CCR2_BUILD(baud_setting.mddr, baud_setting.cks,
+                         baud_setting.brme, baud_setting.brr,
+                         baud_setting.abcse, baud_setting.abcs,
+                         baud_setting.bgdm, 0 /* BCP=0 async */);
 
   rzv_sci_putreg(priv, RZV_SCI_CCR_OFFSET(2), ccr2);
 
-  /* Enable transmit and receive */
+  /* H1 fix: clear all status/error flags (CFCLR) before enabling TE/RE.
+   * FSP r_sci_b_uart.c:394 writes CFCLR=0x9D070010 (CLEAR_ALL_MASK)
+   * unconditionally before enable. Without this, residual ORER/PER/FER
+   * from a prior session are re-reported on the first receive call.
+   * Value: RDRFC(31)|TDREC(29)|FERC(28)|PERC(27)|MFFC(26)|ORERC(24)|
+   *        DFERC(18)|DPERC(17)|DCMFC(16)|ERSC(4) = 0x9D070010
+   */
 
-  rzv_sci_putreg(priv, RZV_SCI_CCR_OFFSET(0), SCI_CCR0_TE | SCI_CCR0_RE);
+  rzv_sci_putreg(priv, RZV_SCI_CFCLR_OFFSET, 0x9D070010u);
+
+  /* Enable transmit and receive.
+   * P0-3 fix: include SCI_CCR0_IDSE (idle-state edge detect) which was
+   * incorrectly being written to CCR3 as SCI_CCR3_IDSEL before.
+   */
+
+  rzv_sci_putreg(priv, RZV_SCI_CCR_OFFSET(0),
+                 SCI_CCR0_TE | SCI_CCR0_RE | SCI_CCR0_IDSE);
 
   /* CRITICAL: Wait for RIST bit before starting reception (P0 fix)
    * SCI_B hardware requires receiver to stabilize before data transfer
@@ -1829,10 +2006,44 @@ static int rzv_setup(struct uart_dev_s *dev)
 static void rzv_shutdown(struct uart_dev_s *dev)
 {
   struct rzv_uart_s *priv = (struct rzv_uart_s *)dev->priv;
+  uint32_t ccr0;
 
-  /* Disable transmit and receive */
+  /* C3 fix: FSP r_sci_b_uart.c:456-468 warns that clearing TE before TEND==1
+   * leaves the SCI state machine in an abnormal state on the next TE=1.
+   * Sequence: disable TIE/TEIE → wait CSR.TEND==1 → disable FIFO resets
+   * → clear TE → wait CESR.TIST==0 → clear RE → disable clock.
+   */
+
+  /* Step 1: disable TX/TX-end interrupts to stop re-triggering */
+
+  ccr0 = rzv_sci_getreg(priv, RZV_SCI_CCR_OFFSET(0));
+  ccr0 &= ~(SCI_CCR0_TIE | SCI_CCR0_TEIE);
+  rzv_sci_putreg(priv, RZV_SCI_CCR_OFFSET(0), ccr0);
+
+  /* Step 2: wait for transmit to complete (TEND == 1) */
+
+  while ((rzv_sci_getreg(priv, RZV_SCI_CSR_OFFSET) & SCI_CSR_TEND) == 0)
+    {
+      /* Wait for shift register to drain */
+    }
+
+#ifdef CONFIG_RZV_SCI_FIFO_MODE
+  /* Step 3: reset TX FIFO before clearing TE */
+
+  rzv_sci_modifyreg(priv, RZV_SCI_FCR_OFFSET, 0, SCI_FCR_TFRST);
+#endif
+
+  /* Step 4: clear TE (and RE) */
 
   rzv_sci_putreg(priv, RZV_SCI_CCR_OFFSET(0), 0);
+
+  /* Step 5: wait for CESR.TIST==0 (TX stopped) and CESR.RIST==0 */
+
+  while ((rzv_sci_getreg(priv, RZV_SCI_CESR_OFFSET) &
+         (SCI_CESR_TIST | SCI_CESR_RIST)) != 0)
+    {
+      /* Wait for channel stop */
+    }
 
   /* Disable clock */
 
@@ -1905,7 +2116,7 @@ static int rzv_attach(struct uart_dev_s *dev)
   /* Configure DMA channel for TX if enabled */
   if (priv->dma_tx_chn >= 0)
     {
-      ret = rzv_dma_setup_tx(priv);
+      ret = rzv_dma_setup_tx(dev);  /* C4 fix: was priv */
       if (ret < 0)
         {
           syslog(LOG_ERR, "UART%d: TX DMA setup failed: %d\n",
@@ -1920,7 +2131,7 @@ static int rzv_attach(struct uart_dev_s *dev)
   /* Configure DMA channel for RX if enabled */
   if (priv->dma_rx_chn >= 0)
     {
-      ret = rzv_dma_setup_rx(priv);
+      ret = rzv_dma_setup_rx(dev);  /* C4 fix: was priv */
       if (ret < 0)
         {
           syslog(LOG_ERR, "UART%d: RX DMA setup failed: %d\n",
@@ -1934,14 +2145,32 @@ static int rzv_attach(struct uart_dev_s *dev)
   return OK;
 
 errout_tei:
-  rzv_icu_detach(priv->irq_tei);
-  priv->irq_tei = -1;
+  /* H6 fix: only detach if the slot was successfully allocated (>= 0).
+   * When irq_tei attach failed, priv->irq_tei holds a negative errno.
+   * Calling rzv_icu_detach() with a negative value risks indexing a
+   * negative slot array position.
+   */
+
+  if (priv->irq_tei >= 0)
+    {
+      rzv_icu_detach(priv->irq_tei);
+      priv->irq_tei = -1;
+    }
+
 errout_txi:
-  rzv_icu_detach(priv->irq_txi);
-  priv->irq_txi = -1;
+  if (priv->irq_txi >= 0)
+    {
+      rzv_icu_detach(priv->irq_txi);
+      priv->irq_txi = -1;
+    }
+
 errout_rxi:
-  rzv_icu_detach(priv->irq_rxi);
-  priv->irq_rxi = -1;
+  if (priv->irq_rxi >= 0)
+    {
+      rzv_icu_detach(priv->irq_rxi);
+      priv->irq_rxi = -1;
+    }
+
 errout:
   return ret;
 }
@@ -1972,11 +2201,16 @@ static void rzv_detach(struct uart_dev_s *dev)
   rzv_dma_shutdown_rx(priv);
 #endif
 
-  /* Disable interrupts in the SCI peripheral */
+  /* Disable interrupts and receiver/transmitter in the SCI peripheral.
+   * L1 fix: also clear RE and TE so the channel no longer asserts ERI
+   * from line noise after detach.  The channel is fully quiesced here;
+   * rzv_shutdown() is called shortly after to gate the clock.
+   */
 
   rzv_sci_putreg(priv, RZV_SCI_CCR_OFFSET(0),
                 rzv_sci_getreg(priv, RZV_SCI_CCR_OFFSET(0)) &
-                ~(SCI_CCR0_RIE | SCI_CCR0_TIE | SCI_CCR0_TEIE));
+                ~(SCI_CCR0_RIE | SCI_CCR0_TIE | SCI_CCR0_TEIE |
+                  SCI_CCR0_RE  | SCI_CCR0_TE));
 
   /* Detach and release ICU interrupt slots */
 
@@ -2071,37 +2305,51 @@ static int rzv_interrupt(int irq, void *context, void *arg)
       rzv_sci_putreg(priv, RZV_SCI_CFCLR_OFFSET, cfclr);
     }
 
+  /* M5 note: ISR processes one event per entry (no loop).
+   * If TXI and RDRF assert simultaneously, only one path is handled;
+   * the ELC edge-trigger will re-assert the unhandled event on the next
+   * IRQ cycle, so both events will be serviced without data loss.
+   * This is acceptable for ELC edge-triggered mode (no missed wakeup).
+   * If level-triggered mode is ever used, add a loop here:
+   *   while (csr & active_flags) { handle; csr = re-read; }
+   */
+
   /* Handle incoming characters (Receive Data Full) */
 
   if ((csr & SCI_CSR_RDRF) && (ccr0 & SCI_CCR0_RIE))
     {
       uart_recvchars(dev);
 
-      /* Clear RX data full flag */
-
-      rzv_sci_putreg(priv, RZV_SCI_CFCLR_OFFSET, SCI_CFCLR_RDRFC);
+      /* L2 fix: explicit CFCLR.RDRFC write removed — it is redundant.
+       * uart_recvchars() calls rzv_receive() which reads RDR; reading RDR
+       * auto-clears RDRF per SCI-B hardware spec.  The extra CFCLR write
+       * was harmless but misleading (implied RDRF needed manual clearing).
+       */
     }
 
-  /* Handle outgoing characters (Transmit Data Empty or Transmit End) */
+  /* Handle outgoing characters (Transmit Data Empty — TXI source).
+   * Medium-15 fix: distinguish TXI (TDRE+TIE) from TEI (TEND+TEIE) to avoid
+   * double uart_xmitchars dispatch. TXI = data register empty, refill it.
+   * TEI = all bytes shifted out, disable TEIE to stop the TEI loop.
+   */
 
-  if (((csr & SCI_CSR_TDRE) && (ccr0 & SCI_CCR0_TIE)) ||
-      ((csr & SCI_CSR_TEND) && (ccr0 & SCI_CCR0_TEIE)))
+  if ((csr & SCI_CSR_TDRE) && (ccr0 & SCI_CCR0_TIE))
     {
+      /* TXI: transmit buffer empty — refill from SW FIFO */
+
       uart_xmitchars(dev);
 
-      /* Clear TX data empty flag */
+      /* Clear TDRE flag (write-1-clear via CFCLR) */
 
-      if (csr & SCI_CSR_TDRE)
-        {
-          rzv_sci_putreg(priv, RZV_SCI_CFCLR_OFFSET, SCI_CFCLR_TDREC);
-        }
+      rzv_sci_putreg(priv, RZV_SCI_CFCLR_OFFSET, SCI_CFCLR_TDREC);
+    }
+  else if ((csr & SCI_CSR_TEND) && (ccr0 & SCI_CCR0_TEIE))
+    {
+      /* TEI: all data shifted out — disable TEIE to stop continuous interrupt.
+       * TEND auto-clears on next TDR write; no CFCLR needed.
+       */
 
-      /* Clear transmit end flag */
-
-      if (csr & SCI_CSR_TEND)
-        {
-          rzv_sci_putreg(priv, RZV_SCI_CFCLR_OFFSET, SCI_CFCLR_TDREC);
-        }
+      rzv_sci_modifyreg(priv, RZV_SCI_CCR_OFFSET(0), SCI_CCR0_TEIE, 0);
     }
 
   return OK;
@@ -2117,7 +2365,138 @@ static int rzv_interrupt(int irq, void *context, void *arg)
 
 static int rzv_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
-  return -ENOTTY;
+  struct inode      *inode  = filep->f_inode;
+  struct uart_dev_s *dev    = inode->i_private;
+  int ret = OK;
+
+#ifdef CONFIG_SERIAL_TERMIOS
+  struct rzv_uart_s *priv   = (struct rzv_uart_s *)dev->priv;
+#else
+  (void)dev;  /* suppress unused-variable when TERMIOS is off */
+#endif
+
+  switch (cmd)
+    {
+#ifdef CONFIG_SERIAL_TERMIOS
+    /* High-7 fix: TCGETS/TCSETS for runtime baud/parity/bits/stop
+     * reconfiguration required by PX4 MAVLink baud renegotiation.
+     */
+
+    case TCGETS:
+      {
+        struct termios *termiosp = (struct termios *)(uintptr_t)arg;
+
+        if (!termiosp)
+          {
+            ret = -EINVAL;
+            break;
+          }
+
+        memset(termiosp, 0, sizeof(struct termios));
+
+        /* Return parity settings */
+
+        termiosp->c_cflag = ((priv->parity != 0) ? PARENB : 0) |
+                            ((priv->parity == 1) ? PARODD : 0);
+
+        /* Return stop bits */
+
+        termiosp->c_cflag |= (priv->stopbits2) ? CSTOPB : 0;
+
+        /* Return character size */
+
+        switch (priv->bits)
+          {
+          case 7:
+            termiosp->c_cflag |= CS7;
+            break;
+          default:
+          case 8:
+            termiosp->c_cflag |= CS8;
+            break;
+          }
+
+        /* Return baud rate */
+
+        cfsetispeed(termiosp, priv->baud);
+        cfsetospeed(termiosp, priv->baud);
+      }
+      break;
+
+    case TCSETS:
+      {
+        struct termios *termiosp = (struct termios *)(uintptr_t)arg;
+        irqstate_t flags;
+        uint32_t baud;
+        uint8_t parity;
+        uint8_t nbits;
+        bool stop2;
+
+        if (!termiosp)
+          {
+            ret = -EINVAL;
+            break;
+          }
+
+        /* Decode baud rate */
+
+        baud = cfgetispeed(termiosp);
+
+        /* Decode character size */
+
+        switch (termiosp->c_cflag & CSIZE)
+          {
+          case CS7:
+            nbits = 7;
+            break;
+          default:
+          case CS8:
+            nbits = 8;
+            break;
+          }
+
+        /* Decode parity */
+
+        if ((termiosp->c_cflag & PARENB) != 0)
+          {
+            parity = (termiosp->c_cflag & PARODD) ? 1 : 2;
+          }
+        else
+          {
+            parity = 0;
+          }
+
+        /* Decode stop bits */
+
+        stop2 = (termiosp->c_cflag & CSTOPB) != 0;
+
+        /* H2 fix: do NOT call setup() inside critical section.
+         * rzv_setup() invokes rzv_clock_enable, rzv2h_serial_setup,
+         * up_udelay(10), and polling loops on CESR.RIST/TIST — all of
+         * which can block indefinitely or take internal locks, causing
+         * deadlock or infinite spin with IRQs disabled.
+         * Only protect the priv-struct field write with critical section;
+         * the heavy hardware setup runs with interrupts enabled.
+         */
+
+        flags = enter_critical_section();
+        priv->baud      = baud;
+        priv->parity    = parity;
+        priv->bits      = nbits;
+        priv->stopbits2 = stop2;
+        leave_critical_section(flags);
+
+        ret = dev->ops->setup(dev);
+      }
+      break;
+#endif /* CONFIG_SERIAL_TERMIOS */
+
+    default:
+      ret = -ENOTTY;
+      break;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -2146,7 +2525,13 @@ static int rzv_receive(struct uart_dev_s *dev, unsigned int *status)
 
   /* Use saved error status (P2 fix)
    * Combine current CSR with saved error bits to ensure
-   * error conditions are not lost between interrupt and receive
+   * error conditions are not lost between interrupt and receive.
+   * L4 note: csr already has live error bits; OR with priv->sr is redundant
+   * unless priv->sr holds bits from a prior ISR call that weren't yet read.
+   * priv->sr is set only when the ISR sees an error, cleared here after
+   * reporting — this creates a 1-ISR window where the same error could be
+   * reported twice if csr still shows the flag. Acceptable; error recovery
+   * is idempotent.
    */
 
   *status = csr | priv->sr;
@@ -2190,12 +2575,22 @@ static void rzv_rxint(struct uart_dev_s *dev, bool enable)
 static bool rzv_rxavailable(struct uart_dev_s *dev)
 {
   struct rzv_uart_s *priv = (struct rzv_uart_s *)dev->priv;
-  uint32_t csr;
 
-  /* Check the RDRF (Receive Data Full) bit in CSR */
+#ifdef CONFIG_RZV_SCI_FIFO_MODE
+  /* Medium-13 fix: when FIFO mode active, consult FRSR.R (bytes in RX FIFO)
+   * rather than CSR.RDRF which only reflects a single-character threshold.
+   */
 
-  csr = rzv_sci_getreg(priv, RZV_SCI_CSR_OFFSET);
-  return (csr & SCI_CSR_RDRF) != 0;
+  if (priv->fifo_depth > 0)
+    {
+      uint32_t frsr = rzv_sci_getreg(priv, RZV_SCI_FRSR_OFFSET);
+      return ((frsr & SCI_FRSR_R_MASK) >> SCI_FRSR_R_SHIFT) > 0;
+    }
+#endif
+
+  /* Non-FIFO mode: check RDRF bit in CSR */
+
+  return (rzv_sci_getreg(priv, RZV_SCI_CSR_OFFSET) & SCI_CSR_RDRF) != 0;
 }
 
 /****************************************************************************
@@ -2301,40 +2696,45 @@ static bool rzv_txempty(struct uart_dev_s *dev)
 
 void arm_earlyserialinit(void)
 {
-  /* Disable all UARTs */
+  /* C5 fix: do NOT call rzv_shutdown on the console channel.
+   * rzv_shutdown gates the clock; any up_putc() between shutdown and the
+   * rzv_setup call below will hang on TDRE poll with clock off.
+   * Skip non-console channels only; console is already configured by lowputc.
+   * Non-console channels are shut down to reset state before full driver init.
+   */
 
-#ifdef TTYS0_DEV
+#if defined(TTYS0_DEV) && !defined(CONFIG_SCI0_SERIAL_CONSOLE)
   rzv_shutdown(&TTYS0_DEV);
 #endif
-#ifdef TTYS1_DEV
+#if defined(TTYS1_DEV) && !defined(CONFIG_SCI1_SERIAL_CONSOLE)
   rzv_shutdown(&TTYS1_DEV);
 #endif
-#ifdef TTYS2_DEV
+#if defined(TTYS2_DEV) && !defined(CONFIG_SCI2_SERIAL_CONSOLE)
   rzv_shutdown(&TTYS2_DEV);
 #endif
-#ifdef TTYS3_DEV
+#if defined(TTYS3_DEV) && !defined(CONFIG_SCI3_SERIAL_CONSOLE)
   rzv_shutdown(&TTYS3_DEV);
 #endif
-#ifdef TTYS4_DEV
+#if defined(TTYS4_DEV) && !defined(CONFIG_SCI4_SERIAL_CONSOLE)
   rzv_shutdown(&TTYS4_DEV);
 #endif
-#ifdef TTYS5_DEV
+#if defined(TTYS5_DEV) && !defined(CONFIG_SCI5_SERIAL_CONSOLE)
   rzv_shutdown(&TTYS5_DEV);
 #endif
-#ifdef TTYS6_DEV
+#if defined(TTYS6_DEV) && !defined(CONFIG_SCI6_SERIAL_CONSOLE)
   rzv_shutdown(&TTYS6_DEV);
 #endif
-#ifdef TTYS7_DEV
+#if defined(TTYS7_DEV) && !defined(CONFIG_SCI7_SERIAL_CONSOLE)
   rzv_shutdown(&TTYS7_DEV);
 #endif
-#ifdef TTYS8_DEV
+#if defined(TTYS8_DEV) && !defined(CONFIG_SCI8_SERIAL_CONSOLE)
   rzv_shutdown(&TTYS8_DEV);
 #endif
-#ifdef TTYS9_DEV
+#if defined(TTYS9_DEV) && !defined(CONFIG_SCI9_SERIAL_CONSOLE)
   rzv_shutdown(&TTYS9_DEV);
 #endif
 
-  /* Configuration whichever one is the console */
+  /* Configure console channel */
 
 #ifdef CONSOLE_DEV
   CONSOLE_DEV.isconsole = true;

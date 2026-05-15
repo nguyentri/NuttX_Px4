@@ -316,24 +316,24 @@ static int spi_test_loopback(void)
 {
   syslog(LOG_INFO, "Starting SPI loopback test...\n");
 
-  /* Test SPI0 loopback */
+  /* Test SPI0 loopback — enable SPCR2.SPLP, transfer, then disable */
+
   syslog(LOG_INFO, "Testing Internal SPI0 loopback ...\n");
   SPI_LOCK(g_spi_loopback.spi0, true);
-  /* TODO: Implement rzv_spi_set_loopback() in driver if hardware supports it */
-  /* rzv_spi_set_loopback(g_spi_loopback.spi0, true, false, false); */
+  rzv_spi_set_loopback(g_spi_loopback.spi0, true);
   SPI_EXCHANGE(g_spi_loopback.spi0, g_spi_loopback.spi0_tx_buff,
                g_spi_loopback.spi0_rx_buff, SPI_BUFF_LEN);
-  /* rzv_spi_set_loopback(g_spi_loopback.spi0, false, false, false); */
+  rzv_spi_set_loopback(g_spi_loopback.spi0, false);
   SPI_LOCK(g_spi_loopback.spi0, false);
 
-  /* Test SPI1 loopback */
+  /* Test SPI1 loopback — enable SPCR2.SPLP, transfer, then disable */
+
   syslog(LOG_INFO, "Testing Internal SPI1 loopback ...\n");
   SPI_LOCK(g_spi_loopback.spi1, true);
-  /* TODO: Implement rzv_spi_set_loopback() in driver if hardware supports it */
-  /* rzv_spi_set_loopback(g_spi_loopback.spi1, true, false, false); */
+  rzv_spi_set_loopback(g_spi_loopback.spi1, true);
   SPI_EXCHANGE(g_spi_loopback.spi1, g_spi_loopback.spi1_tx_buff,
                g_spi_loopback.spi1_rx_buff, SPI_BUFF_LEN);
-  /* rzv_spi_set_loopback(g_spi_loopback.spi1, false, false, false); */
+  rzv_spi_set_loopback(g_spi_loopback.spi1, false);
   SPI_LOCK(g_spi_loopback.spi1, false);
 
   syslog(LOG_INFO, "Loopback transfers completed\n");

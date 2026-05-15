@@ -32,6 +32,32 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* gpio_pinset_t Encoding (Phase-03 canonical ABI — single authoritative def).
+ *
+ * Phase-03 [Critical-2, Low-18]: Documents and enforces single encoding.
+ * The old encoding had PSEL at [18:15] in rzv_gpio.h AND at [3:0] here —
+ * two incompatible locations. Phase-03 removes the [18:15] field entirely.
+ *
+ *   Bit layout:
+ *     [31:28] Port  — PORT0..PORT11 = (port << 28)
+ *     [27:24] Pin   — PIN0..PIN15   = (pin << 24)
+ *     [23]    Initial output value  (bit 23 of rzv_gpio.h GPIO_OUTPUT_SHIFT)
+ *     [19:16] Mode  — RZV_GPIO_INPUT/OUTPUT/PERIPH/ANALOG (rzv_gpio.h)
+ *     [15:12] Drive — RZV_GPIO_DRVSTR_* (rzv_gpio.h GPIO_DRVSTR_SHIFT=12)
+ *     [11:8]  Pull  — RZV_GPIO_FLOAT/PULLUP/PULLDOWN (rzv_gpio.h GPIO_PULL_SHIFT=8)
+ *     [7:4]   Func  — RZV_GPIO_OPENDRAIN; also IRQ line 0-15 for gpiosetevent
+ *     [3:0]   PSEL  — RZV_PFS_PSEL_MODE1..15 (peripheral function select)
+ *                     FSP: BSP_FEATURE_IOPORT_PFC_REG_BITFIELD=0xF
+ *
+ * Pinmap constant format (alternative function definitions below):
+ *   GPIO_SIGNAL_PORTx_PINy_MODEz = PORT<x> | PIN<y> | RZV_PFS_PSEL_MODE<z>
+ *   Driver (rzv_gpioconfig) ORs in RZV_GPIO_PERIPH | drive | pull as needed.
+ *
+ * PSEL field location: bits [3:0] ONLY. The old GPIO_PSEL_SHIFT=15 field in
+ * the original rzv_gpio.h is REMOVED in Phase-03. Any code using bits[18:15]
+ * for PSEL was already dead code (driver read [3:0] only). Source: audit §8.
+ */
+
 /* RZV2H Peripheral Selection (PSEL) Values - Direct FSP IOPORT_PERIPHERAL_MODE mapping */
 #define RZV_PFS_PSEL_MODE1                     (0x01)  /* GPT Timer, GPTP */
 #define RZV_PFS_PSEL_MODE2                     (0x02)  /* SCI/UART */
@@ -72,6 +98,11 @@
 #define PIN5                                   (5 <<  24)
 #define PIN6                                   (6 <<  24)
 #define PIN7                                   (7 <<  24)
+/* LOW-20 note: PIN8-PIN15 encoded here but NO GP port has >= 8 pins.
+ * rzv_gpio_pin_valid() rejects pin >= 8 at runtime.
+ * These macros are retained for completeness but must not be used with
+ * any GP port (PORT0-PORT11 = P20-P2B); doing so returns -EINVAL.
+ */
 #define PIN8                                   (8 <<  24)
 #define PIN9                                   (9 <<  24)
 #define PIN10                                  (10 << 24)
@@ -1418,6 +1449,8 @@
 #define GPIO_OUTPUT_HIGH                (RZV_GPIO_INITIAL_HIGH)
 #define GPIO_OUTPUT_LOW                 (RZV_GPIO_INITIAL_LOW)
 #define GPIO_PULLUP                     (RZV_GPIO_PULLUP)
+#define GPIO_PULLDOWN                   (RZV_GPIO_PULLDOWN)  /* Phase-03 [Low-18]: was missing */
+#define GPIO_FLOAT                      (RZV_GPIO_FLOAT)     /* no pull — explicit alias */
 #define GPIO_OPENDRAIN                  (RZV_GPIO_OPENDRAIN)
 
 /* Note: Peripheral mode is detected automatically when PSEL != 0 */

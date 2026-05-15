@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/rzv/hardware/rzv_poega.h
+ * arch/arm/src/rzv/hardware/rzv_poeg.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RZV_HARDWARE_RZV_POEGA_H
-#define __ARCH_ARM_SRC_RZV_HARDWARE_RZV_POEGA_H
+#ifndef __ARCH_ARM_SRC_RZV_HARDWARE_RZV_POEG_H
+#define __ARCH_ARM_SRC_RZV_HARDWARE_RZV_POEG_H
 
 /****************************************************************************
  * Included Files
@@ -31,52 +31,67 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* POEGA POEGGn Register Bit Definitions *****************************/
+/* POEG Base Addresses — R9A09G057H (RZ/V2H)
+ * Source: FSP poeg_iodefine.h, confirmed addresses.
+ * Unit 0 serves GPT0-7 (unit0); Unit 1 serves GPT10-17 (unit1).
+ *
+ * Each unit has 4 POEG channels (A/B/C/D) corresponding to GPT groups.
+ * POEGGn register is a single 32-bit register at offset 0 in each block. */
 
-#define POEGA_POEGGn_PIDF                       (1 << 0)  /* Pidf */
+/* POEG Unit 0 (covers GPT0-7) */
+#define RZV_POEG0A_BASE             0x13001C00u  /* POEGGnA for unit0 */
+#define RZV_POEG0B_BASE             0x13002000u  /* POEGGnB for unit0 */
+#define RZV_POEG0C_BASE             0x13002400u  /* POEGGnC for unit0 */
+#define RZV_POEG0D_BASE             0x13002800u  /* POEGGnD for unit0 */
 
-#define POEGA_POEGGn_IOCF                       (1 << 1)  /* Iocf */
+/* POEG Unit 1 (covers GPT10-17) */
+#define RZV_POEG1A_BASE             0x13002C00u  /* POEGGnA for unit1 */
+#define RZV_POEG1B_BASE             0x13003000u  /* POEGGnB for unit1 */
+#define RZV_POEG1C_BASE             0x13003400u  /* POEGGnC for unit1 */
+#define RZV_POEG1D_BASE             0x13003800u  /* POEGGnD for unit1 */
 
-#define POEGA_POEGGn_SSF                        (1 << 3)  /* Ssf */
+/* POEGGn Register Offset (only one 32-bit register per POEG block) */
+#define RZV_POEG_POEGGn_OFFSET      0x0000u
 
-#define POEGA_POEGGn_PIDE                       (1 << 4)  /* Pide */
+/* POEGGn Register Bit Definitions
+ * Source: FSP poeg_iodefine.h POEGGn_b struct fields. */
+#define POEG_POEGGn_PIDF            (1u << 0)   /* Port input detect flag (R/W, write 0 to clear) */
+#define POEG_POEGGn_IOCF            (1u << 1)   /* I/O short-circuit detect flag */
+#define POEG_POEGGn_SSF             (1u << 3)   /* Software stop flag */
+#define POEG_POEGGn_PIDE            (1u << 4)   /* Port input detect enable */
+#define POEG_POEGGn_IOCE            (1u << 5)   /* I/O short-circuit detect enable */
+#define POEG_POEGGn_ST              (1u << 16)  /* GPT output stopped (read-only) */
+#define POEG_POEGGn_INV             (1u << 28)  /* Invert port input polarity */
+#define POEG_POEGGn_NFEN            (1u << 29)  /* Noise filter enable */
+#define POEG_POEGGn_NFCS_SHIFT      (30u)
+#define POEG_POEGGn_NFCS_MASK       (0x3u << POEG_POEGGn_NFCS_SHIFT)  /* Noise filter clock select */
 
-#define POEGA_POEGGn_IOCE                       (1 << 5)  /* Ioce */
+/* Convenience: clear all status flags (write 0 to PIDF, IOCF, SSF) */
+#define POEG_POEGGn_CLEAR_FLAGS     (0u)
 
-#define POEGA_POEGGn_ST                         (1 << 16)  /* St */
+/* POEG channel index (logical, per unit) */
+#define RZV_POEG_CHANNEL_A          0u
+#define RZV_POEG_CHANNEL_B          1u
+#define RZV_POEG_CHANNEL_C          2u
+#define RZV_POEG_CHANNEL_D          3u
+#define RZV_POEG_MAX_CHANNELS       4u
 
-#define POEGA_POEGGn_INV                        (1 << 28)  /* Inv */
+/* Number of POEG units on R9A09G057H */
+#define RZV_POEG_MAX_UNITS          2u
 
-#define RZV_POEG_CHANNEL_0    0
-#define RZV_POEG_CHANNEL_1    1
-#define RZV_POEG_CHANNEL_2    2
-#define RZV_POEG_CHANNEL_3    3
+/* Event detection enable flags (for rzv_poeg_configure event bitmask) */
+#define POEG_EVENT_PORT_INPUT       POEG_POEGGn_PIDE
+#define POEG_EVENT_SHORT_CIRCUIT    POEG_POEGGn_IOCE
 
-/* Maximum number of POEG channels *******************************************/
+/* Status flag check masks */
+#define POEG_STATUS_ANY_FAULT       (POEG_POEGGn_PIDF | POEG_POEGGn_IOCF | POEG_POEGGn_SSF)
 
-#define RZV_POEG_MAX_CHANNELS 4
+/* Register address accessor (unit 0 or 1, channel A-D) */
+#define RZV_POEG_BASE(unit, ch) \
+  (((unit) == 0u) \
+    ? (RZV_POEG0A_BASE + (uintptr_t)(ch) * 0x400u) \
+    : (RZV_POEG1A_BASE + (uintptr_t)(ch) * 0x400u))
 
-/* POEG Event Detection Types ***********************************************/
+#define RZV_POEG_POEGGn(unit, ch)  (RZV_POEG_BASE(unit, ch) + RZV_POEG_POEGGn_OFFSET)
 
-#define POEG_EVENT_PORT_INPUT   (1 << 0)  /* Port input detection */
-#define POEG_EVENT_SHORT_CIRCUIT (1 << 1) /* Output short-circuit detection */
-#define POEG_EVENT_SOFTWARE     (1 << 2)  /* Software stop */
-
-/* POEG Status Flags ********************************************************/
-
-#define POEG_STATUS_PORT_INPUT_DETECTED     POEG_POEGG_PIDF
-#define POEG_STATUS_SHORT_CIRCUIT_DETECTED  POEG_POEGG_IOCF
-#define POEG_STATUS_SOFTWARE_STOP           POEG_POEGG_SSF
-#define POEG_STATUS_GPT_STOPPED             POEG_POEGG_ST
-
-/* POEG Enable Flags ********************************************************/
-
-#define POEG_ENABLE_PORT_INPUT_DETECTION    POEG_POEGG_PIDE
-#define POEG_ENABLE_SHORT_CIRCUIT_DETECTION POEG_POEGG_IOCE
-#define POEG_ENABLE_NOISE_FILTER            POEG_POEGG_NFEN
-
-/* POEG Configuration Flags *************************************************/
-
-#define POEG_CONFIG_INVERT_INPUT            POEG_POEGG_INV
-
-#endif /* __ARCH_ARM_SRC_RZV_HARDWARE_RZV_POEGA_H */
+#endif /* __ARCH_ARM_SRC_RZV_HARDWARE_RZV_POEG_H */

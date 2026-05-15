@@ -1,20 +1,23 @@
 /****************************************************************************
  * arch/arm/src/rzv/rzv_sci_i2c.h
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.  The
- * ASF licenses this file to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the
- * License.  You may obtain a copy of the License at
+ * Public API for the RZ/V2H SCI-B Simple-I2C master driver.
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * Board integration ABI
+ * ---------------------
+ * For each CONFIG_RZV_SCIn_I2C=y channel, the board header (board.h) MUST
+ * define the following GPIO pinset macros using the Phase-03 encoding
+ * (port[31:28] | pin[27:24] | mode[23:16] | psel[3:0]):
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
- * License for the specific language governing permissions and limitations
- * under the License.
+ *   #define BOARD_SCIn_I2C_SDA_GPIO   GPIO_TXDn_MOSIn_SDAn_Pxx_Mm
+ *   #define BOARD_SCIn_I2C_SCL_GPIO   GPIO_RXDn_MISOn_SCLn_Pxx_Mm
+ *
+ * The SCI RXD pin becomes SCL; the TXD pin becomes SDA (open-drain).
+ * Use the BOARD_SCIn_* prefix, not BOARD_I2Cn_* (those are RIIC).
+ *
+ * Missing macros for an enabled channel produce a compile-time #error.
+ *
+ * Licensed under Apache License 2.0 — see top-level NOTICE.
  *
  ****************************************************************************/
 
@@ -32,51 +35,32 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
+#ifdef CONFIG_RZV_SCI_I2C
 
 /****************************************************************************
  * Name: rzv_sci_i2c_initialize
  *
  * Description:
- *   Initialize one SCI I2C port (Simple I2C mode using SCI peripheral).
- *   This provides a simpler I2C implementation compared to the dedicated
- *   RIIC peripheral, sharing hardware with UART functionality.
+ *   Initialise a SCI channel as Simple-I2C master.
  *
  * Input Parameters:
- *   port - SCI channel number (0-3)
+ *   channel - SCI channel index (0..3); must match an enabled
+ *             CONFIG_RZV_SCIn_I2C Kconfig option.
  *
  * Returned Value:
- *   Valid I2C device structure pointer on success; NULL on failure
+ *   Pointer to struct i2c_master_s on success.
+ *   NULL if channel not enabled, IRQ attach fails, or clock error.
+ *
+ * Notes:
+ *   - Call once per channel; subsequent calls return the same pointer.
+ *   - Pass the returned pointer to i2c_register() (board glue, Phase 04).
+ *   - Driver is CPU-mode only (no DMAC); returns -ENOSYS for polling path.
+ *   - 10-bit address messages return -ENOTSUP from transfer().
  *
  ****************************************************************************/
 
-struct i2c_master_s *rzv_sci_i2c_initialize(int port);
+struct i2c_master_s *rzv_sci_i2c_initialize(int channel);
 
-/****************************************************************************
- * Name: rzv_sci_i2c_uninitialize
- *
- * Description:
- *   Uninitialize an SCI I2C port
- *
- * Input Parameters:
- *   dev - Device structure as returned by rzv_sci_i2c_initialize()
- *
- * Returned Value:
- *   OK on success; a negated errno on failure
- *
- ****************************************************************************/
-
-int rzv_sci_i2c_uninitialize(struct i2c_master_s *dev);
-
-#undef EXTERN
-#ifdef __cplusplus
-}
-#endif
+#endif /* CONFIG_RZV_SCI_I2C */
 
 #endif /* __ARCH_ARM_SRC_RZV_RZV_SCI_I2C_H */

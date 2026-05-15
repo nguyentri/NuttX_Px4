@@ -66,20 +66,11 @@ ifeq ($(CONFIG_RZV_I2C),y)
 CHIP_CSRCS += rzv_i2c.c
 endif
 
-# SCI I2C driver (Simple I2C mode)
-ifeq ($(CONFIG_RZV_SCI_I2C),y)
-CHIP_CSRCS += rzv_sci_i2c.c
-endif
-
 # DMAC driver
 ifeq ($(CONFIG_RZV_DMA),y)
 CHIP_CSRCS += rzv_dmac.c
 endif
 
-# DTC driver
-ifeq ($(CONFIG_RZV_DTC),y)
-CHIP_CSRCS += rzv_dtc.c
-endif
 
 # SPI driver
 ifeq ($(CONFIG_RZV_SPI),y)
@@ -91,14 +82,29 @@ ifeq ($(CONFIG_RZV_SCI_SPI),y)
 CHIP_CSRCS += rzv_sci_spi.c
 endif
 
+# SCI I2C driver (Simple-I2C master mode)
+ifeq ($(CONFIG_RZV_SCI_I2C),y)
+CHIP_CSRCS += rzv_sci_i2c.c rzv_sci_i2c_isr.c rzv_sci_i2c_clock.c
+endif
+
 # PWM driver
 ifeq ($(CONFIG_RZV_PWM),y)
 CHIP_CSRCS += rzv_gpt.c
 endif
 
+# POEG (Port Output Enable for GPT) — optional, opt-in via CONFIG_RZV_POEG
+ifeq ($(CONFIG_RZV_POEG),y)
+CHIP_CSRCS += rzv_poeg.c
+endif
+
 # Timer driver
 ifeq ($(CONFIG_RZV_GTM),y)
 CHIP_CSRCS += rzv_gtm.c
+endif
+
+# PX4 High-Resolution Timer (HRT) shim — backed by GTM7 in free-run mode
+ifeq ($(CONFIG_RZV_HRT),y)
+CHIP_CSRCS += rzv_hrt.c
 endif
 
 # Ethernet driver

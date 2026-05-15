@@ -26,6 +26,15 @@
  ****************************************************************************/
 
 #include <stdint.h>
+#include <stdbool.h>
+
+/* ARM_DSB() for barrier after CLKON/RST writes (audit Medium-8).
+ * Included from arch-specific barriers.h via arm_internal.h if available;
+ * provide a fallback inline asm for files that include this header standalone.
+ */
+#if defined(__GNUC__) && !defined(ARM_DSB)
+#  define ARM_DSB()  __asm__ __volatile__ ("dsb" : : : "memory")
+#endif
 
 #if defined(__has_include)
 #  if __has_include(<nuttx/config.h>)
@@ -47,77 +56,127 @@
  ****************************************************************************/
 
 /* Clock domains and module IDs *********************************************/
+/*
+ * Encoding: (CLKON_reg_index << 16) | bit_position
+ *   CLKON_reg_index → CPG_CLKON_N  (N in RZV_CPG_CLKON(N))
+ *   bit_position    → bit within the 16-bit control field [15:0]
+ *
+ * NOTE: R9A09G057H uses only numbered CPG_CLKON_N registers (no named
+ * aliases like CPG_CLKON_GPIO).  The mapping below is UNVERIFIED against
+ * hardware documentation; it needs confirmation from the RZ/V2H HW manual.
+ * TODO(phase-01): validate each entry against RZ/V2H UM Table 9.x.
+ * See audit finding Critical-2.
+ */
 
-/* Domain 0 - GPIO, ICU */
-#define RZV_CPG_CLK_GPIO            (0 << 16 | 0)   /* GPIO clock */
-#define RZV_CPG_CLK_ICU             (0 << 16 | 1)   /* ICU clock */
+/* CLKON_0 - GPIO, CA55 core clocks */
+/* UNVERIFIED: GPIO channel 0; needs RZ/V2H UM confirmation */
+#define RZV_CPG_CLK_GPIO            (0 << 16 | 0)
+/* UNVERIFIED: ICU channel 0; needs RZ/V2H UM confirmation */
+#define RZV_CPG_CLK_ICU             (0 << 16 | 1)
 
-/* Domain 1 - SCI/UART */
-#define RZV_CPG_CLK_SCI0            (1 << 16 | 0)   /* SCI0 clock */
-#define RZV_CPG_CLK_SCI1            (1 << 16 | 1)   /* SCI1 clock */
-#define RZV_CPG_CLK_SCI2            (1 << 16 | 2)   /* SCI2 clock */
-#define RZV_CPG_CLK_SCI3            (1 << 16 | 3)   /* SCI3 clock */
-#define RZV_CPG_CLK_SCI4            (1 << 16 | 4)   /* SCI4 clock */
-#define RZV_CPG_CLK_SCI5            (1 << 16 | 5)   /* SCI5 clock */
-#define RZV_CPG_CLK_SCI6            (1 << 16 | 6)   /* SCI6 clock */
-#define RZV_CPG_CLK_SCI7            (1 << 16 | 7)   /* SCI7 clock */
-#define RZV_CPG_CLK_SCI8            (1 << 16 | 8)   /* SCI8 clock */
-#define RZV_CPG_CLK_SCI9            (1 << 16 | 9)   /* SCI9 clock */
+/* CLKON_11 - SCI_B (UART) channels 0-7
+ * FSP bsp_clocks.c: CPG_CLKON_11 CLK8=SCI0..CLK15=SCI7
+ * bsp_clocks.c:750 R_CPG->CPG_CLKON_11 CLK8_ON = SCI_B channel 0
+ * UNVERIFIED: awaiting RZ/V2H UM cross-check */
+#define RZV_CPG_CLK_SCI0            (11 << 16 | 8)
+#define RZV_CPG_CLK_SCI1            (11 << 16 | 9)
+#define RZV_CPG_CLK_SCI2            (11 << 16 | 10)
+#define RZV_CPG_CLK_SCI3            (11 << 16 | 11)
+#define RZV_CPG_CLK_SCI4            (11 << 16 | 12)
+#define RZV_CPG_CLK_SCI5            (11 << 16 | 13)
+#define RZV_CPG_CLK_SCI6            (11 << 16 | 14)
+#define RZV_CPG_CLK_SCI7            (11 << 16 | 15)
+/* CLKON_12 CLK0=SCI8, CLK1=SCI9
+ * bsp_clocks.c:804,827 CPG_CLKON_12 CLK0_ON=SCI8, CLK1_ON=SCI9 */
+#define RZV_CPG_CLK_SCI8            (12 << 16 | 0)
+#define RZV_CPG_CLK_SCI9            (12 << 16 | 1)
 
-/* Domain 2 - SPI */
-#define RZV_CPG_CLK_SPI0            (2 << 16 | 0)   /* SPI0 clock */
-#define RZV_CPG_CLK_SPI1            (2 << 16 | 1)   /* SPI1 clock */
-#define RZV_CPG_CLK_SPI2            (2 << 16 | 2)   /* SPI2 clock */
+/* SPI (RSPI/SPI_B) - UNVERIFIED: needs RZ/V2H UM confirmation */
+#define RZV_CPG_CLK_SPI0            (2 << 16 | 0)
+#define RZV_CPG_CLK_SPI1            (2 << 16 | 1)
+#define RZV_CPG_CLK_SPI2            (2 << 16 | 2)
 
-/* Domain 3 - I2C */
-#define RZV_CPG_CLK_I2C0            (3 << 16 | 0)   /* I2C0 clock */
-#define RZV_CPG_CLK_I2C1            (3 << 16 | 1)   /* I2C1 clock */
-#define RZV_CPG_CLK_I2C2            (3 << 16 | 2)   /* I2C2 clock */
-#define RZV_CPG_CLK_I2C3            (3 << 16 | 3)   /* I2C3 clock */
+/* I2C (RIIC) - UNVERIFIED: needs RZ/V2H UM confirmation */
+#define RZV_CPG_CLK_I2C0            (3 << 16 | 0)
+#define RZV_CPG_CLK_I2C1            (3 << 16 | 1)
+#define RZV_CPG_CLK_I2C2            (3 << 16 | 2)
+#define RZV_CPG_CLK_I2C3            (3 << 16 | 3)
 
-/* Domain 4 - Timers */
-#define RZV_CPG_CLK_GPT0            (4 << 16 | 0)   /* GPT0 clock */
-#define RZV_CPG_CLK_GPT1            (4 << 16 | 1)   /* GPT1 clock */
-#define RZV_CPG_CLK_GPT2            (4 << 16 | 2)   /* GPT2 clock */
-#define RZV_CPG_CLK_GPT3            (4 << 16 | 3)   /* GPT3 clock */
-#define RZV_CPG_CLK_GPT4            (4 << 16 | 4)   /* GPT4 clock */
-#define RZV_CPG_CLK_GPT5            (4 << 16 | 5)   /* GPT5 clock */
-#define RZV_CPG_CLK_GPT6            (4 << 16 | 6)   /* GPT6 clock */
-#define RZV_CPG_CLK_GPT7            (4 << 16 | 7)   /* GPT7 clock */
-#define RZV_CPG_CLK_GPT8            (4 << 16 | 8)   /* GPT8 clock */
-#define RZV_CPG_CLK_GPT9            (4 << 16 | 9)   /* GPT9 clock */
-#define RZV_CPG_CLK_GPT10           (4 << 16 | 10)  /* GPT10 clock */
-#define RZV_CPG_CLK_OSTM0           (4 << 16 | 11)  /* OSTM0 clock */
-#define RZV_CPG_CLK_OSTM1           (4 << 16 | 12)  /* OSTM1 clock */
-#define RZV_CPG_CLK_OSTM2           (4 << 16 | 13)  /* OSTM2 clock */
+/* GPT timers - UNVERIFIED: needs RZ/V2H UM confirmation.
+ * FSP bsp_clocks.h: BSP_CLKON_REG_FSP_IP_GPT → CPG_CLKON_GPT (named alias
+ * not present in R9A09G057H iobitmask → numeric mapping TBD). */
+#define RZV_CPG_CLK_GPT0            (4 << 16 | 0)
+#define RZV_CPG_CLK_GPT1            (4 << 16 | 1)
+#define RZV_CPG_CLK_GPT2            (4 << 16 | 2)
+#define RZV_CPG_CLK_GPT3            (4 << 16 | 3)
+#define RZV_CPG_CLK_GPT4            (4 << 16 | 4)
+#define RZV_CPG_CLK_GPT5            (4 << 16 | 5)
+#define RZV_CPG_CLK_GPT6            (4 << 16 | 6)
+#define RZV_CPG_CLK_GPT7            (4 << 16 | 7)
+/* GPT8 and GPT9 do NOT exist on R9A09G057H — phantom channels removed.
+ * Logical driver channels 8-15 map to physical GPT10-17 (unit1).
+ * GPT10-17 may share one CPG gate with unit0 or have a separate CLKON_N bit;
+ * UNVERIFIED pending RZ/V2H UM. For now, use same domain 4 placeholder. */
+#define RZV_CPG_CLK_GPT10           (4 << 16 | 8)
+#define RZV_CPG_CLK_GPT11           (4 << 16 | 9)
+#define RZV_CPG_CLK_GPT12           (4 << 16 | 10)
+#define RZV_CPG_CLK_GPT13           (4 << 16 | 11)  /* UNVERIFIED — placeholder, needs RZ/V2H UM */
+#define RZV_CPG_CLK_GPT14           (4 << 16 | 12)  /* UNVERIFIED — placeholder, needs RZ/V2H UM */
+#define RZV_CPG_CLK_GPT15           (4 << 16 | 13)  /* UNVERIFIED — placeholder, needs RZ/V2H UM */
+#define RZV_CPG_CLK_GPT16           (4 << 16 | 14)  /* UNVERIFIED — placeholder, needs RZ/V2H UM */
+#define RZV_CPG_CLK_GPT17           (4 << 16 | 15)  /* UNVERIFIED — placeholder, needs RZ/V2H UM */
 
-/* GTM (OSTM) clocks - aliases for compatibility */
-#define RZV_CPG_CLK_GTM0            RZV_CPG_CLK_OSTM0  /* GTM0 = OSTM0 */
-#define RZV_CPG_CLK_GTM1            RZV_CPG_CLK_OSTM1  /* GTM1 = OSTM1 */
-#define RZV_CPG_CLK_GTM2            RZV_CPG_CLK_OSTM2  /* GTM2 = OSTM2 */
-#define RZV_CPG_CLK_GTM3            (4 << 16 | 11)     /* GTM3 clock */
-#define RZV_CPG_CLK_GTM4            (4 << 16 | 12)     /* GTM4 clock */
-#define RZV_CPG_CLK_GTM5            (4 << 16 | 13)     /* GTM5 clock */
-#define RZV_CPG_CLK_GTM6            (4 << 16 | 14)     /* GTM6 clock */
-#define RZV_CPG_CLK_GTM7            (4 << 16 | 15)     /* GTM7 clock */
+/* OSTM timers - UNVERIFIED: needs RZ/V2H UM confirmation.
+ * GPT and OSTM likely share CPG_CLKON_4 but bit offsets unknown. */
+#define RZV_CPG_CLK_OSTM0           (4 << 16 | 11)
+#define RZV_CPG_CLK_OSTM1           (4 << 16 | 12)
+#define RZV_CPG_CLK_OSTM2           (4 << 16 | 13)
 
-/* Domain 5 - DMA */
-#define RZV_CPG_CLK_DMAC0           (5 << 16 | 0)   /* DMAC0 clock */
-#define RZV_CPG_CLK_DMAC1           (5 << 16 | 1)   /* DMAC1 clock */
-#define RZV_CPG_CLK_DMAC2           (5 << 16 | 2)   /* DMAC2 clock */
-#define RZV_CPG_CLK_DMAC3           (5 << 16 | 3)   /* DMAC3 clock */
+/* GTM (General Timer Module) clocks.
+ * FSP bsp_clocks.h line 92: BSP_CLKON_REG_FSP_IP_GTM → CPG_CLKON_GTM (single
+ * register, all 8 GTM channels as bits 0-7).  The named alias CPG_CLKON_GTM
+ * is NOT in R9A09G057H iobitmask (only in R9A07G054L).
+ * UNVERIFIED: mapping to CPG_CLKON_N pending RZ/V2H UM verification.
+ * Previous code erroneously aliased GTM0-2 to OSTM0-2 and put GTM3-7 in
+ * domain 4 bits 11-15 (conflicting with OSTM entries above).
+ * Corrected: GTM0-7 assigned to domain 5 (placeholder) pending verification.
+ * TODO(phase-01): confirm CPG_CLKON_N register for GTM on R9A09G057H. */
+#define RZV_CPG_CLK_GTM0            (5 << 16 | 0)
+#define RZV_CPG_CLK_GTM1            (5 << 16 | 1)
+#define RZV_CPG_CLK_GTM2            (5 << 16 | 2)
+#define RZV_CPG_CLK_GTM3            (5 << 16 | 3)
+#define RZV_CPG_CLK_GTM4            (5 << 16 | 4)
+#define RZV_CPG_CLK_GTM5            (5 << 16 | 5)
+#define RZV_CPG_CLK_GTM6            (5 << 16 | 6)
+#define RZV_CPG_CLK_GTM7            (5 << 16 | 7)
 
-/* Domain 6 - CAN */
-#define RZV_CPG_CLK_CANFD           (6 << 16 | 0)   /* CANFD clock */
-#define RZV_CPG_CLK_CAN0            (6 << 16 | 1)   /* CAN0 clock */
-#define RZV_CPG_CLK_CAN1            (6 << 16 | 2)   /* CAN1 clock */
+/* DMAC_B - FSP bsp_override.h:1656-1660:
+ *   BSP_CLKON_REG_FSP_IP_DMAC → R_CPG->CPG_CLKON_0 (domain 0)
+ *   BSP_CLKON_BIT_FSP_IP_DMAC = 0x1FU << CLK0_ON_Pos(=0) → 5-bit mask [4:0]
+ *   CLK0_ON_Pos = 0 per R9A09G057H cpg_iobitmask.h:719.
+ * D2-fix: domain was 6 (wrong), must be 0 (CPG_CLKON_0).
+ * The rzv_clock_enable/disable DMAC special-case uses 0x1F mask (5 units). */
+#define RZV_CPG_CLK_DMAC            (0 << 16 | 0)   /* DMAC: CPG_CLKON_0 bits[4:0], 5-unit mask */
 
-/* Domain 7 - Ethernet */
-#define RZV_CPG_CLK_ETH0            (7 << 16 | 0)   /* Ethernet0 clock */
+/* Legacy per-unit aliases (Phase 04 DMAC driver compatibility).
+ * All resolve to the same CLKON entry — there is one gate for all DMAC. */
+#define RZV_CPG_CLK_DMAC0           RZV_CPG_CLK_DMAC
+#define RZV_CPG_CLK_DMAC1           RZV_CPG_CLK_DMAC
+#define RZV_CPG_CLK_DMAC2           RZV_CPG_CLK_DMAC
+#define RZV_CPG_CLK_DMAC3           RZV_CPG_CLK_DMAC
 
-/* Domain 8 - ADC */
-#define RZV_CPG_CLK_ADC0            (8 << 16 | 0)   /* ADC0 clock */
-#define RZV_CPG_CLK_ADC1            (8 << 16 | 1)   /* ADC1 clock */
+/* CANFD - UNVERIFIED: needs RZ/V2H UM confirmation */
+#define RZV_CPG_CLK_CANFD           (7 << 16 | 0)
+#define RZV_CPG_CLK_CAN0            RZV_CPG_CLK_CANFD  /* CAN0 shares CANFD gate */
+#define RZV_CPG_CLK_CAN1            RZV_CPG_CLK_CANFD  /* CAN1 shares CANFD gate */
+
+/* Ethernet (GBE) - UNVERIFIED: needs RZ/V2H UM confirmation */
+#define RZV_CPG_CLK_ETH0            (8 << 16 | 0)
+
+/* ADC - FSP bsp_clocks.h line 479: 2-bit pair (3U << CLK0_ON_Pos)
+ * UNVERIFIED: CPG_CLKON_N index for ADC on R9A09G057H. */
+#define RZV_CPG_CLK_ADC0            (9 << 16 | 0)   /* ADC: 2-bit pair [1:0] */
+#define RZV_CPG_CLK_ADC1            RZV_CPG_CLK_ADC0
 
 
 /* Maximum values ***********************************************************/
@@ -192,10 +251,26 @@
 /* SPI/SD clocks */
 #define RZV_CLOCK_SPI0CLK_HZ          (266666666)   /* SPI 0 266.67MHz */
 #define RZV_CLOCK_SPI1CLK_HZ          (133333333)   /* SPI 1 133.33MHz */
+#define RZV_CLOCK_SPI2CLK_HZ          (66666666)    /* SPI 2 66.67MHz — UNVERIFIED */
 #define RZV_CLOCK_SDCLK_HZ            (800000000)   /* SD base 800MHz */
+#define RZV_CLOCK_SD0CLK_HZ           (200000000)   /* SD0 200MHz — UNVERIFIED */
+#define RZV_CLOCK_SD1CLK_HZ           (200000000)   /* SD1 200MHz — UNVERIFIED */
+
+/* System bus / fabric clocks */
+#define RZV_CLOCK_GCLK_HZ             (200000000)   /* G-bus 200MHz — UNVERIFIED */
+#define RZV_CLOCK_S0CLK_HZ            (200000000)   /* S0 clock 200MHz — UNVERIFIED */
+#define RZV_CLOCK_S1CLK_HZ            (200000000)   /* S1 clock 200MHz — UNVERIFIED */
+#define RZV_CLOCK_S2CLK_HZ            (200000000)   /* S2 clock 200MHz — UNVERIFIED */
+#define RZV_CLOCK_S3CLK_HZ            (200000000)   /* S3 clock 200MHz — UNVERIFIED */
+#define RZV_CLOCK_M5CLK_HZ            (148500000)   /* Video 5 148.5MHz — UNVERIFIED */
+#define RZV_CLOCK_TSUCLK_HZ           (4000000)     /* TSU 4MHz — UNVERIFIED */
+#define RZV_CLOCK_P13CLK_HZ           (200000000)   /* Peripheral 13 200MHz — UNVERIFIED */
+#define RZV_CLOCK_P14CLK_HZ           (200000000)   /* Peripheral 14 200MHz — UNVERIFIED */
+#define RZV_CLOCK_P15CLK_HZ           (200000000)   /* Peripheral 15 200MHz — UNVERIFIED */
 
 /* Communication clocks */
 #define RZV_CLOCK_CANCLK_HZ           (80000000)    /* CAN 80MHz */
+#define RZV_CLOCK_CANFDCLK_HZ         (80000000)    /* CANFD 80MHz — UNVERIFIED */
 #define RZV_CLOCK_ADCCLK_HZ           (50000000)    /* ADC 50MHz */
 
 /* Ethernet clocks */
@@ -203,6 +278,10 @@
 #define RZV_CLOCK_ETHRX0CLK_HZ        (125000000)   /* ETH0 RX 125MHz */
 #define RZV_CLOCK_ETHTX1CLK_HZ        (125000000)   /* ETH1 TX 125MHz */
 #define RZV_CLOCK_ETHRX1CLK_HZ        (125000000)   /* ETH1 RX 125MHz */
+#define RZV_CLOCK_ET0_TXC_TXCLK_HZ   (125000000)   /* ETH0 TXC TX 125MHz */
+#define RZV_CLOCK_ET0_RXC_RXCLK_HZ   (125000000)   /* ETH0 RXC RX 125MHz */
+#define RZV_CLOCK_ET1_TXC_TXCLK_HZ   (125000000)   /* ETH1 TXC TX 125MHz */
+#define RZV_CLOCK_ET1_RXC_RXCLK_HZ   (125000000)   /* ETH1 RXC RX 125MHz */
 
 
 /* Clock extraction macros **************************************************/
@@ -211,42 +290,61 @@
 #define RZV_CPG_BIT(clk)            ((clk) & 0xFFFF)
 
 /* Module clock control macros **********************************************/
-/* These provide a NuttX-style interface to the CPG clock/reset registers  */
+/* DEPRECATED: prefer rzv_clock_enable/disable and rzv_module_reset/unreset
+ * C functions which add retry, diagnostics, and proper critical-section
+ * handling.  These macros are kept for legacy boot-path only.
+ * audit: Critical-1 — RZV_MODULE_RSTOFF had compile-breaking typo
+ * (RZV_CPG_RST_MON) and inverted wait condition; DELETED (see below).
+ * audit: Medium-8 — ARM_DSB() added after CLKON/RST write.
+ */
 
-/* Start clock supply to a module */
+/* Start clock supply to a module (boot-path fast path only).
+ * Write includes write-enable bits [31:16]; poll CLKMON until bit set.
+ * ARM_DSB() after poll ensures subsequent IP register writes are ordered. */
 #define RZV_MODULE_CLKON(domain, bit)                                        \
   do {                                                                       \
     putreg32((1 << (bit)) | (1 << ((bit) + 16)),                           \
              RZV_CPG_CLKON(domain));                                         \
-    while ((getreg32(RZV_CPG_CLKMON(domain)) & (1 << (bit))) == 0);        \
+    while ((getreg32(RZV_CPG_CLKMON(domain)) & (1 << (bit))) == 0)        \
+      {                                                                      \
+      }                                                                      \
+    ARM_DSB();                                                               \
   } while (0)
 
-/* Stop clock supply to a module */
+/* Stop clock supply to a module (boot-path fast path only). */
 #define RZV_MODULE_CLKOFF(domain, bit)                                       \
   do {                                                                       \
     putreg32((1 << ((bit) + 16)), RZV_CPG_CLKON(domain));                  \
-    while ((getreg32(RZV_CPG_CLKMON(domain)) & (1 << (bit))) != 0);        \
+    while ((getreg32(RZV_CPG_CLKMON(domain)) & (1 << (bit))) != 0)        \
+      {                                                                      \
+      }                                                                      \
+    ARM_DSB();                                                               \
   } while (0)
 
-/* Assert reset for a module */
+/* Assert reset (write-enable only, control=0 → reset asserted). */
 #define RZV_MODULE_RSTON(domain, bit)                                        \
   do {                                                                       \
     putreg32((1 << ((bit) + 16)), RZV_CPG_RST(domain));                    \
+    ARM_DSB();                                                               \
   } while (0)
 
-/* Deassert reset for a module */
-#define RZV_MODULE_RSTOFF(domain, bit)                                       \
-  do {                                                                       \
-    putreg32((1 << (bit)) | (1 << ((bit) + 16)),                           \
-             RZV_CPG_RST(domain));                                           \
-    while ((getreg32(RZV_CPG_RST_MON(domain)) & (1 << (bit))) != 0);       \
-  } while (0)
+/* RZV_MODULE_RSTOFF DELETED — audit Critical-1.
+ * Was: referenced RZV_CPG_RST_MON (compile error; correct is RZV_CPG_RSTMON)
+ * and polled "!= 0" (inverted; should be "== 0" for reset-asserted wait).
+ * Use rzv_module_unreset() instead — it polls RSTMON correctly. */
 
-/* Default clock frequencies for backwards compatibility ********************/
-/* These can be overridden by board configuration but should match hardware */
+/* Default clock frequencies ************************************************/
+/* Prefer Kconfig overrides (CONFIG_RZV_CPU_CLOCK_HZ etc.) when provided.
+ * audit: Low-14 — Kconfig overrides now consumed here.
+ * audit: High — hardcoded HZ used as fallback when divider readback not done.
+ */
 
 #ifndef RZV_MAIN_CLOCK_HZ
-#  define RZV_MAIN_CLOCK_HZ         RZV_CLOCK_OSCCLK_HZ
+#  ifdef CONFIG_RZV_XTAL_FREQ
+#    define RZV_MAIN_CLOCK_HZ       CONFIG_RZV_XTAL_FREQ
+#  else
+#    define RZV_MAIN_CLOCK_HZ       RZV_CLOCK_OSCCLK_HZ
+#  endif
 #endif
 
 #ifndef RZV_PLL_CLOCK_HZ
@@ -254,11 +352,19 @@
 #endif
 
 #ifndef RZV_CPU_CLOCK_HZ
-#  define RZV_CPU_CLOCK_HZ          RZV_CLOCK_I6CLK_HZ
+#  ifdef CONFIG_RZV_CPU_CLOCK_HZ
+#    define RZV_CPU_CLOCK_HZ        CONFIG_RZV_CPU_CLOCK_HZ
+#  else
+#    define RZV_CPU_CLOCK_HZ        RZV_CLOCK_I6CLK_HZ
+#  endif
 #endif
 
 #ifndef RZV_PCLK_HZ
-#  define RZV_PCLK_HZ               RZV_CLOCK_P0CLK_HZ
+#  ifdef CONFIG_RZV_PCLK_0_HZ
+#    define RZV_PCLK_HZ             CONFIG_RZV_PCLK_0_HZ
+#  else
+#    define RZV_PCLK_HZ             RZV_CLOCK_P0CLK_HZ
+#  endif
 #endif
 
 /****************************************************************************
@@ -465,6 +571,41 @@ uint32_t rzv_get_pclk_frequency(void);
  ****************************************************************************/
 
 uint32_t rzv_get_cpu_frequency(void);
+
+/****************************************************************************
+ * Name: rzv_get_p4clk_frequency
+ *
+ * Description:
+ *   Get P4CLK frequency (200 MHz default).  Used by SPI and GPT peripherals.
+ *   audit finding #4: rzv_get_pclk_frequency() only returns P0CLK (100 MHz);
+ *   callers needing P4CLK must use this function instead.
+ *
+ * Returned Value:
+ *   P4CLK frequency in Hz
+ *
+ ****************************************************************************/
+
+uint32_t rzv_get_p4clk_frequency(void);
+
+/****************************************************************************
+ * Name: rzv_get_gpt_clock_hz
+ *
+ * Description:
+ *   Return the clock frequency fed to the GPT prescaler (GTCR.TPCS divides
+ *   this source).  On R9A09G057H the GPT clock source is P4CLK (200 MHz).
+ *   FSP BSP_FEATURE_GPT_CLOCK_SOURCE = FSP_PRIV_CLOCK_P4CLK (bsp_feature.h
+ *   line 146).  GPTCK is a separate optional source not used by default.
+ *
+ *   UNVERIFIED: Confirm against RZ/V2H UM Table 9.x if board clock tree
+ *   differs from EVK default (BSP_CFG_CLOCK_P4CLK_HZ may vary).
+ *
+ * Returned Value:
+ *   GPT input clock frequency in Hz (P4CLK = 200 MHz compile-time default,
+ *   RZV_CLOCK_P4CLK_HZ).
+ *
+ ****************************************************************************/
+
+uint32_t rzv_get_gpt_clock_hz(void);
 
 /****************************************************************************
  * Name: rzv_clock_get_rate

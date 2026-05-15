@@ -64,4 +64,20 @@ struct spi_dev_s *rzv_spibus_initialize(int port);
 
 int rzv_spibus_uninitialize(struct spi_dev_s *dev);
 
+/****************************************************************************
+ * Name: rzv_spi_set_loopback
+ *
+ * Description:
+ *   Enable or disable internal SPI loopback (SPCR2.SPLP).
+ *   When enabled, MOSI is wired internally to MISO — no physical wire needed.
+ *   Phase-07 [Low-20]: replaces the commented-out stub in rzv2h_spi_loopback.c.
+ *
+ * Input Parameters:
+ *   dev    - SPI device from rzv_spibus_initialize()
+ *   enable - true = enable loopback, false = normal operation
+ *
+ ****************************************************************************/
+
+void rzv_spi_set_loopback(struct spi_dev_s *dev, bool enable);
+
 #endif /* __ARCH_ARM_SRC_RZV_RZV_SPI_H */

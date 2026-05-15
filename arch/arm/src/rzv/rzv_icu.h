@@ -26,7 +26,7 @@
  *
  * 2. **ICU (Interrupt Control Unit)** - Handles external interrupt preprocessing
  *    - NMI, IRQ0-15, TINT0-31 status and configuration
- *    - Base: 0x10410000
+ *    - Base: 0x10400000 (INTC base; ICU regs at INTC offsets 0x0000-0x004C)
  *    - Does NOT route peripheral events to GIC
  *
  * 3. **INTC (Interrupt Controller)** - Routes events to CPU cores
@@ -43,7 +43,14 @@
  * - NuttX: Dynamic allocation via rzv_icu_attach() (runtime configuration)
  *
  * Interrupt Flow:
- *   Peripheral Event → INTC INTR8SEL[slot] → GIC SPI[32+slot] → CPU → Handler
+ *   Peripheral Event → INTC INTR8SEL[slot] → GIC SPI[353+slot] → CPU → Handler
+ *
+ * Slot→IRQ mapping (CRIT-1 fix):
+ *   FSP BSP_FEATURE_ICU_FIXED_INTSEL_COUNT = 353 (first SELECT SPI INTID).
+ *   INTR8SEL slot N → GIC SPI INTID (353+N) → NuttX IRQ index == GIC INTID.
+ *   rzv_icu_attach() returns NuttX IRQ (= GIC INTID = 353+N); callers must
+ *   use that value for up_enable_irq/up_disable_irq and irq_detach.
+ *   Do NOT add RZV_IRQ_FIRST — it was already double-counted.
  *
  * Usage Example:
  *   int irq = rzv_icu_attach(RZV_ELC_SCI0_RXI, uart_handler, &dev, true);
@@ -155,7 +162,7 @@ void rzv_icu_clear_irq(int irq);
  *   irq_enable - If true, enable the IRQ immediately
  *
  * Returned Value:
- *   On success, returns the GIC IRQ number (RZV_IRQ_FIRST + slot).
+ *   On success, returns NuttX IRQ (GIC INTID = 353 + slot).
  *   On failure, returns a negated errno value:
  *     -ENOMEM: No more slots available
  *
@@ -297,6 +304,22 @@ void rzv_icu_disable_nmi(uint16_t mask);
 
 void rzv_icu_enable_wakeup(uint32_t mask);
 void rzv_icu_disable_wakeup(uint32_t mask);
+
+/****************************************************************************
+ * Name: rzv_gic_set_irq_type
+ *
+ * Description:
+ *   Configure GIC ICDICFR edge/level type for a SPI interrupt.
+ *   MED-9 fix: GIC must be configured for edge when ICU IITSR is set to
+ *   edge mode; otherwise the GIC line hangs on first edge assertion.
+ *
+ * Input Parameters:
+ *   irq  - GIC INTID (NuttX IRQ number)
+ *   edge - true = edge-triggered, false = level-sensitive
+ *
+ ****************************************************************************/
+
+void rzv_gic_set_irq_type(int irq, bool edge);
 
 #ifdef __cplusplus
 }

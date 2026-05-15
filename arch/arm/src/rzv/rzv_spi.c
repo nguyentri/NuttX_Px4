@@ -18,6 +18,42 @@
  *
  ****************************************************************************/
 
+/* RZ/V2H SPI-B (r_spi_b) native driver.
+ *
+ * Phase-07 fixes applied:
+ *   [Crit-1]  SPBR written via 32-bit SPCR3[15:8] RMW (not dead SPBR_OFFSET).
+ *   [Crit-3]  Clock source from rzv_clock_get_rate(RZV_CLOCK_SPI0/1/2CLK).
+ *   [High-5]  SPEIE|SPRIE|SPTIE|CENDIE ORed into final SPCR write.
+ *   [High-6]  setmode/setbits/setfrequency use RMW; SPCR not wiped to SPE|MSTR.
+ *   [High-8]  send/exchange use 32-bit SPDR exclusively; FIFO fill loop.
+ *   [High-9]  priv->irq_* initialised to -1 before attach calls.
+ *   [Med-11]  SPSRC bits cleared after each frame (SPTEFC, SPRFC, CENDFC).
+ *   [Med-12]  enter_critical_section wraps setbits/setfrequency RMW.
+ *   [Med-13]  setbits validates nbits; returns -EINVAL for unsupported width.
+ *   [Med-14]  SPCR read-back after first write (1-TCLK sync per FSP :668).
+ *   [Low-17]  CONFIG_SPI_TRIGGER symbol references guarded.
+ *   [Low-18]  SPI_FIFO_SIZE replaced with SPI_FIFO_DEPTH (16).
+ *   [Low-19]  Dead SPI_TIMEOUT_LOOPS heuristic removed.
+ *   Board GPIO MUX is done by rzv2h_spi.c board init (Phase-07, [Crit-2]).
+ *
+ * Review-fix-260515 findings applied (review-spi-260515-1600.md):
+ *   [C1]  spi_clock changed to RZV_CLOCK_P4CLK (200 MHz) for all channels;
+ *         SPI0CLK/SPI1CLK are wrong sources per FSP BSP_FEATURE_SPI_CLK.
+ *   [C2]  RX poll in send() now uses SPRFSR.RFDN (FIFO count) not SPSR.SPRF;
+ *         RTRG lowered to 1 so single-word transfers don't hang.
+ *   [H4/M10] SPTIE/SPRIE removed from init SPCR; only SPEIE+SCKASE set.
+ *         IE bits must be armed per-transfer to avoid IRQ storm at startup.
+ *   [H5]  SCKASE bit added to init SPCR (master-mode RX overflow prevention).
+ *   [H6]  SPCMD0 init now includes SCKDEN|SLNDEN|SPNDEN so SPDECR delays
+ *         are active in hardware (were bypassed before).
+ *   [H7]  SPCR RMW in rxi/txi ISRs now protected by enter_critical_section.
+ *   [M8]  Per-word SPTEFC clear removed from polled send() path.
+ *   [M9]  SPI_ERROR_FLAGS trimmed to OVRF|UDRF (in hardware/rzv_spi.h).
+ *   [M12] rzv_spi_setbits_dev guard removed; HW always programmed on call.
+ *   [L13] SSLA(0) explicit in SPCMD0 init.
+ *   [L14] LSBF implicitly 0 via full mask; comment added.
+ */
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -44,21 +80,21 @@
 #include "rzv_icu.h"
 #include "rzv_gpio.h"
 #include "hardware/rzv_spi.h"
+#include "rzv_spi.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Default values ***********************************************************/
+#define SPI_DEFAULT_FREQUENCY     1000000u   /* 1 MHz */
+#define SPI_TIMEOUT_MS            1000u      /* Polled transfer timeout ms */
 
-#define SPI_DEFAULT_FREQUENCY     1000000   /* 1 MHz */
-#define SPI_FIFO_SIZE             4         /* FIFO depth */
-#define SPI_TIMEOUT_MS            1000      /* Transfer timeout in ms */
-#define SPI_TIMEOUT_LOOPS         (SPI_TIMEOUT_MS * 1000) /* Timeout iterations */
-
-/* Error flags to check in SPSR */
-#define SPI_ERROR_FLAGS   (SPI_SPSR_OVRF | SPI_SPSR_MODF | \
-                           SPI_SPSR_PERF | SPI_SPSR_UDRF)
+/* Polled wait iterations — each iteration is ~2-3 instructions, so
+ * 1000 ms * 10000 gives a generous ceiling without floating division.
+ * Phase-07: replaced the old SPI_TIMEOUT_LOOPS heuristic (ms*1000) with
+ * a cycle-count estimate that is at least proportional to real time.
+ */
+#define SPI_TIMEOUT_CYCLES        (SPI_TIMEOUT_MS * 10000u)
 
 /****************************************************************************
  * Private Types
@@ -68,69 +104,65 @@
 
 struct rzv_spi_config_s
 {
-  uintptr_t base;         /* SPI base address */
-  uint32_t  frequency;    /* Default SPI frequency */
-  uint8_t   port;         /* SPI port number (0-2) */
-  uint32_t  clk_id;       /* Clock ID for CPG */
-  uint16_t  elc_rxi;      /* ELC event for RX interrupt */
-  uint16_t  elc_txi;      /* ELC event for TX interrupt */
-  uint16_t  elc_tei;      /* ELC event for Transfer end */
-  uint16_t  elc_eri;      /* ELC event for Error interrupt */
+  uintptr_t base;          /* SPI peripheral base address */
+  uint32_t  frequency;     /* Default SPI frequency */
+  uint8_t   port;          /* SPI port number (0-2) */
+  uint32_t  clk_id;        /* CPG clock gate ID */
+  enum rzv_clock_id_e spi_clock; /* SPI clock source for baud rate calc */
+  uint16_t  elc_rxi;       /* ELC event: RX buffer full */
+  uint16_t  elc_txi;       /* ELC event: TX buffer empty */
+  uint16_t  elc_tei;       /* ELC event: transfer end (CEND) */
+  uint16_t  elc_eri;       /* ELC event: error */
 };
 
 /* SPI Device Private Data */
 
 struct rzv_spi_priv_s
 {
-  struct spi_dev_s spidev;            /* Externally visible part */
-  const struct rzv_spi_config_s *config; /* Port configuration */
-  sem_t exclsem;                      /* Mutual exclusion semaphore */
-  sem_t waitsem;                      /* Wait for transfer completion */
+  struct spi_dev_s          spidev;   /* Externally visible part */
+  const struct rzv_spi_config_s *config;
+  sem_t  exclsem;                     /* Mutual exclusion semaphore */
+  sem_t  waitsem;                     /* IRQ transfer completion sem */
 
   uint32_t frequency;                 /* Requested clock frequency */
-  uint32_t actual;                    /* Actual clock frequency */
-  uint8_t  nbits;                     /* Width of word in bits (8 or 16) */
-  uint8_t  mode;                      /* SPI mode */
+  uint32_t actual;                    /* Achieved clock frequency */
+  uint8_t  nbits;                     /* Current word width (8/16/32) */
+  uint8_t  mode;                      /* Current SPI mode */
 
-  /* IRQ tracking */
-  int      irq_rxi;                   /* Allocated RX IRQ */
-  int      irq_txi;                   /* Allocated TX IRQ */
-  int      irq_tei;                   /* Allocated TEI IRQ */
-  int      irq_eri;                   /* Allocated Error IRQ */
+  /* IRQ slots — kept as -1 until successfully attached */
 
-  /* Transfer state */
-  const void *txbuffer;               /* TX buffer pointer */
-  void       *rxbuffer;               /* RX buffer pointer */
-  size_t      ntxwords;               /* TX words remaining */
-  size_t      nrxwords;               /* RX words remaining */
-  bool        error;                  /* Transfer error flag */
+  int  irq_rxi;
+  int  irq_txi;
+  int  irq_tei;
+  int  irq_eri;
+
+  /* IRQ-driven transfer state */
+
+  const void *txbuffer;
+  void       *rxbuffer;
+  size_t      ntxwords;
+  size_t      nrxwords;
+  bool        error;
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-/* SPI Register Access */
+/* Register access — 32-bit only per FSP recommendation */
 
-static inline uint8_t rzv_spi_getreg8(struct rzv_spi_priv_s *priv,
-                                      unsigned int offset);
-static inline void rzv_spi_putreg8(struct rzv_spi_priv_s *priv,
-                                   unsigned int offset, uint8_t value);
-static inline uint16_t rzv_spi_getreg16(struct rzv_spi_priv_s *priv,
-                                        unsigned int offset);
-static inline void rzv_spi_putreg16(struct rzv_spi_priv_s *priv,
-                                    unsigned int offset, uint16_t value);
 static inline uint32_t rzv_spi_getreg32(struct rzv_spi_priv_s *priv,
                                         unsigned int offset);
 static inline void rzv_spi_putreg32(struct rzv_spi_priv_s *priv,
                                     unsigned int offset, uint32_t value);
 
-/* SPI Helpers */
+/* Internal helpers */
 
+static uint32_t rzv_spi_get_clk_hz(struct rzv_spi_priv_s *priv);
 static void rzv_spi_setfrequency(struct rzv_spi_priv_s *priv,
                                  uint32_t frequency);
-static void rzv_spi_setmode(struct rzv_spi_priv_s *priv, uint8_t mode);
-static void rzv_spi_setbits(struct rzv_spi_priv_s *priv, uint8_t nbits);
+static int  rzv_spi_setmode(struct rzv_spi_priv_s *priv, uint8_t mode);
+static int  rzv_spi_setbits(struct rzv_spi_priv_s *priv, int nbits);
 
 /* Interrupt handlers */
 
@@ -139,59 +171,51 @@ static int rzv_spi_txi_interrupt(int irq, void *context, void *arg);
 static int rzv_spi_tei_interrupt(int irq, void *context, void *arg);
 static int rzv_spi_eri_interrupt(int irq, void *context, void *arg);
 
-/* SPI Operations */
+/* NuttX SPI ops */
 
-static int rzv_spi_lock(struct spi_dev_s *dev, bool lock);
+static int      rzv_spi_lock(struct spi_dev_s *dev, bool lock);
 static uint32_t rzv_spi_setfrequency_dev(struct spi_dev_s *dev,
                                          uint32_t frequency);
-static void rzv_spi_setmode_dev(struct spi_dev_s *dev,
-                                enum spi_mode_e mode);
-static void rzv_spi_setbits_dev(struct spi_dev_s *dev, int nbits);
+static void     rzv_spi_setmode_dev(struct spi_dev_s *dev,
+                                    enum spi_mode_e mode);
+static void     rzv_spi_setbits_dev(struct spi_dev_s *dev, int nbits);
 #ifdef CONFIG_SPI_HWFEATURES
-static int rzv_spi_hwfeatures(struct spi_dev_s *dev,
-                              spi_hwfeatures_t features);
+static int      rzv_spi_hwfeatures(struct spi_dev_s *dev,
+                                   spi_hwfeatures_t features);
 #endif
 static uint32_t rzv_spi_send(struct spi_dev_s *dev, uint32_t wd);
-static void rzv_spi_exchange(struct spi_dev_s *dev,
-                             const void *txbuffer,
-                             void *rxbuffer, size_t nwords);
+static void     rzv_spi_exchange(struct spi_dev_s *dev,
+                                 const void *txbuf,
+                                 void *rxbuf, size_t nwords);
 #ifndef CONFIG_SPI_EXCHANGE
 static void rzv_spi_sndblock(struct spi_dev_s *dev,
-                             const void *txbuffer, size_t nwords);
+                              const void *txbuf, size_t nwords);
 static void rzv_spi_recvblock(struct spi_dev_s *dev,
-                              void *rxbuffer, size_t nwords);
+                               void *rxbuf, size_t nwords);
 #endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/* Weak default implementations for board-specific SPI functions
- *
- * Note: Hardware CS support via SSLP register is available but requires
- * board-specific configuration. To enable hardware CS:
- *
- * 1. Define board-specific rzv_spi_select() that configures SSLP register:
- *    - Set SSLP bits in SPCMD register for automatic CS control
- *    - Configure SSL pin polarity via SSLP register
- *
- * 2. Configure GPIO pins for SSL function (not GPIO mode)
- *
- * The default implementation uses GPIO-based manual CS control via
- * board_spi_select() which is more flexible and commonly used.
+/* Weak board-override hooks.  Board file (rzv2h_spi.c) provides strong
+ * versions that configure GPIO MUX and CS lines.
  */
 
 weak_function void rzv_spi_select(struct spi_dev_s *dev, uint32_t devid,
                                    bool selected)
 {
-  /* Default implementation uses board-provided GPIO CS.
-   * For hardware CS, override this function to configure SSLP.
-   */
+  /* No-op default: board must override for real CS control */
+
+  UNUSED(dev);
+  UNUSED(devid);
+  UNUSED(selected);
 }
 
 weak_function uint8_t rzv_spi_status(struct spi_dev_s *dev, uint32_t devid)
 {
-  /* Default implementation returns 0 */
+  UNUSED(dev);
+  UNUSED(devid);
   return 0;
 }
 
@@ -199,26 +223,28 @@ weak_function uint8_t rzv_spi_status(struct spi_dev_s *dev, uint32_t devid)
 weak_function int rzv_spi_cmddata(struct spi_dev_s *dev, uint32_t devid,
                                    bool cmd)
 {
-  /* Default implementation returns OK */
+  UNUSED(dev);
+  UNUSED(devid);
+  UNUSED(cmd);
   return OK;
 }
 #endif
 
-/* SPI Interface */
+/* SPI ops table */
 
 static const struct spi_ops_s g_spi_ops =
 {
   .lock              = rzv_spi_lock,
-  .select            = rzv_spi_select,      /* Provided by board */
+  .select            = rzv_spi_select,
   .setfrequency      = rzv_spi_setfrequency_dev,
   .setmode           = rzv_spi_setmode_dev,
   .setbits           = rzv_spi_setbits_dev,
 #ifdef CONFIG_SPI_HWFEATURES
   .hwfeatures        = rzv_spi_hwfeatures,
 #endif
-  .status            = rzv_spi_status,      /* Provided by board */
+  .status            = rzv_spi_status,
 #ifdef CONFIG_SPI_CMDDATA
-  .cmddata           = rzv_spi_cmddata,     /* Provided by board */
+  .cmddata           = rzv_spi_cmddata,
 #endif
   .send              = rzv_spi_send,
 #ifdef CONFIG_SPI_EXCHANGE
@@ -228,12 +254,13 @@ static const struct spi_ops_s g_spi_ops =
   .recvblock         = rzv_spi_recvblock,
 #endif
 #ifdef CONFIG_SPI_TRIGGER
-  .trigger           = rzv_spi_trigger,     /* Not implemented */
+  /* trigger not implemented; guarded to avoid link error */
+  .trigger           = NULL,
 #endif
-  .registercallback  = NULL,                /* Not implemented */
+  .registercallback  = NULL,
 };
 
-/* SPI0 Configuration */
+/* Per-channel config tables */
 
 #ifdef CONFIG_RZV_SPI0
 static const struct rzv_spi_config_s g_spi0_config =
@@ -242,6 +269,10 @@ static const struct rzv_spi_config_s g_spi0_config =
   .frequency = SPI_DEFAULT_FREQUENCY,
   .port      = 0,
   .clk_id    = RZV_CPG_CLK_SPI0,
+  /* [C1] FSP BSP_FEATURE_SPI_CLK=P4CLK (200 MHz) for all SPI-B channels.
+   * SPI0CLK (266 MHz) is the wrong source; baud would be off by ~33%.
+   */
+  .spi_clock = RZV_CLOCK_P4CLK,
   .elc_rxi   = RZV_ELC_SP_ELCRDRF_0,
   .elc_txi   = RZV_ELC_SP_ELCTDRE_0,
   .elc_tei   = RZV_ELC_SP_ELCCEND_0,
@@ -252,10 +283,12 @@ static struct rzv_spi_priv_s g_spi0_priv =
 {
   .spidev.ops = &g_spi_ops,
   .config     = &g_spi0_config,
+  .irq_rxi    = -1,
+  .irq_txi    = -1,
+  .irq_tei    = -1,
+  .irq_eri    = -1,
 };
-#endif
-
-/* SPI1 Configuration */
+#endif /* CONFIG_RZV_SPI0 */
 
 #ifdef CONFIG_RZV_SPI1
 static const struct rzv_spi_config_s g_spi1_config =
@@ -264,6 +297,8 @@ static const struct rzv_spi_config_s g_spi1_config =
   .frequency = SPI_DEFAULT_FREQUENCY,
   .port      = 1,
   .clk_id    = RZV_CPG_CLK_SPI1,
+  /* [C1] Same P4CLK source as SPI0; FSP uses P4CLK for all SPI-B instances. */
+  .spi_clock = RZV_CLOCK_P4CLK,
   .elc_rxi   = RZV_ELC_SP_ELCRDRF_1,
   .elc_txi   = RZV_ELC_SP_ELCTDRE_1,
   .elc_tei   = RZV_ELC_SP_ELCCEND_1,
@@ -274,40 +309,24 @@ static struct rzv_spi_priv_s g_spi1_priv =
 {
   .spidev.ops = &g_spi_ops,
   .config     = &g_spi1_config,
+  .irq_rxi    = -1,
+  .irq_txi    = -1,
+  .irq_tei    = -1,
+  .irq_eri    = -1,
 };
-#endif
+#endif /* CONFIG_RZV_SPI1 */
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: rzv_spi_getreg8/16/32
+ * Name: rzv_spi_getreg32 / rzv_spi_putreg32
+ *
+ * Description:
+ *   32-bit register access only.  FSP uses 32-bit SPDR for all widths;
+ *   AXI bridge support for sub-word writes is unconfirmed (phase-07 §6).
  ****************************************************************************/
-
-static inline uint8_t rzv_spi_getreg8(struct rzv_spi_priv_s *priv,
-                                      unsigned int offset)
-{
-  return getreg8(priv->config->base + offset);
-}
-
-static inline void rzv_spi_putreg8(struct rzv_spi_priv_s *priv,
-                                   unsigned int offset, uint8_t value)
-{
-  putreg8(value, priv->config->base + offset);
-}
-
-static inline uint16_t rzv_spi_getreg16(struct rzv_spi_priv_s *priv,
-                                        unsigned int offset)
-{
-  return getreg16(priv->config->base + offset);
-}
-
-static inline void rzv_spi_putreg16(struct rzv_spi_priv_s *priv,
-                                    unsigned int offset, uint16_t value)
-{
-  putreg16(value, priv->config->base + offset);
-}
 
 static inline uint32_t rzv_spi_getreg32(struct rzv_spi_priv_s *priv,
                                         unsigned int offset)
@@ -322,95 +341,154 @@ static inline void rzv_spi_putreg32(struct rzv_spi_priv_s *priv,
 }
 
 /****************************************************************************
+ * Name: rzv_spi_get_clk_hz
+ *
+ * Description:
+ *   Return the SPI peripheral input clock in Hz.
+ *   Phase-07 [Crit-3]: use per-channel SPI clock, not generic P0CLK.
+ *   rzv_clock_get_rate() returns compile-time default if HW readback is
+ *   not yet decoded (Phase-01 concern); that is still more accurate than
+ *   P0CLK which is the wrong clock tree entirely.
+ ****************************************************************************/
+
+static uint32_t rzv_spi_get_clk_hz(struct rzv_spi_priv_s *priv)
+{
+  uint32_t hz = rzv_clock_get_rate(priv->config->spi_clock);
+
+  if (hz == 0)
+    {
+      /* Fallback — should not happen if CPG was initialised */
+
+      spierr("SPI%d: clock rate is 0, using 100 MHz fallback\n",
+             priv->config->port);
+      hz = 100000000u;
+    }
+
+  return hz;
+}
+
+/****************************************************************************
  * Name: rzv_spi_setfrequency
+ *
+ * Description:
+ *   Program SPCR3.SPBR and SPCMD0.BRDV for the requested bit rate.
+ *
+ *   Baud = spi_clk / (2 * (SPBR + 1) * 2^BRDV)
+ *   → SPBR = spi_clk / (2 * baud * 2^BRDV) - 1
+ *
+ *   Phase-07 [High-6]: RMW only; SPCR not wiped.
+ *   Phase-07 [Crit-1]: SPBR written to SPCR3[15:8], not a phantom register.
+ *   Phase-07 [Med-12]: critical section wraps register RMW.
  ****************************************************************************/
 
 static void rzv_spi_setfrequency(struct rzv_spi_priv_s *priv,
                                  uint32_t frequency)
 {
-  uint32_t pclk;
-  uint8_t spbr;
-  uint8_t brdv;
+  uint32_t spi_clk;
+  uint32_t spcr;
+  uint32_t spcr3;
+  uint32_t spcmd;
+  uint32_t spbr_calc;
+  uint8_t  spbr  = 255;
+  uint8_t  brdv  = SPI_BRDV_DIV_8;
+  uint8_t  b;
+  irqstate_t flags;
 
-  /* Get peripheral clock */
-  pclk = rzv_get_pclk_frequency();
-
-  /* Calculate bit rate using correct formula:
-   * Bit Rate = PCLK / (2 * (SPBR + 1) * 2^BRDV)
-   * Therefore: SPBR = (PCLK / (2 * Bit Rate * 2^BRDV)) - 1
-   */
-
-  for (brdv = 0; brdv <= 3; brdv++)
+  if (frequency == 0)
     {
-      uint32_t divider = 2 * frequency * (1 << brdv);
-      uint32_t spbr_calc = (pclk / divider);
+      spierr("SPI%d: zero frequency requested\n", priv->config->port);
+      return;
+    }
 
-      if (spbr_calc > 0)
+  spi_clk = rzv_spi_get_clk_hz(priv);
+
+  /* Find smallest BRDV + SPBR pair that satisfies the requested rate */
+
+  for (b = 0; b <= 3; b++)
+    {
+      uint32_t divisor = 2u * frequency * (1u << b);
+
+      if (divisor == 0)
         {
-          spbr_calc--; /* SPBR is (divider - 1) */
+          continue;
         }
 
-      if (spbr_calc <= 255)
+      spbr_calc = (spi_clk / divisor);
+      if (spbr_calc > 0)
+        {
+          spbr_calc--;
+        }
+
+      if (spbr_calc <= 255u)
         {
           spbr = (uint8_t)spbr_calc;
+          brdv = b;
           break;
         }
     }
 
-  if (brdv > 3)
-    {
-      /* Limit to maximum divisor */
-      brdv = 3;
-      spbr = 255;
-      spiwarn("Frequency %lu too low, using minimum\n", frequency);
-    }
+  /* Calculate achieved frequency for caller reporting */
 
-  /* Disable SPI (SPCR is a 32-bit control register) */
-  rzv_spi_putreg32(priv, RZV_SPI_SPCR_OFFSET, 0);
-
-  /* Set bit rate (SPBR register) */
-  rzv_spi_putreg8(priv, RZV_SPI_SPBR_OFFSET, spbr);
-
-  /* Update command register with BRDV (SPCMD is 32-bit) */
-  uint32_t spcmd = rzv_spi_getreg32(priv, RZV_SPI_SPCMD_OFFSET(0));
-  spcmd = (spcmd & ~SPI_SPCMD_BRDV_MASK) |
-    ((brdv << SPI_SPCMD_BRDV_SHIFT) & SPI_SPCMD_BRDV_MASK);
-  rzv_spi_putreg32(priv, RZV_SPI_SPCMD_OFFSET(0), spcmd);
-
-  /* Calculate actual frequency */
-  priv->actual = pclk / (2 * (spbr + 1) * (1 << brdv));
+  priv->actual    = spi_clk / (2u * ((uint32_t)spbr + 1u) * (1u << brdv));
   priv->frequency = frequency;
 
-  /* Re-enable SPI */
-  rzv_spi_putreg32(priv, RZV_SPI_SPCR_OFFSET,
-                  SPI_SPCR_SPE | SPI_SPCR_MSTR);
+  flags = enter_critical_section();
 
-  spiinfo("Frequency: request=%lu actual=%lu\n",
-          frequency, priv->actual);
+  /* Disable SPI before touching baud-rate registers */
+
+  spcr = rzv_spi_getreg32(priv, RZV_SPI_SPCR_OFFSET);
+  rzv_spi_putreg32(priv, RZV_SPI_SPCR_OFFSET, spcr & ~SPI_SPCR_SPE);
+
+  /* SPCR3: RMW — preserve SSL polarity bits [3:0] and SPSLN [26:24] */
+
+  spcr3  = rzv_spi_getreg32(priv, RZV_SPI_SPCR3_OFFSET);
+  spcr3 &= ~SPI_SPCR3_SPBR_MASK;
+  spcr3 |= ((uint32_t)spbr << SPI_SPCR3_SPBR_SHIFT);
+  rzv_spi_putreg32(priv, RZV_SPI_SPCR3_OFFSET, spcr3);
+
+  /* SPCMD0: RMW — update BRDV field only */
+
+  spcmd  = rzv_spi_getreg32(priv, RZV_SPI_SPCMD_OFFSET(0));
+  spcmd &= ~SPI_SPCMD_BRDV_MASK;
+  spcmd |= SPI_SPCMD_BRDV(brdv);
+  rzv_spi_putreg32(priv, RZV_SPI_SPCMD_OFFSET(0), spcmd);
+
+  /* Re-enable SPI (restore original SPE state) */
+
+  rzv_spi_putreg32(priv, RZV_SPI_SPCR_OFFSET, spcr);
+
+  leave_critical_section(flags);
+
+  spiinfo("SPI%d: freq req=%lu actual=%lu SPBR=%u BRDV=%u\n",
+          priv->config->port, (unsigned long)frequency,
+          (unsigned long)priv->actual, spbr, brdv);
 }
 
 /****************************************************************************
  * Name: rzv_spi_setmode
+ *
+ * Description:
+ *   Configure CPOL/CPHA in SPCMD0 via RMW.
+ *   Phase-07 [High-6]: does NOT wipe SPCR to SPE|MSTR.
+ *   Phase-07 [Med-12]: critical section.
+ *
+ * Returns OK or -EINVAL.
  ****************************************************************************/
 
-static void rzv_spi_setmode(struct rzv_spi_priv_s *priv, uint8_t mode)
+static int rzv_spi_setmode(struct rzv_spi_priv_s *priv, uint8_t mode)
 {
-  uint32_t spcmd;  /* SPCMD is 32-bit register on RZV2H */
+  uint32_t spcr;
+  uint32_t spcmd;
   irqstate_t flags;
 
-  /* Critical section for atomic register modification */
   flags = enter_critical_section();
 
-  /* Disable SPI */
-  rzv_spi_putreg32(priv, RZV_SPI_SPCR_OFFSET, 0);
+  spcr = rzv_spi_getreg32(priv, RZV_SPI_SPCR_OFFSET);
+  rzv_spi_putreg32(priv, RZV_SPI_SPCR_OFFSET, spcr & ~SPI_SPCR_SPE);
 
-  /* Read command register */
-  spcmd = rzv_spi_getreg32(priv, RZV_SPI_SPCMD_OFFSET(0));
-
-  /* Clear mode bits (CPOL, CPHA) */
+  spcmd  = rzv_spi_getreg32(priv, RZV_SPI_SPCMD_OFFSET(0));
   spcmd &= ~(SPI_SPCMD_CPOL | SPI_SPCMD_CPHA);
 
-  /* Set mode */
   switch (mode)
     {
       case SPIDEV_MODE0:  /* CPOL=0 CPHA=0 */
@@ -429,66 +507,65 @@ static void rzv_spi_setmode(struct rzv_spi_priv_s *priv, uint8_t mode)
         break;
 
       default:
-        spierr("Invalid mode: %d\n", mode);
+        spierr("SPI%d: invalid mode %d\n", priv->config->port, mode);
+        rzv_spi_putreg32(priv, RZV_SPI_SPCR_OFFSET, spcr);
         leave_critical_section(flags);
-        return;
+        return -EINVAL;
     }
 
-  /* Write command register atomically */
   rzv_spi_putreg32(priv, RZV_SPI_SPCMD_OFFSET(0), spcmd);
-
+  rzv_spi_putreg32(priv, RZV_SPI_SPCR_OFFSET, spcr);
   priv->mode = mode;
 
-  /* Re-enable SPI */
-  rzv_spi_putreg32(priv, RZV_SPI_SPCR_OFFSET,
-                  SPI_SPCR_SPE | SPI_SPCR_MSTR);
-
   leave_critical_section(flags);
-
-  spiinfo("Mode: %d\n", mode);
+  return OK;
 }
 
 /****************************************************************************
  * Name: rzv_spi_setbits
+ *
+ * Description:
+ *   Configure SPCMD0.SPB for the given word width.
+ *   Phase-07 [Med-13]: validate nbits.
+ *   Phase-07 [High-6]: RMW only.
+ *   Phase-07 [Med-12]: critical section.
+ *
+ * Returns OK or -EINVAL.
  ****************************************************************************/
 
-static void rzv_spi_setbits(struct rzv_spi_priv_s *priv, uint8_t nbits)
+static int rzv_spi_setbits(struct rzv_spi_priv_s *priv, int nbits)
 {
-  uint32_t spcmd;  /* Fixed: SPCMD is 32-bit register */
+  uint32_t spb;
+  uint32_t spcr;
+  uint32_t spcmd;
+  irqstate_t flags;
 
-  /* Disable SPI */
-  rzv_spi_putreg32(priv, RZV_SPI_SPCR_OFFSET, 0);
+  switch (nbits)
+    {
+      case 8:   spb = SPI_SPB_8_BITS;  break;
+      case 16:  spb = SPI_SPB_16_BITS; break;
+      case 32:  spb = SPI_SPB_32_BITS; break;
+      default:
+        spierr("SPI%d: unsupported nbits=%d (8/16/32 only)\n",
+               priv->config->port, nbits);
+        return -EINVAL;
+    }
 
-  /* Read command register */
-  spcmd = rzv_spi_getreg32(priv, RZV_SPI_SPCMD_OFFSET(0));
+  flags = enter_critical_section();
 
-  /* Clear data length bits */
+  spcr = rzv_spi_getreg32(priv, RZV_SPI_SPCR_OFFSET);
+  rzv_spi_putreg32(priv, RZV_SPI_SPCR_OFFSET, spcr & ~SPI_SPCR_SPE);
+
+  spcmd  = rzv_spi_getreg32(priv, RZV_SPI_SPCMD_OFFSET(0));
   spcmd &= ~SPI_SPCMD_SPB_MASK;
-
-  /* Set data length */
-  if (nbits == 8)
-    {
-      spcmd |= SPI_SPCMD_SPB_8BIT;
-    }
-  else if (nbits == 16)
-    {
-      spcmd |= SPI_SPCMD_SPB_16BIT;
-    }
-  else
-    {
-      return;
-    }
-
-  /* Write command register (32-bit) */
+  spcmd |= SPI_SPCMD_SPB_VAL(spb);
   rzv_spi_putreg32(priv, RZV_SPI_SPCMD_OFFSET(0), spcmd);
 
-  priv->nbits = nbits;
+  rzv_spi_putreg32(priv, RZV_SPI_SPCR_OFFSET, spcr);
+  priv->nbits = (uint8_t)nbits;
 
-  /* Re-enable SPI */
-  rzv_spi_putreg32(priv, RZV_SPI_SPCR_OFFSET,
-                  SPI_SPCR_SPE | SPI_SPCR_MSTR);
-
-  spiinfo("Bits: %d\n", nbits);
+  leave_critical_section(flags);
+  return OK;
 }
 
 /****************************************************************************
@@ -498,22 +575,17 @@ static void rzv_spi_setbits(struct rzv_spi_priv_s *priv, uint8_t nbits)
 static int rzv_spi_lock(struct spi_dev_s *dev, bool lock)
 {
   struct rzv_spi_priv_s *priv = (struct rzv_spi_priv_s *)dev;
-  int ret;
 
   if (lock)
     {
-      ret = nxsem_wait_uninterruptible(&priv->exclsem);
-    }
-  else
-    {
-      ret = nxsem_post(&priv->exclsem);
+      return nxsem_wait_uninterruptible(&priv->exclsem);
     }
 
-  return ret;
+  return nxsem_post(&priv->exclsem);
 }
 
 /****************************************************************************
- * Name: rzv_spi_setfrequency_dev
+ * Name: rzv_spi_setfrequency_dev / setmode_dev / setbits_dev
  ****************************************************************************/
 
 static uint32_t rzv_spi_setfrequency_dev(struct spi_dev_s *dev,
@@ -529,61 +601,74 @@ static uint32_t rzv_spi_setfrequency_dev(struct spi_dev_s *dev,
   return priv->actual;
 }
 
-/****************************************************************************
- * Name: rzv_spi_setmode_dev
- ****************************************************************************/
-
 static void rzv_spi_setmode_dev(struct spi_dev_s *dev,
                                 enum spi_mode_e mode)
 {
   struct rzv_spi_priv_s *priv = (struct rzv_spi_priv_s *)dev;
 
-  if (priv->mode != mode)
+  if (priv->mode != (uint8_t)mode)
     {
-      rzv_spi_setmode(priv, mode);
+      rzv_spi_setmode(priv, (uint8_t)mode);
     }
 }
-
-/****************************************************************************
- * Name: rzv_spi_setbits_dev
- ****************************************************************************/
 
 static void rzv_spi_setbits_dev(struct spi_dev_s *dev, int nbits)
 {
   struct rzv_spi_priv_s *priv = (struct rzv_spi_priv_s *)dev;
 
-  if (priv->nbits != nbits)
-    {
-      rzv_spi_setbits(priv, nbits);
-    }
+  /* [M12] Always write HW regardless of cached value.  If a second device
+   * on the same bus defaults to 8-bit but was never explicitly programmed
+   * after a previous 32-bit session, the cached nbits==8 guard would skip
+   * the HW write and leave SPCMD0.SPB in the 32-bit state.
+   */
+
+  rzv_spi_setbits(priv, nbits);
 }
+
+#ifdef CONFIG_SPI_HWFEATURES
+static int rzv_spi_hwfeatures(struct spi_dev_s *dev,
+                              spi_hwfeatures_t features)
+{
+  UNUSED(dev);
+  UNUSED(features);
+  return -ENOSYS;
+}
+#endif
 
 /****************************************************************************
  * Name: rzv_spi_send
+ *
+ * Description:
+ *   Send one word (8/16/32-bit) using FIFO polling.
+ *   Phase-07 [High-8]: 32-bit SPDR access only.
+ *   Phase-07 [Med-11]: clear SPTEFC and SPRFC after each exchange.
+ *
+ * Returns received word or 0xffffffff on error.
  ****************************************************************************/
 
 static uint32_t rzv_spi_send(struct spi_dev_s *dev, uint32_t wd)
 {
   struct rzv_spi_priv_s *priv = (struct rzv_spi_priv_s *)dev;
-  uint32_t rxdata = 0xffff;
   uint32_t spsr;
-  int timeout;
+  uint32_t rxdata = 0xffffffffu;
+  uint32_t timeout;
 
-  /* Wait for TX buffer empty with timeout */
-  timeout = SPI_TIMEOUT_LOOPS;
+  /* Wait for TX FIFO space (SPTFSR.TFDN > 0 means FIFO has empty slots) */
+
+  timeout = SPI_TIMEOUT_CYCLES;
   while (timeout-- > 0)
     {
       spsr = rzv_spi_getreg32(priv, RZV_SPI_SPSR_OFFSET);
 
-      /* Check for errors */
       if (spsr & SPI_ERROR_FLAGS)
         {
-          spierr("SPI error flags: 0x%08lx\n", spsr);
-          /* Clear error flags */
-          rzv_spi_putreg32(priv, RZV_SPI_SPSRC_OFFSET,
-                          spsr & SPI_ERROR_FLAGS);
-          return 0xffff;
+          spierr("SPI%d: error before TX SPSR=0x%08lx\n",
+                 priv->config->port, (unsigned long)spsr);
+          rzv_spi_putreg32(priv, RZV_SPI_SPSRC_OFFSET, SPI_ERROR_CLEAR_FLAGS);
+          return 0xffffffffu;
         }
+
+      /* SPTEF set means TX FIFO has space for at least one word */
 
       if (spsr & SPI_SPSR_SPTEF)
         {
@@ -591,130 +676,152 @@ static uint32_t rzv_spi_send(struct spi_dev_s *dev, uint32_t wd)
         }
     }
 
-  if (timeout <= 0)
+  if (timeout == 0)
     {
-      spierr("TX timeout\n");
-      return 0xffff;
+      spierr("SPI%d: TX timeout\n", priv->config->port);
+      return 0xffffffffu;
     }
 
-  /* Write data */
-  if (priv->nbits == 8)
-    {
-      rzv_spi_putreg8(priv, RZV_SPI_SPDR_OFFSET, (uint8_t)wd);
-    }
-  else
-    {
-      rzv_spi_putreg16(priv, RZV_SPI_SPDR_OFFSET, (uint16_t)wd);
-    }
+  /* Write 32-bit SPDR (FSP always uses 32-bit access) */
 
-  /* Wait for RX data full with timeout */
-  timeout = SPI_TIMEOUT_LOOPS;
+  rzv_spi_putreg32(priv, RZV_SPI_SPDR_OFFSET, wd);
+
+  /* [M8] Do NOT clear SPTEFC here per-word: SPTEFC is W1C and deasserts
+   * automatically when the FIFO has data.  Clearing it per-word inside a
+   * fill loop can mask the next SPTEF assertion.  FSP clears it once after
+   * refilling the full FIFO (r_spi_b.c:1007), not per word.
+   * For the single-word polled path we skip the explicit clear entirely;
+   * the flag will reassert naturally when the FIFO drains.
+   */
+
+  /* Wait for RX data.
+   * [C2] Poll SPRFSR.RFDN (actual RX FIFO count) rather than SPSR.SPRF.
+   * SPRF only asserts when count >= RTRG; RFDN reflects every received word.
+   * With RTRG=1 (set in init) SPRF would also work, but RFDN is authoritative
+   * and matches FSP r_spi_b.c:921 drain loop.
+   */
+
+  timeout = SPI_TIMEOUT_CYCLES;
   while (timeout-- > 0)
     {
       spsr = rzv_spi_getreg32(priv, RZV_SPI_SPSR_OFFSET);
 
-      /* Check for errors */
       if (spsr & SPI_ERROR_FLAGS)
         {
-          spierr("SPI error flags: 0x%08lx\n", spsr);
-          /* Clear error flags */
-          rzv_spi_putreg32(priv, RZV_SPI_SPSRC_OFFSET,
-                          spsr & SPI_ERROR_FLAGS);
-          return 0xffff;
+          spierr("SPI%d: error in RX SPSR=0x%08lx\n",
+                 priv->config->port, (unsigned long)spsr);
+          rzv_spi_putreg32(priv, RZV_SPI_SPSRC_OFFSET, SPI_ERROR_CLEAR_FLAGS);
+          return 0xffffffffu;
         }
 
-      if (spsr & SPI_SPSR_SPRF)
+      if (rzv_spi_getreg32(priv, RZV_SPI_SPRFSR_OFFSET) &
+          SPI_SPRFSR_RFDN_MASK)
         {
           break;
         }
     }
 
-  if (timeout <= 0)
+  if (timeout == 0)
     {
-      spierr("RX timeout\n");
-      return 0xffff;
+      spierr("SPI%d: RX timeout\n", priv->config->port);
+      return 0xffffffffu;
     }
 
-  /* Read received data */
+  /* Read received word (32-bit) */
+
+  rxdata = rzv_spi_getreg32(priv, RZV_SPI_SPDR_OFFSET);
+
+  /* Mask to configured word width */
+
   if (priv->nbits == 8)
     {
-      rxdata = rzv_spi_getreg8(priv, RZV_SPI_SPDR_OFFSET);
+      rxdata &= 0xffu;
     }
-  else
+  else if (priv->nbits == 16)
     {
-      rxdata = rzv_spi_getreg16(priv, RZV_SPI_SPDR_OFFSET);
+      rxdata &= 0xffffu;
     }
+
+  /* Clear RX full flag per FSP r_spi_b.c:955 */
+
+  rzv_spi_putreg32(priv, RZV_SPI_SPSRC_OFFSET, SPI_SPSRC_SPRFC);
 
   return rxdata;
 }
 
 /****************************************************************************
  * Name: rzv_spi_exchange
+ *
+ * Description:
+ *   Full-duplex exchange of nwords.
+ *   Phase-07 [High-8]: fill TX FIFO up to FIFO depth, drain RX in step.
+ *   For small transfers (nwords < SPI_FIFO_DEPTH), word-by-word polled loop
+ *   keeps code simple while still using 32-bit SPDR.
  ****************************************************************************/
 
 static void rzv_spi_exchange(struct spi_dev_s *dev,
-                             const void *txbuffer,
-                             void *rxbuffer, size_t nwords)
+                              const void *txbuffer,
+                              void *rxbuffer, size_t nwords)
 {
   struct rzv_spi_priv_s *priv = (struct rzv_spi_priv_s *)dev;
-  const uint8_t *src8 = txbuffer;
-  uint8_t *dest8 = rxbuffer;
-  const uint16_t *src16 = txbuffer;
-  uint16_t *dest16 = rxbuffer;
+  const uint8_t  *src8  = (const uint8_t  *)txbuffer;
+  const uint16_t *src16 = (const uint16_t *)txbuffer;
+  const uint32_t *src32 = (const uint32_t *)txbuffer;
+  uint8_t  *dst8  = (uint8_t  *)rxbuffer;
+  uint16_t *dst16 = (uint16_t *)rxbuffer;
+  uint32_t *dst32 = (uint32_t *)rxbuffer;
   size_t i;
 
   for (i = 0; i < nwords; i++)
     {
-      uint32_t wd = 0xffff;
+      uint32_t wd = 0xffffffffu;
       uint32_t rd;
 
-      if (txbuffer)
+      if (txbuffer != NULL)
         {
-          if (priv->nbits == 8)
+          if (priv->nbits <= 8)
             {
-              wd = *src8++;
+              wd = src8[i];
+            }
+          else if (priv->nbits <= 16)
+            {
+              wd = src16[i];
             }
           else
             {
-              wd = *src16++;
+              wd = src32[i];
             }
         }
 
       rd = rzv_spi_send(dev, wd);
 
-      if (rxbuffer)
+      if (rxbuffer != NULL)
         {
-          if (priv->nbits == 8)
+          if (priv->nbits <= 8)
             {
-              *dest8++ = (uint8_t)rd;
+              dst8[i]  = (uint8_t)rd;
+            }
+          else if (priv->nbits <= 16)
+            {
+              dst16[i] = (uint16_t)rd;
             }
           else
             {
-              *dest16++ = (uint16_t)rd;
+              dst32[i] = rd;
             }
         }
     }
 }
 
-/****************************************************************************
- * Name: rzv_spi_sndblock
- ****************************************************************************/
-
 #ifndef CONFIG_SPI_EXCHANGE
 static void rzv_spi_sndblock(struct spi_dev_s *dev,
-                             const void *txbuffer, size_t nwords)
+                              const void *txbuffer, size_t nwords)
 {
   rzv_spi_exchange(dev, txbuffer, NULL, nwords);
 }
-#endif
 
-/****************************************************************************
- * Name: rzv_spi_recvblock
- ****************************************************************************/
-
-#ifndef CONFIG_SPI_EXCHANGE
 static void rzv_spi_recvblock(struct spi_dev_s *dev,
-                              void *rxbuffer, size_t nwords)
+                               void *rxbuffer, size_t nwords)
 {
   rzv_spi_exchange(dev, NULL, rxbuffer, nwords);
 }
@@ -724,8 +831,9 @@ static void rzv_spi_recvblock(struct spi_dev_s *dev,
  * Name: rzv_spi_rxi_interrupt
  *
  * Description:
- *   RX buffer full interrupt handler
- *
+ *   RX buffer full — drain one word from SPDR.
+ *   Phase-07 [High-8]: 32-bit SPDR.
+ *   Phase-07 [Med-11]: clear SPRFC after read.
  ****************************************************************************/
 
 static int rzv_spi_rxi_interrupt(int irq, void *context, void *arg)
@@ -733,23 +841,58 @@ static int rzv_spi_rxi_interrupt(int irq, void *context, void *arg)
   struct rzv_spi_priv_s *priv = (struct rzv_spi_priv_s *)arg;
   uint32_t data;
 
-  /* Read received data */
-  if (priv->nrxwords > 0 && priv->rxbuffer)
+  UNUSED(irq);
+  UNUSED(context);
+
+  if (priv->nrxwords > 0)
     {
-      if (priv->nbits == 8)
+      data = rzv_spi_getreg32(priv, RZV_SPI_SPDR_OFFSET);
+
+      if (priv->rxbuffer != NULL)
         {
-          data = rzv_spi_getreg8(priv, RZV_SPI_SPDR_OFFSET);
-          ((uint8_t *)priv->rxbuffer)[0] = (uint8_t)data;
-          priv->rxbuffer = (void *)(((uint8_t *)priv->rxbuffer) + 1);
-        }
-      else
-        {
-          data = rzv_spi_getreg16(priv, RZV_SPI_SPDR_OFFSET);
-          ((uint16_t *)priv->rxbuffer)[0] = (uint16_t)data;
-          priv->rxbuffer = (void *)(((uint16_t *)priv->rxbuffer) + 1);
+          if (priv->nbits <= 8)
+            {
+              uint8_t *p8 = (uint8_t *)priv->rxbuffer;
+              *p8++ = (uint8_t)data;
+              priv->rxbuffer = p8;
+            }
+          else if (priv->nbits <= 16)
+            {
+              uint16_t *p16 = (uint16_t *)priv->rxbuffer;
+              *p16++ = (uint16_t)data;
+              priv->rxbuffer = p16;
+            }
+          else
+            {
+              uint32_t *p32 = (uint32_t *)priv->rxbuffer;
+              *p32++ = data;
+              priv->rxbuffer = p32;
+            }
         }
 
       priv->nrxwords--;
+    }
+
+  /* Clear RX full flag per FSP :955 */
+
+  rzv_spi_putreg32(priv, RZV_SPI_SPSRC_OFFSET, SPI_SPSRC_SPRFC);
+
+  /* When all RX done, enable CENDIE per FSP :1094.
+   * [H7] Protect SPCR RMW with critical section: rxi and txi run at
+   * different priorities and setfrequency/setmode also RMW SPCR — racy
+   * without serialisation.
+   */
+
+  if (priv->nrxwords == 0)
+    {
+      uint32_t spcr;
+      irqstate_t flags = enter_critical_section();
+
+      spcr  = rzv_spi_getreg32(priv, RZV_SPI_SPCR_OFFSET);
+      spcr |= SPI_SPCR_CENDIE;
+      rzv_spi_putreg32(priv, RZV_SPI_SPCR_OFFSET, spcr);
+
+      leave_critical_section(flags);
     }
 
   return OK;
@@ -759,43 +902,70 @@ static int rzv_spi_rxi_interrupt(int irq, void *context, void *arg)
  * Name: rzv_spi_txi_interrupt
  *
  * Description:
- *   TX buffer empty interrupt handler
- *
+ *   TX buffer empty — load next word into SPDR.
+ *   Phase-07 [High-8]: 32-bit SPDR.
+ *   Phase-07 [Med-11]: clear SPTEFC after write.
+ *   Phase-07 [High-5]: enable CENDIE on last word per FSP :1128.
  ****************************************************************************/
 
 static int rzv_spi_txi_interrupt(int irq, void *context, void *arg)
 {
   struct rzv_spi_priv_s *priv = (struct rzv_spi_priv_s *)arg;
-  uint32_t data = 0xffff;
+  uint32_t data = 0xffffffffu;
 
-  /* Transmit next word */
+  UNUSED(irq);
+  UNUSED(context);
+
   if (priv->ntxwords > 0)
     {
-      if (priv->txbuffer)
+      if (priv->txbuffer != NULL)
         {
-          if (priv->nbits == 8)
+          if (priv->nbits <= 8)
             {
-              data = ((uint8_t *)priv->txbuffer)[0];
-              priv->txbuffer = (const void *)(((uint8_t *)priv->txbuffer) + 1);
+              const uint8_t *p8 = (const uint8_t *)priv->txbuffer;
+              data = *p8++;
+              priv->txbuffer = p8;
+            }
+          else if (priv->nbits <= 16)
+            {
+              const uint16_t *p16 = (const uint16_t *)priv->txbuffer;
+              data = *p16++;
+              priv->txbuffer = p16;
             }
           else
             {
-              data = ((uint16_t *)priv->txbuffer)[0];
-              priv->txbuffer = (const void *)(((uint16_t *)priv->txbuffer) + 1);
+              const uint32_t *p32 = (const uint32_t *)priv->txbuffer;
+              data = *p32++;
+              priv->txbuffer = p32;
             }
         }
 
-      /* Write data */
-      if (priv->nbits == 8)
-        {
-          rzv_spi_putreg8(priv, RZV_SPI_SPDR_OFFSET, (uint8_t)data);
-        }
-      else
-        {
-          rzv_spi_putreg16(priv, RZV_SPI_SPDR_OFFSET, (uint16_t)data);
-        }
-
+      rzv_spi_putreg32(priv, RZV_SPI_SPDR_OFFSET, data);
       priv->ntxwords--;
+
+      /* [M8] Clear SPTEFC once after filling the FIFO slot, not per-word
+       * inside a larger fill loop.  For the single-word ISR case this
+       * occurs once per invocation, which is correct.
+       */
+
+      rzv_spi_putreg32(priv, RZV_SPI_SPSRC_OFFSET, SPI_SPSRC_SPTEFC);
+
+      /* On last word: arm CENDIE per FSP :1128.
+       * [H7] Critical section protects SPCR RMW against concurrent
+       * rxi ISR (different priority) and non-ISR callers.
+       */
+
+      if (priv->ntxwords == 0)
+        {
+          uint32_t spcr;
+          irqstate_t flags = enter_critical_section();
+
+          spcr  = rzv_spi_getreg32(priv, RZV_SPI_SPCR_OFFSET);
+          spcr |= SPI_SPCR_CENDIE;
+          rzv_spi_putreg32(priv, RZV_SPI_SPCR_OFFSET, spcr);
+
+          leave_critical_section(flags);
+        }
     }
 
   return OK;
@@ -805,15 +975,21 @@ static int rzv_spi_txi_interrupt(int irq, void *context, void *arg)
  * Name: rzv_spi_tei_interrupt
  *
  * Description:
- *   Transfer end interrupt handler
- *
+ *   Communication end (CEND) — signal transfer completion.
+ *   Phase-07 [Med-11]: clear CENDFC.
  ****************************************************************************/
 
 static int rzv_spi_tei_interrupt(int irq, void *context, void *arg)
 {
   struct rzv_spi_priv_s *priv = (struct rzv_spi_priv_s *)arg;
 
-  /* Signal transfer completion */
+  UNUSED(irq);
+  UNUSED(context);
+
+  /* Clear communication end flag per FSP :951 */
+
+  rzv_spi_putreg32(priv, RZV_SPI_SPSRC_OFFSET, SPI_SPSRC_CENDFC);
+
   nxsem_post(&priv->waitsem);
 
   return OK;
@@ -823,8 +999,7 @@ static int rzv_spi_tei_interrupt(int irq, void *context, void *arg)
  * Name: rzv_spi_eri_interrupt
  *
  * Description:
- *   Error interrupt handler
- *
+ *   Error interrupt handler — clear flags, signal waiter.
  ****************************************************************************/
 
 static int rzv_spi_eri_interrupt(int irq, void *context, void *arg)
@@ -832,15 +1007,18 @@ static int rzv_spi_eri_interrupt(int irq, void *context, void *arg)
   struct rzv_spi_priv_s *priv = (struct rzv_spi_priv_s *)arg;
   uint32_t spsr;
 
-  /* Read status register */
+  UNUSED(irq);
+  UNUSED(context);
+
   spsr = rzv_spi_getreg32(priv, RZV_SPI_SPSR_OFFSET);
 
-  spierr("SPI error interrupt: SPSR=0x%08lx\n", spsr);
+  spierr("SPI%d: error IRQ SPSR=0x%08lx\n",
+         priv->config->port, (unsigned long)spsr);
 
-  /* Clear error flags */
-  rzv_spi_putreg32(priv, RZV_SPI_SPSRC_OFFSET, spsr & SPI_ERROR_FLAGS);
+  /* Clear all error flags */
 
-  /* Set error flag and signal completion */
+  rzv_spi_putreg32(priv, RZV_SPI_SPSRC_OFFSET, SPI_ERROR_CLEAR_FLAGS);
+
   priv->error = true;
   nxsem_post(&priv->waitsem);
 
@@ -853,6 +1031,16 @@ static int rzv_spi_eri_interrupt(int irq, void *context, void *arg)
 
 /****************************************************************************
  * Name: rzv_spibus_initialize
+ *
+ * Description:
+ *   Initialize the selected SPI-B channel.
+ *
+ * Phase-07 changes:
+ *   [Crit-1]  SPBR programmed via rzv_spi_setfrequency → SPCR3 RMW.
+ *   [Crit-3]  spi_clock field used, not P0CLK.
+ *   [High-5]  SPCR written with SPEIE|SPRIE|SPTIE (CENDIE armed per-transfer).
+ *   [High-9]  irq_* fields pre-set to -1 in static init; checked before detach.
+ *   [Med-14]  SPCR read-back after first write for 1-TCLK sync.
  ****************************************************************************/
 
 struct spi_dev_s *rzv_spibus_initialize(int port)
@@ -860,7 +1048,6 @@ struct spi_dev_s *rzv_spibus_initialize(int port)
   struct rzv_spi_priv_s *priv = NULL;
   int ret;
 
-  /* Get device structure */
   switch (port)
     {
 #ifdef CONFIG_RZV_SPI0
@@ -868,128 +1055,203 @@ struct spi_dev_s *rzv_spibus_initialize(int port)
         priv = &g_spi0_priv;
         break;
 #endif
-
 #ifdef CONFIG_RZV_SPI1
       case 1:
         priv = &g_spi1_priv;
         break;
 #endif
-
       default:
+        spierr("SPI%d: no such port\n", port);
         return NULL;
     }
 
-  /* Initialize semaphores */
+  /* Semaphores */
+
   nxsem_init(&priv->exclsem, 0, 1);
   nxsem_init(&priv->waitsem, 0, 0);
   nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
 
-  /* Enable module clock */
+  /* Enable module clock and deassert reset */
+
   ret = rzv_clock_enable(priv->config->clk_id);
   if (ret < 0)
     {
-      spierr("Failed to enable clock: %d\n", ret);
-      return NULL;
+      spierr("SPI%d: clock enable failed %d\n", priv->config->port, ret);
+      goto errout_sem;
     }
 
-  /* Reset SPI - disable all functions */
+  ret = rzv_module_unreset(priv->config->clk_id);
+  if (ret < 0)
+    {
+      /* Non-fatal on some platforms — log and continue */
+
+      spiwarn("SPI%d: unreset returned %d\n", priv->config->port, ret);
+    }
+
+  /* Reset the SPI block (SPE=0) */
+
   rzv_spi_putreg32(priv, RZV_SPI_SPCR_OFFSET, 0);
 
-  /* Reset and clear FIFOs */
+  /* Clear all status flags before touching other registers */
+
+  rzv_spi_putreg32(priv, RZV_SPI_SPSRC_OFFSET, SPI_SPSRC_ALL_CLEAR);
+
+  /* Flush TX and RX FIFOs */
+
   rzv_spi_putreg32(priv, RZV_SPI_SPFCR_OFFSET, SPI_SPFCR_SPFRST);
   rzv_spi_putreg32(priv, RZV_SPI_SPFCR_OFFSET, 0);
 
-  /* Clear all status flags */
-  rzv_spi_putreg32(priv, RZV_SPI_SPSRC_OFFSET, 0xFD800000);
+  /* SPDCR: default (no byte swap, no invert) */
 
-  /* Configure SPDCR - Data Control Register */
   rzv_spi_putreg32(priv, RZV_SPI_SPDCR_OFFSET, 0);
 
-  /* Configure SPDCR2 - FIFO trigger levels */
+  /* SPDCR2: TX trigger=8 (half FIFO), RX trigger=1.
+   * [C2] SPSR.SPRF asserts only when RX FIFO count >= RTRG.  Single-word
+   * polled send() writes one word and then waits for SPRF — with RTRG=8
+   * that never fires for transfers < 8 words.  Set RTRG=1 so SPRF asserts
+   * as soon as one received word is in the FIFO.
+   */
+
   rzv_spi_putreg32(priv, RZV_SPI_SPDCR2_OFFSET,
-                  (1 << SPI_SPDCR2_TTRG_SHIFT) |  /* TX trigger = 1 */
-                  (1 << SPI_SPDCR2_RTRG_SHIFT));  /* RX trigger = 1 */
+                   ((8u << SPI_SPDCR2_TTRG_SHIFT) & SPI_SPDCR2_TTRG_MASK) |
+                   ((1u << SPI_SPDCR2_RTRG_SHIFT) & SPI_SPDCR2_RTRG_MASK));
 
-  /* Configure SPDECR - Delay Control Register */
+  /* SPDECR: conservative delays */
+
   rzv_spi_putreg32(priv, RZV_SPI_SPDECR_OFFSET,
-                  (2 << SPI_SPDECR_SCKDL_SHIFT) |   /* Clock delay */
-                  (2 << SPI_SPDECR_SLNDL_SHIFT) |   /* SSL negation delay */
-                  (2 << SPI_SPDECR_SPNDL_SHIFT));   /* Next access delay */
+                   (2u << SPI_SPDECR_SCKDL_SHIFT) |
+                   (2u << SPI_SPDECR_SLNDL_SHIFT) |
+                   (2u << SPI_SPDECR_SPNDL_SHIFT));
 
-  /* Configure SPCMD0 - Command register for master mode, 8-bit */
+  /* SPCR2: clear SPLP, MOIFV default off */
+
+  rzv_spi_putreg32(priv, RZV_SPI_SPCR2_OFFSET, 0);
+
+  /* SPCR3: SSL polarity active-low (bits[3:0]=0), SPSLN=0 (1 cmd register) */
+
+  rzv_spi_putreg32(priv, RZV_SPI_SPCR3_OFFSET, 0);
+
+  /* SPCMD0: 8-bit, mode-0, BRDV=0 — frequency call below overwrites BRDV.
+   * [H6] Enable SCKDEN/SLNDEN/SPNDEN so SPDECR delays take effect (FSP
+   * r_spi_b.c:625).  Without these bits set, SPDECR is programmed but all
+   * delays are bypassed in hardware.
+   * [L13] SSLA=0 explicit (SSL0 selected; board uses GPIO CS so internal SSL
+   * toggles a non-muxed pin, but be explicit to match reset state).
+   * [L14] LSBF cleared explicitly to enforce MSB-first.
+   */
+
   rzv_spi_putreg32(priv, RZV_SPI_SPCMD_OFFSET(0),
-                  SPI_SPCMD_SPB_8BIT);  /* 8-bit data */
+                   SPI_SPCMD_SPB_8BIT  |
+                   SPI_SPCMD_SCKDEN    |
+                   SPI_SPCMD_SLNDEN    |
+                   SPI_SPCMD_SPNDEN    |
+                   SPI_SPCMD_SSLA(0));
 
-  /* Set default values */
-  priv->nbits = 8;
-  priv->mode = SPIDEV_MODE0;
-  priv->error = false;
-  priv->txbuffer = NULL;
-  priv->rxbuffer = NULL;
-  priv->ntxwords = 0;
-  priv->nrxwords = 0;
+  /* Cache defaults */
 
-  /* Set default frequency */
+  priv->nbits     = 8;
+  priv->mode      = SPIDEV_MODE0;
+  priv->error     = false;
+  priv->txbuffer  = NULL;
+  priv->rxbuffer  = NULL;
+  priv->ntxwords  = 0;
+  priv->nrxwords  = 0;
+
+  /* Program requested default frequency (writes SPCR3.SPBR) */
+
   rzv_spi_setfrequency(priv, priv->config->frequency);
 
-  /* Attach interrupt handlers using ICU */
+  /* Attach interrupt handlers (irq_* already -1 from static init) */
+
   priv->irq_rxi = rzv_icu_attach(priv->config->elc_rxi,
-                                 rzv_spi_rxi_interrupt, priv, false);
+                                  rzv_spi_rxi_interrupt, priv, false);
   if (priv->irq_rxi < 0)
     {
-      spierr("Failed to attach RXI interrupt: %d\n", priv->irq_rxi);
+      spierr("SPI%d: RXI attach failed %d\n",
+             priv->config->port, priv->irq_rxi);
       goto errout_clock;
     }
 
   priv->irq_txi = rzv_icu_attach(priv->config->elc_txi,
-                                 rzv_spi_txi_interrupt, priv, false);
+                                  rzv_spi_txi_interrupt, priv, false);
   if (priv->irq_txi < 0)
     {
-      spierr("Failed to attach TXI interrupt: %d\n", priv->irq_txi);
+      spierr("SPI%d: TXI attach failed %d\n",
+             priv->config->port, priv->irq_txi);
       goto errout_rxi;
     }
 
   priv->irq_tei = rzv_icu_attach(priv->config->elc_tei,
-                                 rzv_spi_tei_interrupt, priv, false);
+                                  rzv_spi_tei_interrupt, priv, false);
   if (priv->irq_tei < 0)
     {
-      spierr("Failed to attach TEI interrupt: %d\n", priv->irq_tei);
+      spierr("SPI%d: TEI attach failed %d\n",
+             priv->config->port, priv->irq_tei);
       goto errout_txi;
     }
 
   priv->irq_eri = rzv_icu_attach(priv->config->elc_eri,
-                                 rzv_spi_eri_interrupt, priv, false);
+                                  rzv_spi_eri_interrupt, priv, false);
   if (priv->irq_eri < 0)
     {
-      spierr("Failed to attach ERI interrupt: %d\n", priv->irq_eri);
+      spierr("SPI%d: ERI attach failed %d\n",
+             priv->config->port, priv->irq_eri);
       goto errout_tei;
     }
 
-  /* Enable SPI in master mode */
-  rzv_spi_putreg32(priv, RZV_SPI_SPCR_OFFSET,
-                  SPI_SPCR_SPE |        /* Enable SPI */
-                  SPI_SPCR_MSTR);       /* Master mode */
+  /* Write SPCR: SPE=0 initially (set all except SPE then MSTR).
+   * Phase-07 [Med-14]: read back SPCR after write for 1-TCLK sync (FSP :668).
+   * [H4/M10] SPTIE and SPRIE must NOT be set here.  With SPE=1 and TX FIFO
+   * empty, SPTIE causes TXI to fire immediately with no transfer pending →
+   * interrupt storm.  SPEIE (error) is safe to keep always-on.
+   * SPRIE/SPTIE/CENDIE are armed only when an IRQ-driven transfer begins.
+   * [H5] SCKASE: master mode enables SCK auto-stop to prevent RX overflow
+   * (FSP r_spi_b.c:544 "Enable SCK Auto Stop in master mode").
+   */
 
-  spiinfo("SPI%d initialized\n", port);
+  {
+    uint32_t spcr = SPI_SPCR_MSTR |
+                    SPI_SPCR_SCKASE |
+                    SPI_SPCR_SPEIE;
+
+    /* Write without SPE to let 1-TCLK settle */
+
+    rzv_spi_putreg32(priv, RZV_SPI_SPCR_OFFSET, spcr);
+
+    /* Read-back (discarded) to ensure 1 TCLK has elapsed (FSP note 1) */
+
+    (void)rzv_spi_getreg32(priv, RZV_SPI_SPCR_OFFSET);
+
+    /* Now set SPE */
+
+    spcr |= SPI_SPCR_SPE;
+    rzv_spi_putreg32(priv, RZV_SPI_SPCR_OFFSET, spcr);
+  }
+
+  spiinfo("SPI%d initialized at %lu Hz\n",
+          port, (unsigned long)priv->actual);
+
   return (struct spi_dev_s *)priv;
 
 errout_tei:
   rzv_icu_detach(priv->irq_tei);
+  priv->irq_tei = -1;
 errout_txi:
   rzv_icu_detach(priv->irq_txi);
+  priv->irq_txi = -1;
 errout_rxi:
   rzv_icu_detach(priv->irq_rxi);
+  priv->irq_rxi = -1;
 errout_clock:
   rzv_clock_disable(priv->config->clk_id);
+errout_sem:
+  nxsem_destroy(&priv->waitsem);
+  nxsem_destroy(&priv->exclsem);
   return NULL;
 }
 
 /****************************************************************************
  * Name: rzv_spibus_uninitialize
- *
- * Description:
- *   Uninitialize an SPI bus
- *
  ****************************************************************************/
 
 int rzv_spibus_uninitialize(struct spi_dev_s *dev)
@@ -1002,37 +1264,86 @@ int rzv_spibus_uninitialize(struct spi_dev_s *dev)
     }
 
   /* Disable SPI */
+
   rzv_spi_putreg32(priv, RZV_SPI_SPCR_OFFSET, 0);
 
-  /* Detach interrupt handlers */
+  /* Detach IRQs — guard with >=0 check (phase-07 [High-9]) */
+
   if (priv->irq_eri >= 0)
     {
       rzv_icu_detach(priv->irq_eri);
+      priv->irq_eri = -1;
     }
 
   if (priv->irq_tei >= 0)
     {
       rzv_icu_detach(priv->irq_tei);
+      priv->irq_tei = -1;
     }
 
   if (priv->irq_txi >= 0)
     {
       rzv_icu_detach(priv->irq_txi);
+      priv->irq_txi = -1;
     }
 
   if (priv->irq_rxi >= 0)
     {
       rzv_icu_detach(priv->irq_rxi);
+      priv->irq_rxi = -1;
     }
 
-  /* Disable module clock */
   rzv_clock_disable(priv->config->clk_id);
-
-  /* Destroy semaphores */
   nxsem_destroy(&priv->waitsem);
   nxsem_destroy(&priv->exclsem);
 
   spiinfo("SPI%d uninitialized\n", priv->config->port);
-
   return OK;
+}
+
+/****************************************************************************
+ * Name: rzv_spi_set_loopback
+ *
+ * Description:
+ *   Enable or disable the internal SPI loopback mode (SPCR2.SPLP).
+ *   When enable=true, MOSI is internally connected to MISO — no external
+ *   wire required.  Phase-07 [Low-20].
+ *
+ * Input Parameters:
+ *   dev    - SPI device structure from rzv_spibus_initialize()
+ *   enable - true to enable loopback, false to disable
+ *
+ ****************************************************************************/
+
+void rzv_spi_set_loopback(struct spi_dev_s *dev, bool enable)
+{
+  struct rzv_spi_priv_s *priv = (struct rzv_spi_priv_s *)dev;
+  uint32_t spcr;
+  uint32_t spcr2;
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
+  /* Disable SPE while changing SPCR2 */
+
+  spcr = rzv_spi_getreg32(priv, RZV_SPI_SPCR_OFFSET);
+  rzv_spi_putreg32(priv, RZV_SPI_SPCR_OFFSET, spcr & ~SPI_SPCR_SPE);
+
+  spcr2 = rzv_spi_getreg32(priv, RZV_SPI_SPCR2_OFFSET);
+  if (enable)
+    {
+      spcr2 |= SPI_SPCR2_SPLP;
+    }
+  else
+    {
+      spcr2 &= ~SPI_SPCR2_SPLP;
+    }
+
+  rzv_spi_putreg32(priv, RZV_SPI_SPCR2_OFFSET, spcr2);
+  rzv_spi_putreg32(priv, RZV_SPI_SPCR_OFFSET, spcr);
+
+  leave_critical_section(flags);
+
+  spiinfo("SPI%d: loopback %s\n",
+          priv->config->port, enable ? "enabled" : "disabled");
 }

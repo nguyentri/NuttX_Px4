@@ -64,7 +64,7 @@ ifeq ($(CONFIG_RZV_I2C),y)
 CSRCS += rzv2h_i2c.c
 endif
 
-# SCI I2C support (Simple I2C mode)
+# SCI-B Simple-I2C master support
 ifeq ($(CONFIG_RZV_SCI_I2C),y)
 CSRCS += rzv2h_sci_i2c.c
 endif
@@ -89,9 +89,9 @@ ifeq ($(CONFIG_RZV_ADC),y)
 CSRCS += rzv2h_adc.c
 endif
 
-# DTC support
-ifeq ($(CONFIG_RZV_DTC),y)
-CSRCS += rzv2h_dtc.c
+# DMAC board-level channel allocation and collision detection
+ifeq ($(CONFIG_RZV_DMAC),y)
+CSRCS += rzv2h_dmac.c
 endif
 
 # Watchdog Timer support
