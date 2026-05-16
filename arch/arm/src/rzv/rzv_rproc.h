@@ -10,11 +10,10 @@
 
 #include <nuttx/config.h>
 #include <stdint.h>
-
-typedef void (*rzv_rproc_notify_t)(FAR void *arg, uint32_t notifyid);
+#include <nuttx/rptun/rptun.h>   /* rptun_callback_t */
 
 int rzv_rproc_initialize(void);
-int rzv_rproc_register_callback(rzv_rproc_notify_t callback, FAR void *arg);
+int rzv_rproc_register_callback(rptun_callback_t callback, FAR void *arg);
 int rzv_rproc_notify(uint32_t notifyid);
 
 #endif /* __ARCH_ARM_SRC_RZV_RZV_RPROC_H */

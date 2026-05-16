@@ -485,7 +485,8 @@ SECTIONS
 
     __tz_MHU_SHMEM = ABSOLUTE ( MHU_SHMEM_START ) ;
     . = __tz_MHU_SHMEM;
-    .resource_table (NOLOAD) :
+    /* NEW-HIGH-1 fix: drop NOLOAD so ELF loader zero-fills on boot. */
+    .resource_table :
     {
         PROVIDE(__rsctbl_start = .);
         *  (  .resource_table  )

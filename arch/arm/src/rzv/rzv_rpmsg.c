@@ -125,6 +125,29 @@ int rzv_rpmsg_initialize(rzv_rpmsg_rxnotify_t rxnotify, FAR void *arg)
                                  rzv_rpmsg_device_destroy, NULL, NULL);
 }
 
+/****************************************************************************
+ * Name: rzv_rpmsg_detach
+ *
+ * Description:
+ *   Idempotent teardown: destroy the endpoint if live, then unregister the
+ *   rpmsg device watcher.  Must be called with g_rzv_ipcc_lock held
+ *   (see rzv_ipc_ipcc.c).  Uses the identical 4-arg tuple as
+ *   rzv_rpmsg_initialize() to guarantee symmetry (IPC-API-001).
+ *
+ ****************************************************************************/
+
+void rzv_rpmsg_detach(void)
+{
+  if (g_rpmsg.ready)
+    {
+      rpmsg_destroy_ept(&g_rpmsg.ept);
+      g_rpmsg.ready = false;
+    }
+
+  rpmsg_unregister_callback(&g_rpmsg, rzv_rpmsg_device_created,
+                            rzv_rpmsg_device_destroy, NULL, NULL);
+}
+
 bool rzv_rpmsg_ready(void)
 {
   return g_rpmsg.ready;
