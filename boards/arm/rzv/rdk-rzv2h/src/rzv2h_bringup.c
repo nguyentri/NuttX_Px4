@@ -295,6 +295,18 @@ int board_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_RZV_OPENAMP
+  /* Initialize CR8 to CA55 OpenAMP/IPCC transport. */
+
+  ret = board_ipc_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize OpenAMP/IPCC: %d\n",
+             ret);
+      if (first_error == 0) first_error = ret;
+    }
+#endif
+
 #ifdef CONFIG_RZV2H_EXAMPLE_SUPPORT
   /* Run application examples */
 

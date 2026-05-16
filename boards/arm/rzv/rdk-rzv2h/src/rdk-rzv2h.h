@@ -178,6 +178,18 @@ int board_timer_initialize(void);
 #endif
 
 /****************************************************************************
+ * Name: board_ipc_initialize
+ *
+ * Description:
+ *   Initialize RZ/V2H CR8 OpenAMP/RPMsg and optional IPCC device.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RZV_OPENAMP
+int board_ipc_initialize(void);
+#endif
+
+/****************************************************************************
  * Name: rzv2h_xspi_paramfs_initialize
  *
  * Description:

@@ -1078,12 +1078,55 @@ config RZV_GTM7_TIMER
 config RZV_HRT
    bool "PX4 High-Resolution Timer (HRT) via GTM7"
    default n
-   depends on RZV_HAVE_GTM7 && !RZV_GTM7_TIMER
+   depends on RZV_HAVE_GTM7
    ---help---
      Enable the PX4 HRT shim backed by GTM7 in free-running mode.
      GTM7 is reserved exclusively for HRT; do not enable RZV_GTM7_TIMER
      at the same time (channel conflict).  P1CLK (100 MHz) gives 10 ns
      resolution and ~42.9 s monotonic range per overflow epoch.
+
+menu "RZ/V2H OpenAMP/IPCC"
+
+config RZV_OPENAMP
+   bool "RZ/V2H CR8 OpenAMP/RPMsg transport"
+   default n
+   depends on !RZV2H_BUILD_CM33
+   select OPENAMP
+   select RPTUN
+   ---help---
+     Enable the RZ/V2H CR8 side OpenAMP/RPMsg transport using the
+     resource-table, vring, shared-memory, and MHU channel layout from the
+     working Renesas FreeRTOS reference.
+
+config RZV_IPC_IPCC
+   bool "Expose RZ/V2H RPMsg transport as /dev/ipcc0"
+   default n
+   depends on RZV_OPENAMP
+   select IPCC
+   ---help---
+     Register a NuttX IPCC character driver lower half backed by the
+     RZ/V2H RPMsg endpoint named rpmsg-service-0.
+
+config RZV_RPMSG_RX_QUEUE_DEPTH
+   int "RZ/V2H RPMsg receive queue depth"
+   default 8
+   range 2 64
+   depends on RZV_OPENAMP
+   ---help---
+     Number of complete RPMsg packets queued by the CR8 endpoint before
+     user space reads from /dev/ipcc0.
+
+config RZV_IPCC_RXBUFSIZE
+   int "RZ/V2H buffered IPCC RX size"
+   default 2048
+   depends on RZV_IPC_IPCC && IPCC_BUFFERED
+
+config RZV_IPCC_TXBUFSIZE
+   int "RZ/V2H buffered IPCC TX size"
+   default 2048
+   depends on RZV_IPC_IPCC && IPCC_BUFFERED
+
+endmenu
 
 config RZV_GPT
    bool "General PWM Timer (GPT)"

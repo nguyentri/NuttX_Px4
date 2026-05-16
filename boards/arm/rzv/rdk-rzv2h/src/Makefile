@@ -119,6 +119,11 @@ ifeq ($(CONFIG_RDK_RZV2H_XSPI_PARAMFS),y)
 CSRCS += rzv2h_xspi_paramfs.c
 endif
 
+# OpenAMP/IPCC registration
+ifeq ($(CONFIG_RZV_OPENAMP),y)
+CSRCS += rzv2h_ipc.c
+endif
+
 ############################################################################
 # Example applications
 ############################################################################

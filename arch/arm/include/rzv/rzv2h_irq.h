@@ -495,6 +495,7 @@
  * generated vector_data.c, which currently reaches IRQ 455.
  */
 
+#define RZV_IRQ_MHU_MSG3_NS                          (314)
 #define RZV_IRQ_ICU_SLOTS                             (129)
 #define RZV_IRQ_GIC_SIZE                              (480)
 

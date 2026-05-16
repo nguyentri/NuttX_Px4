@@ -107,6 +107,18 @@ ifeq ($(CONFIG_RZV_HRT),y)
 CHIP_CSRCS += rzv_hrt.c
 endif
 
+# OpenAMP/RPMsg/IPCC support
+ifeq ($(CONFIG_RZV_OPENAMP),y)
+CHIP_CSRCS += rzv_openamp.c
+CHIP_CSRCS += rzv_rproc.c
+CHIP_CSRCS += rzv_rpmsg.c
+CHIP_CSRCS += rzv_ipc.c
+endif
+
+ifeq ($(CONFIG_RZV_IPC_IPCC),y)
+CHIP_CSRCS += rzv_ipc_ipcc.c
+endif
+
 # Ethernet driver
 ifeq ($(CONFIG_RZV_ETHERNET),y)
 CHIP_CSRCS += rzv_ether.c rzv_ether_phy.c
