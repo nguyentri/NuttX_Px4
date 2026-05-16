@@ -244,16 +244,6 @@ int rzv2h_spi_loopback_init(void);
 int rzv2h_spi_loopback_main(int argc, char *argv[]);
 #endif
 
-#ifdef CONFIG_RZV2H_I2C_GY912_EXAMPLE
-int rzv2h_i2c_gy912_init(void);
-int rzv2h_i2c_gy912_main(int argc, char *argv[]);
-#endif
-
-#ifdef CONFIG_RZV2H_SPI_GY921_EXAMPLE
-int rzv2h_spi_gy921_init(void);
-int rzv2h_spi_gy921_main(int argc, char *argv[]);
-#endif
-
 #ifdef CONFIG_RZV2H_PWM_ONESHOT_EXAMPLE
 int rzv2h_pwm_oneshot_init(void);
 int rzv2h_pwm_oneshot_main(int argc, char *argv[]);

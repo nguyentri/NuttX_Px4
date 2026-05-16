@@ -79,14 +79,6 @@ if(CONFIG_RZV2H_SPI_LOOPBACK_EXAMPLE)
   list(APPEND SRCS rzv2h_spi_loopback.c)
 endif()
 
-if(CONFIG_RZV2H_I2C_GY912_EXAMPLE)
-  list(APPEND SRCS rzv2h_i2c_gy912.c)
-endif()
-
-if(CONFIG_RZV2H_SPI_GY921_EXAMPLE)
-  list(APPEND SRCS rzv2h_spi_gy921.c)
-endif()
-
 if(CONFIG_RZV2H_PWM_ONESHOT_EXAMPLE)
   list(APPEND SRCS rzv2h_pwm_oneshot.c)
 endif()

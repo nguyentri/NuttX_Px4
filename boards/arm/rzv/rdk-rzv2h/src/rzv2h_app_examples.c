@@ -53,34 +53,6 @@ static int rzv2h_spi_loopback_example(void)
 }
 #endif
 
-#ifdef CONFIG_RZV2H_I2C_GY912_EXAMPLE
-static int rzv2h_i2c_gy912_example(void)
-{
-  int ret = rzv2h_i2c_gy912_init();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "I2C GY-912 init failed: %d\n", ret);
-      return ret;
-    }
-
-  return rzv2h_i2c_gy912_main(0, NULL);
-}
-#endif
-
-#ifdef CONFIG_RZV2H_SPI_GY921_EXAMPLE
-static int rzv2h_spi_gy921_example(void)
-{
-  int ret = rzv2h_spi_gy921_init();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "SPI GY-921 init failed: %d\n", ret);
-      return ret;
-    }
-
-  return rzv2h_spi_gy921_main(0, NULL);
-}
-#endif
-
 #ifdef CONFIG_RZV2H_PWM_ONESHOT_EXAMPLE
 static int rzv2h_pwm_oneshot_example(void)
 {
@@ -139,32 +111,6 @@ int rzv2h_app_examples(void)
   else
     {
       syslog(LOG_INFO, "SPI Loopback example completed successfully\n");
-    }
-#endif
-
-#ifdef CONFIG_RZV2H_I2C_GY912_EXAMPLE
-  ret = rzv2h_i2c_gy912_example();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "I2C GY-912 example failed: %d\n", ret);
-      last_err = ret;
-    }
-  else
-    {
-      syslog(LOG_INFO, "I2C GY-912 example completed successfully\n");
-    }
-#endif
-
-#ifdef CONFIG_RZV2H_SPI_GY921_EXAMPLE
-  ret = rzv2h_spi_gy921_example();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "SPI GY-921 example failed: %d\n", ret);
-      last_err = ret;
-    }
-  else
-    {
-      syslog(LOG_INFO, "SPI GY-921 example completed successfully\n");
     }
 #endif
 
