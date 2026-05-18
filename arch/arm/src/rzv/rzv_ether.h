@@ -93,7 +93,7 @@ struct rzv_eth_s
   unsigned int txtail;      /* Next TX descriptor to clean */
   unsigned int txinflight;   /* Number of TX descriptors owned by DMA */
   unsigned int rxndx;       /* Next RX descriptor to check */
-  uint32_t intpending;       /* Deferred DMA interrupt status */
+  volatile uint32_t intpending; /* Deferred DMA interrupt status (ISR <-> work) */
 
   /* PHY state */
   int phy_addr;             /* PHY address */
@@ -122,5 +122,25 @@ struct rzv_eth_s
  ****************************************************************************/
 
 int rzv_ether_initialize(int intf);
+
+/****************************************************************************
+ * Name: rzv_ether_board_set_speed
+ *
+ * Description:
+ *   Board-level hook invoked by the arch driver after the PHY resolves a
+ *   new link speed. The board implementation programs SYSC_SYS_GBETHx_CFG
+ *   MAC_SPEED bits so the RGMII reference clock divider matches link speed.
+ *
+ * Input Parameters:
+ *   intf  - Interface number (0 or 1).
+ *   mbps  - Negotiated link speed in Mbps (10 / 100 / 1000).  0 = link down.
+ *
+ * Returned Value:
+ *   None.  Implemented as a weak no-op in the arch driver and overridden in
+ *   board-level rzv2h_ether.c.
+ *
+ ****************************************************************************/
+
+void rzv_ether_board_set_speed(int intf, int mbps);
 
 #endif /* __ARCH_ARM_SRC_RZV_RZV_ETHER_H */

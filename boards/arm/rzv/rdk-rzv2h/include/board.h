@@ -265,6 +265,25 @@
 #define BOARD_SCI3_I2C_SCL_GPIO  GPIO_RXD3_MISO3_SCL3_P5_7_M1  /* P57 Mode1 */
 #define BOARD_SCI3_I2C_SDA_GPIO  GPIO_TXD3_MOSI3_SDA3_P5_6_M1  /* P56 Mode1 */
 
+/* Ethernet (GBETH0 RGMII) Configuration ************************************/
+
+/* TODO(rzv2h-eth-pins): RGMII pin assignments for GBETH0 on RDK-RZV2H are
+ * not yet populated.  boards/arm/rzv/rdk-rzv2h/src/rzv2h_ether.c declares
+ * the GPIO_ETH0_* macros as (0) placeholders and skips rzv_configgpio()
+ * calls until these are confirmed from the RDK-RZV2H board schematic.
+ *
+ * Once the schematic is available, define the following BOARD_ETH0_*
+ * symbols here (using the GPIO_<func>_P<port>_<pin>_M<mode> naming style
+ * already used for SPI / SCI / I2C above) and propagate them into
+ * rzv2h_ether.c::rzv2h_ether_pinconfig():
+ *   BOARD_ETH0_TXD0_GPIO, BOARD_ETH0_TXD1_GPIO, BOARD_ETH0_TXD2_GPIO,
+ *   BOARD_ETH0_TXD3_GPIO, BOARD_ETH0_TX_CLK_GPIO, BOARD_ETH0_TX_CTL_GPIO,
+ *   BOARD_ETH0_RXD0_GPIO, BOARD_ETH0_RXD1_GPIO, BOARD_ETH0_RXD2_GPIO,
+ *   BOARD_ETH0_RXD3_GPIO, BOARD_ETH0_RX_CLK_GPIO, BOARD_ETH0_RX_CTL_GPIO,
+ *   BOARD_ETH0_MDC_GPIO,  BOARD_ETH0_MDIO_GPIO
+ * Add equivalent BOARD_ETH1_* set if/when GBETH1 is wired on this board.
+ */
+
 /* SPI Configuration ********************************************************/
 
 /* SPI bus configuration (matches FSP rzv_gen + PX4 board_config.h)

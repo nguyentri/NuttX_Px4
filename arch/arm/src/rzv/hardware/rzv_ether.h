@@ -142,10 +142,22 @@
 #define DMA_CH0_RX_CTRL_RXPBL_MASK  (0x3f << DMA_CH0_RX_CTRL_RXPBL_SHIFT)
 #define DMA_CH0_RX_CTRL_RXPBL(n)    ((n) << DMA_CH0_RX_CTRL_RXPBL_SHIFT)
 
-/* MAC MDIO Address Register */
+/* MAC MDIO Address Register
+ *
+ * DWMAC4/EQOS GOC[3:2] is a 2-bit opcode field:
+ *   01 = Write, 10 = Post-Increment-Read, 11 = Single Read.
+ * Use MAC_MII_ADDR_GOC_WRITE / MAC_MII_ADDR_GOC_READ helpers below; the
+ * legacy MAC_MII_ADDR_GW / MAC_MII_ADDR_GR aliases are kept for readers
+ * familiar with the older single-bit naming.
+ */
+
 #define MAC_MII_ADDR_GB             (1 << 0)  /* GMII Busy */
-#define MAC_MII_ADDR_GW             (1 << 2)  /* GMII Write */
-#define MAC_MII_ADDR_GR             (1 << 3)  /* GMII Read */
+#define MAC_MII_ADDR_GOC_SHIFT      (2)
+#define MAC_MII_ADDR_GOC_MASK       (0x3 << MAC_MII_ADDR_GOC_SHIFT)
+#define MAC_MII_ADDR_GOC_WRITE      (0x1 << MAC_MII_ADDR_GOC_SHIFT)
+#define MAC_MII_ADDR_GOC_READ       (0x3 << MAC_MII_ADDR_GOC_SHIFT)
+#define MAC_MII_ADDR_GW             MAC_MII_ADDR_GOC_WRITE
+#define MAC_MII_ADDR_GR             MAC_MII_ADDR_GOC_READ
 #define MAC_MII_ADDR_CR_SHIFT       (8)       /* CSR Clock Range */
 #define MAC_MII_ADDR_CR_MASK        (0xF << MAC_MII_ADDR_CR_SHIFT)
 #define MAC_MII_ADDR_GR_SHIFT       (16)      /* GMII Register */
@@ -153,6 +165,60 @@
 #define MAC_MII_ADDR_PA_SHIFT       (21)      /* Physical Layer Address */
 #define MAC_MII_ADDR_PA_MASK        (0x1F << MAC_MII_ADDR_PA_SHIFT)
 #define MAC_MII_ADDR_CR_150_250MHZ  (4 << MAC_MII_ADDR_CR_SHIFT)
+#define MAC_MII_ADDR_CR_100_150MHZ  (1 << MAC_MII_ADDR_CR_SHIFT)
+#define MAC_MII_ADDR_CR_250_300MHZ  (5 << MAC_MII_ADDR_CR_SHIFT)
+
+/* MAC Packet Filter Register (0x0008) */
+
+#define MAC_PKT_FILT_PR             (1 << 0)  /* Promiscuous Mode */
+#define MAC_PKT_FILT_HUC            (1 << 1)  /* Hash Unicast */
+#define MAC_PKT_FILT_HMC            (1 << 2)  /* Hash Multicast */
+#define MAC_PKT_FILT_DAIF           (1 << 3)  /* DA Inverse Filtering */
+#define MAC_PKT_FILT_PM             (1 << 4)  /* Pass All Multicast */
+#define MAC_PKT_FILT_DBF            (1 << 5)  /* Disable Broadcast */
+#define MAC_PKT_FILT_PCF_SHIFT      (6)
+#define MAC_PKT_FILT_PCF_MASK       (0x3 << MAC_PKT_FILT_PCF_SHIFT)
+#define MAC_PKT_FILT_HPF            (1 << 10) /* Hash or Perfect Filter */
+#define MAC_PKT_FILT_RA             (1 << 31) /* Receive All */
+
+/* MTL Operation Mode Register (0x0C00) */
+
+#define MTL_OP_MODE_DTXSTS          (1 << 1)  /* Drop TX Status */
+#define MTL_OP_MODE_RAA             (1 << 2)  /* Receive Arbitration Algorithm */
+
+/* MTL TXQ0 Operation Mode (0x0D00) */
+
+#define MTL_TXQ_OP_FTQ              (1 << 0)  /* Flush Transmit Queue */
+#define MTL_TXQ_OP_TSF              (1 << 1)  /* Transmit Store-and-Forward */
+#define MTL_TXQ_OP_TXQEN_SHIFT      (2)       /* Bits 3:2 TX Queue Enable */
+#define MTL_TXQ_OP_TXQEN_MASK       (0x3 << MTL_TXQ_OP_TXQEN_SHIFT)
+#define MTL_TXQ_OP_TXQEN_EN         (0x2 << MTL_TXQ_OP_TXQEN_SHIFT) /* Enabled */
+#define MTL_TXQ_OP_TTC_SHIFT        (4)       /* Bits 6:4 TX Threshold */
+#define MTL_TXQ_OP_TTC_MASK         (0x7 << MTL_TXQ_OP_TTC_SHIFT)
+#define MTL_TXQ_OP_TQS_SHIFT        (16)      /* Bits 24:16 TX Queue Size */
+#define MTL_TXQ_OP_TQS_MASK         (0x1FF << MTL_TXQ_OP_TQS_SHIFT)
+#define MTL_TXQ_OP_TQS(n)           ((n) << MTL_TXQ_OP_TQS_SHIFT)
+
+/* MTL RXQ0 Operation Mode (0x0D30) */
+
+#define MTL_RXQ_OP_RTC_SHIFT        (0)       /* Bits 1:0 RX Threshold */
+#define MTL_RXQ_OP_RTC_MASK         (0x3 << MTL_RXQ_OP_RTC_SHIFT)
+#define MTL_RXQ_OP_FUP              (1 << 3)  /* Forward Undersized Good Frames */
+#define MTL_RXQ_OP_FEP              (1 << 4)  /* Forward Error Packets */
+#define MTL_RXQ_OP_RSF              (1 << 5)  /* RX Store-and-Forward */
+#define MTL_RXQ_OP_DIS_TCP_EF       (1 << 6)  /* Disable Dropping of TCP/IP CSE err */
+#define MTL_RXQ_OP_EHFC             (1 << 7)  /* Enable Hardware Flow Control */
+#define MTL_RXQ_OP_RFA_SHIFT        (8)       /* Threshold for Activating */
+#define MTL_RXQ_OP_RFD_SHIFT        (14)      /* Threshold for Deactivating */
+#define MTL_RXQ_OP_RQS_SHIFT        (20)      /* Bits 28:20 RX Queue Size */
+#define MTL_RXQ_OP_RQS_MASK         (0x1FF << MTL_RXQ_OP_RQS_SHIFT)
+#define MTL_RXQ_OP_RQS(n)           ((n) << MTL_RXQ_OP_RQS_SHIFT)
+
+/* MTL RXQ DMA Map 0 (0x0C30) - route RXQ0 -> DMA CH0 */
+
+#define MTL_RXQ_DMA_MAP_Q0MDMACH_SHIFT (0)
+#define MTL_RXQ_DMA_MAP_Q0MDMACH_MASK  (0x7 << MTL_RXQ_DMA_MAP_Q0MDMACH_SHIFT)
+#define MTL_RXQ_DMA_MAP_Q0DDMACH       (1 << 4)  /* Q0 Dynamic DMA Channel */
 
 /* Descriptors */
 
@@ -189,14 +255,18 @@
 #define TDES3_CTXT                  (1 << 30) /* Context Type */
 #define TDES3_OWN                   (1 << 31) /* Own Bit */
 
-/* RDES3 (Read Format) */
+/* RDES3 Read Format (CPU -> DMA) */
+#define RDES3_BUF1V                 (1 << 24) /* Buffer 1 Address Valid */
+#define RDES3_BUF2V                 (1 << 25) /* Buffer 2 Address Valid */
+#define RDES3_IOC                   (1 << 30) /* Interrupt on Completion */
+#define RDES3_OWN                   (1 << 31) /* Own Bit (1=DMA owns) */
+
+/* RDES3 Write-Back Format (DMA -> CPU) */
 #define RDES3_FL_SHIFT              (0)
 #define RDES3_FL_MASK               (0x7FFF << RDES3_FL_SHIFT) /* Frame Length */
-#define RDES3_OWN_WRBACK            (1 << 31) /* Descriptor owned by DMA */
-#define RDES3_BUF1V                 (1 << 24) /* Buffer 1 Valid */
-#define RDES3_BUF2V                 (1 << 25) /* Buffer 2 Valid */
-#define RDES3_OSTC                  (1 << 27) /* One-step timestamp control */
-#define RDES3_IOC                   (1 << 30) /* Interrupt on Completion */
-#define RDES3_OWN                   (1 << 31) /* Own Bit */
+#define RDES3_ES                    (1 << 15) /* Error Summary */
+#define RDES3_LD                    (1 << 28) /* Last Descriptor */
+#define RDES3_FD                    (1 << 29) /* First Descriptor */
+#define RDES3_CTXT                  (1 << 30) /* Context Descriptor */
 
 #endif /* __ARCH_ARM_SRC_RZV_HARDWARE_RZV_ETHER_H */

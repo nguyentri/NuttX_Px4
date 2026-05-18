@@ -109,10 +109,14 @@ int rzv_phy_read(uintptr_t base, uint8_t phyaddr, uint8_t regaddr,
       return ret;
     }
 
-  /* Build MDIO address register value for read operation */
+  /* Build MDIO address register value for read operation.
+   * DWMAC4/EQOS requires GOC[3:2] = 11b for a single read; the legacy
+   * "GR-only" encoding selects post-increment-read on this core and
+   * produces undefined values for the auto-increment register pointer.
+   */
 
   regval = MAC_MII_ADDR_GB |
-           MAC_MII_ADDR_GR |
+           MAC_MII_ADDR_GOC_READ |
            MAC_MII_ADDR_CR_150_250MHZ |
            ((phyaddr << MAC_MII_ADDR_PA_SHIFT) & MAC_MII_ADDR_PA_MASK) |
            ((regaddr << MAC_MII_ADDR_GR_SHIFT) & MAC_MII_ADDR_GR_MASK);
@@ -165,7 +169,7 @@ int rzv_phy_write(uintptr_t base, uint8_t phyaddr, uint8_t regaddr,
   /* Build MDIO address register value for write operation */
 
   regval = MAC_MII_ADDR_GB |
-           MAC_MII_ADDR_GW |
+           MAC_MII_ADDR_GOC_WRITE |
            MAC_MII_ADDR_CR_150_250MHZ |
            ((phyaddr << MAC_MII_ADDR_PA_SHIFT) & MAC_MII_ADDR_PA_MASK) |
            ((regaddr << MAC_MII_ADDR_GR_SHIFT) & MAC_MII_ADDR_GR_MASK);
@@ -397,13 +401,26 @@ int rzv_phy_linkstatus(uintptr_t base, uint8_t phyaddr)
       return PHY_LINK_DOWN;
     }
 
-  /* Check for 1000BASE-T capability and status */
+  /* Check for 1000BASE-T capability and status.  Claim 1000FD only when
+   *   - local advertises 1000FD (1000BTCR.ADV_1000FD), and
+   *   - link partner is 1000FD-capable (1000BTSR.LP_1000FD), and
+   *   - Master/Slave resolved and local+remote receivers OK.
+   * Otherwise auto-negotiation could not have resolved to 1000BASE-T.
+   */
 
   ret = rzv_phy_read(base, phyaddr, PHY_REG_1000BTSR, &btsr);
-  if (ret == OK && (btsr & PHY_1000BTSR_LP_1000FD))
+  if (ret == OK && (btsr & PHY_1000BTSR_LP_1000FD) &&
+      (btsr & PHY_1000BTSR_MS_RESOLVED) &&
+      (btsr & PHY_1000BTSR_LOCAL_RX_OK) &&
+      (btsr & PHY_1000BTSR_REMOTE_RX_OK))
     {
-      ninfo("Link is up: 1000 Mbps Full Duplex\n");
-      return PHY_LINK_1000FD;
+      uint16_t btcr;
+      if (rzv_phy_read(base, phyaddr, PHY_REG_1000BTCR, &btcr) == OK &&
+          (btcr & PHY_1000BTCR_ADV_1000FD))
+        {
+          ninfo("Link is up: 1000 Mbps Full Duplex\n");
+          return PHY_LINK_1000FD;
+        }
     }
 
   /* Read local and link-partner auto-negotiation abilities.  The BMSR

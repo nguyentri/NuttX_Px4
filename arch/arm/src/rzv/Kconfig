@@ -1377,7 +1377,6 @@ config RZV_DAC
 menuconfig RZV_ETHERNET
    bool "Ethernet (GBETH) Driver"
    default n
-   depends on RZV_HAVE_ETHERC_MII || RZV_HAVE_ETHERC_RMII
    select NETDEVICES
    select ARCH_HAVE_NETDEV_STATISTICS
    ---help---

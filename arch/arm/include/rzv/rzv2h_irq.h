@@ -482,6 +482,21 @@
 #define RZV_ELC_GBETH_PORT0_PTP_PPS_O_1               (0x1BE)  /* GBETH PORT0 Event (INPUT) 1 - Event 0x1BE */
 #define RZV_ELC_GBETH_PORT0_PTP_PPS_O_2               (0x1BF)  /* GBETH PORT0 Event (INPUT) 2 - Event 0x1BF */
 #define RZV_ELC_GBETH_PORT0_PTP_PPS_O_3               (0x1C0)  /* GBETH PORT0 Event (INPUT) 3 - Event 0x1C0 */
+
+/* TODO(rzv2h-gbeth-irq): the GBETH MAC/DMA combined interrupt event IDs are
+ * not yet captured here.  arch/arm/src/rzv/rzv_ether.c currently passes the
+ * raw FSP vector_data.c numbers (0x2FD for GBETH0, 0x30C for GBETH1) directly
+ * to rzv_icu_attach().  Replace the magic numbers in rzv_ether.c with named
+ * symbols defined here once the RZ/V2H User's Manual ICU event-ID table is
+ * cross-checked.  Expected additions (event IDs taken from FSP vector tables,
+ * unverified against the UM):
+ *   RZV_ELC_GBETH_PORT0_MACIRQ                  (0x2FD)
+ *   RZV_ELC_GBETH_PORT1_MACIRQ                  (0x30C)
+ * If GBETH exposes separate per-channel TX/RX DMA event IDs in addition to
+ * the combined MAC IRQ, add them in the same pass so the driver can route
+ * RX/TX completion to dedicated handlers in a future revision.
+ */
+
 #define RZV_ELC_ISU_INT_FRE0                          (0x1C1)  /* ISU Frame end interrupt 0 - Event 0x1C1 */
 #define RZV_ELC_ISU_INT_FRE1                          (0x1C2)  /* ISU Frame end interrupt 1 - Event 0x1C2 */
 #define RZV_ELC_ISU_INT_FRE2                          (0x1C3)  /* ISU Frame end interrupt 2 - Event 0x1C3 */

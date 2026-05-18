@@ -126,9 +126,25 @@ static int rzv2h_ether_clockconfig(int port)
 {
   int ret;
 
+  /* The current rzv_clock.h only exposes RZV_CPG_CLK_ETH0 (port 0 module
+   * gate).  Port 1 module gate and the TX/RX 125 MHz reference clock IDs
+   * (ETHTX0CLK, ETHRX0CLK, ET0_TXC_TXCLK, ET0_RXC_RXCLK and their port-1
+   * equivalents) are declared as frequency constants but not yet exposed
+   * as RZV_CPG_CLK_* gate IDs.
+   *
+   * TODO(rzv2h-clocks): add RZV_CPG_CLK_ETH1, RZV_CPG_CLK_ETHTX{0,1}CLK,
+   * RZV_CPG_CLK_ETHRX{0,1}CLK, RZV_CPG_CLK_ET{0,1}_TXC_TXCLK and
+   * RZV_CPG_CLK_ET{0,1}_RXC_RXCLK to arch/arm/src/rzv/rzv_clock.h once the
+   * CLKON/RST register indices are pulled from the RZ/V2H User's Manual
+   * (FSP bsp_clocks.h, search for ETH/GBE clock-on bits).  Then enable
+   * them here so RGMII reference clocks are gated on before the MAC is
+   * brought out of reset.
+   */
+
   if (port != 0)
     {
-      nwarn("WARNING: GBETH%d clock ID is not defined yet\n", port);
+      nwarn("WARNING: GBETH%d clock IDs not defined; see TODO in %s\n",
+            port, __FILE__);
       return -ENODEV;
     }
 
@@ -148,6 +164,59 @@ static int rzv2h_ether_clockconfig(int port)
 
   syslog(LOG_INFO, "GBETH%d: clock enabled and reset released\n", port);
   return OK;
+}
+
+/****************************************************************************
+ * Name: rzv_ether_board_set_speed
+ *
+ * Description:
+ *   Called by the arch driver after the PHY resolves a new link speed so
+ *   the SYSC_SYS_GBETHx_CFG.MAC_SPEED bits stay in sync with the RGMII
+ *   reference clock divider.  MAC_SPEED encoding (DWMAC EQOS):
+ *     00 = 2.5 MHz (10 Mbps)
+ *     01 = 25 MHz  (100 Mbps)
+ *     10 = 125 MHz (1000 Mbps)
+ *
+ ****************************************************************************/
+
+void rzv_ether_board_set_speed(int intf, int mbps)
+{
+  uintptr_t cfg_reg;
+  uint32_t mask;
+  uint32_t shift;
+  uint32_t regval;
+  uint32_t mac_speed;
+
+  if (intf == 0)
+    {
+      cfg_reg = RZV_SYSC_SYS_GBETH0_CFG;
+      mask    = SYSC_SYS_GBETH0_CFG_MAC_SPEED_MASK;
+      shift   = SYSC_SYS_GBETH0_CFG_MAC_SPEED_SHIFT;
+    }
+  else if (intf == 1)
+    {
+      cfg_reg = RZV_SYSC_SYS_GBETH1_CFG;
+      mask    = SYSC_SYS_GBETH1_CFG_MAC_SPEED_MASK;
+      shift   = SYSC_SYS_GBETH1_CFG_MAC_SPEED_SHIFT;
+    }
+  else
+    {
+      return;
+    }
+
+  switch (mbps)
+    {
+      case 10:   mac_speed = 0; break;
+      case 100:  mac_speed = 1; break;
+      case 1000: mac_speed = 2; break;
+      default:                  /* 0 = link down, leave divider at last */
+        return;
+    }
+
+  regval  = getreg32(cfg_reg);
+  regval &= ~mask;
+  regval |= (mac_speed << shift) & mask;
+  putreg32(regval, cfg_reg);
 }
 
 /****************************************************************************
