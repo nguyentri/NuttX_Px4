@@ -1126,6 +1126,121 @@ config RZV_IPCC_TXBUFSIZE
    default 2048
    depends on RZV_IPC_IPCC && IPCC_BUFFERED
 
+config RZV_MHU_DOMAIN_NS
+   bool
+   default y if !RZV_MHU_DOMAIN_S_CR8 && !RZV_MHU_DOMAIN_S_CM33
+   ---help---
+     Select the MHU Non-Secure register window (default; preserves existing
+     CA55 rptun behavior).
+
+config RZV_MHU_DOMAIN_S_CR8
+   bool "Use MHU Secure-CR8 register window"
+   default n
+   ---help---
+     Select the MHU Secure window accessible by CR8.  Only choose this if
+     TrustZone is configured and the NS window is not accessible from CR8.
+     Changing this affects ALL MHU consumers; use with care.
+
+config RZV_MHU_DOMAIN_S_CM33
+   bool "Use MHU Secure-CM33 register window"
+   default n
+   ---help---
+     Select the MHU Secure window accessible by CM33.  Only for CM33-side
+     builds where the NS window is inaccessible.
+
+config RZV_IPC_RAW
+   bool "RZ/V2H raw MHU+SHM IPCC lower half"
+   default n
+   select IPCC
+   ---help---
+     Enable the generic raw IPCC lower half driver backed by MHU doorbell
+     + shared-memory ring buffers.  Used by CR8↔CR8 (/dev/ipcc1) and
+     CR8↔CM33 (/dev/ipcc2) links.  No OpenAMP/virtio dependency.
+
+config RZV_IPC_RAW_RING_ENTRIES
+   int "Raw IPCC ring depth (entries per direction)"
+   default 16
+   range 4 256
+   depends on RZV_IPC_RAW
+   ---help---
+     Number of entries in each ring direction (TX and RX).
+     Must be a power of two.
+
+config RZV_IPC_RAW_ENTRY_SIZE
+   int "Raw IPCC ring entry payload size (bytes)"
+   default 64
+   range 16 512
+   depends on RZV_IPC_RAW
+   ---help---
+     Payload bytes per ring entry.  Round to cache-line multiple for
+     best cache-maintenance efficiency (recommend 64).
+
+config RZV_IPC_TX_TIMEOUT_MS
+   int "Raw IPCC TX-ACK timeout (ms, 0=infinite)"
+   default 100
+   depends on RZV_IPC_RAW
+   ---help---
+     Milliseconds to wait for peer TX-ACK before returning -ETIMEDOUT.
+     Set 0 for infinite wait (only safe for trusted peers like CR8_1).
+     CR8↔CM33 link always uses this timeout regardless of setting because
+     CM33 firmware may be absent.
+
+config RZV_IPC_CR8_CR8
+   bool "Instantiate /dev/ipcc1 for CR8_0 ↔ CR8_1"
+   default n
+   depends on RZV_IPC_RAW
+   ---help---
+     Register a raw IPCC character device at /dev/ipcc1 using MHU
+     channels 4/5 and DDR SHM at 0x43800000.
+
+config RZV_IPC_ROLE_INITIATOR
+   bool "This core is the ring initiator (zeros SHM on boot)"
+   default y
+   depends on RZV_IPC_CR8_CR8
+   ---help---
+     The initiator zeros the SHM ring headers on first open.  Only one
+     side must be initiator; the other must be responder.
+     CR8_0 = initiator (y), CR8_1 = responder (n).
+
+config RZV_IPC_CR8_CR8_LOOPBACK
+   bool "CR8_0 self-loopback test on /dev/ipccLB (no CR8_1 needed)"
+   default n
+   depends on RZV_IPC_CR8_CR8
+   ---help---
+     Wire MHU channel 8 TX back to channel 8 RX on CR8_0 alone.
+     Registers /dev/ipccLB.  Used to smoke-test the ring driver before
+     CR8_1 firmware is available.
+
+config RZV_IPC_CR8_CM33
+   bool "Instantiate /dev/ipcc2 for CR8_0 ↔ CM33"
+   default n
+   depends on RZV_IPC_RAW
+   ---help---
+     Register a raw IPCC character device at /dev/ipcc2 using MHU
+     channels 10/15 and DDR SHM at 0x43810000.  Send path times out
+     after CONFIG_RZV_IPC_TX_TIMEOUT_MS when CM33 firmware is absent.
+
+config RZV_MPU_PORT_FSP
+   bool "Port FreeRTOS FSP MPU region table to NuttX CR8"
+   default y if RZV_IPC_RAW
+   depends on !RZV2H_BUILD_CM33
+   ---help---
+     Programme the Cortex-R8 MPU with the canonical Renesas FSP region
+     table.  11 active regions per core covering ITCM, DTCM,
+     SRAM, peripheral, xSPI, DDR cacheable/non-cacheable, OpenAMP RSCTBL,
+     MHU SHMEM, and the 16 MiB VRING carveout (which also covers the IPC
+     raw SHM at 0x43800000).  No IPC-specific MPU region is needed.
+     Software cache ops in rzv_ipc_raw.c are retained for defence-in-depth.
+
+config RZV_MPU_CR8_CORE_NUM
+   int "CR8 core number for MPU table selection (0 or 1)"
+   default 0
+   range 0 1
+   depends on RZV_MPU_PORT_FSP
+   ---help---
+     Selects which MPU region table variant to use.  0 = CR8_0 addresses,
+     1 = CR8_1 addresses (SRAM cache/non-cache regions differ).
+
 endmenu
 
 config RZV_GPT

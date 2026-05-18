@@ -495,7 +495,39 @@
  * generated vector_data.c, which currently reaches IRQ 455.
  */
 
+/* MHU-B Non-Secure MSG interrupt IDs (GIC SPI numbers).
+ * Source: RZ/V2H TRM Ch.11 / FSP bsp_irq_id.h MHU_MSGn_NS_IRQn.
+ * Valid MHU-B-NS channels (BSP_FEATURE_MHU_B_NS_VALID_CHANNEL_MASK =
+ * 0x030410618618): 3,4,9,10,15,16,21,22,28,34,40,41.
+ * Channels 5–8 are NOT valid in MHU-B-NS.
+ */
 #define RZV_IRQ_MHU_MSG3_NS                          (314)
+#define RZV_IRQ_MHU_MSG4_NS                          (315)
+#define RZV_IRQ_MHU_MSG9_NS                          (316)
+#define RZV_IRQ_MHU_MSG10_NS                         (317)
+#define RZV_IRQ_MHU_MSG15_NS                         (318)
+#define RZV_IRQ_MHU_MSG16_NS                         (319)
+#define RZV_IRQ_MHU_MSG21_NS                         (320)
+#define RZV_IRQ_MHU_MSG22_NS                         (321)
+#define RZV_IRQ_MHU_MSG28_NS                         (322)
+#define RZV_IRQ_MHU_MSG34_NS                         (323)
+#define RZV_IRQ_MHU_MSG40_NS                         (324)
+#define RZV_IRQ_MHU_MSG41_NS                         (325)
+
+/* MHU-B Non-Secure RSP (response/ACK) interrupt IDs */
+#define RZV_IRQ_MHU_RSP3_NS                          (326)
+#define RZV_IRQ_MHU_RSP4_NS                          (327)
+#define RZV_IRQ_MHU_RSP9_NS                          (328)
+#define RZV_IRQ_MHU_RSP10_NS                         (329)
+#define RZV_IRQ_MHU_RSP15_NS                         (330)
+#define RZV_IRQ_MHU_RSP16_NS                         (331)
+#define RZV_IRQ_MHU_RSP21_NS                         (332)
+#define RZV_IRQ_MHU_RSP22_NS                         (333)
+#define RZV_IRQ_MHU_RSP28_NS                         (334)
+#define RZV_IRQ_MHU_RSP34_NS                         (335)
+#define RZV_IRQ_MHU_RSP40_NS                         (336)
+#define RZV_IRQ_MHU_RSP41_NS                         (337)
+
 #define RZV_IRQ_ICU_SLOTS                             (129)
 #define RZV_IRQ_GIC_SIZE                              (480)
 

@@ -44,6 +44,11 @@
 #include "rzv_clock.h"
 #include "rzv_lowputc.h"
 
+#ifdef CONFIG_RZV_MPU_PORT_FSP
+/* Declared in rzv_mpu_regions.c */
+void rzv_mpu_init(void);
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -325,10 +330,18 @@ void arm_boot(void)
 
   showprogress('D');
 
-  /* Enable caches and branch prediction */
-  rzv_enable_caches();
+  /* Programme MPU regions before enabling caches.
+   * This must run after RAM init (region table is in .data/.rodata) but
+   * before caches are enabled so the D$ is clean at MPU enable time.
+   */
+#ifdef CONFIG_RZV_MPU_PORT_FSP
+  rzv_mpu_init();
+#endif
 
   showprogress('E');
+
+  /* Enable caches and branch prediction */
+  rzv_enable_caches();
 
   /* Configure low-level serial for early debug output */
   rzv_lowsetup();
