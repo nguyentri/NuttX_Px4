@@ -265,11 +265,27 @@
 #define BOARD_SCI3_I2C_SCL_GPIO  GPIO_RXD3_MISO3_SCL3_P5_7_M1  /* P57 Mode1 */
 #define BOARD_SCI3_I2C_SDA_GPIO  GPIO_TXD3_MOSI3_SDA3_P5_6_M1  /* P56 Mode1 */
 
+/* SCI-SPI GPIO pin assignments *********************************************
+ *
+ * SCI0 SPI (sci-spi-loopback config):
+ *   MOSI = TXD0 = P50 (Mode1)
+ *   MISO = RXD0 = P51 (Mode1)
+ *   SCK  = SCK0 = P52 (Mode2)
+ *
+ * Note: SCI0 SPI and SCI0 I2C use the same P50/P51 physical pins — they
+ * are mutually exclusive at the Kconfig level (RZV_SCI0_SPI && RZV_SCI0_I2C
+ * is rejected by Kconfig depends).
+ */
+
+#define BOARD_SCI0_SPI_MOSI_GPIO  GPIO_TXD0_MOSI0_DA0_P5_0_M1    /* P50 Mode1 */
+#define BOARD_SCI0_SPI_MISO_GPIO  GPIO_RXD0_MISO0_SCL0_P5_1_M1   /* P51 Mode1 */
+#define BOARD_SCI0_SPI_SCK_GPIO   GPIO_SCK0_P5_2_M2               /* P52 Mode2 */
+
 /* Ethernet (GBETH0 RGMII) Configuration ************************************/
 
 /* TODO(rzv2h-eth-pins): RGMII pin assignments for GBETH0 on RDK-RZV2H are
  * not yet populated.  boards/arm/rzv/rdk-rzv2h/src/rzv2h_ether.c declares
- * the GPIO_ETH0_* macros as (0) placeholders and skips rzv_configgpio()
+ * the GPIO_ETH0_* macros as (0) placeholders and skips rzv_gpioconfig()
  * calls until these are confirmed from the RDK-RZV2H board schematic.
  *
  * Once the schematic is available, define the following BOARD_ETH0_*

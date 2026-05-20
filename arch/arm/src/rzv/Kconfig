@@ -1368,6 +1368,20 @@ config RZV_ADC
    bool "ADC support"
    default n
    depends on RZV_HAVE_ADC12
+   select ANALOG
+   select ADC
+
+if RZV_ADC
+
+config RZV_ADC0
+   bool "ADC0 instance"
+   default y
+   ---help---
+     Enable the RZ/V2H ADC_E channel-0 instance (the single ADC_E unit
+     present on RZ/V2H).  Drives /dev/adc0 via the NuttX analog upper
+     half.
+
+endif # RZV_ADC
 
 config RZV_DAC
    bool "DAC support"

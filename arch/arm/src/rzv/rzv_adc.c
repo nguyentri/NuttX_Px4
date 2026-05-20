@@ -36,13 +36,13 @@
 /* ADC register bit definitions (map to ADC_E bits) */
 #define ADC_ADCSR_ADST          ADC_E_ADCSR_ADST
 #define ADC_ADCSR_ADIE          ADC_E_ADCSR_ADIE
+#define ADC_ADREF_ADF           ADC_E_ADREF_ADF
 #define ADC_ADCER_ADPRC_12BIT   (0x00 << ADC_E_ADCER_ADPRC_SHIFT)  /* 12-bit resolution */
 
 /* ADC Device Hardware Configuration */
 struct rzv_adc_config_s
 {
   uintptr_t base;         /* ADC base address */
-  uint8_t   irq;          /* ADC interrupt number */
   int       elc_event;    /* ELC event number for ICU attachment */
   uint8_t   resolution;   /* ADC resolution (bits) */
   uint32_t  clk;          /* CPG clock identifier (RZV_CPG_CLK_ADCx) */
@@ -54,14 +54,13 @@ struct rzv_adc_priv_s
   FAR struct adc_dev_s *dev;          /* ADC device structure */
   const struct adc_callback_s *cb;    /* ADC callbacks */
   const struct rzv_adc_config_s *config; /* Hardware configuration */
-  int icu_irq;                        /* Allocated ICU IRQ (RZV_IRQ_FIRST + slot) or -1 */
+  int icu_irq;                        /* Allocated ICU IRQ or -1 */
 
-  sem_t exclsem;                      /* Mutual exclusion semaphore */
+  sem_t exclsem;                      /* Trigger serialization */
   sem_t waitsem;                      /* Wait for conversion complete */
 
   uint32_t chanmask;                  /* Enabled channel mask */
   uint8_t  nchannels;                 /* Number of enabled channels */
-  bool     running;                   /* ADC running flag */
 };
 
 /* ADC Register Access (forward declarations) */
@@ -74,13 +73,13 @@ static inline void rzv_adc_modifyreg(struct rzv_adc_priv_s *priv,
                                      uint16_t clearbits, uint16_t setbits);
 
 /* ADC Helpers (forward) */
-#if defined(CONFIG_RZV_ADC0) || defined(CONFIG_RZV_ADC1)
+#ifdef CONFIG_RZV_ADC0
 static void rzv_adc_reset(struct rzv_adc_priv_s *priv);
 static int rzv_adc_interrupt(int irq, void *context, void *arg);
 #endif
 
 /* ADC Operations (forward) */
-#if defined(CONFIG_RZV_ADC0) || defined(CONFIG_RZV_ADC1)
+#ifdef CONFIG_RZV_ADC0
 static int rzv_adc_bind(struct adc_dev_s *dev,
                         const struct adc_callback_s *callback);
 static void rzv_adc_reset_dev(struct adc_dev_s *dev);
@@ -97,12 +96,9 @@ static int rzv_adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg);
 #ifndef RZV_ADC0_BASE
 #  define RZV_ADC0_BASE         RZV_ADC_E_BASE
 #endif
-#ifndef RZV_ADC1_BASE
-#  define RZV_ADC1_BASE         RZV_ADC_E_BASE
-#endif
 
 /* Define operations only if at least one ADC instance is enabled */
-#if defined(CONFIG_RZV_ADC0) || defined(CONFIG_RZV_ADC1)
+#ifdef CONFIG_RZV_ADC0
 static const struct adc_ops_s g_adc_ops =
 {
   .ao_bind     = rzv_adc_bind,
@@ -119,10 +115,9 @@ static const struct adc_ops_s g_adc_ops =
 static const struct rzv_adc_config_s g_adc0_config =
 {
   .base       = RZV_ADC0_BASE,
-  .irq        = 0,  /* Legacy IRQ field (unused when elc_event is set) */
   .elc_event  = RZV_ELC_ADC0_ADA_ADELCREQ,
   .resolution = 12,
-  .clk        = RZV_CPG_CLK_ADC0,  /* Clock control */
+  .clk        = RZV_CPG_CLK_ADC0,
 };
 
 static struct rzv_adc_priv_s g_adc0_priv =
@@ -138,30 +133,9 @@ static struct adc_dev_s g_adc0_dev =
 };
 #endif
 
-/* ADC1 Configuration */
-
-#ifdef CONFIG_RZV_ADC1
-/* ADC1 (optional) */
-static const struct rzv_adc_config_s g_adc1_config =
-{
-  .base       = RZV_ADC1_BASE,
-  .irq        = 0,
-  .elc_event  = 0,
-  .resolution = 12,
-  .clk        = RZV_CPG_CLK_ADC1,  /* Clock control */
-};
-
-static struct rzv_adc_priv_s g_adc1_priv =
-{
-  .config = &g_adc1_config,
-};
-
-static struct adc_dev_s g_adc1_dev =
-{
-  .ad_ops  = &g_adc_ops,
-  .ad_priv = &g_adc1_priv,
-};
-#endif
+/* NOTE: RZ/V2H has a single ADC_E instance. No ADC1 block is defined here
+ * until a second physical instance exists.
+ */
 
 #endif /* CONFIG_RZV_ADC */
 
@@ -203,7 +177,7 @@ static inline void rzv_adc_modifyreg(struct rzv_adc_priv_s *priv,
   rzv_adc_putreg(priv, offset, regval);
 }
 
-#if defined(CONFIG_RZV_ADC0) || defined(CONFIG_RZV_ADC1)
+#ifdef CONFIG_RZV_ADC0
 /****************************************************************************
  * Name: rzv_adc_reset
  ****************************************************************************/
@@ -223,40 +197,54 @@ static void rzv_adc_reset(struct rzv_adc_priv_s *priv)
   /* Reset addition/average */
   rzv_adc_putreg(priv, RZV_ADC_E_ADADC_OFFSET, 0);
   rzv_adc_putreg(priv, RZV_ADC_E_ADADS0_OFFSET, 0);
-
-  priv->running = false;
 }
 
 static int rzv_adc_interrupt(int irq, void *context, void *arg)
 {
   struct rzv_adc_priv_s *priv = (struct rzv_adc_priv_s *)arg;
-  struct adc_msg_s msg;
   unsigned int offset;
   int i;
 
-  DEBUGASSERT(priv != NULL && priv->dev != NULL && priv->cb != NULL);
+  DEBUGASSERT(priv != NULL && priv->dev != NULL);
 
-  /* Read converted values for each enabled channel */
+  /* Acknowledge the scan-end flag. ADREF.ADF is W0C; clearing it stops the
+   * interrupt from re-asserting immediately on ISR exit.
+   */
+
+  rzv_adc_modifyreg(priv, RZV_ADC_E_ADREF_OFFSET, ADC_ADREF_ADF, 0);
+
+  /* If userspace has not bound a callback yet, mask further interrupts and
+   * bail.  Without this guard the next conversion would NULL-deref cb.
+   */
+
+  if (priv->cb == NULL || priv->cb->au_receive == NULL)
+    {
+      rzv_adc_modifyreg(priv, RZV_ADC_E_ADCSR_OFFSET, ADC_ADCSR_ADIE, 0);
+      return OK;
+    }
+
+  /* Deliver every enabled channel result. Walk the channel mask, not the
+   * full 0..ADC_MAX_CHANNELS range, so disabled-channel results are not
+   * fabricated from stale ADDR shadows.
+   */
+
   for (i = 0; i < ADC_MAX_CHANNELS; i++)
     {
-      if ((priv->chanmask & (1 << i)) != 0)
+      if ((priv->chanmask & (1u << i)) != 0)
         {
-          /* Read conversion result from ADDR register */
           offset = RZV_ADC_E_ADDR_OFFSET(i);
-          msg.am_channel = i;
-          msg.am_data = rzv_adc_getreg(priv, offset);
-          priv->cb->au_receive(priv->dev, msg.am_channel, msg.am_data);
+          priv->cb->au_receive(priv->dev, i, rzv_adc_getreg(priv, offset));
         }
     }
 
-  /* Signal completion */
-  nxsem_post(&priv->waitsem);
+  /* Signal any waiter */
 
+  nxsem_post(&priv->waitsem);
   return OK;
 }
 #endif
 
-#if defined(CONFIG_RZV_ADC0) || defined(CONFIG_RZV_ADC1)
+#ifdef CONFIG_RZV_ADC0
 static int rzv_adc_bind(struct adc_dev_s *dev,
                         const struct adc_callback_s *callback)
 {
@@ -281,55 +269,28 @@ static void rzv_adc_reset_dev(struct adc_dev_s *dev)
 static int rzv_adc_setup(struct adc_dev_s *dev)
 {
   struct rzv_adc_priv_s *priv = (struct rzv_adc_priv_s *)dev->ad_priv;
-  int ret;
+  int icu;
 
-  /* CRITICAL: Enable module clock before accessing peripheral registers */
+  /* Clock is already gated on in rzv_adc_initialize(); MMIO is safe. */
 
-  uint32_t domain = RZV_CPG_DOMAIN(priv->config->clk);
-  uint32_t bit = RZV_CPG_BIT(priv->config->clk);
-  RZV_MODULE_CLKON(domain, bit);
-
-  /* Small delay for clock stabilization */
-
-  up_udelay(10);
-
-  /* Initialize semaphores */
-  nxsem_init(&priv->exclsem, 0, 1);
-  nxsem_init(&priv->waitsem, 0, 0);
-
-  /* Reset ADC */
   rzv_adc_reset(priv);
 
-  /* Configure resolution (12-bit) */
+  /* 12-bit resolution and enable channel mask now that device is open. */
+
   rzv_adc_putreg(priv, RZV_ADC_E_ADCER_OFFSET, ADC_ADCER_ADPRC_12BIT);
+  rzv_adc_putreg(priv, RZV_ADC_E_ADANSA0_OFFSET, priv->chanmask & 0xff);
 
-  /* Attach interrupt handler */
-  /* Prefer dynamic ICU attachment via ELC event if provided */
-  if (priv->config->elc_event >= 0)
+  /* Route the ADC scan-end ELC event through the ICU to a GIC SPI. */
+
+  icu = rzv_icu_attach(priv->config->elc_event,
+                       (xcpt_t)rzv_adc_interrupt, priv, true);
+  if (icu < 0)
     {
-      int icu = rzv_icu_attach(priv->config->elc_event,
-                               (xcpt_t)rzv_adc_interrupt,
-                               priv, true);
-      if (icu < 0)
-        {
-          aerr("ERROR: rzv_icu_attach failed: %d\n", icu);
-          return icu;
-        }
-
-      priv->icu_irq = icu;
+      aerr("ERROR: rzv_icu_attach failed: %d\n", icu);
+      return icu;
     }
-  else if (priv->config->irq)
-    {
-      /* Fallback to legacy IRQ attach */
-      ret = irq_attach(priv->config->irq, rzv_adc_interrupt, priv);
-      if (ret < 0)
-        {
-          aerr("ERROR: Failed to attach ADC interrupt: %d\n", ret);
-          return ret;
-        }
 
-      up_enable_irq(priv->config->irq);
-    }
+  priv->icu_irq = icu;
 
   ainfo("ADC setup complete\n");
   return OK;
@@ -339,24 +300,22 @@ static void rzv_adc_shutdown(struct adc_dev_s *dev)
 {
   struct rzv_adc_priv_s *priv = (struct rzv_adc_priv_s *)dev->ad_priv;
 
-  /* Disable and detach interrupt */
+  /* Mask the scan-end interrupt and stop any conversion in flight BEFORE
+   * tearing down the ICU/GIC routing — otherwise a late edge could fire
+   * after detach with a stale handler.
+   */
+
+  rzv_adc_modifyreg(priv, RZV_ADC_E_ADCSR_OFFSET,
+                    ADC_ADCSR_ADIE | ADC_ADCSR_ADST, 0);
+  rzv_adc_putreg(priv, RZV_ADC_E_ADANSA0_OFFSET, 0);
+
   if (priv->icu_irq >= 0)
     {
       rzv_icu_detach(priv->icu_irq);
       priv->icu_irq = -1;
     }
-  else if (priv->config->irq)
-    {
-      up_disable_irq(priv->config->irq);
-      irq_detach(priv->config->irq);
-    }
 
-  /* Reset ADC */
   rzv_adc_reset(priv);
-
-  /* Destroy semaphores */
-  nxsem_destroy(&priv->exclsem);
-  nxsem_destroy(&priv->waitsem);
 
   ainfo("ADC shutdown complete\n");
 }
@@ -386,17 +345,33 @@ static int rzv_adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
     {
       case ANIOC_TRIGGER:
         {
-          /* Start A/D conversion */
-          rzv_adc_modifyreg(priv, RZV_ADC_E_ADCSR_OFFSET, 0, ADC_ADCSR_ADST);
-          priv->running = true;
+          ret = nxsem_wait_uninterruptible(&priv->exclsem);
+          if (ret < 0)
+            {
+              break;
+            }
+
+          /* If a conversion is already in flight, refuse rather than racing
+           * the hardware. ADST self-clears on completion.
+           */
+
+          if ((rzv_adc_getreg(priv, RZV_ADC_E_ADCSR_OFFSET) &
+               ADC_ADCSR_ADST) != 0)
+            {
+              ret = -EBUSY;
+            }
+          else
+            {
+              rzv_adc_modifyreg(priv, RZV_ADC_E_ADCSR_OFFSET, 0,
+                                ADC_ADCSR_ADST);
+            }
+
+          nxsem_post(&priv->exclsem);
         }
         break;
 
       case ANIOC_GET_NCHANNELS:
-        {
-          /* Return number of ADC channels */
-          ret = ADC_MAX_CHANNELS;
-        }
+        ret = priv->nchannels;
         break;
 
       default:
@@ -412,27 +387,21 @@ static int rzv_adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
 int rzv_adc_initialize(const char *devpath, const uint8_t *chanlist,
                       int nchannels)
 {
-  struct adc_dev_s *dev;
-  struct rzv_adc_priv_s *priv;
+#ifdef CONFIG_RZV_ADC0
+  struct adc_dev_s *dev = &g_adc0_dev;
+  struct rzv_adc_priv_s *priv = &g_adc0_priv;
   uint32_t chanmask = 0;
+  uint32_t domain;
+  uint32_t bit;
   int ret;
   int i;
 
-#ifdef CONFIG_RZV_ADC0
-  dev = &g_adc0_dev;
-  priv = &g_adc0_priv;
-#else
-  return -ENODEV;
-#endif
-
-  /* Validate number of channels */
   if (nchannels < 1 || nchannels > ADC_MAX_CHANNELS)
     {
       aerr("ERROR: Invalid number of channels: %d\n", nchannels);
       return -EINVAL;
     }
 
-  /* Build channel mask */
   for (i = 0; i < nchannels; i++)
     {
       if (chanlist[i] >= ADC_MAX_CHANNELS)
@@ -441,26 +410,46 @@ int rzv_adc_initialize(const char *devpath, const uint8_t *chanlist,
           return -EINVAL;
         }
 
-      chanmask |= (1 << chanlist[i]);
+      chanmask |= (1u << chanlist[i]);
     }
 
   priv->chanmask = chanmask;
   priv->nchannels = nchannels;
 
-  /* Configure channel selection - RZV2H ADC_E only supports 8 channels (0-7) */
-  if (chanmask & 0xFF)
-    {
-      rzv_adc_putreg(priv, RZV_ADC_E_ADANSA0_OFFSET, chanmask & 0xFF);
-    }
+  /* Gate the ADC module clock ON before any other MMIO touches the block.
+   * Upper-half adc_register() will call ao_reset() during registration,
+   * which writes ADCSR/ADCER/etc. — without the clock those writes bus
+   * fault.
+   */
 
-  /* Register ADC device */
+  domain = RZV_CPG_DOMAIN(priv->config->clk);
+  bit = RZV_CPG_BIT(priv->config->clk);
+  RZV_MODULE_CLKON(domain, bit);
+  up_udelay(10);
+
+  /* One-shot semaphore init (ao_setup/ao_shutdown may be invoked multiple
+   * times across open/close; semaphores must persist).
+   */
+
+  nxsem_init(&priv->exclsem, 0, 1);
+  nxsem_init(&priv->waitsem, 0, 0);
+
   ret = adc_register(devpath, dev);
   if (ret < 0)
     {
       aerr("ERROR: Failed to register ADC device: %d\n", ret);
+      nxsem_destroy(&priv->exclsem);
+      nxsem_destroy(&priv->waitsem);
       return ret;
     }
 
-  ainfo("ADC initialized: %s (channels=0x%08lx)\n", devpath, (unsigned long)chanmask);
+  ainfo("ADC initialized: %s (channels=0x%08lx)\n", devpath,
+        (unsigned long)chanmask);
   return OK;
+#else
+  UNUSED(devpath);
+  UNUSED(chanlist);
+  UNUSED(nchannels);
+  return -ENODEV;
+#endif
 }

@@ -69,19 +69,19 @@ static void rzv2h_sci0_spi_setup(void)
 
   /* TX (MOSI) - Output, peripheral function */
 
-  rzv_configgpio(RZV_SCI0_MOSI_PIN);
+  rzv_gpioconfig(RZV_SCI0_MOSI_PIN);
 
   /* RX (MISO) - Input, peripheral function */
 
-  rzv_configgpio(RZV_SCI0_MISO_PIN);
+  rzv_gpioconfig(RZV_SCI0_MISO_PIN);
 
   /* SCK - Output, peripheral function */
 
-  rzv_configgpio(RZV_SCI0_SCK_PIN);
+  rzv_gpioconfig(RZV_SCI0_SCK_PIN);
 
   /* CS - GPIO output, initially high (inactive) */
 
-  rzv_configgpio(RZV_SCI0_CS_PIN);
+  rzv_gpioconfig(RZV_SCI0_CS_PIN);
 
   spiinfo("SCI0 SPI pins configured\n");
 }
@@ -211,7 +211,7 @@ int board_sci_spi_initialize(void)
 
   /* Initialize SCI0 SPI bus */
 
-  spi = rzv_sci_spibus_initialize(0);
+  spi = rzv_sci_spi_initialize(0);
   if (spi == NULL)
     {
       spierr("ERROR: Failed to initialize SCI0 SPI bus\n");

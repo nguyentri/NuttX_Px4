@@ -1,20 +1,28 @@
 /****************************************************************************
  * arch/arm/src/rzv/rzv_sci_spi.c
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.  The
- * ASF licenses this file to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the
- * License.  You may obtain a copy of the License at
+ * RZ/V2H SCI-B SPI master driver (Simple-SPI mode, interrupt-driven).
+ * Mirrors rzv_sci_i2c.c structure exactly.
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * Supported: 8-bit word, modes 0-3, MSB/LSB first, up to 50 MHz.
+ * Not supported: slave mode, DMA/DTC, >8-bit words (returns spierr).
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
- * License for the specific language governing permissions and limitations
- * under the License.
+ * Fixes from code-review (findings #1-#32):
+ *   #1  — rzv_icu_attach (not rzv_icu_attach_event)
+ *   #2  — rzv_clock_get_rate(RZV_CLOCK_P5CLK) with fallback
+ *   #3  — rzv_clock_enable + rzv_module_unreset before any MMIO
+ *   #4  — uninitialize() removed (YAGNI)
+ *   #7  — exchange() uses nxsem_timedwait_uninterruptible
+ *   #8  — sem_isr re-init to 0 before each exchange (stale-post fix)
+ *   #9  — timeout: mask IRQs, disable TE/RE, return -ETIMEDOUT
+ *   #10 — frequency/mode defaults set BEFORE hw_init; no div-by-zero
+ *   #13 — static g_sci_spi_priv[10] table; all 10 channels guarded
+ *   #15 — setfrequency/setmode patch only CCR2/CCR3, not full reconfigure
+ *   #16 — no critical_section wrapping icu_attach
+ *   #21 — select/status/cmddata declared weak_function
+ *   #22 — initialized guard on every initialize() call
+ *
+ * Licensed under Apache License 2.0 — see top-level NOTICE.
  *
  ****************************************************************************/
 
@@ -27,32 +35,28 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
 #include <errno.h>
-#include <assert.h>
 #include <debug.h>
+#include <assert.h>
+#include <time.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/mutex.h>
 #include <nuttx/spi/spi.h>
-#include <nuttx/power/pm.h>
 
 #include <arch/board/board.h>
-#include <arch/rzv/irq.h>
 
 #include "arm_internal.h"
-#include "chip.h"
+#include "hardware/rzv_sci.h"
 #include "hardware/rzv_sci_spi.h"
-#include "barriers.h"
-
+#include "hardware/rzv_elc.h"
 #include "rzv_clock.h"
+#include "rzv_gpio.h"
 #include "rzv_icu.h"
 #include "rzv_sci_spi.h"
-
-#include <nuttx/cache.h>
+#include "rzv_sci_spi_internal.h"
 
 #ifdef CONFIG_RZV_SCI_SPI
 
@@ -60,957 +64,677 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* SCI_B SPI Maximum frequency */
+/* Board must define BOARD_SCIn_SPI_{MOSI,MISO,SCK}_GPIO for each enabled
+ * channel.  Missing definitions cause a compile-time error — fail fast.
+ * Pattern mirrors sci_i2c.c:88-122.
+ */
 
-#define R_SCI_SPI_MAX_FREQUENCY      50000000
-
-/* SCI_B SPI Timeout */
-
-#define R_SCI_SPI_TIMEOUT_MS         1000
-
-/* Clock calculation constants */
-
-#define R_SCI_SPI_CLK_MAX_N          (0xFFU)
-#define R_SCI_SPI_CLK_MAX_DIV        (R_SCI_SPI_CLK_MAX_N + 1)
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/* SCI_B SPI Device hardware configuration */
-
-struct rzv_sci_spi_config_s
-{
-  uint32_t base;              /* SCI_B base address */
-  uint8_t  channel;           /* SCI_B channel number (0-9) */
-  uint32_t rxi_irq;           /* RX interrupt number (will be dynamically assigned) */
-  uint32_t txi_irq;           /* TX interrupt number (will be dynamically assigned) */
-  uint32_t tei_irq;           /* TE interrupt number (will be dynamically assigned) */
-  uint32_t eri_irq;           /* ER interrupt number (will be dynamically assigned) */
-  uint32_t rxi_elc;           /* RX ELC event number */
-  uint32_t txi_elc;           /* TX ELC event number */
-  uint32_t tei_elc;           /* TE ELC event number */
-  uint32_t eri_elc;           /* ER ELC event number */
-};
-
-/* SCI_B SPI Device Private Data */
-
-struct rzv_sci_spi_priv_s
-{
-  struct spi_dev_s             spi_dev;       /* External SPI interface */
-  const struct rzv_sci_spi_config_s *config;  /* Hardware configuration */
-  mutex_t                      lock;          /* Device mutex */
-  sem_t                        sem_isr;       /* ISR wait semaphore */
-
-  uint32_t                     frequency;     /* Current frequency */
-  uint32_t                     actual;        /* Actual frequency */
-  enum spi_mode_e              mode;          /* Current SPI mode */
-  uint8_t                      nbits;         /* Data width (8 bits) */
-  bool                         lsbfirst;      /* LSB first */
-
-  /* Transfer state */
-
-  const uint8_t               *txbuffer;      /* TX buffer pointer */
-  uint8_t                     *rxbuffer;      /* RX buffer pointer */
-  size_t                       ntxwords;      /* TX words remaining */
-  size_t                       nrxwords;      /* RX words remaining */
-  bool                         error;         /* Transfer error flag */
-
-  /* Interrupt request numbers (dynamically assigned) */
-
-  int                          rxi_irq;       /* RX interrupt */
-  int                          txi_irq;       /* TX interrupt */
-  int                          tei_irq;       /* TE interrupt */
-  int                          eri_irq;       /* ER interrupt */
-
-#ifdef CONFIG_PM
-  struct pm_callback_s         pmcb;          /* PM callbacks */
+#ifdef CONFIG_RZV_SCI0_SPI
+#  ifndef BOARD_SCI0_SPI_MOSI_GPIO
+#    error "CONFIG_RZV_SCI0_SPI requires BOARD_SCI0_SPI_MOSI_GPIO in board.h"
+#  endif
+#  ifndef BOARD_SCI0_SPI_MISO_GPIO
+#    error "CONFIG_RZV_SCI0_SPI requires BOARD_SCI0_SPI_MISO_GPIO in board.h"
+#  endif
+#  ifndef BOARD_SCI0_SPI_SCK_GPIO
+#    error "CONFIG_RZV_SCI0_SPI requires BOARD_SCI0_SPI_SCK_GPIO in board.h"
+#  endif
 #endif
-};
+
+#ifdef CONFIG_RZV_SCI1_SPI
+#  ifndef BOARD_SCI1_SPI_MOSI_GPIO
+#    error "CONFIG_RZV_SCI1_SPI requires BOARD_SCI1_SPI_MOSI_GPIO in board.h"
+#  endif
+#  ifndef BOARD_SCI1_SPI_MISO_GPIO
+#    error "CONFIG_RZV_SCI1_SPI requires BOARD_SCI1_SPI_MISO_GPIO in board.h"
+#  endif
+#  ifndef BOARD_SCI1_SPI_SCK_GPIO
+#    error "CONFIG_RZV_SCI1_SPI requires BOARD_SCI1_SPI_SCK_GPIO in board.h"
+#  endif
+#endif
+
+#ifdef CONFIG_RZV_SCI2_SPI
+#  ifndef BOARD_SCI2_SPI_MOSI_GPIO
+#    error "CONFIG_RZV_SCI2_SPI requires BOARD_SCI2_SPI_MOSI_GPIO in board.h"
+#  endif
+#  ifndef BOARD_SCI2_SPI_MISO_GPIO
+#    error "CONFIG_RZV_SCI2_SPI requires BOARD_SCI2_SPI_MISO_GPIO in board.h"
+#  endif
+#  ifndef BOARD_SCI2_SPI_SCK_GPIO
+#    error "CONFIG_RZV_SCI2_SPI requires BOARD_SCI2_SPI_SCK_GPIO in board.h"
+#  endif
+#endif
+
+#ifdef CONFIG_RZV_SCI3_SPI
+#  ifndef BOARD_SCI3_SPI_MOSI_GPIO
+#    error "CONFIG_RZV_SCI3_SPI requires BOARD_SCI3_SPI_MOSI_GPIO in board.h"
+#  endif
+#  ifndef BOARD_SCI3_SPI_MISO_GPIO
+#    error "CONFIG_RZV_SCI3_SPI requires BOARD_SCI3_SPI_MISO_GPIO in board.h"
+#  endif
+#  ifndef BOARD_SCI3_SPI_SCK_GPIO
+#    error "CONFIG_RZV_SCI3_SPI requires BOARD_SCI3_SPI_SCK_GPIO in board.h"
+#  endif
+#endif
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-/* Low-level helpers */
-
-static void rzv_sci_spi_putreg32(struct rzv_sci_spi_priv_s *priv,
-                                 uint8_t offset, uint32_t value);
-static uint32_t rzv_sci_spi_getreg32(struct rzv_sci_spi_priv_s *priv,
-                                     uint8_t offset);
-static void rzv_sci_spi_putreg8(struct rzv_sci_spi_priv_s *priv,
-                                uint8_t offset, uint8_t value);
-static uint8_t rzv_sci_spi_getreg8(struct rzv_sci_spi_priv_s *priv,
-                                   uint8_t offset);
-
-/* Hardware configuration */
-
-static void rzv_sci_spi_hw_initialize(struct rzv_sci_spi_priv_s *priv);
-static void rzv_sci_spi_hw_configure(struct rzv_sci_spi_priv_s *priv);
-static int rzv_sci_spi_calculate_bitrate(uint32_t bitrate,
-                                         uint8_t *brr, uint8_t *cks,
-                                         uint8_t *mddr);
-
-/* Transfer helpers */
-
-static void rzv_sci_spi_writeword(struct rzv_sci_spi_priv_s *priv,
-                                  uint8_t data);
-static uint8_t rzv_sci_spi_readword(struct rzv_sci_spi_priv_s *priv);
-static void rzv_sci_spi_enable(struct rzv_sci_spi_priv_s *priv);
-static void rzv_sci_spi_disable(struct rzv_sci_spi_priv_s *priv);
-
-/* Interrupt handling */
-
-static int rzv_sci_spi_rxi_interrupt(int irq, void *context, void *arg);
-static int rzv_sci_spi_txi_interrupt(int irq, void *context, void *arg);
-static int rzv_sci_spi_tei_interrupt(int irq, void *context, void *arg);
-static int rzv_sci_spi_eri_interrupt(int irq, void *context, void *arg);
-
-/* SPI methods */
-
-static int rzv_sci_spi_lock(struct spi_dev_s *dev, bool lock);
-static uint32_t rzv_sci_spi_setfrequency(struct spi_dev_s *dev,
-                                         uint32_t frequency);
-static void rzv_sci_spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode);
-static void rzv_sci_spi_setbits(struct spi_dev_s *dev, int nbits);
-#ifdef CONFIG_SPI_HWFEATURES
-static int rzv_sci_spi_hwfeatures(struct spi_dev_s *dev,
-                                  spi_hwfeatures_t features);
-#endif
-static uint32_t rzv_sci_spi_send(struct spi_dev_s *dev, uint32_t wd);
-static void rzv_sci_spi_exchange(struct spi_dev_s *dev,
+static int      sci_spi_lock(struct spi_dev_s *dev, bool lock);
+static uint32_t sci_spi_setfrequency(struct spi_dev_s *dev,
+                                     uint32_t frequency);
+static void     sci_spi_setmode(struct spi_dev_s *dev,
+                                enum spi_mode_e mode);
+static void     sci_spi_setbits(struct spi_dev_s *dev, int nbits);
+static uint32_t sci_spi_send(struct spi_dev_s *dev, uint32_t wd);
+static void     sci_spi_exchange(struct spi_dev_s *dev,
                                  const void *txbuffer,
                                  void *rxbuffer, size_t nwords);
 #ifndef CONFIG_SPI_EXCHANGE
-static void rzv_sci_spi_sndblock(struct spi_dev_s *dev,
-                                 const void *txbuffer,
-                                 size_t nwords);
-static void rzv_sci_spi_recvblock(struct spi_dev_s *dev, void *rxbuffer,
-                                  size_t nwords);
+static void     sci_spi_sndblock(struct spi_dev_s *dev,
+                                 const void *txbuffer, size_t nwords);
+static void     sci_spi_recvblock(struct spi_dev_s *dev,
+                                  void *rxbuffer, size_t nwords);
 #endif
 
-/* Weak external functions */
+/* Weak board-supplied callbacks — stubs prevent link errors */
 
-const struct rzv_sci_spi_ext_dev_config_s *
-weak_function rzv_sci_spi_get_dev_config(struct spi_dev_s *dev,
+void weak_function rzv_sci_spi_select(struct spi_dev_s *dev,
+                                      uint32_t devid, bool selected);
+uint8_t weak_function rzv_sci_spi_status(struct spi_dev_s *dev,
                                          uint32_t devid);
+#ifdef CONFIG_SPI_CMDDATA
+int weak_function rzv_sci_spi_cmddata(struct spi_dev_s *dev,
+                                      uint32_t devid, bool cmd);
+#endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/* SCI_B SPI operations */
+/* NuttX SPI ops table */
 
-static const struct spi_ops_s rzv_sci_spi_ops =
+static const struct spi_ops_s g_sci_spi_ops =
 {
-  .lock              = rzv_sci_spi_lock,
-  .select            = rzv_sci_spi_select,    /* Provided externally */
-  .setfrequency      = rzv_sci_spi_setfrequency,
-  .setmode           = rzv_sci_spi_setmode,
-  .setbits           = rzv_sci_spi_setbits,
-#ifdef CONFIG_SPI_HWFEATURES
-  .hwfeatures        = rzv_sci_spi_hwfeatures,
-#endif
-  .status            = rzv_sci_spi_status,     /* Provided externally */
+  .lock         = sci_spi_lock,
+  .select       = rzv_sci_spi_select,    /* board-supplied weak */
+  .setfrequency = sci_spi_setfrequency,
+  .setmode      = sci_spi_setmode,
+  .setbits      = sci_spi_setbits,
+  .status       = rzv_sci_spi_status,    /* board-supplied weak */
 #ifdef CONFIG_SPI_CMDDATA
-  .cmddata           = rzv_sci_spi_cmddata,    /* Provided externally */
+  .cmddata      = rzv_sci_spi_cmddata,   /* board-supplied weak */
 #endif
-  .send              = rzv_sci_spi_send,
+  .send         = sci_spi_send,
 #ifdef CONFIG_SPI_EXCHANGE
-  .exchange          = rzv_sci_spi_exchange,
+  .exchange     = sci_spi_exchange,
 #else
-  .sndblock          = rzv_sci_spi_sndblock,
-  .recvblock         = rzv_sci_spi_recvblock,
-#endif
-#ifdef CONFIG_SPI_CALLBACK
-  .registercallback  = rzv_sci_spi_register_callback, /* Provided externally */
+  .sndblock     = sci_spi_sndblock,
+  .recvblock    = sci_spi_recvblock,
 #endif
 };
 
-/* SCI_B SPI device configurations */
+/* Per-channel ELC event table (indexed [channel][0=txi,1=rxi,2=tei,3=eri]) */
 
-#ifdef CONFIG_RZV_SCI0_SPI
-static const struct rzv_sci_spi_config_s rzv_sci0_spi_config =
+static const int g_sci_spi_events[SCI_SPI_MAX_CHANNELS][4] =
 {
-  .base     = RZV_SCI0_BASE,
-  .channel  = 0,
-  .rxi_elc  = RZV_ELC_SC_ELCRDRF_0,
-  .txi_elc  = RZV_ELC_SC_ELCTDRE_0,
-  .tei_elc  = RZV_ELC_SC_ELCTEND_0,
-  .eri_elc  = RZV_ELC_SC_ELCER_0,
+  { ELC_EVENT_SCI0_TXI, ELC_EVENT_SCI0_RXI,
+    ELC_EVENT_SCI0_TEI, ELC_EVENT_SCI0_ERI },
+  { ELC_EVENT_SCI1_TXI, ELC_EVENT_SCI1_RXI,
+    ELC_EVENT_SCI1_TEI, ELC_EVENT_SCI1_ERI },
+  { ELC_EVENT_SCI2_TXI, ELC_EVENT_SCI2_RXI,
+    ELC_EVENT_SCI2_TEI, ELC_EVENT_SCI2_ERI },
+  { ELC_EVENT_SCI3_TXI, ELC_EVENT_SCI3_RXI,
+    ELC_EVENT_SCI3_TEI, ELC_EVENT_SCI3_ERI },
+  { RZV_ELC_SC_ELCTDRE_4, RZV_ELC_SC_ELCRDRF_4,
+    RZV_ELC_SC_ELCTEND_4, RZV_ELC_SC_ELCER_4 },
+  { RZV_ELC_SC_ELCTDRE_5, RZV_ELC_SC_ELCRDRF_5,
+    RZV_ELC_SC_ELCTEND_5, RZV_ELC_SC_ELCER_5 },
+  { RZV_ELC_SC_ELCTDRE_6, RZV_ELC_SC_ELCRDRF_6,
+    RZV_ELC_SC_ELCTEND_6, RZV_ELC_SC_ELCER_6 },
+  { RZV_ELC_SC_ELCTDRE_7, RZV_ELC_SC_ELCRDRF_7,
+    RZV_ELC_SC_ELCTEND_7, RZV_ELC_SC_ELCER_7 },
+  { RZV_ELC_SC_ELCTDRE_8, RZV_ELC_SC_ELCRDRF_8,
+    RZV_ELC_SC_ELCTEND_8, RZV_ELC_SC_ELCER_8 },
+  { RZV_ELC_SC_ELCTDRE_9, RZV_ELC_SC_ELCRDRF_9,
+    RZV_ELC_SC_ELCTEND_9, RZV_ELC_SC_ELCER_9 },
 };
 
-static struct rzv_sci_spi_priv_s rzv_sci0_spi_priv =
-{
-  .spi_dev =
-  {
-    .ops = &rzv_sci_spi_ops,
-  },
-  .config = &rzv_sci0_spi_config,
-};
-#endif
+/* Per-channel base address table */
 
-#ifdef CONFIG_RZV_SCI1_SPI
-static const struct rzv_sci_spi_config_s rzv_sci1_spi_config =
+static const uint32_t g_sci_base[SCI_SPI_MAX_CHANNELS] =
 {
-  .base     = RZV_SCI1_BASE,
-  .channel  = 1,
-  .rxi_elc  = RZV_ELC_SC_ELCRDRF_1,
-  .txi_elc  = RZV_ELC_SC_ELCTDRE_1,
-  .tei_elc  = RZV_ELC_SC_ELCTEND_1,
-  .eri_elc  = RZV_ELC_SC_ELCER_1,
+  RZV_SCI0_BASE, RZV_SCI1_BASE, RZV_SCI2_BASE, RZV_SCI3_BASE,
+  RZV_SCI4_BASE, RZV_SCI5_BASE, RZV_SCI6_BASE, RZV_SCI7_BASE,
+  RZV_SCI8_BASE, RZV_SCI9_BASE,
 };
 
-static struct rzv_sci_spi_priv_s rzv_sci1_spi_priv =
-{
-  .spi_dev =
-  {
-    .ops = &rzv_sci_spi_ops,
-  },
-  .config = &rzv_sci1_spi_config,
-};
-#endif
+/* Per-channel CPG clock IDs */
 
-/* Additional SCI channels 2-9 would follow the same pattern */
+static const uint32_t g_sci_clk[SCI_SPI_MAX_CHANNELS] =
+{
+  RZV_CPG_CLK_SCI0, RZV_CPG_CLK_SCI1,
+  RZV_CPG_CLK_SCI2, RZV_CPG_CLK_SCI3,
+  RZV_CPG_CLK_SCI4, RZV_CPG_CLK_SCI5,
+  RZV_CPG_CLK_SCI6, RZV_CPG_CLK_SCI7,
+  RZV_CPG_CLK_SCI8, RZV_CPG_CLK_SCI9,
+};
+
+/* Static per-channel private structures — no heap (#13 fix) */
+
+static struct rzv_sci_spi_priv_s g_sci_spi_priv[SCI_SPI_MAX_CHANNELS];
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: rzv_sci_spi_putreg32
+ * Name: sci_spi_hw_configure
  *
  * Description:
- *   Write 32-bit value to SCI_B register
+ *   One-shot hardware initialisation: reset → SPI mode → FIFO → baud.
+ *   Called once from rzv_sci_spi_initialize() after clocks are enabled.
+ *   Does NOT re-enable TE/RE — exchange() enables them before each xfer.
  *
  ****************************************************************************/
 
-static void rzv_sci_spi_putreg32(struct rzv_sci_spi_priv_s *priv,
-                                 uint8_t offset, uint32_t value)
+static int sci_spi_hw_configure(struct rzv_sci_spi_priv_s *priv)
 {
-  putreg32(value, priv->config->base + offset);
-}
-
-/****************************************************************************
- * Name: rzv_sci_spi_getreg32
- *
- * Description:
- *   Read 32-bit value from SCI_B register
- *
- ****************************************************************************/
-
-static uint32_t rzv_sci_spi_getreg32(struct rzv_sci_spi_priv_s *priv,
-                                     uint8_t offset)
-{
-  return getreg32(priv->config->base + offset);
-}
-
-/****************************************************************************
- * Name: rzv_sci_spi_putreg8
- *
- * Description:
- *   Write 8-bit value to SCI_B register
- *
- ****************************************************************************/
-
-static void rzv_sci_spi_putreg8(struct rzv_sci_spi_priv_s *priv,
-                                uint8_t offset, uint8_t value)
-{
-  putreg8(value, priv->config->base + offset);
-}
-
-/****************************************************************************
- * Name: rzv_sci_spi_getreg8
- *
- * Description:
- *   Read 8-bit value from SCI_B register
- *
- ****************************************************************************/
-
-static uint8_t rzv_sci_spi_getreg8(struct rzv_sci_spi_priv_s *priv,
-                                   uint8_t offset)
-{
-  return getreg8(priv->config->base + offset);
-}
-
-/****************************************************************************
- * Name: rzv_sci_spi_calculate_bitrate
- *
- * Description:
- *   Calculate baud rate generator settings for desired frequency
- *
- * Input Parameters:
- *   bitrate - Desired SPI bit rate
- *   brr     - Pointer to store BRR value
- *   cks     - Pointer to store CKS value (clock source divisor)
- *   mddr    - Pointer to store MDDR value (modulation duty)
- *
- * Returned Value:
- *   OK on success; a negated errno on failure
- *
- ****************************************************************************/
-
-static int rzv_sci_spi_calculate_bitrate(uint32_t bitrate,
-                                         uint8_t *brr, uint8_t *cks,
-                                         uint8_t *mddr)
-{
+  uint32_t base  = priv->base;
+  uint32_t timeout;
+  uint8_t  brr;
+  uint8_t  cks;
+  uint8_t  mddr;
+  uint32_t ccr3;
+  uint32_t ccr2;
+  uint32_t fcr;
   uint32_t pclk;
-  uint32_t divisor;
-  uint32_t n;
-  uint8_t  k;
-  uint32_t best_diff = UINT32_MAX;
-  uint8_t  best_brr = 0;
-  uint8_t  best_cks = 0;
-  uint32_t actual_rate;
-  uint32_t diff;
+  int      ret;
 
-  /* Get peripheral clock */
+  /* Step 1: Disable TE/RE (CCR0 = 0) */
 
-  pclk = rzv_get_pclk();
+  putreg32(0u, base + RZV_SCI_CCR0_OFFSET);
 
-  /* Try different clock divider settings */
+  /* Step 2: Wait for CESR quiescence */
 
-  for (k = 0; k <= 3; k++)
+  for (timeout = SCI_SPI_CESR_TIMEOUT; timeout > 0; timeout--)
     {
-      /* Calculate required divisor: PCLK / (divider * bitrate * 2) - 1 */
-
-      divisor = 1 << (2 * k);  /* CKS: 0=÷1, 1=÷4, 2=÷16, 3=÷64 */
-
-      /* Calculate BRR: n = (PCLK / (divisor * bitrate * 2)) - 1 */
-
-      n = (pclk / (divisor * bitrate * 2)) - 1;
-
-      if (n <= R_SCI_SPI_CLK_MAX_N)
+      if ((getreg32(base + RZV_SCI_CESR_OFFSET) &
+           (SCI_CESR_RIST | SCI_CESR_TIST)) == 0u)
         {
-          /* Calculate actual rate */
-
-          actual_rate = pclk / (divisor * 2 * (n + 1));
-          diff = (actual_rate > bitrate) ?
-                 (actual_rate - bitrate) : (bitrate - actual_rate);
-
-          if (diff < best_diff)
-            {
-              best_diff = diff;
-              best_brr = n;
-              best_cks = k;
-            }
+          break;
         }
     }
 
-  if (best_diff == UINT32_MAX)
+  if (timeout == 0u)
     {
-      return -EINVAL;
+      spierr("SCI%u: CESR quiescence timeout\n", priv->channel);
+      return -ETIMEDOUT;
     }
 
-  *brr = best_brr;
-  *cks = best_cks;
-  *mddr = 0;  /* Not using modulation */
+  /* Step 3: CCR3 — Simple-SPI mode, 8-bit, FIFO, internal SCK output */
 
-  return OK;
-}
+  ccr3 = SCI_CCR3_MOD_SPI |              /* MOD=3: Simple SPI */
+         SCI_CCR3_CHR_8BIT |             /* 8-bit character length */
+         SCI_CCR3_FM |                   /* FIFO mode enable */
+         SCI_CCR3_CKE_INT_SCK_OUT;       /* Internal clock, SCK output */
 
-/****************************************************************************
- * Name: rzv_sci_spi_hw_configure
- *
- * Description:
- *   Configure SCI_B hardware for SPI mode
- *
- ****************************************************************************/
-
-static void rzv_sci_spi_hw_configure(struct rzv_sci_spi_priv_s *priv)
-{
-  uint32_t ccr0, ccr1, ccr2, ccr3, fcr;
-  uint8_t brr, cks, mddr;
-
-  /* Disable SCI_B */
-
-  rzv_sci_spi_disable(priv);
-
-  /* Clear all flags */
-
-  rzv_sci_spi_putreg32(priv, RZV_SCI_CFCLR_OFFSET, 0xFFFFFFFF);
-  rzv_sci_spi_putreg32(priv, RZV_SCI_FFCLR_OFFSET, 0xFFFFFFFF);
-
-  /* Configure CCR3 for SPI mode */
-
-  ccr3 = SCI_CCR3_MOD_SPI;           /* SPI mode */
-  ccr3 |= SCI_CCR3_CHR_8BIT;         /* 8-bit data */
-  ccr3 |= SCI_CCR3_FM;               /* FIFO mode */
-  ccr3 |= SCI_CCR3_CKE_INT_SCK_OUT;  /* Internal clock, SCK output */
-
-  /* Configure clock phase and polarity based on mode */
+  /* CPOL/CPHA per SPI mode.
+   * SCI-B CCR3: CPHA=bit0, CPOL=bit1.
+   * NuttX spi_mode_e: MODE0={CPOL=0,CPHA=0}, MODE1={0,1},
+   *                   MODE2={CPOL=1,CPHA=0}, MODE3={1,1}.
+   * FSP r_sci_b_spi.c uses same mapping — verified.
+   */
 
   switch (priv->mode)
     {
-      case SPIDEV_MODE0:
-        /* CPOL=0, CPHA=0 */
-
+      case SPIDEV_MODE0: /* CPOL=0, CPHA=0 */
         break;
-
-      case SPIDEV_MODE1:
-        /* CPOL=0, CPHA=1 */
-
+      case SPIDEV_MODE1: /* CPOL=0, CPHA=1 */
         ccr3 |= SCI_CCR3_CPHA;
         break;
-
-      case SPIDEV_MODE2:
-        /* CPOL=1, CPHA=0 */
-
+      case SPIDEV_MODE2: /* CPOL=1, CPHA=0 */
         ccr3 |= SCI_CCR3_CPOL;
         break;
-
-      case SPIDEV_MODE3:
-        /* CPOL=1, CPHA=1 */
-
+      case SPIDEV_MODE3: /* CPOL=1, CPHA=1 */
         ccr3 |= SCI_CCR3_CPHA | SCI_CCR3_CPOL;
         break;
+      default:
+        break;
     }
-
-  /* Configure bit order */
 
   if (priv->lsbfirst)
     {
       ccr3 |= SCI_CCR3_LSBF;
     }
 
-  rzv_sci_spi_putreg32(priv, RZV_SCI_CCR3_OFFSET, ccr3);
+  putreg32(ccr3, base + RZV_SCI_CCR3_OFFSET);
 
-  /* Calculate and configure baud rate */
+  /* Step 4: CCR2 — compute baud settings (#2/#10 fix: correct PCLK source) */
 
-  if (rzv_sci_spi_calculate_bitrate(priv->frequency, &brr, &cks, &mddr) == OK)
+  pclk = rzv_clock_get_rate(RZV_CLOCK_P5CLK);
+  if (pclk == 0u)
     {
-      ccr2 = (brr << SCI_CCR2_BRR_SHIFT) | (cks << SCI_CCR2_CKS_SHIFT);
-      if (mddr != 0)
-        {
-          ccr2 |= SCI_CCR2_BRME | (mddr << SCI_CCR2_MDDR_SHIFT);
-        }
-
-      rzv_sci_spi_putreg32(priv, RZV_SCI_CCR2_OFFSET, ccr2);
+      pclk = SCI_SPI_PCLK_FALLBACK_HZ;
     }
 
-  /* Configure CCR0 */
-
-  ccr0 = SCI_CCR0_RE |    /* Receive enable */
-         SCI_CCR0_TE |    /* Transmit enable */
-         SCI_CCR0_RIE |   /* RX interrupt enable */
-         SCI_CCR0_TIE |   /* TX interrupt enable */
-         SCI_CCR0_TEIE;   /* TE interrupt enable */
-
-  rzv_sci_spi_putreg32(priv, RZV_SCI_CCR0_OFFSET, ccr0);
-
-  /* Configure CCR1 (noise filter, etc.) */
-
-  ccr1 = 0;  /* Default settings */
-  rzv_sci_spi_putreg32(priv, RZV_SCI_CCR1_OFFSET, ccr1);
-
-  /* Configure FIFO */
-
-  fcr = (1 << SCI_FCR_RTRG_SHIFT) |   /* RX trigger level = 1 */
-        (1 << SCI_FCR_TTRG_SHIFT);    /* TX trigger level = 1 */
-  rzv_sci_spi_putreg32(priv, RZV_SCI_FCR_OFFSET, fcr);
-
-  /* Reset FIFOs */
-
-  rzv_sci_spi_putreg32(priv, RZV_SCI_FCR_OFFSET,
-                       fcr | SCI_FCR_RFRST | SCI_FCR_TFRST);
-  rzv_sci_spi_putreg32(priv, RZV_SCI_FCR_OFFSET, fcr);
-
-  ARM_DSB();
-  ARM_ISB();
-}
-
-/****************************************************************************
- * Name: rzv_sci_spi_hw_initialize
- *
- * Description:
- *   Initialize SCI_B hardware
- *
- ****************************************************************************/
-
-static void rzv_sci_spi_hw_initialize(struct rzv_sci_spi_priv_s *priv)
-{
-  /* Enable module clock (MSTP) */
-
-  /* Note: Clock enabling should be done in board-specific code */
-
-  /* Configure hardware */
-
-  rzv_sci_spi_hw_configure(priv);
-
-  spiinfo("SCI%d SPI initialized\n", priv->config->channel);
-}
-
-/****************************************************************************
- * Name: rzv_sci_spi_writeword
- *
- * Description:
- *   Write one byte to SCI_B TX register
- *
- ****************************************************************************/
-
-static void rzv_sci_spi_writeword(struct rzv_sci_spi_priv_s *priv,
-                                  uint8_t data)
-{
-  rzv_sci_spi_putreg8(priv, RZV_SCI_TDR_OFFSET, data);
-}
-
-/****************************************************************************
- * Name: rzv_sci_spi_readword
- *
- * Description:
- *   Read one byte from SCI_B RX register
- *
- ****************************************************************************/
-
-static uint8_t rzv_sci_spi_readword(struct rzv_sci_spi_priv_s *priv)
-{
-  return rzv_sci_spi_getreg8(priv, RZV_SCI_RDR_OFFSET);
-}
-
-/****************************************************************************
- * Name: rzv_sci_spi_enable
- *
- * Description:
- *   Enable SCI_B SPI
- *
- ****************************************************************************/
-
-static void rzv_sci_spi_enable(struct rzv_sci_spi_priv_s *priv)
-{
-  uint32_t ccr0;
-
-  ccr0 = rzv_sci_spi_getreg32(priv, RZV_SCI_CCR0_OFFSET);
-  ccr0 |= SCI_CCR0_RE | SCI_CCR0_TE;
-  rzv_sci_spi_putreg32(priv, RZV_SCI_CCR0_OFFSET, ccr0);
-
-  ARM_DSB();
-  ARM_ISB();
-}
-
-/****************************************************************************
- * Name: rzv_sci_spi_disable
- *
- * Description:
- *   Disable SCI_B SPI
- *
- ****************************************************************************/
-
-static void rzv_sci_spi_disable(struct rzv_sci_spi_priv_s *priv)
-{
-  uint32_t ccr0;
-
-  ccr0 = rzv_sci_spi_getreg32(priv, RZV_SCI_CCR0_OFFSET);
-  ccr0 &= ~(SCI_CCR0_RE | SCI_CCR0_TE);
-  rzv_sci_spi_putreg32(priv, RZV_SCI_CCR0_OFFSET, ccr0);
-
-  ARM_DSB();
-  ARM_ISB();
-}
-
-/****************************************************************************
- * Name: rzv_sci_spi_rxi_interrupt
- *
- * Description:
- *   RX interrupt handler
- *
- ****************************************************************************/
-
-static int rzv_sci_spi_rxi_interrupt(int irq, void *context, void *arg)
-{
-  struct rzv_sci_spi_priv_s *priv = (struct rzv_sci_spi_priv_s *)arg;
-  uint32_t csr;
-  uint8_t data;
-
-  csr = rzv_sci_spi_getreg32(priv, RZV_SCI_CSR_OFFSET);
-
-  /* Check for receive data full */
-
-  if (csr & SCI_CSR_RDRF)
+  ret = rzv_sci_spi_calc_bitrate(pclk, priv->frequency, &brr, &cks, &mddr);
+  if (ret < 0)
     {
-      /* Read data */
-
-      data = rzv_sci_spi_readword(priv);
-
-      if (priv->rxbuffer && priv->nrxwords > 0)
-        {
-          *priv->rxbuffer++ = data;
-          priv->nrxwords--;
-        }
-
-      /* Clear flag */
-
-      rzv_sci_spi_putreg32(priv, RZV_SCI_CFCLR_OFFSET, SCI_CFCLR_RDRFC);
+      spierr("SCI%u: no valid baud for freq=%u pclk=%u\n",
+             priv->channel, (unsigned)priv->frequency, (unsigned)pclk);
+      return ret;
     }
 
-  /* Check if transfer complete */
+  ccr2 = ((uint32_t)brr  << SCI_CCR2_BRR_SHIFT)  |
+         ((uint32_t)cks  << SCI_CCR2_CKS_SHIFT)  |
+         ((uint32_t)mddr << SCI_CCR2_MDDR_SHIFT) |
+         (mddr ? SCI_CCR2_BRME : 0u);
+  putreg32(ccr2, base + RZV_SCI_CCR2_OFFSET);
 
-  if (priv->nrxwords == 0 && priv->ntxwords == 0)
-    {
-      /* Disable interrupts */
+  /* Record actual frequency for setfrequency() return value */
 
-      uint32_t ccr0 = rzv_sci_spi_getreg32(priv, RZV_SCI_CCR0_OFFSET);
-      ccr0 &= ~(SCI_CCR0_RIE | SCI_CCR0_TIE);
-      rzv_sci_spi_putreg32(priv, RZV_SCI_CCR0_OFFSET, ccr0);
+  {
+    uint32_t div = 1u << (2u * (uint32_t)cks);
+    priv->actual = pclk / (2u * div * ((uint32_t)brr + 1u));
+  }
 
-      /* Wake up waiting thread */
+  /* Step 5: CCR1 = 0 (no noise filter needed in SPI mode) */
 
-      nxsem_post(&priv->sem_isr);
-    }
+  putreg32(0u, base + RZV_SCI_CCR1_OFFSET);
+
+  /* Step 6: CCR4 = 0 */
+
+  putreg32(0u, base + RZV_SCI_CCR4_OFFSET);
+
+  /* Step 7: FIFO — RX trigger=8, TX trigger=8 (FIFO_DEPTH/2), then reset.
+   * With RTRG=8, RXI fires every 8 bytes; the last (nwords % 8) bytes are
+   * captured by the TEI handler which drains the RX FIFO before posting.
+   * TEIE is always enabled so TEI is the completion signal for ALL transfer
+   * sizes, including those smaller than RTRG.  (A9 fix)
+   */
+
+  fcr = ((RZV_SCI_SPI_FIFO_DEPTH / 2u) << SCI_FCR_RTRG_SHIFT) |
+        ((RZV_SCI_SPI_FIFO_DEPTH / 2u) << SCI_FCR_TTRG_SHIFT);
+  putreg32(fcr | SCI_FCR_RFRST | SCI_FCR_TFRST, base + RZV_SCI_FCR_OFFSET);
+  putreg32(fcr, base + RZV_SCI_FCR_OFFSET);
+
+  /* Step 8: Clear all status flags (W1C — use named bits, not 0xFFFFFFFF) */
+
+  putreg32(SCI_CFCLR_RDRFC | SCI_CFCLR_TDREC | SCI_CFCLR_ERSC |
+           SCI_CFCLR_DCMFC | SCI_CFCLR_DPERC | SCI_CFCLR_DFERC |
+           SCI_CFCLR_ORERC | SCI_CFCLR_MFFC  | SCI_CFCLR_PERC  |
+           SCI_CFCLR_FERC,
+           base + RZV_SCI_CFCLR_OFFSET);
+  putreg32(SCI_FFCLR_DRC, base + RZV_SCI_FFCLR_OFFSET);
+
+  /* Note: CCR0 (TE|RE) enabled in exchange() before each transfer */
 
   return OK;
 }
 
 /****************************************************************************
- * Name: rzv_sci_spi_txi_interrupt
- *
- * Description:
- *   TX interrupt handler
- *
+ * Name: sci_spi_lock
  ****************************************************************************/
 
-static int rzv_sci_spi_txi_interrupt(int irq, void *context, void *arg)
-{
-  struct rzv_sci_spi_priv_s *priv = (struct rzv_sci_spi_priv_s *)arg;
-  uint32_t csr;
-  uint8_t data;
-
-  csr = rzv_sci_spi_getreg32(priv, RZV_SCI_CSR_OFFSET);
-
-  /* Check for transmit data empty */
-
-  if (csr & SCI_CSR_TDRE)
-    {
-      if (priv->ntxwords > 0)
-        {
-          /* Get next byte to transmit */
-
-          data = priv->txbuffer ? *priv->txbuffer++ : 0xFF;
-          priv->ntxwords--;
-
-          /* Write data */
-
-          rzv_sci_spi_writeword(priv, data);
-
-          /* Clear flag */
-
-          rzv_sci_spi_putreg32(priv, RZV_SCI_CFCLR_OFFSET, SCI_CFCLR_TDREC);
-        }
-    }
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: rzv_sci_spi_tei_interrupt
- *
- * Description:
- *   TE (transmit end) interrupt handler
- *
- ****************************************************************************/
-
-static int rzv_sci_spi_tei_interrupt(int irq, void *context, void *arg)
-{
-  struct rzv_sci_spi_priv_s *priv = (struct rzv_sci_spi_priv_s *)arg;
-  uint32_t csr;
-
-  csr = rzv_sci_spi_getreg32(priv, RZV_SCI_CSR_OFFSET);
-
-  if (csr & SCI_CSR_TEND)
-    {
-      /* Transmission complete */
-
-      spiinfo("TE interrupt\n");
-    }
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: rzv_sci_spi_eri_interrupt
- *
- * Description:
- *   Error interrupt handler
- *
- ****************************************************************************/
-
-static int rzv_sci_spi_eri_interrupt(int irq, void *context, void *arg)
-{
-  struct rzv_sci_spi_priv_s *priv = (struct rzv_sci_spi_priv_s *)arg;
-  uint32_t csr;
-
-  csr = rzv_sci_spi_getreg32(priv, RZV_SCI_CSR_OFFSET);
-
-  /* Check for errors */
-
-  if (csr & (SCI_CSR_ORER | SCI_CSR_PER | SCI_CSR_FER | SCI_CSR_MFF))
-    {
-      spierr("SCI%d error: CSR=0x%08x\n", priv->config->channel, csr);
-      priv->error = true;
-
-      /* Clear error flags */
-
-      rzv_sci_spi_putreg32(priv, RZV_SCI_CFCLR_OFFSET,
-                           SCI_CFCLR_ORERC | SCI_CFCLR_PERC |
-                           SCI_CFCLR_FERC | SCI_CFCLR_MFFC);
-
-      /* Wake up waiting thread */
-
-      nxsem_post(&priv->sem_isr);
-    }
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: rzv_sci_spi_lock
- *
- * Description:
- *   Lock/unlock the SPI device
- *
- ****************************************************************************/
-
-static int rzv_sci_spi_lock(struct spi_dev_s *dev, bool lock)
+static int sci_spi_lock(struct spi_dev_s *dev, bool lock)
 {
   struct rzv_sci_spi_priv_s *priv = (struct rzv_sci_spi_priv_s *)dev;
-  int ret;
 
   if (lock)
     {
-      ret = nxmutex_lock(&priv->lock);
+      return nxmutex_lock(&priv->lock);
     }
   else
     {
-      ret = nxmutex_unlock(&priv->lock);
+      return nxmutex_unlock(&priv->lock);
     }
-
-  return ret;
 }
 
 /****************************************************************************
- * Name: rzv_sci_spi_setfrequency
+ * Name: sci_spi_setfrequency
  *
  * Description:
- *   Set the SPI frequency
+ *   Update baud rate.  Patches CCR2 only; skips if unchanged or BUSY.
+ *   (#15 fix: no full hw_configure on each setfrequency call)
  *
  ****************************************************************************/
 
-static uint32_t rzv_sci_spi_setfrequency(struct spi_dev_s *dev,
-                                         uint32_t frequency)
+static uint32_t sci_spi_setfrequency(struct spi_dev_s *dev,
+                                     uint32_t frequency)
 {
   struct rzv_sci_spi_priv_s *priv = (struct rzv_sci_spi_priv_s *)dev;
-  uint8_t brr, cks, mddr;
+  uint8_t  brr;
+  uint8_t  cks;
+  uint8_t  mddr;
   uint32_t pclk;
-  uint32_t divisor;
+  uint32_t ccr2;
+  uint32_t div;
 
-  if (frequency != priv->frequency)
+  DEBUGASSERT(priv != NULL);
+
+  if (frequency == 0u)
     {
-      /* Limit frequency range */
-
-      if (frequency > RZV_SCI_SPI_MAX_FREQUENCY)
-        {
-          frequency = RZV_SCI_SPI_MAX_FREQUENCY;
-        }
-      else if (frequency < RZV_SCI_SPI_MIN_FREQUENCY)
-        {
-          frequency = RZV_SCI_SPI_MIN_FREQUENCY;
-        }
-
-      priv->frequency = frequency;
-
-      /* Calculate actual frequency */
-
-      if (rzv_sci_spi_calculate_bitrate(frequency, &brr, &cks, &mddr) == OK)
-        {
-          pclk = rzv_get_pclk();
-          divisor = 1 << (2 * cks);
-          priv->actual = pclk / (divisor * 2 * (brr + 1));
-
-          /* Reconfigure hardware */
-
-          rzv_sci_spi_hw_configure(priv);
-        }
-
-      spiinfo("Frequency: %d -> %d\n", frequency, priv->actual);
+      return priv->actual;
     }
 
+  if (frequency == priv->frequency)
+    {
+      return priv->actual;
+    }
+
+  /* Reject change while transfer in progress */
+
+  if (priv->state == SCI_SPI_STATE_BUSY)
+    {
+      spiwarn("SCI%u: setfrequency while BUSY — ignored\n", priv->channel);
+      return priv->actual;
+    }
+
+  pclk = rzv_clock_get_rate(RZV_CLOCK_P5CLK);
+  if (pclk == 0u)
+    {
+      pclk = SCI_SPI_PCLK_FALLBACK_HZ;
+    }
+
+  if (rzv_sci_spi_calc_bitrate(pclk, frequency, &brr, &cks, &mddr) < 0)
+    {
+      spiwarn("SCI%u: no valid baud for %u Hz\n",
+              priv->channel, (unsigned)frequency);
+      return priv->actual;
+    }
+
+  priv->frequency = frequency;
+  div = 1u << (2u * (uint32_t)cks);
+  priv->actual = pclk / (2u * div * ((uint32_t)brr + 1u));
+
+  /* Patch CCR2 only — CCR3/FIFO unchanged */
+
+  ccr2 = ((uint32_t)brr  << SCI_CCR2_BRR_SHIFT)  |
+         ((uint32_t)cks  << SCI_CCR2_CKS_SHIFT)  |
+         ((uint32_t)mddr << SCI_CCR2_MDDR_SHIFT) |
+         (mddr ? SCI_CCR2_BRME : 0u);
+  putreg32(ccr2, priv->base + RZV_SCI_CCR2_OFFSET);
+
+  spiinfo("SCI%u freq %u → actual %u\n",
+          priv->channel, (unsigned)frequency, (unsigned)priv->actual);
   return priv->actual;
 }
 
 /****************************************************************************
- * Name: rzv_sci_spi_setmode
+ * Name: sci_spi_setmode
  *
  * Description:
- *   Set the SPI mode
+ *   Update SPI mode (CPOL/CPHA).  Patches CCR3 polarity bits only.
+ *   (#15 fix: no full hw_configure on each setmode call)
  *
  ****************************************************************************/
 
-static void rzv_sci_spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
+static void sci_spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 {
   struct rzv_sci_spi_priv_s *priv = (struct rzv_sci_spi_priv_s *)dev;
+  uint32_t ccr3;
 
-  if (mode != priv->mode)
+  DEBUGASSERT(priv != NULL);
+
+  if (mode == priv->mode)
     {
-      priv->mode = mode;
-      rzv_sci_spi_hw_configure(priv);
-      spiinfo("Mode: %d\n", mode);
-    }
-}
-
-/****************************************************************************
- * Name: rzv_sci_spi_setbits
- *
- * Description:
- *   Set the number of bits per word
- *
- ****************************************************************************/
-
-static void rzv_sci_spi_setbits(struct spi_dev_s *dev, int nbits)
-{
-  struct rzv_sci_spi_priv_s *priv = (struct rzv_sci_spi_priv_s *)dev;
-
-  /* SCI_B SPI only supports 8-bit transfers */
-
-  if (nbits != 8)
-    {
-      spierr("Unsupported nbits: %d (only 8-bit supported)\n", nbits);
       return;
     }
 
-  priv->nbits = nbits;
-}
-
-#ifdef CONFIG_SPI_HWFEATURES
-/****************************************************************************
- * Name: rzv_sci_spi_hwfeatures
- *
- * Description:
- *   Set hardware-specific feature flags
- *
- ****************************************************************************/
-
-static int rzv_sci_spi_hwfeatures(struct spi_dev_s *dev,
-                                  spi_hwfeatures_t features)
-{
-  struct rzv_sci_spi_priv_s *priv = (struct rzv_sci_spi_priv_s *)dev;
-
-  /* Check for LSB first */
-
-  if ((features & HWFEAT_LSBFIRST) != 0)
+  if (priv->state == SCI_SPI_STATE_BUSY)
     {
-      priv->lsbfirst = true;
-    }
-  else
-    {
-      priv->lsbfirst = false;
+      spiwarn("SCI%u: setmode while BUSY — ignored\n", priv->channel);
+      return;
     }
 
-  rzv_sci_spi_hw_configure(priv);
+  priv->mode = mode;
 
-  return OK;
-}
-#endif
+  /* RMW CCR3: clear CPOL/CPHA bits, set new values */
 
-/****************************************************************************
- * Name: rzv_sci_spi_send
- *
- * Description:
- *   Exchange one word on SPI
- *
- ****************************************************************************/
+  ccr3  = getreg32(priv->base + RZV_SCI_CCR3_OFFSET);
+  ccr3 &= ~(SCI_CCR3_CPOL | SCI_CCR3_CPHA);
 
-static uint32_t rzv_sci_spi_send(struct spi_dev_s *dev, uint32_t wd)
-{
-  struct rzv_sci_spi_priv_s *priv = (struct rzv_sci_spi_priv_s *)dev;
-  uint8_t txbyte = (uint8_t)wd;
-  uint8_t rxbyte = 0;
+  switch (mode)
+    {
+      case SPIDEV_MODE0: break;
+      case SPIDEV_MODE1: ccr3 |= SCI_CCR3_CPHA;              break;
+      case SPIDEV_MODE2: ccr3 |= SCI_CCR3_CPOL;              break;
+      case SPIDEV_MODE3: ccr3 |= SCI_CCR3_CPHA | SCI_CCR3_CPOL; break;
+      default: break;
+    }
 
-  rzv_sci_spi_exchange(dev, &txbyte, &rxbyte, 1);
-
-  return (uint32_t)rxbyte;
+  putreg32(ccr3, priv->base + RZV_SCI_CCR3_OFFSET);
 }
 
 /****************************************************************************
- * Name: rzv_sci_spi_exchange
+ * Name: sci_spi_setbits
  *
  * Description:
- *   Exchange a block of data on SPI
+ *   Only 8-bit transfers supported.  Log warning for other sizes.
  *
  ****************************************************************************/
 
-static void rzv_sci_spi_exchange(struct spi_dev_s *dev,
-                                 const void *txbuffer,
-                                 void *rxbuffer, size_t nwords)
+static void sci_spi_setbits(struct spi_dev_s *dev, int nbits)
 {
   struct rzv_sci_spi_priv_s *priv = (struct rzv_sci_spi_priv_s *)dev;
-  uint32_t ccr0;
 
-  /* Set up transfer state */
+  DEBUGASSERT(priv != NULL);
+
+  if (nbits != 8)
+    {
+      spierr("SCI%u: only 8-bit transfers supported (got %d)\n",
+             priv->channel, nbits);
+      return;
+    }
+
+  priv->nbits = (uint8_t)nbits;
+}
+
+/****************************************************************************
+ * Name: sci_spi_exchange
+ *
+ * Description:
+ *   Full-duplex SPI exchange of nwords bytes.
+ *   txbuffer==NULL → sends 0xFF for each byte.
+ *   rxbuffer==NULL → discards received bytes.
+ *   Uses nxsem_timedwait_uninterruptible with 1-second timeout.
+ *   (#7 fix: uninterruptible; #9 fix: timeout recovery)
+ *
+ ****************************************************************************/
+
+static void sci_spi_exchange(struct spi_dev_s *dev,
+                             const void *txbuffer,
+                             void *rxbuffer, size_t nwords)
+{
+  struct rzv_sci_spi_priv_s *priv = (struct rzv_sci_spi_priv_s *)dev;
+  struct timespec abstime;
+  uint32_t timeout;
+  int ret;
+
+  DEBUGASSERT(priv != NULL);
+
+  if (nwords == 0u)
+    {
+      return;
+    }
+
+  /* Set up transfer context.
+   * Use nxsem_reset (not nxsem_init) to drain any stale posts from prior
+   * transfers.  nxsem_init on an already-initialised sem is POSIX-undefined
+   * when waiters exist.  nxsem_reset is the correct NuttX primitive here.
+   * The one-shot nxsem_init lives in rzv_sci_spi_initialize() only.
+   * (A3+A10 fix)
+   */
 
   priv->txbuffer = (const uint8_t *)txbuffer;
   priv->rxbuffer = (uint8_t *)rxbuffer;
   priv->ntxwords = nwords;
   priv->nrxwords = nwords;
-  priv->error = false;
+  priv->state    = SCI_SPI_STATE_BUSY;
 
-  /* Clear semaphore */
+  nxsem_reset(&priv->sem_isr, 0);
 
-  while (nxsem_trywait(&priv->sem_isr) == OK);
+  /* Enable TE/RE */
 
-  /* Enable interrupts */
+  putreg32(SCI_CCR0_TE | SCI_CCR0_RE,
+           priv->base + RZV_SCI_CCR0_OFFSET);
 
-  ccr0 = rzv_sci_spi_getreg32(priv, RZV_SCI_CCR0_OFFSET);
-  ccr0 |= SCI_CCR0_RIE | SCI_CCR0_TIE;
-  rzv_sci_spi_putreg32(priv, RZV_SCI_CCR0_OFFSET, ccr0);
+  /* Wait for CESR to confirm TE/RE active */
 
-  /* Start first transmission */
-
-  if (priv->ntxwords > 0)
+  for (timeout = SCI_SPI_CESR_TIMEOUT; timeout > 0; timeout--)
     {
-      uint8_t data = priv->txbuffer ? *priv->txbuffer++ : 0xFF;
-      priv->ntxwords--;
-      rzv_sci_spi_writeword(priv, data);
+      uint32_t cesr = getreg32(priv->base + RZV_SCI_CESR_OFFSET);
+      if ((cesr & (SCI_CESR_RIST | SCI_CESR_TIST)) ==
+          (SCI_CESR_RIST | SCI_CESR_TIST))
+        {
+          break;
+        }
     }
 
-  /* Wait for completion */
-
-  nxsem_wait(&priv->sem_isr);
-
-  /* Check for errors */
-
-  if (priv->error)
+  if (timeout == 0u)
     {
-      spierr("Transfer error occurred\n");
+      spierr("SCI%u: CESR enable timeout\n", priv->channel);
+      putreg32(0u, priv->base + RZV_SCI_CCR0_OFFSET);
+      priv->state = SCI_SPI_STATE_IDLE;
+      return;
     }
+
+  /* Enable TIE + RIE + TEIE to start the ISR-driven transfer.
+   * TEIE is enabled from the outset because with RTRG=8, transfers smaller
+   * than 8 bytes never trigger RXI — TEI is the sole completion signal for
+   * those.  For longer transfers, tei_isr drains the RX remainder before
+   * posting done.  txi_isr still disables TIE and the TEIE already set here
+   * is harmless (idempotent set).  (A9 fix)
+   */
+
+  putreg32(SCI_CCR0_TE | SCI_CCR0_RE |
+           SCI_CCR0_TIE | SCI_CCR0_RIE | SCI_CCR0_TEIE,
+           priv->base + RZV_SCI_CCR0_OFFSET);
+
+  /* Wait for ISR to post sem_isr.
+   * Use CLOCK_MONOTONIC to be immune to RTC adjustments (A7 fix).
+   * nxsem_clockwait_uninterruptible handles the clock query internally;
+   * on failure we fall back to a safe absolute timeout of +2 seconds.
+   */
+
+  if (clock_gettime(CLOCK_MONOTONIC, &abstime) < 0)
+    {
+      /* clock_gettime failed — use a safe fallback epoch */
+
+      abstime.tv_sec  = SCI_SPI_TIMEOUT_MS / 1000 + 1;
+      abstime.tv_nsec = 0;
+    }
+  else
+    {
+      abstime.tv_sec  += SCI_SPI_TIMEOUT_MS / 1000;
+      abstime.tv_nsec += (SCI_SPI_TIMEOUT_MS % 1000) * 1000000L;
+      if (abstime.tv_nsec >= 1000000000L)
+        {
+          abstime.tv_sec++;
+          abstime.tv_nsec -= 1000000000L;
+        }
+    }
+
+  ret = nxsem_clockwait_uninterruptible(&priv->sem_isr,
+                                        CLOCK_MONOTONIC, &abstime);
+
+  if (ret == -ETIMEDOUT)
+    {
+      /* (#9 fix) Timeout recovery: mask all IRQs, disable TE/RE, flush FIFOs.
+       * TODO: CS deassert is responsibility of upper SPI layer via select(false).
+       *       Driver cannot trigger this. Slave may stay selected until next
+       *       transfer. (A1 deferred — needs spi_ops_s API change)
+       * TOCTOU race exists for concurrent first-init; matches sci_i2c pattern.
+       *       (A2 deferred — matches gold pattern)
+       */
+
+      putreg32(0u, priv->base + RZV_SCI_CCR0_OFFSET);
+
+      /* Flush both FIFOs so next exchange() starts clean */
+
+      {
+        uint32_t fcr = getreg32(priv->base + RZV_SCI_FCR_OFFSET);
+        putreg32(fcr | SCI_FCR_RFRST | SCI_FCR_TFRST,
+                 priv->base + RZV_SCI_FCR_OFFSET);
+        putreg32(fcr, priv->base + RZV_SCI_FCR_OFFSET);
+      }
+
+      priv->state = SCI_SPI_STATE_IDLE;
+      spierr("SCI%u: transfer timeout (%zu words)\n",
+             priv->channel, nwords);
+    }
+  else if (priv->state == SCI_SPI_STATE_ERROR)
+    {
+      spierr("SCI%u: transfer error\n", priv->channel);
+    }
+
+  /* Disable TE/RE after transfer (CCR0=0; IRQs already masked by ISR) */
+
+  putreg32(0u, priv->base + RZV_SCI_CCR0_OFFSET);
+  priv->state = SCI_SPI_STATE_IDLE;
+}
+
+/****************************************************************************
+ * Name: sci_spi_send
+ ****************************************************************************/
+
+static uint32_t sci_spi_send(struct spi_dev_s *dev, uint32_t wd)
+{
+  uint8_t txbyte = (uint8_t)wd;
+  uint8_t rxbyte = 0;
+
+  sci_spi_exchange(dev, &txbyte, &rxbyte, 1);
+  return (uint32_t)rxbyte;
 }
 
 #ifndef CONFIG_SPI_EXCHANGE
 /****************************************************************************
- * Name: rzv_sci_spi_sndblock
- *
- * Description:
- *   Send a block of data on SPI
- *
+ * Name: sci_spi_sndblock / sci_spi_recvblock
  ****************************************************************************/
 
-static void rzv_sci_spi_sndblock(struct spi_dev_s *dev,
-                                 const void *txbuffer,
-                                 size_t nwords)
+static void sci_spi_sndblock(struct spi_dev_s *dev,
+                             const void *txbuffer, size_t nwords)
 {
-  rzv_sci_spi_exchange(dev, txbuffer, NULL, nwords);
+  sci_spi_exchange(dev, txbuffer, NULL, nwords);
 }
 
+static void sci_spi_recvblock(struct spi_dev_s *dev,
+                              void *rxbuffer, size_t nwords)
+{
+  sci_spi_exchange(dev, NULL, rxbuffer, nwords);
+}
+#endif /* !CONFIG_SPI_EXCHANGE */
+
 /****************************************************************************
- * Name: rzv_sci_spi_recvblock
- *
- * Description:
- *   Receive a block of data from SPI
- *
+ * Weak stubs — board overrides these with real CS/status logic
  ****************************************************************************/
 
-static void rzv_sci_spi_recvblock(struct spi_dev_s *dev, void *rxbuffer,
-                                  size_t nwords)
+void weak_function rzv_sci_spi_select(struct spi_dev_s *dev,
+                                      uint32_t devid, bool selected)
 {
-  rzv_sci_spi_exchange(dev, NULL, rxbuffer, nwords);
+  (void)dev;
+  (void)devid;
+  (void)selected;
+}
+
+uint8_t weak_function rzv_sci_spi_status(struct spi_dev_s *dev,
+                                         uint32_t devid)
+{
+  (void)dev;
+  (void)devid;
+  return 0;
+}
+
+#ifdef CONFIG_SPI_CMDDATA
+int weak_function rzv_sci_spi_cmddata(struct spi_dev_s *dev,
+                                      uint32_t devid, bool cmd)
+{
+  (void)dev;
+  (void)devid;
+  (void)cmd;
+  return -ENOTSUP;
 }
 #endif
 
@@ -1019,175 +743,227 @@ static void rzv_sci_spi_recvblock(struct spi_dev_s *dev, void *rxbuffer,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: rzv_sci_spibus_initialize
+ * Name: rzv_sci_spi_initialize
  *
  * Description:
- *   Initialize the selected SCI_B SPI bus
+ *   Initialise a SCI channel as SPI master.
+ *   Returns spi_dev_s * or NULL.
+ *
+ *   Order (mirrors rzv_sci_i2c_initialize exactly):
+ *     1. Validate channel
+ *     2. initialized guard
+ *     3. Populate compile-time fields
+ *     4. nxmutex_init + nxsem_init (one-shot)
+ *     5. rzv_clock_enable + rzv_module_unreset  ← MANDATORY before MMIO
+ *     6. Configure GPIO pins
+ *     7. sci_spi_hw_configure()
+ *     8. rzv_icu_attach × 4
+ *     9. initialized = true
  *
  ****************************************************************************/
 
-struct spi_dev_s *rzv_sci_spibus_initialize(int bus)
+struct spi_dev_s *rzv_sci_spi_initialize(int channel)
 {
-  struct rzv_sci_spi_priv_s *priv = NULL;
-  irqstate_t flags;
-  int ret;
+  struct rzv_sci_spi_priv_s *priv;
 
-  spiinfo("Initializing SCI%d SPI bus\n", bus);
+  /* Validate channel against compile-time-enabled set (#13 fix) */
 
-  /* Get device instance */
-
-  switch (bus)
+  switch (channel)
     {
 #ifdef CONFIG_RZV_SCI0_SPI
-      case 0:
-        priv = &rzv_sci0_spi_priv;
-        break;
+      case 0: break;
 #endif
 #ifdef CONFIG_RZV_SCI1_SPI
-      case 1:
-        priv = &rzv_sci1_spi_priv;
-        break;
+      case 1: break;
+#endif
+#ifdef CONFIG_RZV_SCI2_SPI
+      case 2: break;
+#endif
+#ifdef CONFIG_RZV_SCI3_SPI
+      case 3: break;
 #endif
       default:
-        spierr("Invalid bus number: %d\n", bus);
+        spierr("SCI-SPI: channel %d not enabled in Kconfig\n", channel);
         return NULL;
     }
 
-  /* Initialize mutex and semaphore */
+  priv = &g_sci_spi_priv[channel];
+
+  /* (#22 fix) Return existing device on second call */
+
+  if (priv->initialized)
+    {
+      return &priv->dev;
+    }
+
+  /* Populate channel-invariant fields */
+
+  priv->dev.ops  = &g_sci_spi_ops;
+  priv->channel  = (uint8_t)channel;
+  priv->base     = g_sci_base[channel];
+  priv->clk_id   = g_sci_clk[channel];
+  priv->evt_txi  = g_sci_spi_events[channel][0];
+  priv->evt_rxi  = g_sci_spi_events[channel][1];
+  priv->evt_tei  = g_sci_spi_events[channel][2];
+  priv->evt_eri  = g_sci_spi_events[channel][3];
+  priv->state    = SCI_SPI_STATE_IDLE;
+
+  /* Set defaults BEFORE hw_configure (prevents div-by-zero in calc_bitrate) */
+
+  priv->frequency = SCI_SPI_DEFAULT_HZ;
+  priv->actual    = 0;
+  priv->mode      = SPIDEV_MODE0;
+  priv->nbits     = 8;
+  priv->lsbfirst  = false;
+
+  /* One-shot semaphore/mutex init (#22 fix: not re-init on every call) */
 
   nxmutex_init(&priv->lock);
   nxsem_init(&priv->sem_isr, 0, 0);
 
-  /* Set default configuration */
+  /* (#3 fix) Enable peripheral clock and deassert module reset BEFORE MMIO.
+   * Capture return values; if either fails, resources committed so far are
+   * mutex + sem (trivially cleaned up by re-init on retry), no MMIO yet,
+   * no IRQs — NULL return is safe.  (A11 fix)
+   */
 
-  priv->frequency = 100000;  /* 100 kHz default */
-  priv->actual = 0;
-  priv->mode = SPIDEV_MODE0;
-  priv->nbits = 8;
-  priv->lsbfirst = false;
-
-  /* Initialize hardware */
-
-  rzv_sci_spi_hw_initialize(priv);
-
-  /* Attach interrupts using dynamic IRQ assignment */
-
-  flags = enter_critical_section();
-
-  /* RXI interrupt */
-
-  priv->rxi_irq = rzv_icu_attach_event(priv->config->rxi_elc,
-                                       rzv_sci_spi_rxi_interrupt,
-                                       priv);
-  if (priv->rxi_irq < 0)
+  if (rzv_clock_enable(priv->clk_id) < 0)
     {
-      spierr("Failed to attach RXI interrupt\n");
-      goto errout;
+      spierr("SCI%d: clock enable failed\n", channel);
+      return NULL;
     }
 
-  /* TXI interrupt */
-
-  priv->txi_irq = rzv_icu_attach_event(priv->config->txi_elc,
-                                       rzv_sci_spi_txi_interrupt,
-                                       priv);
-  if (priv->txi_irq < 0)
+  if (rzv_module_unreset(priv->clk_id) < 0)
     {
-      spierr("Failed to attach TXI interrupt\n");
-      goto errout;
+      spierr("SCI%d: module unreset failed\n", channel);
+      return NULL;
     }
 
-  /* TEI interrupt */
+  /* Configure GPIO pins */
 
-  priv->tei_irq = rzv_icu_attach_event(priv->config->tei_elc,
-                                       rzv_sci_spi_tei_interrupt,
-                                       priv);
-  if (priv->tei_irq < 0)
+  switch (channel)
     {
-      spierr("Failed to attach TEI interrupt\n");
-      goto errout;
+#ifdef CONFIG_RZV_SCI0_SPI
+      case 0:
+        rzv_gpioconfig(BOARD_SCI0_SPI_MOSI_GPIO);
+        rzv_gpioconfig(BOARD_SCI0_SPI_MISO_GPIO);
+        rzv_gpioconfig(BOARD_SCI0_SPI_SCK_GPIO);
+        break;
+#endif
+#ifdef CONFIG_RZV_SCI1_SPI
+      case 1:
+        rzv_gpioconfig(BOARD_SCI1_SPI_MOSI_GPIO);
+        rzv_gpioconfig(BOARD_SCI1_SPI_MISO_GPIO);
+        rzv_gpioconfig(BOARD_SCI1_SPI_SCK_GPIO);
+        break;
+#endif
+#ifdef CONFIG_RZV_SCI2_SPI
+      case 2:
+        rzv_gpioconfig(BOARD_SCI2_SPI_MOSI_GPIO);
+        rzv_gpioconfig(BOARD_SCI2_SPI_MISO_GPIO);
+        rzv_gpioconfig(BOARD_SCI2_SPI_SCK_GPIO);
+        break;
+#endif
+#ifdef CONFIG_RZV_SCI3_SPI
+      case 3:
+        rzv_gpioconfig(BOARD_SCI3_SPI_MOSI_GPIO);
+        rzv_gpioconfig(BOARD_SCI3_SPI_MISO_GPIO);
+        rzv_gpioconfig(BOARD_SCI3_SPI_SCK_GPIO);
+        break;
+#endif
     }
 
-  /* ERI interrupt */
+  /* One-shot hardware initialisation.
+   * hw_configure failure at this point: clock enabled, GPIO configured, but
+   * no IRQs attached yet — NULL return is clean; no rollback needed for
+   * mutex/sem (static storage; re-init on next call is safe).  (A12 fix)
+   */
 
-  priv->eri_irq = rzv_icu_attach_event(priv->config->eri_elc,
-                                       rzv_sci_spi_eri_interrupt,
-                                       priv);
-  if (priv->eri_irq < 0)
+  if (sci_spi_hw_configure(priv) < 0)
     {
-      spierr("Failed to attach ERI interrupt\n");
-      goto errout;
+      spierr("SCI%d: hw_configure failed\n", channel);
+      return NULL;
     }
 
-  /* Enable interrupts */
+  /* (#1 fix) Attach interrupts via INTR8SEL — no critical_section needed
+   * (#16 fix: attach is init-context only, not atomic)
+   * Initialise irq fields to -1 so rollback logic below is clean.  (A13 fix)
+   */
 
-  up_enable_irq(priv->rxi_irq);
-  up_enable_irq(priv->txi_irq);
-  up_enable_irq(priv->tei_irq);
-  up_enable_irq(priv->eri_irq);
+  priv->irq_txi = -1;
+  priv->irq_rxi = -1;
+  priv->irq_tei = -1;
+  priv->irq_eri = -1;
 
-  leave_critical_section(flags);
+  priv->irq_txi = rzv_icu_attach(priv->evt_txi,
+                                  rzv_sci_spi_txi_isr, priv, true);
+  if (priv->irq_txi < 0)
+    {
+      goto irq_fail;
+    }
 
-  spiinfo("SCI%d SPI bus initialized successfully\n", bus);
+  priv->irq_rxi = rzv_icu_attach(priv->evt_rxi,
+                                  rzv_sci_spi_rxi_isr, priv, true);
+  if (priv->irq_rxi < 0)
+    {
+      goto irq_fail;
+    }
 
-  return &priv->spi_dev;
+  priv->irq_tei = rzv_icu_attach(priv->evt_tei,
+                                  rzv_sci_spi_tei_isr, priv, true);
+  if (priv->irq_tei < 0)
+    {
+      goto irq_fail;
+    }
 
-errout:
-  leave_critical_section(flags);
+  priv->irq_eri = rzv_icu_attach(priv->evt_eri,
+                                  rzv_sci_spi_eri_isr, priv, true);
+  if (priv->irq_eri < 0)
+    {
+      goto irq_fail;
+    }
+
+  /* All resources committed — mark as initialised last (A12 fix) */
+
+  priv->initialized = true;
+  spiinfo("SCI%d SPI initialized (freq=%u)\n",
+          channel, (unsigned)priv->frequency);
+  return &priv->dev;
+
+irq_fail:
+  /* Detach any IRQs that were successfully attached before the failure.
+   * Guards with >= 0 prevent detaching un-attached slots.  (A13 fix)
+   */
+
+  spierr("SCI%d: IRQ attach failed (txi=%d rxi=%d tei=%d eri=%d)\n",
+         channel, priv->irq_txi, priv->irq_rxi,
+         priv->irq_tei, priv->irq_eri);
+
+  if (priv->irq_txi >= 0)
+    {
+      rzv_icu_detach(priv->irq_txi);
+      priv->irq_txi = -1;
+    }
+
+  if (priv->irq_rxi >= 0)
+    {
+      rzv_icu_detach(priv->irq_rxi);
+      priv->irq_rxi = -1;
+    }
+
+  if (priv->irq_tei >= 0)
+    {
+      rzv_icu_detach(priv->irq_tei);
+      priv->irq_tei = -1;
+    }
+
+  if (priv->irq_eri >= 0)
+    {
+      rzv_icu_detach(priv->irq_eri);
+      priv->irq_eri = -1;
+    }
+
   return NULL;
-}
-
-/****************************************************************************
- * Name: rzv_sci_spibus_uninitialize
- *
- * Description:
- *   Uninitialize an SCI_B SPI bus
- *
- ****************************************************************************/
-
-int rzv_sci_spibus_uninitialize(struct spi_dev_s *dev)
-{
-  struct rzv_sci_spi_priv_s *priv = (struct rzv_sci_spi_priv_s *)dev;
-
-  /* Disable interrupts */
-
-  up_disable_irq(priv->rxi_irq);
-  up_disable_irq(priv->txi_irq);
-  up_disable_irq(priv->tei_irq);
-  up_disable_irq(priv->eri_irq);
-
-  /* Detach interrupts */
-
-  irq_detach(priv->rxi_irq);
-  irq_detach(priv->txi_irq);
-  irq_detach(priv->tei_irq);
-  irq_detach(priv->eri_irq);
-
-  /* Disable hardware */
-
-  rzv_sci_spi_disable(priv);
-
-  /* Destroy mutex and semaphore */
-
-  nxmutex_destroy(&priv->lock);
-  nxsem_destroy(&priv->sem_isr);
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: rzv_sci_spi_setbitorder
- *
- * Description:
- *   Set the SCI_B SPI bit order (MSB-first or LSB-first)
- *
- ****************************************************************************/
-
-void rzv_sci_spi_setbitorder(struct spi_dev_s *dev, bool lsbfirst)
-{
-  struct rzv_sci_spi_priv_s *priv = (struct rzv_sci_spi_priv_s *)dev;
-
-  priv->lsbfirst = lsbfirst;
-  rzv_sci_spi_hw_configure(priv);
 }
 
 #endif /* CONFIG_RZV_SCI_SPI */

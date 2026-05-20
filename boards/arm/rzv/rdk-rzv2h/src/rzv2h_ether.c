@@ -84,7 +84,7 @@
 
 static void rzv2h_ether_pinconfig(int port)
 {
-  /* TODO: Configure RGMII pins using rzv_configgpio()
+  /* TODO: Configure RGMII pins using rzv_gpioconfig()
    * This requires actual pin definitions from the board schematic
    */
 
@@ -93,24 +93,24 @@ static void rzv2h_ether_pinconfig(int port)
       /* Configure GBETH0 pins */
 
       /* TX pins */
-      /* rzv_configgpio(GPIO_ETH0_TXD0); */
-      /* rzv_configgpio(GPIO_ETH0_TXD1); */
-      /* rzv_configgpio(GPIO_ETH0_TXD2); */
-      /* rzv_configgpio(GPIO_ETH0_TXD3); */
-      /* rzv_configgpio(GPIO_ETH0_TX_CLK); */
-      /* rzv_configgpio(GPIO_ETH0_TX_CTL); */
+      /* rzv_gpioconfig(GPIO_ETH0_TXD0); */
+      /* rzv_gpioconfig(GPIO_ETH0_TXD1); */
+      /* rzv_gpioconfig(GPIO_ETH0_TXD2); */
+      /* rzv_gpioconfig(GPIO_ETH0_TXD3); */
+      /* rzv_gpioconfig(GPIO_ETH0_TX_CLK); */
+      /* rzv_gpioconfig(GPIO_ETH0_TX_CTL); */
 
       /* RX pins */
-      /* rzv_configgpio(GPIO_ETH0_RXD0); */
-      /* rzv_configgpio(GPIO_ETH0_RXD1); */
-      /* rzv_configgpio(GPIO_ETH0_RXD2); */
-      /* rzv_configgpio(GPIO_ETH0_RXD3); */
-      /* rzv_configgpio(GPIO_ETH0_RX_CLK); */
-      /* rzv_configgpio(GPIO_ETH0_RX_CTL); */
+      /* rzv_gpioconfig(GPIO_ETH0_RXD0); */
+      /* rzv_gpioconfig(GPIO_ETH0_RXD1); */
+      /* rzv_gpioconfig(GPIO_ETH0_RXD2); */
+      /* rzv_gpioconfig(GPIO_ETH0_RXD3); */
+      /* rzv_gpioconfig(GPIO_ETH0_RX_CLK); */
+      /* rzv_gpioconfig(GPIO_ETH0_RX_CTL); */
 
       /* MDIO pins */
-      /* rzv_configgpio(GPIO_ETH0_MDC); */
-      /* rzv_configgpio(GPIO_ETH0_MDIO); */
+      /* rzv_gpioconfig(GPIO_ETH0_MDC); */
+      /* rzv_gpioconfig(GPIO_ETH0_MDIO); */
     }
 }
 
