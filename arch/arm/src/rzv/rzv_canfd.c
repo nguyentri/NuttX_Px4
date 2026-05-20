@@ -150,7 +150,6 @@ struct rzv_canfd_s
   int      tx_irq;                         /* IRQ from rzv_icu_attach TX  */
   int      rx_irq;                         /* IRQ from rzv_icu_attach RX  */
   int      err_irq;                        /* IRQ from rzv_icu_attach ERR */
-  int      glerr_irq;                      /* IRQ from rzv_icu_attach GL  */
   bool     initialized;                    /* True after first setup()    */
   bool     loopback;                       /* True = internal loopback    */
 };
@@ -164,7 +163,6 @@ struct rzv_canfd_config_s
   int      elc_rx;            /* ELC event: common FIFO RX          */
   int      elc_err;           /* ELC event: channel error           */
   int      elc_glerr;         /* ELC event: global error            */
-  int      elc_rxf;           /* ELC event: global RX FIFO (shared) */
 };
 
 /****************************************************************************
@@ -227,11 +225,15 @@ static const struct can_ops_s g_rzv_canfd_ops =
   .co_txempty       = rzv_canfd_txempty,
 };
 
-/* Global RX FIFO interrupt is shared between channels.  CH0 owns the
- * attached IRQ; CH1 uses the same slot (no double-attach).
+/* Shared global IRQs — attached once by rzv_canfd_global_init().
+ * Per-FIFO dispatch: FIFO k -> channel k (identity mapping).
  */
 
-static int g_rxf_irq = -1;  /* Global RX FIFO IRQ (attached once) */
+#define RZV_CANFD_RXF_FIFO_FOR_CH(ch) (ch)   /* identity mapping, 0..1 */
+
+static int g_rxf_irq  = -1;                   /* attached once in global_init */
+static int g_glerr_irq = -1;                  /* attached once in global_init */
+static struct rzv_canfd_s *g_priv_by_fifo[2]; /* fifo 0..1 -> priv           */
 
 #ifdef CONFIG_RZV_CANFD0
 
@@ -242,7 +244,6 @@ static const struct rzv_canfd_config_s g_rzv_canfd0_config =
   .elc_rx   = RZV_ELC_CANFD_CH0_REC,  /* common FIFO RX ch0 */
   .elc_err  = RZV_ELC_CANFD_CH0_ERR,
   .elc_glerr = RZV_ELC_CANFD_GLERR,
-  .elc_rxf  = RZV_ELC_CANFD_RXFINT,   /* global RX FIFO */
 };
 
 static struct rzv_canfd_s g_rzv_canfd0_priv =
@@ -257,7 +258,6 @@ static struct rzv_canfd_s g_rzv_canfd0_priv =
   .tx_irq   = -1,
   .rx_irq   = -1,
   .err_irq  = -1,
-  .glerr_irq = -1,
   .initialized = false,
   .loopback = true,  /* boot default: internal loopback */
 };
@@ -273,7 +273,6 @@ static const struct rzv_canfd_config_s g_rzv_canfd1_config =
   .elc_rx   = RZV_ELC_CANFD_CH1_REC,  /* common FIFO RX ch1 */
   .elc_err  = RZV_ELC_CANFD_CH1_ERR,
   .elc_glerr = RZV_ELC_CANFD_GLERR,
-  .elc_rxf  = RZV_ELC_CANFD_RXFINT,   /* global RX FIFO (shared) */
 };
 
 static struct rzv_canfd_s g_rzv_canfd1_priv =
@@ -288,7 +287,6 @@ static struct rzv_canfd_s g_rzv_canfd1_priv =
   .tx_irq   = -1,
   .rx_irq   = -1,
   .err_irq  = -1,
-  .glerr_irq = -1,
   .initialized = false,
   .loopback = true,
 };
@@ -370,8 +368,8 @@ static int rzv_canfd_global_init(void)
 
   rzv_wr32(0, RZV_CANFD_CFDRMNB);
 
-  /* Step 5: RX FIFO 0 config — depth=8, payload=64B, IE=on, threshold=3
-   * RFDC_8 (depth=8), RFPLS_64B, RFIE=1, RFIGCV=2 (threshold=3)
+  /* Step 5a: RX FIFO 0 config (channel 0 destination)
+   * depth=8, payload=64B, interrupt enable, threshold=3
    */
 
   val = CANFD_RFCC_RFE                                    /* FIFO enable */
@@ -381,34 +379,70 @@ static int rzv_canfd_global_init(void)
       | (2u << CANFD_RFCC_RFIGCV_SHIFT);                 /* threshold = 3 */
   rzv_wr32(val, RZV_CANFD_CFDRFCC(0));
 
-  /* Step 6: AFL config — 1 rule for CH0, 0 for CH1 at v1.
-   * GAFLCFG0: RNC1[8:0]=0, RNC0[24:16]=1
+#ifdef CONFIG_RZV_CANFD1
+  /* Step 5b: RX FIFO 1 config (channel 1 destination) — same settings */
+
+  rzv_wr32(val, RZV_CANFD_CFDRFCC(1));
+#endif
+
+  /* Step 6: AFL — per-channel slice.
+   *   ch0 slice: 1 rule  (page-relative rule 0)         -> FIFO 0
+   *   ch1 slice: 1 rule  (page-relative rule 1 globally) -> FIFO 1
+   * CFDGAFLCFG0: RNC1[8:0] = ch1 count, RNC0[24:16] = ch0 count.
+   * Note swapped field positions vs RA8 — verified in rzv_canfd.h:523-526.
    */
 
-  rzv_wr32((1u << CANFD_GAFLCFG_RNC0_SHIFT), RZV_CANFD_CFDGAFLCFG0);
+  val = (1u << CANFD_GAFLCFG_RNC0_SHIFT);     /* ch0 = 1 rule */
+#ifdef CONFIG_RZV_CANFD1
+  val |= (1u << CANFD_GAFLCFG_RNC1_SHIFT);    /* ch1 = 1 rule */
+#endif
+  rzv_wr32(val, RZV_CANFD_CFDGAFLCFG0);
 
-  /* AFL page 0, rule 0: accept all → route to RX FIFO 0
-   * GAFLECTR: AFLDAE=1, AFLPN=0 (page 0)
-   */
+  /* Unlock AFL for write (AFLDAE=1, page 0) */
 
   rzv_wr32(CANFD_GAFLECTR_AFLDAE | (0u << CANFD_GAFLECTR_AFLPN_SHIFT),
            RZV_CANFD_CFDGAFLECTR);
 
-  /* Rule 0 ID: match any (ID=0, mask=0, GAFLIDE=0 → standard only).
-   * For accept-all: set mask bits so nothing must match.
-   */
+  /* Rule 0: ch0 slice, accept-all -> FIFO 0 */
 
   rzv_wr32(0, RZV_CANFD_BASE + RZV_CANFD_CFDGAFL_ID_OFFSET(0));
   rzv_wr32(0, RZV_CANFD_BASE + RZV_CANFD_CFDGAFL_M_OFFSET(0));
-
-  /* Rule 0 Pointer 1: GAFLFDP — direct to RX FIFO 0 (bit 0 = RFPTR0) */
-
-  rzv_wr32(1u << 0, RZV_CANFD_BASE + RZV_CANFD_CFDGAFL_P1_OFFSET(0));
   rzv_wr32(0, RZV_CANFD_BASE + RZV_CANFD_CFDGAFL_P0_OFFSET(0));
+  rzv_wr32((1u << 0), RZV_CANFD_BASE + RZV_CANFD_CFDGAFL_P1_OFFSET(0));
+
+#ifdef CONFIG_RZV_CANFD1
+  /* Rule 1: ch1 slice, accept-all -> FIFO 1.
+   * AFL rule index is global across slices; ch1's first rule sits at
+   * global index = RNC0 = 1.
+   */
+
+  rzv_wr32(0, RZV_CANFD_BASE + RZV_CANFD_CFDGAFL_ID_OFFSET(1));
+  rzv_wr32(0, RZV_CANFD_BASE + RZV_CANFD_CFDGAFL_M_OFFSET(1));
+  rzv_wr32(0, RZV_CANFD_BASE + RZV_CANFD_CFDGAFL_P0_OFFSET(1));
+  rzv_wr32((1u << 1), RZV_CANFD_BASE + RZV_CANFD_CFDGAFL_P1_OFFSET(1));
+#endif
 
   /* Lock AFL */
 
   rzv_wr32(0, RZV_CANFD_CFDGAFLECTR);
+
+  /* Attach shared global IRQs once. arg=NULL — ISRs read globals. */
+
+  g_glerr_irq = rzv_icu_attach(RZV_ELC_CANFD_GLERR,
+                                rzv_canfd_glerr_isr, NULL, true);
+  if (g_glerr_irq < 0)
+    {
+      canerr("CANFD: glerr icu_attach failed %d\n", g_glerr_irq);
+      /* non-fatal: continue */
+    }
+
+  g_rxf_irq = rzv_icu_attach(RZV_ELC_CANFD_RXFINT,
+                              rzv_canfd_rx_isr, NULL, true);
+  if (g_rxf_irq < 0)
+    {
+      canerr("CANFD: rxf icu_attach failed %d\n", g_rxf_irq);
+      /* non-fatal: RX disabled */
+    }
 
   /* Global error interrupt enables */
 
@@ -637,44 +671,6 @@ static int rzv_canfd_setup(struct can_dev_s *dev)
       return priv->err_irq;
     }
 
-  /* Global error IRQ and global RX FIFO IRQ are shared; attach only once
-   * (CH0 owns the slot; CH1 reuses).
-   */
-
-  if (priv->channel == 0)
-    {
-      priv->glerr_irq = rzv_icu_attach(cfg->elc_glerr,
-                                        rzv_canfd_glerr_isr, priv, true);
-      if (priv->glerr_irq < 0)
-        {
-          canerr("CAN%d: glerr icu_attach failed %d\n",
-                 priv->channel, priv->glerr_irq);
-          rzv_icu_detach(priv->tx_irq);
-          rzv_icu_detach(priv->rx_irq);
-          rzv_icu_detach(priv->err_irq);
-          return priv->glerr_irq;
-        }
-
-      /* Global RX FIFO interrupt — shared across channels */
-
-      if (g_rxf_irq < 0)
-        {
-          g_rxf_irq = rzv_icu_attach(cfg->elc_rxf,
-                                      rzv_canfd_rx_isr, priv, true);
-          if (g_rxf_irq < 0)
-            {
-              canerr("CANFD: rxf icu_attach failed %d\n", g_rxf_irq);
-              /* Non-fatal: common FIFO RX still works via elc_rx */
-            }
-        }
-    }
-  else
-    {
-      /* CH1: global IRQs already attached by CH0 */
-
-      priv->glerr_irq = -1;
-    }
-
   priv->initialized = true;
   return OK;
 }
@@ -703,11 +699,11 @@ static void rzv_canfd_shutdown(struct can_dev_s *dev)
       priv->err_irq = -1;
     }
 
-  if (priv->glerr_irq >= 0)
-    {
-      rzv_icu_detach(priv->glerr_irq);
-      priv->glerr_irq = -1;
-    }
+  /* Global IRQs (g_glerr_irq, g_rxf_irq) outlive any single channel —
+   * leave attached for the driver lifetime.
+   */
+
+  g_priv_by_fifo[priv->channel] = NULL;
 
   priv->initialized = false;
 }
@@ -906,97 +902,112 @@ static int rzv_canfd_tx_isr(int irq, void *context, void *arg)
   return OK;
 }
 
-/* rzv_canfd_rx_isr: handles both global RX FIFO and per-channel common FIFO.
- * The priv pointer may be CH0 (for global RX FIFO) or per-channel for
- * common FIFO events.  We drain whichever FIFO signaled.
+/* rzv_canfd_rx_isr: global RX FIFO dispatcher.
+ * Loops over all enabled FIFOs (k = 0 .. nfifos-1); each FIFO k
+ * belongs to channel k via identity mapping.  g_priv_by_fifo[k] is
+ * NULL-guarded for channels not yet registered.
  */
 
 static int rzv_canfd_rx_isr(int irq, void *context, void *arg)
 {
-  struct rzv_canfd_s *priv = (struct rzv_canfd_s *)arg;
-  struct can_hdr_s hdr;
-  uint8_t  data[CAN_MAXDATALEN];
-  uint32_t rfsts;
-  uint32_t id_reg;
-  uint32_t ptr_reg;
-  uint32_t fdsts_reg;
-  int      dw;
-  int      bytes;
+  const int nfifos =
+#ifdef CONFIG_RZV_CANFD1
+    2;
+#else
+    1;
+#endif
+  int k;
 
-  /* Drain global RX FIFO 0 */
-
-  rfsts = rzv_rd32(RZV_CANFD_CFDRFSTS(0));
-
-  while ((rfsts & CANFD_RFSTS_RFEMP) == 0)
+  for (k = 0; k < nfifos; k++)
     {
-      memset(&hdr, 0, sizeof(hdr));
+      struct rzv_canfd_s *priv = g_priv_by_fifo[k];
+      struct can_hdr_s hdr;
+      uint8_t  data[CAN_MAXDATALEN];
+      uint32_t rfsts;
+      uint32_t id_reg;
+      uint32_t ptr_reg;
+      uint32_t fdsts_reg;
+      int      dw;
+      int      bytes;
 
-      id_reg  = rzv_rd32(RZV_CANFD_BASE + RZV_CANFD_CFDRFID_OFFSET(0));
-      ptr_reg = rzv_rd32(RZV_CANFD_BASE + RZV_CANFD_CFDRFPTR_OFFSET(0));
-      fdsts_reg = rzv_rd32(RZV_CANFD_BASE
-                           + RZV_CANFD_CFDRFFDSTS_OFFSET(0));
+      if (priv == NULL)
+        {
+          continue;   /* channel not registered yet */
+        }
 
-      hdr.ch_rtr   = (id_reg & CANFD_RFID_RFRTR) ? 1 : 0;
-      hdr.ch_dlc   = (uint8_t)((ptr_reg & CANFD_RFPTR_RFDLC_MASK)
-                                >> CANFD_RFPTR_RFDLC_SHIFT);
+      rfsts = rzv_rd32(RZV_CANFD_CFDRFSTS(k));
+
+      while ((rfsts & CANFD_RFSTS_RFEMP) == 0)
+        {
+          memset(&hdr, 0, sizeof(hdr));
+
+          id_reg    = rzv_rd32(RZV_CANFD_BASE + RZV_CANFD_CFDRFID_OFFSET(k));
+          ptr_reg   = rzv_rd32(RZV_CANFD_BASE + RZV_CANFD_CFDRFPTR_OFFSET(k));
+          fdsts_reg = rzv_rd32(RZV_CANFD_BASE
+                               + RZV_CANFD_CFDRFFDSTS_OFFSET(k));
+
+          hdr.ch_rtr = (id_reg & CANFD_RFID_RFRTR) ? 1 : 0;
+          hdr.ch_dlc = (uint8_t)((ptr_reg & CANFD_RFPTR_RFDLC_MASK)
+                                  >> CANFD_RFPTR_RFDLC_SHIFT);
 
 #ifdef CONFIG_CAN_EXTID
-      hdr.ch_extid = (id_reg & CANFD_RFID_RFIDE) ? 1 : 0;
-      if (hdr.ch_extid)
-        {
-          hdr.ch_id = id_reg & 0x1fffffffu;  /* 29-bit extended ID */
-        }
-      else
-        {
-          hdr.ch_id = (id_reg >> 18) & 0x7ffu;  /* 11-bit standard ID */
-        }
+          hdr.ch_extid = (id_reg & CANFD_RFID_RFIDE) ? 1 : 0;
+          if (hdr.ch_extid)
+            {
+              hdr.ch_id = id_reg & 0x1fffffffu;  /* 29-bit extended ID */
+            }
+          else
+            {
+              hdr.ch_id = (id_reg >> 18) & 0x7ffu;  /* 11-bit standard ID */
+            }
 #else
-      hdr.ch_id  = (uint16_t)((id_reg >> 18) & 0x7ffu);  /* std ID only */
+          hdr.ch_id = (uint16_t)((id_reg >> 18) & 0x7ffu);  /* std ID only */
 #endif
 
 #ifdef CONFIG_CAN_FD
-      hdr.ch_edl = (fdsts_reg & CANFD_RFFDSTS_RFFDF) ? 1 : 0;
-      hdr.ch_brs = (fdsts_reg & CANFD_RFFDSTS_RFBRS) ? 1 : 0;
+          hdr.ch_edl = (fdsts_reg & CANFD_RFFDSTS_RFFDF) ? 1 : 0;
+          hdr.ch_brs = (fdsts_reg & CANFD_RFFDSTS_RFBRS) ? 1 : 0;
 #endif
 
-      /* Decode DLC to byte count; clamp to buffer size.
-       * DLC > 8 is non-linear for CAN-FD frames — use LUT.
-       */
+          /* Decode DLC to byte count; clamp to buffer size.
+           * DLC > 8 is non-linear for CAN-FD frames — use LUT.
+           */
 
-      bytes = (int)g_dlc_to_bytes[hdr.ch_dlc & 0xfu];
-      if (bytes > CAN_MAXDATALEN)
-        {
-          bytes = CAN_MAXDATALEN;
-        }
-
-      for (dw = 0; dw < (bytes + 3) / 4; dw++)
-        {
-          uint32_t word;
-          int b;
-
-          word = rzv_rd32(RZV_CANFD_BASE
-                          + RZV_CANFD_CFDRFDF_OFFSET(0, (uint32_t)dw));
-          for (b = 0; b < 4 && (dw * 4 + b) < bytes; b++)
+          bytes = (int)g_dlc_to_bytes[hdr.ch_dlc & 0xfu];
+          if (bytes > CAN_MAXDATALEN)
             {
-              data[dw * 4 + b] = (uint8_t)(word >> (b * 8));
+              bytes = CAN_MAXDATALEN;
             }
+
+          for (dw = 0; dw < (bytes + 3) / 4; dw++)
+            {
+              uint32_t word;
+              int b;
+
+              word = rzv_rd32(RZV_CANFD_BASE
+                              + RZV_CANFD_CFDRFDF_OFFSET(k, (uint32_t)dw));
+              for (b = 0; b < 4 && (dw * 4 + b) < bytes; b++)
+                {
+                  data[dw * 4 + b] = (uint8_t)(word >> (b * 8));
+                }
+            }
+
+          /* Increment RX FIFO read pointer to release slot */
+
+          rzv_wr32(0xffu, RZV_CANFD_CFDRFPCTR(k));
+
+          /* Deliver frame to upper half */
+
+          can_receive(&priv->dev, &hdr, data);
+
+          rfsts = rzv_rd32(RZV_CANFD_CFDRFSTS(k));
         }
 
-      /* Increment RX FIFO read pointer to release slot */
+      /* W1C: clear RFIF flag, preserve other status bits */
 
-      rzv_wr32(0xffu, RZV_CANFD_CFDRFPCTR(0));
-
-      /* Deliver frame to upper half */
-
-      can_receive(&priv->dev, &hdr, data);
-
-      rfsts = rzv_rd32(RZV_CANFD_CFDRFSTS(0));
+      rzv_wr32(rzv_rd32(RZV_CANFD_CFDRFSTS(k)) & ~CANFD_RFSTS_RFIF,
+               RZV_CANFD_CFDRFSTS(k));
     }
-
-  /* Clear RX FIFO interrupt flag */
-
-  rzv_wr32(rzv_rd32(RZV_CANFD_CFDRFSTS(0)) & ~CANFD_RFSTS_RFIF,
-           RZV_CANFD_CFDRFSTS(0));
 
   return OK;
 }
@@ -1064,7 +1075,7 @@ int rzv_canfd_initialize(int channel)
 
   /* CFDTMIEC0 covers mailboxes 0-31 (ch0 MB0=bit0, ch1 MB0=bit16).
    * Channels >= 2 require CFDTMIEC1 which is not wired — guard here.
-   * ch1 enablement also requires g_rxf_irq ownership refactor (Adv-3).
+   * RX FIFO per-channel ownership resolved: g_priv_by_fifo[] dispatcher.
    */
 
   DEBUGASSERT(channel < 2);
@@ -1132,6 +1143,11 @@ int rzv_canfd_register(const char *devpath, int channel)
       default:
         return -ENODEV;
     }
+
+  /* Map this channel's priv to its dedicated RX FIFO */
+
+  DEBUGASSERT(priv->channel < (sizeof(g_priv_by_fifo) / sizeof(g_priv_by_fifo[0])));
+  g_priv_by_fifo[priv->channel] = priv;
 
   ret = can_register(devpath, &priv->dev);
   if (ret < 0)

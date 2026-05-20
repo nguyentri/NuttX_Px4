@@ -344,6 +344,11 @@
 #define RZV_SYSC_SYS_WDT2_CTRL                       (RZV_SYSC_BASE + RZV_SYSC_SYS_WDT2_CTRL_OFFSET)
 #define RZV_SYSC_SYS_WDT3_CTRL                       (RZV_SYSC_BASE + RZV_SYSC_SYS_WDT3_CTRL_OFFSET)
 #define RZV_SYSC_SYS_WDT1_CTRL                       (RZV_SYSC_BASE + RZV_SYSC_SYS_WDT1_CTRL_OFFSET)
+
+/* SYS_WDTx_CTRL bit definitions (R9A09G057H sysc_iobitmask.h) */
+
+#define SYS_WDT_CTRL_BP_HALTED                       (1u << 0)   /* Halt counter when 1 */
+#define SYS_WDT_CTRL_WDTSTOPMASK                     (1u << 16)  /* Write-enable companion */
 #define RZV_SYSC_SYS_GBETH0_CFG                      (RZV_SYSC_BASE + RZV_SYSC_SYS_GBETH0_CFG_OFFSET)
 #define RZV_SYSC_SYS_GBETH1_CFG                      (RZV_SYSC_BASE + RZV_SYSC_SYS_GBETH1_CFG_OFFSET)
 #define RZV_SYSC_SYS_PCIE_MSI1_CH0                   (RZV_SYSC_BASE + RZV_SYSC_SYS_PCIE_MSI1_CH0_OFFSET)

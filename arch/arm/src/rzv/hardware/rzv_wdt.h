@@ -74,9 +74,7 @@
 #define WDT_WDTCR_RPSS_SHIFT                    (12)      /* Bits 12-13: Rpss */
 #define WDT_WDTCR_RPSS_MASK                     (0x3 << WDT_WDTCR_RPSS_SHIFT)
 
-/* WDT WDTRCR Register Bit Definitions *******************************/
-
-#define WDT_WDTRCR_RSTIRQS                      (1 << 7)  /* Rstirqs */
+/* WDT WDTRCR Register Bit Definitions: see WDTRCR section below */
 
 /* WDT WDTRR Register Bit Definitions ********************************/
 
@@ -104,5 +102,38 @@
 
 /* Maximum number of WDT channels */
 #define RZV_WDT_MAX_CHANNELS       4
+
+/* CPG bring-up helpers for RZ/V2H (R9A09G057H).
+ *
+ * Derived from FSP bsp_override.h lines 1745-1772:
+ *   - WDT_CLKP: ch=0..2 in CPG_CLKON_4 (bits 11/13/15), ch=3 in CPG_CLKON_5 (bit 1)
+ *   - WDT_LOCO: ch=0,1 in CPG_CLKON_4 (bits 12/14), ch=2,3 in CPG_CLKON_5 (bits 0/2)
+ *   - Reset:    CPG_RST_7 bits 5..8 = WDT ch 0..3
+ *   - Monitor:  CPG_RSTMON_3 bits 6..9 = WDT ch 0..3
+ *   - Underflow→system-reset routing: CPG_ERRORRST_SEL2 bits 0..3 = WDT ch 0..3,
+ *     WEN companions at +16.
+ * MSTOP is intentionally absent — FSP leaves it undefined for WDT on this MCU.
+ */
+
+#define RZV_CPG_CLK_WEN_SHIFT                  16
+
+#define RZV_CPG_CLKON_WDT_CLKP_M(ch)           ((ch) < 3 ? 4 : 5)
+#define RZV_CPG_CLKON_WDT_LOCO_M(ch)           ((ch) < 2 ? 4 : 5)
+
+#define RZV_CPG_CLKON_WDT_CLKP_BIT(ch)         ((ch) < 3 ? (1u << (11 + 2 * (ch))) : (1u << 1))
+#define RZV_CPG_CLKON_WDT_LOCO_BIT(ch)         ((ch) < 2 ? (1u << (12 + 2 * (ch))) \
+                                                         : (1u << (2 * ((ch) - 2))))
+
+/* CLKMON: per FSP all WDT monitor bits live in CLKMON_2 at CLK11/CLK12 base */
+#define RZV_CPG_CLKMON_WDT_M                   2
+
+#define RZV_CPG_RST_WDT_M                      7
+#define RZV_CPG_RST_WDT_BIT(ch)                (1u << (5 + (ch)))
+#define RZV_CPG_RSTMON_WDT_M                   3
+#define RZV_CPG_RSTMON_WDT_BIT(ch)             (1u << (6 + (ch)))
+
+#define RZV_CPG_ERRORRST_SEL2_M                2
+#define RZV_CPG_ERRORRST_SEL2_BIT(ch)          (1u << (ch))
+#define RZV_CPG_ERRORRST_SEL2_WEN(ch)          (1u << (16 + (ch)))
 
 #endif /* __ARCH_ARM_SRC_RZV_HARDWARE_RZV_WDT_H */

@@ -23,9 +23,6 @@
  * Mirrors the pattern of rzv2h_ether.c: configure GPIO pins then delegate
  * to the arch driver via rzv_canfd_register().
  *
- * v1 scope: CH0 only (/dev/can0).  CH1 pin macros are defined in board.h
- * but the CH1 init block below is compiled-out until CONFIG_RZV_CANFD1=y.
- *
  * Internal loopback at boot is the driver default (set in rzv_canfd.c
  * rzv_canfd_initialize); no board-level knob is needed here.
  */
@@ -67,6 +64,24 @@ static void rzv2h_canfd0_pins_setup(void)
   rzv_gpioconfig(BOARD_CANFD0_RX_GPIO);
 }
 
+#ifdef CONFIG_RZV_CANFD1
+/****************************************************************************
+ * Name: rzv2h_canfd1_pins_setup
+ *
+ * Description:
+ *   Configure GPIO pins for CAN-FD channel 1.
+ *   P86 (PORT8 pin 6) → CTX3 (CAN2_TXD on RDK), PSEL=5
+ *   P87 (PORT8 pin 7) → CRX3 (CAN2_RXD on RDK), PSEL=5
+ *
+ ****************************************************************************/
+
+static void rzv2h_canfd1_pins_setup(void)
+{
+  rzv_gpioconfig(BOARD_CANFD1_TX_GPIO);
+  rzv_gpioconfig(BOARD_CANFD1_RX_GPIO);
+}
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -104,11 +119,23 @@ int board_canfd_initialize(void)
   syslog(LOG_INFO, "CAN-FD CH0 registered as /dev/can0 (internal loopback)\n");
 #endif /* CONFIG_RZV_CANFD0 */
 
-  /* CH1 is not registered at v1. Pin macros BOARD_CANFD1_TX_GPIO /
-   * BOARD_CANFD1_RX_GPIO (P86/P87) are defined in board.h for future use.
-   * Enable CONFIG_RZV_CANFD1 and add the CH1 block here once CH0
-   * hardware-validates on the RDK board.
-   */
+#ifdef CONFIG_RZV_CANFD1
+  /* Configure CH1 GPIO pins (P86=TX, P87=RX) */
+
+  rzv2h_canfd1_pins_setup();
+
+  /* Register /dev/can1 via the arch lower-half driver */
+
+  ret = rzv_canfd_register("/dev/can1", 1);
+  if (ret < 0)
+    {
+      canerr("ERROR: rzv_canfd_register(\"/dev/can1\", 1) failed: %d\n",
+             ret);
+      return ret;
+    }
+
+  syslog(LOG_INFO, "CAN-FD CH1 registered as /dev/can1 (internal loopback)\n");
+#endif /* CONFIG_RZV_CANFD1 */
 
   return ret;
 }

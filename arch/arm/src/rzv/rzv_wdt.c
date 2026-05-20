@@ -40,6 +40,8 @@
 #include "rzv_clock.h"
 #include "rzv_icu.h"
 #include "hardware/rzv_wdt.h"
+#include "hardware/rzv_cpg.h"
+#include "hardware/rzv_sysc.h"
 
 #ifdef CONFIG_RZV_WDT
 
@@ -202,16 +204,83 @@ static inline void rzv_wdt_putreg16(struct rzv_wdt_priv_s *priv,
  * Name: rzv_wdt_clock_enable
  ****************************************************************************/
 
+/* Per-channel SYS_WDTx_CTRL absolute address (channel 1 is at 0x0C0C, not
+ * sequential — see hardware/rzv_sysc.h:190-193).
+ */
+
+static uintptr_t rzv_wdt_sysc_ctrl(uint8_t channel)
+{
+  switch (channel)
+    {
+      case 0: return RZV_SYSC_SYS_WDT0_CTRL;
+      case 1: return RZV_SYSC_SYS_WDT1_CTRL;
+      case 2: return RZV_SYSC_SYS_WDT2_CTRL;
+      case 3: return RZV_SYSC_SYS_WDT3_CTRL;
+      default: return 0;
+    }
+}
+
+/****************************************************************************
+ * Name: rzv_wdt_clock_enable
+ *
+ * Description:
+ *   Turn on CPG clock gates (CLKP + LOCO), wait for clock-monitor to confirm,
+ *   then deassert the WDT reset and wait for reset-monitor. Mirrors FSP
+ *   R_BSP_MODULE_START_FSP_IP_WDT (bsp_override.h:1382). MSTOP is a no-op on
+ *   RZ/V2H for WDT.
+ *
+ ****************************************************************************/
+
 static int rzv_wdt_clock_enable(uint8_t channel)
 {
-  /* TODO: Implement MSTP clock control when rzv_mstp module is available
-   * For now, assume clock is enabled by bootloader or system initialization
+  uint32_t clkp_bit  = RZV_CPG_CLKON_WDT_CLKP_BIT(channel);
+  uint32_t loco_bit  = RZV_CPG_CLKON_WDT_LOCO_BIT(channel);
+  uintptr_t clkp_reg = RZV_CPG_CLKON(RZV_CPG_CLKON_WDT_CLKP_M(channel));
+  uintptr_t loco_reg = RZV_CPG_CLKON(RZV_CPG_CLKON_WDT_LOCO_M(channel));
+  uintptr_t clkmon   = RZV_CPG_CLKMON(RZV_CPG_CLKMON_WDT_M);
+  uint32_t rst_bit   = RZV_CPG_RST_WDT_BIT(channel);
+  uintptr_t rstmon   = RZV_CPG_RSTMON(RZV_CPG_RSTMON_WDT_M);
+  int timeout;
+
+  /* Enable CLKP and LOCO gates (with WEN). */
+
+  putreg32((clkp_bit << RZV_CPG_CLK_WEN_SHIFT) | clkp_bit, clkp_reg);
+  putreg32((loco_bit << RZV_CPG_CLK_WEN_SHIFT) | loco_bit, loco_reg);
+
+  /* Wait for clock monitor to confirm. CLKMON_2 carries WDT bits for
+   * ch=0..2; for ch=3 LOCO/CLKP live elsewhere — best-effort wait, then
+   * proceed (FSP itself only polls CLKMON_2).
    */
 
-  wdinfo("WDT%d clock enable (MSTP control pending implementation)\n",
-         channel);
+  timeout = 1000;
+  while (timeout-- > 0)
+    {
+      uint32_t mon = getreg32(clkmon);
+      if ((mon & (clkp_bit | loco_bit)) == (clkp_bit | loco_bit))
+        {
+          break;
+        }
+    }
 
-  return OK;
+  /* Deassert reset (with WEN). */
+
+  putreg32((rst_bit << RZV_CPG_CLK_WEN_SHIFT) | rst_bit,
+           RZV_CPG_RST(RZV_CPG_RST_WDT_M));
+
+  /* Wait for reset monitor (RSTMON bit reads 0 when reset is released). */
+
+  timeout = 1000;
+  while (timeout-- > 0)
+    {
+      if ((getreg32(rstmon) & RZV_CPG_RSTMON_WDT_BIT(channel)) == 0)
+        {
+          wdinfo("WDT%d clock+reset released\n", channel);
+          return OK;
+        }
+    }
+
+  wderr("ERROR: WDT%d reset monitor timeout\n", channel);
+  return -ETIMEDOUT;
 }
 
 /****************************************************************************
@@ -251,6 +320,9 @@ static int rzv_wdt_calculate_timeout(struct rzv_wdt_priv_s *priv,
 {
   uint32_t pclk;
   uint32_t best_timeout = 0;
+  /* WDT IP count clock is OSCCLK (24 MHz on RZ/V2H EVK), not P0CLK.
+   * Matches FSP r_wdt.c which uses R_FSP_SystemClockHzGet(FSP_PRIV_CLOCK_OSCCLK).
+   */
   int best_tops = -1;
   int best_cks = -1;
   int i;
@@ -258,12 +330,15 @@ static int rzv_wdt_calculate_timeout(struct rzv_wdt_priv_s *priv,
 
   /* Clock divider values */
 
-  const uint32_t cks_div[] = {4, 64, 128, 512, 2048, 8192};
+  const uint32_t cks_div[] = {4, 16, 32, 64, 128, 256, 512, 2048, 8192};
   const uint8_t cks_val[] =
     {
       0x1,  /* PCLK/4 */
+      0x2,  /* PCLK/16 */
+      0x3,  /* PCLK/32 */
       0x4,  /* PCLK/64 */
       0xF,  /* PCLK/128 */
+      0x5,  /* PCLK/256 */
       0x6,  /* PCLK/512 */
       0x7,  /* PCLK/2048 */
       0x8   /* PCLK/8192 */
@@ -274,22 +349,16 @@ static int rzv_wdt_calculate_timeout(struct rzv_wdt_priv_s *priv,
   const uint32_t tops_cycles[] = {1024, 4096, 8192, 16384};
   const uint8_t tops_val[] = {0x0, 0x1, 0x2, 0x3};
 
-  /* Get peripheral clock frequency */
+  /* WDT count clock is OSCCLK (24 MHz), not P0CLK. */
 
-  pclk = rzv_get_pclk_frequency();
-  if (pclk == 0)
-    {
-      wderr("ERROR: Invalid PCLK frequency\n");
-      return -EINVAL;
-    }
-
-  wdinfo("PCLK frequency: %lu Hz\n", (unsigned long)pclk);
+  pclk = RZV_CLOCK_OSCCLK_HZ;
+  wdinfo("WDT OSCCLK frequency: %lu Hz\n", (unsigned long)pclk);
 
   /* Find the best CKS and TOPS combination to match the requested timeout
    * timeout (ms) = (cycles * 1000) / (PCLK / div)
    */
 
-  for (i = 0; i < 6; i++)
+  for (i = 0; i < 9; i++)
     {
       for (j = 0; j < 4; j++)
         {
@@ -413,6 +482,29 @@ static int rzv_wdt_configure(struct rzv_wdt_priv_s *priv)
   wdinfo("WDT%d configured for reset mode\n", priv->channel);
 #endif
 
+  /* Route WDT underflow to system reset (reset mode only). FSP equivalent:
+   * R_BSP_WDT_SYSTEM_RESET_ENABLE (bsp_wdt.h:55).
+   */
+
+#ifndef CONFIG_RZV_WDT_INTERRUPT_MODE
+  putreg32(RZV_CPG_ERRORRST_SEL2_BIT(priv->channel) |
+           RZV_CPG_ERRORRST_SEL2_WEN(priv->channel),
+           RZV_CPG_ERRORRST_SEL(RZV_CPG_ERRORRST_SEL2_M));
+#endif
+
+  /* Release the counter halt latch in SYSC so the WDT actually counts.
+   * Equivalent to FSP R_BSP_WDT_COUNTING_ENABLE (bsp_wdt.h:38).
+   * Write WDTSTOPMASK (WEN=1) with bp_halted=0.
+   */
+
+  {
+    uintptr_t ctrl = rzv_wdt_sysc_ctrl(priv->channel);
+    if (ctrl != 0)
+      {
+        putreg32(SYS_WDT_CTRL_WDTSTOPMASK, ctrl);
+      }
+  }
+
   priv->configured = true;
 
   wdinfo("WDT%d configured: WDTCR=0x%04x\n", priv->channel, wdtcr);
@@ -481,15 +573,20 @@ static int rzv_wdt_stop(struct watchdog_lowerhalf_s *lower)
 
   wdinfo("Stopping WDT%d\n", priv->channel);
 
-  /* Note: RZV2H WDT cannot be stopped once started in hardware.
-   * This just marks it as stopped in software for status tracking.
+  /* Halt the counter via SYSC: set bp_halted=1 with WEN=1.
+   * Per FSP bsp_wdt.h R_BSP_WDT_COUNTING_ENABLE, writing bp_halted=1
+   * with the WDTSTOPMASK WEN bit set freezes the WDT counter immediately.
    */
 
+  {
+    uintptr_t ctrl = rzv_wdt_sysc_ctrl(priv->channel);
+    if (ctrl != 0)
+      {
+        putreg32(SYS_WDT_CTRL_BP_HALTED | SYS_WDT_CTRL_WDTSTOPMASK, ctrl);
+      }
+  }
+
   priv->started = false;
-
-  wdwarn("WDT%d marked as stopped (hardware cannot be stopped)\n",
-         priv->channel);
-
   return OK;
 }
 
@@ -649,6 +746,7 @@ static xcpt_t rzv_wdt_capture(struct watchdog_lowerhalf_s *lower,
 #ifdef CONFIG_RZV_WDT_INTERRUPT_MODE
   oldhandler = priv->handler;
   priv->handler = handler;
+  priv->arg = priv;
 
   /* Enable or disable IRQ based on handler */
 
@@ -710,10 +808,24 @@ static int rzv_wdt_interrupt(int irq, void *context, void *arg)
       wderr("WDT%d REFRESH ERROR detected\n", priv->channel);
     }
 
-  /* Clear interrupt flags */
+  /* Clear interrupt flags. Hardware does not always clear in the same cycle;
+   * loop with a bounded retry until flags read back as 0 (matches FSP
+   * r_wdt.c status-clear loop).
+   */
 
-  rzv_wdt_putreg16(priv, RZV_WDT_WDTSR_OFFSET,
-                   wdtsr & ~(WDT_WDTSR_UNDFF | WDT_WDTSR_REFEF));
+  {
+    int retries = 16;
+    while (retries-- > 0)
+      {
+        uint16_t cur = rzv_wdt_getreg16(priv, RZV_WDT_WDTSR_OFFSET);
+        if ((cur & (WDT_WDTSR_UNDFF | WDT_WDTSR_REFEF)) == 0)
+          {
+            break;
+          }
+        rzv_wdt_putreg16(priv, RZV_WDT_WDTSR_OFFSET,
+                         cur & ~(WDT_WDTSR_UNDFF | WDT_WDTSR_REFEF));
+      }
+  }
 
   /* Call user handler if registered */
 
