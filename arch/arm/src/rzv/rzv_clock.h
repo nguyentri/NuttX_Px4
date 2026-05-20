@@ -113,18 +113,16 @@
 #define RZV_CPG_CLK_GPT5            (4 << 16 | 5)
 #define RZV_CPG_CLK_GPT6            (4 << 16 | 6)
 #define RZV_CPG_CLK_GPT7            (4 << 16 | 7)
-/* GPT8 and GPT9 do NOT exist on R9A09G057H — phantom channels removed.
- * Logical driver channels 8-15 map to physical GPT10-17 (unit1).
- * GPT10-17 may share one CPG gate with unit0 or have a separate CLKON_N bit;
- * UNVERIFIED pending RZ/V2H UM. For now, use same domain 4 placeholder. */
-#define RZV_CPG_CLK_GPT10           (4 << 16 | 8)
-#define RZV_CPG_CLK_GPT11           (4 << 16 | 9)
-#define RZV_CPG_CLK_GPT12           (4 << 16 | 10)
-#define RZV_CPG_CLK_GPT13           (4 << 16 | 11)  /* UNVERIFIED — placeholder, needs RZ/V2H UM */
-#define RZV_CPG_CLK_GPT14           (4 << 16 | 12)  /* UNVERIFIED — placeholder, needs RZ/V2H UM */
-#define RZV_CPG_CLK_GPT15           (4 << 16 | 13)  /* UNVERIFIED — placeholder, needs RZ/V2H UM */
-#define RZV_CPG_CLK_GPT16           (4 << 16 | 14)  /* UNVERIFIED — placeholder, needs RZ/V2H UM */
-#define RZV_CPG_CLK_GPT17           (4 << 16 | 15)  /* UNVERIFIED — placeholder, needs RZ/V2H UM */
+#define RZV_CPG_CLK_GPT8            (4 << 16 | 8)
+#define RZV_CPG_CLK_GPT9            (4 << 16 | 9)
+#define RZV_CPG_CLK_GPT10           (4 << 16 | 10)
+#define RZV_CPG_CLK_GPT11           (4 << 16 | 11)
+#define RZV_CPG_CLK_GPT12           (4 << 16 | 12)
+#define RZV_CPG_CLK_GPT13           (4 << 16 | 13)  /* UNVERIFIED — placeholder, needs RZ/V2H UM */
+#define RZV_CPG_CLK_GPT14           (4 << 16 | 14)  /* UNVERIFIED — placeholder, needs RZ/V2H UM */
+#define RZV_CPG_CLK_GPT15           (4 << 16 | 15)  /* UNVERIFIED — placeholder, needs RZ/V2H UM */
+#define RZV_CPG_CLK_GPT16           (4 << 16 | 16)  /* UNVERIFIED — placeholder, needs RZ/V2H UM */
+#define RZV_CPG_CLK_GPT17           (4 << 16 | 17)  /* UNVERIFIED — placeholder, needs RZ/V2H UM */
 
 /* OSTM timers - UNVERIFIED: needs RZ/V2H UM confirmation.
  * GPT and OSTM likely share CPG_CLKON_4 but bit offsets unknown. */

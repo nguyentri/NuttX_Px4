@@ -63,6 +63,8 @@ config ARCH_CHIP_R9A09G057
    select RZV_HAVE_GPT5
    select RZV_HAVE_GPT6
    select RZV_HAVE_GPT7
+   select RZV_HAVE_GPT8
+   select RZV_HAVE_GPT9
    select RZV_HAVE_GPT10
    select RZV_HAVE_GPT11
 
@@ -461,6 +463,13 @@ config RZV_HAVE_GPT7
    bool
    default n
 
+config RZV_HAVE_GPT8
+   bool
+   default n
+
+config RZV_HAVE_GPT9
+   bool
+   default n
 
 config RZV_HAVE_GPT10
    bool
@@ -1228,26 +1237,37 @@ config RZV_GPT7
    ---help---
      Enable GPT7 channel.
 
+config RZV_GPT8
+   bool "GPT8"
+   default n
+   depends on RZV_HAVE_GPT8 && RZV_GPT
+   ---help---
+     Enable GPT8 channel.
+
+config RZV_GPT9
+   bool "GPT9"
+   default n
+   depends on RZV_HAVE_GPT9 && RZV_GPT
+   ---help---
+     Enable GPT9 channel.
 
 config RZV_GPT10
-   bool "GPT10 (physical GPT10 = logical channel 8)"
+   bool "GPT10"
    default n
    depends on RZV_HAVE_GPT10 && RZV_GPT
    ---help---
-     Enable physical GPT10 (unit1 channel 0, base 0x13020000).
-     Accessed via rzv_gpt_initialize(8) after phantom GPT8/9 removal.
+     Enable GPT10 channel.
 
 config RZV_HAVE_GPT11
    bool
    default n
 
 config RZV_GPT11
-   bool "GPT11 (physical GPT11 = logical channel 9)"
+   bool "GPT11"
    default n
    depends on RZV_HAVE_GPT11 && RZV_GPT
    ---help---
-     Enable physical GPT11 (unit1 channel 1, base 0x13020100).
-     Accessed via rzv_gpt_initialize(9) after phantom GPT8/9 removal.
+     Enable GPT11 channel.
 
 config RZV_ADC
    bool "ADC support"

@@ -154,30 +154,27 @@ static const struct pwm_ops_s g_rzv_gpt_ops =
   .ioctl    = rzv_gpt_ioctl,
 };
 
-/* Base address table: logical channels 0-7 → GPT0-7 (unit0, 0x13010xxx),
- *                     logical channels 8-15 → GPT10-17 (unit1, 0x13020xxx).
- * GPT8/9 do NOT exist on R9A09G057H — removed to prevent bus faults.
- * FSP gpt_iodefine.h:788-795 confirms only GPT0-7 in unit0. */
+/* Base address table indexed by the hardware GPT number. */
 static const uintptr_t g_rzv_gpt_base[RZV_GPT_MAX_CHANNELS] =
 {
-  /* Unit 0: GPT0-7, base 0x13010000, stride 0x100 */
-  RZV_GPT0_BASE,   /* logical 0  = physical GPT0  */
-  RZV_GPT1_BASE,   /* logical 1  = physical GPT1  */
-  RZV_GPT2_BASE,   /* logical 2  = physical GPT2  */
-  RZV_GPT3_BASE,   /* logical 3  = physical GPT3  */
-  RZV_GPT4_BASE,   /* logical 4  = physical GPT4  */
-  RZV_GPT5_BASE,   /* logical 5  = physical GPT5  */
-  RZV_GPT6_BASE,   /* logical 6  = physical GPT6  */
-  RZV_GPT7_BASE,   /* logical 7  = physical GPT7  */
-  /* Unit 1: GPT10-17, base 0x13020000, stride 0x100 */
-  RZV_GPT10_BASE,  /* logical 8  = physical GPT10 */
-  RZV_GPT11_BASE,  /* logical 9  = physical GPT11 */
-  RZV_GPT12_BASE,  /* logical 10 = physical GPT12 */
-  RZV_GPT13_BASE,  /* logical 11 = physical GPT13 */
-  RZV_GPT14_BASE,  /* logical 12 = physical GPT14 */
-  RZV_GPT15_BASE,  /* logical 13 = physical GPT15 */
-  RZV_GPT16_BASE,  /* logical 14 = physical GPT16 */
-  RZV_GPT17_BASE,  /* logical 15 = physical GPT17 */
+  RZV_GPT0_BASE,
+  RZV_GPT1_BASE,
+  RZV_GPT2_BASE,
+  RZV_GPT3_BASE,
+  RZV_GPT4_BASE,
+  RZV_GPT5_BASE,
+  RZV_GPT6_BASE,
+  RZV_GPT7_BASE,
+  RZV_GPT8_BASE,
+  RZV_GPT9_BASE,
+  RZV_GPT10_BASE,
+  RZV_GPT11_BASE,
+  RZV_GPT12_BASE,
+  RZV_GPT13_BASE,
+  RZV_GPT14_BASE,
+  RZV_GPT15_BASE,
+  RZV_GPT16_BASE,
+  RZV_GPT17_BASE,
 };
 
 /* Clock-enable IDs for each logical channel.
@@ -186,22 +183,24 @@ static const uintptr_t g_rzv_gpt_base[RZV_GPT_MAX_CHANNELS] =
  * Actual mapping requires RZ/V2H UM Table 9.x confirmation. */
 static const uint32_t g_rzv_gpt_clkid[RZV_GPT_MAX_CHANNELS] =
 {
-  RZV_CPG_CLK_GPT0,  /* logical 0  = physical GPT0  */
-  RZV_CPG_CLK_GPT1,  /* logical 1  = physical GPT1  */
-  RZV_CPG_CLK_GPT2,  /* logical 2  = physical GPT2  */
-  RZV_CPG_CLK_GPT3,  /* logical 3  = physical GPT3  */
-  RZV_CPG_CLK_GPT4,  /* logical 4  = physical GPT4  */
-  RZV_CPG_CLK_GPT5,  /* logical 5  = physical GPT5  */
-  RZV_CPG_CLK_GPT6,  /* logical 6  = physical GPT6  */
-  RZV_CPG_CLK_GPT7,  /* logical 7  = physical GPT7  */
-  RZV_CPG_CLK_GPT10, /* logical 8  = physical GPT10 */
-  RZV_CPG_CLK_GPT11, /* logical 9  = physical GPT11 */
-  RZV_CPG_CLK_GPT12, /* logical 10 = physical GPT12 */
-  RZV_CPG_CLK_GPT13, /* logical 11 = physical GPT13 (UNVERIFIED clk id) */
-  RZV_CPG_CLK_GPT14, /* logical 12 = physical GPT14 (UNVERIFIED clk id) */
-  RZV_CPG_CLK_GPT15, /* logical 13 = physical GPT15 (UNVERIFIED clk id) */
-  RZV_CPG_CLK_GPT16, /* logical 14 = physical GPT16 (UNVERIFIED clk id) */
-  RZV_CPG_CLK_GPT17, /* logical 15 = physical GPT17 (UNVERIFIED clk id) */
+  RZV_CPG_CLK_GPT0,
+  RZV_CPG_CLK_GPT1,
+  RZV_CPG_CLK_GPT2,
+  RZV_CPG_CLK_GPT3,
+  RZV_CPG_CLK_GPT4,
+  RZV_CPG_CLK_GPT5,
+  RZV_CPG_CLK_GPT6,
+  RZV_CPG_CLK_GPT7,
+  RZV_CPG_CLK_GPT8,
+  RZV_CPG_CLK_GPT9,
+  RZV_CPG_CLK_GPT10,
+  RZV_CPG_CLK_GPT11,
+  RZV_CPG_CLK_GPT12,
+  RZV_CPG_CLK_GPT13,
+  RZV_CPG_CLK_GPT14,
+  RZV_CPG_CLK_GPT15,
+  RZV_CPG_CLK_GPT16,
+  RZV_CPG_CLK_GPT17,
 };
 
 static const struct rzv_gpt_divider_s g_rzv_gpt_dividers[] =
@@ -266,7 +265,7 @@ static const uint16_t g_rzv_gpt_overflow_event[RZV_GPT_MAX_CHANNELS] =
     .base      = g_rzv_gpt_base[ch],                            \
     .clkid     = g_rzv_gpt_clkid[ch],                           \
     .channel   = (ch),                                          \
-    .hw_ch     = ((ch) % 8u),                                   \
+    .hw_ch     = ((ch) >= 10 ? ((ch) - 10u) : (ch)),             \
     .pclk      = 0,                                             \
     .period    = 0,                                             \
     .divsel    = 0,                                             \
@@ -299,16 +298,17 @@ static struct rzv_gpt_lowerhalf_s g_rzv_gpt6 = RZV_GPT_LOWER_INIT(6);
 #ifdef CONFIG_RZV_GPT7
 static struct rzv_gpt_lowerhalf_s g_rzv_gpt7 = RZV_GPT_LOWER_INIT(7);
 #endif
-/* GPT8 and GPT9 are NOT defined — phantom channels removed.
- * CONFIG_RZV_GPT8 / CONFIG_RZV_GPT9 are kept in Kconfig for backward-compat
- * but must NOT be selected; selecting them would silently access wrong HW. */
-/* logical 8 = physical GPT10 (unit1, channel 0) */
-#ifdef CONFIG_RZV_GPT10
-static struct rzv_gpt_lowerhalf_s g_rzv_gpt10 = RZV_GPT_LOWER_INIT(8);
+#ifdef CONFIG_RZV_GPT8
+static struct rzv_gpt_lowerhalf_s g_rzv_gpt8 = RZV_GPT_LOWER_INIT(8);
 #endif
-/* logical 9 = physical GPT11 (unit1, channel 1) */
+#ifdef CONFIG_RZV_GPT9
+static struct rzv_gpt_lowerhalf_s g_rzv_gpt9 = RZV_GPT_LOWER_INIT(9);
+#endif
+#ifdef CONFIG_RZV_GPT10
+static struct rzv_gpt_lowerhalf_s g_rzv_gpt10 = RZV_GPT_LOWER_INIT(10);
+#endif
 #ifdef CONFIG_RZV_GPT11
-static struct rzv_gpt_lowerhalf_s g_rzv_gpt11 = RZV_GPT_LOWER_INIT(9);
+static struct rzv_gpt_lowerhalf_s g_rzv_gpt11 = RZV_GPT_LOWER_INIT(11);
 #endif
 
 /****************************************************************************
@@ -896,15 +896,20 @@ FAR struct pwm_lowerhalf_s *rzv_gpt_initialize(int channel)
       case 7:
         return &g_rzv_gpt7.dev;
 #endif
-  /* GPT8 and GPT9 cases intentionally absent — phantom channels removed.
-   * Logical 8 = physical GPT10 (unit1 ch0), logical 9 = physical GPT11 (unit1 ch1).
-   * Board code (rzv2h_pwm.c) uses logical 8 and 9 after fix. */
+#ifdef CONFIG_RZV_GPT8
+      case 8:
+        return &g_rzv_gpt8.dev;
+#endif
+#ifdef CONFIG_RZV_GPT9
+      case 9:
+        return &g_rzv_gpt9.dev;
+#endif
 #ifdef CONFIG_RZV_GPT10
-      case 8:  /* logical 8 = physical GPT10 (unit1, hw_ch=0) */
+      case 10:
         return &g_rzv_gpt10.dev;
 #endif
 #ifdef CONFIG_RZV_GPT11
-      case 9:  /* logical 9 = physical GPT11 (unit1, hw_ch=1) */
+      case 11:
         return &g_rzv_gpt11.dev;
 #endif
       default:

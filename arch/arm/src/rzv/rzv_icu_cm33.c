@@ -295,3 +295,85 @@ int rzv_icu_m33_detach(int icu_irq)
 
   return OK;
 }
+
+/****************************************************************************
+ * Name: rzv_icu_initialize
+ *
+ * Description:
+ *   Common ICU API wrapper for the CM33 implementation.
+ *
+ ****************************************************************************/
+
+void rzv_icu_initialize(void)
+{
+  rzv_icu_m33_initialize();
+}
+
+/****************************************************************************
+ * Name: rzv_icu_attach
+ *
+ * Description:
+ *   Common ICU API wrapper for the CM33 implementation.
+ *
+ ****************************************************************************/
+
+int rzv_icu_attach(int event, xcpt_t handler, void *arg, bool irq_enable)
+{
+  return rzv_icu_m33_attach(event, handler, arg, irq_enable);
+}
+
+/****************************************************************************
+ * Name: rzv_icu_detach
+ *
+ * Description:
+ *   Common ICU API wrapper for the CM33 implementation.
+ *
+ ****************************************************************************/
+
+int rzv_icu_detach(int icu_irq)
+{
+  return rzv_icu_m33_detach(icu_irq);
+}
+
+/****************************************************************************
+ * Name: rzv_icu_clear_irq
+ *
+ * Description:
+ *   Clear pending CM33 ICU interrupt state.
+ *
+ ****************************************************************************/
+
+void rzv_icu_clear_irq(int irq)
+{
+  if (irq >= RZV_INTC_M33SEL_SPI_BASE &&
+      irq < (RZV_INTC_M33SEL_SPI_BASE + RZV_IRQ_ICU_SLOTS))
+    {
+      putreg32(1u << (irq % 32), RZV_INTC_GIC_GICD_ICDICPR(irq >> 5));
+    }
+}
+
+/****************************************************************************
+ * Name: rzv_icu_set_priority
+ *
+ * Description:
+ *   Set CM33 ICU interrupt priority. Not implemented yet for INTM33SEL.
+ *
+ ****************************************************************************/
+
+int rzv_icu_set_priority(int icu_irq, int priority)
+{
+  return -ENOSYS;
+}
+
+/****************************************************************************
+ * Name: rzv_icu_set_event
+ *
+ * Description:
+ *   Common ICU API wrapper for CM33 INTM33SEL routing.
+ *
+ ****************************************************************************/
+
+int rzv_icu_set_event(int icu_slot, int event)
+{
+  return rzv_icu_m33_set_event(icu_slot, event);
+}

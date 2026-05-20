@@ -81,11 +81,12 @@
 #ifndef RZV_GPT7_BASE
 #  define RZV_GPT7_BASE               0x13010700
 #endif
-/* GPT8 and GPT9 do NOT exist on R9A09G057H (RZ/V2H).
- * R9A09G057H has GPT0-7 (unit0, 0x13010000) and GPT10-17 (unit1, 0x13020000).
- * DO NOT define RZV_GPT8_BASE / RZV_GPT9_BASE — accessing 0x13010800/0x13010900
- * causes a bus fault. Phantom channels removed per FSP gpt_iodefine.h:788-795.
- */
+#ifndef RZV_GPT8_BASE
+#  define RZV_GPT8_BASE               0x13010800
+#endif
+#ifndef RZV_GPT9_BASE
+#  define RZV_GPT9_BASE               0x13010900
+#endif
 
 /* RZV_GPT_UNIT_BIT: produce a single-bit mask for a unit-local hw channel.
  * Input hw_ch MUST be 0-7 (unit-local, NOT the logical driver channel 0-15).
@@ -1066,13 +1067,13 @@
 #define RZV_GPT_CHANNEL_5          5
 #define RZV_GPT_CHANNEL_6          6
 #define RZV_GPT_CHANNEL_7          7
+#define RZV_GPT_CHANNEL_8          8
+#define RZV_GPT_CHANNEL_9          9
 
 /* Maximum number of GPT channels.
- * Physical hardware: GPT0-7 (unit0) + GPT10-17 (unit1) = 16 real channels.
- * NuttX driver maps: logical 0-7 → GPT0-7, logical 8-15 → GPT10-17.
- * Phantom GPT8/9 removed; this count reflects the driver table size (0-10 valid
- * after removal of phantom entries, but only indices 0-7 and 8+=GPT10+). */
-#define RZV_GPT_MAX_CHANNELS       16
+ * Physical hardware channels are addressed by their GPT number so board
+ * descriptions can match the Renesas FSP/PX4 FreeRTOS reference directly. */
+#define RZV_GPT_MAX_CHANNELS       18
 
 /* GTBER double-buffering value: force-transfer CCRA/CCRB/PR buffers at overflow.
  * CCRA_BITS[17:16]=01, CCRB_BITS[19:18]=01, PR_BITS[21:20]=01 → 0x00150000 normal
