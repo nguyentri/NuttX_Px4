@@ -502,6 +502,30 @@
 
 /* End of FSP-generated pin mappings */
 
+/* CAN-FD Pin Configuration *************************************************/
+
+/* RDK-RZV2H CAN-FD channel pin assignments (PSEL=5 for CAN/CANFD function).
+ *
+ * Channel 0 (RDK "CAN1") — registered as /dev/can0 at v1:
+ *   CAN1_TXD: P80 = PORT8 pin 0 → CTX0  (GPIO_CTX0_P8_0_M5)
+ *   CAN1_RXD: P81 = PORT8 pin 1 → CRX0  (GPIO_CRQ0_P8_1_M5)
+ *
+ * Channel 1 (RDK "CAN2") — macros defined but NOT registered at v1.
+ *   Enable CONFIG_RZV_CANFD1 and add the CH1 init block in rzv2h_canfd.c
+ *   once CH0 hardware-validates on the RDK board.
+ *   CAN2_TXD: P86 = PORT8 pin 6 → CTX3  (GPIO_CTX3_P8_6_M5)
+ *   CAN2_RXD: P87 = PORT8 pin 7 → CRX3  (GPIO_CRX3_P8_7_M5)
+ */
+
+#define BOARD_CANFD0_TX_GPIO  GPIO_CTX0_P8_0_M5   /* P80 CH0 TX, PSEL=5 */
+#define BOARD_CANFD0_RX_GPIO  GPIO_CRQ0_P8_1_M5   /* P81 CH0 RX, PSEL=5 */
+
+/* CH1 macros — not registered at v1; uncomment board_canfd_initialize()
+ * CH1 block when CONFIG_RZV_CANFD1=y is enabled post-validation.
+ */
+#define BOARD_CANFD1_TX_GPIO  GPIO_CTX3_P8_6_M5   /* P86 CH1 TX, PSEL=5 */
+#define BOARD_CANFD1_RX_GPIO  GPIO_CRX3_P8_7_M5   /* P87 CH1 RX, PSEL=5 */
+
 /* Board Capabilities *******************************************************/
 
 #define BOARD_HAS_LEDS        1

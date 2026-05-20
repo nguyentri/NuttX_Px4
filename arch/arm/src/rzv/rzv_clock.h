@@ -165,8 +165,17 @@
 #define RZV_CPG_CLK_DMAC2           RZV_CPG_CLK_DMAC
 #define RZV_CPG_CLK_DMAC3           RZV_CPG_CLK_DMAC
 
-/* CANFD - UNVERIFIED: needs RZ/V2H UM confirmation */
-#define RZV_CPG_CLK_CANFD           (7 << 16 | 0)
+/* CANFD - CPG_CLKON_9 bits[14:12] (3-bit mask CLK12/13/14, value 7U<<12)
+ * Source: bsp_override.h lines 1692-1693 (R9A09G057H):
+ *   BSP_CLKON_REG_FSP_IP_CANFD(ch)  = R_CPG->CPG_CLKON_9
+ *   BSP_CLKON_BIT_FSP_IP_CANFD(ch)  = 7U << R_CPG_CPG_CLKON_9_CLK12_ON_Pos
+ *   R_CPG_CPG_CLKON_9_CLK12_ON_Pos  = 12 (cpg_iobitmask.h:1319)
+ * Encoding: (CLKON_reg_index << 16 | bit_position) = (9 << 16 | 12)
+ * CORRECTED from previous wrong value (7 << 16 | 0).
+ * Reset: CPG_RST_10 bits[2:1] (3U<<1). Same encoding → (10 << 16 | 1).
+ * Module-stop: CPG_BUS_MCPU2_MSTOP bit 9 (MSTOP9).
+ */
+#define RZV_CPG_CLK_CANFD           (9 << 16 | 12)
 #define RZV_CPG_CLK_CAN0            RZV_CPG_CLK_CANFD  /* CAN0 shares CANFD gate */
 #define RZV_CPG_CLK_CAN1            RZV_CPG_CLK_CANFD  /* CAN1 shares CANFD gate */
 

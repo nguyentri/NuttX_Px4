@@ -483,6 +483,34 @@
 #define RZV_ELC_GBETH_PORT0_PTP_PPS_O_2               (0x1BF)  /* GBETH PORT0 Event (INPUT) 2 - Event 0x1BF */
 #define RZV_ELC_GBETH_PORT0_PTP_PPS_O_3               (0x1C0)  /* GBETH PORT0 Event (INPUT) 3 - Event 0x1C0 */
 
+/* CAN-FD IRQSEL event IDs — sourced from FSP bsp_irq_id.h (R9A09G057H CR8)
+ * IRQSEL No values verified against:
+ *   refs/can_fd_rzv2h_evk_cr8_0_ep/e2studio/rzv/fsp/src/bsp/mcu/rzv2h/cr/bsp_irq_id.h
+ *   Lines 921-940 — CANFD_INTRCANnERR/REC/TRX_IRQSELn
+ * These are passed to rzv_icu_attach() as the 'event' parameter.
+ */
+
+#define RZV_ELC_CANFD_CH0_ERR                         (354)  /* CANFD0 channel error (can_cherr_int_0) */
+#define RZV_ELC_CANFD_CH1_ERR                         (355)  /* CANFD1 channel error (can_cherr_int_1) */
+#define RZV_ELC_CANFD_CH2_ERR                         (356)  /* CANFD2 channel error (can_cherr_int_2) */
+#define RZV_ELC_CANFD_CH3_ERR                         (357)  /* CANFD3 channel error (can_cherr_int_3) */
+#define RZV_ELC_CANFD_CH4_ERR                         (358)  /* CANFD4 channel error (can_cherr_int_4) */
+#define RZV_ELC_CANFD_CH5_ERR                         (359)  /* CANFD5 channel error (can_cherr_int_5) */
+#define RZV_ELC_CANFD_CH0_REC                         (360)  /* CANFD0 common FIFO RX (can_comfrx_int_0) */
+#define RZV_ELC_CANFD_CH1_REC                         (361)  /* CANFD1 common FIFO RX (can_comfrx_int_1) */
+#define RZV_ELC_CANFD_CH2_REC                         (362)  /* CANFD2 common FIFO RX (can_comfrx_int_2) */
+#define RZV_ELC_CANFD_CH3_REC                         (363)  /* CANFD3 common FIFO RX (can_comfrx_int_3) */
+#define RZV_ELC_CANFD_CH4_REC                         (364)  /* CANFD4 common FIFO RX (can_comfrx_int_4) */
+#define RZV_ELC_CANFD_CH5_REC                         (365)  /* CANFD5 common FIFO RX (can_comfrx_int_5) */
+#define RZV_ELC_CANFD_GLERR                           (366)  /* CANFD global error (can_glerr_int) */
+#define RZV_ELC_CANFD_RXFINT                          (367)  /* CANFD global RX FIFO (can_rxf_int) */
+#define RZV_ELC_CANFD_CH0_TRX                         (368)  /* CANFD0 TX (can_tx_int_0) */
+#define RZV_ELC_CANFD_CH1_TRX                         (369)  /* CANFD1 TX (can_tx_int_1) */
+#define RZV_ELC_CANFD_CH2_TRX                         (370)  /* CANFD2 TX (can_tx_int_2) */
+#define RZV_ELC_CANFD_CH3_TRX                         (371)  /* CANFD3 TX (can_tx_int_3) */
+#define RZV_ELC_CANFD_CH4_TRX                         (372)  /* CANFD4 TX (can_tx_int_4) */
+#define RZV_ELC_CANFD_CH5_TRX                         (373)  /* CANFD5 TX (can_tx_int_5) */
+
 /* TODO(rzv2h-gbeth-irq): the GBETH MAC/DMA combined interrupt event IDs are
  * not yet captured here.  arch/arm/src/rzv/rzv_ether.c currently passes the
  * raw FSP vector_data.c numbers (0x2FD for GBETH0, 0x30C for GBETH1) directly

@@ -104,6 +104,11 @@ ifeq ($(CONFIG_RZV_ETHERNET),y)
 CSRCS += rzv2h_ether.c
 endif
 
+# CAN-FD support
+ifeq ($(CONFIG_RZV_CANFD),y)
+CSRCS += rzv2h_canfd.c
+endif
+
 # WDT test application
 ifeq ($(CONFIG_RZV2H_WDT_TEST),y)
 CSRCS += rzv2h_wdt_test.c

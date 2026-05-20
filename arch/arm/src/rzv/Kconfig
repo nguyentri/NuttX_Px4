@@ -1452,6 +1452,59 @@ endif # RZV_ETHERNET
 
 # Watchdog Timer (WDT)
 
+# CAN-FD Driver
+
+menuconfig RZV_CANFD
+   bool "CAN-FD driver (RSCAN-FD)"
+   default n
+   depends on RZV_HAVE_CAN0 || RZV_HAVE_CAN1
+   select CAN
+   select CAN_FD
+   ---help---
+     Enable the RZ/V2H CAN-FD lower-half driver.  The hardware block
+     (RSCAN-FD) supports 6 channels at base 0x12440000.  v1 enables CH0
+     (/dev/can0) only; CH1 framework is compiled but not registered.
+
+     CANFDCLK = 80 MHz (verified by FSP bsp_clock_cfg.h).
+     Nominal timing: BRP=2, TSEG1=74, TSEG2=25, SJW=25 → 400 kbps.
+     Data timing:    BRP=1, TSEG1=16, TSEG2=8,  SJW=8  → 3.2 Mbps.
+
+     Boot default: internal loopback.  Toggle bus mode via ioctl cmd
+     0x1000 with arg=0.
+
+     Requires CONFIG_CAN_FD=y for 64-byte payload support.
+
+if RZV_CANFD
+
+config RZV_CANFD0
+   bool "Enable CAN-FD channel 0 (/dev/can0)"
+   default y
+   depends on RZV_HAVE_CAN0
+   ---help---
+     Register CAN-FD channel 0 as /dev/can0.
+     RDK-RZV2H: CAN1 connector (P80/P81, PSEL=5).
+     CH0 is the primary channel for v1 bring-up.
+
+config RZV_CANFD1
+   bool "Enable CAN-FD channel 1 (/dev/can1)"
+   default n
+   depends on RZV_HAVE_CAN1
+   ---help---
+     Register CAN-FD channel 1 as /dev/can1.
+     RDK-RZV2H: CAN2 connector (P86/P87, PSEL=5).
+     Disabled by default at v1; enable after CH0 hardware validation.
+
+config RZV_CANFD_IRQ_PRIORITY
+   int "CAN-FD interrupt priority"
+   default 12
+   range 0 15
+   ---help---
+     GIC priority for all CAN-FD interrupts (TX, RX, error, global error).
+     Lower number = higher priority.  12 matches other peripheral drivers
+     in this BSP.
+
+endif # RZV_CANFD
+
 config RZV_WDT
    bool "Watchdog Timer (WDT)"
    default n

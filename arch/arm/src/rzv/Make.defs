@@ -140,6 +140,11 @@ ifeq ($(CONFIG_RZV_WDT),y)
 CHIP_CSRCS += rzv_wdt.c
 endif
 
+# CAN-FD driver
+ifeq ($(CONFIG_RZV_CANFD),y)
+CHIP_CSRCS += rzv_canfd.c
+endif
+
 # IDLE task custom
 #ifeq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += rzv_idle.c

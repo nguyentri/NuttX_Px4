@@ -214,6 +214,19 @@ int rzv2h_ether_initialize(void);
 #endif
 
 /****************************************************************************
+ * Name: board_canfd_initialize
+ *
+ * Description:
+ *   Configure CAN-FD GPIO pins and register CAN-FD character device(s).
+ *   CH0 is registered as /dev/can0. CH1 is stubbed at v1.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RZV_CANFD
+int board_canfd_initialize(void);
+#endif
+
+/****************************************************************************
  * Name: rzv2h_app_examples
  *
  * Description:
