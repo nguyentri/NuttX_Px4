@@ -482,6 +482,49 @@
 #define RZV_ELC_GBETH_PORT0_PTP_PPS_O_1               (0x1BE)  /* GBETH PORT0 Event (INPUT) 1 - Event 0x1BE */
 #define RZV_ELC_GBETH_PORT0_PTP_PPS_O_2               (0x1BF)  /* GBETH PORT0 Event (INPUT) 2 - Event 0x1BF */
 #define RZV_ELC_GBETH_PORT0_PTP_PPS_O_3               (0x1C0)  /* GBETH PORT0 Event (INPUT) 3 - Event 0x1C0 */
+
+/* CAN-FD IRQSEL event IDs — sourced from FSP bsp_irq_id.h (R9A09G057H CR8)
+ * IRQSEL No values verified against:
+ *   refs/can_fd_rzv2h_evk_cr8_0_ep/e2studio/rzv/fsp/src/bsp/mcu/rzv2h/cr/bsp_irq_id.h
+ *   Lines 921-940 — CANFD_INTRCANnERR/REC/TRX_IRQSELn
+ * These are passed to rzv_icu_attach() as the 'event' parameter.
+ */
+
+#define RZV_ELC_CANFD_CH0_ERR                         (354)  /* CANFD0 channel error (can_cherr_int_0) */
+#define RZV_ELC_CANFD_CH1_ERR                         (355)  /* CANFD1 channel error (can_cherr_int_1) */
+#define RZV_ELC_CANFD_CH2_ERR                         (356)  /* CANFD2 channel error (can_cherr_int_2) */
+#define RZV_ELC_CANFD_CH3_ERR                         (357)  /* CANFD3 channel error (can_cherr_int_3) */
+#define RZV_ELC_CANFD_CH4_ERR                         (358)  /* CANFD4 channel error (can_cherr_int_4) */
+#define RZV_ELC_CANFD_CH5_ERR                         (359)  /* CANFD5 channel error (can_cherr_int_5) */
+#define RZV_ELC_CANFD_CH0_REC                         (360)  /* CANFD0 common FIFO RX (can_comfrx_int_0) */
+#define RZV_ELC_CANFD_CH1_REC                         (361)  /* CANFD1 common FIFO RX (can_comfrx_int_1) */
+#define RZV_ELC_CANFD_CH2_REC                         (362)  /* CANFD2 common FIFO RX (can_comfrx_int_2) */
+#define RZV_ELC_CANFD_CH3_REC                         (363)  /* CANFD3 common FIFO RX (can_comfrx_int_3) */
+#define RZV_ELC_CANFD_CH4_REC                         (364)  /* CANFD4 common FIFO RX (can_comfrx_int_4) */
+#define RZV_ELC_CANFD_CH5_REC                         (365)  /* CANFD5 common FIFO RX (can_comfrx_int_5) */
+#define RZV_ELC_CANFD_GLERR                           (366)  /* CANFD global error (can_glerr_int) */
+#define RZV_ELC_CANFD_RXFINT                          (367)  /* CANFD global RX FIFO (can_rxf_int) */
+#define RZV_ELC_CANFD_CH0_TRX                         (368)  /* CANFD0 TX (can_tx_int_0) */
+#define RZV_ELC_CANFD_CH1_TRX                         (369)  /* CANFD1 TX (can_tx_int_1) */
+#define RZV_ELC_CANFD_CH2_TRX                         (370)  /* CANFD2 TX (can_tx_int_2) */
+#define RZV_ELC_CANFD_CH3_TRX                         (371)  /* CANFD3 TX (can_tx_int_3) */
+#define RZV_ELC_CANFD_CH4_TRX                         (372)  /* CANFD4 TX (can_tx_int_4) */
+#define RZV_ELC_CANFD_CH5_TRX                         (373)  /* CANFD5 TX (can_tx_int_5) */
+
+/* TODO(rzv2h-gbeth-irq): the GBETH MAC/DMA combined interrupt event IDs are
+ * not yet captured here.  arch/arm/src/rzv/rzv_ether.c currently passes the
+ * raw FSP vector_data.c numbers (0x2FD for GBETH0, 0x30C for GBETH1) directly
+ * to rzv_icu_attach().  Replace the magic numbers in rzv_ether.c with named
+ * symbols defined here once the RZ/V2H User's Manual ICU event-ID table is
+ * cross-checked.  Expected additions (event IDs taken from FSP vector tables,
+ * unverified against the UM):
+ *   RZV_ELC_GBETH_PORT0_MACIRQ                  (0x2FD)
+ *   RZV_ELC_GBETH_PORT1_MACIRQ                  (0x30C)
+ * If GBETH exposes separate per-channel TX/RX DMA event IDs in addition to
+ * the combined MAC IRQ, add them in the same pass so the driver can route
+ * RX/TX completion to dedicated handlers in a future revision.
+ */
+
 #define RZV_ELC_ISU_INT_FRE0                          (0x1C1)  /* ISU Frame end interrupt 0 - Event 0x1C1 */
 #define RZV_ELC_ISU_INT_FRE1                          (0x1C2)  /* ISU Frame end interrupt 1 - Event 0x1C2 */
 #define RZV_ELC_ISU_INT_FRE2                          (0x1C3)  /* ISU Frame end interrupt 2 - Event 0x1C3 */
@@ -495,7 +538,39 @@
  * generated vector_data.c, which currently reaches IRQ 455.
  */
 
+/* MHU-B Non-Secure MSG interrupt IDs (GIC SPI numbers).
+ * Source: RZ/V2H TRM Ch.11 / FSP bsp_irq_id.h MHU_MSGn_NS_IRQn.
+ * Valid MHU-B-NS channels (BSP_FEATURE_MHU_B_NS_VALID_CHANNEL_MASK =
+ * 0x030410618618): 3,4,9,10,15,16,21,22,28,34,40,41.
+ * Channels 5–8 are NOT valid in MHU-B-NS.
+ */
 #define RZV_IRQ_MHU_MSG3_NS                          (314)
+#define RZV_IRQ_MHU_MSG4_NS                          (315)
+#define RZV_IRQ_MHU_MSG9_NS                          (316)
+#define RZV_IRQ_MHU_MSG10_NS                         (317)
+#define RZV_IRQ_MHU_MSG15_NS                         (318)
+#define RZV_IRQ_MHU_MSG16_NS                         (319)
+#define RZV_IRQ_MHU_MSG21_NS                         (320)
+#define RZV_IRQ_MHU_MSG22_NS                         (321)
+#define RZV_IRQ_MHU_MSG28_NS                         (322)
+#define RZV_IRQ_MHU_MSG34_NS                         (323)
+#define RZV_IRQ_MHU_MSG40_NS                         (324)
+#define RZV_IRQ_MHU_MSG41_NS                         (325)
+
+/* MHU-B Non-Secure RSP (response/ACK) interrupt IDs */
+#define RZV_IRQ_MHU_RSP3_NS                          (326)
+#define RZV_IRQ_MHU_RSP4_NS                          (327)
+#define RZV_IRQ_MHU_RSP9_NS                          (328)
+#define RZV_IRQ_MHU_RSP10_NS                         (329)
+#define RZV_IRQ_MHU_RSP15_NS                         (330)
+#define RZV_IRQ_MHU_RSP16_NS                         (331)
+#define RZV_IRQ_MHU_RSP21_NS                         (332)
+#define RZV_IRQ_MHU_RSP22_NS                         (333)
+#define RZV_IRQ_MHU_RSP28_NS                         (334)
+#define RZV_IRQ_MHU_RSP34_NS                         (335)
+#define RZV_IRQ_MHU_RSP40_NS                         (336)
+#define RZV_IRQ_MHU_RSP41_NS                         (337)
+
 #define RZV_IRQ_ICU_SLOTS                             (129)
 #define RZV_IRQ_GIC_SIZE                              (480)
 

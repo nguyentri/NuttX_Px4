@@ -455,6 +455,16 @@ int rzv_clock_enable(uint32_t clk_id)
       mask     = (0x3u << 16) | 0x3u;  /* WEN[17:16] + ON[1:0] */
       mon_mask = 0x3u;
     }
+  else if (clk_id == RZV_CPG_CLK_CANFD)
+    {
+      /* CAN-FD gate: 3-bit field CLK12/13/14 in CPG_CLKON_9 (per FSP
+       * bsp_override.h CANFD entry — global + ch0 + ch1 clocks).
+       * bit==12, span 3 bits → bits[14:12].
+       */
+
+      mask     = (0x7u << (bit + 16)) | (0x7u << bit);
+      mon_mask = (0x7u << bit);
+    }
   else
     {
       mask     = (1u << (bit + 16)) | (1u << bit);
@@ -529,6 +539,16 @@ int rzv_clock_disable(uint32_t clk_id)
       mask     = 0x3u << 16;   /* WEN[17:16] only, ON[1:0]=0 → disable both */
       mon_mask = 0x3u;
     }
+  else if (clk_id == RZV_CPG_CLK_CANFD)
+    {
+      /* CAN-FD gate: 3-bit field CLK12/13/14 — write-enable upper half,
+       * data bits 0 → gate off all three clocks.
+       * Symmetric to rzv_clock_enable CAN-FD case.
+       */
+
+      mask     = (0x7u << (bit + 16)) | (0x0u << bit);
+      mon_mask = (0x7u << bit);
+    }
   else
     {
       mask     = (1u << (bit + 16));  /* write-enable only, ON=0 */
@@ -595,6 +615,16 @@ int rzv_module_reset(uint32_t clk_id)
     {
       domain = 3;
       bitmask = (0x1Fu << 1);
+    }
+  else if (clk_id == RZV_CPG_CLK_CANFD)
+    {
+      /* CAN-FD reset: CPG_RST_10 bits[2:1] (UNIT0+UNIT1) per hardware
+       * header. Clock encodes domain=9/bit=12; reset domain=10/bit=1,
+       * span 2 bits.
+       */
+
+      domain  = 10;
+      bitmask = (0x3u << 1);
     }
 
   mrst_addr = RZV_CPG_RST(domain);
@@ -665,6 +695,16 @@ int rzv_module_unreset(uint32_t clk_id)
     {
       domain = 3;
       bitmask = (0x1Fu << 1);
+    }
+  else if (clk_id == RZV_CPG_CLK_CANFD)
+    {
+      /* CAN-FD reset: CPG_RST_10 bits[2:1] (UNIT0+UNIT1) per hardware
+       * header. Clock encodes domain=9/bit=12; reset domain=10/bit=1,
+       * span 2 bits.
+       */
+
+      domain  = 10;
+      bitmask = (0x3u << 1);
     }
 
   mrst_addr = RZV_CPG_RST(domain);

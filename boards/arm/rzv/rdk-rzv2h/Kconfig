@@ -28,23 +28,6 @@ config RZV2H_SPI_LOOPBACK_EXAMPLE
       Enable SPI internal loopback test example for verifying
       SPI driver functionality on RDK-RZV2H board.
 
-config RZV2H_I2C_GY912_EXAMPLE
-    bool "I2C GY-912 sensor example"
-    default n
-    depends on RZV_RIIC && RZV2H_EXAMPLE_SUPPORT
-    ---help---
-      Enable the GY-912 sensor module example application. This example
-      demonstrates I2C communication with the ICM-20948 9-axis IMU and
-      BMP388 pressure sensor on the GY-912 module using the RIIC interface.
-
-config RZV2H_SPI_GY921_EXAMPLE
-    bool "SPI GY-921 sensor example"
-    default n
-    depends on RZV_SPI && RZV2H_EXAMPLE_SUPPORT
-    ---help---
-      Enable the GY-921 sensor module example application. This example
-      demonstrates SPI communication with MPU-9250 9-axis IMU sensor.
-
 config RZV2H_PWM_ONESHOT_EXAMPLE
     bool "GPT PWM oneshot mode example"
     default n

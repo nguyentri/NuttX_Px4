@@ -70,6 +70,10 @@ if(CONFIG_RZV_ADC)
   list(APPEND SRCS rzv2h_adc.c)
 endif()
 
+if(CONFIG_RZV_ETHERNET)
+  list(APPEND SRCS rzv2h_ether.c)
+endif()
+
 if(CONFIG_RDK_RZV2H_XSPI_PARAMFS)
   list(APPEND SRCS rzv2h_xspi_paramfs.c)
 endif()
@@ -77,14 +81,6 @@ endif()
 # Example applications
 if(CONFIG_RZV2H_SPI_LOOPBACK_EXAMPLE)
   list(APPEND SRCS rzv2h_spi_loopback.c)
-endif()
-
-if(CONFIG_RZV2H_I2C_GY912_EXAMPLE)
-  list(APPEND SRCS rzv2h_i2c_gy912.c)
-endif()
-
-if(CONFIG_RZV2H_SPI_GY921_EXAMPLE)
-  list(APPEND SRCS rzv2h_spi_gy921.c)
 endif()
 
 if(CONFIG_RZV2H_PWM_ONESHOT_EXAMPLE)

@@ -1135,6 +1135,121 @@ config RZV_IPCC_TXBUFSIZE
    default 2048
    depends on RZV_IPC_IPCC && IPCC_BUFFERED
 
+config RZV_MHU_DOMAIN_NS
+   bool
+   default y if !RZV_MHU_DOMAIN_S_CR8 && !RZV_MHU_DOMAIN_S_CM33
+   ---help---
+     Select the MHU Non-Secure register window (default; preserves existing
+     CA55 rptun behavior).
+
+config RZV_MHU_DOMAIN_S_CR8
+   bool "Use MHU Secure-CR8 register window"
+   default n
+   ---help---
+     Select the MHU Secure window accessible by CR8.  Only choose this if
+     TrustZone is configured and the NS window is not accessible from CR8.
+     Changing this affects ALL MHU consumers; use with care.
+
+config RZV_MHU_DOMAIN_S_CM33
+   bool "Use MHU Secure-CM33 register window"
+   default n
+   ---help---
+     Select the MHU Secure window accessible by CM33.  Only for CM33-side
+     builds where the NS window is inaccessible.
+
+config RZV_IPC_RAW
+   bool "RZ/V2H raw MHU+SHM IPCC lower half"
+   default n
+   select IPCC
+   ---help---
+     Enable the generic raw IPCC lower half driver backed by MHU doorbell
+     + shared-memory ring buffers.  Used by CR8↔CR8 (/dev/ipcc1) and
+     CR8↔CM33 (/dev/ipcc2) links.  No OpenAMP/virtio dependency.
+
+config RZV_IPC_RAW_RING_ENTRIES
+   int "Raw IPCC ring depth (entries per direction)"
+   default 16
+   range 4 256
+   depends on RZV_IPC_RAW
+   ---help---
+     Number of entries in each ring direction (TX and RX).
+     Must be a power of two.
+
+config RZV_IPC_RAW_ENTRY_SIZE
+   int "Raw IPCC ring entry payload size (bytes)"
+   default 64
+   range 16 512
+   depends on RZV_IPC_RAW
+   ---help---
+     Payload bytes per ring entry.  Round to cache-line multiple for
+     best cache-maintenance efficiency (recommend 64).
+
+config RZV_IPC_TX_TIMEOUT_MS
+   int "Raw IPCC TX-ACK timeout (ms, 0=infinite)"
+   default 100
+   depends on RZV_IPC_RAW
+   ---help---
+     Milliseconds to wait for peer TX-ACK before returning -ETIMEDOUT.
+     Set 0 for infinite wait (only safe for trusted peers like CR8_1).
+     CR8↔CM33 link always uses this timeout regardless of setting because
+     CM33 firmware may be absent.
+
+config RZV_IPC_CR8_CR8
+   bool "Instantiate /dev/ipcc1 for CR8_0 ↔ CR8_1"
+   default n
+   depends on RZV_IPC_RAW
+   ---help---
+     Register a raw IPCC character device at /dev/ipcc1 using MHU
+     channels 4/5 and DDR SHM at 0x43800000.
+
+config RZV_IPC_ROLE_INITIATOR
+   bool "This core is the ring initiator (zeros SHM on boot)"
+   default y
+   depends on RZV_IPC_CR8_CR8
+   ---help---
+     The initiator zeros the SHM ring headers on first open.  Only one
+     side must be initiator; the other must be responder.
+     CR8_0 = initiator (y), CR8_1 = responder (n).
+
+config RZV_IPC_CR8_CR8_LOOPBACK
+   bool "CR8_0 self-loopback test on /dev/ipccLB (no CR8_1 needed)"
+   default n
+   depends on RZV_IPC_CR8_CR8
+   ---help---
+     Wire MHU channel 8 TX back to channel 8 RX on CR8_0 alone.
+     Registers /dev/ipccLB.  Used to smoke-test the ring driver before
+     CR8_1 firmware is available.
+
+config RZV_IPC_CR8_CM33
+   bool "Instantiate /dev/ipcc2 for CR8_0 ↔ CM33"
+   default n
+   depends on RZV_IPC_RAW
+   ---help---
+     Register a raw IPCC character device at /dev/ipcc2 using MHU
+     channels 10/15 and DDR SHM at 0x43810000.  Send path times out
+     after CONFIG_RZV_IPC_TX_TIMEOUT_MS when CM33 firmware is absent.
+
+config RZV_MPU_PORT_FSP
+   bool "Port FreeRTOS FSP MPU region table to NuttX CR8"
+   default y if RZV_IPC_RAW
+   depends on !RZV2H_BUILD_CM33
+   ---help---
+     Programme the Cortex-R8 MPU with the canonical Renesas FSP region
+     table.  11 active regions per core covering ITCM, DTCM,
+     SRAM, peripheral, xSPI, DDR cacheable/non-cacheable, OpenAMP RSCTBL,
+     MHU SHMEM, and the 16 MiB VRING carveout (which also covers the IPC
+     raw SHM at 0x43800000).  No IPC-specific MPU region is needed.
+     Software cache ops in rzv_ipc_raw.c are retained for defence-in-depth.
+
+config RZV_MPU_CR8_CORE_NUM
+   int "CR8 core number for MPU table selection (0 or 1)"
+   default 0
+   range 0 1
+   depends on RZV_MPU_PORT_FSP
+   ---help---
+     Selects which MPU region table variant to use.  0 = CR8_0 addresses,
+     1 = CR8_1 addresses (SRAM cache/non-cache regions differ).
+
 endmenu
 
 config RZV_GPT
@@ -1273,6 +1388,20 @@ config RZV_ADC
    bool "ADC support"
    default n
    depends on RZV_HAVE_ADC12
+   select ANALOG
+   select ADC
+
+if RZV_ADC
+
+config RZV_ADC0
+   bool "ADC0 instance"
+   default y
+   ---help---
+     Enable the RZ/V2H ADC_E channel-0 instance (the single ADC_E unit
+     present on RZ/V2H).  Drives /dev/adc0 via the NuttX analog upper
+     half.
+
+endif # RZV_ADC
 
 config RZV_DAC
    bool "DAC support"
@@ -1282,7 +1411,6 @@ config RZV_DAC
 menuconfig RZV_ETHERNET
    bool "Ethernet (GBETH) Driver"
    default n
-   depends on RZV_HAVE_ETHERC_MII || RZV_HAVE_ETHERC_RMII
    select NETDEVICES
    select ARCH_HAVE_NETDEV_STATISTICS
    ---help---
@@ -1343,6 +1471,59 @@ config RZV_ETHER_PHY_RGMII
 endif # RZV_ETHERNET
 
 # Watchdog Timer (WDT)
+
+# CAN-FD Driver
+
+menuconfig RZV_CANFD
+   bool "CAN-FD driver (RSCAN-FD)"
+   default n
+   depends on RZV_HAVE_CAN0 || RZV_HAVE_CAN1
+   select CAN
+   select CAN_FD
+   ---help---
+     Enable the RZ/V2H CAN-FD lower-half driver.  The hardware block
+     (RSCAN-FD) supports 6 channels at base 0x12440000.  v1 enables CH0
+     (/dev/can0) only; CH1 framework is compiled but not registered.
+
+     CANFDCLK = 80 MHz (verified by FSP bsp_clock_cfg.h).
+     Nominal timing: BRP=2, TSEG1=74, TSEG2=25, SJW=25 → 400 kbps.
+     Data timing:    BRP=1, TSEG1=16, TSEG2=8,  SJW=8  → 3.2 Mbps.
+
+     Boot default: internal loopback.  Toggle bus mode via ioctl cmd
+     0x1000 with arg=0.
+
+     Requires CONFIG_CAN_FD=y for 64-byte payload support.
+
+if RZV_CANFD
+
+config RZV_CANFD0
+   bool "Enable CAN-FD channel 0 (/dev/can0)"
+   default y
+   depends on RZV_HAVE_CAN0
+   ---help---
+     Register CAN-FD channel 0 as /dev/can0.
+     RDK-RZV2H: CAN1 connector (P80/P81, PSEL=5).
+     CH0 is the primary channel for v1 bring-up.
+
+config RZV_CANFD1
+   bool "Enable CAN-FD channel 1 (/dev/can1)"
+   default n
+   depends on RZV_HAVE_CAN1
+   ---help---
+     Register CAN-FD channel 1 as /dev/can1.
+     RDK-RZV2H: CAN2 connector (P86/P87, PSEL=5).
+     Disabled by default at v1; enable after CH0 hardware validation.
+
+config RZV_CANFD_IRQ_PRIORITY
+   int "CAN-FD interrupt priority"
+   default 12
+   range 0 15
+   ---help---
+     GIC priority for all CAN-FD interrupts (TX, RX, error, global error).
+     Lower number = higher priority.  12 matches other peripheral drivers
+     in this BSP.
+
+endif # RZV_CANFD
 
 config RZV_WDT
    bool "Watchdog Timer (WDT)"

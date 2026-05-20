@@ -50,6 +50,7 @@
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/phy.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/net.h>
 
 #ifdef CONFIG_NET_ARP
 #  include <nuttx/net/arp.h>
@@ -72,10 +73,13 @@
 
 /* GBETH DMA status interrupt event IDs from the RZ/V2H reference IRQ list.
  * These are INTC event selectors, not PPS events.
+ * TODO: move to arch/arm/include/rzv/rzv2h_irq.h next to the other
+ * RZV_ELC_GBETH_* defines once the exact symbol naming is agreed.
+ * Values 0x2FD / 0x30C are from FSP vector_data.c GBETH0/1 SBD_PERCH_TX/RX_0.
  */
 
-#define RZV_ELC_GBETH0_INT  765
-#define RZV_ELC_GBETH1_INT  780
+#define RZV_ELC_GBETH0_INT  0x2FD  /* 765 */
+#define RZV_ELC_GBETH1_INT  0x30C  /* 780 */
 
 #define RZV_ETHER_TX_TIMEOUT (2 * CLOCKS_PER_SEC)
 #define RZV_ETHER_PKTSIZE    (MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE)
@@ -224,7 +228,7 @@ static void rzv_init_descriptors(struct rzv_eth_s *priv)
       desc->des0 = (uint32_t)(uintptr_t)buffer;
       desc->des1 = 0;
       desc->des2 = 0;
-      desc->des3 = RDES3_OWN | RDES3_IOC | RDES3_BUF1V | RDES3_OSTC;
+      desc->des3 = RDES3_OWN | RDES3_IOC | RDES3_BUF1V;
 
       rzv_invalidate_dcache_region(buffer, RZV_ETHER_BUFSIZE);
     }
@@ -305,6 +309,12 @@ static int rzv_configure_link(struct rzv_eth_s *priv)
   macconf &= ~(MAC_CONF_RE | MAC_CONF_TE | MAC_CONF_DM |
                MAC_CONF_FES | MAC_CONF_PS);
 
+  /* Enable Automatic Pad/CRC Stripping and CRC stripping for Type frames so
+   * the network stack does not receive the 4-byte FCS tail.
+   */
+
+  macconf |= MAC_CONF_ACS | MAC_CONF_CST;
+
   switch (link)
     {
       case PHY_LINK_1000FD:
@@ -342,11 +352,28 @@ static int rzv_configure_link(struct rzv_eth_s *priv)
     }
 
   putreg32(macconf, priv->base + RZV_ETH_MAC_CONF);
+
+  /* Inform the board layer so it can update SYSC_SYS_GBETHx_CFG.MAC_SPEED
+   * to keep the RGMII reference clock divider in sync with link speed.
+   */
+
+  rzv_ether_board_set_speed(priv->intf, priv->speed);
+
   ninfo("GBETH%d link: phy=%d id=%08" PRIx32 " %dMbps %s-duplex\n",
         priv->intf, priv->phy_addr, priv->phy_id, priv->speed,
         priv->duplex ? "full" : "half");
 
   return OK;
+}
+
+/* Default weak board hook: do nothing.  Boards override this when they
+ * actually have GBETH and need SYSC MAC_SPEED programming.
+ */
+
+void weak_function rzv_ether_board_set_speed(int intf, int mbps)
+{
+  UNUSED(intf);
+  UNUSED(mbps);
 }
 
 static int rzv_transmit(struct rzv_eth_s *priv)
@@ -372,11 +399,17 @@ static int rzv_transmit(struct rzv_eth_s *priv)
 
   /* Setup descriptor */
 
+  /* Single-buffer, non-TSO, non-PTP descriptor.
+   * Only TDES2.B1L carries the buffer length; TDES3.FL is the TSO
+   * header+payload length and is meaningful only when TDES3.TSE=1.
+   * Do not set TDES2.TTSE: timestamp insertion requires MAC PTP setup
+   * that this driver does not configure.
+   */
+
   txdesc->des0 = (uint32_t)(uintptr_t)txbuffer;
   txdesc->des1 = 0;
-  txdesc->des2 = (priv->dev.d_len & TDES2_B1L_MASK) | TDES2_IOC | TDES2_TTSE;
-  txdesc->des3 = (priv->dev.d_len << TDES3_FL_SHIFT) |
-                 TDES3_OWN | TDES3_FD | TDES3_LD;
+  txdesc->des2 = (priv->dev.d_len & TDES2_B1L_MASK) | TDES2_IOC;
+  txdesc->des3 = TDES3_OWN | TDES3_FD | TDES3_LD;
   rzv_clean_dcache_region(txdesc, sizeof(*txdesc));
 
   /* Update head */
@@ -502,24 +535,35 @@ static void rzv_receive(struct rzv_eth_s *priv)
 {
   struct rzv_eth_desc_s *rxdesc;
   unsigned int rxndx;
+  bool processed = false;
+  unsigned int last_returned = priv->rxndx;
+  uint32_t des3;
 
   rxndx = priv->rxndx;
   rxdesc = &priv->rxdesc[rxndx];
   rzv_invalidate_dcache_region(rxdesc, sizeof(*rxdesc));
 
-  while (!(rxdesc->des3 & RDES3_OWN))
+  while ((rxdesc->des3 & RDES3_OWN) == 0)
     {
-      /* Check for errors */
-      if (rxdesc->des3 & (1 << 15)) /* Error summary */
+      des3 = rxdesc->des3;
+
+      /* Store-and-forward in MTL guarantees full frame in one buffer, so
+       * FD and LD must both be set; otherwise the frame is malformed.
+       */
+
+      if ((des3 & (RDES3_FD | RDES3_LD)) != (RDES3_FD | RDES3_LD))
         {
-          nerr("RX Error: %08x\n", rxdesc->des3);
+          nerr("RX malformed (no FD|LD): des3=%08" PRIx32 "\n", des3);
+          NETDEV_RXDROPPED(&priv->dev);
+        }
+      else if ((des3 & RDES3_ES) != 0)
+        {
+          nerr("RX Error: des3=%08" PRIx32 "\n", des3);
+          NETDEV_RXERRORS(&priv->dev);
         }
       else
         {
-          /* Copy data */
-
-          priv->dev.d_len = (rxdesc->des3 & RDES3_FL_MASK) >>
-                            RDES3_FL_SHIFT;
+          priv->dev.d_len = (des3 & RDES3_FL_MASK) >> RDES3_FL_SHIFT;
           if (priv->dev.d_len > RZV_ETHER_PKTSIZE)
             {
               nerr("RX length too large: %" PRIu16 "\n", priv->dev.d_len);
@@ -533,45 +577,42 @@ static void rzv_receive(struct rzv_eth_s *priv)
                      (void *)(uintptr_t)rxdesc->des0,
                      priv->dev.d_len);
 
-              /* Pass to network */
-
               rzv_receive_dispatch(priv);
             }
         }
 
-      /* Return descriptor to DMA */
+      /* Hand the descriptor back to DMA */
 
       rzv_invalidate_dcache_region((void *)(uintptr_t)rxdesc->des0,
                                     RZV_ETHER_BUFSIZE);
-      rxdesc->des3 = RDES3_OWN | RDES3_IOC | RDES3_BUF1V | RDES3_OSTC;
+      rxdesc->des3 = RDES3_OWN | RDES3_IOC | RDES3_BUF1V;
       rzv_clean_dcache_region(rxdesc, sizeof(*rxdesc));
 
-      /* Update index */
+      last_returned = rxndx;
+      processed = true;
 
-      priv->rxndx++;
-      if (priv->rxndx >= CONFIG_RZV_ETHER_RXDESC)
+      /* Advance ring index */
+
+      rxndx++;
+      if (rxndx >= CONFIG_RZV_ETHER_RXDESC)
         {
-          priv->rxndx = 0;
+          rxndx = 0;
         }
 
-      if (priv->rxndx == CONFIG_RZV_ETHER_RXDESC - 1)
-        {
-          putreg32((uint32_t)(uintptr_t)&priv->rxdesc[0],
-                   priv->base + RZV_ETH_DMA_CH0_RXDESC_TAIL);
-        }
-      else
-        {
-          putreg32((uint32_t)(uintptr_t)&priv->rxdesc[priv->rxndx + 1],
-                   priv->base + RZV_ETH_DMA_CH0_RXDESC_TAIL);
-        }
-
-      putreg32(getreg32(priv->base + RZV_ETH_DMA_CH0_RX_CTRL) |
-               DMA_CH0_RX_CTRL_SR,
-               priv->base + RZV_ETH_DMA_CH0_RX_CTRL);
-
-      rxndx = priv->rxndx;
+      priv->rxndx = rxndx;
       rxdesc = &priv->rxdesc[rxndx];
       rzv_invalidate_dcache_region(rxdesc, sizeof(*rxdesc));
+    }
+
+  /* Bump RX tail pointer once to the last returned-to-DMA descriptor so the
+   * engine knows new buffers are available. RX_CTRL.SR is already set in
+   * ifup; the DMA resumes automatically when tail advances.
+   */
+
+  if (processed)
+    {
+      putreg32((uint32_t)(uintptr_t)&priv->rxdesc[last_returned],
+               priv->base + RZV_ETH_DMA_CH0_RXDESC_TAIL);
     }
 }
 
@@ -586,10 +627,12 @@ static void rzv_txdone(struct rzv_eth_s *priv)
 
   while ((txdesc->des3 & TDES3_OWN) == 0 && priv->txinflight > 0)
     {
-      /* Check for errors */
-      if (txdesc->des3 & (1 << 15)) /* Error summary */
+      /* Check for errors (TDES3 write-back ES bit is also bit 15) */
+
+      if ((txdesc->des3 & RDES3_ES) != 0)
         {
-          nerr("TX Error: %08x\n", txdesc->des3);
+          nerr("TX Error: des3=%08" PRIx32 "\n", txdesc->des3);
+          NETDEV_TXERRORS(&priv->dev);
         }
 
       /* Update tail */
@@ -691,10 +734,14 @@ static void rzv_txtimeout_work(void *arg)
 {
   struct rzv_eth_s *priv = (struct rzv_eth_s *)arg;
 
-  nerr("TX Timeout\n");
+  nerr("TX Timeout on GBETH%d - resetting interface\n", priv->intf);
 
-  /* Reset hardware or recover */
-  UNUSED(priv);
+  /* Take the netdev down and back up to fully reset DMA/MAC state. */
+
+  net_lock();
+  rzv_ifdown(&priv->dev);
+  rzv_ifup(&priv->dev);
+  net_unlock();
 }
 
 static void rzv_txtimeout_expiry(wdparm_t arg)
@@ -710,16 +757,7 @@ static int rzv_ifup(struct net_driver_s *dev)
   uint32_t timeout;
   int ret;
 
-  rzv_init_descriptors(priv);
-  rzv_set_macaddr(priv);
-
-  ret = rzv_configure_link(priv);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  /* Reset DMA and wait for reset completion with a bounded timeout. */
+  /* 1. Reset DMA first so MTL/DMA register writes below are not clobbered. */
 
   putreg32(DMA_MODE_SWR, priv->base + RZV_ETH_DMA_MODE);
   for (timeout = 100000; timeout > 0; timeout--)
@@ -736,7 +774,30 @@ static int rzv_ifup(struct net_driver_s *dev)
       return -ETIMEDOUT;
     }
 
-  /* Configure DMA */
+  /* 2. Initialize descriptors and program the MAC address. */
+
+  rzv_init_descriptors(priv);
+  rzv_set_macaddr(priv);
+
+  /* 3. Configure MAC packet filter. Allow broadcast and pass-all-multicast
+   * so the network stack receives ARP, IPv6 ND, mDNS, etc.  Promiscuous /
+   * hash-multicast can be added later via ioctl or addmac/rmmac.
+   */
+
+  putreg32(MAC_PKT_FILT_PM, priv->base + RZV_ETH_MAC_PKT_FILT);
+
+  /* 4. Configure MTL queues. Without TXQEN/RXQ map the MAC silently drops
+   * every packet.  RSF/TSF (store-and-forward) gives us full-frame buffers
+   * on RX which simplifies the receive loop.
+   */
+
+  putreg32(MTL_TXQ_OP_TSF | MTL_TXQ_OP_TXQEN_EN | MTL_TXQ_OP_TQS(7),
+           priv->base + RZV_ETH_MTL_TXQ0_OP_MODE);
+  putreg32(MTL_RXQ_OP_RSF | MTL_RXQ_OP_FEP | MTL_RXQ_OP_RQS(7),
+           priv->base + RZV_ETH_MTL_RXQ0_OP_MODE);
+  putreg32(MTL_RXQ_DMA_MAP_Q0DDMACH, priv->base + RZV_ETH_MTL_RXQ_DMA_MAP0);
+
+  /* 5. Configure DMA channel 0 */
 
   putreg32(DMA_SYSBUS_MODE_AAL, priv->base + RZV_ETH_DMA_SYSBUS_MODE);
   putreg32(0, priv->base + RZV_ETH_DMA_CH0_TXDESC_HI);
@@ -760,31 +821,34 @@ static int rzv_ifup(struct net_driver_s *dev)
            DMA_CH0_RX_CTRL_RXPBL(32),
            priv->base + RZV_ETH_DMA_CH0_RX_CTRL);
 
-  /* Enable MAC */
+  /* 6. Bring up PHY and resolve link speed; this may call into the board
+   * layer to reprogram SYSC MAC_SPEED divider.
+   */
 
-  macconf = getreg32(priv->base + RZV_ETH_MAC_CONF);
-  putreg32(macconf | MAC_CONF_RE | MAC_CONF_TE,
-           priv->base + RZV_ETH_MAC_CONF);
+  ret = rzv_configure_link(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
-  /* Enable interrupts */
+  /* 7. Attach DMA channel interrupt */
 
   ret = rzv_icu_attach(priv->event, rzv_interrupt, priv, true);
   if (ret < 0)
     {
-      putreg32(macconf, priv->base + RZV_ETH_MAC_CONF);
       return ret;
     }
 
   priv->irq = ret;
 
-  /* Enable DMA interrupts */
+  /* 8. Enable DMA channel interrupts */
 
   putreg32(DMA_CH0_INT_EN_TIE | DMA_CH0_INT_EN_TBUE |
            DMA_CH0_INT_EN_RIE | DMA_CH0_INT_EN_RBUE |
            DMA_CH0_INT_EN_NISE | DMA_CH0_INT_EN_AISE,
            priv->base + RZV_ETH_DMA_CH0_INT_EN);
 
-  /* Start TX/RX */
+  /* 9. Start DMA TX/RX (start bits stay latched until ifdown). */
 
   putreg32(getreg32(priv->base + RZV_ETH_DMA_CH0_TX_CTRL) |
            DMA_CH0_TX_CTRL_ST,
@@ -792,6 +856,12 @@ static int rzv_ifup(struct net_driver_s *dev)
   putreg32(getreg32(priv->base + RZV_ETH_DMA_CH0_RX_CTRL) |
            DMA_CH0_RX_CTRL_SR,
            priv->base + RZV_ETH_DMA_CH0_RX_CTRL);
+
+  /* 10. Enable MAC RX/TX last, now that filtering and DMA are armed. */
+
+  macconf = getreg32(priv->base + RZV_ETH_MAC_CONF);
+  putreg32(macconf | MAC_CONF_RE | MAC_CONF_TE,
+           priv->base + RZV_ETH_MAC_CONF);
 
   priv->bifup = true;
   return OK;
@@ -801,7 +871,11 @@ static int rzv_ifdown(struct net_driver_s *dev)
 {
   struct rzv_eth_s *priv = (struct rzv_eth_s *)dev->d_private;
 
-  /* Disable interrupts */
+  /* 1. Mask DMA interrupts at the controller before detaching the line. */
+
+  putreg32(0, priv->base + RZV_ETH_DMA_CH0_INT_EN);
+
+  /* 2. Detach ICU/GIC line */
 
   if (priv->irq >= 0)
     {
@@ -809,22 +883,53 @@ static int rzv_ifdown(struct net_driver_s *dev)
       priv->irq = -1;
     }
 
-  /* Stop DMA/MAC */
-  putreg32(0, priv->base + RZV_ETH_MAC_CONF);
+  /* 3. Stop DMA TX/RX first so the MAC does not receive more requests. */
+
   putreg32(0, priv->base + RZV_ETH_DMA_CH0_TX_CTRL);
   putreg32(0, priv->base + RZV_ETH_DMA_CH0_RX_CTRL);
 
+  /* 4. Disable MAC TX/RX */
+
+  putreg32(0, priv->base + RZV_ETH_MAC_CONF);
+
+  /* 5. Cancel pending watchdog and clear deferred state. */
+
+  wd_cancel(&priv->txtimeout);
+  priv->intpending = 0;
   priv->bifup = false;
+  priv->linkup = false;
+
+  /* 6. Tell the board layer the link is down so it can park SYSC clock. */
+
+  rzv_ether_board_set_speed(priv->intf, 0);
+
   return OK;
+}
+
+static void rzv_txavail_work(void *arg)
+{
+  struct rzv_eth_s *priv = (struct rzv_eth_s *)arg;
+
+  net_lock();
+  if (priv->bifup)
+    {
+      devif_poll(&priv->dev, rzv_txpoll);
+    }
+
+  net_unlock();
 }
 
 static int rzv_txavail(struct net_driver_s *dev)
 {
   struct rzv_eth_s *priv = (struct rzv_eth_s *)dev->d_private;
 
-  if (priv->bifup)
+  /* Defer to the work queue so devif_poll() runs under net_lock() and not
+   * in the caller's (possibly user) context.
+   */
+
+  if (work_available(&priv->pollwork))
     {
-      devif_poll(&priv->dev, rzv_txpoll);
+      work_queue(LPWORK, &priv->pollwork, rzv_txavail_work, priv, 0);
     }
 
   return OK;

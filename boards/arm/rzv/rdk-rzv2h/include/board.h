@@ -265,6 +265,41 @@
 #define BOARD_SCI3_I2C_SCL_GPIO  GPIO_RXD3_MISO3_SCL3_P5_7_M1  /* P57 Mode1 */
 #define BOARD_SCI3_I2C_SDA_GPIO  GPIO_TXD3_MOSI3_SDA3_P5_6_M1  /* P56 Mode1 */
 
+/* SCI-SPI GPIO pin assignments *********************************************
+ *
+ * SCI0 SPI (sci-spi-loopback config):
+ *   MOSI = TXD0 = P50 (Mode1)
+ *   MISO = RXD0 = P51 (Mode1)
+ *   SCK  = SCK0 = P52 (Mode2)
+ *
+ * Note: SCI0 SPI and SCI0 I2C use the same P50/P51 physical pins — they
+ * are mutually exclusive at the Kconfig level (RZV_SCI0_SPI && RZV_SCI0_I2C
+ * is rejected by Kconfig depends).
+ */
+
+#define BOARD_SCI0_SPI_MOSI_GPIO  GPIO_TXD0_MOSI0_DA0_P5_0_M1    /* P50 Mode1 */
+#define BOARD_SCI0_SPI_MISO_GPIO  GPIO_RXD0_MISO0_SCL0_P5_1_M1   /* P51 Mode1 */
+#define BOARD_SCI0_SPI_SCK_GPIO   GPIO_SCK0_P5_2_M2               /* P52 Mode2 */
+
+/* Ethernet (GBETH0 RGMII) Configuration ************************************/
+
+/* TODO(rzv2h-eth-pins): RGMII pin assignments for GBETH0 on RDK-RZV2H are
+ * not yet populated.  boards/arm/rzv/rdk-rzv2h/src/rzv2h_ether.c declares
+ * the GPIO_ETH0_* macros as (0) placeholders and skips rzv_gpioconfig()
+ * calls until these are confirmed from the RDK-RZV2H board schematic.
+ *
+ * Once the schematic is available, define the following BOARD_ETH0_*
+ * symbols here (using the GPIO_<func>_P<port>_<pin>_M<mode> naming style
+ * already used for SPI / SCI / I2C above) and propagate them into
+ * rzv2h_ether.c::rzv2h_ether_pinconfig():
+ *   BOARD_ETH0_TXD0_GPIO, BOARD_ETH0_TXD1_GPIO, BOARD_ETH0_TXD2_GPIO,
+ *   BOARD_ETH0_TXD3_GPIO, BOARD_ETH0_TX_CLK_GPIO, BOARD_ETH0_TX_CTL_GPIO,
+ *   BOARD_ETH0_RXD0_GPIO, BOARD_ETH0_RXD1_GPIO, BOARD_ETH0_RXD2_GPIO,
+ *   BOARD_ETH0_RXD3_GPIO, BOARD_ETH0_RX_CLK_GPIO, BOARD_ETH0_RX_CTL_GPIO,
+ *   BOARD_ETH0_MDC_GPIO,  BOARD_ETH0_MDIO_GPIO
+ * Add equivalent BOARD_ETH1_* set if/when GBETH1 is wired on this board.
+ */
+
 /* SPI Configuration ********************************************************/
 
 /* SPI bus configuration (matches FSP rzv_gen + PX4 board_config.h)
@@ -466,6 +501,30 @@
 #define BOARD_P0_1_GPIO   GPIO_P0_1_OUTPUT_HIGH
 
 /* End of FSP-generated pin mappings */
+
+/* CAN-FD Pin Configuration *************************************************/
+
+/* RDK-RZV2H CAN-FD channel pin assignments (PSEL=5 for CAN/CANFD function).
+ *
+ * Channel 0 (RDK "CAN1") — registered as /dev/can0 at v1:
+ *   CAN1_TXD: P80 = PORT8 pin 0 → CTX0  (GPIO_CTX0_P8_0_M5)
+ *   CAN1_RXD: P81 = PORT8 pin 1 → CRX0  (GPIO_CRQ0_P8_1_M5)
+ *
+ * Channel 1 (RDK "CAN2") — macros defined but NOT registered at v1.
+ *   Enable CONFIG_RZV_CANFD1 and add the CH1 init block in rzv2h_canfd.c
+ *   once CH0 hardware-validates on the RDK board.
+ *   CAN2_TXD: P86 = PORT8 pin 6 → CTX3  (GPIO_CTX3_P8_6_M5)
+ *   CAN2_RXD: P87 = PORT8 pin 7 → CRX3  (GPIO_CRX3_P8_7_M5)
+ */
+
+#define BOARD_CANFD0_TX_GPIO  GPIO_CTX0_P8_0_M5   /* P80 CH0 TX, PSEL=5 */
+#define BOARD_CANFD0_RX_GPIO  GPIO_CRQ0_P8_1_M5   /* P81 CH0 RX, PSEL=5 */
+
+/* CH1 macros — not registered at v1; uncomment board_canfd_initialize()
+ * CH1 block when CONFIG_RZV_CANFD1=y is enabled post-validation.
+ */
+#define BOARD_CANFD1_TX_GPIO  GPIO_CTX3_P8_6_M5   /* P86 CH1 TX, PSEL=5 */
+#define BOARD_CANFD1_RX_GPIO  GPIO_CRX3_P8_7_M5   /* P87 CH1 RX, PSEL=5 */
 
 /* Board Capabilities *******************************************************/
 

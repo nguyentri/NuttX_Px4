@@ -163,12 +163,39 @@
 #define RZV_CPG_CLK_DMAC2           RZV_CPG_CLK_DMAC
 #define RZV_CPG_CLK_DMAC3           RZV_CPG_CLK_DMAC
 
-/* CANFD - UNVERIFIED: needs RZ/V2H UM confirmation */
-#define RZV_CPG_CLK_CANFD           (7 << 16 | 0)
+/* CANFD - CPG_CLKON_9 bits[14:12] (3-bit mask CLK12/13/14, value 7U<<12)
+ * Source: bsp_override.h lines 1692-1693 (R9A09G057H):
+ *   BSP_CLKON_REG_FSP_IP_CANFD(ch)  = R_CPG->CPG_CLKON_9
+ *   BSP_CLKON_BIT_FSP_IP_CANFD(ch)  = 7U << R_CPG_CPG_CLKON_9_CLK12_ON_Pos
+ *   R_CPG_CPG_CLKON_9_CLK12_ON_Pos  = 12 (cpg_iobitmask.h:1319)
+ * Encoding: (CLKON_reg_index << 16 | bit_position) = (9 << 16 | 12)
+ * CORRECTED from previous wrong value (7 << 16 | 0).
+ * Reset: CPG_RST_10 bits[2:1] (3U<<1). Same encoding → (10 << 16 | 1).
+ * Module-stop: CPG_BUS_MCPU2_MSTOP bit 9 (MSTOP9).
+ */
+#define RZV_CPG_CLK_CANFD           (9 << 16 | 12)
 #define RZV_CPG_CLK_CAN0            RZV_CPG_CLK_CANFD  /* CAN0 shares CANFD gate */
 #define RZV_CPG_CLK_CAN1            RZV_CPG_CLK_CANFD  /* CAN1 shares CANFD gate */
 
-/* Ethernet (GBE) - UNVERIFIED: needs RZ/V2H UM confirmation */
+/* Ethernet (GBE) - UNVERIFIED: needs RZ/V2H UM confirmation
+ *
+ * TODO(rzv2h-eth-clocks): only the GBETH0 module gate is currently exposed.
+ * The following additional CPG gate IDs must be added once the CPG_CLKON_N
+ * register index and bit position for each are pulled from the RZ/V2H User's
+ * Manual (cross-reference Renesas FSP bsp_clocks.h, search "ETH"/"GBE"):
+ *   RZV_CPG_CLK_ETH1            - GBETH1 module gate
+ *   RZV_CPG_CLK_ETHTX0CLK       - GBETH0 TX 125 MHz reference clock gate
+ *   RZV_CPG_CLK_ETHRX0CLK       - GBETH0 RX 125 MHz reference clock gate
+ *   RZV_CPG_CLK_ETHTX1CLK       - GBETH1 TX 125 MHz reference clock gate
+ *   RZV_CPG_CLK_ETHRX1CLK       - GBETH1 RX 125 MHz reference clock gate
+ *   RZV_CPG_CLK_ET0_TXC_TXCLK   - GBETH0 RGMII TXC pad clock gate
+ *   RZV_CPG_CLK_ET0_RXC_RXCLK   - GBETH0 RGMII RXC pad clock gate
+ *   RZV_CPG_CLK_ET1_TXC_TXCLK   - GBETH1 RGMII TXC pad clock gate
+ *   RZV_CPG_CLK_ET1_RXC_RXCLK   - GBETH1 RGMII RXC pad clock gate
+ * Until these are added, boards/arm/rzv/rdk-rzv2h/src/rzv2h_ether.c can only
+ * bring up GBETH0 and the RGMII reference clocks are assumed gated-on by
+ * earlier boot stages (TF-A / U-Boot).
+ */
 #define RZV_CPG_CLK_ETH0            (8 << 16 | 0)
 
 /* ADC - FSP bsp_clocks.h line 479: 2-bit pair (3U << CLK0_ON_Pos)

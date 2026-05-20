@@ -250,6 +250,21 @@ int board_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_RZV_CANFD
+  /* Initialize CAN-FD driver (CH0 → /dev/can0) */
+
+  ret = board_canfd_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize CAN-FD: %d\n", ret);
+      if (first_error == 0) first_error = ret;
+    }
+  else
+    {
+      syslog(LOG_INFO, "CAN-FD initialized successfully\n");
+    }
+#endif
+
 #ifdef CONFIG_PWM
   /* Initialize GPT PWM devices */
 

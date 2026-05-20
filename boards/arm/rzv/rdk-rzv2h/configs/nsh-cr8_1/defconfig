@@ -102,3 +102,9 @@ CONFIG_ARCH_DPFPU=y
 # Enable idle state logging
 # CONFIG_ARCH_IDLE_CUSTOM is not set
 # CONFIG_RZV_IDLE_LOG_STATE is not set
+
+# CR8_1 raw IPCC responder for /dev/ipcc1 (CR8_0 is initiator)
+CONFIG_RZV_IPC_RAW=y
+CONFIG_RZV_IPC_CR8_CR8=y
+CONFIG_IPCC=y
+# CONFIG_RZV_IPC_ROLE_INITIATOR is not set

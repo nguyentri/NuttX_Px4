@@ -104,6 +104,11 @@ ifeq ($(CONFIG_RZV_ETHERNET),y)
 CSRCS += rzv2h_ether.c
 endif
 
+# CAN-FD support
+ifeq ($(CONFIG_RZV_CANFD),y)
+CSRCS += rzv2h_canfd.c
+endif
+
 # WDT test application
 ifeq ($(CONFIG_RZV2H_WDT_TEST),y)
 CSRCS += rzv2h_wdt_test.c
@@ -131,16 +136,6 @@ endif
 # SPI loopback example
 ifeq ($(CONFIG_RZV2H_SPI_LOOPBACK_EXAMPLE),y)
 CSRCS += rzv2h_spi_loopback.c
-endif
-
-# I2C GY-912 sensor example
-ifeq ($(CONFIG_RZV2H_I2C_GY912_EXAMPLE),y)
-CSRCS += rzv2h_i2c_gy912.c
-endif
-
-# SPI GY-921 sensor example
-ifeq ($(CONFIG_RZV2H_SPI_GY921_EXAMPLE),y)
-CSRCS += rzv2h_spi_gy921.c
 endif
 
 # PWM oneshot example

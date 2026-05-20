@@ -77,9 +77,9 @@ ifeq ($(CONFIG_RZV_SPI),y)
 CHIP_CSRCS += rzv_spi.c
 endif
 
-# SCI SPI driver (SPI mode)
+# SCI SPI driver (SPI mode) — 4-file split mirroring sci_i2c layout
 ifeq ($(CONFIG_RZV_SCI_SPI),y)
-CHIP_CSRCS += rzv_sci_spi.c
+CHIP_CSRCS += rzv_sci_spi.c rzv_sci_spi_isr.c rzv_sci_spi_clock.c
 endif
 
 # SCI I2C driver (Simple-I2C master mode)
@@ -119,6 +119,17 @@ ifeq ($(CONFIG_RZV_IPC_IPCC),y)
 CHIP_CSRCS += rzv_ipc_ipcc.c
 endif
 
+# Raw MHU+SHM IPCC lower half (CR8↔CR8, CR8↔CM33)
+ifeq ($(CONFIG_RZV_IPC_RAW),y)
+CHIP_CSRCS += rzv_mhu_core.c
+CHIP_CSRCS += rzv_ipc_raw.c
+endif
+
+# MPU region table port from FreeRTOS FSP reference
+ifeq ($(CONFIG_RZV_MPU_PORT_FSP),y)
+CHIP_CSRCS += rzv_mpu_regions.c
+endif
+
 # Ethernet driver
 ifeq ($(CONFIG_RZV_ETHERNET),y)
 CHIP_CSRCS += rzv_ether.c rzv_ether_phy.c
@@ -127,6 +138,11 @@ endif
 # Watchdog Timer driver
 ifeq ($(CONFIG_RZV_WDT),y)
 CHIP_CSRCS += rzv_wdt.c
+endif
+
+# CAN-FD driver
+ifeq ($(CONFIG_RZV_CANFD),y)
+CHIP_CSRCS += rzv_canfd.c
 endif
 
 # IDLE task custom
