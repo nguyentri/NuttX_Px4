@@ -190,7 +190,7 @@ static int rzv_dmac_setup_channel(struct rzv_dmac_ctrl_s *ctrl)
    * N[1] zeroed (no reload buffer) the HW re-executes a zero-byte transfer
    * to address 0 after the first END, causing faults.  This driver supports
    * only one-shot register-mode transfers; REN is left 0.
-   * Reference: FSP r_dmac_b.c:684-691 (RSW/REN only for CONTINUOUS_SETTING). */
+   * RSW/REN are only for CONTINUOUS_SETTING mode. */
 
   if (config->callback != NULL)
     {
@@ -389,15 +389,14 @@ int rzv_dmac_channel_initialize(int channel)
   rzv_module_unreset(RZV_CPG_CLK_DMAC);
 
   /* D6-fix: Unmask AXI/AHB bus interface (MSTP) for all 5 DMAC units.
-   * FSP R_BSP_MODULE_START(FSP_IP_DMAC, unit) touches:
+   * Per RZ/V2H hardware manual, bus stop bits are:
    *   BUS_5_MSTOP  bit 9  (DMAC0)
    *   BUS_3_MSTOP  bit 2  (DMAC1)
    *   BUS_3_MSTOP  bit 3  (DMAC2)
    *   BUS_10_MSTOP bit 11 (DMAC3)
    *   BUS_10_MSTOP bit 12 (DMAC4)
    * Write WEN=1 + data=0 to clear the MSTOP bit (allow bus access).
-   * Format: bit[N+16]=WEN, bit[N]=value.  To clear: write (1<<(N+16)).
-   * Reference: FSP bsp_override.h:2393-2402. */
+   * Format: bit[N+16]=WEN, bit[N]=value.  To clear: write (1<<(N+16)). */
 
   putreg32(1u << (9 + 16),  RZV_CPG_BUS_5_MSTOP);  /* DMAC0 */
   putreg32((1u << (2 + 16)) | (1u << (3 + 16)),
@@ -604,9 +603,8 @@ int rzv_dmac_channel_start(int channel)
     }
 
   /* D7-fix: SWRST before SETEN to clear any stale END/ER flags from a
-   * previous transfer.  FSP r_dmac_b_prv_enable (r_dmac_b.c:596) always
-   * issues SWRST first.  Without this, stale flags can re-trigger callbacks
-   * or corrupt the channel state machine. */
+   * previous transfer.  SWRST must be issued first; without it, stale flags
+   * can re-trigger callbacks or corrupt the channel state machine. */
 
   putreg32(DMAC_CHCTRL_SWRST,
            RZV_DMAC_CHCTRL(ctrl->unit, ctrl->local_ch));

@@ -82,7 +82,7 @@ struct rzv_gpt_lowerhalf_s
   uint8_t                channel;   /* Logical channel index (0-15) */
   uint8_t                hw_ch;     /* HW channel within unit (channel % 8).
                                      * Used for GTSTR/GTSTP/GTCLR channel mask.
-                                     * FSP r_gpt.c:262 confirms ch%8 for unit1. */
+                                     * channel_mask = 1U << (channel % 8) for unit1. */
   uint8_t                divsel;
   bool                   initialized;
   bool                   running;
@@ -258,7 +258,7 @@ static const uint16_t g_rzv_gpt_overflow_event[RZV_GPT_MAX_CHANNELS] =
 
 /* hw_ch: hardware channel within the GPT unit (ch % 8).
  * Used for GTSTR/GTSTP/GTCLR channel mask bits (unit-local bit index).
- * FSP r_gpt.c:262: channel_mask = 1U << (channel % 8) for unit1 channels. */
+ * channel_mask = 1U << (channel % 8) for unit1 channels per RZ/V2H UM. */
 #define RZV_GPT_LOWER_INIT(ch)                                 \
   {                                                             \
     .dev       = { .ops = &g_rzv_gpt_ops },                     \
@@ -440,7 +440,7 @@ static uint32_t gpt_duty_to_counts(uint32_t period, ub16_t duty)
 /* Compute GTIOR value for standard PWM output (high at start, low at compare).
  * 0%/100% duty is handled separately via GTUDDTYC, not by disabling output here.
  * Output enable bits (OAE/OBE) remain set regardless of duty so POEG can track
- * the output state. Source: FSP r_gpt.c:1443-1445, r_gpt.c:619-636. */
+ * the output state per RZ/V2H GPT hardware manual. */
 static uint32_t gpt_compose_gtior(uint32_t duty_a_counts,
                                   uint32_t duty_b_counts,
                                   uint32_t period_counts)
@@ -470,7 +470,7 @@ static uint32_t gpt_compose_gtior(uint32_t duty_a_counts,
 }
 
 /* Compute GTUDDTYC value to enforce 0%/100% duty or return to compare mode.
- * Per FSP r_gpt.c:619-636, OADTY/OBDTY fields:
+ * OADTY/OBDTY fields per RZ/V2H GPT hardware manual:
  *   0 = normal compare-match (register value), 2 = force 0%, 3 = force 100%. */
 static uint32_t gpt_compute_gtuddtyc(uint32_t duty_a_counts,
                                      uint32_t duty_b_counts,
@@ -598,7 +598,7 @@ static int rzv_gpt_setup(FAR struct pwm_lowerhalf_s *dev)
   irqstate_t flags = enter_critical_section();
   gpt_unlock(priv);
   /* Use hw_ch (unit-local channel 0-7) for GTSTR/GTSTP/GTCLR channel mask.
-   * FSP r_gpt.c:262: channel_mask = 1U << (channel % 8) for unit1. */
+   * channel_mask = 1U << (channel % 8) for unit1. */
   gpt_putreg(priv, RZV_GPT_GTSTP_OFFSET, RZV_GPT_UNIT_BIT(priv->hw_ch));
   gpt_putreg(priv, RZV_GPT_GTCLR_OFFSET, RZV_GPT_UNIT_BIT(priv->hw_ch));
   gpt_putreg(priv, RZV_GPT_GTST_OFFSET, 0);
@@ -704,7 +704,7 @@ static int rzv_gpt_start(FAR struct pwm_lowerhalf_s *dev,
   gpt_unlock(priv);
 
   /* Stop and clear counter before reconfiguration. Use hw_ch (unit-local bit)
-   * for GTSTR/GTSTP/GTCLR — FSP r_gpt.c:262: 1U << (channel % 8). */
+   * for GTSTR/GTSTP/GTCLR: 1U << (channel % 8). */
   gpt_putreg(priv, RZV_GPT_GTSTP_OFFSET, RZV_GPT_UNIT_BIT(priv->hw_ch));
   gpt_putreg(priv, RZV_GPT_GTCLR_OFFSET, RZV_GPT_UNIT_BIT(priv->hw_ch));
 
@@ -726,8 +726,7 @@ static int rzv_gpt_start(FAR struct pwm_lowerhalf_s *dev,
    * GTBER = 0x550000: CCRA_BITS[17:16]=01, CCRB_BITS[19:18]=01, PR_BITS[21:20]=01
    * with force-transfer mode.  New values written to GTCCRC/GTCCRE/GTPBR
    * are latched into GTCCRA/GTCCRB/GTPR at next overflow — no mid-cycle glitch.
-   * Source: FSP r_gpt.c:34 GPT_PRV_GTBER_BUFFER_ENABLE_FORCE_TRANSFER = 0x550000U
-   * and FSP r_gpt.c:497 p_instance_ctrl->p_reg->GTBER = GPT_PRV_GTBER... */
+   * GPT_PRV_GTBER_BUFFER_ENABLE_FORCE_TRANSFER = 0x550000U per RZ/V2H UM. */
   gpt_putreg(priv, RZV_GPT_GTPBR_OFFSET, period - 1u);
   gpt_putreg(priv, RZV_GPT_GTCCRC_OFFSET, duty_a_counts);
 #ifdef CONFIG_PWM_MULTICHAN
@@ -743,7 +742,7 @@ static int rzv_gpt_start(FAR struct pwm_lowerhalf_s *dev,
 
   /* Set GTUDDTYC to handle 0%/100% duty via forced static levels.
    * Replaces old GTIOA_DISABLE hack which disabled the output buffer.
-   * Source: FSP r_gpt.c:619-636, GPT_DUTY_CYCLE_MODE_0/100_PERCENT. */
+   * GPT_DUTY_CYCLE_MODE_0/100_PERCENT per RZ/V2H GPT hardware manual. */
   gpt_putreg(priv, RZV_GPT_GTUDDTYC_OFFSET,
              gpt_compute_gtuddtyc(duty_a_counts, duty_b_counts, period));
 

@@ -18,7 +18,7 @@
  *
  ****************************************************************************/
 
-/* Register offsets confirmed against FSP spi_b_iodefine.h (R9A09G057H).
+/* Register offsets confirmed against spi_b_iodefine.h (R9A09G057H).
  * Phase-07 fix: dropped false SPBR_OFFSET=0x10; SPBR now lives in SPCR3[15:8].
  *               SPCR2 (0x0C) and SPCR3 (0x10) added.
  *               RMFM/RMEDTG/RMSTTG/SPDRC/SPLP/MOIFV moved to SPCR2 section.
@@ -37,7 +37,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* SPI Base Addresses (FSP spi_b_iodefine.h R_SPI_B0/1/2_BASE) ***********/
+/* SPI Base Addresses (spi_b_iodefine.h R_SPI_B0/1/2_BASE) ***************/
 
 #ifndef RZV_SPI0_BASE
 #  define RZV_SPI0_BASE               0x12800000
@@ -49,7 +49,7 @@
 #  define RZV_SPI2_BASE               0x12800800
 #endif
 
-/* SPI Register Offsets (from FSP spi_b_iodefine.h struct R_SPI_B0_Type) **/
+/* SPI Register Offsets (from spi_b_iodefine.h struct R_SPI_B0_Type) *****/
 
 #define RZV_SPI_SPDR_OFFSET                          0x0000  /* SPI Data Register (32-bit) */
 #define RZV_SPI_SPDECR_OFFSET                        0x0004  /* SPI Delay Control Register */
@@ -115,7 +115,7 @@
 #define RZV_SPI_SPSRC(ch)       (RZV_SPI##ch##_BASE + RZV_SPI_SPSRC_OFFSET)
 #define RZV_SPI_SPFCR(ch)       (RZV_SPI##ch##_BASE + RZV_SPI_SPFCR_OFFSET)
 
-/* SPCMD Register Bit Definitions (FSP spi_b_iodefine.h SPCMD0_b) *********/
+/* SPCMD Register Bit Definitions (spi_b_iodefine.h SPCMD0_b) *************/
 
 #define SPI_SPCMD_CPHA                          (1u << 0)   /* RSPCK Phase */
 #define SPI_SPCMD_CPOL                          (1u << 1)   /* RSPCK Polarity */
@@ -134,7 +134,7 @@
 #define SPI_SPCMD_SSLA_MASK                     (0x3u << SPI_SPCMD_SSLA_SHIFT)
 #define SPI_SPCMD_SSLA(val)                     (((val) << SPI_SPCMD_SSLA_SHIFT) & SPI_SPCMD_SSLA_MASK)
 
-/* SPCR Register Bit Definitions (FSP spi_b_iodefine.h SPCR_b) ************/
+/* SPCR Register Bit Definitions (spi_b_iodefine.h SPCR_b) ***************/
 
 #define SPI_SPCR_SPE                            (1u << 0)   /* SPI Function Enable */
 #define SPI_SPCR_SPSCKSEL                       (1u << 7)   /* SPI Master Receive Clock Select */
@@ -157,7 +157,7 @@
 #define SPI_SPCR_MSTR                           (1u << 30)  /* Master/Slave Mode Select */
 #define SPI_SPCR_BPEN                           (1u << 31)  /* Synchronization Circuit Bypass Enable */
 
-/* SPCR2 Register Bit Definitions (FSP spi_b_iodefine.h SPCR2_b at 0x0C) */
+/* SPCR2 Register Bit Definitions (spi_b_iodefine.h SPCR2_b at 0x0C) ****/
 /* Phase-07 fix: these bits were WRONGLY listed under SPCR in old header.  */
 
 #define SPI_SPCR2_RMFM_SHIFT                    (0)
@@ -231,7 +231,7 @@
 #define SPI_SPSRC_CENDFC                        (1u << 30)
 #define SPI_SPSRC_SPRFC                         (1u << 31)
 
-/* Clear all clearable status bits (FSP SPI_B_PRV_SPSRC_ALL_CLEAR) */
+/* Clear all clearable status bits (SPI_B_PRV_SPSRC_ALL_CLEAR) */
 #define SPI_SPSRC_ALL_CLEAR  (SPI_SPSRC_SPDRFC | SPI_SPSRC_OVRFC | \
                               SPI_SPSRC_MODFC  | SPI_SPSRC_PERFC | \
                               SPI_SPSRC_UDRFC  | SPI_SPSRC_SPTEFC | \

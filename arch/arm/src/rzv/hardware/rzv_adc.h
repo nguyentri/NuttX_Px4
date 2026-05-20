@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/rzv/hardware/rzv_adc_e.h
+ * arch/arm/src/rzv/hardware/rzv_adc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -310,11 +310,5 @@
 
 #define ADC_E_ADWINULB_CMPULB_SHIFT             (0)      /* Bits 0-15: Cmpulb */
 #define ADC_E_ADWINULB_CMPULB_MASK              (0xffff << ADC_E_ADWINULB_CMPULB_SHIFT)
-
-/* ADC_E Channel definitions */
-#define RZV_ADC_E_CHANNEL_0        0
-
-/* Maximum number of ADC_E channels */
-#define RZV_ADC_E_MAX_CHANNELS     1
 
 #endif /* __ARCH_ARM_SRC_RZV_HARDWARE_RZV_ADC_E_H */

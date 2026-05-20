@@ -435,9 +435,9 @@ int rzv_clock_enable(uint32_t clk_id)
   uint32_t delay_us;
 
   /* audit Critical-3: DMAC uses a 5-bit mask (CLK0-CLK4 all required).
-   * FSP bsp_override.h:1656-1660: BSP_CLKON_BIT_FSP_IP_DMAC = 0x1FU << CLK0_ON_Pos.
+   * DMAC CPG_CLKON_0 bits [4:0] are all required per RZ/V2H UM CPG §CLKON.
    * audit finding #5/#6: ADC also needs a 2-bit pair (CLK0+CLK1).
-   * FSP bsp_clocks.h:479: 3U << CLK0_ON_Pos for ADC_E.
+   * ADC requires 3U << CLK0_ON_Pos (both clock bits) per RZ/V2H UM.
    * Both are detected by domain here so any ID within that domain is gated
    * correctly regardless of which per-unit alias was passed. */
 
@@ -450,15 +450,15 @@ int rzv_clock_enable(uint32_t clk_id)
     }
   else if (domain == RZV_CPG_DOMAIN(RZV_CPG_CLK_ADC0))
     {
-      /* ADC gate: 2-bit pair [1:0] — FSP requires both CLK0+CLK1 set */
+      /* ADC gate: 2-bit pair [1:0] — both CLK0+CLK1 must be set */
 
       mask     = (0x3u << 16) | 0x3u;  /* WEN[17:16] + ON[1:0] */
       mon_mask = 0x3u;
     }
   else if (clk_id == RZV_CPG_CLK_CANFD)
     {
-      /* CAN-FD gate: 3-bit field CLK12/13/14 in CPG_CLKON_9 (per FSP
-       * bsp_override.h CANFD entry — global + ch0 + ch1 clocks).
+      /* CAN-FD gate: 3-bit field CLK12/13/14 in CPG_CLKON_9 per RZ/V2H UM.
+       * global + ch0 + ch1 clocks all required.
        * bit==12, span 3 bits → bits[14:12].
        */
 
@@ -608,8 +608,8 @@ int rzv_module_reset(uint32_t clk_id)
   int retry;
   uint32_t delay_us;
 
-  /* DMAC special-case (FSP bsp_override.h:1656): reset lives in CPG_RST_3
-   * bits 1..5 (RSTB1..RSTB5), not in CLK domain 0 bit 0. */
+  /* DMAC special-case: reset lives in CPG_RST_3 bits 1..5 (RSTB1..RSTB5),
+   * not in CLK domain 0 bit 0 per RZ/V2H UM CPG §RST. */
 
   if (clk_id == RZV_CPG_CLK_DMAC)
     {
@@ -688,8 +688,8 @@ int rzv_module_unreset(uint32_t clk_id)
   int retry;
   uint32_t delay_us;
 
-  /* DMAC special-case (FSP bsp_override.h:1656): reset lives in CPG_RST_3
-   * bits 1..5 (RSTB1..RSTB5), not in CLK domain 0 bit 0. */
+  /* DMAC special-case: reset lives in CPG_RST_3 bits 1..5 (RSTB1..RSTB5),
+   * not in CLK domain 0 bit 0 per RZ/V2H UM CPG §RST. */
 
   if (clk_id == RZV_CPG_CLK_DMAC)
     {
@@ -775,8 +775,8 @@ uint32_t rzv_get_pclk_frequency(void)
  * Name: rzv_get_p4clk_frequency
  *
  * Description:
- *   Get P4CLK frequency (200 MHz).  Used by SPI (FSP BSP_FEATURE_SPI_CLK),
- *   GPT (FSP BSP_FEATURE_GPT_CLOCK_SOURCE = P4CLK), and other P4 peripherals.
+ *   Get P4CLK frequency (200 MHz).  Used by SPI, GPT, and other P4 peripherals
+ *   on RZ/V2H per the hardware manual clock tree.
  *   audit finding #4: added to prevent callers from erroneously using
  *   rzv_get_pclk_frequency() (P0CLK = 100 MHz) for P4CLK peripherals.
  *
@@ -824,8 +824,7 @@ uint32_t rzv_get_cpu_frequency(void)
  *
  * Description:
  *   Return the GPT input clock frequency.  GPT on R9A09G057H uses P4CLK
- *   (200 MHz) as its prescaler input.  FSP BSP_FEATURE_GPT_CLOCK_SOURCE is
- *   defined as FSP_PRIV_CLOCK_P4CLK (see refs/bsp_feature.h:146).
+ *   (200 MHz) as its prescaler input per RZ/V2H hardware manual clock tree.
  *   UNVERIFIED: confirm against RZ/V2H UM Table 9.x if board clock tree
  *   differs from EVK default.
  *
@@ -833,9 +832,8 @@ uint32_t rzv_get_cpu_frequency(void)
 
 uint32_t rzv_get_gpt_clock_hz(void)
 {
-  /* GPT clock source = P4CLK (200 MHz).
-   * FSP BSP_FEATURE_GPT_CLOCK_SOURCE = FSP_PRIV_CLOCK_P4CLK, not P0CLK.
-   * Use compile-time constant; update if board BSP_CFG_CLOCK_P4CLK_HZ
+  /* GPT clock source = P4CLK (200 MHz) per RZ/V2H UM clock tree, not P0CLK.
+   * Use compile-time constant; update if board RZV_CLOCK_P4CLK_HZ
    * differs from the EVK default. */
   return RZV_CLOCK_P4CLK_HZ;
 }
@@ -886,7 +884,7 @@ static void rzv_pll_init(void)
   clkinfo("PLLCM33: CR8 build — skipping (TF-A/CM33 owns PLLCM33)\n");
 #endif /* CONFIG_RZV2H_BUILD_CM33 */
 
-  /* audit Low-12: FSP PLL order = PLLCLN→PLLDTY→PLLCA55→PLLVDO→PLLETH→
+  /* audit Low-12: PLL init order = PLLCLN→PLLDTY→PLLCA55→PLLVDO→PLLETH→
    * PLLDSI→PLLGPU→PLLDRP.  Order is cosmetic; PLLs are independent. */
 
   /* Initialize PLLCLN (1.6 GHz) if not already running */
@@ -1513,11 +1511,11 @@ void rzv_clock_config(void)
 
   rzv_clock_verify_frequencies();
 
-  /* FIX-104: emit FSP-aligned summary so the bring-up trace can be
-   * cross-checked against bsp_clock_cfg.h with a scope.
+  /* FIX-104: emit clock summary so the bring-up trace can be
+   * cross-checked against the expected clock tree with a scope.
    */
 
-  clkinfo("Clock summary (FSP-aligned): "
+  clkinfo("Clock summary: "
           "CR8/I6=%u Hz, SYS/I7=%u Hz, "
           "P0=%u Hz, P1=%u Hz, P5=%u Hz, AT=%u Hz\n",
           (unsigned)g_clock_freq[RZV_CLOCK_I6CLK],

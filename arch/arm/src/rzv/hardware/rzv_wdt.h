@@ -105,14 +105,14 @@
 
 /* CPG bring-up helpers for RZ/V2H (R9A09G057H).
  *
- * Derived from FSP bsp_override.h lines 1745-1772:
+ * RZ/V2H WDT CPG register layout (bsp_override.h, R9A09G057H):
  *   - WDT_CLKP: ch=0..2 in CPG_CLKON_4 (bits 11/13/15), ch=3 in CPG_CLKON_5 (bit 1)
  *   - WDT_LOCO: ch=0,1 in CPG_CLKON_4 (bits 12/14), ch=2,3 in CPG_CLKON_5 (bits 0/2)
  *   - Reset:    CPG_RST_7 bits 5..8 = WDT ch 0..3
  *   - Monitor:  CPG_RSTMON_3 bits 6..9 = WDT ch 0..3
  *   - Underflow→system-reset routing: CPG_ERRORRST_SEL2 bits 0..3 = WDT ch 0..3,
  *     WEN companions at +16.
- * MSTOP is intentionally absent — FSP leaves it undefined for WDT on this MCU.
+ * MSTOP is intentionally absent — undefined for WDT on this MCU.
  */
 
 #define RZV_CPG_CLK_WEN_SHIFT                  16
@@ -124,7 +124,7 @@
 #define RZV_CPG_CLKON_WDT_LOCO_BIT(ch)         ((ch) < 2 ? (1u << (12 + 2 * (ch))) \
                                                          : (1u << (2 * ((ch) - 2))))
 
-/* CLKMON: per FSP all WDT monitor bits live in CLKMON_2 at CLK11/CLK12 base */
+/* CLKMON: all WDT monitor bits live in CLKMON_2 at CLK11/CLK12 base */
 #define RZV_CPG_CLKMON_WDT_M                   2
 
 #define RZV_CPG_RST_WDT_M                      7

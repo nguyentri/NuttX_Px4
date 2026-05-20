@@ -2,12 +2,12 @@
  * arch/arm/src/rzv/rzv_sci_i2c_clock.c
  *
  * SCI-B Simple-I2C baud rate calculator.
- * Integer port of FSP r_sci_b_i2c_calculate_clock (not in public FSP tree;
- * derived from sci_b_i2c_open_hw_master:718-723 and SCI-B UM Section 23.3).
+ * Derived from sci_b_i2c_open_hw_master CCR2 write sequence and
+ * SCI-B UM Section 23.3.
  *
  * Formula (SCI-B I2C mode, BCP=4):
  *   SCL_hz = PCLK / (8 * BCP * (1 << (2*cks)) * (BRR + 1))
- *   where BCP=4 (fixed per FSP CCR2 write at line 718).
+ *   where BCP=4 (fixed in I2C mode).
  *
  * With MDDR fractional correction:
  *   SCL_actual = SCL_nominal * (MDDR / 256)   [MDDR range 128..255]
@@ -33,7 +33,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* BCP is fixed at 4 in I2C mode (FSP r_sci_b_i2c.c:718) */
+/* BCP is fixed at 4 in I2C mode */
 
 #define SCI_I2C_BCP             4u
 
@@ -187,13 +187,13 @@ int sci_i2c_calc_clock(uint32_t pclk_hz, uint32_t scl_hz,
   out->brme = false;
   out->mddr = 0;
 
-  /* Noise filter: SNFR=1 (1-clock filter) for I2C per FSP CCR1 write:730 */
+  /* Noise filter: SNFR=1 (1-clock filter) for I2C (CCR1 write) */
 
   out->snfr = 1u;
 
   /* SDA output delay: IICDL=0 (no extra delay) — ICR field, separate from
-   * NFCS (#5 fix: cycles_value and snfr are distinct per FSP clock_settings).
-   * FSP uses pextend->clock_settings.cycles_value for ICR.IICDL.
+   * NFCS (#5 fix: cycles_value and snfr are distinct clock settings).
+   * cycles_value maps to ICR.IICDL.
    */
 
   out->cycles_value = 0u;

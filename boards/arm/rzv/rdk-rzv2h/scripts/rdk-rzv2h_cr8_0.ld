@@ -50,7 +50,7 @@ OPENAMP_RSCTBL_LENGTH   = 0x00001000;
 MHU_SHMEM_START         = DEFINED(CR8_0) ? DDR0_CR8_0_START + 0x02f01000 : DDR0_CR8_1_START + 0x02f01000;
 MHU_SHMEM_LENGTH        = 0x00001000;
 OPENAMP_VRING_START     = DEFINED(CR8_0) ? DDR0_CR8_0_START + 0x03000000 : DDR0_CR8_1_START + 0x03000000;
-/* HIGH-1 fix: shrink VRING to 8 MiB (matches FreeRTOS rpmsg footprint).
+/* Shrink VRING to 8 MiB (matches the rpmsg footprint).
  * The original 0x00F00000 (15 MiB) reached 0x43EFFFFF, fully enclosing
  * the IPC raw SHM carveout at 0x43800000-0x4381FFFF.
  * 8 MiB ends at 0x43800000 exactly, leaving the SHM region clean.
@@ -497,7 +497,7 @@ SECTIONS
 
     __tz_MHU_SHMEM = ABSOLUTE ( MHU_SHMEM_START ) ;
     . = __tz_MHU_SHMEM;
-    /* NEW-HIGH-1 fix: drop NOLOAD so the ELF loader zero-fills this region.
+    /* NEW-drop NOLOAD so the ELF loader zero-fills this region.
      * g_rzv_resources is a C static (zero-init by default), and without
      * NOLOAD the loader writes those zeros to DDR at boot — CA55 never
      * sees garbage bytes before rzv_openamp_resource_table_init() runs.

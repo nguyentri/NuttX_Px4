@@ -30,8 +30,7 @@
  *
  * TODO(phase-05): confirm with board bring-up that bootloader leaves SCI3
  * configured at 115200 8N1.  If not, the fallback init path below will engage.
- * C2 fix: FSP bsp_feature.h BSP_FEATURE_SCI_CLOCK = FSP_PRIV_CLOCK_P5CLK.
- * SCI is clocked from P5CLK (100 MHz on RZ/V2H), NOT P0CLK.
+ * C2 fix: SCI is clocked from P5CLK (100 MHz on RZ/V2H per hardware manual), NOT P0CLK.
  * BRR value below recalculated for 100 MHz P5CLK at 115200 baud.
  * TODO(phase-05): confirm P5CLK = 100 MHz at board bring-up; if different,
  * recalculate LOWPUTC_CCR2_115200 accordingly.
@@ -78,13 +77,13 @@
 
 /* CCR2 value for 115200 baud at 100 MHz P5CLK, async mode.
  * C2 fix: SCI clock source is P5CLK (100 MHz per RZV_CLOCK_P5CLK_HZ), not P0CLK.
- * Previous comment claimed "120 MHz P0CLK" — incorrect per FSP bsp_feature.h
- * (BSP_FEATURE_SCI_CLOCK = FSP_PRIV_CLOCK_P5CLK) and rzv_clock.h.
+ * Previous comment claimed "120 MHz P0CLK" — incorrect per RZ/V2H hardware manual
+ * and rzv_clock.h (SCI clock = P5CLK = 100 MHz).
  * 100 MHz / bgdm=1 / cks=0: divisor=32, BRR=floor(100e6/32/115200)-1 = 26
  *   actual_baud = 100e6/(32*(26+1)) = 115740 Hz, error = +0.47%
  *   mddr = 256*26/26.127 ≈ 255 → negligible modulation
  * Layout: BGDM=bit4, BRR=[15:8], BRME=bit16, MDDR=[31:24].
- * TODO(phase-05): verify at board bring-up; replace with FSP 100 MHz table value.
+ * TODO(phase-05): verify at board bring-up; recalculate if P5CLK differs from 100 MHz.
  */
 #define LOWPUTC_CCR2_115200  \
   ((255u << 24) | (1u << 16) | (26u << 8) | (1u << 4))

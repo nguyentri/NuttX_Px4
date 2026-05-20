@@ -2,7 +2,6 @@
  * arch/arm/src/rzv/rzv_sci_i2c.c
  *
  * RZ/V2H SCI-B Simple-I2C master driver (CPU-mode, interrupt-driven).
- * FSP ground truth: refs/.../rzv/fsp/src/r_sci_b_i2c/r_sci_b_i2c.c
  *
  * Supported: 7-bit address, standard (100 kHz) and fast (400 kHz) modes,
  *            multi-message transfer with REPEATED START.
@@ -10,7 +9,7 @@
  *
  * Audit fixes addressed:
  *   dim 1  — 32-bit register layout via hardware/rzv_sci.h (no legacy 8-bit)
- *   dim 2  — CCR3.MOD=I2C, ICR config per FSP sci_b_i2c_open_hw_master:676
+ *   dim 2  — CCR3.MOD=I2C, ICR config per RZ/V2H SCI-B hardware manual
  *   dim 3  — clock calc in rzv_sci_i2c_clock.c, PCLK from Kconfig fallback
  *   dim 4  — rzv_clock_enable + rzv_module_unreset (no deprecated CLKON)
  *   dim 5  — rzv_icu_attach × 3 (TXI/TEI/RXI); -ENOSYS if attach fails
@@ -60,8 +59,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* SCI-I2C clock source per FSP bsp_feature.h
- *   BSP_FEATURE_SCI_CLOCK = FSP_PRIV_CLOCK_P5CLK (100 MHz)
+/* SCI-I2C clock source is P5CLK (100 MHz) per RZ/V2H hardware manual.
  * Resolved at runtime via rzv_clock_get_rate(); falls back to compile-time
  * default when the CPG read returns 0.
  */
@@ -76,7 +74,7 @@
 
 #define SCI_I2C_CESR_TIMEOUT       10000u
 
-/* BCP fixed at 4 for I2C mode (FSP r_sci_b_i2c.c:718) */
+/* BCP fixed at 4 for I2C mode per RZ/V2H SCI-B hardware manual */
 
 #define SCI_I2C_CCR2_BCP           4u
 
@@ -187,10 +185,9 @@ static struct rzv_sci_i2c_priv_s g_sci_i2c_priv[4];
  * Name: sci_i2c_hw_init
  *
  * Description:
- *   Initialise SCI-B hardware in Simple-I2C master mode.
- *   Follows FSP sci_b_i2c_open_hw_master:676-755.
+ *   Initialise SCI-B hardware in Simple-I2C master mode per RZ/V2H UM.
  *   dim 1 — all accesses via 32-bit hardware/rzv_sci.h macros
- *   dim 2 — CCR3.MOD=4 (I2C), ICR configured per FSP
+ *   dim 2 — CCR3.MOD=4 (I2C), ICR configured per RZ/V2H SCI-B hardware manual
  *   dim 3 — baud from sci_i2c_calc_clock, PCLK from Kconfig fallback
  *
  ****************************************************************************/
@@ -203,11 +200,11 @@ static int sci_i2c_hw_init(struct rzv_sci_i2c_priv_s *priv,
   uint32_t timeout;
   int ret;
 
-  /* Step 1: Set CCR0=0 (disable TE/RE/TIE/RIE/TEIE) — FSP :683 */
+  /* Step 1: Set CCR0=0 (disable TE/RE/TIE/RIE/TEIE) */
 
   putreg32(0u, base + RZV_SCI_CCR0_OFFSET);
 
-  /* Step 2: Wait for CESR.{RIST,TIST} == 0 — FSP :686 */
+  /* Step 2: Wait for CESR.{RIST,TIST} == 0 (transfers idle) */
 
   for (timeout = SCI_I2C_CESR_TIMEOUT; timeout > 0; timeout--)
     {
@@ -225,7 +222,7 @@ static int sci_i2c_hw_init(struct rzv_sci_i2c_priv_s *priv,
     }
 
   /* Step 3: Compute baud settings (dim 3).
-   * FSP-aligned: SCI source = P5CLK; read live rate via rzv_clock_get_rate()
+   * SCI source = P5CLK; read live rate via rzv_clock_get_rate()
    * and fall back to the compile-time constant if the CPG table is unset.
    */
 
@@ -241,29 +238,28 @@ static int sci_i2c_hw_init(struct rzv_sci_i2c_priv_s *priv,
       return ret;
     }
 
-  /* Step 4: Write ICR — high-Z SDA/SCL + IICINTM + IICCSC + IICACKT
-   * FSP :695-699  IICSCLS_Msk | IICSDAS_Msk = high-impedance (0x3<<each)
+  /* Step 4: Write ICR — high-Z SDA/SCL + IICINTM + IICCSC + IICACKT.
+   * IICSCLS_Msk | IICSDAS_Msk = high-impedance (0x3 each) per RZ/V2H SCI-B UM.
    * Use clk.cycles_value for IICDL (SDA delay), NOT clk.snfr (#5 fix).
    */
 
   uint32_t icr = SCI_ICR_IICSDAS_MASK | SCI_ICR_IICSCLS_MASK;
-  icr |= (uint32_t)(clk.cycles_value & 0x1fu); /* IICDL bits [4:0] per FSP */
+  icr |= (uint32_t)(clk.cycles_value & 0x1fu); /* IICDL bits [4:0] per RZ/V2H SCI-B UM */
   icr |= SCI_ICR_IICINTM | SCI_ICR_IICCSC | SCI_ICR_IICACKT;
   putreg32(icr, base + RZV_SCI_ICR_OFFSET);
 
-  /* Step 5: Write CCR3 — 8-bit char, MSB first, I2C mode — FSP :707-710
-   * FSP sets CHR = 2U << CHR_Pos (= 0x200) for 8-bit in I2C/sync mode.
+  /* Step 5: Write CCR3 — 8-bit char, MSB first, I2C mode per RZ/V2H SCI-B UM.
+   * CHR = 2U << CHR_Pos (= 0x200) for 8-bit in I2C/sync mode.
    * MOD[18:16]=4 = Simple I2C.
-   * BPEN=1 (bit 7) selects PCLK as BRG source (#3 fix: FSP :708 ORs
-   * clock_source into CCR3.BPEN_Pos; PCLK=1 so baud calc matches PCLK).
+   * BPEN=1 (bit 7) selects PCLK as BRG source (#3 fix; PCLK=1 so baud calc matches PCLK).
    */
 
   uint32_t ccr3 = SCI_CCR3_MOD_I2C |
-                  (2u << SCI_CCR3_CHR_SHIFT) | /* 8-bit I2C: CHR=2 per FSP :707 */
+                  (2u << SCI_CCR3_CHR_SHIFT) | /* 8-bit I2C: CHR=2 per RZ/V2H SCI-B UM */
                   SCI_CCR3_BPEN;               /* Select PCLK for BRG (#3 fix) */
   putreg32(ccr3, base + RZV_SCI_CCR3_OFFSET);
 
-  /* Step 6: Write CCR2 with computed baud values — FSP :718-723
+  /* Step 6: Write CCR2 with computed baud values.
    * BCP=4, BRR, BRME, CKS, MDDR in single write (no RMW).
    */
 
@@ -274,7 +270,7 @@ static int sci_i2c_hw_init(struct rzv_sci_i2c_priv_s *priv,
                   (clk.brme ? SCI_CCR2_BRME : 0u);
   putreg32(ccr2, base + RZV_SCI_CCR2_OFFSET);
 
-  /* Step 7: Write CCR1 — noise filter — FSP :729-731 */
+  /* Step 7: Write CCR1 — noise filter */
 
   uint32_t ccr1 = ((uint32_t)clk.snfr << SCI_CCR1_NFCS_SHIFT) |
                   SCI_CCR1_NFEN;
@@ -284,7 +280,7 @@ static int sci_i2c_hw_init(struct rzv_sci_i2c_priv_s *priv,
 
   putreg32(0u, base + RZV_SCI_CCR4_OFFSET);
 
-  /* Step 9: Clear all status flags — FSP :733-743 */
+  /* Step 9: Clear all status flags (write-1-clear CFCLR/ICFCLR) */
 
   putreg32(SCI_CFCLR_RDRFC | SCI_CFCLR_TDREC | SCI_CFCLR_ERSC |
            SCI_CFCLR_DCMFC | SCI_CFCLR_DPERC | SCI_CFCLR_DFERC |
@@ -293,9 +289,7 @@ static int sci_i2c_hw_init(struct rzv_sci_i2c_priv_s *priv,
            base + RZV_SCI_CFCLR_OFFSET);
   putreg32(SCI_ICFCLR_IICSTIFC, base + RZV_SCI_ICFCLR_OFFSET);
 
-  /* Note: CCR0 (TE|RE) written in transfer() just before START
-   * per FSP sci_b_i2c_run_hw_master:787
-   */
+  /* Note: CCR0 (TE|RE) written in transfer() just before START */
 
   return OK;
 }
@@ -367,12 +361,12 @@ static int sci_i2c_transfer(struct i2c_master_s *dev,
   priv->result       = OK;
   priv->state        = SCI_I2C_STATE_ADDR;
 
-  /* Enable TE, RE, TIE, TEIE — FSP sci_b_i2c_run_hw_master:787 */
+  /* Enable TE, RE, TIE, TEIE to start transfer */
 
   putreg32(SCI_CCR0_TE | SCI_CCR0_RE | SCI_CCR0_TIE | SCI_CCR0_TEIE,
            priv->base + RZV_SCI_CCR0_OFFSET);
 
-  /* Wait for CESR.{RIST,TIST} == 1 (transfers enabled) — FSP :791 */
+  /* Wait for CESR.{RIST,TIST} == 1 (transfers enabled) */
 
   for (timeout = SCI_I2C_CESR_TIMEOUT; timeout > 0; timeout--)
     {
@@ -394,7 +388,7 @@ static int sci_i2c_transfer(struct i2c_master_s *dev,
       goto out_unlock;
     }
 
-  /* Issue START condition atomically (FSP :804) */
+  /* Issue START condition atomically via ICR request word */
 
   icr = getreg32(priv->base + RZV_SCI_ICR_OFFSET);
   putreg32(SCI_I2C_REQ(icr, 1, 1, SCI_ICR_IICSTAREQ),

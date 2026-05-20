@@ -90,7 +90,7 @@
  *   Channels 5–8 are NOT valid; original assignment (ch5 RX) was wrong.
  *   TX_IRQ is the RSP (response/ACK) interrupt on the TX channel (ch4).
  *   RX_IRQ is the MSG interrupt on the RX channel (ch9).
- *   Both IRQ values verified against FSP bsp_irq_id.h.
+ *   Both IRQ values verified against the RZ/V2H hardware manual.
  * -------------------------------------------------------------------------
  */
 #define RZV_IPC_CR8CR8_MHU_BASE      RZV_MHU0_NS_BASE
@@ -116,7 +116,7 @@
  * Channel selection: ch10 and ch15 are valid MHU-B-NS channels per
  * BSP_FEATURE_MHU_B_NS_VALID_CHANNEL_MASK.  Original ch6/ch7 were invalid.
  * TX_IRQ = RSP ACK on ch10; RX_IRQ = MSG kick on ch15.
- * IRQ values from FSP bsp_irq_id.h MHU_RSP10_NS_IRQn / MHU_MSG15_NS_IRQn.
+ * IRQ values: MHU_RSP10_NS_IRQn / MHU_MSG15_NS_IRQn per RZ/V2H hardware manual.
  * -------------------------------------------------------------------------
  */
 #define RZV_IPC_CR8CM33_MHU_BASE     RZV_MHU0_NS_BASE

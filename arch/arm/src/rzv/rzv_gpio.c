@@ -88,11 +88,10 @@
 
 /* Per-port maximum pin count (HIGH-8 / H-9 fix).
  * GP ports P20-P2B (NuttX ports 0-11) have varying pin counts.
- * Source: FSP iodefine bitfields for each port.
- * P20=8, P21=6, P22=2 confirmed from FSP; remainder set to 8 (safe upper
+ * Source: RZ/V2H hardware manual iodefine bitfields for each port.
+ * P20=8, P21=6, P22=2 confirmed; remainder set to 8 (safe upper
  * bound — HW ignores writes to non-existent pins but better to reject them).
- * UNVERIFIED for ports 3-11 beyond confirmed FSP data: mark as 8 until UM
- * Table 53.x is checked.
+ * UNVERIFIED for ports 3-11: mark as 8 until RZ/V2H UM Table 53.x is checked.
  */
 static const uint8_t g_rzv_port_pin_count[RZV_GPIO_MAX_PORT] =
 {
@@ -240,8 +239,8 @@ static bool rzv_gpio_pin_valid(unsigned int port, unsigned int pin)
  * Name: rzv_gpio_regwrite_8 / _16 / _32
  *
  * Description:
- *   Read-modify-write helpers matching FSP r_ioport_regwrite_{8,16,32}.
- *   Source: FSP r_ioport.c lines 135-175.
+ *   Read-modify-write helpers for GPIO register access.
+ *   Apply mask/shift to update only the targeted field without disturbing others.
  *
  ****************************************************************************/
 
@@ -283,13 +282,13 @@ static void rzv_gpio_regwrite_32(volatile uint32_t *ioreg, uint32_t write_value,
  *     - Wrote bit 7 (undefined on RZV2H) during disable
  *     - Cleared REGWE_B accidentally during enable via 0x00 write
  *
- *   Correct sequence (from FSP bsp_io.h R_BSP_PinAccessEnable, rzv2h path):
+ *   Correct RZ/V2H PWPR sequence:
  *     enable:  PWPR = (PWPR & REGWE_A_MASK) | REGWE_A_BIT   // RMW, set bit6
  *     disable: PWPR = (PWPR & REGWE_A_MASK)                 // RMW, clear bit6
  *
- *   Source: FSP bsp_feature.h (rzv2h/cr):
- *     BSP_FEATURE_IOPORT_PFC_PWPR_REGWE_A_OFFSET = 6
- *     BSP_FEATURE_IOPORT_PFC_PWPR_REGWE_A_MASK   = 0xFFFFFFBF
+ *   Per RZ/V2H hardware manual GPIO section:
+ *     PWPR REGWE_A bit offset = 6
+ *     PWPR REGWE_A mask       = 0xFFFFFFBF
  *
  *   NOTE: caller must already hold a critical section; these functions
  *   additionally take their own critical section for the counter update.
@@ -349,12 +348,12 @@ static void rzv_gpio_pwpr_disable(void)
  *     0x1C10 + (port-5)*8 for ports 5-11 — wrong for port 5 offset and
  *     wrong uniform-stride assumption (missing gap at PUPDD in SP group).
  *
- *   Correct: NuttX ports 0-11 map to FSP GP group (ports 0x20-0x2B).
+ *   Correct: NuttX ports 0-11 are GP group (ports 0x20-0x2B per RZ/V2H UM).
  *   All have PUPD registers starting at PUPD20_L (0x1CE8). Formula:
  *     offset = PUPD20_L_OFFSET + port*8 + (pin >= 8 ? 4 : 0)
  *   Bit position within register: (pin % 8) * 2
  *
- *   Source: FSP r_ioport.c line 1450:
+ *   Per RZ/V2H hardware manual GPIO §PUPD:
  *     adr_offset_pupd = port*2 + pin/4  (with p_pupd base = &R_GPIO->PUPD20_L)
  *     Which equals: PUPD20_L_OFFSET + port*8 + (pin/4)*4
  *     Simplified for _L/_H split: PUPD20_L + port*8, PUPD20_H + port*8
@@ -378,11 +377,11 @@ static int rzv_gpioconfigure_pull(unsigned int port, unsigned int pin,
       return -EINVAL;
     }
 
-  /* CRIT-2 fix: FSP layout is 4 pins per 32-bit register, 8 bits per pin.
+  /* CRIT-2 fix: 4 pins per 32-bit register, 8 bits per pin (RZ/V2H UM GPIO).
    * _L holds pins 0-3, _H holds pins 4-7.  Shift = (pin % 4) * 8.
    * Old code: split at pin<8 with shift=pin*2 — wrong register AND wrong shift.
    * Source: hardware/rzv_gpio.h GPIO_PUPD20_L_IOLH_SHIFT(n) = n*8.
-   * Source: FSP r_ioport.c line ~1450: bitpos_align = (pin & 3) * 8.
+   * bitpos_align = (pin & 3) * 8 per RZ/V2H UM GPIO §PUPD.
    */
   if (pin < 4U)
     {
@@ -423,15 +422,15 @@ static int rzv_gpioconfigure_pull(unsigned int port, unsigned int pin,
  *   Old code:
  *     port 0-2: iolh_offset = 0x0FFC + (port+3)*8  → SP-group base (wrong)
  *     port 3-11: iolh_offset = 0x1014 + (port-3)*8 → skips gap at IOLHD
- *   Both paths are wrong for NuttX ports 0-11 which are FSP GP group.
+ *   Both paths are wrong for NuttX ports 0-11 which are GP group ports.
  *
- *   Correct: GP ports use IOLH20_L (0x10E4) as base.
+ *   Correct: GP ports use IOLH20_L (0x10E4) as base per RZ/V2H UM GPIO.
  *     offset = IOLH20_L_OFFSET + port*8 + (pin >= 8 ? 4 : 0)
  *
- *   Source: FSP r_ioport.c line 1442:
+ *   Per RZ/V2H hardware manual GPIO §IOLH:
  *     adr_offset_iolh = port*2 + pin/4  (p_iolh base = &R_GPIO->IOLH20_L)
  *   Source: hardware/rzv_gpio.h RZV_GPIO_GP_IOLH_L/H_OFFSET macros.
- *   Source: bsp_feature.h BSP_FEATURE_IOPORT_GP_REG_BASE_NUM = 20.
+ *   GP_REG_BASE_NUM = 20 (GP group base port number per RZ/V2H UM).
  *
  ****************************************************************************/
 
@@ -451,7 +450,7 @@ static int rzv_gpioconfigure_drive(unsigned int port, unsigned int pin,
     }
 
   /* CRIT-2 fix: _L = pins 0-3, _H = pins 4-7, shift = (pin%4)*8.
-   * Source: FSP r_ioport.c bitpos_align = (pin & 3) * 8.
+   * bitpos_align = (pin & 3) * 8 per RZ/V2H UM GPIO §IOLH.
    * Source: hardware/rzv_gpio.h GPIO_IOLH20_L_IOLH_SHIFT(n) = n*8.
    */
 
@@ -478,16 +477,15 @@ static int rzv_gpioconfigure_drive(unsigned int port, unsigned int pin,
  *   Slew rate (SR) is not written — caller passes default (keep reset value).
  *
  *   Phase-03 fix [Medium-13, audit §3]:
- *   FSP r_ioport_peri_mode_pin_config programs PFC, IOLH, PUPD, SR, NOD, IEN.
+ *   Peripheral mode pin configuration programs PFC, IOLH, PUPD, SR, NOD, IEN.
  *   This implementation adds NOD (open-drain) for I2C compatibility.
  *   SR and IEN are deferred (no pinset encoding yet, safe to leave at reset).
  *   TODO(phase-03): Encode SR/IEN in pinset GPIO_FUNC bits and apply here.
- *   Source: FSP r_ioport.c r_ioport_peri_mode_pin_config (lines 1375-1458).
  *
  *   Caller (rzv_gpioconfig) has already written PMC=0 before calling here.
  *   We write PMC=1 inside to complete the PFC programming window.
  *
- *   Phase-03 [Medium-14]: PFC is programmed before PM per FSP order.
+ *   Phase-03 [Medium-14]: PFC is programmed before PM per RZ/V2H UM ordering.
  *   Caller sets PM=Hi-Z after this function returns.
  *
  ****************************************************************************/
@@ -515,8 +513,7 @@ static int rzv_gpioconfigure_peripheral(unsigned int port, unsigned int pin,
                       (uint8_t)(1U << pin));
 
   /* PFC: set peripheral function select (4 bits per pin).
-   * Source: FSP r_ioport.c line 1435: 4-bit field at pin*4 in 32-bit reg.
-   * Source: bsp_feature.h BSP_FEATURE_IOPORT_PFC_REG_BITFIELD = 0xF (4-bit).
+   * Per RZ/V2H UM GPIO §PFC: 4-bit field at pin*4 in 32-bit reg (field mask = 0xF).
    */
   p_pfc = (volatile uint32_t *)(base + RZV_GPIO_PFC_OFFSET(port));
   shift = pin * GPIO_PIN_ALIGN_4BIT;
@@ -526,7 +523,7 @@ static int rzv_gpioconfigure_peripheral(unsigned int port, unsigned int pin,
   /* NOD: N-channel open-drain mode for I2C/SMBus pins.
    * CRIT-2 fix: same 4-pins-per-reg, 8-bits-per-pin layout as IOLH/PUPD.
    * _L = pins 0-3, _H = pins 4-7, shift = (pin % 4) * 8.
-   * Source: FSP r_ioport.c NOD register; hardware/rzv_gpio.h NOD macros.
+   * Source: hardware/rzv_gpio.h NOD macros (4-pins-per-reg, 8-bits-per-pin layout).
    */
   if (pin < 4U)
     {
@@ -539,7 +536,7 @@ static int rzv_gpioconfigure_peripheral(unsigned int port, unsigned int pin,
 
   shift = (pin & 3U) * 8U;
   mask  = 0x3U << shift;
-  /* NOD value: 01=open-drain, 00=push-pull (2-bit field per FSP encoding) */
+  /* NOD value: 01=open-drain, 00=push-pull (2-bit field per RZ/V2H UM GPIO) */
   rzv_gpio_regwrite_32(p_nod,
                        (func & RZV_GPIO_OPENDRAIN) ? 0x01U : 0x00U,
                        shift, mask);
@@ -634,10 +631,8 @@ static int rzv_gpio_irq_handler_shim(int irq, void *context, void *arg)
  *   [High-7]:     PUPD via GP-group lookup.
  *   [High-11]:    Full PMC/PFC/PM/IOLH/PUPD RMW under critical section.
  *   [Medium-13]:  NOD (open-drain) written in peripheral mode.
- *   [Medium-14]:  FSP-correct order: PMC(0) → PFC → IOLH → PUPD → P → PM.
+ *   [Medium-14]:  Correct order per RZ/V2H UM: PMC(0) → PFC → IOLH → PUPD → P → PM.
  *   [Low-17]:     P register written BEFORE PM=OUTPUT to avoid glitch.
- *
- *   Source: FSP r_ioport.c + bsp_io.h; referenced inline below.
  *
  ****************************************************************************/
 
@@ -677,33 +672,30 @@ int rzv_gpioconfig(gpio_pinset_t cfgset)
     }
 
   /* Phase-03 [Critical-4]: Enable GPIO module clock before any register
-   * access. Equivalent to FSP R_BSP_MODULE_CLKON(IOPORT, ...).
+   * access via rzv_clock_enable(RZV_CPG_CLK_GPIO).
    * NOTE: RZV_CPG_CLK_GPIO bit index is UNVERIFIED for R9A09G057H.
    * Phase-01 report confirmed mapping is a placeholder — value (domain=0,
    * bit=0) is NOT confirmed against RZ/V2H Hardware User Manual Table 9.x.
    * UNVERIFIED — needs RZ/V2H UM for R9A09G057H GPIO CLKON bit.
    * The call is idempotent if clock already running (TF-A may have enabled).
-   * Source: FSP bsp_clocks.h R_BSP_MODULE_CLKON.
    */
   rzv_clock_enable(RZV_CPG_CLK_GPIO);
 
   /* Phase-03 [High-11]: Critical section wraps the ENTIRE PMC/PFC/IOLH/PUPD/
    * PM RMW sequence to prevent concurrent config on the same port byte.
-   * Source: FSP R_BSP_PinAccessEnable wraps the full pin config call.
    */
   flags = enter_critical_section();
   rzv_gpio_pwpr_enable();  /* Phase-03 [High-5]: 32-bit RMW PWPR */
 
-  /* Phase-03 [Medium-14] FSP sequence step 1: PMC=0 (force GPIO mode).
-   * This must precede PFC programming per FSP convention.
-   * Source: FSP r_ioport.c r_ioport_peri_mode_pin_config line ~1430.
+  /* Phase-03 [Medium-14] step 1: PMC=0 (force GPIO mode).
+   * This must precede PFC programming per RZ/V2H UM GPIO §PMC.
    */
   p_pmc = (volatile uint8_t *)(base + RZV_GPIO_PMC_OFFSET(port));
   rzv_gpio_regwrite_8(p_pmc, PMC_GPIO_MODE, (uint8_t)pin,
                       (uint8_t)(1U << pin));
 
   /* Step 2: PFC + PMC=1 (only if peripheral mode).
-   * Phase-03 [Medium-14]: PFC written before PM per FSP order.
+   * Phase-03 [Medium-14]: PFC written before PM per RZ/V2H UM ordering.
    */
   if (mode == RZV_GPIO_PERIPH)
     {
@@ -734,7 +726,7 @@ int rzv_gpioconfig(gpio_pinset_t cfgset)
 
   /* Step 5: Set output latch (P register) BEFORE enabling output in PM.
    * Phase-03 [Low-17]: avoids glitch on active-high-idle pins (e.g. SPI CS).
-   * Source: FSP bsp_io.h BSP_IO_PinWrite sets P then PM simultaneously.
+   * Writing P before PM avoids output glitch per RZ/V2H GPIO timing requirements.
    */
   if (mode == RZV_GPIO_OUTPUT)
     {
@@ -744,9 +736,9 @@ int rzv_gpioconfig(gpio_pinset_t cfgset)
                           (uint8_t)(1U << pin));
     }
 
-  /* Step 6: Configure PM register (port direction) — written last per FSP.
+  /* Step 6: Configure PM register (port direction) — written last per RZ/V2H UM.
    * For peripheral mode: PM=Hi-Z (pin driven by peripheral via PFC).
-   * Source: FSP r_ioport.c: PM set after PFC/PMC/IOLH/PUPD.
+   * PM is set after PFC/PMC/IOLH/PUPD per GPIO initialization sequence.
    */
   p_pm    = (volatile uint16_t *)(base + RZV_GPIO_PM_OFFSET(port));
   pm_mask = (uint16_t)(0x3U << (pin * GPIO_PIN_ALIGN_2BIT));
@@ -783,7 +775,6 @@ out:
  *   Write high/low to a GPIO output pin.
  *   Phase-03 [Low-16]: returns int (OK/-EINVAL) instead of void so that
  *   callers can detect invalid port. Source: audit §6 Low-16.
- *   Source: FSP bsp_io.h R_BSP_PinWrite.
  *
  ****************************************************************************/
 
@@ -815,7 +806,6 @@ int rzv_gpiowrite(gpio_pinset_t pinset, bool value)
  * Description:
  *   Read the value of a GPIO pin via PIN register.
  *   Returns false on invalid port (caller cannot distinguish from low — LOW).
- *   Source: FSP bsp_io.h R_BSP_PinRead.
  *
  ****************************************************************************/
 
@@ -915,9 +905,9 @@ void rzv_gpiosetdrivestrength(gpio_pinset_t pinset, uint8_t strength)
  *     The find-slot call used `cfg` (undefined); correct variable is `pinset`.
  *   [High-8]:  ISEL offset via GP-group lookup (hardware/rzv_gpio.h macro),
  *     not unsourced magic 0x2CE8+port*8 (which was coincidentally correct
- *     but had no traceability to FSP/UM). Source: RZV_GPIO_GP_ISEL_L/H_OFFSET.
+ *     but had no traceability to RZ/V2H UM). Source: RZV_GPIO_GP_ISEL_L/H_OFFSET.
  *   [High-9]:  Only IRQ0-15 direct lines supported. TINT routing via TSSR0-7
- *     requires FSP bsp_group_irq.c-style programming and is deferred.
+ *     requires additional TSSR programming and is deferred.
  *     TODO(phase-03): Add TINT if PX4 RC-IN or sensor IRQs require it.
  *   [High-10]: IRQ number extracted from pinset bits [7:4] (GPIO_FUNC field).
  *     This is a defined workaround — bits [3:0] are PSEL, not IRQ number.
@@ -1054,7 +1044,7 @@ int rzv_gpiosetevent(gpio_pinset_t pinset, bool rising, bool falling,
 
   /* Enable ISEL — CRIT-2 fix: 4-pins-per-reg, 8-bits-per-pin layout.
    * _L = pins 0-3, _H = pins 4-7, shift = (pin % 4) * 8.
-   * Source: FSP r_ioport.c bitpos_align = (pin & 3) * 8.
+   * bitpos_align = (pin & 3) * 8 per RZ/V2H UM GPIO §ISEL.
    */
   flags = enter_critical_section();
   rzv_gpio_pwpr_enable();

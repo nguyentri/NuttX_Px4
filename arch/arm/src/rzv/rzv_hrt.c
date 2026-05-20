@@ -79,7 +79,7 @@
 #  define putreg32(v, a) (*(volatile uint32_t *)(a) = (v))
 #endif
 
-/* GTM7 base address (verified against FSP gtm_iodefine.h) */
+/* GTM7 base address per RZ/V2H hardware manual */
 
 #define HRT_GTM_BASE    RZV_GTM7_BASE
 

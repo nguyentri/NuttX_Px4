@@ -75,7 +75,7 @@
  * These are INTC event selectors, not PPS events.
  * TODO: move to arch/arm/include/rzv/rzv2h_irq.h next to the other
  * RZV_ELC_GBETH_* defines once the exact symbol naming is agreed.
- * Values 0x2FD / 0x30C are from FSP vector_data.c GBETH0/1 SBD_PERCH_TX/RX_0.
+ * Values 0x2FD / 0x30C are the GBETH0/1 SBD_PERCH_TX/RX_0 event IDs.
  */
 
 #define RZV_ELC_GBETH0_INT  0x2FD  /* 765 */

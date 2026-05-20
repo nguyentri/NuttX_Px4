@@ -1220,8 +1220,7 @@ static int rzv_calculate_baud_setting(uint32_t baudrate,
   int32_t hit_bit_err = 100000; /* 100% error as starting point */
   uint32_t divisor;
 
-  /* C1 fix: SCI clock source is P5CLK per FSP bsp_feature.h
-   * (BSP_FEATURE_SCI_CLOCK = FSP_PRIV_CLOCK_P5CLK), not P0CLK.
+  /* C1 fix: SCI clock source is P5CLK (BSP_FEATURE_SCI_CLOCK), not P0CLK.
    * Use rzv_clock_get_rate(RZV_CLOCK_P5CLK) directly.
    */
 
@@ -1304,7 +1303,7 @@ static int rzv_calculate_baud_setting(uint32_t baudrate,
           /* M7 note: XOR of (:1) bit-fields with uint8_t cast — safe because
            * abcs and abcse are each 1-bit fields, their OR is 0 or 1, and
            * select_16_base_clk_cycles is 0 or 1.  The cast to uint8_t makes
-           * the integer promotion visible.  Same logic as FSP r_sci_b_uart.c.
+           * the integer promotion visible.
            */
 
           if (((uint8_t)select_16_base_clk_cycles) ^
@@ -1340,7 +1339,7 @@ static int rzv_calculate_baud_setting(uint32_t baudrate,
                     }
 
                   /* High-8 fix: try MDDR modulation to reduce bit error.
-                   * Formula (FSP r_sci_b_uart.c:1050):
+                   * Formula:
                    *   mddr = err_divisor / (freq_hz / SCI_B_UART_MDDR_MAX)
                    * Only valid when mddr >= SCI_B_UART_MDDR_MIN (128).
                    * Adjusted bit error with MDDR:
@@ -1364,13 +1363,13 @@ static int rzv_calculate_baud_setting(uint32_t baudrate,
                     }
                   else
                     {
-                      /* M8 fix: FSP r_sci_b_uart.c:1055 breaks out of the
-                       * inner loop when mddr is below the minimum threshold
-                       * rather than clamping to MIN and continuing.
-                       * Clamping lets NuttX compare adj_bit_err with the
-                       * unclamped original (bit_err) which can pick a worse
-                       * BRR setting that "looks better" due to the MDDR=MIN
-                       * adjustment. Match FSP: skip this temp_brr entirely.
+                      /* M8 fix: break out of the inner loop when mddr is
+                       * below the minimum threshold rather than clamping to
+                       * MIN and continuing.  Clamping lets NuttX compare
+                       * adj_bit_err with the unclamped original (bit_err)
+                       * which can pick a worse BRR setting that "looks
+                       * better" due to the MDDR=MIN adjustment.
+                       * Skip this temp_brr entirely.
                        */
 
                       break; /* mddr too low — no valid modulation for this BRR */
@@ -1394,7 +1393,6 @@ static int rzv_calculate_baud_setting(uint32_t baudrate,
                    * When modulation is active (mddr >= MIN), continue
                    * decrementing temp_brr to find the optimal BRR/MDDR combo.
                    * The M8 break above handles the mddr < MIN exit path.
-                   * Combined, this matches FSP r_sci_b_uart.c:1055/1085-1093.
                    */
                 }
             }
@@ -1479,9 +1477,8 @@ static void rzv_fifo_configure(struct rzv_uart_s *priv)
   rzv_sci_modifyreg(priv, RZV_SCI_CCR_OFFSET(3), 0, SCI_CCR3_FM);
 
   /* M2 fix: clear FIFO flags (FFCLR.DRC=1) before programming FCR.
-   * FSP r_sci_b_uart.c clears FIFO flags prior to enabling FIFO mode to
-   * prevent stale DR/parity/framing bits from a prior session from
-   * being reported on the first receive in the new session.
+   * Clears stale DR/parity/framing bits from a prior session so they are
+   * not reported on the first receive in the new session.
    */
 
   rzv_sci_putreg(priv, RZV_SCI_FFCLR_OFFSET, SCI_FFCLR_DRC);
@@ -1496,8 +1493,8 @@ static void rzv_fifo_configure(struct rzv_uart_s *priv)
 
   rzv_sci_putreg(priv, RZV_SCI_FCR_OFFSET, fcr);
 
-  /* Reset FIFOs: TFRST and RFRST are write-only auto-clearing trigger bits
-   * (__OM in FSP iodefine). Reading FCR back always yields 0 for these bits.
+  /* Reset FIFOs: TFRST and RFRST are write-only auto-clearing trigger bits.
+   * Reading FCR back always yields 0 for these bits.
    * P0-6 fix: poll FRSR.FNUM==0 (RX FIFO empty) and FTSR.T==0 (TX FIFO empty)
    * instead of spinning on FCR read (which would be an infinite loop).
    */
@@ -1834,16 +1831,16 @@ static int rzv_setup(struct uart_dev_s *dev)
 
   /* Disable transmit and receive */
 
-  /* M1 fix: FSP r_sci_b_uart.c:365-371 sets CCR0=IDSEL before configuring
-   * CCR1-3.  Write IDSE first so the channel is in the correct idle state
-   * while subsequent CCR writes are made.  TE/RE remain 0 (channel disabled).
+  /* M1 fix: set CCR0=IDSEL before configuring CCR1-3.  Write IDSE first so
+   * the channel is in the correct idle state while subsequent CCR writes are
+   * made.  TE/RE remain 0 (channel disabled).
    */
 
   rzv_sci_putreg(priv, RZV_SCI_CCR_OFFSET(0), SCI_CCR0_IDSE);
 
-  /* Medium-11 fix: wait for CESR.RIST==0 and CESR.TIST==0 after CCR0=IDSE.
-   * FSP r_sci_b_uart_disable_transfers() requires this to avoid a race when
-   * the channel is reopened (e.g., TCSETS baud change while data is in flight).
+  /* Medium-11 fix: wait for CESR.RIST==0 and CESR.TIST==0 after CCR0=IDSE
+   * to avoid a race when the channel is reopened (e.g., TCSETS baud change
+   * while data is in flight).
    * CESR is a byte register at CESR_OFFSET; getreg32 reads the low byte safely.
    */
 
@@ -1936,7 +1933,7 @@ static int rzv_setup(struct uart_dev_s *dev)
 
   /* Configure CCR2 with calculated baud rate settings.
    * P0-1 fix: use SCI_CCR2_BUILD() for a single write covering all fields at
-   * their correct positions per FSP CCR2_b layout (BCP=0 default,
+   * their correct positions in CCR2_b layout (BCP=0 default,
    * BGDM=4, ABCS=5, ABCSE=6, BRR=[15:8], BRME=16, CKS=[18:17], MDDR=[31:24]).
    */
 
@@ -1948,11 +1945,10 @@ static int rzv_setup(struct uart_dev_s *dev)
   rzv_sci_putreg(priv, RZV_SCI_CCR_OFFSET(2), ccr2);
 
   /* H1 fix: clear all status/error flags (CFCLR) before enabling TE/RE.
-   * FSP r_sci_b_uart.c:394 writes CFCLR=0x9D070010 (CLEAR_ALL_MASK)
-   * unconditionally before enable. Without this, residual ORER/PER/FER
-   * from a prior session are re-reported on the first receive call.
-   * Value: RDRFC(31)|TDREC(29)|FERC(28)|PERC(27)|MFFC(26)|ORERC(24)|
-   *        DFERC(18)|DPERC(17)|DCMFC(16)|ERSC(4) = 0x9D070010
+   * Clears residual ORER/PER/FER from a prior session so they are not
+   * re-reported on the first receive call. CFCLR=0x9D070010 (CLEAR_ALL_MASK):
+   * RDRFC(31)|TDREC(29)|FERC(28)|PERC(27)|MFFC(26)|ORERC(24)|
+   * DFERC(18)|DPERC(17)|DCMFC(16)|ERSC(4) = 0x9D070010
    */
 
   rzv_sci_putreg(priv, RZV_SCI_CFCLR_OFFSET, 0x9D070010u);
@@ -2008,8 +2004,8 @@ static void rzv_shutdown(struct uart_dev_s *dev)
   struct rzv_uart_s *priv = (struct rzv_uart_s *)dev->priv;
   uint32_t ccr0;
 
-  /* C3 fix: FSP r_sci_b_uart.c:456-468 warns that clearing TE before TEND==1
-   * leaves the SCI state machine in an abnormal state on the next TE=1.
+  /* C3 fix: clearing TE before TEND==1 leaves the SCI state machine in an
+   * abnormal state on the next TE=1.
    * Sequence: disable TIE/TEIE → wait CSR.TEND==1 → disable FIFO resets
    * → clear TE → wait CESR.TIST==0 → clear RE → disable clock.
    */
@@ -2849,7 +2845,10 @@ int up_putc(int ch)
 #endif
 }
 
-#else /* No SCI devices configured */
+#elif !defined(CONFIG_RZV_UART_SCIF)
+/* No SCI devices configured AND SCIF driver not in use -> provide stubs.
+ * If CONFIG_RZV_UART_SCIF=y, rzv_scif.c provides arm_serialinit / up_putc.
+ */
 
 /****************************************************************************
  * Name: arm_serialinit
@@ -2881,6 +2880,6 @@ int up_putc(int ch)
   return 0;
 }
 
-#endif /* CONFIG_RZV_SCIx enabled */
+#endif /* CONFIG_RZV_SCIx enabled / SCIF fallback */
 
 #endif /* USE_SERIALDRIVER */

@@ -646,42 +646,176 @@ config RZV_SERIAL_RXDMA_BUFFER_SIZE
 
      Recommended: 256 (balances performance and memory)
 
-# Serial Communications Interface with FIFO (SCIF) - legacy compatibility
+# Serial Communications Interface with FIFO (SCIF)
+# Backed by rzv_scif.c (FSP-aligned port). Enables all SCIF channels
+# through CONFIG_RZV_UART_SCIF. Mutually compatible at file level with
+# RZV_UART_SCI but typically only one is selected as the console.
+
+config RZV_UART_SCIF
+   bool
+   default n
 
 config RZV_SCIF0
    bool "SCIF0"
    default n
    depends on RZV_HAVE_SCIF0_UART
-   select RZV_UART_SCI
-   select UART0_SERIALDRIVER
+   select RZV_UART_SCIF
 
 config RZV_SCIF1
    bool "SCIF1"
    default n
    depends on RZV_HAVE_SCIF1_UART
-   select RZV_UART_SCI
-   select UART1_SERIALDRIVER
+   select RZV_UART_SCIF
 
 config RZV_SCIF2
    bool "SCIF2"
    default n
    depends on RZV_HAVE_SCIF2_UART
-   select RZV_UART_SCI
-   select UART2_SERIALDRIVER
+   select RZV_UART_SCIF
 
 config RZV_SCIF3
    bool "SCIF3"
    default n
    depends on RZV_HAVE_SCIF3_UART
-   select RZV_UART_SCI
-   select UART3_SERIALDRIVER
+   select RZV_UART_SCIF
 
 config RZV_SCIF4
    bool "SCIF4"
    default n
    depends on RZV_HAVE_SCIF4_UART
-   select RZV_UART_SCI
-   select UART4_SERIALDRIVER
+   select RZV_UART_SCIF
+
+# Per-channel SCIF runtime options (consumed by rzv_scif.c)
+
+if RZV_SCIF0
+config SCIF0_SERIAL_CONSOLE
+   bool "Use SCIF0 as serial console"
+   default n
+   select SERIAL_CONSOLE
+config SCIF0_RXBUFSIZE
+   int "SCIF0 RX buffer size"
+   default 256
+config SCIF0_TXBUFSIZE
+   int "SCIF0 TX buffer size"
+   default 256
+config SCIF0_BAUD
+   int "SCIF0 baud rate"
+   default 115200
+config SCIF0_BITS
+   int "SCIF0 data bits"
+   default 8
+config SCIF0_PARITY
+   int "SCIF0 parity (0=none, 1=odd, 2=even)"
+   default 0
+   range 0 2
+config SCIF0_2STOP
+   int "SCIF0 two stop bits"
+   default 0
+endif
+
+if RZV_SCIF1
+config SCIF1_SERIAL_CONSOLE
+   bool "Use SCIF1 as serial console"
+   default n
+   select SERIAL_CONSOLE
+config SCIF1_RXBUFSIZE
+   int "SCIF1 RX buffer size"
+   default 256
+config SCIF1_TXBUFSIZE
+   int "SCIF1 TX buffer size"
+   default 256
+config SCIF1_BAUD
+   int "SCIF1 baud rate"
+   default 115200
+config SCIF1_BITS
+   int "SCIF1 data bits"
+   default 8
+config SCIF1_PARITY
+   int "SCIF1 parity (0=none, 1=odd, 2=even)"
+   default 0
+   range 0 2
+config SCIF1_2STOP
+   int "SCIF1 two stop bits"
+   default 0
+endif
+
+if RZV_SCIF2
+config SCIF2_SERIAL_CONSOLE
+   bool "Use SCIF2 as serial console"
+   default n
+   select SERIAL_CONSOLE
+config SCIF2_RXBUFSIZE
+   int "SCIF2 RX buffer size"
+   default 256
+config SCIF2_TXBUFSIZE
+   int "SCIF2 TX buffer size"
+   default 256
+config SCIF2_BAUD
+   int "SCIF2 baud rate"
+   default 115200
+config SCIF2_BITS
+   int "SCIF2 data bits"
+   default 8
+config SCIF2_PARITY
+   int "SCIF2 parity (0=none, 1=odd, 2=even)"
+   default 0
+   range 0 2
+config SCIF2_2STOP
+   int "SCIF2 two stop bits"
+   default 0
+endif
+
+if RZV_SCIF3
+config SCIF3_SERIAL_CONSOLE
+   bool "Use SCIF3 as serial console"
+   default n
+   select SERIAL_CONSOLE
+config SCIF3_RXBUFSIZE
+   int "SCIF3 RX buffer size"
+   default 256
+config SCIF3_TXBUFSIZE
+   int "SCIF3 TX buffer size"
+   default 256
+config SCIF3_BAUD
+   int "SCIF3 baud rate"
+   default 115200
+config SCIF3_BITS
+   int "SCIF3 data bits"
+   default 8
+config SCIF3_PARITY
+   int "SCIF3 parity (0=none, 1=odd, 2=even)"
+   default 0
+   range 0 2
+config SCIF3_2STOP
+   int "SCIF3 two stop bits"
+   default 0
+endif
+
+if RZV_SCIF4
+config SCIF4_SERIAL_CONSOLE
+   bool "Use SCIF4 as serial console"
+   default n
+   select SERIAL_CONSOLE
+config SCIF4_RXBUFSIZE
+   int "SCIF4 RX buffer size"
+   default 256
+config SCIF4_TXBUFSIZE
+   int "SCIF4 TX buffer size"
+   default 256
+config SCIF4_BAUD
+   int "SCIF4 baud rate"
+   default 115200
+config SCIF4_BITS
+   int "SCIF4 data bits"
+   default 8
+config SCIF4_PARITY
+   int "SCIF4 parity (0=none, 1=odd, 2=even)"
+   default 0
+   range 0 2
+config SCIF4_2STOP
+   int "SCIF4 two stop bits"
+   default 0
+endif
 
 config RZV_I2C
    bool
@@ -784,7 +918,6 @@ menuconfig RZV_SCI_I2C
    select I2C
    ---help---
      Enables RZ/V2H SCI-B block in Simple-I2C master mode.
-     FSP ground truth: r_sci_b_i2c.c (Renesas FSP r_sci_b_i2c port).
      Each channel is mutually exclusive with UART (RZV_SCIn) and
      SPI (RZV_SCIn_SPI) — enforced at config time via depends on.
      CPU-mode only (no DMAC). Slave mode not supported.
@@ -982,9 +1115,8 @@ endif # RZV_DMAC
 
 # CONFIG_RZV_DTC intentionally removed.
 # DTC peripheral does NOT exist on RZ/V2H (R9A09G057H). There is no
-# r_dtc* source under the FSP rzv/ tree and no DTC iodefine under
-# R9A09G057H/. The old RZV_DTC_BASE (0x11400400) overlapped DMAC0 group-1
-# registers and would have caused silent register corruption.
+# DTC iodefine for R9A09G057H. The old RZV_DTC_BASE (0x11400400) overlapped
+# DMAC0 group-1 registers and would have caused silent register corruption.
 
 config RZV_TIMER
    bool
@@ -1105,7 +1237,7 @@ config RZV_OPENAMP
    ---help---
      Enable the RZ/V2H CR8 side OpenAMP/RPMsg transport using the
      resource-table, vring, shared-memory, and MHU channel layout from the
-     working Renesas FreeRTOS reference.
+     Renesas reference design.
 
 config RZV_IPC_IPCC
    bool "Expose RZ/V2H RPMsg transport as /dev/ipcc0"
@@ -1230,11 +1362,11 @@ config RZV_IPC_CR8_CM33
      after CONFIG_RZV_IPC_TX_TIMEOUT_MS when CM33 firmware is absent.
 
 config RZV_MPU_PORT_FSP
-   bool "Port FreeRTOS FSP MPU region table to NuttX CR8"
+   bool "RZ/V2H CR8 MPU region table"
    default y if RZV_IPC_RAW
    depends on !RZV2H_BUILD_CM33
    ---help---
-     Programme the Cortex-R8 MPU with the canonical Renesas FSP region
+     Programme the Cortex-R8 MPU with the canonical Renesas region
      table.  11 active regions per core covering ITCM, DTCM,
      SRAM, peripheral, xSPI, DDR cacheable/non-cacheable, OpenAMP RSCTBL,
      MHU SHMEM, and the 16 MiB VRING carveout (which also covers the IPC
@@ -1485,7 +1617,7 @@ menuconfig RZV_CANFD
      (RSCAN-FD) supports 6 channels at base 0x12440000.  v1 enables CH0
      (/dev/can0) only; CH1 framework is compiled but not registered.
 
-     CANFDCLK = 80 MHz (verified by FSP bsp_clock_cfg.h).
+     CANFDCLK = 80 MHz (verified by bsp_clock_cfg.h).
      Nominal timing: BRP=2, TSEG1=74, TSEG2=25, SJW=25 → 400 kbps.
      Data timing:    BRP=1, TSEG1=16, TSEG2=8,  SJW=8  → 3.2 Mbps.
 

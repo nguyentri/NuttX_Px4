@@ -38,10 +38,6 @@
  *    - Receives SPI interrupts from INTC
  *    - Handles priority, masking, acknowledgment
  *
- * Comparison with Renesas FSP:
- * - FSP: Static allocation via vector_data.c (compile-time configuration)
- * - NuttX: Dynamic allocation via rzv_icu_attach() (runtime configuration)
- *
  * Interrupt Flow:
  *   Peripheral Event → INTC INTR8SEL[slot] → GIC SPI[32+slot] → CPU → Handler
  *

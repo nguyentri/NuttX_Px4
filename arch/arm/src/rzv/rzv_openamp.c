@@ -42,14 +42,14 @@
  * Layout uses struct rptun_rsc_s from NuttX rptun.h directly.
  *
  * We advertise num=1 with a single offset pointing at rpmsg_vdev.
- * This matches the FreeRTOS reference intent (rsc_table.c option-a):
+ * Layout intent (rsc_table.c option-a):
  * the log_trace slot in rptun_rsc_s is at a lower offset but is NOT
  * referenced by any offset[] entry, so the CA55 OpenAMP parser never
  * touches it.  This avoids a zeroed RSC_CARVEOUT (type=0) being parsed
  * when offset[0] pointed at log_trace (C2 fix).
  *
- * FreeRTOS ref includes an RSC_RPROC_MEM entry; rptun_rsc_s does not
- * have a rproc_mem field, so we omit it (slave-only, CA55 owns memory).
+ * An RSC_RPROC_MEM entry is omitted: rptun_rsc_s has no rproc_mem
+ * field (slave-only, CA55 owns memory).
  *   offset[0] = offsetof(rptun_rsc_s, rpmsg_vdev)  — the single vdev entry
  ****************************************************************************/
 
@@ -62,7 +62,7 @@
  * zero-initializer at boot so the region is not garbage on first attach.
  * rzv_openamp_resource_table_init() populates it at runtime and then
  * cleans the D-cache so CA55 sees the coherent content.
- * (NEW-HIGH-1 fix: dropping NOLOAD ensures defined DDR content at boot.)
+ * (NEW-dropping NOLOAD ensures defined DDR content at boot.)
  */
 
 static struct rptun_rsc_s g_rzv_resources

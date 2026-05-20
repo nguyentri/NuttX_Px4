@@ -55,7 +55,7 @@
  * Description:
  *   Initialize GPIO port security attributes to secure mode (default).
  *   Must be called before configuring any GPIO pins.
- *   Based on FSP r_ioport security initialization.
+ *   Based on ioport security initialization sequence.
  *
  ****************************************************************************/
 

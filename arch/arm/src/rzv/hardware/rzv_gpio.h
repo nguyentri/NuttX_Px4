@@ -401,7 +401,7 @@
  * NOT RA-style BOWI/PFSWE. PWPR is a 32-bit register (8-bit writes may be
  * silently dropped on AXI bus). Always use 32-bit RMW.
  *
- * Source: FSP bsp_feature.h (rzv2h/cr):
+ * Source: bsp_feature.h (rzv2h/cr):
  *   BSP_FEATURE_IOPORT_PFC_PWPR_REGWE_A_OFFSET = 6U
  *   BSP_FEATURE_IOPORT_PFC_PWPR_REGWE_A_MASK   = 0xFFFFFFBF  (clears bit 6)
  *   BSP_FEATURE_IOPORT_PFC_PWPR_REGWE_B_OFFSET = 5U
@@ -429,11 +429,11 @@
  * Phase-03 fix [High-6, High-7, High-8, audit §2]: Replace hand-rolled
  * IOLH/PUPD formulas in rzv_gpio.c with these lookup macros.
  *
- * FSP source (bsp_feature.h rzv2h/cr):
- *   BSP_FEATURE_IOPORT_GP_REG_BASE_NUM = 20  (FSP GP group base = port 0x20)
- *   FSP IOLH GP formula: offset = IOLH20_L + port*8  (port is 0-based in GP)
- *   FSP PUPD GP formula: offset = PUPD20_L + port*8
- *   FSP ISEL GP formula: offset = ISEL20_L + port*8
+ * Source: bsp_feature.h (rzv2h/cr):
+ *   BSP_FEATURE_IOPORT_GP_REG_BASE_NUM = 20  (GP group base = port 0x20)
+ *   IOLH GP formula: offset = IOLH20_L + port*8  (port is 0-based in GP)
+ *   PUPD GP formula: offset = PUPD20_L + port*8
+ *   ISEL GP formula: offset = ISEL20_L + port*8
  *
  * For NuttX port N (0-11), pin P (0-7 → _L, 8-15 → _H):
  *   IOLH_L offset = RZV_GPIO_IOLH20_L_OFFSET + N*8

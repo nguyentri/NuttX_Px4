@@ -3,16 +3,15 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  *
- * RZ/V2H Cortex-R8 MPU region table — NuttX port of the FreeRTOS FSP
- * reference in refs/px4-freertos-posix-renesas-fsp/src/runtime/mpu_region_table.c
+ * RZ/V2H Cortex-R8 MPU region table.
  *
- * Narrow port: region table verbatim, wired into CR8 startup.
- * No IPC-specific region added — FreeRTOS region 9 (16 MiB at 0x43000000,
+ * Region table wired into CR8 startup.
+ * No IPC-specific region added — region 9 (16 MiB at 0x43000000,
  * Strongly-Ordered Shareable) already covers the IPC raw SHM carveout at
  * 0x43800000–0x4381FFFF. Software cache ops in rzv_ipc_raw.c are kept as
  * defence-in-depth.
  *
- * Region layout (matches FreeRTOS g_mpu_region_table_array):
+ * Region layout:
  *  CR8_0:
  *   0: ITCM         0x00000000  128 KiB  Normal, outer-NC / inner-NC
  *   1: DTCM         0x00020000  128 KiB  Normal, outer-NC / inner-NC, XN
@@ -57,7 +56,7 @@
  ****************************************************************************/
 
 /* ARMv7-R DRSR size encoding: bits[5:1] = (log2(size) - 1).
- * BSP uses (n << 1) where n = log2(size)-1.  Map FSP sizes to log2.
+ * BSP uses (n << 1) where n = log2(size)-1.
  */
 #define RZV_MPU_LOG2_128KB    17u  /* 2^17 = 128 KiB */
 #define RZV_MPU_LOG2_8KB      13u  /* 2^13 =   8 KiB */
@@ -74,7 +73,7 @@
 #define DRACR_B               (1u   << 0)
 #define DRACR_S               (1u   << 2)   /* Shareable */
 
-/* Attribute bundles matching FreeRTOS BSP macros */
+/* Attribute bundles */
 
 /* Normal, outer-NC / inner-NC = TEX=001, C=0, B=0 */
 #define ATTR_NORMAL_NC        (DRACR_AP_RWRW | (1u << DRACR_TEX_SHIFT))
@@ -236,7 +235,7 @@ void rzv_mpu_init(void)
 
   /* Enable MPU with background-region enabled (SCTLR.BR=1) so
    * privileged accesses to unmapped regions are still permitted
-   * (matches FreeRTOS default; NuttX mpu_control sets SCTLR_BR).
+   * (NuttX mpu_control sets SCTLR_BR).
    */
 
   mpu_control(true);

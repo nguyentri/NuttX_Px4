@@ -166,7 +166,7 @@
  * BOARD_P7_x/BOARD_P8_x definitions below.
  */
 
-/* SCI3 pins for NSH Console. FSP RDK pinconfig routes RSCI3 to P34/P35;
+/* SCI3 pins for NSH Console. RDK pinconfig routes RSCI3 to P34/P35;
  * P56/P57 are disabled there and must not be used as the console pair.
  */
 
@@ -179,7 +179,7 @@
 /* I2C bus configuration matching PX4 board setup
  *
  * SCI-mode I2C7 is used for the BMP280 barometer sensor at address 0x76
- * This corresponds to g_i2c_baro in the FSP configuration
+ * This corresponds to the I2C barometer channel.
  */
 
 /* Number of I2C buses defined in PX4 board_config.h */
@@ -302,10 +302,10 @@
 
 /* SPI Configuration ********************************************************/
 
-/* SPI bus configuration (matches FSP rzv_gen + PX4 board_config.h)
+/* SPI bus configuration (per PX4 board_config.h)
  *
  * RSPI0 = single bus for MPU9250 IMU. Single-IMU per HARDWARE.md BOM.
- * P94/SSLA1 is FSP-routed but unused (no second IMU wired).
+ * P94/SSLA1 is routed but unused (no second IMU wired).
  */
 
 /* Number of SPI buses (must match PX4 board_config.h) */
@@ -317,7 +317,7 @@
  * RSPI0_MISO: P91 (Mode 1)
  * RSPI0_SCK:  P92 (Mode 1)
  * RSPI0_SS0:  P93 (SSLA0, MPU9250 hardware chip-select)
- * RSPI0_SS1:  P94 (SSLA1, FSP-routed but unused)
+ * RSPI0_SS1:  P94 (SSLA1, routed but unused)
  */
 
 #define BOARD_SPI0_MOSI_GPIO  GPIO_MOSA_P9_0_M1         /* P90 = PORT9 pin 0, Mode1 */
@@ -330,12 +330,12 @@
 /* MPU9250 IMU Sensor (RSPI0)
  *
  * Chip select: P93 (RSPI0 SSLA0, hardware CS)
- * Data Ready (DRDY) interrupt: P50 (FSP TINT_ENABLE)
+ * Data Ready (DRDY) interrupt: P50 (TINT_ENABLE)
  */
 
 #define BOARD_MPU9250_BUS           0        /* RSPI0 */
 #define BOARD_MPU9250_CS_GPIO       GPIO_P9_3_OUTPUT_HIGH  /* P93 chip select */
-#define BOARD_MPU9250_DRDY_GPIO     GPIO_P5_0_INPUT  /* P50, FSP TINT */
+#define BOARD_MPU9250_DRDY_GPIO     GPIO_P5_0_INPUT  /* P50, TINT */
 
 /* External IRQ configuration for MPU9250 DRDY */
 #define BOARD_MPU9250_DRDY_IRQ_ENABLE   1
@@ -431,11 +431,11 @@
 
 /* GPIO Pins ***********************************************************/
 
-/* Pin configurations from FSP pin_data.c
+/* Pin configurations
  *
  * These definitions reflect the actual pin assignments used in the
- * PX4 FreeRTOS+FSP configuration, ensuring compatibility between
- * NuttX and the reference implementation.
+ * PX4 configuration, ensuring compatibility between NuttX and the
+ * reference implementation.
  */
 
 /* P5_0 - MPU9250 DRDY with TINT (external interrupt) capability */
@@ -465,7 +465,7 @@
 
 /* Legacy GPIO pin definitions (from previous configuration) */
 
-/* P1_4 - configured as input with noise filter and TINT in FSP */
+/* P1_4 - configured as input with noise filter and TINT */
 #define BOARD_P1_4_GPIO   GPIO_P1_4_INPUT_PULLUP
 
 /* P2_0 and P2_1 - I2C2 peripheral function mode4 */
@@ -493,14 +493,14 @@
 #define BOARD_P9_1_GPIO   GPIO_RXD8_MISO8_SCL6_P9_1_M2  /* I2C6 SCL via SCI8 */
 #define BOARD_P9_2_GPIO   GPIO_RSPCK4_P9_2_M1   /* SPI4 clock */
 
-/* P6_0 - used by FSP event config as output */
+/* P6_0 - configured as output */
 #define BOARD_P6_0_GPIO   GPIO_P6_0_OUTPUT_LOW
 
 /* LED pins - aliases to existing NuttX LED macros */
 #define BOARD_P0_0_GPIO   GPIO_P0_0_OUTPUT_HIGH
 #define BOARD_P0_1_GPIO   GPIO_P0_1_OUTPUT_HIGH
 
-/* End of FSP-generated pin mappings */
+/* End of pin mappings */
 
 /* CAN-FD Pin Configuration *************************************************/
 

@@ -52,7 +52,7 @@ OPENAMP_RSCTBL_LENGTH   = 0x00001000;
 MHU_SHMEM_START         = DEFINED(CR8_0) ? DDR0_CR8_0_START + 0x02f01000 : DDR0_CR8_1_START + 0x02f01000;
 MHU_SHMEM_LENGTH        = 0x00001000;
 OPENAMP_VRING_START     = DEFINED(CR8_0) ? DDR0_CR8_0_START + 0x03000000 : DDR0_CR8_1_START + 0x03000000;
-/* HIGH-1 fix: shrink VRING to 8 MiB — see rdk-rzv2h_cr8_0.ld for rationale */
+/* Shrink VRING to 8 MiB — see rdk-rzv2h_cr8_0.ld for rationale */
 OPENAMP_VRING_LENGTH    = 0x00800000;
 IPC_RAW_SHM_START       = DEFINED(CR8_0) ? DDR0_CR8_0_START + 0x03800000 : DDR0_CR8_1_START + 0x03800000;
 IPC_RAW_SHM_LENGTH      = 0x00020000;  /* 128 KiB */
@@ -492,7 +492,7 @@ SECTIONS
 
     __tz_MHU_SHMEM = ABSOLUTE ( MHU_SHMEM_START ) ;
     . = __tz_MHU_SHMEM;
-    /* NEW-HIGH-1 fix: drop NOLOAD so ELF loader zero-fills on boot. */
+    /* NEW-drop NOLOAD so ELF loader zero-fills on boot. */
     .resource_table :
     {
         PROVIDE(__rsctbl_start = .);

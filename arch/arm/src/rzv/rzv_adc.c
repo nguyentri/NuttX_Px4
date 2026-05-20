@@ -1,4 +1,4 @@
-/*
+/****************************************************************************
  * arch/arm/src/rzv/rzv_adc.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -6,7 +6,17 @@
  * this work for additional information regarding copyright ownership.  The
  * ASF licenses this file to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance with the
- */
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <sys/types.h>
@@ -27,16 +37,13 @@
 #include "arm_internal.h"
 #include "chip.h"
 #include "rzv_clock.h"
+#include "rzv_adc.h"
 #include "hardware/rzv_adc.h"
 /* ICU API for dynamic event -> IRQ routing */
 #include "rzv_icu.h"
-/* Maximum number of ADC channels */
-#define ADC_MAX_CHANNELS        8
-
 /* ADC register bit definitions (map to ADC_E bits) */
 #define ADC_ADCSR_ADST          ADC_E_ADCSR_ADST
 #define ADC_ADCSR_ADIE          ADC_E_ADCSR_ADIE
-#define ADC_ADREF_ADF           ADC_E_ADREF_ADF
 #define ADC_ADCER_ADPRC_12BIT   (0x00 << ADC_E_ADCER_ADPRC_SHIFT)  /* 12-bit resolution */
 
 /* ADC Device Hardware Configuration */
@@ -57,7 +64,6 @@ struct rzv_adc_priv_s
   int icu_irq;                        /* Allocated ICU IRQ or -1 */
 
   sem_t exclsem;                      /* Trigger serialization */
-  sem_t waitsem;                      /* Wait for conversion complete */
 
   uint32_t chanmask;                  /* Enabled channel mask */
   uint8_t  nchannels;                 /* Number of enabled channels */
@@ -183,20 +189,31 @@ static inline void rzv_adc_modifyreg(struct rzv_adc_priv_s *priv,
  ****************************************************************************/
 static void rzv_adc_reset(struct rzv_adc_priv_s *priv)
 {
-  /* Stop any ongoing conversion */
+  /* Stop any ongoing conversion before touching other registers */
   rzv_adc_modifyreg(priv, RZV_ADC_E_ADCSR_OFFSET, ADC_ADCSR_ADST, 0);
 
-  /* Reset control registers */
+  /* Reset control / trigger registers */
   rzv_adc_putreg(priv, RZV_ADC_E_ADCSR_OFFSET, 0);
   rzv_adc_putreg(priv, RZV_ADC_E_ADCER_OFFSET, 0);
   rzv_adc_putreg(priv, RZV_ADC_E_ADSTRGR_OFFSET, 0);
 
-  /* Clear channel selections */
+  /* Clear channel selections for all groups */
   rzv_adc_putreg(priv, RZV_ADC_E_ADANSA0_OFFSET, 0);
+  rzv_adc_putreg(priv, RZV_ADC_E_ADANSB0_OFFSET, 0);
+  rzv_adc_putreg(priv, RZV_ADC_E_ADANSC0_OFFSET, 0);
 
   /* Reset addition/average */
   rzv_adc_putreg(priv, RZV_ADC_E_ADADC_OFFSET, 0);
   rzv_adc_putreg(priv, RZV_ADC_E_ADADS0_OFFSET, 0);
+
+  /* Disable group priority and compare windows; clear ELC output gating.
+   * If a previous owner (bootloader, prior firmware) left these enabled,
+   * scan behavior on reopen would be undefined.
+   */
+
+  rzv_adc_putreg(priv, RZV_ADC_E_ADGSPCR_OFFSET, 0);
+  rzv_adc_putreg(priv, RZV_ADC_E_ADCMPCR_OFFSET, 0);
+  rzv_adc_putreg(priv, RZV_ADC_E_ADELCCR_OFFSET, 0);
 }
 
 static int rzv_adc_interrupt(int irq, void *context, void *arg)
@@ -207,11 +224,10 @@ static int rzv_adc_interrupt(int irq, void *context, void *arg)
 
   DEBUGASSERT(priv != NULL && priv->dev != NULL);
 
-  /* Acknowledge the scan-end flag. ADREF.ADF is W0C; clearing it stops the
-   * interrupt from re-asserting immediately on ISR exit.
+  /* No ADREF.ADF software ack needed: ADF is RO and tracks ADST; the
+   * scan-end edge is delivered via ELC->ICU->GIC and acknowledged at GIC
+   * EOI by the NuttX dispatcher.
    */
-
-  rzv_adc_modifyreg(priv, RZV_ADC_E_ADREF_OFFSET, ADC_ADREF_ADF, 0);
 
   /* If userspace has not bound a callback yet, mask further interrupts and
    * bail.  Without this guard the next conversion would NULL-deref cb.
@@ -224,11 +240,11 @@ static int rzv_adc_interrupt(int irq, void *context, void *arg)
     }
 
   /* Deliver every enabled channel result. Walk the channel mask, not the
-   * full 0..ADC_MAX_CHANNELS range, so disabled-channel results are not
+   * full 0..RZV_ADC_MAX_CHANNELS range, so disabled-channel results are not
    * fabricated from stale ADDR shadows.
    */
 
-  for (i = 0; i < ADC_MAX_CHANNELS; i++)
+  for (i = 0; i < RZV_ADC_MAX_CHANNELS; i++)
     {
       if ((priv->chanmask & (1u << i)) != 0)
         {
@@ -237,9 +253,6 @@ static int rzv_adc_interrupt(int irq, void *context, void *arg)
         }
     }
 
-  /* Signal any waiter */
-
-  nxsem_post(&priv->waitsem);
   return OK;
 }
 #endif
@@ -252,7 +265,15 @@ static int rzv_adc_bind(struct adc_dev_s *dev,
 
   DEBUGASSERT(priv != NULL);
   priv->dev = dev;
+
+  /* Publish callback pointer with a barrier so the ISR (potentially on
+   * another CPU under SMP / weakly-ordered ARMv8-R) never observes a
+   * partially-initialized cb after seeing cb != NULL.
+   */
+
+  __sync_synchronize();
   priv->cb = callback;
+  __sync_synchronize();
   return OK;
 }
 
@@ -283,7 +304,7 @@ static int rzv_adc_setup(struct adc_dev_s *dev)
   /* Route the ADC scan-end ELC event through the ICU to a GIC SPI. */
 
   icu = rzv_icu_attach(priv->config->elc_event,
-                       (xcpt_t)rzv_adc_interrupt, priv, true);
+                       rzv_adc_interrupt, priv, true);
   if (icu < 0)
     {
       aerr("ERROR: rzv_icu_attach failed: %d\n", icu);
@@ -396,7 +417,7 @@ int rzv_adc_initialize(const char *devpath, const uint8_t *chanlist,
   int ret;
   int i;
 
-  if (nchannels < 1 || nchannels > ADC_MAX_CHANNELS)
+  if (nchannels < 1 || nchannels > RZV_ADC_MAX_CHANNELS)
     {
       aerr("ERROR: Invalid number of channels: %d\n", nchannels);
       return -EINVAL;
@@ -404,7 +425,7 @@ int rzv_adc_initialize(const char *devpath, const uint8_t *chanlist,
 
   for (i = 0; i < nchannels; i++)
     {
-      if (chanlist[i] >= ADC_MAX_CHANNELS)
+      if (chanlist[i] >= RZV_ADC_MAX_CHANNELS)
         {
           aerr("ERROR: Invalid channel number: %d\n", chanlist[i]);
           return -EINVAL;
@@ -428,18 +449,16 @@ int rzv_adc_initialize(const char *devpath, const uint8_t *chanlist,
   up_udelay(10);
 
   /* One-shot semaphore init (ao_setup/ao_shutdown may be invoked multiple
-   * times across open/close; semaphores must persist).
+   * times across open/close; the semaphore must persist).
    */
 
   nxsem_init(&priv->exclsem, 0, 1);
-  nxsem_init(&priv->waitsem, 0, 0);
 
   ret = adc_register(devpath, dev);
   if (ret < 0)
     {
       aerr("ERROR: Failed to register ADC device: %d\n", ret);
       nxsem_destroy(&priv->exclsem);
-      nxsem_destroy(&priv->waitsem);
       return ret;
     }
 

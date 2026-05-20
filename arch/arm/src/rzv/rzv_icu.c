@@ -50,7 +50,7 @@
  ****************************************************************************/
 
 /* SELECT interrupt GIC SPI base.
- * FSP bsp_feature.h: BSP_FEATURE_ICU_FIXED_INTSEL_COUNT = 353.
+ * BSP_FEATURE_ICU_FIXED_INTSEL_COUNT = 353.
  * INTR8SEL slot N routes to GIC SPI INTID (353 + N).
  * NuttX IRQ number == GIC INTID (RZV_IRQ_FIRST=32 is GIC SPI 0 offset,
  * so irq index = 32 + slot_gic_spi_offset = 32 + (353-32) + N = 353 + N).

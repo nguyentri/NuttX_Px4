@@ -30,7 +30,7 @@
  *   [Med-11]  SPSRC bits cleared after each frame (SPTEFC, SPRFC, CENDFC).
  *   [Med-12]  enter_critical_section wraps setbits/setfrequency RMW.
  *   [Med-13]  setbits validates nbits; returns -EINVAL for unsupported width.
- *   [Med-14]  SPCR read-back after first write (1-TCLK sync per FSP :668).
+ *   [Med-14]  SPCR read-back after first write (1-TCLK sync, RZ/V2H UM §SPI).
  *   [Low-17]  CONFIG_SPI_TRIGGER symbol references guarded.
  *   [Low-18]  SPI_FIFO_SIZE replaced with SPI_FIFO_DEPTH (16).
  *   [Low-19]  Dead SPI_TIMEOUT_LOOPS heuristic removed.
@@ -38,7 +38,7 @@
  *
  * Review-fix-260515 findings applied (review-spi-260515-1600.md):
  *   [C1]  spi_clock changed to RZV_CLOCK_P4CLK (200 MHz) for all channels;
- *         SPI0CLK/SPI1CLK are wrong sources per FSP BSP_FEATURE_SPI_CLK.
+ *         SPI0CLK/SPI1CLK are the wrong sources; P4CLK is correct per RZ/V2H UM.
  *   [C2]  RX poll in send() now uses SPRFSR.RFDN (FIFO count) not SPSR.SPRF;
  *         RTRG lowered to 1 so single-word transfers don't hang.
  *   [H4/M10] SPTIE/SPRIE removed from init SPCR; only SPEIE+SCKASE set.
@@ -149,7 +149,7 @@ struct rzv_spi_priv_s
  * Private Function Prototypes
  ****************************************************************************/
 
-/* Register access — 32-bit only per FSP recommendation */
+/* Register access — 32-bit only (AXI bridge sub-word write support unconfirmed) */
 
 static inline uint32_t rzv_spi_getreg32(struct rzv_spi_priv_s *priv,
                                         unsigned int offset);
@@ -269,7 +269,7 @@ static const struct rzv_spi_config_s g_spi0_config =
   .frequency = SPI_DEFAULT_FREQUENCY,
   .port      = 0,
   .clk_id    = RZV_CPG_CLK_SPI0,
-  /* [C1] FSP BSP_FEATURE_SPI_CLK=P4CLK (200 MHz) for all SPI-B channels.
+  /* [C1] SPI-B clock source is P4CLK (200 MHz) per RZ/V2H hardware manual.
    * SPI0CLK (266 MHz) is the wrong source; baud would be off by ~33%.
    */
   .spi_clock = RZV_CLOCK_P4CLK,
@@ -297,7 +297,7 @@ static const struct rzv_spi_config_s g_spi1_config =
   .frequency = SPI_DEFAULT_FREQUENCY,
   .port      = 1,
   .clk_id    = RZV_CPG_CLK_SPI1,
-  /* [C1] Same P4CLK source as SPI0; FSP uses P4CLK for all SPI-B instances. */
+  /* [C1] Same P4CLK source as SPI0; all SPI-B instances use P4CLK. */
   .spi_clock = RZV_CLOCK_P4CLK,
   .elc_rxi   = RZV_ELC_SP_ELCRDRF_1,
   .elc_txi   = RZV_ELC_SP_ELCTDRE_1,
@@ -324,7 +324,7 @@ static struct rzv_spi_priv_s g_spi1_priv =
  * Name: rzv_spi_getreg32 / rzv_spi_putreg32
  *
  * Description:
- *   32-bit register access only.  FSP uses 32-bit SPDR for all widths;
+ *   32-bit register access only.  All SPDR accesses use 32-bit width;
  *   AXI bridge support for sub-word writes is unconfirmed (phase-07 §6).
  ****************************************************************************/
 
@@ -682,14 +682,14 @@ static uint32_t rzv_spi_send(struct spi_dev_s *dev, uint32_t wd)
       return 0xffffffffu;
     }
 
-  /* Write 32-bit SPDR (FSP always uses 32-bit access) */
+  /* Write 32-bit SPDR (32-bit access only) */
 
   rzv_spi_putreg32(priv, RZV_SPI_SPDR_OFFSET, wd);
 
   /* [M8] Do NOT clear SPTEFC here per-word: SPTEFC is W1C and deasserts
    * automatically when the FIFO has data.  Clearing it per-word inside a
-   * fill loop can mask the next SPTEF assertion.  FSP clears it once after
-   * refilling the full FIFO (r_spi_b.c:1007), not per word.
+   * fill loop can mask the next SPTEF assertion.  Clear SPTEFC only once after
+   * refilling the full FIFO, not per word.
    * For the single-word polled path we skip the explicit clear entirely;
    * the flag will reassert naturally when the FIFO drains.
    */
@@ -698,7 +698,7 @@ static uint32_t rzv_spi_send(struct spi_dev_s *dev, uint32_t wd)
    * [C2] Poll SPRFSR.RFDN (actual RX FIFO count) rather than SPSR.SPRF.
    * SPRF only asserts when count >= RTRG; RFDN reflects every received word.
    * With RTRG=1 (set in init) SPRF would also work, but RFDN is authoritative
-   * and matches FSP r_spi_b.c:921 drain loop.
+   * RFDN reflects every received word without needing RTRG threshold match.
    */
 
   timeout = SPI_TIMEOUT_CYCLES;
@@ -742,7 +742,7 @@ static uint32_t rzv_spi_send(struct spi_dev_s *dev, uint32_t wd)
       rxdata &= 0xffffu;
     }
 
-  /* Clear RX full flag per FSP r_spi_b.c:955 */
+  /* Clear RX full flag (SPRFC) */
 
   rzv_spi_putreg32(priv, RZV_SPI_SPSRC_OFFSET, SPI_SPSRC_SPRFC);
 
@@ -873,11 +873,11 @@ static int rzv_spi_rxi_interrupt(int irq, void *context, void *arg)
       priv->nrxwords--;
     }
 
-  /* Clear RX full flag per FSP :955 */
+  /* Clear RX full flag (SPRFC) */
 
   rzv_spi_putreg32(priv, RZV_SPI_SPSRC_OFFSET, SPI_SPSRC_SPRFC);
 
-  /* When all RX done, enable CENDIE per FSP :1094.
+  /* When all RX done, enable CENDIE to arm the communication-end interrupt.
    * [H7] Protect SPCR RMW with critical section: rxi and txi run at
    * different priorities and setfrequency/setmode also RMW SPCR — racy
    * without serialisation.
@@ -905,7 +905,7 @@ static int rzv_spi_rxi_interrupt(int irq, void *context, void *arg)
  *   TX buffer empty — load next word into SPDR.
  *   Phase-07 [High-8]: 32-bit SPDR.
  *   Phase-07 [Med-11]: clear SPTEFC after write.
- *   Phase-07 [High-5]: enable CENDIE on last word per FSP :1128.
+ *   Phase-07 [High-5]: enable CENDIE on last word to arm communication-end interrupt.
  ****************************************************************************/
 
 static int rzv_spi_txi_interrupt(int irq, void *context, void *arg)
@@ -950,7 +950,7 @@ static int rzv_spi_txi_interrupt(int irq, void *context, void *arg)
 
       rzv_spi_putreg32(priv, RZV_SPI_SPSRC_OFFSET, SPI_SPSRC_SPTEFC);
 
-      /* On last word: arm CENDIE per FSP :1128.
+      /* On last word: arm CENDIE for communication-end interrupt.
        * [H7] Critical section protects SPCR RMW against concurrent
        * rxi ISR (different priority) and non-ISR callers.
        */
@@ -986,7 +986,7 @@ static int rzv_spi_tei_interrupt(int irq, void *context, void *arg)
   UNUSED(irq);
   UNUSED(context);
 
-  /* Clear communication end flag per FSP :951 */
+  /* Clear communication end flag (CENDFC) */
 
   rzv_spi_putreg32(priv, RZV_SPI_SPSRC_OFFSET, SPI_SPSRC_CENDFC);
 
@@ -1132,8 +1132,8 @@ struct spi_dev_s *rzv_spibus_initialize(int port)
   rzv_spi_putreg32(priv, RZV_SPI_SPCR3_OFFSET, 0);
 
   /* SPCMD0: 8-bit, mode-0, BRDV=0 — frequency call below overwrites BRDV.
-   * [H6] Enable SCKDEN/SLNDEN/SPNDEN so SPDECR delays take effect (FSP
-   * r_spi_b.c:625).  Without these bits set, SPDECR is programmed but all
+   * [H6] Enable SCKDEN/SLNDEN/SPNDEN so SPDECR delays take effect per RZ/V2H UM.
+   * Without these bits set, SPDECR is programmed but all
    * delays are bypassed in hardware.
    * [L13] SSLA=0 explicit (SSL0 selected; board uses GPIO CS so internal SSL
    * toggles a non-muxed pin, but be explicit to match reset state).
@@ -1200,13 +1200,13 @@ struct spi_dev_s *rzv_spibus_initialize(int port)
     }
 
   /* Write SPCR: SPE=0 initially (set all except SPE then MSTR).
-   * Phase-07 [Med-14]: read back SPCR after write for 1-TCLK sync (FSP :668).
+   * Phase-07 [Med-14]: read back SPCR after write for 1-TCLK sync (RZ/V2H UM §SPI).
    * [H4/M10] SPTIE and SPRIE must NOT be set here.  With SPE=1 and TX FIFO
    * empty, SPTIE causes TXI to fire immediately with no transfer pending →
    * interrupt storm.  SPEIE (error) is safe to keep always-on.
    * SPRIE/SPTIE/CENDIE are armed only when an IRQ-driven transfer begins.
    * [H5] SCKASE: master mode enables SCK auto-stop to prevent RX overflow
-   * (FSP r_spi_b.c:544 "Enable SCK Auto Stop in master mode").
+   * SCKASE enables SCK Auto Stop in master mode to prevent RX overflow.
    */
 
   {
@@ -1218,7 +1218,7 @@ struct spi_dev_s *rzv_spibus_initialize(int port)
 
     rzv_spi_putreg32(priv, RZV_SPI_SPCR_OFFSET, spcr);
 
-    /* Read-back (discarded) to ensure 1 TCLK has elapsed (FSP note 1) */
+    /* Read-back (discarded) to ensure 1 TCLK has elapsed before SPE set */
 
     (void)rzv_spi_getreg32(priv, RZV_SPI_SPCR_OFFSET);
 

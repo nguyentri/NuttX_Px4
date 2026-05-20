@@ -232,7 +232,7 @@
 
 /* CLKON 2-bit-pair peripheral marker **************************************/
 /* Peripherals that require both CLK0+CLK1 of a CLKON register to be set.
- * FSP bsp_clocks.h: DMAC uses 3U<<CLK0_ON_Pos; ADC uses 3U<<CLK0_ON_Pos.
+ * DMAC uses 3U<<CLK0_ON_Pos; ADC uses 3U<<CLK0_ON_Pos.
  * audit Critical-3.  rzv_clock_enable/disable use RZV_CPG_DOMAIN(clk_id)
  * comparison against the DMAC domain index to detect 2-bit pair entries. */
 #define RZV_CPG_CLKBIT_DMAC_MASK    0x3u  /* bits [1:0] = 2-bit pair for DMAC */

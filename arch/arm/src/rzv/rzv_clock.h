@@ -75,8 +75,7 @@
 #define RZV_CPG_CLK_ICU             (0 << 16 | 1)
 
 /* CLKON_11 - SCI_B (UART) channels 0-7
- * FSP bsp_clocks.c: CPG_CLKON_11 CLK8=SCI0..CLK15=SCI7
- * bsp_clocks.c:750 R_CPG->CPG_CLKON_11 CLK8_ON = SCI_B channel 0
+ * CPG_CLKON_11 CLK8=SCI0..CLK15=SCI7
  * UNVERIFIED: awaiting RZ/V2H UM cross-check */
 #define RZV_CPG_CLK_SCI0            (11 << 16 | 8)
 #define RZV_CPG_CLK_SCI1            (11 << 16 | 9)
@@ -103,8 +102,8 @@
 #define RZV_CPG_CLK_I2C3            (3 << 16 | 3)
 
 /* GPT timers - UNVERIFIED: needs RZ/V2H UM confirmation.
- * FSP bsp_clocks.h: BSP_CLKON_REG_FSP_IP_GPT → CPG_CLKON_GPT (named alias
- * not present in R9A09G057H iobitmask → numeric mapping TBD). */
+ * CPG_CLKON_GPT named alias not present in R9A09G057H iobitmask → numeric
+ * mapping TBD. */
 #define RZV_CPG_CLK_GPT0            (4 << 16 | 0)
 #define RZV_CPG_CLK_GPT1            (4 << 16 | 1)
 #define RZV_CPG_CLK_GPT2            (4 << 16 | 2)
@@ -131,9 +130,8 @@
 #define RZV_CPG_CLK_OSTM2           (4 << 16 | 13)
 
 /* GTM (General Timer Module) clocks.
- * FSP bsp_clocks.h line 92: BSP_CLKON_REG_FSP_IP_GTM → CPG_CLKON_GTM (single
- * register, all 8 GTM channels as bits 0-7).  The named alias CPG_CLKON_GTM
- * is NOT in R9A09G057H iobitmask (only in R9A07G054L).
+ * CPG_CLKON_GTM covers all 8 GTM channels as bits 0-7.  The named alias
+ * CPG_CLKON_GTM is NOT in R9A09G057H iobitmask (only in R9A07G054L).
  * UNVERIFIED: mapping to CPG_CLKON_N pending RZ/V2H UM verification.
  * Previous code erroneously aliased GTM0-2 to OSTM0-2 and put GTM3-7 in
  * domain 4 bits 11-15 (conflicting with OSTM entries above).
@@ -148,10 +146,8 @@
 #define RZV_CPG_CLK_GTM6            (5 << 16 | 6)
 #define RZV_CPG_CLK_GTM7            (5 << 16 | 7)
 
-/* DMAC_B - FSP bsp_override.h:1656-1660:
- *   BSP_CLKON_REG_FSP_IP_DMAC → R_CPG->CPG_CLKON_0 (domain 0)
- *   BSP_CLKON_BIT_FSP_IP_DMAC = 0x1FU << CLK0_ON_Pos(=0) → 5-bit mask [4:0]
- *   CLK0_ON_Pos = 0 per R9A09G057H cpg_iobitmask.h:719.
+/* DMAC_B - CPG_CLKON_0 (domain 0), 5-bit mask [4:0] for 5 units.
+ *   CLK0_ON_Pos = 0 (cpg_iobitmask.h).
  * D2-fix: domain was 6 (wrong), must be 0 (CPG_CLKON_0).
  * The rzv_clock_enable/disable DMAC special-case uses 0x1F mask (5 units). */
 #define RZV_CPG_CLK_DMAC            (0 << 16 | 0)   /* DMAC: CPG_CLKON_0 bits[4:0], 5-unit mask */
@@ -182,7 +178,7 @@
  * TODO(rzv2h-eth-clocks): only the GBETH0 module gate is currently exposed.
  * The following additional CPG gate IDs must be added once the CPG_CLKON_N
  * register index and bit position for each are pulled from the RZ/V2H User's
- * Manual (cross-reference Renesas FSP bsp_clocks.h, search "ETH"/"GBE"):
+ * Manual (cross-reference bsp_clocks.h, search "ETH"/"GBE"):
  *   RZV_CPG_CLK_ETH1            - GBETH1 module gate
  *   RZV_CPG_CLK_ETHTX0CLK       - GBETH0 TX 125 MHz reference clock gate
  *   RZV_CPG_CLK_ETHRX0CLK       - GBETH0 RX 125 MHz reference clock gate
@@ -198,7 +194,7 @@
  */
 #define RZV_CPG_CLK_ETH0            (8 << 16 | 0)
 
-/* ADC - FSP bsp_clocks.h line 479: 2-bit pair (3U << CLK0_ON_Pos)
+/* ADC - 2-bit pair (3U << CLK0_ON_Pos)
  * UNVERIFIED: CPG_CLKON_N index for ADC on R9A09G057H. */
 #define RZV_CPG_CLK_ADC0            (9 << 16 | 0)   /* ADC: 2-bit pair [1:0] */
 #define RZV_CPG_CLK_ADC1            RZV_CPG_CLK_ADC0
@@ -211,8 +207,8 @@
 #define RZV_CPG_MAX_RSTMON    8     /* RSTMON0-RSTMON8 */
 
 /* Board-specific clock frequencies (Hz) ************************************/
-/* These values are derived from the Renesas FSP clock configuration tool
- * for the RZ/V2H EVK board. Adjust these for your specific board/configuration.
+/* These values are based on the RZ/V2H EVK clock configuration.
+ * Adjust these for your specific board/configuration.
  */
 
 #define RZV_CLOCK_OSCCLK_HZ           (24000000)    /* OSC 24MHz */
@@ -409,9 +405,8 @@ struct rzv_clock_status_s
 };
 
 /*
- * Clock tree frequency identifiers.  These align with the Renesas FSP
- * frequency table so the BSP-generated configuration headers can be used to
- * populate NuttX's view of the clock tree.
+ * Clock tree frequency identifiers used to populate NuttX's view of the
+ * clock tree.
  */
 
 #define RZV_CLOCK_LIST(_)          \
@@ -618,8 +613,8 @@ uint32_t rzv_get_p4clk_frequency(void);
  * Description:
  *   Return the clock frequency fed to the GPT prescaler (GTCR.TPCS divides
  *   this source).  On R9A09G057H the GPT clock source is P4CLK (200 MHz).
- *   FSP BSP_FEATURE_GPT_CLOCK_SOURCE = FSP_PRIV_CLOCK_P4CLK (bsp_feature.h
- *   line 146).  GPTCK is a separate optional source not used by default.
+ *   GPT clock source is P4CLK (BSP_FEATURE_GPT_CLOCK_SOURCE).
+ *   GPTCK is a separate optional source not used by default.
  *
  *   UNVERIFIED: Confirm against RZ/V2H UM Table 9.x if board clock tree
  *   differs from EVK default (BSP_CFG_CLOCK_P4CLK_HZ may vary).

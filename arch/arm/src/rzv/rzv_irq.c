@@ -161,7 +161,7 @@ void up_irqinitialize(void)
   /* audit High-6: Ensure INTC/ICU clocks are live before GIC init.
    * RZV_CPG_CLK_ICU gates the ICU peripheral (domain 0, bit 1).
    * The INTC block (GIC-600) is clocked by the always-on fabric;
-   * no separate CLKON gate found in available FSP headers — verify UM.
+   * no separate CLKON gate found in available headers — verify UM.
    */
 
   rzv_clock_enable(RZV_CPG_CLK_ICU);

@@ -56,6 +56,11 @@ CHIP_CSRCS += rzv_memmng.c
 CHIP_CSRCS += rzv_timerisr.c
 CHIP_CSRCS += rzv_serial.c
 
+# SCIF UART driver
+ifeq ($(CONFIG_RZV_UART_SCIF),y)
+CHIP_CSRCS += rzv_scif.c
+endif
+
 # ADC driver
 ifeq ($(CONFIG_RZV_ADC),y)
 CHIP_CSRCS += rzv_adc.c
@@ -125,7 +130,7 @@ CHIP_CSRCS += rzv_mhu_core.c
 CHIP_CSRCS += rzv_ipc_raw.c
 endif
 
-# MPU region table port from FreeRTOS FSP reference
+# MPU region table
 ifeq ($(CONFIG_RZV_MPU_PORT_FSP),y)
 CHIP_CSRCS += rzv_mpu_regions.c
 endif

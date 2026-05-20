@@ -20,19 +20,18 @@
 
 /* RZV2H ELC (Event Link Controller) Event ID Header
  *
- * Source of truth: FSP bsp_elc.h (R9A09G057H, rzv/fsp/src/bsp/mcu/rzv2h/)
  * All RZV_ELC_* numeric values come from rzv2h_irq.h which was derived from
  * the RZV2H Hardware User Manual Table 13.4.
  *
  * This header provides:
- *   1. FSP-compatible ELC_EVENT_* aliases (enum-style defines) so that
- *      driver code written against FSP event names compiles under NuttX.
+ *   1. ELC_EVENT_* aliases (enum-style defines) so that driver code written
+ *      against those names compiles under NuttX.
  *   2. Per-peripheral event groups for Phase 04-09 drivers.
  *
  * Usage:
  *   #include "hardware/rzv_elc.h"
  *   rzv_icu_attach(RZV_ELC_GTM0_GTMTINT, handler, arg, true);
- *   // or FSP alias:
+ *   // or alias:
  *   rzv_icu_attach(ELC_EVENT_GTM0_INT, handler, arg, true);
  *
  * Consumers: Phase 04 (DMAC), Phase 05 (UART/SCI), Phase 06 (SCI-I2C),
@@ -55,8 +54,7 @@
  ****************************************************************************/
 
 /* -------------------------------------------------------------------------
- * FSP-compatible ELC_EVENT_* aliases
- * Source: FSP bsp_elc.h e_elc_event_rzv2h enum
+ * ELC_EVENT_* aliases (RZV2H event IDs)
  * -------------------------------------------------------------------------
  */
 
@@ -83,9 +81,9 @@
  * Note: TINT pins are NOT ELC events routed via INTR8SEL.
  * They are handled via INTC TSSR/TITSR registers → GIC SPI directly.
  * Phase 03 (GPIO) owns TINT routing; no ELC_EVENT_TINT* aliases here.
- * GPIO_TINT0_IRQn = 355 per FSP vector_data.h (first TINT SPI = 355).
+ * GPIO_TINT0_IRQn = 355 (first TINT SPI = 355).
  */
-#define RZV_INTC_TINT_SPI_BASE        (355)  /* FSP vector_data.h: GPIO_TINT0_IRQn */
+#define RZV_INTC_TINT_SPI_BASE        (355)  /* GPIO_TINT0_IRQn */
 #define RZV_ICU_TINT_TO_IRQ(n)        (RZV_IRQ_FIRST + RZV_INTC_TINT_SPI_BASE + (n))
 
 /* GTM timer interrupts (Phase 09 — HRT) */
@@ -118,7 +116,7 @@
 #define ELC_EVENT_DMAC1_END14         RZV_ELC_DMAC1_DMAEND_14
 #define ELC_EVENT_DMAC1_END15         RZV_ELC_DMAC1_DMAEND_15
 
-/* RSCI/SCI-B UART events (Phase 05/06) — FSP: ELC_EVENT_SC_ELCxxx_N */
+/* RSCI/SCI-B UART events (Phase 05/06) */
 
 #define ELC_EVENT_SCI0_ERI            RZV_ELC_SC_ELCER_0    /* RSCI0 receive error */
 #define ELC_EVENT_SCI0_RXI            RZV_ELC_SC_ELCRDRF_0  /* RSCI0 receive data full */
@@ -165,7 +163,7 @@
 
 /* -------------------------------------------------------------------------
  * SELECT interrupt GIC SPI constants (for Phase 04-09 reference)
- * Source: FSP bsp_feature.h BSP_FEATURE_ICU_FIXED_INTSEL_COUNT = 353
+ * BSP_FEATURE_ICU_FIXED_INTSEL_COUNT = 353
  * -------------------------------------------------------------------------
  */
 

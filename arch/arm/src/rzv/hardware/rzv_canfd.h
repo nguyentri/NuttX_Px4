@@ -22,9 +22,7 @@
  *
  * SOURCE / CROSS-CHECK VERDICTS
  * ==============================
- * Primary source:  Renesas FSP iodefine for R9A09G057H (RZ/V2H)
- *   refs/can_fd_rzv2h_evk_cr8_0_ep/e2studio/rzv/fsp/src/bsp/cmsis/Device/
- *     RENESAS/Include/R9A09G057H/cr/iodefines/canfd_iodefine.h
+ * Primary source:  R9A09G057H canfd_iodefine.h
  * Secondary:       NuttX RA8 header
  *   arch/arm/src/ra8/hardware/ra8e1/ra_canfd.h  (RSCAN-FD same IP family)
  *
@@ -36,8 +34,8 @@
  *   stride-separated.  Per-channel control registers (CFDC) are a 6-entry
  *   array at offset 0 (each entry 16 bytes), followed by global registers.
  *
- * RA8 vs FSP CROSS-CHECK (5 critical registers)
- * ===============================================
+ * RA8 vs RZ/V2H CROSS-CHECK (5 critical registers)
+ * ==================================================
  * Register        RA8 offset  RZ/V2H offset  Verdict
  * -------         ----------  -------------  -------
  * CFDCnNCFG       CH_BASE+0   BASE+n*0x10+0  MATCH (per-ch, same bit layout)
@@ -59,7 +57,7 @@
  * Note 1: RA8 places global registers immediately after the single-channel
  *   CFDC block (offset 0x10) — only 1 channel on RA8E1.  RZ/V2H has 6
  *   CFDC entries (6×16=0x60) + 32 bytes reserved = globals start at 0x80.
- *   FSP offsets are authoritative for RZ/V2H.
+ *   RZ/V2H iodefine offsets are authoritative.
  *
  * Note 2: RZ/V2H has 8 RX FIFOs (CFDRFCC[8] at 0xC0) and 18 common FIFOs
  *   (CFDCFCC[18] at 0x120).  RA8E1 has 2 RX FIFOs and 1 common FIFO.
@@ -810,8 +808,8 @@
 #define RZV_CANFD_TXMB_CH1_MB0            16   /* Channel 1, mailbox 0 */
 
 /****************************************************************************
- * Common FIFO index: per FSP config, CH0 uses common FIFO 0, CH1 uses
- * common FIFO 3 (CFIFO_CHANNEL_OFFSET=3 per r_canfd.c for non-LITE mode).
+ * Common FIFO index: CH0 uses common FIFO 0, CH1 uses common FIFO 3
+ * (CFIFO_CHANNEL_OFFSET=3 for non-LITE mode).
  ****************************************************************************/
 
 #define RZV_CANFD_CFIFO_CH_OFFSET         3u   /* Common FIFO index = ch * 3 */

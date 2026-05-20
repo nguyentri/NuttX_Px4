@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/rzv/rzv_gtm.h
+ * arch/arm/src/rzv/rzv_scif.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_RZV_RZV_GTM_H
-#define __ARCH_ARM_SRC_RZV_RZV_GTM_H
+#ifndef __ARCH_ARM_SRC_RZV_SCIF_H
+#define __ARCH_ARM_SRC_RZV_SCIF_H
 
 /****************************************************************************
  * Included Files
@@ -28,76 +28,73 @@
 #include <nuttx/config.h>
 #include <stdint.h>
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* GTM source clock is P1CLK on RZ/V2H (100 MHz per RZ/V2H hardware manual).
- * The compile-time fallback below is used
- * only when rzv_clock_get_rate() returns 0 (clock table not yet populated).
- * Prefer the runtime query via rzv_gtm_get_frequency() over this constant.
- *
- * NOTE: GTM has NO prescaler register — the counter ticks directly at P1CLK.
- */
-#ifndef RZV_GTM_FALLBACK_CLOCK_HZ
-#  define RZV_GTM_FALLBACK_CLOCK_HZ  100000000U  /* P1CLK = 100 MHz */
+/* SCIFA Base Addresses for RZV2H */
+
+#ifndef RZV_SCIFA0_BASE
+#  define RZV_SCIFA0_BASE              0x11C01400UL
 #endif
+
+/* Additional SCIFA channels (define as needed) */
+/* RZV2H datasheet indicates only SCIFA0 for console UART */
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
 #ifndef __ASSEMBLY__
 
-struct timer_lowerhalf_s;
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: rzv_gtm_timer_initialize
+ * Name: arm_serialinit
  *
  * Description:
- *   Initialize GTM timer for use as NuttX timer device.
- *   Returns timer_lowerhalf_s interface for registration with timer_register().
- *
- * Input Parameters:
- *   channel - GTM channel number (0-7)
- *
- * Returned Value:
- *   Pointer to timer_lowerhalf_s on success, NULL on failure
+ *   Initialize serial drivers and register them with the serial upper half.
+ *   This function is called from up_initialize() during boot.
  *
  ****************************************************************************/
 
-FAR struct timer_lowerhalf_s *rzv_gtm_timer_initialize(int channel);
+void arm_serialinit(void);
 
 /****************************************************************************
- * Name: rzv_gtm_get_frequency
+ * Name: up_putc
  *
  * Description:
- *   Get the clock frequency for a GTM channel in Hz.
+ *   Provide priority, low-level access to the console for debug output.
+ *   This function blocks until character transmission is complete.
  *
  * Input Parameters:
- *   channel - GTM channel number (0-7)
+ *   ch - Character to output
  *
  * Returned Value:
- *   Clock frequency in Hz, or 0 on error
+ *   Sent character
  *
  ****************************************************************************/
 
-uint32_t rzv_gtm_get_frequency(int channel);
+int up_putc(int ch);
 
-#endif /* __ASSEMBLY__ */
-
+#undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __ARCH_ARM_SRC_RZV_RZV_GTM_H */
-
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_RZV_SCIF_H */

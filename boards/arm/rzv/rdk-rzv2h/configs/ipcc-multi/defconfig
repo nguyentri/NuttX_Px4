@@ -110,7 +110,7 @@ CONFIG_RZV_IPC_CR8_CR8_LOOPBACK=y
 # MHU0 NS ch10 (TX, RSP-ACK IRQ=329) / ch15 (RX, MSG IRQ=318)
 CONFIG_RZV_IPC_CR8_CM33=y
 
-# ---- MPU port (FreeRTOS FSP region table) ----
+# ---- MPU port (region table) ----
 # Region 9 (16 MiB @ 0x43000000, NC-Shareable) covers IPC raw SHM at 0x43800000
 CONFIG_RZV_MPU_PORT_FSP=y
 CONFIG_RZV_MPU_CR8_CORE_NUM=0

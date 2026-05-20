@@ -225,8 +225,8 @@ static uintptr_t rzv_wdt_sysc_ctrl(uint8_t channel)
  *
  * Description:
  *   Turn on CPG clock gates (CLKP + LOCO), wait for clock-monitor to confirm,
- *   then deassert the WDT reset and wait for reset-monitor. Mirrors FSP
- *   R_BSP_MODULE_START_FSP_IP_WDT (bsp_override.h:1382). MSTOP is a no-op on
+ *   then deassert the WDT reset and wait for reset-monitor.
+ *   MSTOP is a no-op on
  *   RZ/V2H for WDT.
  *
  ****************************************************************************/
@@ -249,7 +249,7 @@ static int rzv_wdt_clock_enable(uint8_t channel)
 
   /* Wait for clock monitor to confirm. CLKMON_2 carries WDT bits for
    * ch=0..2; for ch=3 LOCO/CLKP live elsewhere — best-effort wait, then
-   * proceed (FSP itself only polls CLKMON_2).
+   * proceed.
    */
 
   timeout = 1000;
@@ -320,9 +320,7 @@ static int rzv_wdt_calculate_timeout(struct rzv_wdt_priv_s *priv,
 {
   uint32_t pclk;
   uint32_t best_timeout = 0;
-  /* WDT IP count clock is OSCCLK (24 MHz on RZ/V2H EVK), not P0CLK.
-   * Matches FSP r_wdt.c which uses R_FSP_SystemClockHzGet(FSP_PRIV_CLOCK_OSCCLK).
-   */
+  /* WDT IP count clock is OSCCLK (24 MHz on RZ/V2H EVK), not P0CLK. */
   int best_tops = -1;
   int best_cks = -1;
   int i;
@@ -482,9 +480,7 @@ static int rzv_wdt_configure(struct rzv_wdt_priv_s *priv)
   wdinfo("WDT%d configured for reset mode\n", priv->channel);
 #endif
 
-  /* Route WDT underflow to system reset (reset mode only). FSP equivalent:
-   * R_BSP_WDT_SYSTEM_RESET_ENABLE (bsp_wdt.h:55).
-   */
+  /* Route WDT underflow to system reset (reset mode only). */
 
 #ifndef CONFIG_RZV_WDT_INTERRUPT_MODE
   putreg32(RZV_CPG_ERRORRST_SEL2_BIT(priv->channel) |
@@ -493,7 +489,6 @@ static int rzv_wdt_configure(struct rzv_wdt_priv_s *priv)
 #endif
 
   /* Release the counter halt latch in SYSC so the WDT actually counts.
-   * Equivalent to FSP R_BSP_WDT_COUNTING_ENABLE (bsp_wdt.h:38).
    * Write WDTSTOPMASK (WEN=1) with bp_halted=0.
    */
 
@@ -574,8 +569,8 @@ static int rzv_wdt_stop(struct watchdog_lowerhalf_s *lower)
   wdinfo("Stopping WDT%d\n", priv->channel);
 
   /* Halt the counter via SYSC: set bp_halted=1 with WEN=1.
-   * Per FSP bsp_wdt.h R_BSP_WDT_COUNTING_ENABLE, writing bp_halted=1
-   * with the WDTSTOPMASK WEN bit set freezes the WDT counter immediately.
+   * Writing bp_halted=1 with the WDTSTOPMASK WEN bit set freezes the WDT
+   * counter immediately.
    */
 
   {
@@ -809,8 +804,7 @@ static int rzv_wdt_interrupt(int irq, void *context, void *arg)
     }
 
   /* Clear interrupt flags. Hardware does not always clear in the same cycle;
-   * loop with a bounded retry until flags read back as 0 (matches FSP
-   * r_wdt.c status-clear loop).
+   * loop with a bounded retry until flags read back as 0.
    */
 
   {

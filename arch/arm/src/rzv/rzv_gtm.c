@@ -540,7 +540,7 @@ uint32_t rzv_gtm_get_frequency(int channel)
       return 0;
     }
 
-  /* GTM source clock is P1CLK on RZ/V2H (FSP BSP_FEATURE_GTM_SOURCE_CLOCK).
+  /* GTM source clock is P1CLK on RZ/V2H (BSP_FEATURE_GTM_SOURCE_CLOCK).
    * Query the runtime clock table first; fall back to compile-time constant
    * if the table has not yet been populated (early boot).
    */

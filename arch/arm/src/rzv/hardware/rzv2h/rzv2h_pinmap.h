@@ -47,7 +47,7 @@
  *     [11:8]  Pull  — RZV_GPIO_FLOAT/PULLUP/PULLDOWN (rzv_gpio.h GPIO_PULL_SHIFT=8)
  *     [7:4]   Func  — RZV_GPIO_OPENDRAIN; also IRQ line 0-15 for gpiosetevent
  *     [3:0]   PSEL  — RZV_PFS_PSEL_MODE1..15 (peripheral function select)
- *                     FSP: BSP_FEATURE_IOPORT_PFC_REG_BITFIELD=0xF
+ *                     BSP_FEATURE_IOPORT_PFC_REG_BITFIELD=0xF
  *
  * Pinmap constant format (alternative function definitions below):
  *   GPIO_SIGNAL_PORTx_PINy_MODEz = PORT<x> | PIN<y> | RZV_PFS_PSEL_MODE<z>
@@ -58,7 +58,7 @@
  * for PSEL was already dead code (driver read [3:0] only). Source: audit §8.
  */
 
-/* RZV2H Peripheral Selection (PSEL) Values - Direct FSP IOPORT_PERIPHERAL_MODE mapping */
+/* RZV2H Peripheral Selection (PSEL) Values - IOPORT_PERIPHERAL_MODE mapping */
 #define RZV_PFS_PSEL_MODE1                     (0x01)  /* GPT Timer, GPTP */
 #define RZV_PFS_PSEL_MODE2                     (0x02)  /* SCI/UART */
 #define RZV_PFS_PSEL_MODE3                     (0x03)  /* SPI */

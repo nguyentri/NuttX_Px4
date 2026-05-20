@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /* DMAC_B Unit Base Addresses
- * Source: FSP dmac_b_iodefine.h R_DMAC_B{0-4}_BASE
+ * Source: dmac_b_iodefine.h R_DMAC_B{0-4}_BASE
  * R_DMAC_B0_BASE = 0x11400000  (Cortex-R8 secure DMAC, 2 groups × 8 ch)
  * R_DMAC_B1_BASE = 0x14830000  (CM33/CA55 shared, 2 groups × 8 ch)
  * R_DMAC_B2_BASE = 0x14840000
@@ -64,7 +64,7 @@
 
 /* DMAC_B Channel Register Offsets within R_DMAC_B0_GRP_CH_Type (64 bytes)
  *
- * Layout derived from FSP dmac_b_iodefine.h R_DMAC_B0_GRP_CH_Type:
+ * Layout derived from dmac_b_iodefine.h R_DMAC_B0_GRP_CH_Type:
  *   N[0].SA  @ 0x00  — Next0 source address (initial)
  *   N[0].DA  @ 0x04  — Next0 destination address (initial)
  *   N[0].TB  @ 0x08  — Next0 transfer byte count (initial)
@@ -102,7 +102,7 @@
 
 /* DMAC_B Group Register Offsets within R_DMAC_B0_GRP_Type
  *
- * R_DMAC_B0_GRP_Type layout (from FSP iodefine):
+ * R_DMAC_B0_GRP_Type layout (from iodefine):
  *   CH[8]        @ 0x000  — 8 channels × 0x40 = 0x200 bytes
  *   RESERVED[64] @ 0x200  — 64 × 4 = 0x100 bytes
  *   DCTRL        @ 0x300  — DMA group control
@@ -212,7 +212,7 @@ static inline uintptr_t rzv_dmac_get_base(int unit)
 
 /****************************************************************************
  * CHCFG Register Bit Definitions
- * Source: FSP dmac_b_iodefine.h CHCFG_b
+ * Source: dmac_b_iodefine.h CHCFG_b
  ****************************************************************************/
 
 #define DMAC_CHCFG_SEL_SHIFT        (0)       /* Bits 2:0 - peripheral sel */
@@ -326,7 +326,7 @@ static inline uintptr_t rzv_dmac_get_base(int unit)
  *
  * Reference: refs/.../R9A09G057H/cr/iodefines/intc_iodefine.h DMACKSEL0_b
  *   Each DACK_SEL field is 7 bits. Value = (unit-1)*16 + local_ch
- *   for units 1-4; unit 0: value = (0+4)*16 + local_ch (FSP bsp_dmac.h).
+ *   for units 1-4; unit 0: value = (0+4)*16 + local_ch.
  ****************************************************************************/
 
 #define RZV_INTC_BASE               0x10400000UL  /* Same as RZV_ICU_BASE */
@@ -342,7 +342,7 @@ static inline uintptr_t rzv_dmac_get_base(int unit)
 #define RZV_INTC_DMACKSEL_MASK      0x7fu     /* 7-bit field */
 
 /* Compute the DACK_SEL value for a given DMAC global channel:
- * FSP bsp_dmac.h R_BSP_DMAC_DACK_OUTPUT_PIN_SET logic:
+ * R_BSP_DMAC_DACK_OUTPUT_PIN_SET encoding:
  *   unit==0: write_value = (0+4)*16 + local_ch  = 64 + local_ch
  *   unit>0 : write_value = (unit-1)*16 + local_ch
  */

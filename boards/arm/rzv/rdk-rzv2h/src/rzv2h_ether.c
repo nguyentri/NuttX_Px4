@@ -136,7 +136,7 @@ static int rzv2h_ether_clockconfig(int port)
    * RZV_CPG_CLK_ETHRX{0,1}CLK, RZV_CPG_CLK_ET{0,1}_TXC_TXCLK and
    * RZV_CPG_CLK_ET{0,1}_RXC_RXCLK to arch/arm/src/rzv/rzv_clock.h once the
    * CLKON/RST register indices are pulled from the RZ/V2H User's Manual
-   * (FSP bsp_clocks.h, search for ETH/GBE clock-on bits).  Then enable
+   * (bsp_clocks.h, search for ETH/GBE clock-on bits).  Then enable
    * them here so RGMII reference clocks are gated on before the MAC is
    * brought out of reset.
    */

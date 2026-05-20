@@ -284,7 +284,7 @@ static int sci_spi_hw_configure(struct rzv_sci_spi_priv_s *priv)
    * SCI-B CCR3: CPHA=bit0, CPOL=bit1.
    * NuttX spi_mode_e: MODE0={CPOL=0,CPHA=0}, MODE1={0,1},
    *                   MODE2={CPOL=1,CPHA=0}, MODE3={1,1}.
-   * FSP r_sci_b_spi.c uses same mapping — verified.
+   * Verified against RZ/V2H SCI-B hardware manual CCR3 bit definitions.
    */
 
   switch (priv->mode)

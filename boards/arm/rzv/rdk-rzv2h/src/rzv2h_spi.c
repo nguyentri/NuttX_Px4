@@ -26,7 +26,7 @@
  *   RSPCK4(SCK) : P9_2  MODE1  GPIO_RSPCK4_P9_2_M1
  *   SSLA0 (CS0) : P9_3  MODE1  GPIO_SSLA0_P9_3_M1
  *
- * NOTE: The pinmap provides "RSPI4" function names (FSP channel 4 = hardware
+ * NOTE: The pinmap provides "RSPI4" function names (channel 4 = hardware
  * SPI0 at 0x12800000).  UNVERIFIED against RDK-RZV2H schematic — board bring-up
  * engineer must confirm physical routing before enabling.
  *

@@ -22,7 +22,7 @@
  *
  * RZ/V2H keeps these external interrupt status/configuration registers in
  * the INTC block.  Keep the historical RZV_ICU_* names for existing callers,
- * but use the CMSIS/FSP R_INTC base address.
+ * but use the R_INTC base address from the RZ/V2H hardware manual.
  *
  * The registers handle external interrupt signal conditioning:
  * - NMI: Non-Maskable Interrupt
@@ -59,7 +59,7 @@
 #define RZV_ICU_NMITR               (RZV_ICU_BASE + RZV_ICU_NMITR_OFFSET)
 
 /* NMI/IRQ digital filter registers do NOT exist in the INTC block.
- * Per FSP r_ioport.c:1325 they live in the GPIO peripheral (FILONOFF/
+ * Per RZ/V2H hardware manual they live in the GPIO peripheral (FILONOFF/
  * FILNUM/FILCLKSEL).  Writing 0x0C or 0x1C in INTC hits RESERVED space.
  * CRIT-4: RZV_ICU_NMIFLTC and RZV_ICU_IFLTC are REMOVED.
  * Filter configuration must be done via GPIO FILONOFF/FILNUM/FILCLKSEL regs.

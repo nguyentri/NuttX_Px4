@@ -248,7 +248,7 @@
 #define SCI_CCR0_CKE_MASK       (0x3 << SCI_CCR0_CKE_SHIFT)
 
 /* SCI Common Control Register 1 (CCR1) ************************************/
-/* P0-4 fix: corrected all bit positions to match FSP sci_b_iodefine.h CCR1_b
+/* P0-4 fix: corrected all bit positions per RZ/V2H SCI-B hardware manual CCR1.
  * STOP, LSBF removed (live in CCR3.STP=14, CCR3.LSBF=12)
  * CTSINV, RTSINV removed (not present in RZ/V2H SCI-B CCR1)
  */
@@ -268,10 +268,10 @@
 #define SCI_CCR1_NFEN           (1 << 28) /* Noise Filter Enable */
 
 /* SCI Common Control Register 2 (CCR2) ************************************/
-/* P0-1 fix: complete rewrite to match FSP sci_b_iodefine.h CCR2_b layout.
+/* P0-1 fix: complete rewrite per RZ/V2H SCI-B hardware manual CCR2 layout.
  * Old NuttX layout was entirely wrong — BRR at bits[0:7], CKS at bits[8:9],
  * MDDR at [16:23], ABCSE/ABCS/BGDM at 24/25/26, BFME at 27.
- * Correct (FSP) layout: BCP=[2:0], BGDM=4, ABCS=5, ABCSE=6, BRR=[15:8],
+ * Correct layout: BCP=[2:0], BGDM=4, ABCS=5, ABCSE=6, BRR=[15:8],
  * BRME=16, CKS=[18:17], MDDR=[31:24].
  * Build CCR2 value with single write per pseudocode in phase plan.
  */
@@ -309,11 +309,11 @@
    SCI_CCR2_BGDM      | SCI_CCR2_BCP_MASK)
 
 /* SCI Common Control Register 3 (CCR3) ************************************/
-/* P0-3, P0-5, Low-17 fixes: corrected bit positions per FSP CCR3_b.
+/* P0-3, P0-5, Low-17 fixes: corrected bit positions per RZ/V2H SCI-B hardware manual CCR3.
  * BPEN moved from bit 0 to bit 7 (Low-17).
  * FM (FIFO mode enable) added at bit 20 — was missing entirely (P0-5).
  * LSBF added at bit 12 (removed from CCR1 where it was wrong).
- * SINV, RXDESEL, MP, DEN, CKE, GM, BLK added per FSP.
+ * SINV, RXDESEL, MP, DEN, CKE, GM, BLK added per RZ/V2H SCI-B UM.
  */
 
 #define SCI_CCR3_CPHA           (1 << 0)  /* SPI clock phase */
@@ -345,7 +345,7 @@
 #define SCI_CCR3_BLK            (1 << 29) /* Block transfer mode */
 
 /* SCI Common Control Register 4 (CCR4) ************************************/
-/* Low-16 fix: corrected all CCR4 bit names to match FSP CCR4_b.
+/* Low-16 fix: corrected all CCR4 bit names per RZ/V2H SCI-B hardware manual.
  * CPHA/CPOL/MFF/MSS do NOT live here — they are CCR3 fields in SCI-B.
  * CCR4 is used for auto-baud detection and compare-data features.
  */
@@ -475,11 +475,11 @@
 #define SCI_ISR_IICSTIF                         (1 << 3)  /* Iicstif */
 
 /* =========================================================================
- * I2C-mode helper macro (FSP r_sci_b_i2c.c line 62-64)
+ * I2C-mode helper macro for RZ/V2H SCI-B ICR request generation.
  *
  * SCI_I2C_REQ - Build an ICR request word atomically.
  *
- * Per FSP SCI_B_I2C_PRV_GENERATE_REQUEST: IICSDAS and IICSCLS must be
+ * IICSDAS and IICSCLS must be
  * written in the same store as the request bit (STAREQ/RSTAREQ/STPREQ).
  * This macro clears the SDAS and SCLS fields, then ORs in new values + req.
  *

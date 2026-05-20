@@ -32,13 +32,13 @@
  ****************************************************************************/
 
 /* GTM has NO prescaler — counter runs directly from the GTM source clock
- * (P1CLK = 100 MHz on RZ/V2H, confirmed via FSP BSP_FEATURE_GTM_SOURCE_CLOCK
- * = FSP_PRIV_CLOCK_P1CLK in bsp_feature.h).  Do not add prescaler divider
+ * (P1CLK = 100 MHz on RZ/V2H, BSP_FEATURE_GTM_SOURCE_CLOCK).
+ * Do not add prescaler divider
  * stubs; they are not backed by hardware registers.
  */
 
 /* GTM Base Addresses — each GTM instance has its own 4 KiB region.
- * Addresses verified against FSP R9A09G057H/cr/iodefines/gtm_iodefine.h.
+ * Addresses verified against R9A09G057H/cr/iodefines/gtm_iodefine.h.
  * Use the per-instance base table (g_gtm_base[] in rzv_gtm.c) — do NOT
  * compute addresses via stride arithmetic from a single base.
  ************************************************************************/

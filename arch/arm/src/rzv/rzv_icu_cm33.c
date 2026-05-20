@@ -27,9 +27,9 @@
  * hardware/rzv_intc.h INTM33SEL bit definitions).
  *
  * RZV_INTC_M33SEL_SPI_BASE: GIC SPI INTID for CM33 SEL slot 0.
- * FSP does not document this in available headers — value UNVERIFIED.
- * Placeholder used (481) based on FSP SELECT_IRQ_MAX=128 for CR8 ending
- * at 481, and CM33 slots presumably following. MUST be verified from
+ * Value UNVERIFIED — not found in available hardware documentation.
+ * Placeholder (481) assumes SELECT_IRQ_MAX=128 for CR8 ending at 481,
+ * with CM33 slots following. MUST be verified from
  * RZ/V2H Hardware User Manual before CM33 build is exercised.
  */
 

@@ -22,20 +22,20 @@
  *
  * DESIGN DECISIONS (see brainstorm-260520-1324-rzv2h-canfd-design.md)
  * ===================================================================
- * A — Reference : RA8 driver skeleton + FSP register cross-check
+ * A — Reference : RA8 driver skeleton + register cross-check
  * B — Channel   : CH0 enabled; CH1 framework compiled, not registered at v1
  * C — Mode      : CAN-FD (CONFIG_CAN_FD=y required)
  * D — TX        : single TX mailbox #0 per channel
  * E — Bring-up  : internal loopback as boot default (CTME+CTMS=INT_LOOP)
  * F — Layout    : monolithic single file
  *
- * TIMING (FSP hal_data.c verified, CANFDCLK=80MHz)
- * =================================================
+ * TIMING (CANFDCLK=80MHz)
+ * =======================
  * Nominal : BRP=2 → 40MHz tq, TSEG1=74, TSEG2=25, SJW=25 → 400 kbps
  * Data    : BRP=1 → 80MHz tq, TSEG1=16, TSEG2=8,  SJW=8  → 3.2 Mbps
  *
- * INIT SEQUENCE (mirrors FSP R_CANFD_Open)
- * ========================================
+ * INIT SEQUENCE
+ * =============
  * 1.  CPG clock enable + module unreset
  * 2.  Global → Reset mode (CFDGCTR.GMDC=1)
  * 3.  Global config (CFDGCFG)
@@ -118,7 +118,7 @@
 /* Nominal bit-timing constants (CANFDCLK=80MHz, 400 kbps)
  * Tq = 1/40MHz = 25 ns; bit = 100 Tq = 2.5 µs = 400 kbps
  * Register value = field_value - 1 where hardware adds 1.
- * FSP hal_data.c: nominal_bitrate=400000, BRP=2, TSEG1=74, TSEG2=25, SJW=25
+ * nominal_bitrate=400000, BRP=2, TSEG1=74, TSEG2=25, SJW=25
  */
 
 #define NCFG_NBRP         (2u  - 1u)  /* prescaler = 2    → 40 MHz tq  */
@@ -128,7 +128,7 @@
 
 /* Data-phase bit-timing constants (80 MHz tq, 3.2 Mbps)
  * Tq = 1/80MHz = 12.5 ns; bit = 25 Tq = 312.5 ns = 3.2 Mbps
- * FSP hal_data.c: data_bitrate=3200000, BRP=1, TSEG1=16, TSEG2=8, SJW=8
+ * data_bitrate=3200000, BRP=1, TSEG1=16, TSEG2=8, SJW=8
  */
 
 #define DCFG_DBRP         (1u  - 1u)  /* prescaler = 1    → 80 MHz tq  */
@@ -553,9 +553,8 @@ static void rzv_canfd_ch_init(struct rzv_canfd_s *priv)
 }
 
 /* rzv_canfd_set_loopback: enable/disable internal loopback test mode.
- * Per FSP R_CANFD_Open and RZ/V2H UM, CTME/CTMS are writable only in
- * Channel Reset mode (CHMDC=01).  We transition Comm → Reset → set bits
- * → Comm.
+ * Per RZ/V2H UM, CTME/CTMS are writable only in Channel Reset mode
+ * (CHMDC=01).  We transition Comm → Reset → set bits → Comm.
  */
 
 static void rzv_canfd_set_loopback(struct rzv_canfd_s *priv, bool enable)

@@ -62,11 +62,10 @@
  * Pull  (L): bits [11:8]  — PUPD pull config (0=float, 1=up, 2=down)
  * Func  (F): bits [7:4]   — extended function flags (open-drain, etc.)
  * PSEL  (S): bits [3:0]   — peripheral function select (0-15 for RZV2H)
- *                           FSP: BSP_FEATURE_IOPORT_PFC_REG_BITFIELD=0xF
+ *                           BSP_FEATURE_IOPORT_PFC_REG_BITFIELD=0xF
  *
  * Note: PSEL lives ONLY at bits [3:0]. The old dead PSEL field at [18:15]
  * is REMOVED. GPIO_PERIPH_PIN() encodes psel into [3:0] only.
- * FSP source: bsp_feature.h BSP_FEATURE_IOPORT_PFC_REG_BITFIELD (rzv/fsp)
  */
 
 /* Port field: bits [31:28] — matches pinmap PORT0..(port<<28) */
@@ -113,7 +112,7 @@
 #  define RZV_GPIO_OPENDRAIN    (1U << GPIO_FUNC_SHIFT)  /* NOD open-drain */
 
 /* PSEL field: bits [3:0] — peripheral function select (0x0-0xF for RZV2H)
- * FSP: BSP_FEATURE_IOPORT_PFC_REG_BITFIELD=0xF (bsp_feature.h rzv2h/cr)
+ * BSP_FEATURE_IOPORT_PFC_REG_BITFIELD=0xF.
  * Only this location is used; the old bits[18:15] PSEL is REMOVED (dead).
  */
 #define GPIO_PSEL_SHIFT         0

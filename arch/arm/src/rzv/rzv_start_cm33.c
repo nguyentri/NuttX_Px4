@@ -122,7 +122,7 @@ const uintptr_t g_idle_topstack = (uintptr_t)&_estack;
  *
  * Description:
  *   Initialize CM33 core-specific features (caches, FPU, etc.)
- *   Based on FSP bsp_cm33_core.c initialization
+ *   Based on bsp_cm33_core.c initialization sequence
  *
  ****************************************************************************/
 

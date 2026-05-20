@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /* POEG Base Addresses — R9A09G057H (RZ/V2H)
- * Source: FSP poeg_iodefine.h, confirmed addresses.
+ * Source: poeg_iodefine.h, confirmed addresses.
  * Unit 0 serves GPT0-7 (unit0); Unit 1 serves GPT10-17 (unit1).
  *
  * Each unit has 4 POEG channels (A/B/C/D) corresponding to GPT groups.
@@ -54,7 +54,7 @@
 #define RZV_POEG_POEGGn_OFFSET      0x0000u
 
 /* POEGGn Register Bit Definitions
- * Source: FSP poeg_iodefine.h POEGGn_b struct fields. */
+ * Source: poeg_iodefine.h POEGGn_b struct fields. */
 #define POEG_POEGGn_PIDF            (1u << 0)   /* Port input detect flag (R/W, write 0 to clear) */
 #define POEG_POEGGn_IOCF            (1u << 1)   /* I/O short-circuit detect flag */
 #define POEG_POEGGn_SSF             (1u << 3)   /* Software stop flag */

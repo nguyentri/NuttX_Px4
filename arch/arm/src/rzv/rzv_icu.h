@@ -38,15 +38,11 @@
  *    - Receives SPI interrupts from INTC
  *    - Handles priority, masking, acknowledgment
  *
- * Comparison with Renesas FSP:
- * - FSP: Static allocation via vector_data.c (compile-time configuration)
- * - NuttX: Dynamic allocation via rzv_icu_attach() (runtime configuration)
- *
  * Interrupt Flow:
  *   Peripheral Event → INTC INTR8SEL[slot] → GIC SPI[353+slot] → CPU → Handler
  *
  * Slot→IRQ mapping (CRIT-1 fix):
- *   FSP BSP_FEATURE_ICU_FIXED_INTSEL_COUNT = 353 (first SELECT SPI INTID).
+ *   ICU_FIXED_INTSEL_COUNT = 353 (first SELECT SPI INTID per RZ/V2H UM).
  *   INTR8SEL slot N → GIC SPI INTID (353+N) → NuttX IRQ index == GIC INTID.
  *   rzv_icu_attach() returns NuttX IRQ (= GIC INTID = 353+N); callers must
  *   use that value for up_enable_irq/up_disable_irq and irq_detach.

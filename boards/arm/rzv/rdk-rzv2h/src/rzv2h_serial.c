@@ -61,7 +61,7 @@
 void rzv2h_serial_setup(void)
 {
 #if defined(CONFIG_RZV_SCI3) || defined(CONFIG_SCI3_SERIAL_CONSOLE)
-  /* SCI3: NSH console on P3_4/P3_5 per FSP RDK pinconfig. */
+  /* SCI3: NSH console on P3_4/P3_5 per RDK pinconfig. */
 
   sinfo("Configuring SCI3 pins for UART (NSH Console)\n");
 

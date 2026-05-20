@@ -2,20 +2,20 @@
  * arch/arm/src/rzv/rzv_sci_i2c_isr.c
  *
  * TXI / TEI / RXI interrupt service routines for SCI-B Simple-I2C.
- * ISR state machine ported from FSP r_sci_b_i2c.c:858-1419.
+ * TXI / TEI / RXI interrupt service routines for SCI-B Simple-I2C.
  *
  * Interrupt roles (CPU-mode only, no DMAC):
  *   TXI  – NACK/ACK detected after address or data write; drive next byte.
- *           In CPU-mode, RX data is read here (not in RXI) — FSP :1289.
+ *           In CPU-mode, RX data is read here (not in RXI).
  *   TEI  – START/RESTART/STOP condition complete (IICSTIF flag)
  *   RXI  – Not used in CPU-mode (RIE never enabled). Kept for future DTC
  *           support. Handler is a no-op if fired spuriously.
  *
  * Review fixes applied:
- *   #1  CRIT — RX data moved into TXI (do_dummy_read pattern, FSP :1227)
+ *   #1  CRIT — RX data moved into TXI (do_dummy_read pattern)
  *   #2  CRIT — 1-byte read: RXDATA state handled in TXI with dummy-read skip
  *   #4  CRIT — NACK during read = normal end; read RDR then issue stop/restart
- *   #7  HIGH — TEI: read ISR before clearing ICFCLR (FSP :971 order)
+ *   #7  HIGH — TEI: read ISR before clearing ICFCLR
  *   #13 MED  — Restart bookkeeping: HW serialises STIF→TXI (invariant noted)
  *   #14 MED  — Redundant dead branch in rxi_isr collapsed
  *   #16 MED  — STATE_RESTART_PENDING separate from STATE_STOP
@@ -87,7 +87,7 @@ static void sci_i2c_post_done(struct rzv_sci_i2c_priv_s *priv, int result)
  * Name: sci_i2c_issue_stop
  *
  * Description:
- *   Atomically set IICSTPREQ + SDAS=1 + SCLS=1 in ICR (FSP :1374-1377).
+ *   Atomically set IICSTPREQ + SDAS=1 + SCLS=1 in ICR.
  *
  ****************************************************************************/
 
@@ -102,7 +102,7 @@ static void sci_i2c_issue_stop(struct rzv_sci_i2c_priv_s *priv)
  * Name: sci_i2c_issue_restart
  *
  * Description:
- *   Atomically set IICRSTAREQ + SDAS=1 + SCLS=1 (FSP :918).
+ *   Atomically set IICRSTAREQ + SDAS=1 + SCLS=1.
  *   Uses STATE_RESTART_PENDING to disambiguate from STOP in TEI (#16 fix).
  *
  ****************************************************************************/
@@ -150,10 +150,10 @@ static bool sci_i2c_next_msg(struct rzv_sci_i2c_priv_s *priv)
  *
  * Description:
  *   TXI interrupt: ACK/NACK received from slave after address or data write.
- *   In CPU-mode, RX bytes are read HERE from RDR (FSP :1289).
+ *   In CPU-mode, RX bytes are read HERE from RDR.
  *   Drive the next byte or issue RESTART/STOP.
  *
- *   #1 fix: RX data read inside TXI (do_dummy_read pattern, FSP :1227-1297)
+ *   #1 fix: RX data read inside TXI (do_dummy_read pattern)
  *   #2 fix: RXDATA state handled here; first TXI after addr ACK skips RDR
  *   #4 fix: NACK during read = end-of-read; read last RDR then stop/restart
  *   dim 10: flag clear via CFCLR.TDREC, not legacy SSR
@@ -164,7 +164,7 @@ int sci_i2c_txi_isr(int irq, void *context, void *arg)
 {
   struct rzv_sci_i2c_priv_s *priv = (struct rzv_sci_i2c_priv_s *)arg;
 
-  /* Clear TDR empty flag (FSP uses CFCLR.TDREC — write-1-clear) */
+  /* Clear TDR empty flag (CFCLR.TDREC — write-1-clear) */
 
   CFCLR_WR(priv, SCI_CFCLR_TDREC);
 
@@ -174,14 +174,13 @@ int sci_i2c_txi_isr(int irq, void *context, void *arg)
       return OK;
     }
 
-  /* Check for NACK — FSP r_sci_b_i2c.c:906 */
+  /* Check for NACK */
 
   if (ISR_VAL(priv) & SCI_ISR_IICACKR)
     {
       /* NACK from slave.
        * #4 fix: distinguish NACK-during-write (error) from
-       * NACK-during-read (normal end-of-transaction per I2C spec).
-       * FSP sci_b_i2c_txi_process_nack:1365-1392:
+       * NACK-during-read (normal end-of-transaction per I2C spec):
        *   if (!read || do_dummy_read) → error
        *   else                        → read last RDR, then stop/restart
        */
@@ -230,7 +229,6 @@ int sci_i2c_txi_isr(int irq, void *context, void *arg)
           /* For read: configure SDA/SCL as serial output, write 0xFF
            * to generate SCL and allow slave to drive first data bit.
            * do_dummy_read=true: this first TXI is the addr ACK — skip RDR.
-           * FSP sci_b_i2c_txi_send_data:1227-1288.
            */
 
           irqstate_t flags = enter_critical_section();
@@ -241,7 +239,7 @@ int sci_i2c_txi_isr(int irq, void *context, void *arg)
 
           priv->state = SCI_I2C_STATE_RXDATA;
 
-          /* Set IICACKT=0 (ACK) unless only 1 byte to receive (FSP :1284) */
+          /* Set IICACKT=0 (ACK) unless only 1 byte to receive */
 
           irqstate_t f2 = enter_critical_section();
           uint32_t icr2 = ICR_VAL(priv);
@@ -320,7 +318,6 @@ int sci_i2c_txi_isr(int irq, void *context, void *arg)
 
   /* RX data phase — CPU-mode: RDR read happens in TXI (#1 fix).
    * Each TXI after address ACK signals one byte has been clocked out by HW.
-   * FSP sci_b_i2c_txi_send_data:1289-1310.
    */
 
   if (priv->state == SCI_I2C_STATE_RXDATA)
@@ -354,7 +351,7 @@ int sci_i2c_txi_isr(int irq, void *context, void *arg)
         }
       else
         {
-          /* Enable NACK before last byte (FSP :1299-1302) */
+          /* Enable NACK before last byte */
 
           irqstate_t flags = enter_critical_section();
           uint32_t icr = ICR_VAL(priv);
@@ -369,7 +366,7 @@ int sci_i2c_txi_isr(int irq, void *context, void *arg)
 
           leave_critical_section(flags);
 
-          /* Write 0xFF to clock out next byte (FSP :1310) */
+          /* Write 0xFF to clock out next byte */
 
           TDR_WR(priv, 0xffu);
         }
@@ -384,7 +381,7 @@ int sci_i2c_txi_isr(int irq, void *context, void *arg)
  * Description:
  *   TEI interrupt: START/RESTART/STOP condition detected (IICSTIF).
  *   Send address byte after START; post completion after STOP.
- *   (FSP sci_b_i2c_tei_handler:968)
+ *   TEI handler for START/RESTART/STOP condition detection.
  *
  *   #7 fix: read ISR BEFORE clearing ICFCLR (prevents spurious-clear race).
  *   #16 fix: use STATE_RESTART_PENDING to identify RESTART vs STOP.
@@ -396,7 +393,7 @@ int sci_i2c_tei_isr(int irq, void *context, void *arg)
 {
   struct rzv_sci_i2c_priv_s *priv = (struct rzv_sci_i2c_priv_s *)arg;
 
-  /* #7 fix: read ISR FIRST, then clear STIF (FSP :971 clears after check).
+  /* #7 fix: read ISR FIRST, then clear STIF.
    * Old code cleared before checking — if spurious, flag was lost.
    */
 
@@ -443,14 +440,14 @@ int sci_i2c_tei_isr(int irq, void *context, void *arg)
     {
       /* STOP complete — transfer done */
 
-      /* Drive SDA/SCL to high-Z (FSP :976) */
+      /* Drive SDA/SCL to high-Z */
 
       irqstate_t flags = enter_critical_section();
       uint32_t icr = ICR_VAL(priv);
       ICR_SET(priv, icr | SCI_ICR_IICSDAS_MASK | SCI_ICR_IICSCLS_MASK);
       leave_critical_section(flags);
 
-      /* Disable TE/RE (FSP :1004-1005) */
+      /* Disable TE/RE */
 
       CCR0_SET(priv, 0u);
 
@@ -458,13 +455,13 @@ int sci_i2c_tei_isr(int irq, void *context, void *arg)
       return OK;
     }
 
-  /* START condition complete — send first address byte (FSP :986) */
+  /* START condition complete — send first address byte */
 
   if (priv->state == SCI_I2C_STATE_ADDR)
     {
       struct i2c_msg_s *msg = &priv->msgs[priv->msg_idx];
 
-      /* Configure SDA/SCL as serial output (FSP :1350) */
+      /* Configure SDA/SCL as serial output */
 
       irqstate_t flags = enter_critical_section();
       uint32_t icr = ICR_VAL(priv);
@@ -489,7 +486,7 @@ int sci_i2c_tei_isr(int irq, void *context, void *arg)
  *
  *   NOTE: In CPU-mode, CCR0.RIE is never set so this ISR is effectively
  *   unreachable (#17). The ICU slot is kept allocated for future DTC/DMAC
- *   support (RIE would be enabled in that path per FSP :1241).
+ *   support (RIE would be enabled in that path).
  *   If fired spuriously, clear the flag and return.
  *
  *   #14 fix: dead duplicate branch (read vs write restart) removed.
@@ -505,7 +502,7 @@ int sci_i2c_rxi_isr(int irq, void *context, void *arg)
   CFCLR_WR(priv, SCI_CFCLR_RDRFC);
 
   /* CPU-mode: RXI is not enabled; return immediately.
-   * Data is read in txi_isr per FSP CPU-mode pattern (#1, #17).
+   * Data is read in txi_isr (CPU-mode pattern, #1, #17).
    */
 
   (void)priv;

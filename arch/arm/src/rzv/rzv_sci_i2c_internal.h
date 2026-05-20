@@ -42,7 +42,7 @@
 
 #define SCI_I2C_TIMEOUT_MS          1000
 
-/* TDR mask: upper 24 bits must be 0xFF on write (FSP DATA_REG_MASK) */
+/* TDR mask: upper 24 bits must be 0xFF on write (DATA_REG_MASK) */
 
 #define SCI_I2C_TDR_UPPER_MASK      UINT32_C(0xFFFFFF00)
 
@@ -55,7 +55,7 @@
  * Private Types
  ****************************************************************************/
 
-/* Transfer state machine — mirrors FSP pattern */
+/* Transfer state machine */
 
 enum sci_i2c_state_e
 {
