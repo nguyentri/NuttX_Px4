@@ -49,25 +49,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Debug output configuration */
-
-#ifdef CONFIG_DEBUG_WATCHDOG_INFO
-#  define wdinfo  _info
-#else
-#  define wdinfo(x...)
-#endif
-
-#ifdef CONFIG_DEBUG_WATCHDOG_WARN
-#  define wdwarn  _warn
-#else
-#  define wdwarn(x...)
-#endif
-
-#ifdef CONFIG_DEBUG_WATCHDOG_ERROR
-#  define wderr   _err
-#else
-#  define wderr(x...)
-#endif
 
 /* Default timeout values */
 
@@ -132,7 +113,9 @@ static int rzv_wdt_ioctl(struct watchdog_lowerhalf_s *lower,
 
 /* Interrupt handling */
 
+#ifdef CONFIG_RZV_WDT_INTERRUPT_MODE
 static int rzv_wdt_interrupt(int irq, void *context, void *arg);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -403,8 +386,9 @@ static int rzv_wdt_calculate_timeout(struct rzv_wdt_priv_s *priv,
   priv->frequency = pclk / cks_div[best_cks];
 
   wdinfo("Selected timeout=%lu ms, cks=0x%x (div=%u), tops=0x%x (cycles=%u)\n",
-         (unsigned long)priv->timeout, priv->cks, cks_div[best_cks],
-         priv->tops, tops_cycles[best_tops]);
+         (unsigned long)priv->timeout, priv->cks,
+         (unsigned int)cks_div[best_cks], priv->tops,
+         (unsigned int)tops_cycles[best_tops]);
 
   return OK;
 }
@@ -729,7 +713,10 @@ static xcpt_t rzv_wdt_capture(struct watchdog_lowerhalf_s *lower,
                               xcpt_t handler)
 {
   struct rzv_wdt_priv_s *priv = (struct rzv_wdt_priv_s *)lower;
+
+#ifdef CONFIG_RZV_WDT_INTERRUPT_MODE
   xcpt_t oldhandler;
+#endif
 
   if (lower == NULL)
     {
@@ -758,6 +745,7 @@ static xcpt_t rzv_wdt_capture(struct watchdog_lowerhalf_s *lower,
 
   return oldhandler;
 #else
+  UNUSED(handler);
   wdwarn("WDT%d capture requires CONFIG_RZV_WDT_INTERRUPT_MODE\n",
          priv->channel);
   return NULL;
@@ -780,6 +768,7 @@ static int rzv_wdt_ioctl(struct watchdog_lowerhalf_s *lower,
  * Name: rzv_wdt_interrupt
  ****************************************************************************/
 
+#ifdef CONFIG_RZV_WDT_INTERRUPT_MODE
 static int rzv_wdt_interrupt(int irq, void *context, void *arg)
 {
   struct rzv_wdt_priv_s *priv = (struct rzv_wdt_priv_s *)arg;
@@ -830,6 +819,8 @@ static int rzv_wdt_interrupt(int irq, void *context, void *arg)
 
   return OK;
 }
+
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -979,18 +970,17 @@ int rzv_wdt_initialize(FAR const char *devpath, int channel)
 
   g_wdt_dev[channel].ops = &g_wdt_ops;
 
-  ret = watchdog_register(devpath,
-                          (FAR struct watchdog_lowerhalf_s *)priv);
-  if (ret < 0)
+  if (watchdog_register(devpath,
+                        (FAR struct watchdog_lowerhalf_s *)priv) == NULL)
     {
-      wderr("ERROR: Failed to register WDT%d: %d\n", channel, ret);
+      wderr("ERROR: Failed to register WDT%d\n", channel);
 #ifdef CONFIG_RZV_WDT_INTERRUPT_MODE
       if (priv->irq >= 0)
         {
           rzv_icu_detach(priv->irq);
         }
 #endif
-      return ret;
+      return -EIO;
     }
 
   wdinfo("WDT%d driver registered at %s\n", channel, devpath);

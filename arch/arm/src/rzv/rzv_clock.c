@@ -477,7 +477,7 @@ int rzv_clock_enable(uint32_t clk_id)
         {
           delay_us = CPG_RETRY_DELAY_US << (retry - 1);
           clkinfo("Retrying clock enable (attempt %d/%d) after %uµs\n",
-                  retry + 1, CPG_MAX_RETRIES + 1, delay_us);
+                  retry + 1, CPG_MAX_RETRIES + 1, (unsigned int)delay_us);
           up_udelay(delay_us);
         }
 
@@ -494,13 +494,13 @@ int rzv_clock_enable(uint32_t clk_id)
                               CPG_TIMEOUT_CLOCK_ENABLE);
       if (ret >= 0)
         {
-          clkinfo("Clock enabled: domain=%u bit=%u\n", domain, bit);
+          clkinfo("Clock enabled: domain=%u bit=%u\n", (unsigned int)domain, (unsigned int)bit);
           return OK;
         }
     }
 
   clkerr("ERROR: Clock enable failed after %d attempts: domain=%u bit=%u\n",
-         CPG_MAX_RETRIES + 1, domain, bit);
+         CPG_MAX_RETRIES + 1, (unsigned int)domain, (unsigned int)bit);
   rzv_cpg_dump_registers(domain, "clock_enable_failure");
 
   return ret;
@@ -561,7 +561,7 @@ int rzv_clock_disable(uint32_t clk_id)
         {
           delay_us = CPG_RETRY_DELAY_US << (retry - 1);
           clkinfo("Retrying clock disable (attempt %d/%d) after %uµs\n",
-                  retry + 1, CPG_MAX_RETRIES + 1, delay_us);
+                  retry + 1, CPG_MAX_RETRIES + 1, (unsigned int)delay_us);
           up_udelay(delay_us);
         }
 
@@ -575,13 +575,13 @@ int rzv_clock_disable(uint32_t clk_id)
                               CPG_TIMEOUT_CLOCK_DISABLE);
       if (ret >= 0)
         {
-          clkinfo("Clock disabled: domain=%u bit=%u\n", domain, bit);
+          clkinfo("Clock disabled: domain=%u bit=%u\n", (unsigned int)domain, (unsigned int)bit);
           return OK;
         }
     }
 
   clkerr("ERROR: Clock disable failed after %d attempts: domain=%u bit=%u\n",
-         CPG_MAX_RETRIES + 1, domain, bit);
+         CPG_MAX_RETRIES + 1, (unsigned int)domain, (unsigned int)bit);
   rzv_cpg_dump_registers(domain, "clock_disable_failure");
 
   return ret;
@@ -636,7 +636,7 @@ int rzv_module_reset(uint32_t clk_id)
         {
           delay_us = CPG_RETRY_DELAY_US << (retry - 1);
           clkinfo("Retrying reset assert (attempt %d/%d) after %uµs\n",
-                  retry + 1, CPG_MAX_RETRIES + 1, delay_us);
+                  retry + 1, CPG_MAX_RETRIES + 1, (unsigned int)delay_us);
           up_udelay(delay_us);
         }
 
@@ -655,13 +655,14 @@ int rzv_module_reset(uint32_t clk_id)
                               CPG_TIMEOUT_RESET_ASSERT);
       if (ret >= 0)
         {
-          clkinfo("Reset asserted: domain=%u mask=0x%x\n", domain, bitmask);
+          clkinfo("Reset asserted: domain=%u mask=0x%x\n",
+                  (unsigned int)domain, (unsigned int)bitmask);
           return OK;
         }
     }
 
   clkerr("ERROR: Reset assert failed after %d attempts: domain=%u mask=0x%x\n",
-         CPG_MAX_RETRIES + 1, domain, bitmask);
+         CPG_MAX_RETRIES + 1, (unsigned int)domain, (unsigned int)bitmask);
   rzv_cpg_dump_registers(domain, "reset_assert_failure");
 
   return ret;
@@ -716,7 +717,7 @@ int rzv_module_unreset(uint32_t clk_id)
         {
           delay_us = CPG_RETRY_DELAY_US << (retry - 1);
           clkinfo("Retrying reset release (attempt %d/%d) after %uµs\n",
-                  retry + 1, CPG_MAX_RETRIES + 1, delay_us);
+                  retry + 1, CPG_MAX_RETRIES + 1, (unsigned int)delay_us);
           up_udelay(delay_us);
         }
 
@@ -735,13 +736,14 @@ int rzv_module_unreset(uint32_t clk_id)
                               CPG_TIMEOUT_RESET_RELEASE);
       if (ret >= 0)
         {
-          clkinfo("Reset deasserted: domain=%u mask=0x%x\n", domain, bitmask);
+          clkinfo("Reset deasserted: domain=%u mask=0x%x\n",
+                  (unsigned int)domain, (unsigned int)bitmask);
           return OK;
         }
     }
 
   clkerr("ERROR: Reset release failed after %d attempts: domain=%u mask=0x%x\n",
-         CPG_MAX_RETRIES + 1, domain, bitmask);
+         CPG_MAX_RETRIES + 1, (unsigned int)domain, (unsigned int)bitmask);
   rzv_cpg_dump_registers(domain, "reset_release_failure");
 
   return ret;
@@ -773,7 +775,7 @@ int rzv_clock_enable_sdhi(int ch)
     }
 
   clkinfo("rzv_clock_enable_sdhi: enabling SDHI%d clock (CPG id=0x%08x)\n",
-          ch, clk_ids[ch]);
+          ch, (unsigned int)clk_ids[ch]);
 
   return rzv_clock_enable(clk_ids[ch]);
 }
@@ -800,7 +802,7 @@ int rzv_reset_release_sdhi(int ch)
     }
 
   clkinfo("rzv_reset_release_sdhi: releasing SDHI%d reset (CPG id=0x%08x)\n",
-          ch, rst_ids[ch]);
+          ch, (unsigned int)rst_ids[ch]);
 
   return rzv_module_unreset(rst_ids[ch]);
 }
@@ -1499,11 +1501,12 @@ static void rzv_clock_verify_frequencies(void)
   else
     {
 #if defined(CONFIG_RZV_INIT_PLLDDR)
-      clkerr("ERROR: PLLDDR0 not locked (mon=0x%08x)\n", pll_mon);
+      clkerr("ERROR: PLLDDR0 not locked (mon=0x%08x)\n",
+             (unsigned int)pll_mon);
       errors++;
 #else
       clkinfo("PLLDDR0 not locked in verify (mon=0x%08x) — TF-A owns DDR\n",
-              pll_mon);
+              (unsigned int)pll_mon);
 #endif
     }
 
@@ -1515,11 +1518,12 @@ static void rzv_clock_verify_frequencies(void)
   else
     {
 #if defined(CONFIG_RZV_INIT_PLLDDR)
-      clkerr("ERROR: PLLDDR1 not locked (mon=0x%08x)\n", pll_mon);
+      clkerr("ERROR: PLLDDR1 not locked (mon=0x%08x)\n",
+             (unsigned int)pll_mon);
       errors++;
 #else
       clkinfo("PLLDDR1 not locked in verify (mon=0x%08x) — TF-A owns DDR\n",
-              pll_mon);
+              (unsigned int)pll_mon);
 #endif
     }
 

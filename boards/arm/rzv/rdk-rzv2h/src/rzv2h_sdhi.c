@@ -56,9 +56,6 @@
  *               these pins and document that NuttX need not touch them.
  */
 
-/* SD0 pin-mux warning: cards will not enumerate until pins are configured. */
-
-#warning "rzv2h_sdhi: SD0 dedicated pins (BSP_IO_SD0CLK/CMD/DAT0-3) not configured -- see pin TODO in rzv2h_sdhi.c"
 
 /****************************************************************************
  * Included Files
@@ -116,7 +113,7 @@ int rzv2h_sdhi_initialize(void)
   /* SD0 dedicated pin-mux: see file-level TODO comment.
    * The six pins (AN37/AN36/AP35/AN35/AP37/AR37) use FSP dedicated-pin
    * encoding 0xFFFF09xx / 0xFFFF0Axx and require IEN3/IOLH3 register writes
-   * inside R_GPIO.  Not yet implemented; see #warning above.
+   * inside R_GPIO.  Not yet implemented; see the file-level TODO above.
    * NEEDS_VERIFY: confirm boot firmware state of these pins before adding
    * pin-mux code (u-boot may already enable them).
    */

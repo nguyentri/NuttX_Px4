@@ -312,8 +312,8 @@ int arm_hardfault(int irq, void *context, void *arg)
 {
   _alert("HARD FAULT:\n");
   _alert("  IRQ: %d\n", irq);
-  up_dump_register(context);
-  PANIC();
+  UNUSED(context);
+  PANIC();  /* arm_assert dumps registers from rtcb->xcp.regs */
   return 0;  /* Won't get here */
 }
 
@@ -329,7 +329,7 @@ int arm_memfault(int irq, void *context, void *arg)
 {
   _alert("MEMORY MANAGEMENT FAULT:\n");
   _alert("  IRQ: %d\n", irq);
-  up_dump_register(context);
+  UNUSED(context);
   PANIC();
   return 0;  /* Won't get here */
 }
@@ -346,7 +346,7 @@ int arm_busfault(int irq, void *context, void *arg)
 {
   _alert("BUS FAULT:\n");
   _alert("  IRQ: %d\n", irq);
-  up_dump_register(context);
+  UNUSED(context);
   PANIC();
   return 0;  /* Won't get here */
 }
@@ -363,7 +363,7 @@ int arm_usagefault(int irq, void *context, void *arg)
 {
   _alert("USAGE FAULT:\n");
   _alert("  IRQ: %d\n", irq);
-  up_dump_register(context);
+  UNUSED(context);
   PANIC();
   return 0;  /* Won't get here */
 }

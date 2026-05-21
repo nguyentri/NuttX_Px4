@@ -104,8 +104,5 @@ CONFIG_ARCH_DPFPU=y
 # CONFIG_RZV_IDLE_LOG_STATE is not set
 
 # Minimal defconfig for rdk-rzv2h with ADC enabled
-CONFIG_ARCH="arm"
-CONFIG_ARCH_BOARD="rdk-rzv2h"
-CONFIG_ARCH_BOARD_RDK_RZV2H=y
 CONFIG_RZV_ADC=y
 CONFIG_RZV_ADC0=y

@@ -77,6 +77,8 @@ int board_bringup(void)
                          * overwritten by each subsystem so errors are swallowed.
                          * first_error captures the earliest non-zero status. */
 
+  UNUSED(ret);
+
   syslog(LOG_INFO, "NuttX: RDK-RZV2H Board bring-up starting...\n");
 
 #ifdef CONFIG_RZV_GPIO_IRQ

@@ -57,7 +57,7 @@ static struct rptun_rsc_s g_rzv_rptun_resource =
   {
     RSC_VDEV,
     RZV_OPENAMP_VIRTIO_ID_RPMSG,
-    RZV_OPENAMP_NOTIFYID0,
+    RZV_OPENAMP_NOTIFYID_VDEV,
     RZV_OPENAMP_RPMSG_FEATURES,
     0,
     sizeof(struct fw_rsc_config),
@@ -66,17 +66,17 @@ static struct rptun_rsc_s g_rzv_rptun_resource =
     {0, 0}
   },
   {
-    RZV_OPENAMP_VRING0_BASE0,
+    RZV_OPENAMP_VRING0_BASE,
     RZV_OPENAMP_VRING_ALIGN,
     RZV_OPENAMP_RPMSG_NUM_BUFS,
-    RZV_OPENAMP_NOTIFYID0,
+    RZV_OPENAMP_NOTIFYID_VDEV,
     0
   },
   {
-    RZV_OPENAMP_VRING1_BASE0,
+    RZV_OPENAMP_VRING1_BASE,
     RZV_OPENAMP_VRING_ALIGN,
     RZV_OPENAMP_RPMSG_NUM_BUFS,
-    RZV_OPENAMP_NOTIFYID0,
+    RZV_OPENAMP_NOTIFYID_VDEV,
     0
   },
   {
@@ -121,12 +121,14 @@ static int rzv_rptun_notify(FAR struct rptun_dev_s *dev, uint32_t vqid)
   return rzv_rproc_notify(vqid);
 }
 
-static void rzv_rptun_rproc_callback(FAR void *arg, uint32_t notifyid)
+static int rzv_rptun_rproc_callback(FAR void *arg, uint32_t notifyid)
 {
   if (g_rzv_rptun_callback != NULL)
     {
       g_rzv_rptun_callback(g_rzv_rptun_callback_arg, notifyid);
     }
+
+  return OK;
 }
 
 static int rzv_rptun_register_callback(FAR struct rptun_dev_s *dev,

@@ -1412,6 +1412,7 @@ config RZV_GPT_ONESHOT
    bool "GPT One-shot mode support"
    default n
    depends on RZV_PWM
+   select ARCH_HAVE_PWM_PULSECOUNT
    select PWM_PULSECOUNT
    ---help---
      Enable One-shot mode for the RZV GPT PWM driver.
@@ -1657,10 +1658,13 @@ config RZV_CANFD_IRQ_PRIORITY
 
 endif # RZV_CANFD
 
+config ARCH_HAVE_SDIO
+   bool
+   default y if RZV_SDHI
+
 config RZV_SDHI
    bool "SDHI (SD/eMMC) driver"
    default n
-   select ARCH_HAVE_SDIO
    select MMCSD
    select MMCSD_SDIO
    ---help---
