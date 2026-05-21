@@ -1,0 +1,225 @@
+############################################################################
+# arch/arm/src/ra8/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+# The start-up, "head", file
+
+# Common ARM and Cortex-M85 files
+
+include armv8-m/Make.defs
+
+# Add RA8-specific include paths
+
+EXTRAINCDIRS += $(ARCH_SRCDIR)$(DELIM)ra8
+EXTRAINCDIRS += $(ARCH_SRCDIR)$(DELIM)ra8$(DELIM)hardware
+EXTRAINCDIRS += $(ARCH_SRCDIR)$(DELIM)ra8$(DELIM)hardware$(DELIM)ra8e1
+
+# Required RA files
+CHIP_CSRCS += ra_mstp.c
+CHIP_CSRCS += ra_start.c
+CHIP_CSRCS += ra_clock.c
+CHIP_CSRCS += ra_irq.c
+CHIP_CSRCS += ra_icu.c
+CHIP_CSRCS += ra_gpio.c
+CHIP_CSRCS += ra_lowputc.c
+CHIP_CSRCS += ra_memmng.c
+CHIP_CSRCS += ra_timerisr.c
+CHIP_CSRCS += ra_serial.c
+
+# CAC driver
+ifeq ($(CONFIG_RA_CAC),y)
+CHIP_CSRCS += ra_cac.c
+endif
+
+# SDHI driver
+ifeq ($(CONFIG_RA_SDHI),y)
+CHIP_CSRCS += ra_sdhi.c
+endif
+
+# ADC driver
+ifeq ($(CONFIG_RA_ADC),y)
+ifeq ($(CONFIG_RA8E1_GROUP), y)
+CHIP_CSRCS += ra_adc.c
+endif
+ifeq ($(CONFIG_RA8P1_GROUP), y)
+CHIP_CSRCS += ra_adc_b.c
+endif
+endif
+
+# I2C driver
+ifeq ($(CONFIG_RA_I2C),y)
+CHIP_CSRCS += ra_i2c.c
+endif
+
+# I2C slave driver
+ifeq ($(CONFIG_RA_I2C_SLAVE),y)
+CHIP_CSRCS += ra_i2c_slave.c
+endif
+
+# I3C driver
+ifeq ($(CONFIG_RA_I3C),y)
+CHIP_CSRCS += ra_i3c.c
+endif
+
+# DMAC driver
+ifeq ($(CONFIG_RA_DMAC),y)
+CHIP_CSRCS += ra_dmac.c
+endif
+
+ifeq ($(CONFIG_RA_DTC),y)
+CHIP_CSRCS += ra_dtc.c
+endif
+
+# MIPI-CSI driver
+ifeq ($(CONFIG_RA_MIPI_CSI),y)
+CHIP_CSRCS += ra_mipi_csi.c
+CHIP_CSRCS += ra_ov5640.c
+endif
+
+# SPI driver
+ifeq ($(CONFIG_RA_SPI),y)
+CHIP_CSRCS += ra_spi.c
+endif
+
+# SCI_SPI driver (Simple SPI using SCI)
+ifeq ($(CONFIG_RA_SCI_SPI),y)
+CHIP_CSRCS += ra_sci_spi.c
+endif
+
+# SCI_I2C driver (Simple I2C using SCI)
+ifeq ($(CONFIG_RA_SCI_I2C),y)
+CHIP_CSRCS += ra_sci_i2c.c
+endif
+ifeq ($(CONFIG_RA_SCI_SPI),y)
+CHIP_CSRCS += ra_sci_spi.c
+endif
+
+# OSPI driver
+ifeq ($(CONFIG_RA_OSPI),y)
+CHIP_CSRCS += ra_ospi_b.c
+endif
+
+# PWM driver
+ifeq ($(CONFIG_RA_GPT),y)
+CHIP_CSRCS += ra_gpt.c
+endif
+
+# AGT driver
+ifeq ($(CONFIG_RA8_AGT),y)
+CHIP_CSRCS += ra_agt.c
+endif
+
+# POEG driver
+ifeq ($(CONFIG_RA_POEG),y)
+CHIP_CSRCS += ra_poeg.c
+endif
+
+# ELC driver
+ifeq ($(CONFIG_RA_ELC),y)
+CHIP_CSRCS += ra_elc.c
+endif
+
+# Flash memory driver
+ifeq ($(CONFIG_RA_FLASH),y)
+CHIP_CSRCS += ra_flash.c
+endif
+
+# MRAM driver (for RA8P1)
+ifeq ($(CONFIG_RA_MRAM),y)
+CHIP_CSRCS += ra_mram.c
+endif
+
+# RTC driver
+ifeq ($(CONFIG_RA_RTC),y)
+CHIP_CSRCS += ra_rtc.c
+CHIP_CSRCS += ra_rtc_lowerhalf.c
+endif
+
+# CANFD driver
+ifeq ($(CONFIG_RA_CANFD),y)
+CHIP_CSRCS += ra_canfd.c
+endif
+
+# Ethernet driver
+ifeq ($(CONFIG_RA_ETHERNET),y)
+CHIP_CSRCS += ra_ether.c
+CHIP_CSRCS += ra_ether_phy.c
+CHIP_CSRCS += ra_ether_rmac.c
+
+# PHY target drivers - select based on board configuration
+ifeq ($(CONFIG_RA_ETHERNET_PHY_GPY111),y)
+CHIP_CSRCS += ra_ether_phy_gpy111.c
+endif
+
+ifeq ($(CONFIG_RA_ETHERNET_PHY_KSZ8091RNB),y)
+CHIP_CSRCS += ra_ether_phy_ksz8091rnb.c
+endif
+
+ifeq ($(CONFIG_RA_ETHERNET_PHY_KSZ8041),y)
+CHIP_CSRCS += ra_ether_phy_ksz8041.c
+endif
+
+ifeq ($(CONFIG_RA_ETHERNET_PHY_DP83620),y)
+CHIP_CSRCS += ra_ether_phy_dp83620.c
+endif
+
+ifeq ($(CONFIG_RA_ETHERNET_PHY_ICS1894),y)
+CHIP_CSRCS += ra_ether_phy_ics1894.c
+endif
+endif
+
+# SDRAM driver
+ifeq ($(CONFIG_RA_SDRAM),y)
+CHIP_CSRCS += ra_sdram.c
+endif
+
+# WDT driver
+ifeq ($(CONFIG_RA_WDT),y)
+CHIP_CSRCS += ra_wdt.c
+endif
+
+# IWDT driver
+ifeq ($(CONFIG_RA_IWDT),y)
+CHIP_CSRCS += ra_iwdt.c
+endif
+
+# IPC driver (Inter-Processor Communication)
+ifeq ($(CONFIG_RA_IPC),y)
+CHIP_CSRCS += ra_ipc.c
+endif
+
+# LPM (Low Power Mode) driver
+ifeq ($(CONFIG_RA_LPM),y)
+CHIP_CSRCS += ra_lpm.c
+endif
+
+# ULPT (Ultra-Low Power Timer) driver
+ifeq ($(CONFIG_RA_ULPT),y)
+CHIP_CSRCS += ra_ulpt.c
+endif
+
+# USB Device Controller driver
+ifeq ($(CONFIG_RA_USBDEV),y)
+CHIP_CSRCS += ra_usbdev.c
+endif
+
+# IDLE task custom
+ifeq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
+CHIP_CSRCS += ra_idle.c
+endif

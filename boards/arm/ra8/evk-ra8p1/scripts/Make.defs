@@ -1,0 +1,79 @@
+############################################################################
+# boards/arm/ra8/evk-ra8p1/scripts/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+include $(TOPDIR)/.config
+include $(TOPDIR)/tools/Config.mk
+include $(TOPDIR)/arch/arm/src/armv8-m/Toolchain.defs
+
+# Determine linker script based on build type and configuration
+#ifeq ($(CONFIG_RA_CPU_CORE), 0)
+#  LDSCRIPT = cm85/cm85_user_defs.ld
+#else ifeq ($(CONFIG_RA_CPU_CORE),1)
+#  LDSCRIPT = cm33/cm33_user_defs.ld
+#else
+## No core clarified
+#  LDSCRIPT = evk-ra8p1.ld
+#endif
+ifeq ($(CONFIG_RA_FSP_LINKER_STYPE),y)
+  # Legacy FSP-style linker script with g_init_info tables
+  LDSCRIPT = evk-ra8p1.ld
+else
+  # Optimized NuttX-standard linker script
+  LDSCRIPT = evk-ra8p1_non_ospi.ld
+endif
+
+ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
+
+# Add linker script search paths for INCLUDE directives
+# The linker needs to find included .ld files (common/, cm85/, cm33/)
+LDFLAGS += -L $(BOARD_DIR)$(DELIM)scripts$(DELIM)cm85
+LDFLAGS += -L $(BOARD_DIR)$(DELIM)scripts$(DELIM)cm33
+LDFLAGS += -L $(BOARD_DIR)$(DELIM)scripts$(DELIM)common
+LDFLAGS += -L $(BOARD_DIR)$(DELIM)scripts
+
+# ARM Cortex-M85 specific flags
+ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
+
+# Compile flags
+CFLAGS := $(ARCHCFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+CPICFLAGS = $(ARCHPICFLAGS) $(CFLAGS)
+CXXFLAGS := $(ARCHCXXFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
+CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
+AFLAGS := $(CFLAGS) -D__ASSEMBLY__
+
+# Linker flags
+NXFLATLDFLAGS1 = -r -d -warn-common
+NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-pcrel.ld -no-check-sections
+LDNXFLATFLAGS = -e main -s 2048
+
+# ELF module flags
+LDELFFLAGS = -r -e main
+ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
+  LDELFFLAGS += -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld}"
+else
+  LDELFFLAGS += -T $(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld
+endif
+
+# Board-specific flags
+HOSTCC = gcc
+HOSTINCLUDES = -I.
+HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
+HOSTLDFLAGS =

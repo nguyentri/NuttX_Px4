@@ -1,0 +1,406 @@
+Signal/Function,Pin,Connector,Pin Number,Notes
+SDRAM_A0,PA03,,,
+SDRAM_A1,PA02,,,
+SDRAM_A2,PA01,,,
+SDRAM_A3,PA00,,,
+SDRAM_A4,P503,,,
+SDRAM_A5,P504,,,
+SDRAM_A6,P505,,,
+SDRAM_A7,P506,,,
+SDRAM_A8,P507,,,
+SDRAM_A9,P508,,,
+SDRAM_A10,P509,,,
+SDRAM_A11,P510,,,
+SDRAM_A12,P608,,,
+SDRAM_BA0,PD00,,,
+SDRAM_BA1,PC15,,,
+SDRAM_DQ0,P302,,,
+SDRAM_DQ1,P301,,,
+SDRAM_DQ2,P300,,,
+SDRAM_DQ3,P112,,,
+SDRAM_DQ4,P113,,,
+SDRAM_DQ5,P114,,,
+SDRAM_DQ6,P115,,,
+SDRAM_DQ7,P609,,,
+SDRAM_DQ8,PA11,,,
+SDRAM_DQ9,PA12,,,
+SDRAM_DQ10,PA13,,,
+SDRAM_DQ11,PA14,,,
+SDRAM_DQ12,P610,,,
+SDRAM_DQ13,P611,,,
+SDRAM_DQ14,P612,,,
+SDRAM_DQ15,P613,,,
+SDRAM_DQ16,PC14,,,
+SDRAM_DQ17,PC13,,,
+SDRAM_DQ18,PC12,,,
+SDRAM_DQ19,PC11,,,
+SDRAM_DQ20,PC10,,,
+SDRAM_DQ21,PC09,,,
+SDRAM_DQ22,PC08,,,
+SDRAM_DQ23,PC07,,,
+SDRAM_DQ24,PC06,,,
+SDRAM_DQ25,PC05,,,
+SDRAM_DQ26,PC04,,,
+SDRAM_DQ27,PC03,,,
+SDRAM_DQ28,PC02,,,
+SDRAM_DQ29,PC01,,,
+SDRAM_DQ30,PC00,,,
+SDRAM_DQ31,P607,,,
+SDRAM_CKE,PA06,,,
+SDRAM_CLK,PA15,,,
+SDRAM_DQM0,P614,,,
+SDRAM_DQM1,PA05,,,
+SDRAM_DQM2,P615,,,
+SDRAM_DQM3,PA04,,,
+SDRAM_WE#,PA08,,,
+SDRAM_CAS#,PA09,,,
+SDRAM_RAS#,PA10,,,
+SDRAM_CS#,P813,,,
+GND,GND,J35,1,Camera Expansion Port Parallel
+CAM_D11,NC,J35,2,Camera Expansion Port Parallel
+CAM_D10,NC,J35,3,Camera Expansion Port Parallel
+GND,GND,J35,4,Camera Expansion Port Parallel
+CAM_D9,P703 (D7),J35,5,Camera Expansion Port Parallel
+CAM_D8,P702 (D6),J35,6,Camera Expansion Port Parallel
+GND,GND,J35,7,Camera Expansion Port Parallel
+CAM_D7,P701 (D5),J35,8,Camera Expansion Port Parallel
+CAM_D6,P700 (D4),J35,9,Camera Expansion Port Parallel
+GND,GND,J35,10,Camera Expansion Port Parallel
+CAM_D5,P406 (D3),J35,11,Camera Expansion Port Parallel
+CAM_D4,P405 (D2),J35,12,Camera Expansion Port Parallel
+GND,GND,J35,13,Camera Expansion Port Parallel
+CAM_D3,P902 (D1),J35,14,Camera Expansion Port Parallel
+CAM_D2,P400 (D0),J35,15,Camera Expansion Port Parallel
+GND,GND,J35,16,Camera Expansion Port Parallel
+CAM_D1,NC,J35,17,Camera Expansion Port Parallel
+CAM_D0,NC,J35,18,Camera Expansion Port Parallel
+GND,GND,J35,19,Camera Expansion Port Parallel
+I²C_SCL,P512 (SCL1),J35,20,Camera Expansion Port Parallel
+I²C_SDA,P511 (SDA1),J35,21,Camera Expansion Port Parallel
+GND,GND,J35,22,Camera Expansion Port Parallel
+CAM_VSYNC,PB02,J35,23,Camera Expansion Port Parallel
+CAM_HSYNC,PB03,J35,24,Camera Expansion Port Parallel
+CAM_RST,P709,J35,25,Camera Expansion Port Parallel
+CAM_XCLK,P501,J35,26,Camera Expansion Port Parallel
+CAM_PCLK,PB04,J35,27,Camera Expansion Port Parallel
+CAM_INT,P010 (IRQ-14),J35,28,Camera Expansion Port Parallel
+GND,GND,J35,29,Camera Expansion Port Parallel
+GND,GND,J35,30,Camera Expansion Port Parallel
++3.3V,+3.3V,J35,31,Camera Expansion Port Parallel
+GND,GND,J35,32,Camera Expansion Port Parallel
+GND,GND,J35,33,Camera Expansion Port Parallel
++3.3V,+3.3V,J35,34,Camera Expansion Port Parallel
++3.3V,+3.3V,J35,35,Camera Expansion Port Parallel
++3.3V,+3.3V,J35,36,Camera Expansion Port Parallel
+GND,GND,J35,37,Camera Expansion Port Parallel
+GND,GND,J35,38,Camera Expansion Port Parallel
++3.3V,+3.3V,J35,39,Camera Expansion Port Parallel
+GND,GND,J35,40,Camera Expansion Port Parallel
+GND,GND,J35,1,Camera Expansion Port MIPI
+NC,NC,J35,2,Camera Expansion Port MIPI
+NC,NC,J35,3,Camera Expansion Port MIPI
+GND,GND,J35,4,Camera Expansion Port MIPI
+MIPI_DL1_P,MIPI_CSI_DL1_P,J35,5,Camera Expansion Port MIPI
+MIPI_DL1_N,MIPI_CSI_DL1_N,J35,6,Camera Expansion Port MIPI
+GND,GND,J35,7,Camera Expansion Port MIPI
+MIPI_CL_P,MIPI_CSI_CL_P,J35,8,Camera Expansion Port MIPI
+MIPI_CL_N,MIPI_CSI_CL_N,J35,9,Camera Expansion Port MIPI
+GND,GND,J35,10,Camera Expansion Port MIPI
+MIPI_DL0_P,MIPI_CSI_DL0_P,J35,11,Camera Expansion Port MIPI
+MIPI_DL0_N,MIPI_CSI_DL0_N,J35,12,Camera Expansion Port MIPI
+GND,GND,J35,13,Camera Expansion Port MIPI
+NC,NC,J35,14,Camera Expansion Port MIPI
+NC,NC,J35,15,Camera Expansion Port MIPI
+GND,GND,J35,16,Camera Expansion Port MIPI
+NC,NC,J35,17,Camera Expansion Port MIPI
+NC,NC,J35,18,Camera Expansion Port MIPI
+GND,GND,J35,19,Camera Expansion Port MIPI
+I²C_SCL,P512 (SCL1),J35,20,Camera Expansion Port MIPI
+I²C_SDA,P511 (SDA1),J35,21,Camera Expansion Port MIPI
+GND,GND,J35,22,Camera Expansion Port MIPI
+NC,NC,J35,23,Camera Expansion Port MIPI
+NC,NC,J35,24,Camera Expansion Port MIPI
+RESET,P709,J35,25,Camera Expansion Port MIPI
+XCLK,P501,J35,26,Camera Expansion Port MIPI
+NC,NC,J35,27,Camera Expansion Port MIPI
+CAM_INT,P010 (IRQ-14),J35,28,Camera Expansion Port MIPI
+GND,GND,J35,29,Camera Expansion Port MIPI
+GND,GND,J35,30,Camera Expansion Port MIPI
++3.3V,+3.3V,J35,31,Camera Expansion Port MIPI
+GND,GND,J35,32,Camera Expansion Port MIPI
+GND,GND,J35,33,Camera Expansion Port MIPI
++3.3V,+3.3V,J35,34,Camera Expansion Port MIPI
++3.3V,+3.3V,J35,35,Camera Expansion Port MIPI
++3.3V,+3.3V,J35,36,Camera Expansion Port MIPI
+GND,GND,J35,37,Camera Expansion Port MIPI
+GND,GND,J35,38,Camera Expansion Port MIPI
++3.3V,+3.3V,J35,39,Camera Expansion Port MIPI
+GND,GND,J35,40,Camera Expansion Port MIPI
+I3C_SCL/I2C_SCL,P400 (SCL0) / P512 (SCL1),J27,1,Grove 1
+I3C_SDA/I2C_SDA,P401 (SDA0) / P511 (SDA1),J27,2,Grove 1
+VCC,+3.3V,J27,3,Grove 1
+GND,GND,J27,4,Grove 1
+SCL,P512 (SCL1) / P002 (AN002),J28,1,Grove 2
+SDA,P511 (SDA1) / P005 (AN005),J28,2,Grove 2
+VCC,+3.3V,J28,3,Grove 2
+GND,GND,J28,4,Grove 2
+GND,GND,J30,1,Qwiic
+VCC,+3.3V,J30,2,Qwiic
+I3C_SDA/I2C_SDA,P401 (SDA0) / P511 (SDA1),J30,3,Qwiic
+I3C_SCL/I2C_SCL,P400 (SCL0) / P512 (SCL1),J30,4,Qwiic
+SS,P804 (SS2/IRQ18),J26,1,Pmod 1 SPI
+MOSI,P801 (MOSI2/TXD2/RST),J26,2,Pmod 1 SPI
+MISO,P802 (MISO2/RXD2),J26,3,Pmod 1 SPI
+SCK,P803 (SCK2),J26,4,Pmod 1 SPI
+GND,GND,J26,5,Pmod 1 SPI
+VCC,+3.3V / +5.0V,J26,6,Pmod 1 SPI
+IRQ,P006 (IRQ11-DS),J26,7,Pmod 1
+RESET (master to slave),P402,J26,8,Pmod 1
+GPIO,P412,J26,9,Pmod 1
+GPIO,P413,J26,10,Pmod 1
+GND,GND,J26,11,Pmod 1
+VCC,+3.3V / +5.0V,J26,12,Pmod 1
+CTS,P800 (CTS2/IRQ17),J26,1,Pmod 1 UART
+TXD,P801 (MOSI2/TXD2/RST),J26,2,Pmod 1 UART
+RXD,P802 (MISO2/RXD2),J26,3,Pmod 1 UART
+SCL,P512 (SCL1),J26,4,Pmod 1 I2C
+RTS,P804 (RTS2),J26,4,Pmod 1 UART
+SDA,P511 (SDA1),J26,4,Pmod 1 I2C
+SS,P604 (SSLB0),J25,1,Pmod 2 SPI
+MOSI,P603 (MOSIB/TXD0),J25,2,Pmod 2 SPI
+MISO,P602 (MISOB/RXD0),J25,3,Pmod 2 SPI
+SCK,P601 (RSPCKB),J25,4,Pmod 2 SPI
+GND,GND,J25,5,Pmod 2
+VCC,+3.3V,J25,6,Pmod 2
+IRQ,P012 (IRQ15),J25,7,Pmod 2
+RESET (master to slave),P410,J25,8,Pmod 2
+GPIO,P409,J25,9,Pmod 2
+GPIO,P704,J25,10,Pmod 2
+GND,GND,J25,11,Pmod 2
+VCC,+3.3V,J25,12,Pmod 2
+CTS,P605 (CTS0),J25,1,Pmod 2 UART
+TXD,P603 (MOSIB/TXD0),J25,2,Pmod 2 UART
+RXD,P602 (MISOB/RXD0),J25,3,Pmod 2 UART
+RTS,P604 (RTS0),J25,4,Pmod 2 UART
+NC,NC,J18,1,Arduino
+IOREF,+3.3V,J18,2,Arduino
+RESET,RESET_L,J18,3,Arduino
+3.3V,+3.3V,J18,4,Arduino
+5V,+5V,J18,5,Arduino
+GND,GND,J18,6,Arduino
+GND,GND,J18,7,Arduino
+VIN,NC,J18,8,Arduino
+A0,P001 (AN001),J19,1,Arduino
+A1,P007 (AN007),J19,2,Arduino
+A2,P003 (AN003),J19,3,Arduino
+A3,P004 (AN004),J19,4,Arduino
+A4,P014 (AN014/DA0),J19,5,Arduino
+A5,P015 (AN015/DA1),J19,6,Arduino
+D0 RXD PWM,P808 (RXD7/GTIOC13B),J23,1,Arduino
+D1 TXD,P809 (TXD7),J23,2,Arduino
+D2 INT0,P011 (IRQ16),J23,3,Arduino
+D3 INT1 PWM,P811 (IRQ22/GTIOC10B),J23,4,Arduino
+D4 PWM,P810 (IRQ21/GTIOC10A),J23,5,Arduino
+D5 PWM,P104 (IRQ1/GTIOC1B),J23,6,Arduino
+D6 PWM,P105 (IRQ0/GTIOC1A),J23,7,Arduino
+D7,P312 (IRQ22-DS),J23,8,Arduino
+D8,PD01 (IRQ22),J24,1,Arduino
+D9 PWM,P110 (IRQ20/GTIOC9B),J24,2,Arduino
+D10 SPI_SS PWM,P103 (SSLB/GTIOC2A),J24,3,Arduino
+D11 SPI_MOSI PWM,P101 (MOSIB/GTIOC8A),J24,4,Arduino
+D12 SPI_MISO PWM,P100 (MISOB/GTIOC8B),J24,5,Arduino
+D13 SPI_SCK,P102 (RSPCKB/GTIOC2B),J24,6,Arduino
+GND,GND,J24,7,Arduino
+ARDUINO_AREF,+3.3V,J24,8,Arduino
+I3C_SDA/I2C_SDA,P401 (SDA0)/P511 (SDA1),J24,9,Arduino
+I3C_SCL/I2C_SCL,P400 (SCL0)/P512 (SCL1),J24,10,Arduino
+AN (Analog),P004 (AN004),J21,1,mikroBUS
+RST (Reset),P201/MD (MIKROBUS RESET_L),J21,2,mikroBUS
+CS (SPI Chip Select),P103 (SSLB0),J21,3,mikroBUS
+SCK (SPI Clock),P102 (RSPCKB),J21,4,mikroBUS
+MISO,P100 (MISOB),J21,5,mikroBUS
+MOSI,P101 (MOSIB),J21,6,mikroBUS
++3.3V,+3.3V,J21,7,mikroBUS
+GND,GND,J21,8,mikroBUS
+PWM,P810 (GTIOC10A),J22,1,mikroBUS
+INT (Hardware Interrupt),PD01 (IRQ-22),J22,2,mikroBUS
+RX (UART Receive),P808 (RXD7),J22,3,mikroBUS
+TX (UART Transmit),P809 (TXD7),J22,4,mikroBUS
+I3C_SCL/I2C_SCL,P400 (SCL0) / P512 (SCL1),J22,5,mikroBUS
+I3C_SDA/I2C_SDA,P401 (SDA0) / P511 (SDA1),J22,6,mikroBUS
++5V,+5V,J22,7,mikroBUS
+GND,GND,J22,8,mikroBUS
+LED1 (Blue),P600,,,"User LED, Board LED"
+LED2 (Green),P303,,,"User LED, Board LED"
+LED3 (Red),PA07,,,"User LED, Board LED"
+LED4 (White),+3.3V,,,"Power indicator, Board LED"
+LED5 (Yellow),J-Link OB MCU,,,"Debug LED, Board LED"
+LED6 (Amber),Ethernet PHY IC LED2,,,"Ethernet PHY LED, Board LED"
+LED7 (Yellow),Ethernet PHY IC LED0,,,"Ethernet PHY LED, Board LED"
+LED8 (Green),Ethernet PHY IC LED1,,,"Ethernet PHY LED, Board LED"
+SW1 (Blue),P009 (IRQ13-DS),,,User Switch
+SW2 (Blue),P008 (IRQ12-DS),,,User Switch
+SW3 (Red),RESET_L,,,MCU Reset Switch
+MDINT,P107,,,Ethernet PHY
+MDC,P415,,,Ethernet PHY
+MDIO,P414,,,Ethernet PHY
+TXD0,P307,,,Ethernet PHY
+TXD1,P306,,,Ethernet PHY
+TXD2,P305,,,Ethernet PHY
+TXD3,P304,,,Ethernet PHY
+TX_CTL,P310,,,Ethernet PHY
+TX_CLK,P309,,,Ethernet PHY
+RXD0,P906,,,Ethernet PHY
+RXD1,P907,,,Ethernet PHY
+RXD2,P908,,,Ethernet PHY
+RXD3,P909,,,Ethernet PHY
+RX_CTL,P206,,,Ethernet PHY
+RX_CLK,P905,,,Ethernet PHY
+RSTN,P708,,,Ethernet PHY
+GND,GND,J7-A,1,USB High Speed
+TX1+,NC,J7-A,2,USB High Speed
+TX1-,NC,J7-A,3,USB High Speed
+VBUS,USBHS_cVBUS_CON,J7-A,4,USB High Speed
+CC1,USB_HS_CC1,J7-A,5,USB High Speed
+DA+,USBH_P,J7-A,6,USB High Speed
+DA-,USBH_N,J7-A,7,USB High Speed
+SBU1,NC,J7-A,8,USB High Speed
+VBUS,USBHS_cVBUS_CON,J7-A,9,USB High Speed
+RX2-,NC,J7-A,10,USB High Speed
+RX2+,NC,J7-A,11,USB High Speed
+GND,GND,J7-A,12,USB High Speed
+GND,GND,J7-B,1,USB High Speed
+TX2+,NC,J7-B,2,USB High Speed
+TX2-,NC,J7-B,3,USB High Speed
+VBUS,USBHS_cVBUS_CON,J7-B,4,USB High Speed
+CC2,USB_HS_CC2,J7-B,5,USB High Speed
+DB+,USBH_P,J7-B,6,USB High Speed
+DB-,USBH_N,J7-B,7,USB High Speed
+SBU2,NC,J7-B,8,USB High Speed
+VBUS,USBHS_cVBUS_CON,J7-B,9,USB High Speed
+RX1-,NC,J7-B,10,USB High Speed
+RX1+,NC,J7-B,11,USB High Speed
+GND,GND,J7-B,12,USB High Speed
+SHIELD,GND,J7-S,1,USB High Speed
+SHIELD,GND,J7-S,2,USB High Speed
+SHIELD,GND,J7-S,3,USB High Speed
+SHIELD,GND,J7-S,4,USB High Speed
+QSPI_FLASH_RESET#,P106,,,Octo-SPI Flash
+QSPI_FLASH_ECS#,P105,,,Octo-SPI Flash
+QSPI_FLASH_SCLK,P808,,,Octo-SPI Flash
+QSPI_FLASH_CS#,P104,,,Octo-SPI Flash
+QSPI_FLASH_DQS,P801,,,Octo-SPI Flash
+QSPI_FLASH_SIO0,P100,,,Octo-SPI Flash
+QSPI_FLASH_SIO1,P803,,,Octo-SPI Flash
+QSPI_FLASH_SIO2,P103,,,Octo-SPI Flash
+QSPI_FLASH_SIO3,P101,,,Octo-SPI Flash
+QSPI_FLASH_SIO4,P102,,,Octo-SPI Flash
+QSPI_FLASH_SIO5,P800,,,Octo-SPI Flash
+QSPI_FLASH_SIO6,P802,,,Octo-SPI Flash
+QSPI_FLASH_SIO7,P804,,,Octo-SPI Flash
+GND,GND,J35,1,Camera Expansion Port Parallel
+CAM_D11,NC,J35,2,Camera Expansion Port Parallel
+CAM_D10,NC,J35,3,Camera Expansion Port Parallel
+GND,GND,J35,4,Camera Expansion Port Parallel
+CAM_D9,P703 (D7),J35,5,Camera Expansion Port Parallel
+CAM_D8,P702 (D6),J35,6,Camera Expansion Port Parallel
+GND,GND,J35,7,Camera Expansion Port Parallel
+CAM_D7,P701 (D5),J35,8,Camera Expansion Port Parallel
+CAM_D6,P700 (D4),J35,9,Camera Expansion Port Parallel
+GND,GND,J35,10,Camera Expansion Port Parallel
+CAM_D5,P406 (D3),J35,11,Camera Expansion Port Parallel
+CAM_D4,P405 (D2),J35,12,Camera Expansion Port Parallel
+GND,GND,J35,13,Camera Expansion Port Parallel
+CAM_D3,P902 (D1),J35,14,Camera Expansion Port Parallel
+CAM_D2,P400 (D0),J35,15,Camera Expansion Port Parallel
+GND,GND,J35,16,Camera Expansion Port Parallel
+CAM_D1,NC,J35,17,Camera Expansion Port Parallel
+CAM_D0,NC,J35,18,Camera Expansion Port Parallel
+GND,GND,J35,19,Camera Expansion Port Parallel
+I²C_SCI,P512 (SCL1),J35,20,Camera Expansion Port Parallel
+I²C_SDA,P511 (SDA1),J35,21,Camera Expansion Port Parallel
+GND,GND,J35,22,Camera Expansion Port Parallel
+CAM_VSYNC,PB02,J35,23,Camera Expansion Port Parallel
+CAM_HSYNC,PB03,J35,24,Camera Expansion Port Parallel
+CAM_RST,P709,J35,25,Camera Expansion Port Parallel
+CAM_XCLK,P501,J35,26,Camera Expansion Port Parallel
+CAM_PCLK,PB04,J35,27,Camera Expansion Port Parallel
+CAM_INT,P010 (IRQ-14),J35,28,Camera Expansion Port Parallel
+GND,GND,J35,29,Camera Expansion Port Parallel
+GND,GND,J35,30,Camera Expansion Port Parallel
++3.3V,+3.3V,J35,31,Camera Expansion Port Parallel
+GND,GND,J35,32,Camera Expansion Port Parallel
+GND,GND,J35,33,Camera Expansion Port Parallel
++3.3V,+3.3V,J35,34,Camera Expansion Port Parallel
++3.3V,+3.3V,J35,35,Camera Expansion Port Parallel
++3.3V,+3.3V,J35,36,Camera Expansion Port Parallel
+GND,GND,J35,37,Camera Expansion Port Parallel
+GND,GND,J35,38,Camera Expansion Port Parallel
++3.3V,+3.3V,J35,39,Camera Expansion Port Parallel
+GND,GND,J35,40,Camera Expansion Port Parallel
+BLEN,P514,J1,1,Parallel Graphics - RGB888/666/565
+SDA,P511,J1,2,Parallel Graphics - SDA1
+INT#,P111,J1,3,Parallel Graphics - INT
+SCL,P512,J1,4,Parallel Graphics - SCL1
++3.3V,+3.3 V,J1,5,Parallel Graphics - Power
+RESET_L,P606,J1,6,Parallel Graphics - RST
++3.3V,+3.3 V,J1,7,Parallel Graphics - Power
++5V,+5 V,J1,8,Parallel Graphics - Power
+VSYNC/TCON0,P806,J1,9,Parallel Graphics - TCON0
+CLK,P515,J1,10,Parallel Graphics - CLK
+DE/TCON2,P807,J1,11,Parallel Graphics - TCON2
+HSYNC/TCON1,P805,J1,12,Parallel Graphics - TCON1
+EXTCLK,P710,J1,13,Parallel Graphics - EXTCLK
+TCON3,P513,J1,14,Parallel Graphics - TCON3
+DATA1/B1,P915,J1,15,Parallel Graphics - B1/B3/B4
+DATA0/B0,P914,J1,16,Parallel Graphics - B0/B2/B3
+DATA3/B3,P902,J1,17,Parallel Graphics - B3/B5/B6
+DATA2/B2,P903,J1,18,Parallel Graphics - B2/B4/B5
+DATA5/B5,P911,J1,19,Parallel Graphics - B5/B7/G2
+DATA4/B4,P910,J1,20,Parallel Graphics - B4/B6/B7
+DATA7/B7,P913,J1,21,Parallel Graphics - B7/G3/G4
+DATA6/B6,P912,J1,22,Parallel Graphics - B6/G2/G3
+DATA9/G1,P207,J1,23,Parallel Graphics - G1/G5/G6
+DATA8/G0,P904,J1,24,Parallel Graphics - G0/G4/G5
+DATA11/G3,PB06,J1,25,Parallel Graphics - G3/G7/R3
+DATA10/G2,PB07,J1,26,Parallel Graphics - G2/G6/G7
+DATA13/G5,PB01,J1,27,Parallel Graphics - G5/R3/R5
+DATA12/G4,PB05,J1,28,Parallel Graphics - G4/R2/R4
+DATA15/G7,PB03,J1,29,Parallel Graphics - G7/R5/R7
+DATA14/G6,PB04,J1,30,Parallel Graphics - G6/R4/R6
+DATA17/R1,PB00,J1,31,Parallel Graphics - R1/R7/NC
+DATA16/R0,PB02,J1,32,Parallel Graphics - R0/R6/NC
+DATA19/R3,P711,J1,33,Parallel Graphics - R3/NC/NC
+DATA18/R2,P707,J1,34,Parallel Graphics - R2/NC/NC
+DATA21/R5,P713,J1,35,Parallel Graphics - R5/NC/NC
+DATA20/R4,P712,J1,36,Parallel Graphics - R4/NC/NC
+DATA23/R7,P715,J1,37,Parallel Graphics - R7/NC/NC
+DATA22/R6,P714,J1,38,Parallel Graphics - R6/NC/NC
+GND,GND,J1,39,Parallel Graphics - Ground
+GND,GND,J1,40,Parallel Graphics - Ground
+GND,GND,J32,1,MIPI Graphics Expansion
+GND,GND,J32,2,MIPI Graphics Expansion
+MIPI_DL0_P,MIPI_DSI_DL0_P,J32,3,MIPI Graphics Expansion
+MIPI_DL1_P,MIPI_DSI_DL1_P,J32,4,MIPI Graphics Expansion
+MIPI_DL0_N,MIPI_DSI_DL0_N,J32,5,MIPI Graphics Expansion
+MIPI_DL1_N,MIPI_DSI_DL1_N,J32,6,MIPI Graphics Expansion
+GND,GND,J32,7,MIPI Graphics Expansion
+GND,GND,J32,8,MIPI Graphics Expansion
+MIPI_CL_P,MIPI_DSI_CL_P,J32,9,MIPI Graphics Expansion
+MIPI_DSI_TE,P411,J32,10,MIPI Graphics Expansion
+MIPI_CL_N,MIPI_DSI_CL_N,J32,11,MIPI Graphics Expansion
+GND,GND,J32,12,MIPI Graphics Expansion
+GND,GND,J32,13,MIPI Graphics Expansion
+I2C_SDA,P511 (SDA1),J32,14,MIPI Graphics Expansion
+DISP_BLEN,P514,J32,15,MIPI Graphics Expansion
+I2C_SCL,P512 (SCL1),J32,16,MIPI Graphics Expansion
+DISP_INT,P111 (IRQ-19),J32,17,MIPI Graphics Expansion
+DISP_RST,P606,J32,18,MIPI Graphics Expansion
+GND,GND,J32,19,MIPI Graphics Expansion
+GND,GND,J32,20,MIPI Graphics Expansion
++1.8V,+1.8 V,J32,21,MIPI Graphics Expansion - Power
++1.8V,+1.8 V,J32,22,MIPI Graphics Expansion - Power
++3.3V,+3.3 V,J32,23,MIPI Graphics Expansion - Power
++3.3V,+3.3 V,J32,24,MIPI Graphics Expansion - Power
++5V,+5 V,J32,25,MIPI Graphics Expansion - Power
++5V,+5 V,J32,26,MIPI Graphics Expansion - Power

@@ -1,0 +1,2 @@
+ra8e1_boot.c:48:6:ra_board_initialize	8	static
+/home/a5094159/projects/nuttx_ra_porting/nuttx/include/nuttx/board.h:197:5:board_app_initialize	8	static

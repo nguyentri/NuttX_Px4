@@ -1,0 +1,7083 @@
+#
+# RA8 Family MCU Configuration Options
+#
+# Based on official Renesas User Manuals:
+#  - RA8E1: Single Cortex-M85 @ 360MHz
+#    - 544KB SRAM (including 32KB TCM)
+#    - 1MB Code Flash + 12KB Data Flash
+#  - RA8P1: Dual Cortex-M85 @ 1GHz + Cortex-M33 @ 250MHz
+#    - 2MB SRAM with ECC + dedicated TCM per core
+#    - 1MB MRAM
+#    - 4MB/8MB SiP FLASH (R7JA8P1JRLSAJ)
+
+comment "RA8 Family MCU Selection"
+
+choice
+   prompt "RA8 Chip Selection"
+   default ARCH_CHIP_R7KA8P1KFLCAC
+   depends on ARCH_CHIP_RA8
+
+config ARCH_CHIP_R7FA8E1AFDCFB
+   bool "R7FA8E1AFDCFB (LQFP144)"
+   select RA8_CM85_FAMILY
+   select RA8E1_GROUP
+   # Serial Communication - 6 SCI UART channels
+   select RA_HAVE_SCI0
+   select RA_HAVE_SCI1
+   select RA_HAVE_SCI2
+   select RA_HAVE_SCI3
+   select RA_HAVE_SCI4
+   select RA_HAVE_SCI9
+   # I2C - 3 channels
+   select RA_HAVE_I2C0
+   select RA_HAVE_I2C1
+   # DMA
+   select RA_HAVE_DMAC
+   # SPI - 2 channels
+   select RA_HAVE_SPI0
+   select RA_HAVE_SPI1
+   # CANFD - 2 channels
+   select RA_HAVE_CANFD0
+   select RA_HAVE_CANFD1
+   # Ethernet
+   select RA_HAVE_ETHERC_MII
+   select RA_HAVE_ETHERC_RMII
+   # USB
+   select RA_HAVE_USBFS
+   # Storage
+   select RA_HAVE_OSPI
+   # Audio - 2 SSIE channels
+   select RA_HAVE_SSIE
+   select RA_HAVE_SSIE0
+   select RA_HAVE_SSIE1
+   # Camera/Video
+   select RA_HAVE_CEU
+   # General Purpose Timers - 8 channels
+   select RA_HAVE_GPT
+   select RA_HAVE_GPT0
+   select RA_HAVE_GPT1
+   select RA_HAVE_GPT2
+   select RA_HAVE_GPT3
+   select RA_HAVE_GPT4
+   select RA_HAVE_GPT5
+   select RA_HAVE_GPT6
+   select RA_HAVE_GPT7
+   # Low Power Timers
+   select RA_HAVE_AGT
+   select RA_HAVE_AGT0
+   select RA_HAVE_AGT1
+   select RA_HAVE_AGT2
+   select RA_HAVE_AGT3
+   select RA_HAVE_AGT4
+   select RA_HAVE_AGT5
+   select RA_HAVE_ULPT
+   select RA_HAVE_ULPT0
+   select RA_HAVE_ULPT1
+   # RTC
+   select RA_HAVE_RTC
+   # Analog
+   select RA_HAVE_ADC12
+   select RA_HAVE_DAC12
+   select RA_HAVE_ACMPHS
+   select RA_HAVE_ACMPHS0
+   select RA_HAVE_ACMPHS1
+   # Security Features
+   select RA_HAVE_CPSCU
+   select RA_HAVE_PSCU
+   select RA_HAVE_ECC
+   # System Utilities
+   select RA_HAVE_CRC
+   select RA_HAVE_CAC
+   select RA_HAVE_DOC
+   select RA_HAVE_ELC
+   select RA_HAVE_POEG
+
+config ARCH_CHIP_R7FA8E1AFDCFP
+   bool "R7FA8E1AFDCFP (LQFP100)"
+   select RA8_CM85_FAMILY
+   select RA8E1_GROUP
+   # Serial Communication - 6 SCI UART channels
+   select RA_HAVE_SCI0
+   select RA_HAVE_SCI1
+   select RA_HAVE_SCI2
+   select RA_HAVE_SCI3
+   select RA_HAVE_SCI4
+   select RA_HAVE_SCI9
+   # I2C - 2 channels
+   select RA_HAVE_I2C0
+   select RA_HAVE_I2C1
+   # DMA
+   select RA_HAVE_DMAC
+   # SPI - 1 channel only (LQFP100 package limitation)
+   select RA_HAVE_SPI0
+   # No SPI1, SPI2 (not available in LQFP100)
+   # No CAN (not available in LQFP100)
+   # Ethernet - RMII only (no MII in LQFP100)
+   select RA_HAVE_ETHERC_RMII
+   # USB
+   select RA_HAVE_USBFS
+   # No OSPI, SSIE (not available in LQFP100)
+   # General Purpose Timers - 5 channels (LQFP100 limitation)
+   select RA_HAVE_GPT
+   select RA_HAVE_GPT0
+   select RA_HAVE_GPT1
+   select RA_HAVE_GPT2
+   select RA_HAVE_GPT3
+   select RA_HAVE_GPT4
+   # Low Power Timers
+   select RA_HAVE_AGT
+   select RA_HAVE_AGT0
+   select RA_HAVE_AGT1
+   select RA_HAVE_AGT2
+   select RA_HAVE_AGT3
+   select RA_HAVE_AGT4
+   select RA_HAVE_AGT5
+   select RA_HAVE_ULPT
+   select RA_HAVE_ULPT0
+   select RA_HAVE_ULPT1
+   # RTC
+   select RA_HAVE_RTC
+   # Analog
+   select RA_HAVE_ADC12
+   select RA_HAVE_DAC12
+   select RA_HAVE_ACMPHS
+   select RA_HAVE_ACMPHS0
+   select RA_HAVE_ACMPHS1
+   # Security Features
+   select RA_HAVE_CPSCU
+   select RA_HAVE_PSCU
+   select RA_HAVE_ECC
+   # System Utilities
+   select RA_HAVE_CRC
+   select RA_HAVE_CAC
+   select RA_HAVE_DOC
+   select RA_HAVE_ELC
+   select RA_HAVE_POEG
+
+config ARCH_CHIP_R7KA8P1KFLCAC
+   bool "R7KA8P1KFLCAC"
+   select RA8P1_GROUP
+   # Serial Communication - 10 SCI UART channels
+   select RA_HAVE_SCI0
+   select RA_HAVE_SCI1
+   select RA_HAVE_SCI2
+   select RA_HAVE_SCI3
+   select RA_HAVE_SCI4
+   select RA_HAVE_SCI5
+   select RA_HAVE_SCI6
+   select RA_HAVE_SCI7
+   select RA_HAVE_SCI8
+   select RA_HAVE_SCI9
+   # I2C and I3C interfaces
+   select RA_HAVE_I2C0
+   select RA_HAVE_I2C1
+   select RA_HAVE_I2C2
+   select RA_HAVE_I3C
+   # DMA
+   select RA_HAVE_DMAC
+   # SPI - 2 channels
+   select RA_HAVE_SPI0
+   select RA_HAVE_SPI1
+   # CANFD - 2 channels
+   select RA_HAVE_CANFD0
+   select RA_HAVE_CANFD1
+   # Ethernet - MII, RMII, GMII, RGMII support
+   select RA_HAVE_ETHERC_MII
+   select RA_HAVE_ETHERC_RMII
+   select RA_HAVE_ETHERC_GMII
+   select RA_HAVE_ETHERC_RGMII
+   select RA_HAVE_ETHERCAT
+   select RA_HAVE_ETHSW
+   select RA_HAVE_GPTP
+   # USB - Full Speed and High Speed
+   select RA_HAVE_USBFS
+   select RA_HAVE_USBHS
+   # Storage - Octal SPI (2 channels) and SD Host (2 channels)
+   select RA_HAVE_OSPI
+   select RA_HAVE_OSPI0
+   select RA_HAVE_OSPI1
+   select RA_HAVE_SDHI
+   select RA_HAVE_SDHI0
+   select RA_HAVE_SDHI1
+   # Audio - Serial Sound Interface (2 channels) and PDM
+   select RA_HAVE_SSIE
+   select RA_HAVE_SSIE0
+   select RA_HAVE_SSIE1
+   select RA_HAVE_PDMIF
+   # Graphics and Display
+   select RA_HAVE_GLCDC
+   select RA_HAVE_DRW
+   select RA_HAVE_MIPI_DSI
+   select RA_HAVE_MIPI_CSI
+   select RA_HAVE_CEU
+   select RA_HAVE_VIN
+   # General Purpose Timers - 14 channels (GPT0-GPT13)
+   select RA_HAVE_GPT
+   select RA_HAVE_GPT0
+   select RA_HAVE_GPT1
+   select RA_HAVE_GPT2
+   select RA_HAVE_GPT3
+   select RA_HAVE_GPT4
+   select RA_HAVE_GPT5
+   select RA_HAVE_GPT6
+   select RA_HAVE_GPT7
+   select RA_HAVE_GPT8
+   select RA_HAVE_GPT9
+   select RA_HAVE_GPT10
+   select RA_HAVE_GPT11
+   select RA_HAVE_GPT12
+   select RA_HAVE_GPT13
+   # Low Power Timers
+   select RA_HAVE_AGT
+   select RA_HAVE_AGT0
+   select RA_HAVE_AGT1
+   select RA_HAVE_AGT2
+   select RA_HAVE_AGT3
+   select RA_HAVE_AGT4
+   select RA_HAVE_AGT5
+   select RA_HAVE_ULPT
+   select RA_HAVE_ULPT0
+   select RA_HAVE_ULPT1
+   # RTC
+   select RA_HAVE_RTC
+   # Analog - ADC-B (Advanced ADC with FIFO), DAC, and 4 High-Speed Comparators
+   select RA_HAVE_ADC_B
+   select RA_HAVE_ADC0
+   select RA_HAVE_ADC1
+   select RA_HAVE_DAC12
+   select RA_HAVE_ACMPHS
+   select RA_HAVE_ACMPHS0
+   select RA_HAVE_ACMPHS1
+   select RA_HAVE_ACMPHS2
+   select RA_HAVE_ACMPHS3
+   # Security Features
+   select RA_HAVE_DOTF
+   select RA_HAVE_CPSCU
+   select RA_HAVE_PSCU
+   select RA_HAVE_ECC
+   # System Utilities
+   select RA_HAVE_CRC
+   select RA_HAVE_CAC
+   select RA_HAVE_DOC
+   select RA_HAVE_ELC
+   # PDG - 4 channels
+   select RA_HAVE_PDG
+   select RA_HAVE_PDG0
+   select RA_HAVE_PDG1
+   select RA_HAVE_PDG2
+   select RA_HAVE_PDG3
+   select RA_HAVE_POEG
+   # Inter-Processor Communication
+   select RA_HAVE_IPC
+   # External Bus - SDRAM Controller
+   select RA_HAVE_SDRAM
+
+endchoice
+
+config ARCH_CHIP_R7JA8P1JRLSAJ
+   bool "R7JA8P1JRLSAJ"
+   select RA8P1_GROUP
+   # Serial Communication - 10 SCI UART channels
+   select RA_HAVE_SCI0
+   select RA_HAVE_SCI1
+   select RA_HAVE_SCI2
+   select RA_HAVE_SCI3
+   select RA_HAVE_SCI4
+   select RA_HAVE_SCI5
+   select RA_HAVE_SCI6
+   select RA_HAVE_SCI7
+   select RA_HAVE_SCI8
+   select RA_HAVE_SCI9
+   # I2C and I3C interfaces
+   select RA_HAVE_I2C0
+   select RA_HAVE_I2C1
+   select RA_HAVE_I2C2
+   select RA_HAVE_I3C
+   # DMA
+   select RA_HAVE_DMAC
+   # SPI - 2 channels
+   select RA_HAVE_SPI0
+   select RA_HAVE_SPI1
+   # CANFD - 2 channels
+   select RA_HAVE_CANFD0
+   select RA_HAVE_CANFD1
+   # Ethernet - MII, RMII, GMII, RGMII support
+   select RA_HAVE_ETHERC_MII
+   select RA_HAVE_ETHERC_RMII
+   select RA_HAVE_ETHERC_GMII
+   select RA_HAVE_ETHERC_RGMII
+   select RA_HAVE_ETHERCAT
+   select RA_HAVE_ETHSW
+   select RA_HAVE_GPTP
+   # USB - Full Speed and High Speed
+   select RA_HAVE_USBFS
+   select RA_HAVE_USBHS
+   # Storage - Octal SPI (2 channels) and SD Host (2 channels)
+   select RA_HAVE_OSPI
+   select RA_HAVE_OSPI0
+   select RA_HAVE_OSPI1
+   select RA_HAVE_SDHI
+   select RA_HAVE_SDHI0
+   select RA_HAVE_SDHI1
+   # Audio - Serial Sound Interface (2 channels) and PDM
+   select RA_HAVE_SSIE
+   select RA_HAVE_SSIE0
+   select RA_HAVE_SSIE1
+   select RA_HAVE_PDMIF
+   # Graphics and Display
+   select RA_HAVE_GLCDC
+   select RA_HAVE_DRW
+   select RA_HAVE_MIPI_DSI
+   select RA_HAVE_MIPI_CSI
+   select RA_HAVE_CEU
+   select RA_HAVE_VIN
+   # General Purpose Timers - 14 channels (GPT0-GPT13)
+   select RA_HAVE_GPT
+   select RA_HAVE_GPT0
+   select RA_HAVE_GPT1
+   select RA_HAVE_GPT2
+   select RA_HAVE_GPT3
+   select RA_HAVE_GPT4
+   select RA_HAVE_GPT5
+   select RA_HAVE_GPT6
+   select RA_HAVE_GPT7
+   select RA_HAVE_GPT8
+   select RA_HAVE_GPT9
+   select RA_HAVE_GPT10
+   select RA_HAVE_GPT11
+   select RA_HAVE_GPT12
+   select RA_HAVE_GPT13
+   # Low Power Timers
+   select RA_HAVE_AGT
+   select RA_HAVE_AGT0
+   select RA_HAVE_AGT1
+   select RA_HAVE_AGT2
+   select RA_HAVE_AGT3
+   select RA_HAVE_AGT4
+   select RA_HAVE_AGT5
+   select RA_HAVE_ULPT
+   select RA_HAVE_ULPT0
+   select RA_HAVE_ULPT1
+   # RTC
+   select RA_HAVE_RTC
+   # Analog - ADC-B (Advanced ADC with FIFO), DAC, and 4 High-Speed Comparators
+   select RA_HAVE_ADC_B
+   select RA_HAVE_ADC0
+   select RA_HAVE_ADC1
+   select RA_HAVE_DAC12
+   select RA_HAVE_ACMPHS
+   select RA_HAVE_ACMPHS0
+   select RA_HAVE_ACMPHS1
+   select RA_HAVE_ACMPHS2
+   select RA_HAVE_ACMPHS3
+   # Security Features
+   select RA_HAVE_DOTF
+   select RA_HAVE_CPSCU
+   select RA_HAVE_PSCU
+   select RA_HAVE_ECC
+   # System Utilities
+   select RA_HAVE_CRC
+   select RA_HAVE_CAC
+   select RA_HAVE_DOC
+   select RA_HAVE_ELC
+   # PDG - 4 channels
+   select RA_HAVE_PDG
+   select RA_HAVE_PDG0
+   select RA_HAVE_PDG1
+   select RA_HAVE_PDG2
+   select RA_HAVE_PDG3
+   select RA_HAVE_POEG
+   # Inter-Processor Communication
+   select RA_HAVE_IPC
+   # External Bus - SDRAM Controller
+   select RA_HAVE_SDRAM
+   # Select SiP Flash
+   select RA_HAVE_SIP_FLASH
+
+# CPU Core Selection for Dual-Core RA8P1
+choice
+   prompt "CPU Core Selection"
+   default RA_CPU_CORE_CM85
+   depends on RA8P1_GROUP
+   help
+     Select which CPU core to build for on dual-core RA8P1 MCU.
+     Each core requires separate firmware build.
+
+config RA_CPU_CORE_CM85
+   bool "Cortex-M85 (CPU0) - Primary Core"
+   select RA8_CM85_FAMILY
+   help
+     Build for Cortex-M85 primary core (CPU0) running at 1GHz.
+     This is the main application processor with Helium MVE.
+     Typical use: Main flight controller, sensor fusion, navigation.
+
+config RA_CPU_CORE_CM33
+   bool "Cortex-M33 (CPU1) - Secondary Core"
+   select RA8_CM33_FAMILY
+   help
+     Build for Cortex-M33 secondary core (CPU1) running at 250MHz.
+     This is the safety/real-time processor with TrustZone.
+     Typical use: Safety monitor, RC input, real-time I/O offload.
+
+endchoice
+
+config RA_CPU_CORE
+   int
+   default 0 if RA_CPU_CORE_CM85
+   default 1 if RA_CPU_CORE_CM33
+   default 1 if RA8E1_GROUP
+   help
+     CPU core number (0=CM85, 1=CM33)
+
+# RA8E1 Group Configuration
+config RA8E1_GROUP
+    bool
+    default n
+    help
+       RA8E1 Group: Single-core Cortex-M85 @ 360MHz
+       - 544 KB SRAM (including 32 KB TCM - not separate)
+       - 1 MB Code Flash + 12 KB Data Flash
+       - 16KB I-Cache + 16KB D-Cache
+       - Helium MVE (M-Profile Vector Extension)
+       This is required for all RA8E1 configurations.
+
+# RA8P1 Group Configuration
+config RA8P1_GROUP
+    bool
+    default n
+    help
+       RA8P1 Group: Dual-core
+       - CM85 (CPU0): 1GHz, 128KB ITCM + 128KB DTCM, 16KB I-Cache + 16KB D-Cache
+       - CM33 (CPU1): 250MHz, 64KB CTCM + 64KB STCM, 16KB C-Cache + 16KB S-Cache
+       - 2 MB Shared SRAM with ECC
+       - 1 MB MRAM
+       - 4 MB or 8MB Flash (R7JA8P1JRLSAJ)
+       - Each core has dedicated TCM at same virtual addresses
+       - Requires CPU core selection in "CPU Core Selection" menu
+
+       This is required for all RA8P1 configurations.
+
+config RA8_CM85_FAMILY
+    bool
+    default n
+    select ARCH_CORTEXM85
+    select ARCH_HAVE_FPU
+    select ARCH_HAVE_THUMB
+    select ARCH_HAVE_DPFPU
+    select ARCH_HAVE_SERIAL_TERMIOS
+    select ARMV8M_HAVE_ICACHE
+    select ARMV8M_HAVE_DCACHE
+    select ARMV8M_HAVE_ITCM
+    select ARMV8M_HAVE_DTCM
+    select ARMV8M_HAVE_HELIUM
+    select ARMV8M_HAVE_SECURITY
+    select ARMV8M_HAVE_MPU
+    select ARMV8M_HAVE_SMPU
+    select ARMV8M_HAVE_SYSTICK
+    select ARMV8M_HAVE_CORESIGHT
+    select ARCH_HAVE_CODE_FLASH
+    select ARCH_HAVE_DATA_FLASH
+    select ARCH_HAVE_SRAM
+    select ARCH_HAVE_SDIO
+    select ARCH_HAVE_IRQPRIO
+    select ARCH_IRQPRIO
+    help
+       Enables all core features for the RA8 Cortex-M85 family.
+       RA8E1 CM85:
+       - 360MHz, 32KB TCM total, 16KB I-Cache + 16KB D-Cache
+       RA8P1 CM85 (CPU0):
+       - 1GHz, 128KB ITCM + 128KB DTCM, 16KB I-Cache + 16KB D-Cache
+       - Dedicated TCM @ 0x00000000 (ITCM) / 0x20000000 (DTCM)
+       All CM85 cores support Helium MVE and double-precision FPU.
+
+if RA8_CM85_FAMILY
+
+menu "Cortex-M85 Core Features"
+
+config ARCH_CORTEXM85
+   bool
+   default y
+   help
+     Selects the Arm Cortex-M85 core.
+
+config ARMV8M_HAVE_ICACHE
+    bool
+    default y
+    help
+       Instruction cache present (hardware-implemented).
+       RA8E1: 16 KB I-Cache with ECC
+       RA8P1: 16 KB I-Cache with ECC
+       This is built into the Cortex-M85 core.
+
+config ARMV8M_HAVE_DCACHE
+   bool
+   default y
+   help
+       Data cache present (hardware-implemented).
+       RA8E1: 16 KB D-Cache with ECC
+       RA8P1: 16 KB D-Cache with ECC
+       This is built into the Cortex-M85 core.
+
+config ARMV8M_HAVE_ITCM
+   bool
+   default y
+   help
+       Instruction Tightly Coupled Memory present.
+       RA8E1: Part of 32 KB total TCM (split unknown - check datasheet)
+       RA8P1: 128 KB dedicated ITCM @ 0x00000000 with ECC (CPU0 only)
+       TCM provides zero-wait-state memory access.
+
+config ARMV8M_HAVE_DTCM
+   bool
+   default y
+   help
+       Data Tightly Coupled Memory present.
+       RA8E1: Part of 32 KB total TCM (split unknown - check datasheet)
+       RA8P1: 128 KB dedicated DTCM @ 0x20000000 with ECC (CPU0 only)
+       TCM provides zero-wait-state memory access.
+
+config ARMV8M_HAVE_HELIUM
+   bool
+    default y
+    help
+       Arm Helium (M-Profile Vector Extension) present.
+       Cortex-M85 supports Helium MVE (Integer and Floating-Point):
+       - Integer MVE operations
+       - Half-precision floating-point MVE (MVE-F)
+       - Single-precision floating-point MVE (MVE-F)
+       Provides SIMD acceleration for DSP and ML workloads.
+
+config ARMV8M_HAVE_SECURITY
+   bool
+   default y
+   help
+     Armv8-M Security Extension present.
+
+config ARMV8M_HAVE_MPU
+   bool
+   default y
+   help
+     Memory Protection Unit present.
+
+config ARMV8M_HAVE_SMPU
+   bool
+   default y
+   help
+     Secure Memory Protection Unit present.
+
+config ARMV8M_HAVE_SYSTICK
+   bool
+   default y
+   help
+     SysTick timer present (secure and non-secure).
+
+config ARMV8M_HAVE_CORESIGHT
+   bool
+   default y
+   help
+     CoreSight ETM-M85 trace present.
+
+config ARMV8M_USEBASEPRI
+   bool
+   default y if BUILD_FLAT
+   default y if ARCH_HIPRI_INTERRUPT
+   help
+     Force BASEPRI-based interrupt masking for RA8 Cortex-M85.
+     This is REQUIRED for BUILD_FLAT to avoid hardfaults on SVC instructions
+     during context switches. When using PRIMASK (default without BASEPRI),
+     SVC calls will escalate to hardfaults, which are handled but cause
+     debugging issues and potential instability.
+
+     For RA8 MCUs with Cortex-M85, BASEPRI is strongly recommended for:
+     - BUILD_FLAT configurations
+     - High-priority interrupt scenarios
+     - Reliable SVC handling without hardfault escalation
+
+config ARMV8M_ICACHE
+   bool
+   default y
+   help
+     Enable Cortex-M85 Instruction Cache (16KB with ECC).
+     Strongly recommended for performance.
+
+config ARMV8M_DCACHE
+   bool
+   default y
+   help
+     Enable Cortex-M85 Data Cache (16KB with ECC).
+     Strongly recommended for performance.
+
+config ARMV8M_ITCM
+   bool
+   default y
+   help
+     Enable Instruction Tightly Coupled Memory.
+     RA8E1: Part of 32KB total TCM
+     RA8P1: 128KB dedicated ITCM @ 0x00000000
+     Zero-wait-state memory for critical code.
+
+config ARMV8M_DTCM
+   bool
+   default y
+   help
+     Enable Data Tightly Coupled Memory.
+     RA8E1: Part of 32KB total TCM
+     RA8P1: 128KB dedicated DTCM @ 0x20000000
+     Zero-wait-state memory for critical data.
+
+config ARCH_HAVE_CODE_FLASH
+   bool
+   default y
+   help
+       Code memory:
+       RA8E1: 1 MB Code Flash (traditional NOR flash)
+       - Dual-bank support for FOTA
+       - Background operation support
+       - SWAP operation support
+       RA8P1: 1 MB MRAM (Magnetoresistive RAM - non-volatile)
+       - Shared between CM85 and CM33
+       - Faster write, no erase needed
+       - Unlimited endurance
+
+config ARCH_HAVE_DATA_FLASH
+   bool
+    default y if RA8E1_GROUP
+    default n if RA8P1_GROUP
+      help
+       Data flash memory:
+       RA8E1: 12 KB data flash
+       - 100,000 program/erase cycles
+       - For configuration/parameter storage
+       RA8P1: No separate data flash
+       - Use MRAM partition for parameter storage instead
+
+config ARCH_HAVE_SRAM
+   bool
+   default y
+   help
+       System SRAM:
+       RA8E1: 544 KB total SRAM
+       - INCLUDES 32 KB TCM (not separate)
+       - Effective user SRAM: ~512 KB (544KB - 32KB TCM)
+       RA8P1: 2 MB Shared SRAM with ECC
+       - Accessible by both CM85 and CM33
+       - SEPARATE from dedicated TCM regions
+       - TCM regions:
+          - CM85: 128KB ITCM + 128KB DTCM
+          - CM33: 64KB CTCM + 64KB STCM
+
+config ARCH_HAVE_SDIO
+   bool
+   default y
+   help
+     SDIO (Secure Digital Input Output) interface present.
+
+endmenu
+
+endif # RA8_CM85_FAMILY
+
+config RA8_CM33_FAMILY
+   bool
+   default n
+   select ARCH_CORTEXM33
+   select ARCH_HAVE_FPU
+   select ARCH_HAVE_THUMB
+   select ARMV8M_HAVE_ICACHE    # Renesas implements C-Cache (Code-bus Cache)
+   select ARMV8M_HAVE_DCACHE    # Renesas implements S-Cache (System-bus Cache)
+   select ARMV8M_HAVE_ITCM
+   select ARMV8M_HAVE_DTCM
+   select ARMV8M_HAVE_SECURITY
+   select ARMV8M_HAVE_MPU
+   select ARMV8M_HAVE_SMPU
+   select ARMV8M_HAVE_SYSTICK
+   select ARMV8M_HAVE_CORESIGHT
+   select ARCH_HAVE_CODE_FLASH
+   select ARCH_HAVE_DATA_FLASH
+   select ARCH_HAVE_SRAM
+   select ARCH_HAVE_SDIO
+   select ARCH_HAVE_IRQPRIO
+   select ARCH_IRQPRIO
+   help
+       Enables all core features for the RA8 Cortex-M33 family.
+       RA8P1 CM33 (CPU1) - 250MHz:
+       - 64 KB CTCM + 64 KB STCM with ECC
+       - 16 KB C-Cache + 16 KB S-Cache with ECC (Renesas implementation!)
+       - Single-precision FPU (FPv5-SP)
+       - NO double-precision FPU
+       - NO Helium MVE
+       - Armv8-DSP Extension (saturating math, SIMD integer)
+       - TrustZone security extension
+       IMPORTANT: Standard ARM Cortex-M33 does NOT have caches, but
+       Renesas RA8P1 implements custom caches:
+       - C-Cache (Code-bus Cache): 16 KB with ECC
+       - S-Cache (System-bus Cache): 16 KB with ECC
+       Also, CM33 uses different TCM naming:
+       - CTCM (Code TCM) instead of ITCM
+       - STCM (System TCM) instead of DTCM
+       Both at same virtual addresses as CM85 but separate physical memory.
+
+if RA8_CM33_FAMILY
+
+menu "Cortex-M33 Core Features"
+
+config ARCH_CORTEXM33
+   bool
+   default y
+   help
+     Selects the Arm Cortex-M33 core.
+
+config ARMV8M_HAVE_ICACHE
+   bool
+    default y    # Renesas RA8P1 implements C-Cache!
+    help
+       Code-bus Cache (C-Cache) present - Renesas implementation.
+       IMPORTANT: Standard ARM Cortex-M33 core does NOT include caches.
+       However, Renesas RA8P1 implements custom cache for CM33:
+       C-Cache (Code-bus Cache): 16 KB with ECC
+       - Accelerates code execution from external memory
+       - Hardware-implemented by Renesas (not standard ARM)
+       This is equivalent to Instruction Cache (I-Cache) but uses
+       Renesas-specific naming and implementation.
+       Source: RA8P1 User's Manual, Section (2) CPU1 - Cache
+
+config ARMV8M_HAVE_DCACHE
+   bool
+    default y    # Renesas RA8P1 implements S-Cache!
+    help
+       System-bus Cache (S-Cache) present - Renesas implementation.
+       IMPORTANT: Standard ARM Cortex-M33 core does NOT include caches.
+       However, Renesas RA8P1 implements custom cache for CM33:
+       S-Cache (System-bus Cache): 16 KB with ECC
+       - Accelerates data access from external memory
+       - Hardware-implemented by Renesas (not standard ARM)
+       This is equivalent to Data Cache (D-Cache) but uses
+       Renesas-specific naming and implementation.
+       Source: RA8P1 User's Manual, Section (2) CPU1 - Cache
+       NOTE: Cache coherency between CM85 and CM33 must be managed
+       by software when sharing data in external SRAM/SDRAM.
+
+config ARMV8M_HAVE_ITCM
+   bool
+   default y
+   help
+   Code Tightly Coupled Memory (CTCM) present.
+   RA8P1 CM33: 64 KB CTCM @ 0x00000000 with ECC
+   RENESAS NAMING: CM33 uses "CTCM" (Code TCM) instead of standard
+   ARM "ITCM" (Instruction TCM). Functionally equivalent.
+   IMPORTANT: Virtual address 0x00000000 is same as CM85 ITCM,
+   but physically separate memory - each core has dedicated TCM.
+   Source: RA8P1 User's Manual, Section (2) CPU1:
+   "Tightly Coupled Memory (TCM): CTCM: 64 KB with ECC"
+   TCM provides zero-wait-state memory access for critical code.
+   Note: NuttX uses ARMV8M_HAVE_ITCM flag for both ITCM and CTCM
+   as they serve the same purpose.
+
+config ARMV8M_HAVE_DTCM
+   bool
+   default y
+   help
+   System Tightly Coupled Memory (STCM) present.
+   RA8P1 CM33: 64 KB STCM @ 0x20000000 with ECC
+   RENESAS NAMING: CM33 uses "STCM" (System TCM) instead of standard
+   ARM "DTCM" (Data TCM). Functionally equivalent.
+   IMPORTANT: Virtual address 0x20000000 is same as CM85 DTCM,
+   but physically separate memory - each core has dedicated TCM.
+   Source: RA8P1 User's Manual, Section (2) CPU1:
+   "Tightly Coupled Memory (TCM): STCM: 64 KB with ECC"
+   TCM provides zero-wait-state memory access for critical data.
+   Note: NuttX uses ARMV8M_HAVE_DTCM flag for both DTCM and STCM
+   as they serve the same purpose.
+
+config ARMV8M_HAVE_HELIUM
+   bool
+    default n
+    help
+       Arm Helium (M-Profile Vector Extension) NOT AVAILABLE.
+       The user manual confirms CM33 (CPU1) features:
+       - ARMv8-M architecture (not ARMv8.1-M)
+       - Armv8-DSP Extension (basic SIMD integer operations)
+       - NO M-Profile Vector Extension (MVE/Helium)
+       Only CM85 (CPU0) has Helium:
+       - CM85: ARMv8.1-M with MVE-F (Integer + Float Helium)
+       - CM33: ARMv8-M with DSP Extension only
+       For SIMD operations on RA8P1:
+       - Use CM85 core for Helium MVE (best performance)
+       - Use CM33 DSP extension for basic SIMD integer ops
+       Enabling this incorrectly causes build failures or illegal
+       instruction exceptions at runtime.
+       Source: RA8P1 User's Manual
+       - CPU0 (CM85): "M-profile Vector Extension (MVE)"
+       - CPU1 (CM33): "Armv8-DSP Extension" (no MVE listed)
+
+config ARMV8M_HAVE_SECURITY
+   bool
+   default y
+   help
+     Armv8-M Security Extension present.
+
+config ARMV8M_HAVE_MPU
+   bool
+   default y
+   help
+     Memory Protection Unit present.
+
+config ARMV8M_HAVE_SMPU
+   bool
+   default y
+   help
+     Secure Memory Protection Unit present.
+
+config ARMV8M_HAVE_SYSTICK
+   bool
+   default y
+   help
+     SysTick timer present (secure and non-secure).
+
+config ARMV8M_HAVE_CORESIGHT
+   bool
+   default y
+   help
+     CoreSight ETM-M85 trace present.
+
+config ARMV8M_USEBASEPRI
+   bool
+   default y if BUILD_FLAT
+   default y if ARCH_HIPRI_INTERRUPT
+   help
+     Force BASEPRI-based interrupt masking for RA8 Cortex-M33.
+     This is REQUIRED for BUILD_FLAT to avoid hardfaults on SVC instructions
+     during context switches. When using PRIMASK (default without BASEPRI),
+     SVC calls will escalate to hardfaults, which are handled but cause
+     debugging issues and potential instability.
+
+     For RA8 MCUs with Cortex-M33, BASEPRI is strongly recommended for:
+     - BUILD_FLAT configurations
+     - High-priority interrupt scenarios
+     - Reliable SVC handling without hardfault escalation
+
+config ARMV8M_ICACHE
+   bool
+   default y
+   help
+     Enable Cortex-M33 Code-bus Cache (16KB with ECC).
+     Renesas custom implementation - strongly recommended for performance.
+
+config ARMV8M_DCACHE
+   bool
+   default y
+   help
+     Enable Cortex-M33 System-bus Cache (16KB with ECC).
+     Renesas custom implementation - strongly recommended for performance.
+
+config ARMV8M_ITCM
+   bool
+   default y
+   help
+     Enable Code Tightly Coupled Memory (CTCM).
+     RA8P1 CM33: 64KB CTCM @ 0x00000000
+     Zero-wait-state memory for critical code.
+
+config ARMV8M_DTCM
+   bool
+   default y
+   help
+     Enable System Tightly Coupled Memory (STCM).
+     RA8P1 CM33: 64KB STCM @ 0x20000000
+     Zero-wait-state memory for critical data.
+
+config ARCH_HAVE_CODE_FLASH
+    bool
+    default y
+    help
+       Code memory (shared with CM85 on RA8P1):
+       - 1 MB MRAM @ 0x02000000
+       - Both cores can execute from MRAM
+       - No erase required (MRAM advantage)
+
+config ARCH_HAVE_DATA_FLASH
+    bool
+    default n
+    help
+       RA8P1 does NOT have separate data flash.
+
+       Use MRAM partition for parameter storage instead.
+
+config ARCH_HAVE_SRAM
+    bool
+    default y
+    help
+       System SRAM on RA8P1 (shared between cores):
+
+       Shared SRAM: 2 MB with ECC @ 0x22000000
+       - Accessible by both CM85 and CM33
+
+       CM33 Dedicated TCM (CPU1 only, separate from shared SRAM):
+       - CTCM: 64 KB @ 0x00000000 with ECC (Code TCM)
+       - STCM: 64 KB @ 0x20000000 with ECC (System TCM)
+
+       IMPORTANT: TCM addresses are same as CM85 but physically separate.
+       Each core sees its own TCM at standard ARM addresses.
+
+config ARCH_HAVE_SDIO
+   bool
+   default y
+   help
+     SDIO (Secure Digital Input Output) interface present.
+
+endmenu
+
+endif # RA8_CM33_FAMILY
+
+config RA_MCU_CLOCKS_ENABLE
+   bool "Enable MCU Clocks Configuration"
+   default y
+   help
+     Enable the top-level MCU Clocks Configuration menu and related options.
+
+if RA_MCU_CLOCKS_ENABLE
+
+menu "MCU Clocks Configuration"
+
+# High-Level Clock Configuration Options
+config RA_CLOCK_PLL1P
+   bool "Enable PLL1P Mode (Maximum Performance)"
+   default y
+   help
+     Configure MCU for maximum performance using PLL1P.
+     Best for applications requiring highest CPU performance.
+     RA8E1: Up to 360MHz
+     RA8P1: Up to 1000MHz
+
+config RA_CLOCK_HOCO
+   bool "Enable HOCO Mode (Balanced Performance)"
+   default y
+   help
+     Use HOCO (High-Speed On-Chip Oscillator) for balanced performance
+     and lower power consumption.
+     Good for most applications with moderate performance requirements.
+     Typical frequencies: 16-64 MHz
+
+config RA_CLOCK_MOCO
+   bool "Enable MOCO Mode (Low Power)"
+   default y
+   help
+     Use MOCO (Medium-Speed On-Chip Oscillator) for low power consumption.
+     Suitable for low-power applications and battery-powered devices.
+     Fixed frequency: 8MHz
+
+config RA_CLOCK_LOCO
+   bool "Enable LOCO Mode (Ultra Low Power)"
+   default y
+   help
+     Use LOCO (Low-Speed On-Chip Oscillator) for ultra-low power consumption.
+     Fixed frequency: 32.768kHz
+
+config RA_CLOCK_MAIN
+   bool "Enable Main OSC Mode (External Crystal)"
+   default y
+   help
+     Use external crystal oscillator as system clock.
+     Requires external crystal hardware.
+
+config RA_CLOCK_PLL
+   bool "Enable PLL Mode (Legacy - same as PLL1P)"
+   default y
+   help
+     Use PLL output as system clock (legacy option, same as PLL1P).
+
+# Clock Profile Configuration
+choice
+   prompt "Clock Configuration Profile"
+   default RA_CLOCK_PROFILE_DEFAULT
+   help
+     Select a validated clock configuration profile.
+     This simplifies clock setup by providing tested configurations.
+
+     - Default: Maximum performance (RA8E1: 360MHz, RA8P1: 1000MHz)
+     - Low Power: Reduced frequency for power-sensitive applications (RA8E1: 120MHz, RA8P1: 500MHz)
+     - Custom: Manual configuration of all clock parameters (for advanced users)
+
+config RA_CLOCK_PROFILE_DEFAULT
+   bool "Default Profile (Maximum Performance)"
+   help
+     Default configuration:
+     RA8E1: HOCO 20MHz -> PLL 720MHz -> PLL1P /2 -> CPU 360MHz
+           ICLK 120MHz, PCLKA 120MHz, PCLKB 60MHz, PCLKD 120MHz, FCLK 60MHz
+     RA8P1: XTAL 24MHz -> PLL 2000MHz -> PLL1P /2 -> CPU 1000MHz
+           PLL2 2400MHz -> peripherals at 600/800/480MHz
+           ICLK 250MHz, PCLKA 125MHz, PCLKB 62.5MHz, PCLKD 250MHz, FCLK 125MHz
+
+config RA_CLOCK_PROFILE_LOW_POWER
+   bool "Low Power Profile"
+   help
+     Reduced frequency for power-sensitive applications:
+     RA8E1: HOCO 20MHz -> PLL 480MHz -> PLL1P /4 -> CPU 120MHz
+           ICLK 60MHz, PCLKA 60MHz, PCLKB 30MHz, PCLKD 60MHz, FCLK 30MHz
+     RA8P1: XTAL 24MHz -> PLL 1000MHz -> PLL1P /2 -> CPU 500MHz
+           PLL2 1200MHz -> peripherals at 300/400/240MHz
+           ICLK 125MHz, PCLKA 62.5MHz, PCLKB 31.25MHz, PCLKD 125MHz, FCLK 62.5MHz
+
+config RA_CLOCK_PROFILE_CUSTOM
+   bool "Custom Profile (Advanced Users)"
+   help
+     Manually configure all clock parameters. This provides full control
+     over PLL settings, dividers, and peripheral clock sources.
+     Use this only if you need specific frequencies not covered by presets.
+
+endchoice
+
+# HOCO Mode Configuration
+if RA_CLOCK_HOCO
+
+menu "HOCO Configuration"
+
+config RA_HOCO_FREQUENCY
+   int "HOCO Frequency (Hz)"
+   default 20000000 if RA8E1_GROUP
+   default 48000000 if RA8P1_GROUP
+   range 16000000 64000000
+   help
+     HOCO (High-Speed On-Chip Oscillator) frequency in Hz.
+     Valid frequencies: 16, 18, 20, 24, 32, 48, 64 MHz.
+     Default is 20MHz for RA8E1, 48MHz for RA8P1.
+
+endmenu
+
+endif # RA_CLOCK_HOCO
+
+# MOCO Mode Configuration
+if RA_CLOCK_MOCO
+
+menu "MOCO Configuration"
+
+config RA_MOCO_FREQUENCY
+   int "MOCO Frequency (Hz)"
+   default 8000000
+   help
+     MOCO (Medium-Speed On-Chip Oscillator) frequency.
+     Fixed at 8MHz.
+
+endmenu
+
+endif # RA_CLOCK_MOCO
+
+# LOCO Mode Configuration
+if RA_CLOCK_LOCO
+
+menu "LOCO Configuration"
+
+config RA_LOCO_FREQUENCY
+   int "LOCO Frequency (Hz)"
+   default 32768
+   help
+     LOCO (Low-Speed On-Chip Oscillator) frequency.
+     Fixed at 32.768kHz.
+
+endmenu
+
+endif # RA_CLOCK_LOCO
+
+# Main OSC Mode Configuration
+if RA_CLOCK_MAIN
+
+menu "Main OSC Configuration"
+
+config RA_XTAL_FREQUENCY
+   int "External Crystal Frequency (Hz)"
+   default 20000000 if RA8E1_GROUP
+   default 24000000 if RA8P1_GROUP
+   range 1000000 25000000
+   help
+     External crystal oscillator frequency in Hz.
+     Typically 20MHz for RA8E1 FPB board, 24MHz for RA8P1 EVK board.
+
+endmenu
+
+endif # RA_CLOCK_MAIN
+
+# PLL/PLL1P Mode Configuration
+if RA_CLOCK_PLL || RA_CLOCK_PLL1P
+
+menu "PLL/PLL1P Configuration"
+
+choice
+   prompt "PLL Source Clock"
+   default RA_PLL_SOURCE_HOCO if RA8E1_GROUP
+   default RA_PLL_SOURCE_MAIN_OSC if RA8P1_GROUP
+   help
+     Select the PLL input source clock.
+
+config RA_PLL_SOURCE_HOCO
+   bool "HOCO (High-Speed On-Chip Oscillator)"
+
+config RA_PLL_SOURCE_MAIN_OSC
+   bool "Main Oscillator (External Crystal)"
+
+endchoice
+
+config RA_PLL_SOURCE
+   int
+   default 0 if RA_PLL_SOURCE_HOCO
+   default 3 if RA_PLL_SOURCE_MAIN_OSC
+   help
+     Numeric value for PLL source clock.
+     0 = HOCO, 3 = Main OSC
+
+config RA_PLL_DIV
+   int "PLL Input Divider"
+   default 1 if RA8E1_GROUP
+   default 2 if RA8P1_GROUP
+   range 0 15
+   help
+     PLL input divider selection (encoded value, not actual divider).
+     Encoding: 0=/1, 1=/2, 2=/3, 3=/4, 4=/5, 5=/6, 7=/8, 8=/9, 9=/1.5, 15=/16
+     For RA8E1: default 1 means /2 (HOCO 20MHz / 2 = 10MHz PLL input)
+     For RA8P1: default 2 means /3 (XTAL 24MHz / 3 = 8MHz PLL input)
+
+config RA_PLL_MUL
+   int "PLL Multiplier"
+   default 72 if RA8E1_GROUP
+   default 250 if RA8P1_GROUP
+   range 20 300
+   help
+     PLL multiplier value.
+     For RA8E1: 10MHz * 72 = 720MHz PLL output.
+     For RA8P1: 8MHz * 250 = 2000MHz PLL output.
+
+config RA_PLL1P_DIV
+   int "PLL1P Output Divider"
+   default 1
+   range 0 15
+   help
+     PLL1P output divider selection (encoded value).
+     Encoding: 0=/1, 1=/2, 2=/3, 3=/4, 4=/5, 5=/6, 7=/8, 8=/9, 9=/1.5, 15=/16
+     For RA8E1: default 1 means /2 (720MHz / 2 = 360MHz system clock)
+     For RA8P1: default 1 means /2 (2000MHz / 2 = 1000MHz system clock)
+
+config RA_PLL1Q_DIV
+   int "PLL1Q Output Divider"
+   default 1 if RA8E1_GROUP
+   default 5 if RA8P1_GROUP
+   range 0 15
+   help
+     PLL1Q output divider for peripheral clocks (encoded value).
+     Encoding: 0=/1, 1=/2, 2=/3, 3=/4, 4=/5, 5=/6, 7=/8, 8=/9, 9=/1.5, 15=/16
+     For RA8E1: default 1 means /2 (720MHz / 2 = 360MHz)
+     For RA8P1: default 5 means /6 (2000MHz / 6 = 333MHz)
+
+config RA_PLL1R_DIV
+   int "PLL1R Output Divider"
+   default 1 if RA8E1_GROUP
+   default 4 if RA8P1_GROUP
+   range 0 15
+   help
+     PLL1R output divider for peripheral clocks (encoded value).
+     Encoding: 0=/1, 1=/2, 2=/3, 3=/4, 4=/5, 5=/6, 7=/8, 8=/9, 9=/1.5, 15=/16
+     For RA8E1: default 1 means /2 (720MHz / 2 = 360MHz)
+     For RA8P1: default 4 means /5 (2000MHz / 5 = 400MHz)
+
+menu "PLL2 Configuration"
+   depends on RA8P1_GROUP
+
+config RA_PLL2_ENABLE
+   bool "Enable PLL2"
+   default y if RA8P1_GROUP
+   help
+     Enable PLL2 for additional peripheral clock sources.
+     RA8P1 uses PLL2 for high-performance peripheral clocks.
+
+if RA_PLL2_ENABLE
+
+choice
+   prompt "PLL2 Source Clock"
+   default RA_PLL2_SOURCE_HOCO if RA8E1_GROUP
+   default RA_PLL2_SOURCE_MAIN_OSC if RA8P1_GROUP
+   help
+     Select the PLL2 input source clock.
+
+config RA_PLL2_SOURCE_HOCO
+   bool "HOCO (High-Speed On-Chip Oscillator)"
+
+config RA_PLL2_SOURCE_MAIN_OSC
+   bool "Main Oscillator (External Crystal)"
+
+endchoice
+
+config RA_PLL2_SOURCE
+   int
+   default 0 if RA_PLL2_SOURCE_HOCO
+   default 3 if RA_PLL2_SOURCE_MAIN_OSC
+   help
+     Numeric value for PLL2 source clock (used in C code comparisons).
+     0 = HOCO, 3 = Main OSC
+
+config RA_PLL2_DIV
+   int "PLL2 Input Divider"
+   default 2
+   range 0 15
+   help
+     PLL2 input divider selection (encoded value).
+     Encoding: 0=/1, 1=/2, 2=/3, 3=/4, 4=/5, 5=/6, 7=/8, 8=/9, 9=/1.5, 15=/16
+     For RA8P1: default 2 means /3 (XTAL 24MHz / 3 = 8MHz PLL2 input)
+
+config RA_PLL2_MUL
+   int "PLL2 Multiplier"
+   default 300
+   range 20 300
+   help
+     PLL2 multiplier value.
+     For RA8P1: 8MHz * 300 = 2400MHz PLL2 output.
+
+config RA_PLL2P_DIV
+   int "PLL2P Output Divider"
+   default 3
+   range 0 15
+   help
+     PLL2P output divider for peripheral clocks (encoded value).
+     Encoding: 0=/1, 1=/2, 2=/3, 3=/4, 4=/5, 5=/6, 7=/8, 8=/9, 9=/1.5, 15=/16
+     For RA8P1: default 3 means /4 (2400MHz / 4 = 600MHz)
+
+config RA_PLL2Q_DIV
+   int "PLL2Q Output Divider"
+   default 2
+   range 0 15
+   help
+     PLL2Q output divider for peripheral clocks (encoded value).
+     Encoding: 0=/1, 1=/2, 2=/3, 3=/4, 4=/5, 5=/6, 7=/8, 8=/9, 9=/1.5, 15=/16
+     For RA8P1: default 2 means /3 (2400MHz / 3 = 800MHz)
+
+config RA_PLL2R_DIV
+   int "PLL2R Output Divider"
+   default 4
+   range 0 15
+   help
+     PLL2R output divider for peripheral clocks (encoded value).
+     Encoding: 0=/1, 1=/2, 2=/3, 3=/4, 4=/5, 5=/6, 7=/8, 8=/9, 9=/1.5, 15=/16
+     For RA8P1: default 4 means /5 (2400MHz / 5 = 480MHz)
+
+endif # RA_PLL2_ENABLE
+
+endmenu
+
+endmenu
+
+endif # RA_CLOCK_PLL || RA_CLOCK_PLL1P
+
+menu "System Clock Dividers"
+
+comment "Direct divider value selection (no encoding lookup needed)"
+
+choice
+   prompt "CPU Clock Divider"
+   default RA_CPUCLK_DIV_1
+   help
+     Select CPU clock divider. Shows actual divider value directly.
+
+config RA_CPUCLK_DIV_1
+   bool "Divide by 1 (no division)"
+config RA_CPUCLK_DIV_2
+   bool "Divide by 2"
+config RA_CPUCLK_DIV_4
+   bool "Divide by 4"
+config RA_CPUCLK_DIV_8
+   bool "Divide by 8"
+config RA_CPUCLK_DIV_16
+   bool "Divide by 16"
+config RA_CPUCLK_DIV_32
+   bool "Divide by 32"
+config RA_CPUCLK_DIV_64
+   bool "Divide by 64"
+config RA_CPUCLK_DIV_128
+   bool "Divide by 128"
+config RA_CPUCLK_DIV_3
+   bool "Divide by 3"
+config RA_CPUCLK_DIV_6
+   bool "Divide by 6"
+config RA_CPUCLK_DIV_12
+   bool "Divide by 12"
+config RA_CPUCLK_DIV_24
+   bool "Divide by 24"
+endchoice
+
+config RA_CPUCLK_DIV
+   int
+   default 0 if RA_CPUCLK_DIV_1
+   default 1 if RA_CPUCLK_DIV_2
+   default 2 if RA_CPUCLK_DIV_4
+   default 3 if RA_CPUCLK_DIV_8
+   default 4 if RA_CPUCLK_DIV_16
+   default 5 if RA_CPUCLK_DIV_32
+   default 6 if RA_CPUCLK_DIV_64
+   default 7 if RA_CPUCLK_DIV_128
+   default 8 if RA_CPUCLK_DIV_3
+   default 9 if RA_CPUCLK_DIV_6
+   default 10 if RA_CPUCLK_DIV_12
+   default 11 if RA_CPUCLK_DIV_24
+
+choice
+   prompt "ICLK Divider (Internal System Bus Clock)"
+   default RA_ICK_DIV_3 if RA8E1_GROUP
+   default RA_ICK_DIV_4 if RA8P1_GROUP
+   help
+     Select internal clock (ICLK) divider for system bus.
+     RA8E1: /3 gives 120MHz from 360MHz
+     RA8P1: /4 gives 250MHz from 1000MHz
+
+config RA_ICK_DIV_1
+   bool "Divide by 1"
+config RA_ICK_DIV_2
+   bool "Divide by 2"
+config RA_ICK_DIV_4
+   bool "Divide by 4"
+config RA_ICK_DIV_8
+   bool "Divide by 8"
+config RA_ICK_DIV_16
+   bool "Divide by 16"
+config RA_ICK_DIV_32
+   bool "Divide by 32"
+config RA_ICK_DIV_64
+   bool "Divide by 64"
+config RA_ICK_DIV_3
+   bool "Divide by 3"
+config RA_ICK_DIV_6
+   bool "Divide by 6"
+config RA_ICK_DIV_12
+   bool "Divide by 12"
+config RA_ICK_DIV_24
+   bool "Divide by 24"
+endchoice
+
+config RA_ICK_DIV
+   int
+   default 0 if RA_ICK_DIV_1
+   default 1 if RA_ICK_DIV_2
+   default 2 if RA_ICK_DIV_4
+   default 3 if RA_ICK_DIV_8
+   default 4 if RA_ICK_DIV_16
+   default 5 if RA_ICK_DIV_32
+   default 6 if RA_ICK_DIV_64
+   default 8 if RA_ICK_DIV_3
+   default 9 if RA_ICK_DIV_6
+   default 10 if RA_ICK_DIV_12
+   default 11 if RA_ICK_DIV_24
+
+choice
+   prompt "PCLKA Divider (Peripheral Clock A)"
+   default RA_PCKA_DIV_3 if RA8E1_GROUP
+   default RA_PCKA_DIV_8 if RA8P1_GROUP
+   help
+     Select peripheral clock A divider.
+     RA8E1: /3 gives 120MHz
+     RA8P1: /8 gives 125MHz
+
+config RA_PCKA_DIV_1
+   bool "Divide by 1"
+config RA_PCKA_DIV_2
+   bool "Divide by 2"
+config RA_PCKA_DIV_4
+   bool "Divide by 4"
+config RA_PCKA_DIV_8
+   bool "Divide by 8"
+config RA_PCKA_DIV_16
+   bool "Divide by 16"
+config RA_PCKA_DIV_32
+   bool "Divide by 32"
+config RA_PCKA_DIV_64
+   bool "Divide by 64"
+config RA_PCKA_DIV_3
+   bool "Divide by 3"
+config RA_PCKA_DIV_6
+   bool "Divide by 6"
+config RA_PCKA_DIV_12
+   bool "Divide by 12"
+config RA_PCKA_DIV_24
+   bool "Divide by 24"
+endchoice
+
+config RA_PCKA_DIV
+   int
+   default 0 if RA_PCKA_DIV_1
+   default 1 if RA_PCKA_DIV_2
+   default 2 if RA_PCKA_DIV_4
+   default 3 if RA_PCKA_DIV_8
+   default 4 if RA_PCKA_DIV_16
+   default 5 if RA_PCKA_DIV_32
+   default 6 if RA_PCKA_DIV_64
+   default 8 if RA_PCKA_DIV_3
+   default 9 if RA_PCKA_DIV_6
+   default 10 if RA_PCKA_DIV_12
+   default 11 if RA_PCKA_DIV_24
+
+choice
+   prompt "PCLKB Divider (Peripheral Clock B)"
+   default RA_PCKB_DIV_6 if RA8E1_GROUP
+   default RA_PCKB_DIV_16 if RA8P1_GROUP
+   help
+     Select peripheral clock B divider.
+     RA8E1: /6 gives 60MHz
+     RA8P1: /16 gives 62.5MHz
+
+config RA_PCKB_DIV_1
+   bool "Divide by 1"
+config RA_PCKB_DIV_2
+   bool "Divide by 2"
+config RA_PCKB_DIV_4
+   bool "Divide by 4"
+config RA_PCKB_DIV_8
+   bool "Divide by 8"
+config RA_PCKB_DIV_16
+   bool "Divide by 16"
+config RA_PCKB_DIV_32
+   bool "Divide by 32"
+config RA_PCKB_DIV_64
+   bool "Divide by 64"
+config RA_PCKB_DIV_3
+   bool "Divide by 3"
+config RA_PCKB_DIV_6
+   bool "Divide by 6"
+config RA_PCKB_DIV_12
+   bool "Divide by 12"
+config RA_PCKB_DIV_24
+   bool "Divide by 24"
+endchoice
+
+config RA_PCKB_DIV
+   int
+   default 0 if RA_PCKB_DIV_1
+   default 1 if RA_PCKB_DIV_2
+   default 2 if RA_PCKB_DIV_4
+   default 3 if RA_PCKB_DIV_8
+   default 4 if RA_PCKB_DIV_16
+   default 5 if RA_PCKB_DIV_32
+   default 6 if RA_PCKB_DIV_64
+   default 8 if RA_PCKB_DIV_3
+   default 9 if RA_PCKB_DIV_6
+   default 10 if RA_PCKB_DIV_12
+   default 11 if RA_PCKB_DIV_24
+
+choice
+   prompt "PCLKC Divider (Peripheral Clock C)"
+   default RA_PCKC_DIV_6 if RA8E1_GROUP
+   default RA_PCKC_DIV_8 if RA8P1_GROUP
+   help
+     Select peripheral clock C divider.
+     RA8E1: /6 gives 60MHz
+     RA8P1: /8 gives 125MHz
+
+config RA_PCKC_DIV_1
+   bool "Divide by 1"
+config RA_PCKC_DIV_2
+   bool "Divide by 2"
+config RA_PCKC_DIV_4
+   bool "Divide by 4"
+config RA_PCKC_DIV_8
+   bool "Divide by 8"
+config RA_PCKC_DIV_16
+   bool "Divide by 16"
+config RA_PCKC_DIV_32
+   bool "Divide by 32"
+config RA_PCKC_DIV_64
+   bool "Divide by 64"
+config RA_PCKC_DIV_3
+   bool "Divide by 3"
+config RA_PCKC_DIV_6
+   bool "Divide by 6"
+config RA_PCKC_DIV_12
+   bool "Divide by 12"
+config RA_PCKC_DIV_24
+   bool "Divide by 24"
+endchoice
+
+config RA_PCKC_DIV
+   int
+   default 0 if RA_PCKC_DIV_1
+   default 1 if RA_PCKC_DIV_2
+   default 2 if RA_PCKC_DIV_4
+   default 3 if RA_PCKC_DIV_8
+   default 4 if RA_PCKC_DIV_16
+   default 5 if RA_PCKC_DIV_32
+   default 6 if RA_PCKC_DIV_64
+   default 8 if RA_PCKC_DIV_3
+   default 9 if RA_PCKC_DIV_6
+   default 10 if RA_PCKC_DIV_12
+   default 11 if RA_PCKC_DIV_24
+
+choice
+   prompt "PCLKD Divider (Peripheral Clock D)"
+   default RA_PCKD_DIV_3 if RA8E1_GROUP
+   default RA_PCKD_DIV_4 if RA8P1_GROUP
+   help
+     Select peripheral clock D divider.
+     RA8E1: /3 gives 120MHz
+     RA8P1: /4 gives 250MHz
+
+config RA_PCKD_DIV_1
+   bool "Divide by 1"
+config RA_PCKD_DIV_2
+   bool "Divide by 2"
+config RA_PCKD_DIV_4
+   bool "Divide by 4"
+config RA_PCKD_DIV_8
+   bool "Divide by 8"
+config RA_PCKD_DIV_16
+   bool "Divide by 16"
+config RA_PCKD_DIV_32
+   bool "Divide by 32"
+config RA_PCKD_DIV_64
+   bool "Divide by 64"
+config RA_PCKD_DIV_3
+   bool "Divide by 3"
+config RA_PCKD_DIV_6
+   bool "Divide by 6"
+config RA_PCKD_DIV_12
+   bool "Divide by 12"
+config RA_PCKD_DIV_24
+   bool "Divide by 24"
+endchoice
+
+config RA_PCKD_DIV
+   int
+   default 0 if RA_PCKD_DIV_1
+   default 1 if RA_PCKD_DIV_2
+   default 2 if RA_PCKD_DIV_4
+   default 3 if RA_PCKD_DIV_8
+   default 4 if RA_PCKD_DIV_16
+   default 5 if RA_PCKD_DIV_32
+   default 6 if RA_PCKD_DIV_64
+   default 8 if RA_PCKD_DIV_3
+   default 9 if RA_PCKD_DIV_6
+   default 10 if RA_PCKD_DIV_12
+   default 11 if RA_PCKD_DIV_24
+
+choice
+   prompt "PCLKE Divider (Peripheral Clock E)"
+   default RA_PCKE_DIV_3 if RA8E1_GROUP
+   default RA_PCKE_DIV_4 if RA8P1_GROUP
+   help
+     Select peripheral clock E divider.
+     RA8E1: /3 gives 120MHz
+     RA8P1: /4 gives 250MHz
+
+config RA_PCKE_DIV_1
+   bool "Divide by 1"
+config RA_PCKE_DIV_2
+   bool "Divide by 2"
+config RA_PCKE_DIV_4
+   bool "Divide by 4"
+config RA_PCKE_DIV_8
+   bool "Divide by 8"
+config RA_PCKE_DIV_16
+   bool "Divide by 16"
+config RA_PCKE_DIV_32
+   bool "Divide by 32"
+config RA_PCKE_DIV_64
+   bool "Divide by 64"
+config RA_PCKE_DIV_3
+   bool "Divide by 3"
+config RA_PCKE_DIV_6
+   bool "Divide by 6"
+config RA_PCKE_DIV_12
+   bool "Divide by 12"
+config RA_PCKE_DIV_24
+   bool "Divide by 24"
+endchoice
+
+config RA_PCKE_DIV
+   int
+   default 0 if RA_PCKE_DIV_1
+   default 1 if RA_PCKE_DIV_2
+   default 2 if RA_PCKE_DIV_4
+   default 3 if RA_PCKE_DIV_8
+   default 4 if RA_PCKE_DIV_16
+   default 5 if RA_PCKE_DIV_32
+   default 6 if RA_PCKE_DIV_64
+   default 8 if RA_PCKE_DIV_3
+   default 9 if RA_PCKE_DIV_6
+   default 10 if RA_PCKE_DIV_12
+   default 11 if RA_PCKE_DIV_24
+
+choice
+   prompt "BCLK Divider (Bus Clock)"
+   default RA_BCLK_DIV_12 if RA8E1_GROUP
+   default RA_BCLK_DIV_8 if RA8P1_GROUP
+   help
+     Select bus clock divider.
+     RA8E1: /12 gives 30MHz
+     RA8P1: /8 gives 125MHz
+
+config RA_BCLK_DIV_1
+   bool "Divide by 1"
+config RA_BCLK_DIV_2
+   bool "Divide by 2"
+config RA_BCLK_DIV_4
+   bool "Divide by 4"
+config RA_BCLK_DIV_8
+   bool "Divide by 8"
+config RA_BCLK_DIV_16
+   bool "Divide by 16"
+config RA_BCLK_DIV_32
+   bool "Divide by 32"
+config RA_BCLK_DIV_64
+   bool "Divide by 64"
+config RA_BCLK_DIV_3
+   bool "Divide by 3"
+config RA_BCLK_DIV_6
+   bool "Divide by 6"
+config RA_BCLK_DIV_12
+   bool "Divide by 12"
+config RA_BCLK_DIV_24
+   bool "Divide by 24"
+endchoice
+
+config RA_BCLK_DIV
+   int
+   default 0 if RA_BCLK_DIV_1
+   default 1 if RA_BCLK_DIV_2
+   default 2 if RA_BCLK_DIV_4
+   default 3 if RA_BCLK_DIV_8
+   default 4 if RA_BCLK_DIV_16
+   default 5 if RA_BCLK_DIV_32
+   default 6 if RA_BCLK_DIV_64
+   default 8 if RA_BCLK_DIV_3
+   default 9 if RA_BCLK_DIV_6
+   default 10 if RA_BCLK_DIV_12
+   default 11 if RA_BCLK_DIV_24
+
+choice
+   prompt "FCLK Divider (Flash Clock)"
+   default RA_FCLK_DIV_6 if RA8E1_GROUP
+   default RA_FCLK_DIV_8 if RA8P1_GROUP
+   help
+     Select flash clock divider.
+     RA8E1: /6 gives 60MHz
+     RA8P1: /8 gives 125MHz (MRPCLK)
+
+config RA_FCLK_DIV_1
+   bool "Divide by 1"
+config RA_FCLK_DIV_2
+   bool "Divide by 2"
+config RA_FCLK_DIV_4
+   bool "Divide by 4"
+config RA_FCLK_DIV_8
+   bool "Divide by 8"
+config RA_FCLK_DIV_16
+   bool "Divide by 16"
+config RA_FCLK_DIV_32
+   bool "Divide by 32"
+config RA_FCLK_DIV_64
+   bool "Divide by 64"
+config RA_FCLK_DIV_3
+   bool "Divide by 3"
+config RA_FCLK_DIV_6
+   bool "Divide by 6"
+config RA_FCLK_DIV_12
+   bool "Divide by 12"
+config RA_FCLK_DIV_24
+   bool "Divide by 24"
+endchoice
+
+config RA_FCLK_DIV
+   int
+   default 0 if RA_FCLK_DIV_1
+   default 1 if RA_FCLK_DIV_2
+   default 2 if RA_FCLK_DIV_4
+   default 3 if RA_FCLK_DIV_8
+   default 4 if RA_FCLK_DIV_16
+   default 5 if RA_FCLK_DIV_32
+   default 6 if RA_FCLK_DIV_64
+   default 8 if RA_FCLK_DIV_3
+   default 9 if RA_FCLK_DIV_6
+   default 10 if RA_FCLK_DIV_12
+   default 11 if RA_FCLK_DIV_24
+
+endmenu
+
+menu "Peripheral Clock Sources"
+
+choice
+   prompt "SCI Clock Source"
+   default RA_SCICLK_SOURCE_PLL1P if RA_SCI && RA8E1_GROUP
+   default RA_SCICLK_SOURCE_PLL2R if RA_SCI && RA8P1_GROUP
+   default RA_SCICLK_SOURCE_HOCO if RA_SCI
+   default RA_SCICLK_SOURCE_DISABLED
+   help
+     Select SCI (Serial Communication Interface) clock source.
+
+config RA_SCICLK_SOURCE_HOCO
+   bool "HOCO (High-Speed On-Chip Oscillator)"
+
+config RA_SCICLK_SOURCE_MOCO
+   bool "MOCO (Medium-Speed On-Chip Oscillator)"
+
+config RA_SCICLK_SOURCE_LOCO
+   bool "LOCO (Low-Speed On-Chip Oscillator)"
+
+config RA_SCICLK_SOURCE_MAIN_OSC
+   bool "Main Oscillator (External Crystal)"
+
+config RA_SCICLK_SOURCE_PLL1P
+   bool "PLL1P (High Performance)"
+   depends on RA_CLOCK_PLL || RA_CLOCK_PLL1P
+
+config RA_SCICLK_SOURCE_PLL1Q
+   bool "PLL1Q (PLL1 Q output)"
+   depends on RA_CLOCK_PLL || RA_CLOCK_PLL1P
+
+config RA_SCICLK_SOURCE_PLL2P
+   bool "PLL2P (PLL2 P output)"
+   depends on RA_PLL2_ENABLE
+
+config RA_SCICLK_SOURCE_PLL2Q
+   bool "PLL2Q (PLL2 Q output)"
+   depends on RA_PLL2_ENABLE
+
+config RA_SCICLK_SOURCE_PLL2R
+   bool "PLL2R (PLL2 R output)"
+   depends on RA_PLL2_ENABLE
+
+
+
+config RA_SCICLK_SOURCE_DISABLED
+   bool "Disabled"
+
+endchoice
+
+config RA_SCICLK_DIV
+   int "SCI Clock Divider"
+   default 2 if RA8E1_GROUP
+   default 2 if RA8P1_GROUP
+   range 0 8
+   depends on !RA_SCICLK_SOURCE_DISABLED
+   help
+     SCI clock divider (0=/1, 1=/2, 2=/4, 3=/6, 4=/8, 5=/3, 6=/5, 7=/10, 8=/16).
+     For RA8E1: default 2 (/4) gives 90MHz from 360MHz PLL1P.
+     For RA8P1: default 2 (/4) gives 120MHz from 480MHz PLL2R.
+
+choice
+   prompt "SPI Clock Source"
+   default RA_SPICLK_SOURCE_PLL1P if RA_SPI && (RA_CLOCK_PLL || RA_CLOCK_PLL1P)
+   default RA_SPICLK_SOURCE_HOCO if RA_SPI
+   default RA_SPICLK_SOURCE_DISABLED
+   help
+     Select SPI clock source.
+
+config RA_SPICLK_SOURCE_HOCO
+   bool "HOCO (High-Speed On-Chip Oscillator)"
+
+config RA_SPICLK_SOURCE_MOCO
+   bool "MOCO (Medium-Speed On-Chip Oscillator)"
+
+config RA_SPICLK_SOURCE_LOCO
+   bool "LOCO (Low-Speed On-Chip Oscillator)"
+
+config RA_SPICLK_SOURCE_MAIN_OSC
+   bool "Main Oscillator (External Crystal)"
+
+config RA_SPICLK_SOURCE_PLL1P
+   bool "PLL1P (High Performance)"
+   depends on RA_CLOCK_PLL || RA_CLOCK_PLL1P
+
+config RA_SPICLK_SOURCE_PLL1Q
+   bool "PLL1Q (PLL1 Q output)"
+   depends on RA_CLOCK_PLL || RA_CLOCK_PLL1P
+
+config RA_SPICLK_SOURCE_PLL2P
+   bool "PLL2P (PLL2 P output)"
+   depends on RA_PLL2_ENABLE
+
+config RA_SPICLK_SOURCE_PLL2Q
+   bool "PLL2Q (PLL2 Q output)"
+   depends on RA_PLL2_ENABLE
+
+config RA_SPICLK_SOURCE_PLL2R
+   bool "PLL2R (PLL2 R output)"
+   depends on RA_PLL2_ENABLE
+
+config RA_SPICLK_SOURCE_DISABLED
+   bool "Disabled"
+
+endchoice
+
+choice
+   prompt "CAN-FD Clock Source"
+   default RA_CANFDCLK_SOURCE_PLL1P if RA_CAN && (RA_CLOCK_PLL || RA_CLOCK_PLL1P)
+   default RA_CANFDCLK_SOURCE_HOCO if RA_CAN
+   default RA_CANFDCLK_SOURCE_DISABLED
+   help
+     Select CAN-FD clock source.
+
+config RA_CANFDCLK_SOURCE_HOCO
+   bool "HOCO (High-Speed On-Chip Oscillator)"
+
+config RA_CANFDCLK_SOURCE_MOCO
+   bool "MOCO (Medium-Speed On-Chip Oscillator)"
+
+config RA_CANFDCLK_SOURCE_LOCO
+   bool "LOCO (Low-Speed On-Chip Oscillator)"
+
+config RA_CANFDCLK_SOURCE_MAIN_OSC
+   bool "Main Oscillator (External Crystal)"
+
+config RA_CANFDCLK_SOURCE_PLL1P
+   bool "PLL1P (High Performance)"
+   depends on RA_CLOCK_PLL || RA_CLOCK_PLL1P
+
+config RA_CANFDCLK_SOURCE_PLL1Q
+   bool "PLL1Q (PLL1 Q output)"
+   depends on RA_CLOCK_PLL || RA_CLOCK_PLL1P
+
+config RA_CANFDCLK_SOURCE_PLL2P
+   bool "PLL2P (PLL2 P output)"
+   depends on RA_PLL2_ENABLE
+
+config RA_CANFDCLK_SOURCE_PLL2Q
+   bool "PLL2Q (PLL2 Q output)"
+   depends on RA_PLL2_ENABLE
+
+config RA_CANFDCLK_SOURCE_PLL2R
+   bool "PLL2R (PLL2 R output)"
+   depends on RA_PLL2_ENABLE
+
+config RA_CANFDCLK_SOURCE_DISABLED
+   bool "Disabled"
+
+endchoice
+
+choice
+   prompt "USB Clock Source"
+   default RA_USBCLK_SOURCE_PLL1P if RA_USB && (RA_CLOCK_PLL || RA_CLOCK_PLL1P)
+   default RA_USBCLK_SOURCE_HOCO if RA_USB
+   default RA_USBCLK_SOURCE_DISABLED
+   help
+     Select USB clock source.
+
+config RA_USBCLK_SOURCE_HOCO
+   bool "HOCO (High-Speed On-Chip Oscillator)"
+
+config RA_USBCLK_SOURCE_MOCO
+   bool "MOCO (Medium-Speed On-Chip Oscillator)"
+
+config RA_USBCLK_SOURCE_LOCO
+   bool "LOCO (Low-Speed On-Chip Oscillator)"
+
+config RA_USBCLK_SOURCE_MAIN_OSC
+   bool "Main Oscillator (External Crystal)"
+
+config RA_USBCLK_SOURCE_PLL1P
+   bool "PLL1P (High Performance)"
+   depends on RA_CLOCK_PLL || RA_CLOCK_PLL1P
+
+config RA_USBCLK_SOURCE_PLL1Q
+   bool "PLL1Q (PLL1 Q output)"
+   depends on RA_CLOCK_PLL || RA_CLOCK_PLL1P
+
+config RA_USBCLK_SOURCE_PLL2P
+   bool "PLL2P (PLL2 P output)"
+   depends on RA_PLL2_ENABLE
+
+config RA_USBCLK_SOURCE_PLL2Q
+   bool "PLL2Q (PLL2 Q output)"
+   depends on RA_PLL2_ENABLE
+
+config RA_USBCLK_SOURCE_PLL2R
+   bool "PLL2R (PLL2 R output)"
+   depends on RA_PLL2_ENABLE
+
+config RA_USBCLK_SOURCE_DISABLED
+   bool "Disabled"
+
+endchoice
+
+choice
+   prompt "Octal SPI Clock Source"
+   default RA_OCTACLK_SOURCE_PLL1P if RA_OSPI && (RA_CLOCK_PLL || RA_CLOCK_PLL1P)
+   default RA_OCTACLK_SOURCE_HOCO if RA_OSPI
+   default RA_OCTACLK_SOURCE_DISABLED
+   help
+     Select Octal SPI clock source.
+
+config RA_OCTACLK_SOURCE_HOCO
+   bool "HOCO (High-Speed On-Chip Oscillator)"
+
+config RA_OCTACLK_SOURCE_MOCO
+   bool "MOCO (Medium-Speed On-Chip Oscillator)"
+
+config RA_OCTACLK_SOURCE_LOCO
+   bool "LOCO (Low-Speed On-Chip Oscillator)"
+
+config RA_OCTACLK_SOURCE_MAIN_OSC
+   bool "Main Oscillator (External Crystal)"
+
+config RA_OCTACLK_SOURCE_PLL1P
+   bool "PLL1P (High Performance)"
+   depends on RA_CLOCK_PLL || RA_CLOCK_PLL1P
+
+config RA_OCTACLK_SOURCE_PLL1Q
+   bool "PLL1Q (PLL1 Q output)"
+   depends on RA_CLOCK_PLL || RA_CLOCK_PLL1P
+
+config RA_OCTACLK_SOURCE_PLL2P
+   bool "PLL2P (PLL2 P output)"
+   depends on RA_PLL2_ENABLE
+
+config RA_OCTACLK_SOURCE_PLL2Q
+   bool "PLL2Q (PLL2 Q output)"
+   depends on RA_PLL2_ENABLE
+
+config RA_OCTACLK_SOURCE_PLL2R
+   bool "PLL2R (PLL2 R output)"
+   depends on RA_PLL2_ENABLE
+
+config RA_OCTACLK_SOURCE_DISABLED
+   bool "Disabled"
+
+endchoice
+
+choice
+   prompt "SCI SPI Clock Source"
+   default RA_SCISPICLK_SOURCE_PLL1P if RA_SCI && (RA_CLOCK_PLL || RA_CLOCK_PLL1P)
+   default RA_SCISPICLK_SOURCE_HOCO if RA_SCI
+   default RA_SCISPICLK_SOURCE_DISABLED
+   help
+     Select SCI SPI clock source.
+
+config RA_SCISPICLK_SOURCE_HOCO
+   bool "HOCO (High-Speed On-Chip Oscillator)"
+
+config RA_SCISPICLK_SOURCE_MOCO
+   bool "MOCO (Medium-Speed On-Chip Oscillator)"
+
+config RA_SCISPICLK_SOURCE_LOCO
+   bool "LOCO (Low-Speed On-Chip Oscillator)"
+
+config RA_SCISPICLK_SOURCE_MAIN_OSC
+   bool "Main Oscillator (External Crystal)"
+
+config RA_SCISPICLK_SOURCE_PLL1P
+   bool "PLL1P (High Performance)"
+   depends on RA_CLOCK_PLL || RA_CLOCK_PLL1P
+
+config RA_SCISPICLK_SOURCE_DISABLED
+   bool "Disabled"
+
+endchoice
+
+choice
+   prompt "GPT Clock Source"
+   default RA_GPTCLK_SOURCE_PLL1P if RA_GPT && (RA_CLOCK_PLL || RA_CLOCK_PLL1P)
+   default RA_GPTCLK_SOURCE_HOCO if RA_GPT
+   default RA_GPTCLK_SOURCE_DISABLED
+   help
+     Select GPT (General Purpose Timer) clock source.
+
+config RA_GPTCLK_SOURCE_HOCO
+   bool "HOCO (High-Speed On-Chip Oscillator)"
+
+config RA_GPTCLK_SOURCE_MOCO
+   bool "MOCO (Medium-Speed On-Chip Oscillator)"
+
+config RA_GPTCLK_SOURCE_LOCO
+   bool "LOCO (Low-Speed On-Chip Oscillator)"
+
+config RA_GPTCLK_SOURCE_MAIN_OSC
+   bool "Main Oscillator (External Crystal)"
+
+config RA_GPTCLK_SOURCE_PLL1P
+   bool "PLL1P (High Performance)"
+   depends on RA_CLOCK_PLL || RA_CLOCK_PLL1P
+
+config RA_GPTCLK_SOURCE_PLL1Q
+   bool "PLL1Q (PLL1 Q output)"
+   depends on RA_CLOCK_PLL || RA_CLOCK_PLL1P
+
+config RA_GPTCLK_SOURCE_PLL2P
+   bool "PLL2P (PLL2 P output)"
+   depends on RA_PLL2_ENABLE
+
+config RA_GPTCLK_SOURCE_PLL2Q
+   bool "PLL2Q (PLL2 Q output)"
+   depends on RA_PLL2_ENABLE
+
+config RA_GPTCLK_SOURCE_PLL2R
+   bool "PLL2R (PLL2 R output)"
+   depends on RA_PLL2_ENABLE
+
+config RA_GPTCLK_SOURCE_DISABLED
+   bool "Disabled"
+
+endchoice
+
+choice
+   prompt "I2C Clock Source"
+   default RA_IICCLK_SOURCE_PLL1P if RA_I2C && (RA_CLOCK_PLL || RA_CLOCK_PLL1P)
+   default RA_IICCLK_SOURCE_HOCO if RA_I2C
+   default RA_IICCLK_SOURCE_DISABLED
+   help
+     Select I2C clock source.
+
+config RA_IICCLK_SOURCE_HOCO
+   bool "HOCO (High-Speed On-Chip Oscillator)"
+
+config RA_IICCLK_SOURCE_MOCO
+   bool "MOCO (Medium-Speed On-Chip Oscillator)"
+
+config RA_IICCLK_SOURCE_LOCO
+   bool "LOCO (Low-Speed On-Chip Oscillator)"
+
+config RA_IICCLK_SOURCE_MAIN_OSC
+   bool "Main Oscillator (External Crystal)"
+
+config RA_IICCLK_SOURCE_PLL1P
+   bool "PLL1P (High Performance)"
+   depends on RA_CLOCK_PLL || RA_CLOCK_PLL1P
+
+config RA_IICCLK_SOURCE_DISABLED
+   bool "Disabled"
+
+endchoice
+
+choice
+   prompt "ADC Clock Source"
+   default RA_ADCCLK_SOURCE_PLL1P if (RA_ADC0 || RA_ADC1 || RA_ADC12) && (RA_CLOCK_PLL || RA_CLOCK_PLL1P)
+   default RA_ADCCLK_SOURCE_HOCO if (RA_ADC0 || RA_ADC1 || RA_ADC12)
+   default RA_ADCCLK_SOURCE_DISABLED
+   help
+     Select ADC clock source.
+
+config RA_ADCCLK_SOURCE_HOCO
+   bool "HOCO (High-Speed On-Chip Oscillator)"
+
+config RA_ADCCLK_SOURCE_MOCO
+   bool "MOCO (Medium-Speed On-Chip Oscillator)"
+
+config RA_ADCCLK_SOURCE_LOCO
+   bool "LOCO (Low-Speed On-Chip Oscillator)"
+
+config RA_ADCCLK_SOURCE_MAIN_OSC
+   bool "Main Oscillator (External Crystal)"
+
+config RA_ADCCLK_SOURCE_PLL1P
+   bool "PLL1P (High Performance)"
+   depends on RA_CLOCK_PLL || RA_CLOCK_PLL1P
+
+config RA_ADCCLK_SOURCE_PLL1Q
+   bool "PLL1Q (PLL1 Q output)"
+   depends on RA_CLOCK_PLL || RA_CLOCK_PLL1P
+
+config RA_ADCCLK_SOURCE_PLL2P
+   bool "PLL2P (PLL2 P output)"
+   depends on RA_PLL2_ENABLE
+
+config RA_ADCCLK_SOURCE_PLL2Q
+   bool "PLL2Q (PLL2 Q output)"
+   depends on RA_PLL2_ENABLE
+
+config RA_ADCCLK_SOURCE_PLL2R
+   bool "PLL2R (PLL2 R output)"
+   depends on RA_PLL2_ENABLE
+
+config RA_ADCCLK_SOURCE_DISABLED
+   bool "Disabled"
+
+endchoice
+
+# Peripheral Clock Source Configuration (Automatic from choice selections)
+config RA_SCICLK_SOURCE
+   int
+   default 0 if RA_SCICLK_SOURCE_HOCO
+   default 1 if RA_SCICLK_SOURCE_MOCO
+   default 2 if RA_SCICLK_SOURCE_LOCO
+   default 3 if RA_SCICLK_SOURCE_MAIN_OSC
+   default 5 if RA_SCICLK_SOURCE_PLL1P
+   default 7 if RA_SCICLK_SOURCE_PLL1Q
+   default 6 if RA_SCICLK_SOURCE_PLL2P
+   default 9 if RA_SCICLK_SOURCE_PLL2Q
+   default 10 if RA_SCICLK_SOURCE_PLL2R
+   default 15 if RA_SCICLK_SOURCE_DISABLED
+   default 5
+   help
+   SCI clock source selection (automatically set from choice)
+   Values:
+      0  = HOCO
+      1  = MOCO
+      2  = LOCO
+      3  = Main OSC
+      5  = PLL1P
+      7  = PLL1Q
+      6  = PLL2P
+      9  = PLL2Q
+      10 = PLL2R
+      15 = Disabled
+
+config RA_SPICLK_SOURCE
+   int
+   default 0 if RA_SPICLK_SOURCE_HOCO
+   default 1 if RA_SPICLK_SOURCE_MOCO
+   default 2 if RA_SPICLK_SOURCE_LOCO
+   default 3 if RA_SPICLK_SOURCE_MAIN_OSC
+   default 5 if RA_SPICLK_SOURCE_PLL1P
+   default 7 if RA_SPICLK_SOURCE_PLL1Q
+   default 6 if RA_SPICLK_SOURCE_PLL2P
+   default 9 if RA_SPICLK_SOURCE_PLL2Q
+   default 10 if RA_SPICLK_SOURCE_PLL2R
+   default 15 if RA_SPICLK_SOURCE_DISABLED
+   default 15
+   help
+   SPI clock source selection (automatically set from choice)
+   Values:
+      0  = HOCO
+      1  = MOCO
+      2  = LOCO
+      3  = Main OSC
+      5  = PLL1P
+      7  = PLL1Q
+      6  = PLL2P
+      9  = PLL2Q
+      10 = PLL2R
+      15 = Disabled
+
+config RA_CANFDCLK_SOURCE
+   int
+   default 0 if RA_CANFDCLK_SOURCE_HOCO
+   default 1 if RA_CANFDCLK_SOURCE_MOCO
+   default 2 if RA_CANFDCLK_SOURCE_LOCO
+   default 3 if RA_CANFDCLK_SOURCE_MAIN_OSC
+   default 5 if RA_CANFDCLK_SOURCE_PLL1P
+   default 7 if RA_CANFDCLK_SOURCE_PLL1Q
+   default 6 if RA_CANFDCLK_SOURCE_PLL2P
+   default 9 if RA_CANFDCLK_SOURCE_PLL2Q
+   default 10 if RA_CANFDCLK_SOURCE_PLL2R
+   default 15 if RA_CANFDCLK_SOURCE_DISABLED
+   default 15
+   help
+   CAN-FD clock source selection (automatically set from choice)
+   Values:
+      0  = HOCO
+      1  = MOCO
+      2  = LOCO
+      3  = Main OSC
+      5  = PLL1P
+      7  = PLL1Q
+      6  = PLL2P
+      9  = PLL2Q
+      10 = PLL2R
+      15 = Disabled
+
+config RA_USBCLK_SOURCE
+   int
+   default 0 if RA_USBCLK_SOURCE_HOCO
+   default 1 if RA_USBCLK_SOURCE_MOCO
+   default 2 if RA_USBCLK_SOURCE_LOCO
+   default 3 if RA_USBCLK_SOURCE_MAIN_OSC
+   default 5 if RA_USBCLK_SOURCE_PLL1P
+   default 7 if RA_USBCLK_SOURCE_PLL1Q
+   default 6 if RA_USBCLK_SOURCE_PLL2P
+   default 9 if RA_USBCLK_SOURCE_PLL2Q
+   default 10 if RA_USBCLK_SOURCE_PLL2R
+   default 15 if RA_USBCLK_SOURCE_DISABLED
+   default 15
+   help
+   USB clock source selection (automatically set from choice)
+   Values:
+      0  = HOCO
+      1  = MOCO
+      2  = LOCO
+      3  = Main OSC
+      5  = PLL1P
+      7  = PLL1Q
+      6  = PLL2P
+      9  = PLL2Q
+      10 = PLL2R
+      15 = Disabled
+
+config RA_OCTACLK_SOURCE
+   int
+   default 0 if RA_OCTACLK_SOURCE_HOCO
+   default 1 if RA_OCTACLK_SOURCE_MOCO
+   default 2 if RA_OCTACLK_SOURCE_LOCO
+   default 3 if RA_OCTACLK_SOURCE_MAIN_OSC
+   default 5 if RA_OCTACLK_SOURCE_PLL1P
+   default 7 if RA_OCTACLK_SOURCE_PLL1Q
+   default 6 if RA_OCTACLK_SOURCE_PLL2P
+   default 9 if RA_OCTACLK_SOURCE_PLL2Q
+   default 10 if RA_OCTACLK_SOURCE_PLL2R
+   default 15 if RA_OCTACLK_SOURCE_DISABLED
+   default 15
+   help
+   Octal SPI clock source selection (automatically set from choice)
+   Values:
+      0  = HOCO
+      1  = MOCO
+      2  = LOCO
+      3  = Main OSC
+      5  = PLL1P
+      7  = PLL1Q
+      6  = PLL2P
+      9  = PLL2Q
+      10 = PLL2R
+      15 = Disabled
+
+config RA_SCISPICLK_SOURCE
+   int
+   default 0 if RA_SCISPICLK_SOURCE_HOCO
+   default 1 if RA_SCISPICLK_SOURCE_MOCO
+   default 2 if RA_SCISPICLK_SOURCE_LOCO
+   default 3 if RA_SCISPICLK_SOURCE_MAIN_OSC
+   default 5 if RA_SCISPICLK_SOURCE_PLL1P
+   default 15 if RA_SCISPICLK_SOURCE_DISABLED
+   default 15
+   help
+   SCI SPI clock source selection (automatically set from choice)
+   Values:
+      0  = HOCO
+      1  = MOCO
+      2  = LOCO
+      3  = Main OSC
+      5  = PLL1P
+      15 = Disabled
+
+config RA_GPTCLK_SOURCE
+   int
+   default 0 if RA_GPTCLK_SOURCE_HOCO
+   default 1 if RA_GPTCLK_SOURCE_MOCO
+   default 2 if RA_GPTCLK_SOURCE_LOCO
+   default 3 if RA_GPTCLK_SOURCE_MAIN_OSC
+   default 5 if RA_GPTCLK_SOURCE_PLL1P
+   default 7 if RA_GPTCLK_SOURCE_PLL1Q
+   default 6 if RA_GPTCLK_SOURCE_PLL2P
+   default 9 if RA_GPTCLK_SOURCE_PLL2Q
+   default 10 if RA_GPTCLK_SOURCE_PLL2R
+   default 15 if RA_GPTCLK_SOURCE_DISABLED
+   default 15
+   help
+   GPT clock source selection (automatically set from choice)
+   Values:
+      0  = HOCO
+      1  = MOCO
+      2  = LOCO
+      3  = Main OSC
+      5  = PLL1P
+      7  = PLL1Q
+      6  = PLL2P
+      9  = PLL2Q
+      10 = PLL2R
+      15 = Disabled
+
+config RA_IICCLK_SOURCE
+   int
+   default 0 if RA_IICCLK_SOURCE_HOCO
+   default 1 if RA_IICCLK_SOURCE_MOCO
+   default 2 if RA_IICCLK_SOURCE_LOCO
+   default 3 if RA_IICCLK_SOURCE_MAIN_OSC
+   default 5 if RA_IICCLK_SOURCE_PLL1P
+   default 15 if RA_IICCLK_SOURCE_DISABLED
+   default 15
+   help
+   I2C clock source selection (automatically set from choice)
+   Values:
+      0  = HOCO
+      1  = MOCO
+      2  = LOCO
+      3  = Main OSC
+      5  = PLL1P
+      15 = Disabled
+
+config RA_ADCCLK_SOURCE
+   int
+   default 0 if RA_ADCCLK_SOURCE_HOCO
+   default 1 if RA_ADCCLK_SOURCE_MOCO
+   default 2 if RA_ADCCLK_SOURCE_LOCO
+   default 3 if RA_ADCCLK_SOURCE_MAIN_OSC
+   default 5 if RA_ADCCLK_SOURCE_PLL1P
+   default 7 if RA_ADCCLK_SOURCE_PLL1Q
+   default 6 if RA_ADCCLK_SOURCE_PLL2P
+   default 9 if RA_ADCCLK_SOURCE_PLL2Q
+   default 10 if RA_ADCCLK_SOURCE_PLL2R
+   default 15 if RA_ADCCLK_SOURCE_DISABLED
+   default 15
+   help
+   ADC clock source selection (automatically set from choice)
+   Values:
+      0  = HOCO
+      1  = MOCO
+      2  = LOCO
+      3  = Main OSC
+      5  = PLL1P
+      7  = PLL1Q
+      6  = PLL2P
+      9  = PLL2Q
+      10 = PLL2R
+      15 = Disabled
+
+endmenu
+
+config RA_MCU_PLL_ENABLE
+   bool "Enable PLL"
+   default y if RA_CLOCK_PLL || RA_CLOCK_PLL1P
+   help
+     Enable or disable the PLL clock for frequency multiplication.
+     Required for maximum performance (360MHz).
+
+endmenu
+
+endif # RA_MCU_CLOCKS_ENABLE
+
+menu "Memory Configuration"
+
+config RA_HEAP_SRAM
+   bool "Use SRAM for heap"
+   default y
+   help
+     Use main SRAM for the system heap allocation.
+
+config RA_HEAP_DEBUG
+   bool "Enable heap debug output"
+   default n
+   depends on RA_HEAP_SRAM
+   help
+     Enable debug output for heap allocation and memory layout.
+
+config RA_DTCM_HEAP
+   bool "Use DTCM for heap"
+   default n
+   help
+     Use Data Tightly Coupled Memory (DTCM) for heap allocation.
+     Provides faster access but limited size.
+
+config RA_DTCM_BASE
+   hex "DTCM Base Address"
+    default 0x20000000
+   depends on RA_DTCM_HEAP
+   help
+       Base address of the DTCM memory region.
+
+       Standard ARM TCM address: 0x20000000
+
+       RA8E1: Part of 32 KB total TCM
+       RA8P1 CM85: 128 KB DTCM (CPU0 dedicated)
+       RA8P1 CM33: 64 KB STCM (CPU1 dedicated)
+
+       On RA8P1, both cores use same virtual address but access
+       different physical memory - each core has dedicated TCM.
+
+config RA_DTCM_SIZE
+   int "DTCM Size (bytes)"
+    default 32768 if RA8E1_GROUP                       # 32 KB total TCM
+    default 131072 if RA8P1_GROUP && RA8_CM85_FAMILY   # 128 KB DTCM
+    default 65536 if RA8P1_GROUP && RA8_CM33_FAMILY    # 64 KB STCM
+   depends on RA_DTCM_HEAP
+   help
+       Size of the DTCM/STCM memory region (hardware-fixed).
+
+       RA8E1: 32 KB total TCM (16KB instruction + 16KB data)
+       RA8P1 CM85: 128 KB DTCM with ECC
+       RA8P1 CM33: 64 KB STCM with ECC
+
+config RA_ITCM_HEAP
+   bool "Use ITCM for heap"
+   default n
+   help
+     Use Instruction Tightly Coupled Memory (ITCM) for heap allocation.
+     Not recommended for general heap usage.
+
+config RA_ITCM_BASE
+   hex "ITCM Base Address"
+    default 0x00000000
+   depends on RA_ITCM_HEAP
+   help
+       Base address of the ITCM memory region.
+
+       Standard ARM TCM address: 0x00000000
+
+       RA8E1: May not have separate ITCM (check datasheet)
+       RA8P1 CM85: 128 KB ITCM (CPU0 dedicated)
+       RA8P1 CM33: 64 KB CTCM (CPU1 dedicated, called "Code TCM")
+
+       On RA8P1, both cores use same virtual address but access
+       different physical memory - each core has dedicated TCM.
+
+config RA_ITCM_SIZE
+   int "ITCM Size (bytes)"
+    default 0 if RA8E1_GROUP                           # May not have separate ITCM
+    default 131072 if RA8P1_GROUP && RA8_CM85_FAMILY   # 128 KB ITCM
+    default 65536 if RA8P1_GROUP && RA8_CM33_FAMILY    # 64 KB CTCM
+   depends on RA_ITCM_HEAP
+   help
+       Size of the ITCM/CTCM memory region (hardware-fixed).
+
+       RA8E1: 0 (may not have separate ITCM - verify datasheet)
+       RA8P1 CM85: 128 KB ITCM with ECC
+       RA8P1 CM33: 64 KB CTCM with ECC (Renesas calls it "Code TCM")
+
+       These are hardware-determined sizes from user manuals.
+       Do not modify unless verified in official documentation.
+
+config RA_EXTERNAL_RAM_HEAP
+   bool "Use external RAM for heap"
+   default n
+   help
+     Use external RAM for heap allocation.
+     Requires external memory controller configuration.
+
+config RA_EXTERNAL_RAM_BASE
+   hex "External RAM Base Address"
+   default 0x60000000
+   depends on RA_EXTERNAL_RAM_HEAP
+   help
+     Base address of the external RAM region.
+
+config RA_EXTERNAL_RAM_SIZE
+   int "External RAM Size (bytes)"
+   default 16777216
+   depends on RA_EXTERNAL_RAM_HEAP
+   help
+     Size of the external RAM region in bytes.
+
+config RA_STACK_GUARD
+   bool "Enable stack guard"
+   default n
+   help
+     Enable stack guard to detect stack overflow.
+     Reserves memory area to catch stack overflows.
+
+config RA_STACK_GUARD_SIZE
+   int "Stack guard size (bytes)"
+   default 1024
+   depends on RA_STACK_GUARD
+   help
+     Size of the stack guard area in bytes.
+
+config RA_HEAP_ALIGNMENT
+   int "Heap alignment (bytes)"
+   default 8
+   help
+     Memory alignment requirement for heap allocations.
+     Must be a power of 2.
+
+config RA_SRAM_BASE
+   hex "SRAM Base Address"
+   default 0x20000000 if RA8E1_GROUP
+   default 0x22000000 if RA8P1_GROUP
+   help
+     Base address of the main SRAM memory region.
+
+     RA8E1: 0x20000000
+     - 544 KB total (includes 32 KB TCM - not separate)
+     - Effective user SRAM: ~512 KB
+
+     RA8P1: 0x22000000
+     - 2 MB shared SRAM with ECC
+     - Separate from TCM regions
+     - Both cores can access shared SRAM
+     - Coordinate memory usage between cores!
+
+     RA8P1 TCM regions (separate from shared SRAM):
+     - CM85 ITCM: 0x00000000 (128 KB, CPU0 only)
+     - CM85 DTCM: 0x20000000 (128 KB, CPU0 only)
+     - CM33 CTCM: 0x00000000 (64 KB, CPU1 only)
+     - CM33 STCM: 0x20000000 (64 KB, CPU1 only)
+
+     CRITICAL: On RA8P1, TCM and shared SRAM are at different bases:
+     - TCM: 0x00000000/0x20000000 (per-core dedicated)
+     - Shared: 0x22000000 (both cores access)
+
+     Each core has its own TCM at standard addresses, but shared
+     resources require explicit coordination.
+
+config RA_SRAM_SIZE
+   hex "SRAM Size (bytes)"
+   default 0x00088000 if RA8E1_GROUP  # 544 KB (includes TCM)
+   default 0x00200000 if RA8P1_GROUP  # 2 MB shared
+
+comment "SDRAM Controller"
+
+config RA_SDRAM
+   bool "SDRAM Controller Support"
+   default n
+   depends on RA_HAVE_SDRAM
+   help
+     Enable support for external SDRAM memory via the Bus Controller.
+     The RA8P1 supports SDRAM at CS6 space (0x68000000).
+     This driver provides initialization, self-refresh control, and
+     memory testing capabilities.
+
+if RA_SDRAM
+
+config RA_SDRAM_BASE
+   hex "SDRAM Base Address"
+   default 0x68000000
+   help
+     Base address of the external SDRAM memory region.
+     For RA8P1, SDRAM is mapped to CS6 space at 0x68000000.
+
+config RA_SDRAM_SIZE
+   hex "SDRAM Size (bytes)"
+   default 0x02000000
+   help
+     Size of the external SDRAM memory in bytes.
+     Default is 32MB (0x02000000) for IS42S32800J SDRAM.
+
+config RA_SDRAM_BUS_WIDTH
+   int "SDRAM Bus Width"
+   default 32
+   range 16 32
+   help
+     SDRAM data bus width in bits.
+     Supported values: 16 or 32 bits.
+
+config RA_SDRAM_HEAP
+   bool "Use SDRAM for heap"
+   default n
+   help
+     Use external SDRAM for heap allocation.
+     This enables adding SDRAM memory region to the system heap.
+     Useful for applications requiring large amounts of RAM.
+
+config RA_SDRAM_TEST
+   bool "Enable SDRAM test function"
+   default y
+   help
+     Enable ra_sdram_test() function for SDRAM validation.
+     The test performs pattern write/read verification.
+
+menu "SDRAM Timing Configuration"
+
+comment "Timing values are in BCLK cycles unless specified"
+
+config RA_SDRAM_TRAS
+   int "tRAS - Row Active Time (cycles)"
+   default 5
+   range 1 16
+   help
+     Active to precharge command delay in BCLK cycles.
+     Minimum active row time. Typical: 42ns.
+
+config RA_SDRAM_TRCD
+   int "tRCD - RAS to CAS Delay (cycles)"
+   default 3
+   range 1 8
+   help
+     Row address to column address delay in BCLK cycles.
+     RAS to CAS latency. Typical: 18ns.
+
+config RA_SDRAM_TRP
+   int "tRP - Row Precharge Time (cycles)"
+   default 3
+   range 1 8
+   help
+     Precharge to active command delay in BCLK cycles.
+     Row precharge time. Typical: 18ns.
+
+config RA_SDRAM_TWR
+   int "tWR - Write Recovery Time (cycles)"
+   default 2
+   range 1 8
+   help
+     Write recovery time in BCLK cycles.
+     Last data to precharge delay. Typical: 12ns.
+
+config RA_SDRAM_TCL
+   int "CAS Latency (cycles)"
+   default 3
+   range 2 3
+   help
+     CAS latency in BCLK cycles.
+     Column address strobe latency. Typical: 2 or 3 cycles.
+
+config RA_SDRAM_TRFC
+   int "tRFC - Refresh to Active Time (cycles)"
+   default 8
+   range 1 16
+   help
+     Auto-refresh to active command delay in BCLK cycles.
+     Refresh cycle time. Typical: 60ns.
+
+config RA_SDRAM_TREFW
+   int "tREFW - Refresh Period (cycles)"
+   default 1170
+   range 1 4096
+   help
+     Auto-refresh period in BCLK cycles.
+     Time between auto-refresh commands.
+     For 64ms/8192 rows at 125MHz: ~976 cycles.
+     Default 1170 provides margin.
+
+endmenu
+
+menu "SDRAM Debug Options"
+
+config RA_SDRAM_DEBUG
+   bool "Enable SDRAM debug output"
+   default n
+   depends on DEBUG_FEATURES
+   help
+     Enable debug output for SDRAM driver operations.
+     Shows initialization sequence, timing configuration,
+     and error conditions.
+
+config RA_SDRAM_DEBUG_INFO
+   bool "Enable SDRAM info output"
+   default n
+   depends on RA_SDRAM_DEBUG
+   help
+     Enable informational output for SDRAM operations.
+     More verbose than error-only debug output.
+
+endmenu
+
+comment "SDRAM DTC/DMAC Transfer Options"
+
+config RA_SDRAM_USE_DTC
+   bool "SDRAM use DTC for transfers"
+   default n
+   depends on RA_DTC
+   help
+     Enable DTC (Data Transfer Controller) for SDRAM transfers.
+     DTC provides hardware-assisted data transfers with lower
+     CPU overhead for memory operations.
+
+config RA_SDRAM_USE_DMAC
+   bool "SDRAM use DMAC for transfers"
+   default n
+   depends on RA_DMAC
+   help
+     Enable DMAC (Direct Memory Access Controller) for SDRAM transfers.
+     DMAC provides hardware-assisted data transfers with the lowest
+     CPU overhead for high-speed SDRAM access. This is recommended
+     for large block transfers and framebuffer operations.
+     DMAC takes priority over DTC if both are enabled.
+
+config RA_SDRAM_DMAC_THRESHOLD
+   int "Minimum bytes for SDRAM DMAC transfer"
+   default 256
+   range 1 16384
+   depends on RA_SDRAM_USE_DMAC
+   help
+     Minimum number of bytes required to use DMAC for SDRAM transfers.
+     Transfers smaller than this threshold will use DTC or PIO mode.
+     Default is 256 bytes for optimal performance/overhead balance.
+
+endif # RA_SDRAM
+
+endmenu
+
+menu "RA8 Flash Configuration"
+
+config RA_FLASH
+    bool "Enable RA8 Flash Support"
+    default n
+    select MTD
+    ---help---
+        Enable support for RA8 internal flash memory.
+
+if RA_FLASH
+
+config RA_CODE_FLASH
+    bool "Enable Code Flash Support"
+    default n
+    ---help---
+        Enable support for RA8 code flash memory.
+        Supports dual bank operation for FOTA.
+
+config RA_DATA_FLASH
+    bool "Enable Data Flash Support"
+    default n
+    ---help---
+        Enable support for RA8 data flash memory.
+        Suitable for configuration storage and small data.
+
+config RA_FLASH_DUAL_BANK
+    bool "Enable Dual Bank Support"
+    default n
+    depends on RA_CODE_FLASH
+    ---help---
+        Enable dual bank support for code flash.
+        Required for Firmware Over The Air (FOTA) updates.
+
+config RA_FLASH_BANK_SWAP
+    bool "Enable Bank Swap Support"
+    default n
+    depends on RA_FLASH_DUAL_BANK
+    ---help---
+        Enable bank swap functionality for safe firmware updates.
+
+config RA_FLASH_WRITE_PROTECTION
+    bool "Enable write protection features"
+    default n
+    depends on RA_FLASH
+
+    help
+      Enable flash write protection and security features.
+      Prevents accidental flash corruption.
+
+config RA_FLASH_ERROR_CORRECTION
+    bool "Enable ECC support"
+    default n
+    depends on RA_CODE_FLASH
+    help
+      Enable Error Correction Code (ECC) for flash memory.
+      Improves data integrity and reliability.
+
+endif # RA_FLASH
+
+endmenu
+
+menu "SCI UARTs"
+config RA_HAVE_SCI0
+   bool
+   default n
+
+config RA_HAVE_SCI1
+   bool
+   default n
+
+config RA_HAVE_SCI2
+   bool
+   default n
+
+config RA_HAVE_SCI3
+   bool
+   default n
+
+config RA_HAVE_SCI4
+   bool
+   default n
+
+config RA_HAVE_SCI5
+   bool
+   default n
+
+config RA_HAVE_SCI6
+   bool
+   default n
+
+config RA_HAVE_SCI7
+   bool
+   default n
+
+config RA_HAVE_SCI8
+   bool
+   default n
+
+config RA_HAVE_SCI9
+   bool
+   default n
+
+config RA_SCI
+   bool
+   default n
+   select SERIAL
+
+config RA_SCI0_UART
+   bool "SCI0 UART support"
+   default n
+   depends on RA_HAVE_SCI0
+   select RA_SCI
+   select SCI0_SERIALDRIVER
+   ---help---
+      Enable support for SCI0 UART peripheral.
+
+config RA_SCI1_UART
+   bool "SCI1 UART support"
+   default n
+   depends on RA_HAVE_SCI1
+   select RA_SCI
+   select SCI1_SERIALDRIVER
+   ---help---
+      Enable support for SCI1 UART peripheral.
+
+config RA_SCI2_UART
+   bool "SCI2 UART support"
+   default n
+   depends on RA_HAVE_SCI2
+   select RA_SCI
+   select SCI2_SERIALDRIVER
+   ---help---
+      Enable support for SCI2 UART peripheral.
+
+config RA_SCI3_UART
+   bool "SCI3 UART support"
+   default n
+   depends on RA_HAVE_SCI3
+   select RA_SCI
+   select SCI3_SERIALDRIVER
+   ---help---
+      Enable support for SCI3 UART peripheral.
+
+config RA_SCI4_UART
+   bool "SCI4 UART support"
+   default n
+   depends on RA_HAVE_SCI4
+   select RA_SCI
+   select SCI4_SERIALDRIVER
+   ---help---
+      Enable support for SCI4 UART peripheral.
+
+config RA_SCI5_UART
+   bool "SCI5 UART support"
+   default n
+   depends on RA_HAVE_SCI5
+   select RA_SCI
+   select SCI5_SERIALDRIVER
+   ---help---
+      Enable support for SCI5 UART peripheral.
+
+config RA_SCI6_UART
+   bool "SCI6 UART support"
+   default n
+   depends on RA_HAVE_SCI6
+   select RA_SCI
+   select SCI6_SERIALDRIVER
+   ---help---
+      Enable support for SCI6 UART peripheral.
+
+config RA_SCI7_UART
+   bool "SCI7 UART support"
+   default n
+   depends on RA_HAVE_SCI7
+   select RA_SCI
+   select SCI7_SERIALDRIVER
+   ---help---
+      Enable support for SCI7 UART peripheral.
+
+config RA_SCI8_UART
+   bool "SCI8 UART support"
+   default n
+   depends on RA_HAVE_SCI8
+   select RA_SCI
+   select SCI8_SERIALDRIVER
+   ---help---
+      Enable support for SCI8 UART peripheral.
+
+config RA_SCI9_UART
+   bool "SCI9 UART support"
+   default n
+   depends on RA_HAVE_SCI9
+   select RA_SCI
+   select SCI9_SERIALDRIVER
+   ---help---
+      Enable support for SCI9 UART peripheral.
+
+# Buffer sizes for SCI UARTs
+config RA_SCI0_RXBUFSIZE
+   int "SCI0 receive buffer size"
+   default 256
+   depends on RA_SCI0_UART
+
+config RA_SCI0_TXBUFSIZE
+   int "SCI0 transmit buffer size"
+   default 256
+   depends on RA_SCI0_UART
+
+config RA_SCI1_RXBUFSIZE
+   int "SCI1 receive buffer size"
+   default 256
+   depends on RA_SCI1_UART
+
+config RA_SCI1_TXBUFSIZE
+   int "SCI1 transmit buffer size"
+   default 256
+   depends on RA_SCI1_UART
+
+config RA_SCI2_RXBUFSIZE
+   int "SCI2 receive buffer size"
+   default 256
+   depends on RA_SCI2_UART
+
+config RA_SCI2_TXBUFSIZE
+   int "SCI2 transmit buffer size"
+   default 256
+   depends on RA_SCI2_UART
+
+config RA_SCI3_RXBUFSIZE
+   int "SCI3 receive buffer size"
+   default 256
+   depends on RA_SCI3_UART
+
+config RA_SCI3_TXBUFSIZE
+   int "SCI3 transmit buffer size"
+   default 256
+   depends on RA_SCI3_UART
+
+config RA_SCI4_RXBUFSIZE
+   int "SCI4 receive buffer size"
+   default 256
+   depends on RA_SCI4_UART
+
+config RA_SCI4_TXBUFSIZE
+   int "SCI4 transmit buffer size"
+   default 256
+   depends on RA_SCI4_UART
+
+config RA_SCI5_RXBUFSIZE
+   int "SCI5 receive buffer size"
+   default 256
+   depends on RA_SCI5_UART
+
+config RA_SCI5_TXBUFSIZE
+   int "SCI5 transmit buffer size"
+   default 256
+   depends on RA_SCI5_UART
+
+config RA_SCI6_RXBUFSIZE
+   int "SCI6 receive buffer size"
+   default 256
+   depends on RA_SCI6_UART
+
+config RA_SCI6_TXBUFSIZE
+   int "SCI6 transmit buffer size"
+   default 256
+   depends on RA_SCI6_UART
+
+config RA_SCI7_RXBUFSIZE
+   int "SCI7 receive buffer size"
+   default 256
+   depends on RA_SCI7_UART
+
+config RA_SCI7_TXBUFSIZE
+   int "SCI7 transmit buffer size"
+   default 256
+   depends on RA_SCI7_UART
+
+config RA_SCI8_RXBUFSIZE
+   int "SCI8 receive buffer size"
+   default 256
+   depends on RA_SCI8_UART
+
+config RA_SCI8_TXBUFSIZE
+   int "SCI8 transmit buffer size"
+   default 256
+   depends on RA_SCI8_UART
+
+config RA_SCI9_RXBUFSIZE
+   int "SCI9 receive buffer size"
+   default 256
+   depends on RA_SCI9_UART
+
+config RA_SCI9_TXBUFSIZE
+   int "SCI9 transmit buffer size"
+   default 256
+   depends on RA_SCI9_UART
+
+# SCI UART DMA Support
+config RA_SCI0_RXDMA
+   bool "SCI0 Rx DMA support"
+   default n
+   depends on RA_SCI0_UART && RA_DMAC
+   select SERIAL_RXDMA
+   ---help---
+      Enable Rx DMA transfers on SCI0 UART
+
+config RA_SCI0_TXDMA
+   bool "SCI0 Tx DMA support"
+   default n
+   depends on RA_SCI0_UART && RA_DMAC
+   select SERIAL_TXDMA
+   ---help---
+      Enable Tx DMA transfers on SCI0 UART
+
+config RA_SCI1_RXDMA
+   bool "SCI1 Rx DMA support"
+   default n
+   depends on RA_SCI1_UART && RA_DMAC
+   select SERIAL_RXDMA
+   ---help---
+      Enable Rx DMA transfers on SCI1 UART
+
+config RA_SCI1_TXDMA
+   bool "SCI1 Tx DMA support"
+   default n
+   depends on RA_SCI1_UART && RA_DMAC
+   select SERIAL_TXDMA
+   ---help---
+      Enable Tx DMA transfers on SCI1 UART
+
+config RA_SCI2_RXDMA
+   bool "SCI2 Rx DMA support"
+   default n
+   depends on RA_SCI2_UART && RA_DMAC
+   select SERIAL_RXDMA
+   ---help---
+      Enable Rx DMA transfers on SCI2 UART
+
+config RA_SCI2_TXDMA
+   bool "SCI2 Tx DMA support"
+   default n
+   depends on RA_SCI2_UART && RA_DMAC
+   select SERIAL_TXDMA
+   ---help---
+      Enable Tx DMA transfers on SCI2 UART
+
+config RA_SCI3_RXDMA
+   bool "SCI3 Rx DMA support"
+   default n
+   depends on RA_SCI3_UART && RA_DMAC
+   select SERIAL_RXDMA
+   ---help---
+      Enable Rx DMA transfers on SCI3 UART
+
+config RA_SCI3_TXDMA
+   bool "SCI3 Tx DMA support"
+   default n
+   depends on RA_SCI3_UART && RA_DMAC
+   select SERIAL_TXDMA
+   ---help---
+      Enable Tx DMA transfers on SCI3 UART
+
+config RA_SCI4_RXDMA
+   bool "SCI4 Rx DMA support"
+   default n
+   depends on RA_SCI4_UART && RA_DMAC
+   select SERIAL_RXDMA
+   ---help---
+      Enable Rx DMA transfers on SCI4 UART
+
+config RA_SCI4_TXDMA
+   bool "SCI4 Tx DMA support"
+   default n
+   depends on RA_SCI4_UART && RA_DMAC
+   select SERIAL_TXDMA
+   ---help---
+      Enable Tx DMA transfers on SCI4 UART
+
+config RA_SCI5_RXDMA
+   bool "SCI5 Rx DMA support"
+   default n
+   depends on RA_SCI5_UART && RA_DMAC
+   select SERIAL_RXDMA
+   ---help---
+      Enable Rx DMA transfers on SCI5 UART
+
+config RA_SCI5_TXDMA
+   bool "SCI5 Tx DMA support"
+   default n
+   depends on RA_SCI5_UART && RA_DMAC
+   select SERIAL_TXDMA
+   ---help---
+      Enable Tx DMA transfers on SCI5 UART
+
+config RA_SCI6_RXDMA
+   bool "SCI6 Rx DMA support"
+   default n
+   depends on RA_SCI6_UART && RA_DMAC
+   select SERIAL_RXDMA
+   ---help---
+      Enable Rx DMA transfers on SCI6 UART
+
+config RA_SCI6_TXDMA
+   bool "SCI6 Tx DMA support"
+   default n
+   depends on RA_SCI6_UART && RA_DMAC
+   select SERIAL_TXDMA
+   ---help---
+      Enable Tx DMA transfers on SCI6 UART
+
+config RA_SCI7_RXDMA
+   bool "SCI7 Rx DMA support"
+   default n
+   depends on RA_SCI7_UART && RA_DMAC
+   select SERIAL_RXDMA
+   ---help---
+      Enable Rx DMA transfers on SCI7 UART
+
+config RA_SCI7_TXDMA
+   bool "SCI7 Tx DMA support"
+   default n
+   depends on RA_SCI7_UART && RA_DMAC
+   select SERIAL_TXDMA
+   ---help---
+      Enable Tx DMA transfers on SCI7 UART
+
+config RA_SCI8_RXDMA
+   bool "SCI8 Rx DMA support"
+   default n
+   depends on RA_SCI8_UART && RA_DMAC
+   select SERIAL_RXDMA
+   ---help---
+      Enable Rx DMA transfers on SCI8 UART
+
+config RA_SCI8_TXDMA
+   bool "SCI8 Tx DMA support"
+   default n
+   depends on RA_SCI8_UART && RA_DMAC
+   select SERIAL_TXDMA
+   ---help---
+      Enable Tx DMA transfers on SCI8 UART
+
+config RA_SCI9_RXDMA
+   bool "SCI9 Rx DMA support"
+   default n
+   depends on RA_SCI9_UART && RA_DMAC
+   select SERIAL_RXDMA
+   ---help---
+      Enable Rx DMA transfers on SCI9 UART
+
+config RA_SCI9_TXDMA
+   bool "SCI9 Tx DMA support"
+   default n
+   depends on RA_SCI9_UART && RA_DMAC
+   select SERIAL_TXDMA
+   ---help---
+      Enable Tx DMA transfers on SCI9 UART
+
+# Advanced SCI UART Features
+config RA_SCI_UART_FLOWCONTROL
+   bool "Enable SCI UART flow control support"
+   default n
+   depends on RA_SCI0_UART || RA_SCI1_UART || RA_SCI2_UART || RA_SCI3_UART || RA_SCI4_UART || RA_SCI5_UART || RA_SCI6_UART || RA_SCI7_UART || RA_SCI8_UART || RA_SCI9_UART
+   help
+     Enable hardware flow control (RTS/CTS) support for SCI UARTs.
+     Not all SCI channels support flow control - check hardware manual.
+
+config RA_SCI_UART_RS485
+   bool "Enable SCI UART RS485 support"
+   default n
+   depends on RA_SCI0_UART || RA_SCI1_UART || RA_SCI2_UART || RA_SCI3_UART || RA_SCI4_UART || RA_SCI5_UART || RA_SCI6_UART || RA_SCI7_UART || RA_SCI8_UART || RA_SCI9_UART
+   help
+     Enable RS485 transceiver control (DE signal) for SCI UARTs.
+     Useful for half-duplex communication protocols.
+
+config RA_SCI_UART_BAUDRATE_MODULATION
+   bool "Enable SCI UART baud rate modulation"
+   default y
+   depends on RA_SCI0_UART || RA_SCI1_UART || RA_SCI2_UART || RA_SCI3_UART || RA_SCI4_UART || RA_SCI5_UART || RA_SCI6_UART || RA_SCI7_UART || RA_SCI8_UART || RA_SCI9_UART
+   help
+     Enable baud rate modulation for more accurate baud rates.
+     Reduces baud rate error for better communication reliability.
+
+config RA_SCI_FIFO_MODE
+   bool "Enable SCI-B FIFO Mode"
+   default y
+   depends on RA_SCI0_UART || RA_SCI1_UART || RA_SCI2_UART || RA_SCI3_UART || RA_SCI4_UART || RA_SCI5_UART || RA_SCI6_UART || RA_SCI7_UART || RA_SCI8_UART || RA_SCI9_UART
+   help
+     Enable FIFO mode for SCI-B channels that support it.
+     RA8 series SCI channels have 16-byte TX/RX FIFOs which improve
+     performance and reduce interrupt overhead. The driver will
+     automatically detect which channels support FIFO.
+
+config RA_SCI_FIFO_RX_TRIGGER
+   int "RX FIFO Trigger Level (1-15)"
+   default 1
+   range 1 15
+   depends on RA_SCI_FIFO_MODE
+   help
+     Number of bytes in RX FIFO to trigger receive interrupt.
+     Lower values = lower latency, higher interrupt rate.
+     Higher values = higher latency, lower interrupt rate.
+     Default: 1 (trigger on each byte for lowest latency).
+     Note: Interrupt also triggers after 15 bit times with no data.
+
+config RA_SCI_FIFO_TX_TRIGGER
+   int "TX FIFO Trigger Level (1-15)"
+   default 15
+   range 1 15
+   depends on RA_SCI_FIFO_MODE
+   help
+     Trigger TX interrupt when FIFO has this many or fewer bytes.
+     Lower values = more interrupts, higher values = better efficiency.
+     Default: 15 (trigger when 15 or fewer bytes in FIFO, i.e., 1+ slots free).
+
+endmenu
+
+menu "I2C"
+config RA_HAVE_I2C0
+   bool
+   default n
+
+config RA_HAVE_I2C1
+   bool
+   default n
+
+config RA_HAVE_I2C2
+   bool
+   default n
+
+config RA_HAVE_I3C
+   bool
+   default n
+
+config RA_I2C
+   bool
+   default n
+   select I2C
+
+config RA_I2C0
+   bool "I2C0"
+   default n
+   depends on RA_HAVE_I2C0
+   select RA_I2C
+
+config RA_I2C1
+   bool "I2C1"
+   default n
+   depends on RA_HAVE_I2C1
+   select RA_I2C
+
+config RA_I2C2
+   bool "I2C2"
+   default n
+   depends on RA_HAVE_I2C2
+   select RA_I2C
+
+config RA_I2C_SLAVE
+   bool "I2C Slave support"
+   default n
+   depends on RA_I2C
+   select I2C_SLAVE
+   ---help---
+      Enable I2C slave mode support.
+
+config RA_I2C0_SLAVE
+   bool "I2C0 Slave"
+   default n
+   depends on RA_I2C0 && RA_I2C_SLAVE
+
+config RA_I2C1_SLAVE
+   bool "I2C1 Slave"
+   default n
+   depends on RA_I2C1 && RA_I2C_SLAVE
+
+config RA_I2C2_SLAVE
+   bool "I2C2 Slave"
+   default n
+   depends on RA_I2C2 && RA_I2C_SLAVE
+
+if RA_I2C
+
+comment "I2C DTC/DMAC Transfer Options"
+
+config RA_I2C0_USE_DTC
+   bool "I2C0 use DTC for transfers"
+   default n
+   depends on RA_I2C0 && RA_DTC
+   help
+     Enable DTC (Data Transfer Controller) for I2C0 transfers.
+     DTC provides hardware-assisted data transfers with lower
+     CPU overhead. When enabled, transfers >= threshold bytes
+     will use DTC instead of PIO mode.
+
+config RA_I2C1_USE_DTC
+   bool "I2C1 use DTC for transfers"
+   default n
+   depends on RA_I2C1 && RA_DTC
+   help
+     Enable DTC (Data Transfer Controller) for I2C1 transfers.
+     DTC provides hardware-assisted data transfers with lower
+     CPU overhead. When enabled, transfers >= threshold bytes
+     will use DTC instead of PIO mode.
+
+config RA_I2C2_USE_DTC
+   bool "I2C2 use DTC for transfers"
+   default n
+   depends on RA_I2C2 && RA_DTC
+   help
+     Enable DTC (Data Transfer Controller) for I2C2 transfers.
+     DTC provides hardware-assisted data transfers with lower
+     CPU overhead. When enabled, transfers >= threshold bytes
+     will use DTC instead of PIO mode.
+
+config RA_I2C0_USE_DMAC
+   bool "I2C0 use DMAC for transfers"
+   default n
+   depends on RA_I2C0 && RA_DMAC
+   help
+     Enable DMAC (Direct Memory Access Controller) for I2C0 transfers.
+     DMAC provides hardware-assisted data transfers with the lowest
+     CPU overhead but requires channel allocation. When enabled,
+     transfers >= threshold bytes will use DMAC instead of PIO/DTC.
+     DMAC takes priority over DTC if both are enabled.
+
+config RA_I2C1_USE_DMAC
+   bool "I2C1 use DMAC for transfers"
+   default n
+   depends on RA_I2C1 && RA_DMAC
+   help
+     Enable DMAC (Direct Memory Access Controller) for I2C1 transfers.
+     DMAC provides hardware-assisted data transfers with the lowest
+     CPU overhead but requires channel allocation. When enabled,
+     transfers >= threshold bytes will use DMAC instead of PIO/DTC.
+     DMAC takes priority over DTC if both are enabled.
+
+config RA_I2C2_USE_DMAC
+   bool "I2C2 use DMAC for transfers"
+   default n
+   depends on RA_I2C2 && RA_DMAC
+   help
+     Enable DMAC (Direct Memory Access Controller) for I2C2 transfers.
+     DMAC provides hardware-assisted data transfers with the lowest
+     CPU overhead but requires channel allocation. When enabled,
+     transfers >= threshold bytes will use DMAC instead of PIO/DTC.
+     DMAC takes priority over DTC if both are enabled.
+
+config RA_I2C_DTC_THRESHOLD
+   int "Minimum bytes for I2C DTC transfer"
+   default 8
+   range 1 256
+   depends on RA_I2C0_USE_DTC || RA_I2C1_USE_DTC || RA_I2C2_USE_DTC
+   help
+     Minimum number of bytes required to use DTC for I2C transfers.
+     Transfers smaller than this threshold will use PIO mode.
+     Higher values reduce DTC overhead for small transfers.
+
+config RA_I2C_DMAC_THRESHOLD
+   int "Minimum bytes for I2C DMAC transfer"
+   default 16
+   range 1 256
+   depends on RA_I2C0_USE_DMAC || RA_I2C1_USE_DMAC || RA_I2C2_USE_DMAC
+   help
+     Minimum number of bytes required to use DMAC for I2C transfers.
+     Transfers smaller than this threshold will use DTC or PIO mode.
+     Higher values reduce DMAC overhead for small transfers.
+
+comment "I2C Advanced Features"
+
+config RA_I2C_10BIT_ADDRESS
+   bool "Enable 10-bit I2C addressing"
+   default n
+   depends on RA_I2C
+   help
+     Enable support for 10-bit I2C slave addressing. When enabled,
+     the driver will handle I2C_M_TEN flag in transfer messages and
+     properly format 10-bit addresses per I2C specification.
+     10-bit addressing uses two address bytes: 11110XX (high bits)
+     followed by the low 8 bits of the address.
+
+config RA_I2C0_FAST_MODE_PLUS
+   bool "I2C0 Fast Mode Plus (1 MHz)"
+   default n
+   depends on RA_I2C0
+   help
+     Enable Fast Mode Plus for I2C0, allowing up to 1 MHz operation.
+     This sets the FMPE bit in ICFER register. Only I2C0 supports
+     Fast Mode Plus on most RA8 devices. Requires appropriate
+     pull-up resistors for the higher speed.
+
+config RA_I2C_SMBUS
+   bool "Enable SMBus timing mode"
+   default n
+   depends on RA_I2C
+   help
+     Enable SMBus timing mode instead of standard I2C timing.
+     This sets the SMBS bit in ICMR3 register for SMBus-compliant
+     timing. Use this when communicating with SMBus devices that
+     require specific timing characteristics.
+
+choice
+   prompt "SDA Output Delay"
+   default RA_I2C_SDA_DELAY_1
+   depends on RA_I2C
+   help
+     Select the SDA output delay for I2C hold time compliance.
+     This configures the SDDL field in ICMR2 register. Higher
+     delay values provide more margin for I2C hold time but
+     may limit maximum frequency.
+
+config RA_I2C_SDA_DELAY_0
+   bool "No delay"
+   help
+     No SDA output delay (fastest, minimum hold time).
+
+config RA_I2C_SDA_DELAY_1
+   bool "1 fIIC cycle"
+   help
+     1 fIIC cycle SDA output delay (recommended default).
+
+config RA_I2C_SDA_DELAY_2
+   bool "2 fIIC cycles"
+   help
+     2 fIIC cycles SDA output delay.
+
+config RA_I2C_SDA_DELAY_3
+   bool "3 fIIC cycles"
+   help
+     3 fIIC cycles SDA output delay.
+
+config RA_I2C_SDA_DELAY_4
+   bool "4 fIIC cycles"
+   help
+     4 fIIC cycles SDA output delay.
+
+config RA_I2C_SDA_DELAY_5
+   bool "5 fIIC cycles"
+   help
+     5 fIIC cycles SDA output delay.
+
+config RA_I2C_SDA_DELAY_6
+   bool "6 fIIC cycles"
+   help
+     6 fIIC cycles SDA output delay.
+
+config RA_I2C_SDA_DELAY_7
+   bool "7 fIIC cycles"
+   help
+     7 fIIC cycles SDA output delay (slowest, maximum hold time).
+
+endchoice
+
+endif # RA_I2C
+
+config RA_I3C
+   bool "I3C Interface"
+   default n
+   depends on RA_HAVE_I3C
+   help
+     Enable I3C (Improved Inter-Integrated Circuit) interface support.
+     I3C combines I2C compatibility with higher speeds and advanced features.
+
+endmenu
+
+menu "MIPI-CSI and VIN"
+config RA_MIPI_CSI
+   bool "MIPI-CSI Camera Support"
+   default n
+   depends on RA_HAVE_MIPI_CSI && RA_HAVE_VIN
+   select I2C
+   help
+     Enable support for MIPI-CSI camera interface using VIN and MIPI-CSI peripherals.
+
+if RA_MIPI_CSI
+
+config RA_MIPI_CSI_DEFAULT_WIDTH
+   int "Default Capture Width"
+   default 640
+   help
+     Default width for camera capture.
+
+config RA_MIPI_CSI_DEFAULT_HEIGHT
+   int "Default Capture Height"
+   default 480
+   help
+     Default height for camera capture.
+
+config RA_MIPI_CSI_MAX_WIDTH
+   int "Maximum Capture Width"
+   default 1024
+   help
+     Maximum supported width for camera capture.
+
+config RA_MIPI_CSI_MAX_HEIGHT
+   int "Maximum Capture Height"
+   default 600
+   help
+     Maximum supported height for camera capture.
+
+config RA_MIPI_CSI_FB_BASE
+   hex "Framebuffer Base Address"
+   default 0x60000000
+   help
+     Physical address for the camera framebuffer (in SDRAM).
+
+config RA_MIPI_CSI_I2C_BUS
+   int "Camera I2C Bus"
+   default 0
+   help
+     I2C bus number where the camera sensor is connected.
+
+config RA_MIPI_CSI_DATA_LANES
+   int "MIPI-CSI Data Lanes"
+   default 2
+   range 1 2
+   help
+     Number of MIPI-CSI data lanes to use (1 or 2).
+
+config RA_MIPI_CSI_VIRTUAL_CHANNEL
+   int "Virtual Channel"
+   default 0
+   range 0 3
+   help
+     MIPI-CSI Virtual Channel ID.
+
+config RA_MIPI_CSI_POLLWAITERS
+   int "Poll Waiters"
+   default 4
+   help
+     Number of poll waiters supported.
+
+endif # RA_MIPI_CSI
+
+endmenu
+
+menu "ADC"
+config RA_HAVE_ADC0
+   bool
+   default n
+
+config RA_HAVE_ADC1
+   bool
+   default n
+
+config RA_HAVE_ADC_B
+   bool
+   default n
+
+config RA_ADC
+   bool "ADC support"
+   default n
+   select ADC
+   help
+     Enable Analog-to-Digital Converter (ADC) support.
+
+config RA_ADC0
+   bool "ADC0"
+   default n
+   depends on RA_HAVE_ADC0
+   select RA_ADC
+
+config RA_ADC1
+   bool "ADC1"
+   default n
+   depends on RA_HAVE_ADC1
+   select RA_ADC
+
+config RA_ADC_B
+   bool "ADC-B (Advanced ADC with FIFO)"
+   default n
+   depends on RA_HAVE_ADC_B
+   select RA_ADC
+   help
+     Enable ADC-B (Advanced Analog-to-Digital Converter with FIFO support).
+     Provides multi-group scan capability, averaging, and FIFO buffering.
+
+config RA_ADC_BATTERY_MONITOR
+   bool "Enable ADC battery monitoring"
+   default n
+   depends on RA_ADC
+   help
+     Enable ADC battery voltage monitoring functionality.
+     Provides battery level measurements through ADC channels.
+
+config RA_ADC_BATTERY_VOLTAGE
+   bool "Battery voltage monitoring"
+   default n
+   depends on RA_ADC_BATTERY_MONITOR
+   help
+     Monitor battery voltage through ADC channel AN000.
+
+config RA_ADC_BATTERY_CURRENT
+   bool "Battery current monitoring"
+   default n
+   depends on RA_ADC_BATTERY_MONITOR
+   help
+     Monitor battery current through ADC channel AN104 (ACS712 sensor).
+
+config RA_ADC_ARDUINO
+   bool "Arduino expansion ADC support"
+   default n
+   depends on RA_ADC
+   help
+     Enable ADC support for Arduino expansion connector analog input.
+
+endmenu
+
+menu "PWM and GPT"
+config RA_HAVE_GPT0
+   bool
+   default n
+
+config RA_HAVE_GPT1
+   bool
+   default n
+
+config RA_HAVE_GPT2
+   bool
+   default n
+
+config RA_HAVE_GPT3
+   bool
+   default n
+
+config RA_HAVE_GPT4
+   bool
+   default n
+
+config RA_HAVE_GPT5
+   bool
+   default n
+
+config RA_HAVE_GPT6
+   bool
+   default n
+
+config RA_HAVE_GPT7
+   bool
+   default n
+
+config RA_HAVE_GPT8
+   bool
+   default n
+
+config RA_HAVE_GPT9
+   bool
+   default n
+
+config RA_HAVE_GPT10
+   bool
+   default n
+
+config RA_HAVE_GPT11
+   bool
+   default n
+
+config RA_HAVE_GPT12
+   bool
+   default n
+
+config RA_HAVE_GPT13
+   bool
+   default n
+
+config RA_GPT
+   bool "GPT (General Purpose Timer) support"
+   default n
+   help
+     Enable General Purpose Timer (GPT) support.
+     Required for PWM and other timer-based functions.
+
+config RA_GPT0
+   bool "GPT0 PWM support"
+   default n
+   depends on RA_HAVE_GPT0
+   select RA_GPT
+
+config RA_GPT1
+   bool "GPT1 PWM support"
+   default n
+   depends on RA_HAVE_GPT1
+   select RA_GPT
+
+config RA_GPT2
+   bool "GPT2 PWM support"
+   default n
+   depends on RA_HAVE_GPT2
+   select RA_GPT
+
+config RA_GPT3
+   bool "GPT3 PWM support"
+   default n
+   depends on RA_HAVE_GPT3
+   select RA_GPT
+
+config RA_GPT4
+   bool "GPT4 PWM support"
+   default n
+   depends on RA_HAVE_GPT4
+   select RA_GPT
+
+config RA_GPT5
+   bool "GPT5 PWM support"
+   default n
+   depends on RA_HAVE_GPT5
+   select RA_GPT
+
+config RA_GPT6
+   bool "GPT6 PWM support"
+   default n
+   depends on RA_HAVE_GPT6
+   select RA_GPT
+
+config RA_GPT7
+   bool "GPT7 PWM support"
+   default n
+   depends on RA_HAVE_GPT7
+   select RA_GPT
+
+config RA_GPT8
+   bool "GPT8 PWM support"
+   default n
+   depends on RA_HAVE_GPT8
+   select RA_GPT
+
+config RA_GPT9
+   bool "GPT9 PWM support"
+   default n
+   depends on RA_HAVE_GPT9
+   select RA_GPT
+
+config RA_GPT10
+   bool "GPT10 PWM support"
+   default n
+   depends on RA_HAVE_GPT10
+   select RA_GPT
+
+config RA_GPT11
+   bool "GPT11 PWM support"
+   default n
+   depends on RA_HAVE_GPT11
+   select RA_GPT
+
+config RA_GPT12
+   bool "GPT12 PWM support"
+   default n
+   depends on RA_HAVE_GPT12
+   select RA_GPT
+
+config RA_GPT13
+   bool "GPT13 PWM support"
+   default n
+   depends on RA_HAVE_GPT13
+   select RA_GPT
+
+endmenu
+
+menu "ICU (Interrupt Controller Unit)"
+config RA_HAVE_ICU
+   bool
+   default n
+
+config RA_ICU
+   bool "ICU support"
+   default n
+   depends on RA_HAVE_ICU
+   help
+     Enable Interrupt Controller Unit (ICU) support for external interrupts.
+
+config RA_ICU_IRQ
+   bool "ICU IRQ support"
+   default n
+   depends on RA_ICU
+   help
+     Enable ICU external IRQ interrupt support.
+
+config RA_ICU_IRQ9
+   bool "ICU IRQ9 support"
+   default n
+   depends on RA_ICU_IRQ
+   help
+     Enable ICU IRQ9 external interrupt.
+
+endmenu
+
+menu "SPI"
+config RA_HAVE_SPI0
+   bool
+   default n
+
+config RA_HAVE_SPI1
+   bool
+   default n
+
+config RA_HAVE_SPI2
+   bool
+   default n
+
+config RA_SPI
+   bool
+   default n
+   select SPI
+
+config RA_SPI0
+   bool "SPI0"
+   default n
+   depends on RA_HAVE_SPI0
+   select RA_SPI
+
+config RA_SPI1
+   bool "SPI1"
+   default n
+   depends on RA_HAVE_SPI1
+   select RA_SPI
+
+config RA_SPI2
+   bool "SPI2"
+   default n
+   depends on RA_HAVE_SPI2
+   select RA_SPI
+
+if RA_SPI
+
+comment "SPI DTC/DMAC Transfer Options"
+
+config RA_SPI0_USE_DTC
+   bool "SPI0 use DTC for transfers"
+   default n
+   depends on RA_SPI0 && RA_DTC
+   help
+     Enable DTC (Data Transfer Controller) for SPI0 transfers.
+     DTC provides hardware-assisted data transfers with lower
+     CPU overhead. When enabled, transfers >= threshold words
+     will use DTC instead of PIO mode.
+
+config RA_SPI1_USE_DTC
+   bool "SPI1 use DTC for transfers"
+   default n
+   depends on RA_SPI1 && RA_DTC
+   help
+     Enable DTC (Data Transfer Controller) for SPI1 transfers.
+     DTC provides hardware-assisted data transfers with lower
+     CPU overhead. When enabled, transfers >= threshold words
+     will use DTC instead of PIO mode.
+
+config RA_SPI0_USE_DMAC
+   bool "SPI0 use DMAC for transfers"
+   default n
+   depends on RA_SPI0 && RA_DMAC
+   help
+     Enable DMAC (Direct Memory Access Controller) for SPI0 transfers.
+     DMAC provides hardware-assisted data transfers with the lowest
+     CPU overhead but requires channel allocation. When enabled,
+     transfers >= threshold words will use DMAC instead of PIO/DTC.
+     DMAC takes priority over DTC if both are enabled.
+
+config RA_SPI1_USE_DMAC
+   bool "SPI1 use DMAC for transfers"
+   default n
+   depends on RA_SPI1 && RA_DMAC
+   help
+     Enable DMAC (Direct Memory Access Controller) for SPI1 transfers.
+     DMAC provides hardware-assisted data transfers with the lowest
+     CPU overhead but requires channel allocation. When enabled,
+     transfers >= threshold words will use DMAC instead of PIO/DTC.
+     DMAC takes priority over DTC if both are enabled.
+
+config RA_SPI_DTC_THRESHOLD
+   int "Minimum words for DTC transfer"
+   default 4
+   range 1 256
+   depends on RA_SPI0_USE_DTC || RA_SPI1_USE_DTC
+   help
+     Minimum number of words required to use DTC for SPI transfers.
+     Transfers smaller than this threshold will use PIO mode.
+     Higher values reduce DTC overhead for small transfers.
+
+config RA_SPI_DMAC_THRESHOLD
+   int "Minimum words for DMAC transfer"
+   default 8
+   range 1 256
+   depends on RA_SPI0_USE_DMAC || RA_SPI1_USE_DMAC
+   help
+     Minimum number of words required to use DMAC for SPI transfers.
+     Transfers smaller than this threshold will use DTC or PIO mode.
+     Higher values reduce DMAC overhead for small transfers.
+
+endif # RA_SPI
+
+endmenu
+
+menu "SCI_SPI (Simple SPI using SCI)"
+
+config RA_SCI_SPI
+   bool
+   default n
+   select SPI
+
+config RA_SCI0_SPI
+   bool "SCI0 Simple SPI"
+   default n
+   depends on RA_HAVE_SCI0
+   select RA_SCI_SPI
+   ---help---
+      Enable SCI0 in Simple SPI mode. Cannot be used simultaneously with SCI0 UART.
+
+config RA_SCI1_SPI
+   bool "SCI1 Simple SPI"
+   default n
+   depends on RA_HAVE_SCI1
+   select RA_SCI_SPI
+   ---help---
+      Enable SCI1 in Simple SPI mode. Cannot be used simultaneously with SCI1 UART.
+
+config RA_SCI2_SPI
+   bool "SCI2 Simple SPI"
+   default n
+   depends on RA_HAVE_SCI2
+   select RA_SCI_SPI
+   ---help---
+      Enable SCI2 in Simple SPI mode. Cannot be used simultaneously with SCI2 UART.
+
+config RA_SCI3_SPI
+   bool "SCI3 Simple SPI"
+   default n
+   depends on RA_HAVE_SCI3
+   select RA_SCI_SPI
+   ---help---
+      Enable SCI3 in Simple SPI mode. Cannot be used simultaneously with SCI3 UART.
+
+config RA_SCI4_SPI
+   bool "SCI4 Simple SPI"
+   default n
+   depends on RA_HAVE_SCI4
+   select RA_SCI_SPI
+   ---help---
+      Enable SCI4 in Simple SPI mode. Cannot be used simultaneously with SCI4 UART.
+
+config RA_SCI5_SPI
+   bool "SCI5 Simple SPI"
+   default n
+   depends on RA_HAVE_SCI5
+   select RA_SCI_SPI
+   ---help---
+      Enable SCI5 in Simple SPI mode. Cannot be used simultaneously with SCI5 UART.
+
+config RA_SCI6_SPI
+   bool "SCI6 Simple SPI"
+   default n
+   depends on RA_HAVE_SCI6
+   select RA_SCI_SPI
+   ---help---
+      Enable SCI6 in Simple SPI mode. Cannot be used simultaneously with SCI6 UART.
+
+config RA_SCI7_SPI
+   bool "SCI7 Simple SPI"
+   default n
+   depends on RA_HAVE_SCI7
+   select RA_SCI_SPI
+   ---help---
+      Enable SCI7 in Simple SPI mode. Cannot be used simultaneously with SCI7 UART.
+
+config RA_SCI8_SPI
+   bool "SCI8 Simple SPI"
+   default n
+   depends on RA_HAVE_SCI8
+   select RA_SCI_SPI
+   ---help---
+      Enable SCI8 in Simple SPI mode. Cannot be used simultaneously with SCI8 UART.
+
+config RA_SCI9_SPI
+   bool "SCI9 Simple SPI"
+   default n
+   depends on RA_HAVE_SCI9
+   select RA_SCI_SPI
+   ---help---
+      Enable SCI9 in Simple SPI mode. Cannot be used simultaneously with SCI9 UART.
+
+if RA_SCI_SPI
+
+comment "SCI_SPI DTC/DMAC Transfer Options"
+
+config RA_SCI0_SPI_USE_DTC
+   bool "SCI0_SPI use DTC for transfers"
+   default n
+   depends on RA_SCI0_SPI && RA_DTC
+   help
+     Enable DTC (Data Transfer Controller) for SCI0_SPI transfers.
+     DTC provides hardware-assisted data transfers with lower
+     CPU overhead. When enabled, transfers >= threshold words
+     will use DTC instead of PIO mode.
+
+config RA_SCI1_SPI_USE_DTC
+   bool "SCI1_SPI use DTC for transfers"
+   default n
+   depends on RA_SCI1_SPI && RA_DTC
+   help
+     Enable DTC (Data Transfer Controller) for SCI1_SPI transfers.
+
+config RA_SCI2_SPI_USE_DTC
+   bool "SCI2_SPI use DTC for transfers"
+   default n
+   depends on RA_SCI2_SPI && RA_DTC
+   help
+     Enable DTC (Data Transfer Controller) for SCI2_SPI transfers.
+
+config RA_SCI3_SPI_USE_DTC
+   bool "SCI3_SPI use DTC for transfers"
+   default n
+   depends on RA_SCI3_SPI && RA_DTC
+   help
+     Enable DTC (Data Transfer Controller) for SCI3_SPI transfers.
+
+config RA_SCI4_SPI_USE_DTC
+   bool "SCI4_SPI use DTC for transfers"
+   default n
+   depends on RA_SCI4_SPI && RA_DTC
+   help
+     Enable DTC (Data Transfer Controller) for SCI4_SPI transfers.
+
+config RA_SCI9_SPI_USE_DTC
+   bool "SCI9_SPI use DTC for transfers"
+   default n
+   depends on RA_SCI9_SPI && RA_DTC
+   help
+     Enable DTC (Data Transfer Controller) for SCI9_SPI transfers.
+
+config RA_SCI0_SPI_USE_DMAC
+   bool "SCI0_SPI use DMAC for transfers"
+   default n
+   depends on RA_SCI0_SPI && RA_DMAC
+   help
+     Enable DMAC (Direct Memory Access Controller) for SCI0_SPI transfers.
+     DMAC provides hardware-assisted data transfers with the lowest
+     CPU overhead but requires channel allocation. When enabled,
+     transfers >= threshold words will use DMAC instead of PIO/DTC.
+     DMAC takes priority over DTC if both are enabled.
+
+config RA_SCI1_SPI_USE_DMAC
+   bool "SCI1_SPI use DMAC for transfers"
+   default n
+   depends on RA_SCI1_SPI && RA_DMAC
+   help
+     Enable DMAC for SCI1_SPI transfers.
+
+config RA_SCI2_SPI_USE_DMAC
+   bool "SCI2_SPI use DMAC for transfers"
+   default n
+   depends on RA_SCI2_SPI && RA_DMAC
+   help
+     Enable DMAC for SCI2_SPI transfers.
+
+config RA_SCI3_SPI_USE_DMAC
+   bool "SCI3_SPI use DMAC for transfers"
+   default n
+   depends on RA_SCI3_SPI && RA_DMAC
+   help
+     Enable DMAC for SCI3_SPI transfers.
+
+config RA_SCI4_SPI_USE_DMAC
+   bool "SCI4_SPI use DMAC for transfers"
+   default n
+   depends on RA_SCI4_SPI && RA_DMAC
+   help
+     Enable DMAC for SCI4_SPI transfers.
+
+config RA_SCI9_SPI_USE_DMAC
+   bool "SCI9_SPI use DMAC for transfers"
+   default n
+   depends on RA_SCI9_SPI && RA_DMAC
+   help
+     Enable DMAC for SCI9_SPI transfers.
+
+config RA_SCI_SPI_DTC_THRESHOLD
+   int "Minimum words for SCI_SPI DTC transfer"
+   default 4
+   range 1 256
+   depends on RA_SCI0_SPI_USE_DTC || RA_SCI1_SPI_USE_DTC || RA_SCI2_SPI_USE_DTC || \
+              RA_SCI3_SPI_USE_DTC || RA_SCI4_SPI_USE_DTC || RA_SCI9_SPI_USE_DTC
+   help
+     Minimum number of words required to use DTC for SCI_SPI transfers.
+     Transfers smaller than this threshold will use PIO mode.
+
+config RA_SCI_SPI_DMAC_THRESHOLD
+   int "Minimum words for SCI_SPI DMAC transfer"
+   default 8
+   range 1 256
+   depends on RA_SCI0_SPI_USE_DMAC || RA_SCI1_SPI_USE_DMAC || RA_SCI2_SPI_USE_DMAC || \
+              RA_SCI3_SPI_USE_DMAC || RA_SCI4_SPI_USE_DMAC || RA_SCI9_SPI_USE_DMAC
+   help
+     Minimum number of words required to use DMAC for SCI_SPI transfers.
+     Transfers smaller than this threshold will use DTC or PIO mode.
+
+endif # RA_SCI_SPI
+
+config RA_SCI_I2C
+   bool
+   default n
+   select I2C
+   ---help---
+      Enable SCI peripheral in Simple I2C mode. Each SCIn channel appears as
+      /dev/i2cn (e.g., SCI0 → /dev/i2c0, SCI1 → /dev/i2c1). The channel-to-bus
+      mapping is direct: SCIn maps to I2C bus number n.
+
+if RA_SCI_I2C
+
+config RA_SCI_I2C_DTC
+   bool "Use DTC for SCI I2C transfers"
+   default n
+   depends on RA_DTC
+   ---help---
+      Use Data Transfer Controller (DTC) for high-performance I2C transfers.
+      This reduces CPU overhead for multi-byte transfers.
+
+      NOTE: DTC support is not yet implemented. This option is reserved for
+      future use.
+
+config RA_SCI_I2C_DMAC
+   bool "Use DMAC for SCI I2C transfers"
+   default n
+   depends on RA_DMAC
+   ---help---
+      Use DMA Controller (DMAC) for high-performance I2C transfers. DMAC provides
+      better performance than DTC for large transfers.
+
+      NOTE: DMAC support is not yet implemented. This option is reserved for
+      future use.
+
+endif # RA_SCI_I2C
+
+config RA_SCI0_I2C
+   bool "SCI0 Simple I2C"
+   default n
+   depends on RA_HAVE_SCI0
+   select RA_SCI_I2C
+   ---help---
+      Enable SCI0 in Simple I2C mode. Cannot be used simultaneously with SCI0 UART or SPI.
+      Creates /dev/i2c0 device node.
+
+config RA_SCI1_I2C
+   bool "SCI1 Simple I2C"
+   default n
+   depends on RA_HAVE_SCI1
+   select RA_SCI_I2C
+   ---help---
+      Enable SCI1 in Simple I2C mode. Cannot be used simultaneously with SCI1 UART or SPI.
+      Creates /dev/i2c1 device node.
+
+if RA_SCI1_I2C
+
+choice
+   prompt "SCI1 I2C Pin Selection"
+   default RA_SCI1_I2C_PINS_P400_P401
+   ---help---
+      Select the pin group for SCI1 I2C. Different MCU packages may have
+      different pin options available.
+
+config RA_SCI1_I2C_PINS_P400_P401
+   bool "P400 (SDA) / P401 (SCL) - Group A"
+   ---help---
+      Use pin group A for SCI1 I2C:
+        - P400: SDA (TXD1_A)
+        - P401: SCL (RXD1_A)
+      This is the default and most common pin assignment.
+
+config RA_SCI1_I2C_PINS_P512_P511
+   bool "P512 (SDA) / P511 (SCL) - Group B"
+   ---help---
+      Use pin group B for SCI1 I2C:
+        - P512: SDA (TXD1_B)
+        - P511: SCL (RXD1_B)
+      Check your MCU datasheet to verify these pins are available.
+
+endchoice
+
+endif # RA_SCI1_I2C
+
+config RA_SCI2_I2C
+   bool "SCI2 Simple I2C"
+   default n
+   depends on RA_HAVE_SCI2
+   select RA_SCI_I2C
+   ---help---
+      Enable SCI2 in Simple I2C mode. Cannot be used simultaneously with SCI2 UART or SPI.
+      Creates /dev/i2c2 device node.
+
+config RA_SCI3_I2C
+   bool "SCI3 Simple I2C"
+   default n
+   depends on RA_HAVE_SCI3
+   select RA_SCI_I2C
+   ---help---
+      Enable SCI3 in Simple I2C mode. Cannot be used simultaneously with SCI3 UART or SPI.
+      Creates /dev/i2c3 device node.
+
+config RA_SCI4_I2C
+   bool "SCI4 Simple I2C"
+   default n
+   depends on RA_HAVE_SCI4
+   select RA_SCI_I2C
+   ---help---
+      Enable SCI4 in Simple I2C mode. Cannot be used simultaneously with SCI4 UART or SPI.
+      Creates /dev/i2c4 device node.
+
+config RA_SCI5_I2C
+   bool "SCI5 Simple I2C"
+   default n
+   depends on RA_HAVE_SCI5
+   select RA_SCI_I2C
+   ---help---
+      Enable SCI5 in Simple I2C mode. Cannot be used simultaneously with SCI5 UART or SPI.
+      Creates /dev/i2c5 device node.
+
+config RA_SCI6_I2C
+   bool "SCI6 Simple I2C"
+   default n
+   depends on RA_HAVE_SCI6
+   select RA_SCI_I2C
+   ---help---
+      Enable SCI6 in Simple I2C mode. Cannot be used simultaneously with SCI6 UART or SPI.
+      Creates /dev/i2c6 device node.
+
+config RA_SCI7_I2C
+   bool "SCI7 Simple I2C"
+   default n
+   depends on RA_HAVE_SCI7
+   select RA_SCI_I2C
+   ---help---
+      Enable SCI7 in Simple I2C mode. Cannot be used simultaneously with SCI7 UART or SPI.
+      Creates /dev/i2c7 device node.
+
+config RA_SCI8_I2C
+   bool "SCI8 Simple I2C"
+   default n
+   depends on RA_HAVE_SCI8
+   select RA_SCI_I2C
+   ---help---
+      Enable SCI8 in Simple I2C mode. Cannot be used simultaneously with SCI8 UART or SPI.
+      Creates /dev/i2c8 device node.
+
+config RA_SCI9_I2C
+   bool "SCI9 Simple I2C"
+   default n
+   depends on RA_HAVE_SCI9
+   select RA_SCI_I2C
+   ---help---
+      Enable SCI9 in Simple I2C mode. Cannot be used simultaneously with SCI9 UART or SPI.
+      Creates /dev/i2c9 device node.
+
+endmenu
+
+menu "CAN"
+config RA_HAVE_CANFD0
+   bool
+   default n
+
+config RA_HAVE_CANFD1
+   bool
+   default n
+
+config RA_CANFD
+   bool
+   default n
+   select CAN
+
+config RA_CANFD0
+   bool "CAN0"
+   default n
+   depends on RA_HAVE_CANFD0
+   select RA_CANFD
+
+config RA_CANFD1
+   bool "CAN1"
+   default n
+   depends on RA_HAVE_CANFD1
+   select RA_CANFD
+endmenu
+
+menu "Ethernet"
+config RA_HAVE_ETHERC_MII
+   bool
+   default n
+
+config RA_HAVE_ETHERC_RMII
+   bool
+   default n
+
+config RA_HAVE_ETHERC_RGMII
+   bool
+   default n
+
+config RA_HAVE_ETHERCAT
+   bool
+   default n
+
+config RA_HAVE_ETHSW
+   bool
+   default n
+
+config RA_HAVE_GPTP
+   bool
+   default n
+
+config RA_ETHERC_MII
+   bool "Ethernet MII"
+   default n
+   depends on RA_HAVE_ETHERC_MII
+
+config RA_ETHERC_RMII
+   bool "Ethernet RMII"
+   default n
+   depends on RA_HAVE_ETHERC_RMII
+
+config RA_ETHERC_RGMII
+   bool "Ethernet RGMII"
+   default n
+   depends on RA_HAVE_ETHERC_RGMII
+
+config RA_ETHERCAT
+   bool "EtherCAT Slave Controller"
+   default n
+   depends on RA_HAVE_ETHERCAT
+   help
+     Enable EtherCAT industrial Ethernet slave controller support.
+
+config RA_ETHSW
+   bool "Layer 3 Ethernet Switch"
+   default n
+   depends on RA_HAVE_ETHSW
+   help
+     Enable built-in Layer 3 Ethernet switch support.
+
+config RA_GPTP
+   bool "IEEE 1588 Precision Time Protocol"
+   default n
+   depends on RA_HAVE_GPTP
+   help
+     Enable IEEE 1588 Precision Time Protocol (PTP) support.
+
+config RA_ESWPHY
+   bool
+   default y if RA_ETHSW
+   help
+     Ethernet Switch PHY clock automatically enabled when Ethernet Switch is enabled.
+
+config RA_ETHPHY
+   bool
+   default y if RA_ETHERC_MII || RA_ETHERC_RMII || RA_ETHERC_RGMII
+   help
+     Ethernet PHY clock automatically enabled when Ethernet controller is enabled.
+
+config RA_ESWM
+   bool
+   default y if RA_ETHSW
+   help
+     Ethernet Switch Management automatically enabled when Ethernet Switch is enabled.
+endmenu
+
+menu "USB"
+config RA_HAVE_USBFS
+   bool
+   default n
+
+config RA_HAVE_USBHS
+   bool
+   default n
+
+config RA_USB
+   bool
+   default n
+
+config RA_USBFS
+   bool "USB Full Speed"
+   default n
+   depends on RA_HAVE_USBFS
+   select RA_USB
+
+config RA_USBHS
+   bool "USB High Speed"
+   default n
+   depends on RA_HAVE_USBHS
+   select RA_USB
+   help
+     Enable USB 2.0 High-Speed support.
+
+config RA_USB60
+   bool
+   default y if RA_USBHS
+   help
+     USB 60MHz clock automatically enabled when USB High-Speed is enabled.
+
+config RA_USBDEV
+   bool "USB Device Controller"
+   default n
+   depends on USBDEV && (RA_USBFS || RA_USBHS)
+   help
+     Enable RA8 USB device controller driver. This provides a NuttX
+     usbdev interface for CDC-ACM, Mass Storage, and other USB device
+     classes. Requires either USBFS (Full-Speed 12 Mbps) or USBHS
+     (High-Speed 480 Mbps) hardware module to be enabled.
+
+if RA_USBDEV
+
+config RA_USBDEV_DMA
+   bool "USB Device DMA Support"
+   default n
+   depends on RA_DMAC
+   help
+     Enable DMA transfers for USB bulk endpoints using D0/D1 FIFOs.
+     This improves throughput for large data transfers. Requires DMAC
+     to be enabled. If disabled, uses programmed I/O (PIO) mode.
+
+if RA_USBDEV_DMA
+
+config RA_DMAC_USBFS_D0FIFO_CHANNEL
+   int "USBFS D0FIFO DMAC channel"
+   default -1
+   range -1 17
+   help
+     DMAC channel for USBFS D0FIFO (Pipe 1 Bulk IN/OUT) transfers (-1 = disabled).
+     Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.
+     Channels 8-9 are invalid.
+
+config RA_DMAC_USBFS_D1FIFO_CHANNEL
+   int "USBFS D1FIFO DMAC channel"
+   default -1
+   range -1 17
+   help
+     DMAC channel for USBFS D1FIFO (Pipe 2 Bulk IN/OUT) transfers (-1 = disabled).
+     Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.
+     Channels 8-9 are invalid.
+
+endif # RA_USBDEV_DMA
+
+endif # RA_USBDEV
+endmenu
+
+menu "Storage Interfaces"
+
+comment "Octal SPI"
+
+config RA_HAVE_OSPI
+   bool
+   default n
+
+config RA_HAVE_OSPI0
+   bool
+   default n
+
+config RA_HAVE_OSPI1
+   bool
+   default n
+
+config RA_OSPI
+   bool "Octal SPI"
+   default n
+   depends on RA_HAVE_OSPI
+
+if RA_OSPI
+
+comment "OSPI DTC/DMAC Transfer Options"
+
+config RA_OSPI_USE_DTC
+   bool "OSPI use DTC for transfers"
+   default n
+   depends on RA_DTC
+   help
+     Enable DTC (Data Transfer Controller) for OSPI transfers.
+     DTC provides hardware-assisted data transfers with lower
+     CPU overhead for flash memory operations.
+
+config RA_OSPI_USE_DMAC
+   bool "OSPI use DMAC for transfers"
+   default n
+   depends on RA_DMAC
+   help
+     Enable DMAC (Direct Memory Access Controller) for OSPI transfers.
+     DMAC provides hardware-assisted data transfers with the lowest
+     CPU overhead for high-speed flash memory access.
+     DMAC takes priority over DTC if both are enabled.
+
+config RA_OSPI_DMAC_THRESHOLD
+   int "Minimum bytes for OSPI DMAC transfer"
+   default 64
+   range 1 4096
+   depends on RA_OSPI_USE_DMAC
+   help
+     Minimum number of bytes required to use DMAC for OSPI transfers.
+     Transfers smaller than this threshold will use DTC or PIO mode.
+
+endif # RA_OSPI
+
+comment "SD Host Interface"
+
+config RA_HAVE_SDHI
+   bool
+   default n
+
+config RA_HAVE_SDHI0
+   bool
+   default n
+
+config RA_HAVE_SDHI1
+   bool
+   default n
+
+config RA_SDHI
+   bool "SD Host Interface"
+   default n
+   depends on RA_HAVE_SDHI
+   select SDIO
+   select MMCSD
+   select MMCSD_SDIO
+   help
+     Enable SD Host Interface (SDHI) support for SD/SDIO/MMC card access.
+     This enables the lower-half SDHI driver that interfaces with NuttX MMC/SD
+     upper-half driver.
+
+config RA_SDHI0
+   bool "SDHI0 - SD/MMC Host Controller 0"
+   default n
+   depends on RA_HAVE_SDHI0
+   select RA_SDHI
+   help
+     Enable SD Host Interface 0 for SD/SDIO/MMC card support.
+
+config RA_SDHI1
+   bool "SDHI1 - SD/MMC Host Controller 1"
+   default n
+   depends on RA_HAVE_SDHI1
+   select RA_SDHI
+   help
+     Enable SD Host Interface 1 for SD/SDIO/MMC card support.
+
+if RA_SDHI
+
+comment "SDHI DTC/DMAC Transfer Options"
+
+config RA_SDHI0_USE_DTC
+   bool "SDHI0 use DTC for transfers"
+   default n
+   depends on RA_SDHI0 && RA_DTC
+   help
+     Enable DTC (Data Transfer Controller) for SDHI0 transfers.
+     DTC provides hardware-assisted data transfers with lower
+     CPU overhead for SD card operations.
+
+config RA_SDHI1_USE_DTC
+   bool "SDHI1 use DTC for transfers"
+   default n
+   depends on RA_SDHI1 && RA_DTC
+   help
+     Enable DTC (Data Transfer Controller) for SDHI1 transfers.
+
+config RA_SDHI0_USE_DMAC
+   bool "SDHI0 use DMAC for transfers"
+   default n
+   depends on RA_SDHI0 && RA_DMAC
+   help
+     Enable DMAC (Direct Memory Access Controller) for SDHI0 transfers.
+     DMAC provides hardware-assisted data transfers with the lowest
+     CPU overhead for high-speed SD card access.
+     DMAC takes priority over DTC if both are enabled.
+
+config RA_SDHI1_USE_DMAC
+   bool "SDHI1 use DMAC for transfers"
+   default n
+   depends on RA_SDHI1 && RA_DMAC
+   help
+     Enable DMAC (Direct Memory Access Controller) for SDHI1 transfers.
+     DMAC provides hardware-assisted data transfers with the lowest
+     CPU overhead for high-speed SD card access.
+
+config RA_SDHI_DMAC_THRESHOLD
+   int "Minimum bytes for SDHI DMAC transfer"
+   default 512
+   range 1 4096
+   depends on RA_SDHI0_USE_DMAC || RA_SDHI1_USE_DMAC
+   help
+     Minimum number of bytes required to use DMAC for SDHI transfers.
+     Transfers smaller than this threshold will use DTC or PIO mode.
+     Default is 512 (one block) for optimal SD card performance.
+
+endif # RA_SDHI
+
+comment "External Bus Controller - SDRAM"
+
+config RA_HAVE_SDRAM
+   bool
+   default n
+   help
+     Hidden option indicating the chip has SDRAM controller capability.
+
+endmenu
+
+menu "Audio Interfaces"
+
+comment "Serial Sound Interface (I2S/PCM)"
+
+config RA_HAVE_SSIE
+   bool
+   default n
+
+config RA_HAVE_SSIE0
+   bool
+   default n
+
+config RA_HAVE_SSIE1
+   bool
+   default n
+
+config RA_SSIE
+   bool "Serial Sound Interface"
+   default n
+   depends on RA_HAVE_SSIE
+
+config RA_SSIE0
+   bool "SSIE0 - I2S/PCM Audio Interface 0"
+   default n
+   depends on RA_HAVE_SSIE0
+   select RA_SSIE
+   help
+     Enable Serial Sound Interface 0 for I2S/PCM audio.
+
+config RA_SSIE1
+   bool "SSIE1 - I2S/PCM Audio Interface 1"
+   default n
+   depends on RA_HAVE_SSIE1
+   select RA_SSIE
+   help
+     Enable Serial Sound Interface 1 for I2S/PCM audio.
+
+comment "PDM Digital Microphone Interface"
+
+config RA_HAVE_PDMIF
+   bool
+   default n
+
+config RA_PDMIF
+   bool "PDM Microphone Interface"
+   default n
+   depends on RA_HAVE_PDMIF
+   help
+     Enable PDM (Pulse Density Modulation) interface for digital microphones.
+
+endmenu
+
+menu "Timers"
+config RA_HAVE_GPT
+   bool
+   default n
+
+config RA_HAVE_AGT
+   bool
+   default n
+
+config RA_HAVE_AGT0
+   bool
+   default n
+
+config RA_HAVE_AGT1
+   bool
+   default n
+
+config RA_HAVE_AGT2
+   bool
+   default n
+
+config RA_HAVE_AGT3
+   bool
+   default n
+
+config RA_HAVE_AGT4
+   bool
+   default n
+
+config RA_HAVE_AGT5
+   bool
+   default n
+
+config RA_HAVE_ULPT
+   bool
+   default n
+
+config RA_HAVE_ULPT0
+   bool
+   default n
+
+config RA_HAVE_ULPT1
+   bool
+   default n
+
+config RA_AGT
+   bool "Asynchronous General Purpose Timer"
+   default n
+   depends on RA_HAVE_AGT
+
+config RA_AGT0
+   bool "AGT0 - Asynchronous Timer 0"
+   default n
+   depends on RA_HAVE_AGT0
+   select RA_AGT
+
+config RA_AGT1
+   bool "AGT1 - Asynchronous Timer 1"
+   default n
+   depends on RA_HAVE_AGT1
+   select RA_AGT
+
+config RA_AGT2
+   bool "AGT2 - Asynchronous Timer 2"
+   default n
+   depends on RA_HAVE_AGT2
+   select RA_AGT
+
+config RA_AGT3
+   bool "AGT3 - Asynchronous Timer 3"
+   default n
+   depends on RA_HAVE_AGT3
+   select RA_AGT
+
+config RA_AGT4
+   bool "AGT4 - Asynchronous Timer 4"
+   default n
+   depends on RA_HAVE_AGT4
+   select RA_AGT
+
+config RA_AGT5
+   bool "AGT5 - Asynchronous Timer 5"
+   default n
+   depends on RA_HAVE_AGT5
+   select RA_AGT
+
+if RA_AGT
+
+menu "AGT Configuration"
+
+config RA_AGT_TIMER_INTERFACE
+   bool "Enable NuttX Timer Interface"
+   default n
+   depends on TIMER
+   ---help---
+      Enable NuttX timer lower-half driver wrapper for AGT.
+      This allows AGT timers to be accessed through the standard
+      /dev/timerX interface.
+
+endmenu # AGT Configuration
+
+endif # RA_AGT
+
+config RA_ULPT
+   bool "Ultra Low Power Timer"
+   default n
+   depends on RA_HAVE_ULPT
+
+config RA_ULPT0
+   bool "ULPT0 - Ultra Low Power Timer 0"
+   default n
+   depends on RA_HAVE_ULPT0
+   select RA_ULPT
+
+config RA_ULPT1
+   bool "ULPT1 - Ultra Low Power Timer 1"
+   default n
+   depends on RA_HAVE_ULPT1
+   select RA_ULPT
+
+config RA_PWM
+   bool "RA8 PWM Driver"
+   default n
+   depends on RA_GPT
+   select PWM
+   help
+     Enable PWM support using GPT (General PWM Timer) modules.
+
+endmenu
+
+menu "RTC"
+config RA_HAVE_RTC
+   bool
+   default n
+
+config RA_RTC
+   bool "Real Time Clock"
+   default n
+   depends on RA_HAVE_RTC
+   help
+     Enable the RA8 Real Time Clock peripheral.
+
+choice
+   prompt "RTC Clock Source"
+   default RA_RTC_CLOCK_SUBCLK
+   depends on RA_RTC
+
+config RA_RTC_CLOCK_SUBCLK
+   bool "Sub-clock (SOSC)"
+   help
+     Use the 32.768kHz sub-clock oscillator as the RTC count source.
+     This is the recommended option for accurate timekeeping.
+
+config RA_RTC_CLOCK_LOCO
+   bool "LOCO"
+   help
+     Use the Low-speed On-chip Oscillator (LOCO) as the RTC count source.
+     This is less accurate but does not require an external crystal.
+
+endchoice
+
+config RA_RTC_CLOCK_SOURCE
+   int
+   default 0 if RA_RTC_CLOCK_SUBCLK
+   default 1 if RA_RTC_CLOCK_LOCO
+
+config RA_RTC_LOCO_FREQ_COMPARE
+   int "LOCO Frequency Compare Value"
+   default 255
+   depends on RA_RTC_CLOCK_LOCO
+   help
+     Frequency comparison value for the LOCO when used as RTC clock source.
+     The value is written to RFRL register. Default is 255 for ~32.768kHz.
+
+config RA_RTC_ERROR_ADJUSTMENT
+   bool "RTC Error Adjustment Support"
+   default n
+   depends on RA_RTC
+   help
+     Enable support for the RTC automatic error adjustment feature using
+     the RADJ register. This allows compensation for clock drift.
+
+if RA_RTC_ERROR_ADJUSTMENT
+
+config RA_RTC_ERROR_PERIOD
+   int "Error Adjustment Period (in 1-minute units)"
+   default 10
+   range 1 255
+   help
+     Period for automatic error adjustment in 1-minute units.
+
+config RA_RTC_ERROR_VALUE
+   int "Error Adjustment Value"
+   default 0
+   range 0 63
+   help
+     Error adjustment value (0-63). The time is adjusted by
+     adding or subtracting this many clock cycles.
+
+choice
+   prompt "Error Adjustment Direction"
+   default RA_RTC_ERROR_ADD
+
+config RA_RTC_ERROR_ADD
+   bool "Add (speed up clock)"
+   help
+     Add clock cycles to speed up the RTC.
+
+config RA_RTC_ERROR_SUB
+   bool "Subtract (slow down clock)"
+   help
+     Subtract clock cycles to slow down the RTC.
+
+endchoice
+
+endif # RA_RTC_ERROR_ADJUSTMENT
+
+endmenu
+
+menu "Low Power Mode (LPM)"
+
+config RA_LPM
+    bool "Low Power Mode Support"
+    default n
+    help
+      Enable the RA8 Low Power Mode (LPM) driver.
+      This driver supports multiple low power modes including:
+      - Sleep mode (CPU halts, peripherals run)
+      - Deep Sleep mode
+      - Software Standby mode
+      - Deep Software Standby mode (with reset on wake)
+
+if RA_LPM
+
+config RA_LPM_PM_INTEGRATION
+    bool "NuttX PM Framework Integration"
+    default n
+    depends on PM
+    help
+      Integrate RA8 LPM driver with NuttX Power Management framework.
+      This allows automatic power state transitions based on system
+      activity and PM governor decisions.
+
+config RA_LPM_DEFAULT_STANDBY_TIMEOUT
+    int "Default Standby Wake-up Timeout (ms)"
+    default 10000
+    range 100 3600000
+    help
+      Default timeout in milliseconds for wake-up from standby modes
+      when using ULPT as wake-up source.
+
+config RA_LPM_DEEP_STANDBY_SUPPORT
+    bool "Deep Software Standby Support"
+    default n
+    help
+      Enable support for Deep Software Standby modes.
+      WARNING: Deep standby causes system reset on wake-up.
+      Application must check for deep standby reset at startup
+      and restore state from standby RAM if needed.
+
+if RA_LPM_DEEP_STANDBY_SUPPORT
+
+choice
+    prompt "Deep Standby Power Supply Mode"
+    default RA_LPM_DEEP_STANDBY_MODE1
+
+config RA_LPM_DEEP_STANDBY_MODE1
+    bool "Mode 1 - Standby RAM, LOCO, PVD0 powered"
+    help
+      Power to standby RAM, LOCO, and PVD0 is supplied.
+
+config RA_LPM_DEEP_STANDBY_MODE2
+    bool "Mode 2 - Standby RAM, LOCO, IWDT disabled"
+    help
+      Power to standby RAM, LOCO, and IWDT is disabled.
+
+config RA_LPM_DEEP_STANDBY_MODE3
+    bool "Mode 3 - Minimum power, PVD0 only"
+    help
+      Power to standby RAM, PVD0, LOCO, and IWDT is disabled.
+
+endchoice
+
+config RA_LPM_DEEP_STANDBY_IO_RETAIN
+    bool "Retain I/O Port State in Deep Standby"
+    default y
+    help
+      Retain I/O port states when entering deep software standby.
+      If disabled, I/O ports are reset when waking from deep standby.
+
+endif # RA_LPM_DEEP_STANDBY_SUPPORT
+
+config RA_LPM_DEBUG
+    bool "LPM Debug Output"
+    default n
+    depends on DEBUG_FEATURES
+    help
+      Enable debug output for LPM driver operations.
+
+endif # RA_LPM
+
+endmenu
+
+menu "Watchdog Timer"
+
+config RA_WDT
+    bool "Watchdog Timer (WDT)"
+    default n
+    select WATCHDOG
+
+    help
+      Enable the RA8 Watchdog Timer (WDT) driver.
+      WDT runs from PCLKB and supports longer timeout periods than IWDT.
+      Timeout periods: 1024, 4096, 8192, 16384 cycles.
+
+if RA_WDT
+
+config RA_WDT_NMI_MODE
+    bool "Enable NMI Mode (Non-Maskable Interrupt)"
+    default n
+    help
+      Configure WDT to generate NMI interrupt on timeout instead of reset.
+      This allows graceful handling of watchdog events.
+      If disabled, WDT will reset the MCU on timeout (default safe mode).
+      Note: Requires handler registration via watchdog_capture() API.
+
+config RA_WDT_STOP_IN_SLEEP
+    bool "Stop WDT Counter in Sleep Mode"
+    default n
+    help
+      Stop the WDT counter when the MCU enters sleep mode.
+      If enabled: WDT stops during sleep (saves power)
+      If disabled: WDT continues during sleep (higher safety)
+
+endif # RA_WDT
+
+config RA_IWDT
+    bool "Independent Watchdog Timer (IWDT)"
+    default n
+    select WATCHDOG
+    help
+      Enable the RA8 Independent Watchdog Timer (IWDT) driver.
+      The IWDT is a safety watchdog that cannot be stopped once started.
+      It runs from the LOCO clock (32.768 kHz / 15 = 2184.5 Hz) which is
+      independent of the system clock.
+
+if RA_IWDT
+
+config RA_IWDT_NMI_MODE
+    bool "Enable NMI Mode (Non-Maskable Interrupt)"
+    default n
+    help
+      Configure IWDT to generate NMI interrupt on timeout instead of reset.
+      This allows graceful handling of watchdog events (e.g., save flight data).
+      If disabled, IWDT will reset the MCU on timeout (default safe mode).
+      Note: Requires handler registration via watchdog_capture() API.
+
+config RA_IWDT_STOP_IN_SLEEP
+    bool "Stop IWDT Counter in Sleep Mode"
+    default n
+    help
+      Stop the IWDT counter when the MCU enters sleep mode.
+      If enabled: IWDT stops during sleep (saves power)
+      If disabled: IWDT continues during sleep (higher safety)
+
+      For flight controllers, typically disabled to maintain safety even
+      during low-power modes.
+
+endif # RA_IWDT
+
+endmenu
+
+menu "Inter-Processor Communication (IPC)"
+
+config RA_HAVE_IPC
+   bool
+   default n
+
+config RA_IPC
+   bool "Inter-Processor Communication (IPC)"
+   default n
+   depends on RA_HAVE_IPC && RA8P1_GROUP
+   select SPINLOCK
+   help
+     Enable the RA8 Inter-Processor Communication (IPC) driver.
+     IPC provides hardware-based communication between dual cores
+     on RA8P1 MCU, including:
+     - 16 hardware semaphores for resource locking
+     - Inter-core NMI generation
+     - 4 message channels (2 per core pair)
+     - FIFO-based data transfer
+
+     This driver is required for:
+     - OpenAMP and RPMsg communication
+     - Dual-core applications
+     - Core-to-core synchronization
+
+     Note: Only available on RA8P1 dual-core MCU.
+
+if RA_IPC
+
+config RA_IPC_DEBUG
+   bool "Enable IPC Debug Messages"
+   default n
+   depends on DEBUG_FEATURES
+   help
+     Enable detailed debug output for IPC driver operations,
+     including semaphore operations, channel communication,
+     and interrupt handling.
+
+config RA_IPC_USE_NMI
+   bool "Enable IPC NMI Support"
+   default y
+   help
+     Enable Non-Maskable Interrupt (NMI) support for inter-core
+     communication. NMI can be used for critical notifications
+     between cores that require immediate attention.
+
+config RA_IPC_CH0_ENABLE
+   bool "Enable IPC Channel 0"
+   default y
+   help
+     Enable IPC Channel 0 for inter-core communication.
+     Each channel supports 32-bit data transfer.
+
+config RA_IPC_CH1_ENABLE
+   bool "Enable IPC Channel 1"
+   default y
+   help
+     Enable IPC Channel 1 for inter-core communication.
+     Each channel supports 32-bit data transfer.
+
+config RA_IPC_CH2_ENABLE
+   bool "Enable IPC Channel 2"
+   default n
+   help
+     Enable IPC Channel 2 for inter-core communication.
+     Each channel supports 32-bit data transfer.
+
+config RA_IPC_CH3_ENABLE
+   bool "Enable IPC Channel 3"
+   default n
+   help
+     Enable IPC Channel 3 for inter-core communication.
+     Each channel supports 32-bit data transfer.
+
+config RA_IPC_IPCC
+   bool "Enable IPCC Upper-Half Integration"
+   default n
+   depends on DRIVERS_IPCC
+   help
+     Enable NuttX IPCC (Inter-Processor Communication Controller)
+     upper-half integration. This provides standard character device
+     interface (/dev/ipccN) for IPC channels and enables integration
+     with OpenAMP/RPMsg framework.
+
+     When enabled, IPC channels are registered with the IPCC framework
+     and can be accessed via file operations (open, read, write, ioctl).
+
+     Select 'y' for OpenAMP/RPMsg support.
+
+config RA_IPC_OPENAMP
+   bool "Enable OpenAMP Support"
+   default n
+   depends on RA_IPC_IPCC && OPENAMP
+   help
+     Enable integration with OpenAMP (Open Asymmetric Multi-Processing)
+     framework for high-level inter-core communication using RPMsg
+     (Remote Processor Messaging).
+
+     This enables:
+     - Virtio transport over IPC channels
+     - RPMsg endpoint management
+     - Resource table for remoteproc
+     - Shared memory management for OpenAMP
+
+     Required for PX4 multi-core autopilot architecture.
+
+endif # RA_IPC
+
+endmenu
+
+menu "DAC"
+config RA_HAVE_DAC12
+   bool
+   default n
+
+config RA_DAC12
+   bool "12-bit DAC"
+   default n
+   depends on RA_HAVE_DAC12
+   help
+     Enable 12-bit Digital-to-Analog Converter.
+endmenu
+
+menu "Analog Comparator"
+config RA_HAVE_ACMPHS
+   bool
+   default n
+
+config RA_HAVE_ACMPHS0
+   bool
+   default n
+
+config RA_HAVE_ACMPHS1
+   bool
+   default n
+
+config RA_HAVE_ACMPHS2
+   bool
+   default n
+
+config RA_HAVE_ACMPHS3
+   bool
+   default n
+
+config RA_ACMPHS
+   bool "High-Speed Analog Comparator"
+   default n
+   depends on RA_HAVE_ACMPHS
+   help
+     Enable High-Speed Analog Comparator.
+
+config RA_ACMPHS0
+   bool "ACMPHS0 - High-Speed Comparator 0"
+   default n
+   depends on RA_HAVE_ACMPHS0
+   select RA_ACMPHS
+
+config RA_ACMPHS1
+   bool "ACMPHS1 - High-Speed Comparator 1"
+   default n
+   depends on RA_HAVE_ACMPHS1
+   select RA_ACMPHS
+
+config RA_ACMPHS2
+   bool "ACMPHS2 - High-Speed Comparator 2"
+   default n
+   depends on RA_HAVE_ACMPHS2
+   select RA_ACMPHS
+
+config RA_ACMPHS3
+   bool "ACMPHS3 - High-Speed Comparator 3"
+   default n
+   depends on RA_HAVE_ACMPHS3
+   select RA_ACMPHS
+
+endmenu
+
+menu "DMA and Data Transfer"
+
+comment "Direct Memory Access Controller (DMAC)"
+
+config RA_HAVE_DMAC
+   bool
+   default n
+
+config RA_DMAC
+   bool "DMAC (Direct Memory Access Controller) support"
+   default n
+   depends on RA_HAVE_DMAC
+   select ARCH_DMA
+   help
+     Enable DMAC support for high-performance data transfers.
+     DMAC provides hardware-accelerated memory-to-memory,
+     memory-to-peripheral, and peripheral-to-memory transfers.
+     RA8 MCUs support up to 8 DMAC channels.
+
+if RA_DMAC
+
+config RA_DMAC_IRQ_PRIORITY
+   int "DMAC interrupt priority"
+   default 3
+   range 0 15
+   help
+     Interrupt priority for DMAC completion interrupts (0=highest, 15=lowest).
+     Should typically be lower than the peripheral interrupt priority.
+
+config RA_DMAC_PRIORITY
+   bool "Enable DMAC channel priority control"
+   default n
+   help
+     Enable channel priority control for DMAC.
+     When enabled, lower numbered channels have higher priority.
+     When disabled, round-robin arbitration is used.
+
+config RA_DMAC_HALT_ON_ERROR
+   bool "Halt DMAC on error"
+   default y
+   help
+     Halt all DMAC operations when a bus error occurs.
+     Recommended for debugging; may be disabled for production.
+
+config RA_DMAC_PARAM_CHECKING
+   bool "Enable DMAC parameter checking"
+   default y if DEBUG_FEATURES
+   default n
+   help
+     Enable parameter checking in DMAC driver functions.
+     Adds safety checks but increases code size and execution time.
+
+config RA_DMAC_TRANSFER_MODES
+   bool "Support all DMAC transfer modes"
+   default y
+   help
+     Enable support for all DMAC transfer modes:
+     - Normal transfer
+     - Repeat transfer
+     - Block transfer
+
+menu "DMAC Channel Assignment"
+
+comment "Assign DMAC channels to peripherals (channels 0-7 and 10-17)"
+
+config RA_DMAC_SPI0_TX_CHANNEL
+   int "SPI0 TX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SPI0
+   help
+     DMAC channel for SPI0 transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.  (Channels 8-9 are invalid.)
+
+config RA_DMAC_SPI0_RX_CHANNEL
+   int "SPI0 RX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SPI0
+   help
+     DMAC channel for SPI0 receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.  (Channels 8-9 are invalid.)
+
+config RA_DMAC_SPI1_TX_CHANNEL
+   int "SPI1 TX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SPI1
+   help
+     DMAC channel for SPI1 transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_SPI1_RX_CHANNEL
+   int "SPI1 RX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SPI1
+    help
+       DMAC channel for SPI1 receive (-1 = disabled).
+       Must be unique across all peripheral assignments.
+         Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.  (Channels 8-9 are invalid.)
+
+config RA_DMAC_I2C0_TX_CHANNEL
+   int "I2C0 TX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_I2C0_USE_DMAC
+   help
+     DMAC channel for I2C0 transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.
+
+config RA_DMAC_I2C0_RX_CHANNEL
+   int "I2C0 RX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_I2C0_USE_DMAC
+   help
+     DMAC channel for I2C0 receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.
+
+config RA_DMAC_I2C1_TX_CHANNEL
+   int "I2C1 TX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_I2C1_USE_DMAC
+   help
+     DMAC channel for I2C1 transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.
+
+config RA_DMAC_I2C1_RX_CHANNEL
+   int "I2C1 RX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_I2C1_USE_DMAC
+   help
+     DMAC channel for I2C1 receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.
+
+config RA_DMAC_I2C2_TX_CHANNEL
+   int "I2C2 TX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_I2C2_USE_DMAC
+   help
+     DMAC channel for I2C2 transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.
+
+config RA_DMAC_I2C2_RX_CHANNEL
+   int "I2C2 RX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_I2C2_USE_DMAC
+   help
+     DMAC channel for I2C2 receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.
+
+config RA_DMAC_ADC_CHANNEL
+   int "ADC DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_ADC
+   help
+     DMAC channel for ADC data transfers (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART0_TX_CHANNEL
+   int "UART0 TX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI0_UART
+   help
+     DMAC channel for UART0 transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART0_RX_CHANNEL
+   int "UART0 RX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI0_UART
+   help
+     DMAC channel for UART0 receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART1_TX_CHANNEL
+   int "UART1 TX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI1_UART
+   help
+     DMAC channel for UART1 transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART1_RX_CHANNEL
+   int "UART1 RX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI1_UART
+   help
+     DMAC channel for UART1 receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART2_TX_CHANNEL
+   int "UART2 TX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI2_UART
+   help
+     DMAC channel for UART2 transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART2_RX_CHANNEL
+   int "UART2 RX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI2_UART
+   help
+     DMAC channel for UART2 receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART3_TX_CHANNEL
+   int "UART3 TX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI3_UART
+   help
+     DMAC channel for UART3 transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART3_RX_CHANNEL
+   int "UART3 RX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI3_UART
+   help
+     DMAC channel for UART3 receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART4_TX_CHANNEL
+   int "UART4 TX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI4_UART
+   help
+     DMAC channel for UART4 transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART4_RX_CHANNEL
+   int "UART4 RX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI4_UART
+   help
+     DMAC channel for UART4 receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART5_TX_CHANNEL
+   int "UART5 TX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI5_UART
+   help
+     DMAC channel for UART5 transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART5_RX_CHANNEL
+   int "UART5 RX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI5_UART
+   help
+     DMAC channel for UART5 receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART6_TX_CHANNEL
+   int "UART6 TX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI6_UART
+   help
+     DMAC channel for UART6 transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART6_RX_CHANNEL
+   int "UART6 RX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI6_UART
+   help
+     DMAC channel for UART6 receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART7_TX_CHANNEL
+   int "UART7 TX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI7_UART
+   help
+     DMAC channel for UART7 transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART7_RX_CHANNEL
+   int "UART7 RX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI7_UART
+   help
+     DMAC channel for UART7 receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART8_TX_CHANNEL
+   int "UART8 TX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI8_UART
+   help
+     DMAC channel for UART8 transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART8_RX_CHANNEL
+   int "UART8 RX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI8_UART
+   help
+     DMAC channel for UART8 receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART9_TX_CHANNEL
+   int "UART9 TX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI9_UART
+   help
+     DMAC channel for UART9 transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_UART9_RX_CHANNEL
+   int "UART9 RX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI9_UART
+   help
+     DMAC channel for UART9 receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_SCI0_SPI_TX_CHANNEL
+   int "SCI0_SPI TX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI0_SPI_USE_DMAC
+   help
+     DMAC channel for SCI0_SPI transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.
+
+config RA_DMAC_SCI0_SPI_RX_CHANNEL
+   int "SCI0_SPI RX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI0_SPI_USE_DMAC
+   help
+     DMAC channel for SCI0_SPI receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.
+
+config RA_DMAC_SCI1_SPI_TX_CHANNEL
+   int "SCI1_SPI TX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI1_SPI_USE_DMAC
+   help
+     DMAC channel for SCI1_SPI transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_SCI1_SPI_RX_CHANNEL
+   int "SCI1_SPI RX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI1_SPI_USE_DMAC
+   help
+     DMAC channel for SCI1_SPI receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_SCI2_SPI_TX_CHANNEL
+   int "SCI2_SPI TX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI2_SPI_USE_DMAC
+   help
+     DMAC channel for SCI2_SPI transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_SCI2_SPI_RX_CHANNEL
+   int "SCI2_SPI RX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI2_SPI_USE_DMAC
+   help
+     DMAC channel for SCI2_SPI receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_SCI3_SPI_TX_CHANNEL
+   int "SCI3_SPI TX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI3_SPI_USE_DMAC
+   help
+     DMAC channel for SCI3_SPI transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_SCI3_SPI_RX_CHANNEL
+   int "SCI3_SPI RX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI3_SPI_USE_DMAC
+   help
+     DMAC channel for SCI3_SPI receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_SCI4_SPI_TX_CHANNEL
+   int "SCI4_SPI TX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI4_SPI_USE_DMAC
+   help
+     DMAC channel for SCI4_SPI transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_SCI4_SPI_RX_CHANNEL
+   int "SCI4_SPI RX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI4_SPI_USE_DMAC
+   help
+     DMAC channel for SCI4_SPI receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_SCI9_SPI_TX_CHANNEL
+   int "SCI9_SPI TX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI9_SPI_USE_DMAC
+   help
+     DMAC channel for SCI9_SPI transmit (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_SCI9_SPI_RX_CHANNEL
+   int "SCI9_SPI RX DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SCI9_SPI_USE_DMAC
+   help
+     DMAC channel for SCI9_SPI receive (-1 = disabled).
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_USBFS_D0FIFO_CHANNEL
+   int "USBFS D0FIFO DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_USBDEV_DMA
+   help
+     DMAC channel for USBFS D0FIFO (Pipe 1) transfers (-1 = disabled).
+     Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.
+
+config RA_DMAC_USBFS_D1FIFO_CHANNEL
+   int "USBFS D1FIFO DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_USBDEV_DMA
+   help
+     DMAC channel for USBFS D1FIFO (Pipe 2) transfers (-1 = disabled).
+     Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.
+
+config RA_DMAC_GPT0_CHANNEL
+   int "GPT0 DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_GPT0
+   help
+     DMAC channel for GPT0 transfers (-1 = disabled).
+     Used for timer/PWM capture or compare match operations.
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_GPT1_CHANNEL
+   int "GPT1 DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_GPT1
+   help
+     DMAC channel for GPT1 transfers (-1 = disabled).
+     Used for timer/PWM capture or compare match operations.
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_GPT2_CHANNEL
+   int "GPT2 DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_GPT2
+   help
+     DMAC channel for GPT2 transfers (-1 = disabled).
+     Used for timer/PWM capture or compare match operations.
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_GPT3_CHANNEL
+   int "GPT3 DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_GPT3
+   help
+     DMAC channel for GPT3 transfers (-1 = disabled).
+     Used for timer/PWM capture or compare match operations.
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_GPT4_CHANNEL
+   int "GPT4 DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_GPT4
+   help
+     DMAC channel for GPT4 transfers (-1 = disabled).
+     Used for timer/PWM capture or compare match operations.
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_GPT5_CHANNEL
+   int "GPT5 DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_GPT5
+   help
+     DMAC channel for GPT5 transfers (-1 = disabled).
+     Used for timer/PWM capture or compare match operations.
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_GPT10_CHANNEL
+   int "GPT10 DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_GPT10
+   help
+     DMAC channel for GPT10 transfers (-1 = disabled).
+     Used for timer/PWM capture or compare match operations.
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_GPT11_CHANNEL
+   int "GPT11 DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_GPT11
+   help
+     DMAC channel for GPT11 transfers (-1 = disabled).
+     Used for timer/PWM capture or compare match operations.
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_GPT12_CHANNEL
+   int "GPT12 DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_GPT12
+   help
+     DMAC channel for GPT12 transfers (-1 = disabled).
+     Used for timer/PWM capture or compare match operations.
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_GPT13_CHANNEL
+   int "GPT13 DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_GPT13
+   help
+     DMAC channel for GPT13 transfers (-1 = disabled).
+     Used for timer/PWM capture or compare match operations.
+     Must be unique across all peripheral assignments.
+
+config RA_DMAC_SDHI0_CHANNEL
+   int "SDHI0 DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SDHI0_USE_DMAC
+   help
+     DMAC channel for SDHI0 (SD/MMC Host Interface 0) transfers (-1 = disabled).
+     Used for high-speed SD card data transfers.
+     Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.
+
+config RA_DMAC_SDHI1_CHANNEL
+   int "SDHI1 DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SDHI1_USE_DMAC
+   help
+     DMAC channel for SDHI1 (SD/MMC Host Interface 1) transfers (-1 = disabled).
+     Used for high-speed SD card data transfers.
+     Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.
+
+config RA_DMAC_SDRAM_CHANNEL
+   int "SDRAM DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_SDRAM_USE_DMAC
+   help
+     DMAC channel for SDRAM controller transfers (-1 = disabled).
+     Used for high-speed SDRAM data transfers and memory operations.
+     Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.
+
+config RA_DMAC_OSPI0_CHANNEL
+   int "OSPI0 DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_OSPI_USE_DMAC
+   help
+     DMAC channel for OSPI0 (Octal SPI 0) transfers (-1 = disabled).
+     Used for high-speed flash memory access via OSPI interface.
+     Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.
+
+config RA_DMAC_OSPI1_CHANNEL
+   int "OSPI1 DMAC channel"
+   default -1
+   range -1 17
+   depends on RA_OSPI_USE_DMAC
+   help
+     DMAC channel for OSPI1 (Octal SPI 1) transfers (-1 = disabled).
+     Used for high-speed flash memory access via OSPI interface.
+     Must be unique across all peripheral assignments.
+     Valid channels: -1 = disabled; 0-7 = DMAC unit 0; 10-17 = DMAC unit 1.
+
+endmenu
+
+menu "DMAC Debug Options"
+
+config DEBUG_DMA_ERROR
+   bool "DMAC error output"
+   default n
+   depends on DEBUG_ERROR
+   help
+     Enable DMAC error output (dmaerr).
+
+config DEBUG_DMA_WARN
+   bool "DMAC warnings output"
+   default n
+   depends on DEBUG_WARN
+   help
+     Enable DMAC warning output (dmawarn).
+
+config DEBUG_DMA_INFO
+   bool "DMAC informational output"
+   default n
+   depends on DEBUG_INFO
+   help
+     Enable DMAC informational output (dmainfo).
+     Also enables ra_dmasample() and ra_dmadump() debug functions.
+
+endmenu
+
+endif # RA_DMAC
+
+comment "Data Transfer Controller (DTC)"
+
+config RA_DTC
+   bool "DTC (Data Transfer Controller) support"
+   default n
+   help
+     Enable Data Transfer Controller for simple data transfers.
+     DTC provides lower overhead than DMAC for simple transfers
+     but with reduced capabilities. DTC is independent of DMAC
+     and can be used simultaneously.
+
+if RA_DTC
+
+config RA_DTC_VECTORS
+   int "Number of DTC vectors"
+   default 16
+   range 1 256
+   help
+     Number of DTC transfer vectors to allocate.
+     Each active DTC transfer requires one vector.
+
+config RA_DTC_PARAM_CHECKING
+   bool "Enable DTC parameter checking"
+   default y if DEBUG_FEATURES
+   default n
+   help
+     Enable parameter checking in DTC driver functions.
+     Adds safety checks but increases code size.
+
+menu "DTC Debug Options"
+
+config DEBUG_DTC_ERROR
+   bool "DTC error output"
+   default n
+   depends on DEBUG_ERROR
+   help
+     Enable DTC error output.
+
+config DEBUG_DTC_INFO
+   bool "DTC informational output"
+   default n
+   depends on DEBUG_INFO
+   help
+     Enable DTC informational output.
+
+endmenu
+
+endif # RA_DTC
+
+endmenu
+
+menu "Graphics and Display"
+
+config RA_HAVE_GLCDC
+   bool
+   default n
+
+config RA_HAVE_DRW
+   bool
+   default n
+
+config RA_HAVE_MIPI_DSI
+   bool
+   default n
+
+config RA_HAVE_MIPI_CSI
+   bool
+   default n
+
+config RA_HAVE_CEU
+   bool
+   default n
+
+config RA_HAVE_VIN
+   bool
+   default n
+
+config RA_GLCDC
+   bool "Graphics LCD Controller"
+   default n
+   depends on RA_HAVE_GLCDC
+   help
+     Enable Graphics LCD Controller for display interfaces.
+     Supports multiple layers and various pixel formats.
+
+config RA_DRW
+   bool "2D Drawing Engine"
+   default n
+   depends on RA_HAVE_DRW
+   help
+     Enable 2D hardware graphics acceleration engine.
+
+config RA_MIPI_DSI
+   bool "MIPI Display Serial Interface"
+   default n
+   depends on RA_HAVE_MIPI_DSI
+   help
+     Enable MIPI DSI for display output.
+
+config RA_MIPI_CSI
+   bool "MIPI Camera Serial Interface"
+   default n
+   depends on RA_HAVE_MIPI_CSI
+   help
+     Enable MIPI CSI for camera input.
+
+config RA_CEU
+   bool "Capture Engine Unit"
+   default n
+   depends on RA_HAVE_CEU
+   help
+     Enable image/video capture engine.
+
+config RA_VIN
+   bool "Video Input"
+   default n
+   depends on RA_HAVE_VIN
+   help
+     Enable video input processing.
+
+endmenu
+
+menu "Security Features"
+
+config RA_HAVE_DOTF
+   bool
+   default n
+
+config RA_HAVE_CPSCU
+   bool
+   default n
+
+config RA_HAVE_PSCU
+   bool
+   default n
+
+config RA_HAVE_ECC
+   bool
+   default n
+
+config RA_DOTF
+   bool "Data On-The-Fly Encryption"
+   default n
+   depends on RA_HAVE_DOTF
+   help
+     Enable real-time data encryption/decryption for external memory.
+     Provides transparent encryption for secure data storage.
+
+config RA_CPSCU
+   bool "CPU Security Control Unit"
+   default n
+   depends on RA_HAVE_CPSCU
+   help
+     Enable CPU-level security controls and TrustZone support.
+
+config RA_PSCU
+   bool "Peripheral Security Control Unit"
+   default n
+   depends on RA_HAVE_PSCU
+   help
+     Enable peripheral access security management.
+
+config RA_ECC
+   bool "ECC Memory Protection"
+   default n
+   depends on RA_HAVE_ECC
+   help
+     Enable Error Correction Code for memory protection.
+
+endmenu
+
+menu "System Utilities"
+
+config RA_HAVE_CRC
+   bool
+   default n
+
+config RA_HAVE_CAC
+   bool
+   default n
+
+config RA_CAC
+   bool "CAC support"
+   default n
+   depends on RA_HAVE_CAC
+   ---help---
+     Enable Clock Accuracy Control (CAC) support.
+     CAC monitors clock frequency and can detect clock drift or instability.
+
+config RA_HAVE_DOC
+   bool
+   default n
+
+config RA_HAVE_ELC
+   bool
+   default n
+
+config RA_HAVE_PDG
+   bool
+   default n
+
+config RA_HAVE_POEG
+   bool
+   default n
+
+config RA_HAVE_IPC
+   bool
+   default n
+
+config RA_CRC
+   bool "Hardware CRC Calculator"
+   default n
+   depends on RA_HAVE_CRC
+   help
+     Enable hardware CRC calculation engine.
+
+config RA_CAC
+   bool "Clock Accuracy Measurement"
+   default n
+   depends on RA_HAVE_CAC
+   help
+     Enable clock frequency accuracy measurement circuit.
+
+config RA_DOC
+   bool "Data Operation Circuit"
+   default n
+   depends on RA_HAVE_DOC
+   help
+     Enable hardware data comparison and operations.
+
+config RA_ELC
+   bool "Event Link Controller"
+   default n
+   depends on RA_HAVE_ELC
+   help
+     Enable hardware event routing without CPU intervention.
+     The Event Link Controller (ELC) allows peripheral-to-peripheral
+     event signals to be routed directly, enabling triggers such as
+     GPT timer overflow to start ADC conversions without CPU involvement.
+
+if RA_ELC
+
+config DEBUG_ELC_INFO
+   bool "ELC informational debug output"
+   default n
+   depends on DEBUG_FEATURES
+   help
+     Enable informational debug output for the ELC driver.
+
+config DEBUG_ELC_ERROR
+   bool "ELC error debug output"
+   default y
+   depends on DEBUG_FEATURES
+   help
+     Enable error debug output for the ELC driver.
+
+endif # RA_ELC
+
+config RA_PDG
+   bool "PWM Delay Generation"
+   default n
+   depends on RA_HAVE_PDG
+   help
+     Enable PWM delay generation for motor control applications.
+
+config RA_POEG
+   bool "Port Output Enable for GPT"
+   default n
+   depends on RA_HAVE_POEG
+   help
+     Enable emergency shutdown control for PWM outputs.
+
+config RA_IPC
+   bool "Inter-Processor Communication"
+   default n
+   depends on RA_HAVE_IPC
+   help
+     Enable hardware support for multi-core communication.
+
+endmenu
+
+menu "RA8 Nuttx Drivers"
+comment "RA8 Nuttx Drivers with enhanced functionality"
+
+config RA_MSTP
+   bool "Module Stop Control"
+   default y
+   help
+     Enable Module Stop Control for power management.
+     Required for proper peripheral initialization and power control.
+
+config RA_ETHERNET
+   bool "RA8 Ethernet Driver"
+   default n
+   select NETDEVICES
+   select ARCH_HAVE_NETDEV_STATISTICS
+   select NET
+   depends on RA_HAVE_ETHERC_MII || RA_HAVE_ETHERC_RMII
+   help
+     Enable support for the RA8 Ethernet Controller (ETHERC) and
+     Ethernet DMA Controller (EDMAC).
+
+if RA_ETHERNET
+
+config RA_ETHERNET_NINTERFACES
+   int "Number of Ethernet Interfaces"
+   default 1
+   range 1 2
+   help
+     Number of physical Ethernet interfaces to support.
+
+config RA_ETHERNET_NTXDESC
+   int "Number of TX Descriptors"
+   default 8
+   help
+     Number of transmit descriptors per interface.
+
+config RA_ETHERNET_NRXDESC
+   int "Number of RX Descriptors"
+   default 8
+   help
+     Number of receive descriptors per interface.
+
+menu "Ethernet PHY Selection"
+
+choice
+   prompt "Primary PHY Target"
+   default RA_ETHERNET_PHY_GPY111 if RA8P1_GROUP
+   default RA_ETHERNET_PHY_KSZ8091RNB if RA8E1_GROUP
+   help
+     Select the Ethernet PHY target driver for your board.
+
+config RA_ETHERNET_PHY_GPY111
+   bool "Microchip GPY111 Gigabit PHY"
+   help
+     Enable support for Microchip GPY111 Gigabit Ethernet PHY.
+     This PHY supports 10/100/1000 Mbps with RGMII interface.
+     Used on RA8P1 EVK board (EK-RA8P1).
+
+config RA_ETHERNET_PHY_KSZ8091RNB
+   bool "Micrel KSZ8091RNB 10/100 PHY"
+   help
+     Enable support for Micrel KSZ8091RNB 10/100 Mbps PHY.
+     Supports RMII interface with integrated 25MHz oscillator.
+
+config RA_ETHERNET_PHY_KSZ8041
+   bool "Micrel KSZ8041NL 10/100 PHY"
+   help
+     Enable support for Micrel KSZ8041NL 10/100 Mbps PHY.
+     Standard MII/RMII interface with LED configuration.
+
+config RA_ETHERNET_PHY_DP83620
+   bool "TI DP83620 10/100 PHY"
+   help
+     Enable support for Texas Instruments DP83620 10/100 Mbps PHY.
+     Supports RMII interface with 50MHz clock output option.
+
+config RA_ETHERNET_PHY_ICS1894
+   bool "ICS ICS1894NL 10/100 PHY"
+   help
+     Enable support for ICS ICS1894NL 10/100 Mbps PHY.
+     Note: This PHY supports full duplex only.
+
+endchoice
+
+config RA_ETHERNET_PHY_ADDRESS
+   int "PHY Address"
+   default 0
+   range 0 31
+   help
+     The MDIO address of the Ethernet PHY.
+     Default is 0 which is typical for most evaluation boards.
+
+config RA_ETHERNET_PHY_AUTONEG
+   bool "Enable Auto-Negotiation"
+   default y
+   help
+     Enable auto-negotiation for link speed and duplex mode.
+     When disabled, use the fixed speed and duplex settings below.
+
+config RA_ETHERNET_PHY_SPEED_100
+   bool "Force 100 Mbps"
+   default y
+   depends on !RA_ETHERNET_PHY_AUTONEG
+   help
+     Force 100 Mbps link speed when auto-negotiation is disabled.
+     When disabled, uses 10 Mbps.
+
+config RA_ETHERNET_PHY_FULLDUPLEX
+   bool "Force Full Duplex"
+   default y
+   depends on !RA_ETHERNET_PHY_AUTONEG
+   help
+     Force full duplex mode when auto-negotiation is disabled.
+     When disabled, uses half duplex.
+
+config RA_ETHERNET_PHY_TIMEOUT
+   int "PHY Initialization Timeout (ms)"
+   default 5000
+   help
+     Timeout in milliseconds for PHY initialization and
+     auto-negotiation to complete.
+
+endmenu
+
+menu "Ethernet Debug Options"
+
+config RA_ETHERNET_DEBUG
+   bool "Enable Ethernet Debug"
+   default n
+   depends on DEBUG_NET
+   help
+     Enable detailed Ethernet driver debug output.
+
+config RA_ETHERNET_DEBUG_TX
+   bool "Debug TX Path"
+   default n
+   depends on RA_ETHERNET_DEBUG
+   help
+     Enable transmit path debug output.
+
+config RA_ETHERNET_DEBUG_RX
+   bool "Debug RX Path"
+   default n
+   depends on RA_ETHERNET_DEBUG
+   help
+     Enable receive path debug output.
+
+config RA_ETHERNET_DEBUG_PHY
+   bool "Debug PHY"
+   default n
+   depends on RA_ETHERNET_DEBUG
+   help
+     Enable PHY communication debug output.
+
+config RA_ETHERNET_DEBUG_REGS
+   bool "Debug Registers"
+   default n
+   depends on RA_ETHERNET_DEBUG
+   help
+     Enable register access debug output.
+
+endmenu
+
+endif # RA_ETHERNET
+
+config RA_FLASH_LEGACY
+   bool "Flash Memory Driver"
+   default n
+   select MTD
+   help
+     Enable internal flash memory driver .
+     Supports both code flash and data flash operations.
+
+if RA_FLASH_LEGACY
+
+config RA_FLASH_DUAL_BANK_LEGACY
+   bool "Dual Bank Support"
+   default n
+   help
+     Enable dual bank flash support for firmware updates.
+
+config RA_FLASH_DATA_LEGACY
+   bool "Data Flash Support"
+   default n
+   help
+     Enable data flash support for configuration storage.
+
+endif # RA_FLASH_LEGACY
+
+config RA_MRAM
+   bool "MRAM (Magnetoresistive RAM) Driver"
+   default n
+   select MTD
+   depends on ARCH_CHIP_RA8P1
+   help
+     Enable MRAM driver for RA8P1 devices. MRAM provides non-volatile
+     storage with fast read/write times and unlimited write endurance.
+     Unlike traditional flash, MRAM does not require erase before write.
+
+if RA_MRAM
+
+config RA_MRAM_CODE
+   bool "Code MRAM Partition"
+   default y
+   help
+     Enable code MRAM partition for firmware storage.
+     This partition is used for OTA updates and bootloader.
+     Base: 0x02000000, Size: ~2MB (minus data partition)
+
+config RA_MRAM_DATA
+   bool "Data MRAM Partition"
+   default y
+   help
+     Enable data MRAM partition for parameter storage.
+     This partition is reserved at the end of MRAM.
+     Base: 0x021F0000, Size: 64KB
+
+config RA_MRAM_DATA_SIZE
+   int "Data MRAM Partition Size (bytes)"
+   default 65536
+   depends on RA_MRAM_DATA
+   help
+     Size of the data MRAM partition reserved for parameter storage.
+     Default is 64KB (65536 bytes).
+
+config RA_MRAM_PROGMEM
+   bool "Enable progmem interface"
+   default n
+   depends on RA_MRAM_CODE
+   help
+     Enable up_progmem_* API for code MRAM access.
+     This provides compatibility with bootloader and OTA components
+     that use the standard NuttX progmem interface.
+
+config RA_MRAM_DATA_NXFFS
+   bool "Mount data partition with NXFFS"
+   default n
+   depends on RA_MRAM_DATA && FS_NXFFS
+   help
+     Mount the data MRAM partition with NXFFS file system
+     for wear-leveled parameter storage.
+
+config RA_MRAM_DATA_LITTLEFS
+   bool "Mount data partition with LittleFS"
+   default n
+   depends on RA_MRAM_DATA && FS_LITTLEFS
+   help
+     Mount the data MRAM partition with LittleFS file system
+     for reliable parameter storage with power-loss resilience.
+
+config RA_MRAM_DATA_SMARTFS
+   bool "Mount data partition with SmartFS"
+   default n
+   depends on RA_MRAM_DATA && FS_SMARTFS
+   help
+     Mount the data MRAM partition with SmartFS file system
+     for wear-leveled parameter storage.
+
+config RA_MRAM_DEBUG
+   bool "MRAM debug output"
+   default n
+   depends on DEBUG_FEATURES
+   help
+     Enable debug output for MRAM driver operations.
+     This enables verbose logging of MRAM read/write/erase operations.
+
+endif # RA_MRAM
+
+endmenu
+
+menu "RA8 TrustZone Configuration"
+
+config RA_TZ_SECURE_BUILD
+    bool "Enable TrustZone Secure Build"
+    default n
+    help
+      Enable TrustZone secure build configuration.
+      This enables secure mode features and security attribution.
+
+config RA_TZ_NONSECURE_BUILD
+    bool "Enable TrustZone Non-Secure Build"
+    default n
+    help
+      Enable TrustZone non-secure build configuration.
+      This configures the MCU for non-secure operation.
+
+endmenu
+
+menu "RA8 Option Bytes Configuration"
+
+config RA_OPTION_SETTING_ENABLE
+    bool "Enable Option Setting Configuration"
+    default y
+    help
+      Enable configuration of option setting registers.
+      This allows customization of option function select registers (OFS).
+
+config RA_IWDT_ENABLE
+    bool "Enable Independent Watchdog Timer (IWDT)"
+    default n
+    help
+      Enable Independent Watchdog Timer with auto-start mode.
+      When disabled, IWDT is configured for register-start mode.
+
+if RA_IWDT_ENABLE
+
+config RA_IWDT_TIMEOUT
+    int "IWDT Timeout Period"
+    default 3
+    range 0 3
+    help
+      IWDT timeout period selection:
+      0: 128 cycles
+      1: 512 cycles
+      2: 1024 cycles
+      3: 2048 cycles
+
+config RA_IWDT_CLK_DIV
+    int "IWDT Clock Divisor"
+    default 15
+    range 0 15
+    help
+      IWDT clock frequency division ratio.
+      15: Divide by 128 (recommended)
+
+config RA_IWDT_WINDOW_END
+    int "IWDT Window End Position"
+    default 3
+    range 0 3
+    help
+      IWDT window end position:
+      0: 75%, 1: 50%, 2: 25%, 3: 0% (no window)
+
+config RA_IWDT_WINDOW_START
+    int "IWDT Window Start Position"
+    default 3
+    range 0 3
+    help
+      IWDT window start position:
+      0: 25%, 1: 50%, 2: 75%, 3: 100% (no window)
+
+config RA_IWDT_RESET_IRQ
+    int "IWDT Reset/Interrupt Selection"
+    default 1
+    range 0 1
+    help
+      0: Interrupt mode, 1: Reset mode (recommended)
+
+config RA_IWDT_STOP_CTRL
+    int "IWDT Stop Control"
+    default 1
+    range 0 1
+    help
+      0: Continue in low power modes, 1: Stop in low power modes
+
+endif # RA_IWDT_ENABLE
+
+config RA_WDT_ENABLE
+    bool "Enable Watchdog Timer (WDT)"
+    default n
+    help
+      Enable Watchdog Timer with auto-start mode.
+      When disabled, WDT is configured for register-start mode.
+
+if RA_WDT_ENABLE
+
+config RA_WDT_TIMEOUT
+    int "WDT Timeout Period"
+    default 3
+    range 0 3
+    help
+      WDT timeout period selection:
+      0: 1024 cycles
+      1: 4096 cycles
+      2: 8192 cycles
+      3: 16384 cycles
+
+config RA_WDT_CLK_DIV
+    int "WDT Clock Divisor"
+    default 15
+    range 0 15
+    help
+      WDT clock frequency division ratio.
+      15: Divide by 128 (recommended)
+
+config RA_WDT_WINDOW_END
+    int "WDT Window End Position"
+    default 3
+    range 0 3
+    help
+      WDT window end position:
+      0: 75%, 1: 50%, 2: 25%, 3: 0% (no window)
+
+config RA_WDT_WINDOW_START
+    int "WDT Window Start Position"
+    default 3
+    range 0 3
+    help
+      WDT window start position:
+      0: 25%, 1: 50%, 2: 75%, 3: 100% (no window)
+
+config RA_WDT_RESET_IRQ
+    int "WDT Reset/Interrupt Selection"
+    default 1
+    range 0 1
+    help
+      0: Interrupt mode, 1: Reset mode (recommended)
+
+config RA_WDT_STOP_CTRL
+    int "WDT Stop Control"
+    default 1
+    range 0 1
+    help
+      0: Continue in low power modes, 1: Stop in low power modes
+
+endif # RA_WDT_ENABLE
+
+config RA_VOLTAGE_DETECTION_LEVEL
+    int "Voltage Detection Level"
+    default 7
+    range 0 7
+    help
+      Voltage detection 0 level selection:
+      0: 3.84V, 1: 2.82V, 2: 2.51V, 3: 1.90V, 4: 1.70V, 7: 1.60V
+
+config RA_DCDC_ENABLE
+    bool "Enable DCDC Power Supply"
+    default y
+    help
+      Enable DCDC power supply for better power efficiency.
+      Recommended for most applications.
+
+config RA_OFS0_SETTING
+    bool "Enable OFS0 Option Setting"
+    default y
+    help
+      Enable Option Function Select Register 0 (OFS0) configuration.
+      This configures watchdog and security settings.
+
+config RA_OFS2_SETTING
+    bool "Enable OFS2 Option Setting"
+    default y
+    depends on RA_DCDC_ENABLE
+    help
+      Enable Option Function Select Register 2 (OFS2) configuration.
+      This configures DCDC and power settings.
+
+config RA_OFS1_SETTING
+    bool "Enable OFS1 Option Setting"
+    default  n
+    help
+      Enable Option Function Select Register 1 (OFS1) configuration.
+      This configures additional system settings.
+
+config RA_OFS3_SETTING
+    bool "Enable OFS3 Option Setting"
+    default n
+    depends on RA8P1_GROUP
+    help
+      Enable Option Function Select Register 3 (OFS3) configuration.
+      This configures additional system settings for RA8P1.
+      Only available on RA8P1 MCUs.
+
+config RA_OFS3_SEL_SETTING
+    bool "Enable OFS3 Selection Setting"
+    default n
+    depends on RA8P1_GROUP
+    help
+      Option Function Select Register 3 for Security Attribution.
+      Only available on RA8P1 MCUs in TrustZone secure builds.
+
+config RA_OFS3_SEC_SETTING
+    bool "Enable OFS3 Security Setting"
+    default n
+    depends on RA8P1_GROUP
+    help
+      Enable Option Function Select Register 3 security settings.
+      This configures secure/non-secure OFS3 regions.
+      Only available on RA8P1 MCUs in TrustZone secure builds.
+
+config RA_SAS_SETTING
+    bool "Enable SAS Setting"
+    default n
+    depends on RA8P1_GROUP
+    help
+      Enable Secure Area Setting (SAS) configuration.
+      This configures secure area boundaries for TrustZone.
+      Only available on RA8P1 MCUs.
+
+config RA_OFS1_SEL_SETTING
+    bool "Enable OFS1 Selection Setting"
+    default y
+    help
+      Option Function Select Register 1 for Security Attribution
+
+config RA_OFS1_SEC_SETTING
+    bool "Enable OFS1 Security Setting"
+    default y
+    help
+      Enable Option Function Select Register 1 security settings.
+      This configures secure/non-secure memory regions.
+
+config RA_DUAL_BANK_SETTING
+    bool "Enable Dual Bank Setting"
+    default n
+    depends on RA_FLASH_DUAL_BANK
+    help
+      Enable dual bank flash configuration settings.
+
+config RA_BANK_SELECT_SETTING
+    bool "Enable Bank Select Setting"
+    default n
+    depends on RA_FLASH_DUAL_BANK
+    help
+      Enable bank selection configuration for dual bank flash.
+
+config RA_BOOT_PROTECT_SETTING
+    bool "Enable Boot Protection Setting"
+    default n
+    help
+      Enable boot protection configuration settings.
+
+config RA_OTP_SETTING
+    bool "Enable OTP (One-Time Programmable) Settings"
+    default n
+    depends on RA8P1_GROUP
+    help
+      Enable OTP (One-Time Programmable) configuration settings.
+      These settings are permanent once programmed.
+      Only available on RA8P1 MCUs.
+      WARNING: These settings cannot be reversed once programmed!
+
+if RA_OPTION_SETTING_ENABLE
+
+comment "Option Setting Register Values"
+
+config RA_OPTION_SETTING_OFS0
+    hex "OFS0 (Option Function Select Register 0)"
+    default 0xFFFFFFFF
+    depends on RA_OFS0_SETTING
+    help
+      Option Function Select Register 0 configuration.
+      This register configures:
+      - Independent Watchdog Timer (IWDT) settings
+      - Watchdog Timer (WDT) settings
+      - Low voltage detection settings
+      - HOCO oscillation enable
+      Default: 0xFFFFFFFF
+
+config RA_OPTION_SETTING_OFS1
+    hex "OFS1 (Option Function Select Register 1)"
+    default 0xFEFFF8F8 if RA8E1_GROUP
+    default 0xFFFFFFFF if RA8P1_GROUP
+    depends on RA_OFS1_SETTING
+    help
+      Option Function Select Register 1 configuration.
+      This register configures additional system settings including
+      HOCO frequency and various security/power settings.
+      Default: 0xFEFFF8F8 if RA8E1_GROUP
+               0xFFFFFFFF if RA8P1_GROUP
+
+config RA_OPTION_SETTING_OFS2
+    hex "OFS2 (Option Function Select Register 2)"
+    default 0xFFFFFFFF if RA8E1_GROUP
+    default 0xFFFFFFEF if RA8P1_GROUP
+    depends on RA_OFS2_SETTING
+    help
+      Option Function Select Register 2 configuration.
+      This register configures:
+      - DCDC power supply settings
+      - Additional power management options
+      - NPU Security settings on RA8P1
+      - External VDD Voltage select for SDRAM on RA8P1
+      Default: 0xFFFFFFFF if RA8E1_GROUP
+               0xFFFFFFEF if RA8P1_GROUP
+
+config RA_OPTION_SETTING_SAS
+    hex "SAS (Secure Area Setting)"
+    default 0xFFFFFFFF
+    depends on RA_SAS_SETTING
+    help
+      Secure Area Setting register configuration.
+      This register configures secure area boundaries for TrustZone.
+      Only available on RA8P1 MCUs.
+      Default: 0xFFFFFFFF (no secure areas defined)
+
+config RA_OPTION_SETTING_OFS3
+    hex "OFS3 (Option Function Select Register 3)"
+    default 0xFFFFFFFF
+    depends on RA_OFS3_SETTING
+    help
+      Option Function Select Register 3 configuration.
+      This register configures additional system settings.
+      Only available on RA8P1 MCUs.
+      Default: 0xFFFFFFFF
+
+config RA_OPTION_SETTING_OFS3_SEC
+    hex "OFS3_SEC (OFS3 Security Settings)"
+    default 0xFFFFFFFF
+    depends on RA_OFS3_SEC_SETTING
+    help
+      Option Function Select Register 3 Security configuration.
+      Configures secure/non-secure OFS3 settings.
+      Only available on RA8P1 MCUs in TrustZone secure builds.
+      Default: 0xFFFFFFFF
+
+config RA_OPTION_SETTING_OFS3_SEL
+    hex "OFS3_SEL (OFS3 Selection)"
+    default 0x00000000
+    depends on RA_OFS3_SEL_SETTING
+    help
+      Option Function Select Register 3 Selection configuration.
+      Selects between secure and non-secure OFS3 settings.
+      Only available on RA8P1 MCUs in TrustZone secure builds.
+      Default: 0x00000000 (all settings from secure side)
+
+config RA_OPTION_SETTING_DUALSEL
+    hex "DUALSEL (Dual Bank Selection)"
+    default 0xFFFFFFFF
+    depends on RA_DUAL_BANK_SETTING
+    help
+      Dual Bank Selection register configuration.
+      Configures dual bank flash operation mode.
+      Default: 0xFFFFFFFF (single bank mode)
+
+config RA_OPTION_SETTING_BANKSEL
+    hex "BANKSEL (Bank Selection)"
+    default 0xFFFFFFFF
+    depends on RA_BANK_SELECT_SETTING
+    help
+      Bank Selection register configuration.
+      Selects active flash bank in dual bank mode.
+      Default: 0xFFFFFFFF (bank 0 selected)
+
+config RA_OPTION_SETTING_BPS
+    hex "BPS (Boot Protection Settings)"
+    default 0xFFFFFFFF
+    depends on RA_BOOT_PROTECT_SETTING
+    help
+      Boot Protection Settings register configuration.
+      Configures boot sector protection.
+      Default: 0xFFFFFFFF (no protection)
+
+config RA_OPTION_SETTING_PBPS
+    hex "PBPS (Permanent Boot Protection Settings)"
+    default 0xFFFFFFFF
+    depends on RA_BOOT_PROTECT_SETTING
+    help
+      Permanent Boot Protection Settings register configuration.
+      Configures permanent boot sector protection.
+      Default: 0xFFFFFFFF (no protection)
+
+config RA_OPTION_SETTING_OFS1_SEC
+    hex "OFS1_SEC (OFS1 Security Settings)"
+    default 0xFEFFFFFF
+    depends on RA_OFS1_SEC_SETTING
+    help
+      Option Function Select Register 1 Security configuration.
+      Configures secure/non-secure memory attribution and HOCO frequency.
+      Only available in TrustZone secure builds.
+      Default: 0xFDFFFFFF (includes HOCO frequency 48MHz and security settings)
+
+config RA_OPTION_SETTING_BANKSEL_SEC
+    hex "BANKSEL_SEC (Bank Selection Security)"
+    default 0xFFFFFFFF
+    depends on RA_BANK_SELECT_SETTING
+    help
+      Bank Selection Security register configuration.
+      Configures secure bank selection settings.
+      Only available in TrustZone secure builds.
+      Default: 0xFFFFFFFF (default settings)
+
+config RA_OPTION_SETTING_BPS_SEC
+    hex "BPS_SEC (Boot Protection Settings Security)"
+    default 0xFFFFFFFF
+    depends on RA_BOOT_PROTECT_SETTING
+    help
+      Boot Protection Settings Security register configuration.
+      Configures secure boot protection settings.
+      Only available in TrustZone secure builds.
+      Default: 0xFFFFFFFF (no protection)
+
+config RA_OPTION_SETTING_PBPS_SEC
+    hex "PBPS_SEC (Permanent Boot Protection Settings Security)"
+    default 0xFFFFFFFF
+    depends on RA_BOOT_PROTECT_SETTING
+    help
+      Permanent Boot Protection Settings Security register configuration.
+      Configures permanent secure boot protection settings.
+      Only available in TrustZone secure builds.
+      Default: 0xFFFFFFFF (no protection)
+
+config RA_OPTION_SETTING_OFS1_SEL
+    hex "OFS1_SEL (OFS1 Selection)"
+    default 0x00000000
+    depends on RA_OFS1_SEL_SETTING
+    help
+      Option Function Select Register 1 Selection configuration.
+      Selects between secure and non-secure OFS1 settings and clock security.
+      Only available in TrustZone secure builds.
+      Default: 0x00000000 (secure clocks disabled for non-secure access)
+
+config RA_OPTION_SETTING_BANKSEL_SEL
+    hex "BANKSEL_SEL (Bank Selection Selection)"
+    default 0xFFFFFFFF
+    depends on RA_BANK_SELECT_SETTING
+    help
+      Bank Selection Selection register configuration.
+      Selects between secure and non-secure bank settings.
+      Only available in TrustZone secure builds.
+      Default: 0xFFFFFFFF (default selection)
+
+config RA_OPTION_SETTING_BPS_SEL
+    hex "BPS_SEL (Boot Protection Settings Selection)"
+    default 0xFFFFFFFF
+    depends on RA_BOOT_PROTECT_SETTING
+    help
+      Boot Protection Settings Selection register configuration.
+      Selects between secure and non-secure boot protection.
+      Only available in TrustZone secure builds.
+      Default: 0xFFFFFFFF (default selection)
+
+config RA_OPTION_SETTING_OTP_FSBLCTRL0
+    hex "OTP_FSBLCTRL0 (OTP Flash Security Bootloader Control 0)"
+    default 0xFFFFFFFF
+    depends on RA_OTP_SETTING
+    help
+      OTP Flash Security Bootloader Control register 0.
+      One-time programmable security setting for bootloader.
+      Only available on RA8P1 MCUs.
+      Default: 0xFFFFFFFF
+
+config RA_OPTION_SETTING_OTP_FSBLCTRL1
+    hex "OTP_FSBLCTRL1 (OTP Flash Security Bootloader Control 1)"
+    default 0xFFFFFFFF
+    depends on RA_OTP_SETTING
+    help
+      OTP Flash Security Bootloader Control register 1.
+      One-time programmable security setting for bootloader.
+      Only available on RA8P1 MCUs.
+      Default: 0xFFFFFFFF
+
+config RA_OPTION_SETTING_OTP_FSBLCTRL2
+    hex "OTP_FSBLCTRL2 (OTP Flash Security Bootloader Control 2)"
+    default 0xFFFFFFFF
+    depends on RA_OTP_SETTING
+    help
+      OTP Flash Security Bootloader Control register 2.
+      One-time programmable security setting for bootloader.
+      Only available on RA8P1 MCUs.
+      Default: 0xFFFFFFFF
+
+config RA_OPTION_SETTING_OTP_SAMR
+    hex "OTP_SAMR (OTP Secure Area Memory Region)"
+    default 0xFFFFFFFF
+    depends on RA_OTP_SETTING
+    help
+      OTP Secure Area Memory Region register.
+      One-time programmable setting for secure area boundaries.
+      Only available on RA8P1 MCUs.
+      Default: 0xFFFFFFFF
+
+config RA_OPTION_SETTING_OTP_SACC00
+    hex "OTP_SACC00 (OTP Secure Access Control 00)"
+    default 0xFFFFFFFF
+    depends on RA_OTP_SETTING
+    help
+      OTP Secure Access Control register 00.
+      One-time programmable security access control settings.
+      Only available on RA8P1 MCUs.
+      Default: 0xFFFFFFFF
+
+config RA_OPTION_SETTING_OTP_SACC10
+    hex "OTP_SACC10 (OTP Secure Access Control 10)"
+    default 0xFFFFFFFF
+    depends on RA_OTP_SETTING
+    help
+      OTP Secure Access Control register 10.
+      One-time programmable security access control settings.
+      Only available on RA8P1 MCUs.
+      Default: 0xFFFFFFFF
+
+config RA_OPTION_SETTING_OTP_SACC01
+    hex "OTP_SACC01 (OTP Secure Access Control 01)"
+    default 0xFFFFFFFF
+    depends on RA_OTP_SETTING
+    help
+      OTP Secure Access Control register 01.
+      One-time programmable security access control settings.
+      Only available on RA8P1 MCUs.
+      Default: 0xFFFFFFFF
+
+config RA_OPTION_SETTING_OTP_SACC11
+    hex "OTP_SACC11 (OTP Secure Access Control 11)"
+    default 0xFFFFFFFF
+    depends on RA_OTP_SETTING
+    help
+      OTP Secure Access Control register 11.
+      One-time programmable security access control settings.
+      Only available on RA8P1 MCUs.
+      Default: 0xFFFFFFFF
+
+config RA_OPTION_SETTING_OTP_SACC02
+    hex "OTP_SACC02 (OTP Secure Access Control 02)"
+    default 0xFFFFFFFF
+    depends on RA_OTP_SETTING
+    help
+      OTP Secure Access Control register 02.
+      One-time programmable security access control settings.
+      Only available on RA8P1 MCUs.
+      Default: 0xFFFFFFFF
+
+config RA_OPTION_SETTING_OTP_SACC12
+    hex "OTP_SACC12 (OTP Secure Access Control 12)"
+    default 0xFFFFFFFF
+    depends on RA_OTP_SETTING
+    help
+      OTP Secure Access Control register 12.
+      One-time programmable security access control settings.
+      Only available on RA8P1 MCUs.
+      Default: 0xFFFFFFFF
+
+config RA_OPTION_SETTING_OTP_SACC03
+    hex "OTP_SACC03 (OTP Secure Access Control 03)"
+    default 0xFFFFFFFF
+    depends on RA_OTP_SETTING
+    help
+      OTP Secure Access Control register 03.
+      One-time programmable security access control settings.
+      Only available on RA8P1 MCUs.
+      Default: 0xFFFFFFFF
+
+config RA_OPTION_SETTING_OTP_SACC13
+    hex "OTP_SACC13 (OTP Secure Access Control 13)"
+    default 0xFFFFFFFF
+    depends on RA_OTP_SETTING
+    help
+      OTP Secure Access Control register 13.
+      One-time programmable security access control settings.
+      Only available on RA8P1 MCUs.
+      Default: 0xFFFFFFFF
+
+config RA_OPTION_SETTING_OTP_PBPS_SEC
+    hex "OTP_PBPS_SEC (OTP Permanent Boot Protection Settings Security)"
+    default 0xFFFFFFFF
+    depends on RA_OTP_SETTING
+    help
+      OTP Permanent Boot Protection Settings Security register.
+      One-time programmable boot protection security settings.
+      Only available on RA8P1 MCUs.
+      Default: 0xFFFFFFFF
+
+config RA_OPTION_SETTING_OTP_PBPS
+    hex "OTP_PBPS (OTP Permanent Boot Protection Settings)"
+    default 0xFFFFFFFF
+    depends on RA_OTP_SETTING
+    help
+      OTP Permanent Boot Protection Settings register.
+      One-time programmable boot protection settings.
+      Only available on RA8P1 MCUs.
+      Default: 0xFFFFFFFF
+
+config RA_OPTION_SETTING_OTP_ZHUK
+    hex "OTP_ZHUK (OTP Zero Hidden User Key)"
+    default 0xFFFFFFFF
+    depends on RA_OTP_SETTING
+    help
+      OTP Zero Hidden User Key register.
+      One-time programmable user key for security features.
+      Only available on RA8P1 MCUs.
+      Default: 0xFFFFFFFF
+
+endif # RA_OPTION_SETTING_ENABLE
+
+endmenu
+
+config RA_BOOTLOADED_APPLICATION
+   bool "Bootloaded Application"
+   default n
+   help
+     Enable bootloaded application support.
+     This allows the application to be loaded via a bootloader.
+     Useful for firmware updates and flexible deployment.
+
+config RA_VBATT_SWITCH
+   bool "VBATT Switch"
+   default n
+   help
+     Enable VBATT switch functionality.
+     VCC can switch to VBAT if the voltage drops too low.
+
+config RA_UP_IDLE_CALL_BACK
+   bool "Custom Idle callback function"
+   default n
+   help
+     Enable custom idle callback function support.
+     This allows user-defined actions during CPU idle time.
+
+config RA_FSP_LINKER_STYPE
+    bool "RA memory using similar to FSP"
+    default n
+    help
+        Enable RAM memory using similar to FSP for RA8 family
+
+# AGT Timer Configuration
+menu "AGT Timer Configuration"
+
+config RA8_AGT
+	bool "AGT Timer Support"
+	default n
+	---help---
+		Enable Renesas RA8 AGT (Asynchronous General-purpose Timer) driver.
+		AGT provides low-power timer functionality with flexible clock sources
+		(PCLKB, LOCO, SubClock). Suitable for periodic tasks, one-shot timers,
+		and auxiliary timing functions.
+
+if RA8_AGT
+
+config RA8_AGT0
+	bool "AGT0 Timer"
+	default n
+	---help---
+		Enable AGT0 timer channel
+
+config RA8_AGT1
+	bool "AGT1 Timer"
+	default n
+	---help---
+		Enable AGT1 timer channel
+
+config RA8_AGT2
+	bool "AGT2 Timer"
+	default n
+	---help---
+		Enable AGT2 timer channel
+
+config RA8_AGT3
+	bool "AGT3 Timer"
+	default n
+	---help---
+		Enable AGT3 timer channel
+
+config RA8_AGT4
+	bool "AGT4 Timer"
+	default n
+	---help---
+		Enable AGT4 timer channel
+
+config RA8_AGT5
+	bool "AGT5 Timer"
+	default n
+	---help---
+		Enable AGT5 timer channel
+
+config RA8_AGT6
+	bool "AGT6 Timer"
+	default n
+	---help---
+		Enable AGT6 timer channel
+
+config RA8_AGT_TIMER_INTERFACE
+	bool "NuttX Timer Interface"
+	default y
+	depends on TIMER
+	---help---
+		Wrap AGT drivers with NuttX standard timer interface (/dev/timerX).
+		This allows applications to use AGT timers through the standard
+		NuttX timer API.
+
+endif # RA8_AGT
+
+endmenu # AGT Timer Configuration

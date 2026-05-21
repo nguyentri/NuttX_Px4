@@ -18,8 +18,8 @@
 #
 ############################################################################
 
-TARGET_ZIP =
-SGDIR      = segger
+TARGET_CONTEXT =
+SGDIR          = segger
 
 ifeq ($(CONFIG_SEGGER_RTT),y)
   CSRCS += segger/RTT/RTT/SEGGER_RTT.c
@@ -46,11 +46,17 @@ ifeq ($(CONFIG_SEGGER_RTT),y)
 
 $(SGDIR)/RTT.zip:
 	$(Q) curl -L https://github.com/SEGGERMicro/RTT/archive/refs/tags/V$(RTT_VERSION).zip -o $(SGDIR)/RTT.zip
+
+$(SGDIR)/RTT/.unpacked: $(SGDIR)/RTT.zip
+	$(call DELDIR, $(SGDIR)/RTT)
 	$(Q) unzip -o $(SGDIR)/RTT.zip -d $(SGDIR)
 	$(Q) mv $(SGDIR)/RTT-$(RTT_VERSION) $(SGDIR)/RTT
 	$(Q) patch -p0 < segger/0001-segger-RTT-include-the-SEGGER_RTT_Conf.h-from-custom.patch
+	$(Q) touch $(SGDIR)/RTT/.unpacked
 
-TARGET_ZIP += $(SGDIR)/RTT.zip
+$(SGDIR)/RTT/RTT/SEGGER_RTT.c: $(SGDIR)/RTT/.unpacked
+
+TARGET_CONTEXT += $(SGDIR)/RTT/.unpacked
 
 endif
 
@@ -70,16 +76,23 @@ ifeq ($(CONFIG_SEGGER_SYSVIEW),y)
 
 $(SGDIR)/SystemView.zip:
 	$(Q) curl -L https://github.com/SEGGERMicro/SystemView/archive/refs/tags/V$(SYSVIEW_VERSION).zip -o $(SGDIR)/SystemView.zip
+
+$(SGDIR)/SystemView/.unpacked: $(SGDIR)/SystemView.zip
+	$(call DELDIR, $(SGDIR)/SystemView)
 	$(Q) unzip -o $(SGDIR)/SystemView.zip -d $(SGDIR)
 	$(Q) mv $(SGDIR)/SystemView-$(SYSVIEW_VERSION) $(SGDIR)/SystemView
+	$(Q) touch $(SGDIR)/SystemView/.unpacked
 
-TARGET_ZIP += $(SGDIR)/SystemView.zip
+$(SGDIR)/SystemView/SYSVIEW/SEGGER_SYSVIEW.c: $(SGDIR)/SystemView/.unpacked
+
+TARGET_CONTEXT += $(SGDIR)/SystemView/.unpacked
 
 endif
 
-context:: $(TARGET_ZIP)
+context:: $(TARGET_CONTEXT)
 
 distclean::
 	$(call DELDIR, $(SGDIR)/SystemView)
 	$(call DELDIR, $(SGDIR)/RTT)
-	$(call DELFILE, $(TARGET_ZIP))
+	$(call DELFILE, $(SGDIR)/SystemView.zip)
+	$(call DELFILE, $(SGDIR)/RTT.zip)

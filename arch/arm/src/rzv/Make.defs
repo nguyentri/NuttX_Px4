@@ -1,0 +1,161 @@
+############################################################################
+# arch/arm/src/rzv/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+# The start-up, "head", file
+
+# Common ARM files - different for CM33 vs CR8
+ifeq ($(CONFIG_RZV2H_BUILD_CM33),y)
+# Cortex-M33 (ARMv8-M) files
+include armv8-m/Make.defs
+else
+# Cortex-R8 (ARMv7-R) files
+include armv7-r/Make.defs
+endif
+
+# Add RZV-specific include paths
+
+EXTRAINCDIRS += $(ARCH_SRCDIR)$(DELIM)rzv
+EXTRAINCDIRS += $(ARCH_SRCDIR)$(DELIM)rzv$(DELIM)hardware
+EXTRAINCDIRS += $(ARCH_SRCDIR)$(DELIM)rzv$(DELIM)hardware$(DELIM)rzv2h
+
+# Required RZV files - core-specific startup and IRQ handling
+ifeq ($(CONFIG_RZV2H_BUILD_CM33),y)
+# CM33-specific startup and IRQ files
+CHIP_CSRCS += rzv_start_cm33.c
+CHIP_CSRCS += rzv_irq_cm33.c
+CHIP_CSRCS += rzv_icu_cm33.c
+else
+# CR8-specific startup and IRQ files (default)
+CHIP_CSRCS += rzv_start.c
+CHIP_CSRCS += rzv_irq.c
+CHIP_CSRCS += rzv_icu.c
+endif
+
+# Common RZV files (used by all cores)
+CHIP_CSRCS += rzv_clock.c
+CHIP_CSRCS += rzv_gpio.c
+CHIP_CSRCS += rzv_lowputc.c
+CHIP_CSRCS += rzv_memmng.c
+CHIP_CSRCS += rzv_timerisr.c
+CHIP_CSRCS += rzv_serial.c
+
+# SCIF UART driver
+ifeq ($(CONFIG_RZV_UART_SCIF),y)
+CHIP_CSRCS += rzv_scif.c
+endif
+
+# ADC driver
+ifeq ($(CONFIG_RZV_ADC),y)
+CHIP_CSRCS += rzv_adc.c
+endif
+
+# I2C driver (RIIC)
+ifeq ($(CONFIG_RZV_I2C),y)
+CHIP_CSRCS += rzv_i2c.c
+endif
+
+# DMAC driver
+ifeq ($(CONFIG_RZV_DMA),y)
+CHIP_CSRCS += rzv_dmac.c
+endif
+
+
+# SPI driver
+ifeq ($(CONFIG_RZV_SPI),y)
+CHIP_CSRCS += rzv_spi.c
+endif
+
+# SCI SPI driver (SPI mode) — 4-file split mirroring sci_i2c layout
+ifeq ($(CONFIG_RZV_SCI_SPI),y)
+CHIP_CSRCS += rzv_sci_spi.c rzv_sci_spi_isr.c rzv_sci_spi_clock.c
+endif
+
+# SCI I2C driver (Simple-I2C master mode)
+ifeq ($(CONFIG_RZV_SCI_I2C),y)
+CHIP_CSRCS += rzv_sci_i2c.c rzv_sci_i2c_isr.c rzv_sci_i2c_clock.c
+endif
+
+# PWM driver
+ifeq ($(CONFIG_RZV_PWM),y)
+CHIP_CSRCS += rzv_gpt.c
+endif
+
+# POEG (Port Output Enable for GPT) — optional, opt-in via CONFIG_RZV_POEG
+ifeq ($(CONFIG_RZV_POEG),y)
+CHIP_CSRCS += rzv_poeg.c
+endif
+
+# Timer driver
+ifeq ($(CONFIG_RZV_GTM),y)
+CHIP_CSRCS += rzv_gtm.c
+endif
+
+# PX4 High-Resolution Timer (HRT) shim — backed by GTM7 in free-run mode
+ifeq ($(CONFIG_RZV_HRT),y)
+CHIP_CSRCS += rzv_hrt.c
+endif
+
+# OpenAMP/RPMsg/IPCC support
+ifeq ($(CONFIG_RZV_OPENAMP),y)
+CHIP_CSRCS += rzv_openamp.c
+CHIP_CSRCS += rzv_rproc.c
+CHIP_CSRCS += rzv_rpmsg.c
+CHIP_CSRCS += rzv_ipc.c
+endif
+
+ifeq ($(CONFIG_RZV_IPC_IPCC),y)
+CHIP_CSRCS += rzv_ipc_ipcc.c
+endif
+
+# Raw MHU+SHM IPCC lower half (CR8↔CR8, CR8↔CM33)
+ifeq ($(CONFIG_RZV_IPC_RAW),y)
+CHIP_CSRCS += rzv_mhu_core.c
+CHIP_CSRCS += rzv_ipc_raw.c
+endif
+
+# MPU region table
+ifeq ($(CONFIG_RZV_MPU_PORT_FSP),y)
+CHIP_CSRCS += rzv_mpu_regions.c
+endif
+
+# Ethernet driver
+ifeq ($(CONFIG_RZV_ETHERNET),y)
+CHIP_CSRCS += rzv_ether.c rzv_ether_phy.c
+endif
+
+# Watchdog Timer driver
+ifeq ($(CONFIG_RZV_WDT),y)
+CHIP_CSRCS += rzv_wdt.c
+endif
+
+# CAN-FD driver
+ifeq ($(CONFIG_RZV_CANFD),y)
+CHIP_CSRCS += rzv_canfd.c
+endif
+
+# IDLE task custom
+#ifeq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
+CHIP_CSRCS += rzv_idle.c
+#endif
+
+# SDHI (SD/eMMC) driver
+ifeq ($(CONFIG_RZV_SDHI),y)
+CHIP_CSRCS += rzv_sdhi.c
+endif

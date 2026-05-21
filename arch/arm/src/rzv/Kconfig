@@ -1,0 +1,1749 @@
+#
+# RZV2H MPU Configuration Options
+#
+
+comment "RZV2H MPU Selection"
+
+choice
+   prompt "RZV2H Chip Selection"
+   default ARCH_CHIP_R9A09G057
+   depends on ARCH_CHIP_RZV
+
+config ARCH_CHIP_R9A09G057
+   bool "R9A09G057 (BGA324)"
+   select RZV_FAMILY
+   select RZV2H_GROUP
+   select RZV_HAVE_SCIF0_UART
+   select RZV_HAVE_SCIF1_UART
+   select RZV_HAVE_SCIF2_UART
+   select RZV_HAVE_SCIF3_UART
+   select RZV_HAVE_SCIF4_UART
+   select RZV_HAVE_SCI0
+   select RZV_HAVE_SCI1
+   select RZV_HAVE_SCI2
+   select RZV_HAVE_SCI3
+   select RZV_HAVE_I2C0
+   select RZV_HAVE_I2C1
+   select RZV_HAVE_I2C2
+   select RZV_HAVE_I2C3
+   select RZV_HAVE_DMAC
+   select RZV_HAVE_SPI0
+   select RZV_HAVE_SPI1
+   select RZV_HAVE_SPI2
+   select RZV_HAVE_CAN0
+   select RZV_HAVE_CAN1
+   select RZV_HAVE_ETHERC_MII
+   select RZV_HAVE_ETHERC_RMII
+   select RZV_HAVE_USBFS
+   select RZV_HAVE_OSPI
+   select RZV_HAVE_SSIE
+   select RZV_HAVE_GTM
+   select RZV_HAVE_GTM0
+   select RZV_HAVE_GTM1
+   select RZV_HAVE_GTM2
+   select RZV_HAVE_GTM3
+   select RZV_HAVE_GTM4
+   select RZV_HAVE_GTM5
+   select RZV_HAVE_GTM6
+   select RZV_HAVE_GTM7
+   select RZV_HAVE_OSTM
+   select RZV_HAVE_OSTM0
+   select RZV_HAVE_OSTM1
+   select RZV_HAVE_OSTM2
+   select RZV_HAVE_WDT
+   select RZV_HAVE_ADC12
+   select RZV_HAVE_DAC12
+   select RZV_HAVE_ACMPHS
+   select RZV_HAVE_GPT
+   select RZV_HAVE_GPT0
+   select RZV_HAVE_GPT1
+   select RZV_HAVE_GPT2
+   select RZV_HAVE_GPT3
+   select RZV_HAVE_GPT4
+   select RZV_HAVE_GPT5
+   select RZV_HAVE_GPT6
+   select RZV_HAVE_GPT7
+   select RZV_HAVE_GPT8
+   select RZV_HAVE_GPT9
+   select RZV_HAVE_GPT10
+   select RZV_HAVE_GPT11
+
+endchoice
+
+# RZV2H Group Configuration
+config RZV2H_GROUP
+   bool
+   default y
+   help
+     Enables the RZV2H group of features and peripherals.
+     This is required for all RZV2H configurations.
+
+config RZV_FAMILY
+   bool
+   default y
+   ---help---
+     RZV family of Renesas MPUs
+
+if !RZV2H_BUILD_CM33
+# Cortex-R8 configuration (CR8_0/CR8_1 cores)
+
+config ARCH_CORTEXR8_SELECTED
+   bool
+   default y
+   select ARCH_CORTEXR8
+   select ARCH_HAVE_FPU
+   select ARCH_HAVE_THUMB
+   select ARCH_HAVE_DPFPU
+   select ARCH_HAVE_MPU
+   select ARMV7R_MEMINIT
+
+endif # !RZV2H_BUILD_CM33
+
+if RZV2H_BUILD_CM33
+# Cortex-M33 configuration
+
+config ARCH_CORTEXM33_SELECTED
+   bool
+   default y
+   select ARCH_CORTEXM33
+   select ARCH_HAVE_FPU
+   select ARCH_HAVE_DPFPU
+   select ARMV8M_HAVE_ICACHE
+   select ARMV8M_HAVE_DCACHE
+   select ARM_HAVE_MPU_UNIFIED
+
+endif # RZV2H_BUILD_CM33
+
+# Core Selection (must be choice block for mutual exclusion)
+choice
+    prompt "RZV2H Core Selection"
+    default RZV2H_BUILD_CR8_0
+
+config RZV2H_BUILD_CR8_0
+    bool "Build for CR8_0 core"
+    help
+      Build for the CR8_0 core of the RZV2H.
+      This is the default core for the RDK-RZV2H board.
+      Uses Cortex-R8 (ARMv7-R) architecture.
+
+config RZV2H_BUILD_CR8_1
+    bool "Build for CR8_1 core"
+    help
+      Build for the CR8_1 core of the RZV2H.
+      This is the secondary core for the RDK-RZV2H board.
+      Uses Cortex-R8 (ARMv7-R) architecture.
+
+config RZV2H_BUILD_CM33
+    bool "Build for CM33 core"
+    help
+      Build for the CM33 core of the RZV2H.
+      This core is used for TrustZone security features and real-time control.
+      Uses Cortex-M33 (ARMv8-M) architecture with optional FPU and DSP.
+
+endchoice
+
+if RZV2H_BUILD_CM33
+
+config RZV2H_CM33_ATCM_SIZE
+   int "CM33 ATCM size (KB)"
+   default 128
+   help
+     Size of CM33 Tightly-Coupled Memory A (ATCM) in KB.
+     RZV2H CM33 has 128KB ATCM at 0x00000000.
+
+config RZV2H_CM33_BTCM_SIZE
+   int "CM33 BTCM size (KB)"
+   default 128
+   help
+     Size of CM33 Tightly-Coupled Memory B (BTCM) in KB.
+     RZV2H CM33 has 128KB BTCM at 0x20000000.
+
+config RZV2H_CM33_SRAM_BASE
+   hex "CM33 System RAM base address"
+   default 0x22000000
+   help
+     Base address of CM33 system RAM.
+     RZV2H allocates 512KB RAM for CM33 at 0x22000000.
+
+config RZV2H_CM33_SRAM_SIZE
+   int "CM33 System RAM size (KB)"
+   default 512
+   help
+     Size of CM33 system RAM in KB.
+
+endif # RZV2H_BUILD_CM33
+
+# Clock Configuration
+
+menu "RZV2H Clock Configuration"
+
+config RZV_CLOCK_CONFIG_ENABLE
+   bool "Enable custom clock configuration"
+   default n
+   ---help---
+     Enable custom clock configuration options. When disabled, the clock
+     system uses reset defaults which match the standard board configuration.
+
+config RZV_OSC_FREQUENCY
+   int "Main oscillator frequency (Hz)"
+   default 24000000
+   depends on RZV_CLOCK_CONFIG_ENABLE
+   ---help---
+     Main oscillator (OSC) frequency in Hz. Default is 24 MHz for RDK-RZV2H.
+
+config RZV_OSC2_FREQUENCY
+   int "Secondary oscillator frequency (Hz)"
+   default 4800000
+   depends on RZV_CLOCK_CONFIG_ENABLE
+   ---help---
+     Secondary oscillator (OSC2) frequency in Hz. Default is 4.8 MHz.
+
+config RZV_CLOCK_RETRY_COUNT
+   int "Clock operation retry count"
+   default 3
+   range 0 10
+   ---help---
+     Number of retry attempts for clock enable/disable and reset operations.
+     Set to 0 to disable retries. Default is 3 retries with exponential backoff.
+
+config RZV_CLOCK_ENABLE_TIMEOUT
+   int "Clock enable timeout (10us units)"
+   default 1000
+   range 100 10000
+   ---help---
+     Timeout for clock enable operations in 10-microsecond units.
+     Default is 1000 (10ms). Increase if clock enable operations timeout.
+
+config RZV_CLOCK_PLL_TIMEOUT
+   int "PLL lock timeout (10us units)"
+   default 10000
+   range 1000 100000
+   ---help---
+     Timeout for PLL lock operations in 10-microsecond units.
+     Default is 10000 (100ms). PLLs typically lock within a few milliseconds.
+
+config RZV_CLOCK_DEBUG
+   bool "Enable clock debug logging"
+   default n
+   depends on DEBUG_FEATURES
+   ---help---
+     Enable detailed debug logging for clock operations including register
+     dumps on failures. Useful for diagnosing clock configuration issues.
+
+config RZV_XTAL_FREQ
+   int "Main oscillator (XTAL/OSC) frequency override (Hz)"
+   default 24000000
+   ---help---
+     Main oscillator frequency in Hz.  Default is 24 MHz for RDK-RZV2H.
+     Override if your board uses a different crystal.
+     Consumed by RZV_MAIN_CLOCK_HZ in rzv_clock.h.
+     audit Low-14.
+
+config RZV_CPU_CLOCK_HZ
+   int "CR8 CPU clock frequency override (Hz)"
+   default 800000000
+   ---help---
+     Expected CR8 (I6CLK) frequency in Hz after bootloader configures
+     dividers.  Used as compile-time fallback when CDDIV readback is not
+     yet decoded.  PX4 HRT and USEC_PER_TICK depend on this being accurate.
+     Default: 800 MHz (I6CLK from PLLCLN/2).
+     audit Low-14 / High PX4 compatibility.
+
+config RZV_PCLK_0_HZ
+   int "P0CLK peripheral bus 0 frequency override (Hz)"
+   default 100000000
+   ---help---
+     Expected P0CLK frequency in Hz.  Used for SCI/SPI/I2C baud divisor
+     calculations.  Default: 100 MHz.
+     audit Low-14.
+
+config RZV_PCLK_5_HZ
+   int "P5CLK peripheral bus 5 frequency override (Hz)"
+   default 100000000
+   ---help---
+     Expected P5CLK frequency in Hz.  Default: 100 MHz.
+     audit Low-14.
+
+config RZV_CLOCK_RESET_ASSERT_TIMEOUT
+   int "Reset assert timeout (10us units)"
+   default 500
+   range 50 5000
+   ---help---
+     Timeout for reset assert operations in 10-microsecond units.
+     Default is 500 (5ms).
+     audit Medium-11 per-op timeouts.
+
+config RZV_CLOCK_RESET_RELEASE_TIMEOUT
+   int "Reset release timeout (10us units)"
+   default 1000
+   range 100 10000
+   ---help---
+     Timeout for reset release (deassert) operations in 10-microsecond units.
+     Default is 1000 (10ms).
+     audit Medium-11 per-op timeouts.
+
+config RZV_INIT_PLLDDR
+   bool "Initialize PLLDDR0/1 from NuttX (expert)"
+   default n
+   ---help---
+     Enable NuttX-side initialization of PLLDDR0 and PLLDDR1.
+     WARNING: DDR PLLs are normally initialized by TF-A before NuttX boots.
+     Enabling this when TF-A already initialized the DDR PLLs will cause
+     DDR instability.  Only enable on platforms where TF-A does NOT init DDR.
+     audit Low-13.
+
+endmenu
+
+# Peripheral availability
+config RZV_HAVE_SCIF0_UART
+   bool
+   default n
+
+config RZV_HAVE_SCIF1_UART
+   bool
+   default n
+
+config RZV_HAVE_SCIF2_UART
+   bool
+   default n
+
+config RZV_HAVE_SCIF3_UART
+   bool
+   default n
+
+config RZV_HAVE_SCIF4_UART
+   bool
+   default n
+
+config RZV_HAVE_SCI0
+   bool
+   default n
+
+config RZV_HAVE_SCI1
+   bool
+   default n
+
+config RZV_HAVE_SCI2
+   bool
+   default n
+
+config RZV_HAVE_SCI3
+   bool
+   default n
+
+config RZV_HAVE_I2C0
+   bool
+   default n
+
+config RZV_HAVE_I2C1
+   bool
+   default n
+
+config RZV_HAVE_I2C2
+   bool
+   default n
+
+config RZV_HAVE_I2C3
+   bool
+   default n
+
+config RZV_HAVE_DMAC
+   bool
+   default n
+
+config RZV_HAVE_SPI0
+   bool
+   default n
+
+config RZV_HAVE_SPI1
+   bool
+   default n
+
+config RZV_HAVE_SPI2
+   bool
+   default n
+
+config RZV_HAVE_CAN0
+   bool
+   default n
+
+config RZV_HAVE_CAN1
+   bool
+   default n
+
+config RZV_HAVE_ETHERC_MII
+   bool
+   default n
+
+config RZV_HAVE_ETHERC_RMII
+   bool
+   default n
+
+config RZV_HAVE_USBFS
+   bool
+   default n
+
+config RZV_HAVE_OSPI
+   bool
+   default n
+
+config RZV_HAVE_SSIE
+   bool
+   default n
+
+config RZV_HAVE_GTM
+   bool
+   default n
+
+config RZV_HAVE_GTM0
+   bool
+   default n
+
+config RZV_HAVE_GTM1
+   bool
+   default n
+
+config RZV_HAVE_GTM2
+   bool
+   default n
+
+config RZV_HAVE_GTM3
+   bool
+   default n
+
+config RZV_HAVE_GTM4
+   bool
+   default n
+
+config RZV_HAVE_GTM5
+   bool
+   default n
+
+config RZV_HAVE_GTM6
+   bool
+   default n
+
+config RZV_HAVE_GTM7
+   bool
+   default n
+
+config RZV_HAVE_GPT
+   bool
+   default n
+
+config RZV_HAVE_GPT0
+   bool
+   default n
+
+config RZV_HAVE_GPT1
+   bool
+   default n
+
+config RZV_HAVE_GPT2
+   bool
+   default n
+
+config RZV_HAVE_GPT3
+   bool
+   default n
+
+config RZV_HAVE_GPT4
+   bool
+   default n
+
+config RZV_HAVE_GPT5
+   bool
+   default n
+
+config RZV_HAVE_GPT6
+   bool
+   default n
+
+config RZV_HAVE_GPT7
+   bool
+   default n
+
+config RZV_HAVE_GPT8
+   bool
+   default n
+
+config RZV_HAVE_GPT9
+   bool
+   default n
+
+config RZV_HAVE_GPT10
+   bool
+   default n
+
+config RZV_HAVE_OSTM
+   bool
+   default n
+
+config RZV_HAVE_OSTM0
+   bool
+   default n
+
+config RZV_HAVE_OSTM1
+   bool
+   default n
+
+config RZV_HAVE_OSTM2
+   bool
+   default n
+
+config RZV_HAVE_WDT
+   bool
+   default n
+
+config RZV_HAVE_ADC12
+   bool
+   default n
+
+config RZV_HAVE_DAC12
+   bool
+   default n
+
+config RZV_HAVE_ACMPHS
+   bool
+   default n
+
+# RZV peripheral drivers
+
+comment "RZV Peripheral Selection"
+
+# Serial Communication Interface (SCI) - UART mode
+
+config RZV_UART_SCI
+   bool
+   default n
+
+config RZV_SCI0
+   bool "SCI0 UART"
+   default n
+   select RZV_UART_SCI
+   select SCI0_SERIALDRIVER
+   ---help---
+     Enable SCI0 in UART mode.
+
+config RZV_SCI1
+   bool "SCI1 UART"
+   default n
+   select RZV_UART_SCI
+   select SCI1_SERIALDRIVER
+   ---help---
+     Enable SCI1 in UART mode.
+
+config RZV_SCI2
+   bool "SCI2 UART"
+   default n
+   select RZV_UART_SCI
+   select SCI2_SERIALDRIVER
+   ---help---
+     Enable SCI2 in UART mode.
+
+config RZV_SCI3
+   bool "SCI3 UART"
+   default n
+   select RZV_UART_SCI
+   select SCI3_SERIALDRIVER
+   ---help---
+     Enable SCI3 in UART mode.
+
+config RZV_SCI4
+   bool "SCI4 UART"
+   default n
+   select RZV_UART_SCI
+   select SCI4_SERIALDRIVER
+   ---help---
+     Enable SCI4 in UART mode.
+
+config RZV_SCI5
+   bool "SCI5 UART"
+   default n
+   select RZV_UART_SCI
+   select SCI5_SERIALDRIVER
+   ---help---
+     Enable SCI5 in UART mode.
+
+config RZV_SCI6
+   bool "SCI6 UART"
+   default n
+   select RZV_UART_SCI
+   select SCI6_SERIALDRIVER
+   ---help---
+     Enable SCI6 in UART mode.
+
+config RZV_SCI7
+   bool "SCI7 UART"
+   default n
+   select RZV_UART_SCI
+   select SCI7_SERIALDRIVER
+   ---help---
+     Enable SCI7 in UART mode.
+
+config RZV_SCI8
+   bool "SCI8 UART"
+   default n
+   select RZV_UART_SCI
+   select SCI8_SERIALDRIVER
+   ---help---
+     Enable SCI8 in UART mode.
+
+config RZV_SCI9
+   bool "SCI9 UART"
+   default n
+   select RZV_UART_SCI
+   select SCI9_SERIALDRIVER
+   ---help---
+     Enable SCI9 in UART mode.
+
+# SCI FIFO Configuration
+
+config RZV_SCI_FIFO_MODE
+   bool "Enable SCI FIFO mode"
+   default y
+   depends on RZV_UART_SCI
+   ---help---
+     Enable 16-byte FIFO mode for SCI-B UART channels.
+     This significantly reduces interrupt load at high baud rates.
+
+     Performance improvement:
+     - Without FIFO: ~92,160 interrupts/sec at 921600 baud
+     - With FIFO: ~5,760 interrupts/sec (16x reduction)
+
+config RZV_SCI_FIFO_RX_TRIGGER
+   int "RX FIFO trigger level"
+   default 1
+   range 1 15
+   depends on RZV_SCI_FIFO_MODE
+   ---help---
+     RX interrupt triggers when FIFO contains >= this many bytes.
+     Lower values = lower latency, higher interrupt rate.
+     Higher values = fewer interrupts, may increase latency.
+
+     Recommended: 1 for low latency (console), 8-15 for throughput
+
+config RZV_SCI_FIFO_TX_TRIGGER
+   int "TX FIFO trigger level"
+   default 15
+   range 0 15
+   depends on RZV_SCI_FIFO_MODE
+   ---help---
+     TX interrupt triggers when FIFO has <= this many bytes free.
+     Higher values = fewer interrupts, better throughput.
+
+     Recommended: 15 (maximum efficiency)
+
+config RZV_SERIAL_RXDMA_BUFFER_SIZE
+   int "RX DMA buffer size"
+   default 256
+   range 64 4096
+   depends on SERIAL_RXDMA
+   ---help---
+     Size of circular buffer for RX DMA transfers.
+     Larger buffers reduce DMA interrupt frequency but increase
+     memory usage and potential latency.
+
+     Recommended: 256 (balances performance and memory)
+
+# Serial Communications Interface with FIFO (SCIF)
+# Backed by rzv_scif.c (FSP-aligned port). Enables all SCIF channels
+# through CONFIG_RZV_UART_SCIF. Mutually compatible at file level with
+# RZV_UART_SCI but typically only one is selected as the console.
+
+config RZV_UART_SCIF
+   bool
+   default n
+
+config RZV_SCIF0
+   bool "SCIF0"
+   default n
+   depends on RZV_HAVE_SCIF0_UART
+   select RZV_UART_SCIF
+
+config RZV_SCIF1
+   bool "SCIF1"
+   default n
+   depends on RZV_HAVE_SCIF1_UART
+   select RZV_UART_SCIF
+
+config RZV_SCIF2
+   bool "SCIF2"
+   default n
+   depends on RZV_HAVE_SCIF2_UART
+   select RZV_UART_SCIF
+
+config RZV_SCIF3
+   bool "SCIF3"
+   default n
+   depends on RZV_HAVE_SCIF3_UART
+   select RZV_UART_SCIF
+
+config RZV_SCIF4
+   bool "SCIF4"
+   default n
+   depends on RZV_HAVE_SCIF4_UART
+   select RZV_UART_SCIF
+
+# Per-channel SCIF runtime options (consumed by rzv_scif.c)
+
+if RZV_SCIF0
+config SCIF0_SERIAL_CONSOLE
+   bool "Use SCIF0 as serial console"
+   default n
+   select SERIAL_CONSOLE
+config SCIF0_RXBUFSIZE
+   int "SCIF0 RX buffer size"
+   default 256
+config SCIF0_TXBUFSIZE
+   int "SCIF0 TX buffer size"
+   default 256
+config SCIF0_BAUD
+   int "SCIF0 baud rate"
+   default 115200
+config SCIF0_BITS
+   int "SCIF0 data bits"
+   default 8
+config SCIF0_PARITY
+   int "SCIF0 parity (0=none, 1=odd, 2=even)"
+   default 0
+   range 0 2
+config SCIF0_2STOP
+   int "SCIF0 two stop bits"
+   default 0
+endif
+
+if RZV_SCIF1
+config SCIF1_SERIAL_CONSOLE
+   bool "Use SCIF1 as serial console"
+   default n
+   select SERIAL_CONSOLE
+config SCIF1_RXBUFSIZE
+   int "SCIF1 RX buffer size"
+   default 256
+config SCIF1_TXBUFSIZE
+   int "SCIF1 TX buffer size"
+   default 256
+config SCIF1_BAUD
+   int "SCIF1 baud rate"
+   default 115200
+config SCIF1_BITS
+   int "SCIF1 data bits"
+   default 8
+config SCIF1_PARITY
+   int "SCIF1 parity (0=none, 1=odd, 2=even)"
+   default 0
+   range 0 2
+config SCIF1_2STOP
+   int "SCIF1 two stop bits"
+   default 0
+endif
+
+if RZV_SCIF2
+config SCIF2_SERIAL_CONSOLE
+   bool "Use SCIF2 as serial console"
+   default n
+   select SERIAL_CONSOLE
+config SCIF2_RXBUFSIZE
+   int "SCIF2 RX buffer size"
+   default 256
+config SCIF2_TXBUFSIZE
+   int "SCIF2 TX buffer size"
+   default 256
+config SCIF2_BAUD
+   int "SCIF2 baud rate"
+   default 115200
+config SCIF2_BITS
+   int "SCIF2 data bits"
+   default 8
+config SCIF2_PARITY
+   int "SCIF2 parity (0=none, 1=odd, 2=even)"
+   default 0
+   range 0 2
+config SCIF2_2STOP
+   int "SCIF2 two stop bits"
+   default 0
+endif
+
+if RZV_SCIF3
+config SCIF3_SERIAL_CONSOLE
+   bool "Use SCIF3 as serial console"
+   default n
+   select SERIAL_CONSOLE
+config SCIF3_RXBUFSIZE
+   int "SCIF3 RX buffer size"
+   default 256
+config SCIF3_TXBUFSIZE
+   int "SCIF3 TX buffer size"
+   default 256
+config SCIF3_BAUD
+   int "SCIF3 baud rate"
+   default 115200
+config SCIF3_BITS
+   int "SCIF3 data bits"
+   default 8
+config SCIF3_PARITY
+   int "SCIF3 parity (0=none, 1=odd, 2=even)"
+   default 0
+   range 0 2
+config SCIF3_2STOP
+   int "SCIF3 two stop bits"
+   default 0
+endif
+
+if RZV_SCIF4
+config SCIF4_SERIAL_CONSOLE
+   bool "Use SCIF4 as serial console"
+   default n
+   select SERIAL_CONSOLE
+config SCIF4_RXBUFSIZE
+   int "SCIF4 RX buffer size"
+   default 256
+config SCIF4_TXBUFSIZE
+   int "SCIF4 TX buffer size"
+   default 256
+config SCIF4_BAUD
+   int "SCIF4 baud rate"
+   default 115200
+config SCIF4_BITS
+   int "SCIF4 data bits"
+   default 8
+config SCIF4_PARITY
+   int "SCIF4 parity (0=none, 1=odd, 2=even)"
+   default 0
+   range 0 2
+config SCIF4_2STOP
+   int "SCIF4 two stop bits"
+   default 0
+endif
+
+config RZV_I2C
+   bool
+   default n
+   select I2C
+
+config RZV_I2C0
+   bool "I2C0 (RIIC0)"
+   default n
+   depends on RZV_HAVE_I2C0
+   select RZV_I2C
+
+config RZV_I2C1
+   bool "I2C1 (RIIC1)"
+   default n
+   depends on RZV_HAVE_I2C1
+   select RZV_I2C
+
+config RZV_I2C2
+   bool "I2C2 (RIIC2)"
+   default n
+   depends on RZV_HAVE_I2C2
+   select RZV_I2C
+
+config RZV_I2C3
+   bool "I2C3 (RIIC3)"
+   default n
+   depends on RZV_HAVE_I2C3
+   select RZV_I2C
+
+config RZV_SPI
+   bool
+   default n
+
+config RZV_SPI0
+   bool "SPI0"
+   default n
+   depends on RZV_HAVE_SPI0
+   select RZV_SPI
+
+config RZV_SPI1
+   bool "SPI1"
+   default n
+   depends on RZV_HAVE_SPI1
+   select RZV_SPI
+
+config RZV_SPI2
+   bool "SPI2"
+   default n
+   depends on RZV_HAVE_SPI2
+   select RZV_SPI
+
+# Serial Communication Interface (SCI) - SPI mode
+
+config RZV_SCI_SPI
+   bool
+   default n
+
+config RZV_SCI0_SPI
+   bool "SCI0 SPI mode"
+   default n
+   select RZV_SCI_SPI
+   select SPI
+   ---help---
+      Enable SPI mode on SCI0. Note: SCI0 can be used as UART, I2C, or SPI,
+      but not multiple modes simultaneously.
+
+config RZV_SCI1_SPI
+   bool "SCI1 SPI mode"
+   default n
+   select RZV_SCI_SPI
+   select SPI
+   ---help---
+      Enable SPI mode on SCI1. Note: SCI1 can be used as UART, I2C, or SPI,
+      but not multiple modes simultaneously.
+
+config RZV_SCI2_SPI
+   bool "SCI2 SPI mode"
+   default n
+   select RZV_SCI_SPI
+   select SPI
+   ---help---
+      Enable SPI mode on SCI2. Note: SCI2 can be used as UART, I2C, or SPI,
+      but not multiple modes simultaneously.
+
+config RZV_SCI3_SPI
+   bool "SCI3 SPI mode"
+   default n
+   select RZV_SCI_SPI
+   select SPI
+   ---help---
+      Enable SPI mode on SCI3. Note: SCI3 can be used as UART, I2C, or SPI,
+      but not multiple modes simultaneously.
+
+# Serial Communication Interface (SCI) - Simple I2C mode
+
+menuconfig RZV_SCI_I2C
+   bool "SCI-as-I2C master driver"
+   default n
+   select I2C
+   ---help---
+     Enables RZ/V2H SCI-B block in Simple-I2C master mode.
+     Each channel is mutually exclusive with UART (RZV_SCIn) and
+     SPI (RZV_SCIn_SPI) — enforced at config time via depends on.
+     CPU-mode only (no DMAC). Slave mode not supported.
+
+if RZV_SCI_I2C
+
+config RZV_SCI0_I2C
+   bool "SCI0 as I2C master"
+   default n
+   depends on !RZV_SCI0 && !RZV_SCI0_SPI
+   ---help---
+     Enable SCI0 in Simple-I2C master mode.
+     Mutually exclusive with RZV_SCI0 (UART) and RZV_SCI0_SPI.
+     Board must define BOARD_SCI0_I2C_SDA_GPIO / BOARD_SCI0_I2C_SCL_GPIO.
+
+config RZV_SCI1_I2C
+   bool "SCI1 as I2C master"
+   default n
+   depends on !RZV_SCI1 && !RZV_SCI1_SPI
+   ---help---
+     Enable SCI1 in Simple-I2C master mode.
+     Mutually exclusive with RZV_SCI1 (UART) and RZV_SCI1_SPI.
+     Board must define BOARD_SCI1_I2C_SDA_GPIO / BOARD_SCI1_I2C_SCL_GPIO.
+
+config RZV_SCI2_I2C
+   bool "SCI2 as I2C master"
+   default n
+   depends on !RZV_SCI2 && !RZV_SCI2_SPI
+   ---help---
+     Enable SCI2 in Simple-I2C master mode.
+     Mutually exclusive with RZV_SCI2 (UART) and RZV_SCI2_SPI.
+     Board must define BOARD_SCI2_I2C_SDA_GPIO / BOARD_SCI2_I2C_SCL_GPIO.
+
+config RZV_SCI3_I2C
+   bool "SCI3 as I2C master"
+   default n
+   depends on !RZV_SCI3 && !RZV_SCI3_SPI
+   ---help---
+     Enable SCI3 in Simple-I2C master mode.
+     Mutually exclusive with RZV_SCI3 (UART) and RZV_SCI3_SPI.
+     Board must define BOARD_SCI3_I2C_SDA_GPIO / BOARD_SCI3_I2C_SCL_GPIO.
+
+endif # RZV_SCI_I2C
+
+config RZV_DMA
+   bool "DMA support"
+   default n
+   depends on RZV_HAVE_DMAC
+   select ARCH_DMA
+
+config RZV_DMAC
+   bool "DMAC_B (Direct Memory Access Controller)"
+   default n
+   depends on RZV_HAVE_DMAC
+   select ARCH_DMA
+   ---help---
+     Enable support for the RZV2H DMAC_B (Direct Memory Access Controller).
+     The DMAC_B provides 80 DMA channels (5 units x 16 channels) supporting
+     register mode and link mode transfers with hardware and software triggers.
+     Features include:
+     - Transfer sizes from 1 to 128 bytes
+     - Address increment/fixed modes
+     - Hardware trigger via ELC events
+     - Interrupt-driven operation
+     - Priority control per channel
+
+if RZV_DMAC
+
+config RZV_DMAC_DEBUG
+   bool "DMAC debug output"
+   default n
+   depends on DEBUG_FEATURES
+   ---help---
+     Enable DMAC debug output. This will provide detailed information
+     about DMA transfers, channel configuration, and error conditions.
+
+config RZV_DMAC_REGISTER_LEVEL_DEBUG
+   bool "DMAC register-level debug"
+   default n
+   depends on RZV_DMAC_DEBUG
+   ---help---
+     Enable detailed register-level debugging for DMAC operations.
+     This includes register reads/writes and status monitoring.
+
+comment "DMAC Channel Assignments for Peripherals"
+
+config RZV_DMAC_UART0_RX_CHANNEL
+   int "UART0 RX DMA channel"
+   default -1
+   range -1 79
+   ---help---
+     DMA channel for UART0 receive operations (-1 = no DMA).
+     Valid channels: 0-79 (5 DMAC units × 16 channels each).
+
+config RZV_DMAC_UART0_TX_CHANNEL
+   int "UART0 TX DMA channel"
+   default -1
+   range -1 79
+   ---help---
+     DMA channel for UART0 transmit operations (-1 = no DMA).
+
+config RZV_DMAC_UART1_RX_CHANNEL
+   int "UART1 RX DMA channel"
+   default -1
+   range -1 79
+   ---help---
+     DMA channel for UART1 receive operations (-1 = no DMA).
+
+config RZV_DMAC_UART1_TX_CHANNEL
+   int "UART1 TX DMA channel"
+   default -1
+   range -1 79
+   ---help---
+     DMA channel for UART1 transmit operations (-1 = no DMA).
+
+config RZV_DMAC_UART2_RX_CHANNEL
+   int "UART2 RX DMA channel"
+   default -1
+   range -1 79
+   ---help---
+     DMA channel for UART2 receive operations (-1 = no DMA).
+
+config RZV_DMAC_UART2_TX_CHANNEL
+   int "UART2 TX DMA channel"
+   default -1
+   range -1 79
+   ---help---
+     DMA channel for UART2 transmit operations (-1 = no DMA).
+
+config RZV_DMAC_I2C0_CHANNEL
+   int "I2C0 DMA channel"
+   default -1
+   range -1 79
+   ---help---
+     DMA channel for I2C0 operations (-1 = no DMA).
+
+config RZV_DMAC_I2C1_CHANNEL
+   int "I2C1 DMA channel"
+   default -1
+   range -1 79
+   ---help---
+     DMA channel for I2C1 operations (-1 = no DMA).
+
+config RZV_DMAC_I2C2_CHANNEL
+   int "I2C2 DMA channel"
+   default -1
+   range -1 79
+   ---help---
+     DMA channel for I2C2 operations (-1 = no DMA).
+
+config RZV_DMAC_SPI0_RX_CHANNEL
+   int "SPI0 RX DMA channel"
+   default -1
+   range -1 79
+   ---help---
+     DMA channel for SPI0 receive operations (-1 = no DMA).
+
+config RZV_DMAC_SPI0_TX_CHANNEL
+   int "SPI0 TX DMA channel"
+   default -1
+   range -1 79
+   ---help---
+     DMA channel for SPI0 transmit operations (-1 = no DMA).
+
+config RZV_DMAC_SPI1_RX_CHANNEL
+   int "SPI1 RX DMA channel"
+   default -1
+   range -1 79
+   ---help---
+     DMA channel for SPI1 receive operations (-1 = no DMA).
+
+config RZV_DMAC_SPI1_TX_CHANNEL
+   int "SPI1 TX DMA channel"
+   default -1
+   range -1 79
+   ---help---
+     DMA channel for SPI1 transmit operations (-1 = no DMA).
+
+config RZV_DMAC_ADC_CHANNEL
+   int "ADC DMA channel"
+   default -1
+   range -1 79
+   ---help---
+     DMA channel for ADC data transfer (-1 = no DMA).
+
+config RZV_DMAC_SDHI_CHANNEL
+   int "SDHI DMA channel"
+   default -1
+   range -1 79
+   ---help---
+     DMA channel for SDHI (SD card) operations (-1 = no DMA).
+     Recommended: Use DMAC0 channels (0-15) for high-speed operations.
+
+endif # RZV_DMAC
+
+# CONFIG_RZV_DTC intentionally removed.
+# DTC peripheral does NOT exist on RZ/V2H (R9A09G057H). There is no
+# DTC iodefine for R9A09G057H. The old RZV_DTC_BASE (0x11400400) overlapped
+# DMAC0 group-1 registers and would have caused silent register corruption.
+
+config RZV_TIMER
+   bool
+   default n
+
+config RZV_OSTM0
+   bool "OS Timer 0"
+   default n
+   depends on RZV_HAVE_OSTM0
+   select RZV_TIMER
+
+config RZV_OSTM1
+   bool "OS Timer 1"
+   default n
+   depends on RZV_HAVE_OSTM1
+   select RZV_TIMER
+
+config RZV_OSTM2
+   bool "OS Timer 2"
+   default n
+   depends on RZV_HAVE_OSTM2
+   select RZV_TIMER
+
+# GTM (General Timer Module / OSTM) Configuration
+
+config RZV_GTM
+   bool "General Timer Module (GTM/OSTM)"
+   default n
+   depends on RZV_HAVE_GTM
+   select TIMER
+   ---help---
+     Enable support for the RZV General Timer Module (GTM/OSTM).
+     This is a 32-bit free-running timer suitable for high-resolution
+     timing applications like PX4 HRT (High Resolution Timer).
+
+config RZV_GTM_CLOCK_FREQUENCY
+   int "GTM clock frequency (Hz)"
+   default 200000000
+   depends on RZV_GTM
+   ---help---
+     The GTM clock frequency in Hz. Default is 200 MHz.
+
+config RZV_GTM0_TIMER
+   bool "GTM0 Timer"
+   default n
+   depends on RZV_HAVE_GTM0 && RZV_GTM
+   ---help---
+     Enable GTM0 as a timer device.
+
+config RZV_GTM1_TIMER
+   bool "GTM1 Timer"
+   default n
+   depends on RZV_HAVE_GTM1 && RZV_GTM
+   ---help---
+     Enable GTM1 as a timer device.
+
+config RZV_GTM2_TIMER
+   bool "GTM2 Timer"
+   default n
+   depends on RZV_HAVE_GTM2 && RZV_GTM
+   ---help---
+     Enable GTM2 as a timer device.
+
+config RZV_GTM3_TIMER
+   bool "GTM3 Timer"
+   default n
+   depends on RZV_HAVE_GTM3 && RZV_GTM
+   ---help---
+     Enable GTM3 as a timer device.
+
+config RZV_GTM4_TIMER
+   bool "GTM4 Timer"
+   default n
+   depends on RZV_HAVE_GTM4 && RZV_GTM
+   ---help---
+     Enable GTM4 as a timer device.
+
+config RZV_GTM5_TIMER
+   bool "GTM5 Timer"
+   default n
+   depends on RZV_HAVE_GTM5 && RZV_GTM
+   ---help---
+     Enable GTM5 as a timer device.
+
+config RZV_GTM6_TIMER
+   bool "GTM6 Timer"
+   default n
+   depends on RZV_HAVE_GTM6 && RZV_GTM
+   ---help---
+     Enable GTM6 as a timer device.
+
+config RZV_GTM7_TIMER
+   bool "GTM7 Timer"
+   default n
+   depends on RZV_HAVE_GTM7 && RZV_GTM && !RZV_HRT
+   ---help---
+     Enable GTM7 as a timer device.
+     Cannot be enabled together with RZV_HRT (GTM7 channel conflict).
+
+config RZV_HRT
+   bool "PX4 High-Resolution Timer (HRT) via GTM7"
+   default n
+   depends on RZV_HAVE_GTM7
+   ---help---
+     Enable the PX4 HRT shim backed by GTM7 in free-running mode.
+     GTM7 is reserved exclusively for HRT; do not enable RZV_GTM7_TIMER
+     at the same time (channel conflict).  P1CLK (100 MHz) gives 10 ns
+     resolution and ~42.9 s monotonic range per overflow epoch.
+
+menu "RZ/V2H OpenAMP/IPCC"
+
+config RZV_OPENAMP
+   bool "RZ/V2H CR8 OpenAMP/RPMsg transport"
+   default n
+   depends on !RZV2H_BUILD_CM33
+   select OPENAMP
+   select RPTUN
+   ---help---
+     Enable the RZ/V2H CR8 side OpenAMP/RPMsg transport using the
+     resource-table, vring, shared-memory, and MHU channel layout from the
+     Renesas reference design.
+
+config RZV_IPC_IPCC
+   bool "Expose RZ/V2H RPMsg transport as /dev/ipcc0"
+   default n
+   depends on RZV_OPENAMP
+   select IPCC
+   ---help---
+     Register a NuttX IPCC character driver lower half backed by the
+     RZ/V2H RPMsg endpoint named rpmsg-service-0.
+
+config RZV_RPMSG_RX_QUEUE_DEPTH
+   int "RZ/V2H RPMsg receive queue depth"
+   default 8
+   range 2 64
+   depends on RZV_OPENAMP
+   ---help---
+     Number of complete RPMsg packets queued by the CR8 endpoint before
+     user space reads from /dev/ipcc0.
+
+config RZV_IPCC_RXBUFSIZE
+   int "RZ/V2H buffered IPCC RX size"
+   default 2048
+   depends on RZV_IPC_IPCC && IPCC_BUFFERED
+
+config RZV_IPCC_TXBUFSIZE
+   int "RZ/V2H buffered IPCC TX size"
+   default 2048
+   depends on RZV_IPC_IPCC && IPCC_BUFFERED
+
+config RZV_MHU_DOMAIN_NS
+   bool
+   default y if !RZV_MHU_DOMAIN_S_CR8 && !RZV_MHU_DOMAIN_S_CM33
+   ---help---
+     Select the MHU Non-Secure register window (default; preserves existing
+     CA55 rptun behavior).
+
+config RZV_MHU_DOMAIN_S_CR8
+   bool "Use MHU Secure-CR8 register window"
+   default n
+   ---help---
+     Select the MHU Secure window accessible by CR8.  Only choose this if
+     TrustZone is configured and the NS window is not accessible from CR8.
+     Changing this affects ALL MHU consumers; use with care.
+
+config RZV_MHU_DOMAIN_S_CM33
+   bool "Use MHU Secure-CM33 register window"
+   default n
+   ---help---
+     Select the MHU Secure window accessible by CM33.  Only for CM33-side
+     builds where the NS window is inaccessible.
+
+config RZV_IPC_RAW
+   bool "RZ/V2H raw MHU+SHM IPCC lower half"
+   default n
+   select IPCC
+   ---help---
+     Enable the generic raw IPCC lower half driver backed by MHU doorbell
+     + shared-memory ring buffers.  Used by CR8↔CR8 (/dev/ipcc1) and
+     CR8↔CM33 (/dev/ipcc2) links.  No OpenAMP/virtio dependency.
+
+config RZV_IPC_RAW_RING_ENTRIES
+   int "Raw IPCC ring depth (entries per direction)"
+   default 16
+   range 4 256
+   depends on RZV_IPC_RAW
+   ---help---
+     Number of entries in each ring direction (TX and RX).
+     Must be a power of two.
+
+config RZV_IPC_RAW_ENTRY_SIZE
+   int "Raw IPCC ring entry payload size (bytes)"
+   default 64
+   range 16 512
+   depends on RZV_IPC_RAW
+   ---help---
+     Payload bytes per ring entry.  Round to cache-line multiple for
+     best cache-maintenance efficiency (recommend 64).
+
+config RZV_IPC_TX_TIMEOUT_MS
+   int "Raw IPCC TX-ACK timeout (ms, 0=infinite)"
+   default 100
+   depends on RZV_IPC_RAW
+   ---help---
+     Milliseconds to wait for peer TX-ACK before returning -ETIMEDOUT.
+     Set 0 for infinite wait (only safe for trusted peers like CR8_1).
+     CR8↔CM33 link always uses this timeout regardless of setting because
+     CM33 firmware may be absent.
+
+config RZV_IPC_CR8_CR8
+   bool "Instantiate /dev/ipcc1 for CR8_0 ↔ CR8_1"
+   default n
+   depends on RZV_IPC_RAW
+   ---help---
+     Register a raw IPCC character device at /dev/ipcc1 using MHU
+     channels 4/5 and DDR SHM at 0x43800000.
+
+config RZV_IPC_ROLE_INITIATOR
+   bool "This core is the ring initiator (zeros SHM on boot)"
+   default y
+   depends on RZV_IPC_CR8_CR8
+   ---help---
+     The initiator zeros the SHM ring headers on first open.  Only one
+     side must be initiator; the other must be responder.
+     CR8_0 = initiator (y), CR8_1 = responder (n).
+
+config RZV_IPC_CR8_CR8_LOOPBACK
+   bool "CR8_0 self-loopback test on /dev/ipccLB (no CR8_1 needed)"
+   default n
+   depends on RZV_IPC_CR8_CR8
+   ---help---
+     Wire MHU channel 8 TX back to channel 8 RX on CR8_0 alone.
+     Registers /dev/ipccLB.  Used to smoke-test the ring driver before
+     CR8_1 firmware is available.
+
+config RZV_IPC_CR8_CM33
+   bool "Instantiate /dev/ipcc2 for CR8_0 ↔ CM33"
+   default n
+   depends on RZV_IPC_RAW
+   ---help---
+     Register a raw IPCC character device at /dev/ipcc2 using MHU
+     channels 10/15 and DDR SHM at 0x43810000.  Send path times out
+     after CONFIG_RZV_IPC_TX_TIMEOUT_MS when CM33 firmware is absent.
+
+config RZV_MPU_PORT_FSP
+   bool "RZ/V2H CR8 MPU region table"
+   default y if RZV_IPC_RAW
+   depends on !RZV2H_BUILD_CM33
+   ---help---
+     Programme the Cortex-R8 MPU with the canonical Renesas region
+     table.  11 active regions per core covering ITCM, DTCM,
+     SRAM, peripheral, xSPI, DDR cacheable/non-cacheable, OpenAMP RSCTBL,
+     MHU SHMEM, and the 16 MiB VRING carveout (which also covers the IPC
+     raw SHM at 0x43800000).  No IPC-specific MPU region is needed.
+     Software cache ops in rzv_ipc_raw.c are retained for defence-in-depth.
+
+config RZV_MPU_CR8_CORE_NUM
+   int "CR8 core number for MPU table selection (0 or 1)"
+   default 0
+   range 0 1
+   depends on RZV_MPU_PORT_FSP
+   ---help---
+     Selects which MPU region table variant to use.  0 = CR8_0 addresses,
+     1 = CR8_1 addresses (SRAM cache/non-cache regions differ).
+
+endmenu
+
+config RZV_GPT
+   bool "General PWM Timer (GPT)"
+   default n
+   depends on RZV_HAVE_GPT
+   select PWM
+   ---help---
+     Enable support for the RZV General PWM Timer (GPT) peripheral.
+
+config RZV_PWM
+   bool "GPT PWM support"
+   default n
+   depends on RZV_GPT
+   select PWM
+   ---help---
+     Enable PWM functionality for the RZV GPT peripheral.
+
+config RZV_GPT_TIMER
+   bool "GPT Timer support"
+   default n
+   depends on RZV_GPT
+   select TIMER
+   ---help---
+     Enable Timer functionality for the RZV GPT peripheral.
+
+config RZV_GPT_ONESHOT
+   bool "GPT One-shot mode support"
+   default n
+   depends on RZV_PWM
+   select ARCH_HAVE_PWM_PULSECOUNT
+   select PWM_PULSECOUNT
+   ---help---
+     Enable One-shot mode for the RZV GPT PWM driver.
+
+config RZV_POEG
+   bool "POEG (Port Output Enable for GPT) driver"
+   default n
+   depends on RZV_PWM
+   ---help---
+     Enable the POEG driver for GPT output protection.
+     POEG forces GTIOCA/GTIOCB outputs to inactive state within < 1 PWM
+     cycle when a hardware fault (port input, I/O short-circuit) or a
+     software stop is triggered.  Required for PX4 arming safety.
+     Addresses phase-08 spec High-4 (POEG output disable on fault).
+     Default is n (opt-in) — spurious fault inputs can disarm ESCs.
+
+config RZV_GPT0
+   bool "GPT0"
+   default n
+   depends on RZV_HAVE_GPT0 && RZV_GPT
+   ---help---
+     Enable GPT0 channel.
+
+config RZV_GPT1
+   bool "GPT1"
+   default n
+   depends on RZV_HAVE_GPT1 && RZV_GPT
+   ---help---
+     Enable GPT1 channel.
+
+config RZV_GPT2
+   bool "GPT2"
+   default n
+   depends on RZV_HAVE_GPT2 && RZV_GPT
+   ---help---
+     Enable GPT2 channel.
+
+config RZV_GPT3
+   bool "GPT3"
+   default n
+   depends on RZV_HAVE_GPT3 && RZV_GPT
+   ---help---
+     Enable GPT3 channel.
+
+config RZV_GPT4
+   bool "GPT4"
+   default n
+   depends on RZV_HAVE_GPT4 && RZV_GPT
+   ---help---
+     Enable GPT4 channel.
+
+config RZV_GPT5
+   bool "GPT5"
+   default n
+   depends on RZV_HAVE_GPT5 && RZV_GPT
+   ---help---
+     Enable GPT5 channel.
+
+config RZV_GPT6
+   bool "GPT6"
+   default n
+   depends on RZV_HAVE_GPT6 && RZV_GPT
+   ---help---
+     Enable GPT6 channel.
+
+config RZV_GPT7
+   bool "GPT7"
+   default n
+   depends on RZV_HAVE_GPT7 && RZV_GPT
+   ---help---
+     Enable GPT7 channel.
+
+config RZV_GPT8
+   bool "GPT8"
+   default n
+   depends on RZV_HAVE_GPT8 && RZV_GPT
+   ---help---
+     Enable GPT8 channel.
+
+config RZV_GPT9
+   bool "GPT9"
+   default n
+   depends on RZV_HAVE_GPT9 && RZV_GPT
+   ---help---
+     Enable GPT9 channel.
+
+config RZV_GPT10
+   bool "GPT10"
+   default n
+   depends on RZV_HAVE_GPT10 && RZV_GPT
+   ---help---
+     Enable GPT10 channel.
+
+config RZV_HAVE_GPT11
+   bool
+   default n
+
+config RZV_GPT11
+   bool "GPT11"
+   default n
+   depends on RZV_HAVE_GPT11 && RZV_GPT
+   ---help---
+     Enable GPT11 channel.
+
+config RZV_ADC
+   bool "ADC support"
+   default n
+   depends on RZV_HAVE_ADC12
+   select ANALOG
+   select ADC
+
+if RZV_ADC
+
+config RZV_ADC0
+   bool "ADC0 instance"
+   default y
+   ---help---
+     Enable the RZ/V2H ADC_E channel-0 instance (the single ADC_E unit
+     present on RZ/V2H).  Drives /dev/adc0 via the NuttX analog upper
+     half.
+
+endif # RZV_ADC
+
+config RZV_DAC
+   bool "DAC support"
+   default n
+   depends on RZV_HAVE_DAC12
+
+menuconfig RZV_ETHERNET
+   bool "Ethernet (GBETH) Driver"
+   default n
+   select NETDEVICES
+   select ARCH_HAVE_NETDEV_STATISTICS
+   ---help---
+     Enable support for the RZV2H Gigabit Ethernet (GBETH) driver.
+     The RZV2H has two Ethernet ports (GBETH0, GBETH1) using a
+     DesignWare MAC (DWMAC) compatible architecture.
+
+if RZV_ETHERNET
+
+config RZV_ETHER0
+   bool "Enable Ethernet Port 0 (GBETH0)"
+   default y
+   ---help---
+     Enable Ethernet port 0 (GBETH0) at base address 0x15C30000.
+
+config RZV_ETHER1
+   bool "Enable Ethernet Port 1 (GBETH1)"
+   default n
+   ---help---
+     Enable Ethernet port 1 (GBETH1) at base address 0x15C40000.
+
+config RZV_ETHER_TXDESC
+   int "Number of TX Descriptors"
+   default 8
+   range 4 64
+   ---help---
+     Number of TX DMA descriptors in the ring buffer.
+     More descriptors allow higher throughput but use more memory.
+
+config RZV_ETHER_RXDESC
+   int "Number of RX Descriptors"
+   default 8
+   range 4 64
+   ---help---
+     Number of RX DMA descriptors in the ring buffer.
+     More descriptors allow higher throughput but use more memory.
+
+config RZV_ETHER_BUFSIZE
+   int "Ethernet Buffer Size"
+   default 1536
+   ---help---
+     Size of each TX/RX buffer. Should be at least MTU + headers + FCS.
+
+config RZV_ETHER_PHY_ADDR
+   int "PHY Address"
+   default 0
+   range 0 31
+   ---help---
+     MDIO address of the PHY connected to the Ethernet port.
+
+config RZV_ETHER_PHY_RGMII
+   bool "Use RGMII PHY Interface"
+   default y
+   ---help---
+     Select RGMII (Reduced Gigabit MII) PHY interface.
+     If not selected, MII or RMII will be used based on board configuration.
+
+endif # RZV_ETHERNET
+
+# Watchdog Timer (WDT)
+
+# CAN-FD Driver
+
+menuconfig RZV_CANFD
+   bool "CAN-FD driver (RSCAN-FD)"
+   default n
+   depends on RZV_HAVE_CAN0 || RZV_HAVE_CAN1
+   select CAN
+   select CAN_FD
+   ---help---
+     Enable the RZ/V2H CAN-FD lower-half driver.  The hardware block
+     (RSCAN-FD) supports 6 channels at base 0x12440000.  v1 enables CH0
+     (/dev/can0) only; CH1 framework is compiled but not registered.
+
+     CANFDCLK = 80 MHz (verified by bsp_clock_cfg.h).
+     Nominal timing: BRP=2, TSEG1=74, TSEG2=25, SJW=25 → 400 kbps.
+     Data timing:    BRP=1, TSEG1=16, TSEG2=8,  SJW=8  → 3.2 Mbps.
+
+     Boot default: internal loopback.  Toggle bus mode via ioctl cmd
+     0x1000 with arg=0.
+
+     Requires CONFIG_CAN_FD=y for 64-byte payload support.
+
+if RZV_CANFD
+
+config RZV_CANFD0
+   bool "Enable CAN-FD channel 0 (/dev/can0)"
+   default y
+   depends on RZV_HAVE_CAN0
+   ---help---
+     Register CAN-FD channel 0 as /dev/can0.
+     RDK-RZV2H: CAN1 connector (P80/P81, PSEL=5).
+     CH0 is the primary channel for v1 bring-up.
+
+config RZV_CANFD1
+   bool "Enable CAN-FD channel 1 (/dev/can1)"
+   default n
+   depends on RZV_HAVE_CAN1
+   ---help---
+     Register CAN-FD channel 1 as /dev/can1.
+     RDK-RZV2H: CAN2 connector (P86/P87, PSEL=5).
+     Disabled by default at v1; enable after CH0 hardware validation.
+
+config RZV_CANFD_IRQ_PRIORITY
+   int "CAN-FD interrupt priority"
+   default 12
+   range 0 15
+   ---help---
+     GIC priority for all CAN-FD interrupts (TX, RX, error, global error).
+     Lower number = higher priority.  12 matches other peripheral drivers
+     in this BSP.
+
+endif # RZV_CANFD
+
+config ARCH_HAVE_SDIO
+   bool
+   default y if RZV_SDHI
+
+config RZV_SDHI
+   bool "SDHI (SD/eMMC) driver"
+   default n
+   select MMCSD
+   select MMCSD_SDIO
+   ---help---
+     Enable the RZ/V2H SDHI lower-half driver.
+     Supports SD0/SD1/SD2 channels on R9A09G057H.
+     RDK-RZV2H SD card connector uses SD0 (signals QSD0_*).
+     Phase 1: stub only (no hardware access).
+     Phase 2 will implement PIO data path.
+
+config RZV_WDT
+   bool "Watchdog Timer (WDT)"
+   default n
+   depends on RZV_HAVE_WDT
+   select WATCHDOG
+   ---help---
+     Enable Watchdog Timer support. The RZV2H has 4 WDT channels, one for
+     each CPU domain (CR8_0, CR8_1, CM33, CA55).
+
+if RZV_WDT
+
+config RZV_WDT_INTERRUPT_MODE
+   bool "Use interrupt mode (NMI) instead of reset"
+   default n
+   ---help---
+     Configure WDT to generate NMI interrupt on timeout instead of
+     system reset. This allows for graceful handling of watchdog events.
+     If not selected, the watchdog will cause a system reset on timeout.
+
+config RZV_WDT0
+   bool "WDT0 (CR8_0 domain)"
+   default n
+   ---help---
+     Enable WDT0 for CR8_0 core domain. This is typically used for
+     real-time control applications.
+
+config RZV_WDT0_DEVPATH
+   string "WDT0 device path"
+   default "/dev/watchdog0"
+   depends on RZV_WDT0
+   ---help---
+     Device path for WDT0, defaults to /dev/watchdog0
+
+config RZV_WDT1
+   bool "WDT1 (CR8_1 domain)"
+   default n
+   ---help---
+     Enable WDT1 for CR8_1 core domain.
+
+config RZV_WDT1_DEVPATH
+   string "WDT1 device path"
+   default "/dev/watchdog1"
+   depends on RZV_WDT1
+   ---help---
+     Device path for WDT1, defaults to /dev/watchdog1
+
+config RZV_WDT2
+   bool "WDT2 (CM33 domain)"
+   default n
+   ---help---
+     Enable WDT2 for CM33 core domain.
+
+config RZV_WDT2_DEVPATH
+   string "WDT2 device path"
+   default "/dev/watchdog2"
+   depends on RZV_WDT2
+   ---help---
+     Device path for WDT2, defaults to /dev/watchdog2
+
+config RZV_WDT3
+   bool "WDT3 (CA55 domain)"
+   default n
+   ---help---
+     Enable WDT3 for CA55 core domain.
+
+config RZV_WDT3_DEVPATH
+   string "WDT3 device path"
+   default "/dev/watchdog3"
+   depends on RZV_WDT3
+   ---help---
+     Device path for WDT3, defaults to /dev/watchdog3
+
+endif # RZV_WDT

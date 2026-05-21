@@ -1,0 +1,276 @@
+/****************************************************************************
+ * arch/arm/src/ra8/ra_i2c.h
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+#ifndef __ARCH_ARM_SRC_RA_RA8_I2C_H
+#define __ARCH_ARM_SRC_RA_RA8_I2C_H
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+
+#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
+
+#include <nuttx/irq.h>
+#include <nuttx/mutex.h>
+#include <nuttx/semaphore.h>
+#include <nuttx/i2c/i2c_master.h>
+#include <nuttx/i2c/i2c_slave.h>
+
+#ifdef CONFIG_RA_DTC
+#include "ra_dtc.h"
+#endif
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
+
+/* I2C interrupts */
+#define RA_I2C_NEVENTS           8        /* Number of I2C events */
+
+/* DTC/DMA threshold - use DTC/DMA for transfers larger than this */
+#define RA_I2C_DTC_THRESHOLD     8        /* Minimum bytes for DTC */
+#define RA_I2C_DMA_THRESHOLD     16       /* Minimum bytes for DMA */
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/* I2C Device hardware configuration */
+struct ra_i2c_config_s
+{
+  uint32_t base;          /* I2C base address */
+  uint32_t clk_freq;      /* Clock frequency */
+  uint32_t mstp;          /* Module stop control (mstp) */
+  uint8_t  bus;           /* I2C bus number */
+  uint32_t rxi_elc;       /* RX event/ELC */
+  uint32_t txi_elc;       /* TX event/ELC */
+  uint32_t tei_elc;       /* TE event/ELC */
+  uint32_t eri_elc;       /* ER event/ELC */
+  bool     use_dtc;       /* DTC enable flag */
+  bool     use_dma;       /* DMA enable flag */
+};
+
+/* I2C Device Private Data */
+struct ra_i2c_priv_s
+{
+  /* Standard I2C operations */
+  const struct i2c_ops_s *ops;
+
+  /* Port configuration */
+  const struct ra_i2c_config_s *config;
+
+  int      refs;          /* Reference count */
+  mutex_t  lock;          /* Mutual exclusion mutex */
+
+#ifndef CONFIG_I2C_POLLED
+  sem_t    sem_isr;       /* Interrupt wait semaphore */
+#endif
+
+  /* I2C work state (see enum ra_i2cstate_e) */
+  volatile uint8_t state;
+
+  /* I2C current message */
+  struct i2c_msg_s *msgs; /* Remaining transfers - first one is active */
+  int      msgc;          /* Number of transfer remaining */
+
+  /* I2C Bus frequency */
+  uint32_t frequency;     /* Current I2C frequency */
+
+  /* I2C transfer state */
+  uint8_t *ptr;           /* Current message buffer */
+  uint32_t dcnt;          /* Current message length */
+  uint16_t flags;         /* Current message flags */
+
+  /* I2C address - uint16_t to support 10-bit addressing */
+  uint16_t addr;          /* Current message address */
+
+#ifdef CONFIG_RA_I2C_10BIT_ADDRESS
+  /* 10-bit addressing support */
+  uint8_t  addr_low;      /* Low byte of 10-bit address (A7:A0) */
+  bool     addr_pending;  /* True if low byte still needs to be sent */
+#endif
+
+  /* Interrupt numbers assigned at runtime */
+  int      rxi_irq;       /* RX interrupt number */
+  int      txi_irq;       /* TX interrupt number */
+  int      tei_irq;       /* TE interrupt number */
+  int      eri_irq;       /* ER interrupt number */
+
+  /* I2C trace support */
+#ifdef CONFIG_I2C_TRACE
+  int      tndx;          /* Trace array index */
+  uint32_t start_time;    /* Time when the trace was started */
+
+  /* The actual trace data */
+  struct i2c_trace_s trace[CONFIG_I2C_NTRACE];
+#endif
+
+  uint32_t status;        /* End of transfer SR2|SR1 status */
+
+#ifdef CONFIG_RA_DTC
+  /* DTC support */
+  bool     use_dtc;       /* DTC enable flag */
+  bool     dtc_active;    /* DTC transfer in progress */
+  ra_dtc_info_t dtc_tx_info; /* TX DTC transfer info */
+  ra_dtc_info_t dtc_rx_info; /* RX DTC transfer info */
+#ifndef CONFIG_I2C_POLLED
+  volatile bool dtc_tx_done; /* TX DTC completion flag */
+  volatile bool dtc_rx_done; /* RX DTC completion flag */
+#endif
+#endif
+
+#ifdef CONFIG_RA_DMAC
+  /* DMA support */
+  bool     use_dma;       /* DMA enable flag */
+  bool     dma_active;    /* DMA transfer in progress */
+  void    *dma_tx;        /* TX DMA handle */
+  void    *dma_rx;        /* RX DMA handle */
+  volatile bool dma_tx_done; /* TX DMA completion flag */
+  volatile bool dma_rx_done; /* RX DMA completion flag */
+  int      dma_tx_channel;   /* Assigned TX DMA channel (-1 = dynamic) */
+  int      dma_rx_channel;   /* Assigned RX DMA channel (-1 = dynamic) */
+#endif
+
+#if defined(CONFIG_RA_DMAC) || defined(CONFIG_RA_DTC)
+  bool     activation_on_rxi; /* DMA/DTC activated on RXI - ISR ignores interrupt */
+  bool     activation_on_txi; /* DMA/DTC activated on TXI - ISR ignores interrupt */
+#endif
+};
+
+/* I2C State Machine States */
+enum ra_i2cstate_e
+{
+  I2CSTATE_IDLE = 0,            /* No I2C activity */
+  I2CSTATE_START,               /* START condition sent */
+  I2CSTATE_ADDR_WRITE,          /* Address sent, wait for ACK in write mode */
+  I2CSTATE_ADDR_READ,           /* Address sent, wait for ACK in read mode */
+#ifdef CONFIG_RA_I2C_10BIT_ADDRESS
+  I2CSTATE_ADDR_10BIT_HIGH,     /* 10-bit high byte sent, waiting for ACK */
+  I2CSTATE_ADDR_10BIT_READ_RESTART, /* Waiting for restart for 10-bit read */
+#endif
+  I2CSTATE_WRITE,               /* Transmitting data */
+  I2CSTATE_READ,                /* Receiving data */
+  I2CSTATE_STOP,                /* STOP condition sent */
+  I2CSTATE_ERROR,               /* Error occurred */
+  I2CSTATE_FINISH               /* Transfer finished */
+};
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: ra_i2cbus_initialize
+ *
+ * Description:
+ *   Initialize the selected I2C port. And return a unique instance of struct
+ *   struct i2c_master_s.  This function may be called to obtain multiple
+ *   instances of the interface, each of which may be set up with a
+ *   different frequency and slave address.
+ *
+ * Input Parameters:
+ *   Port number (for hardware that has multiple I2C interfaces)
+ *
+ * Returned Value:
+ *   Valid I2C device structure reference on success; a NULL on failure
+ *
+ ****************************************************************************/
+
+struct i2c_master_s *ra_i2cbus_initialize(int port);
+
+/****************************************************************************
+ * Name: ra_i2cbus_uninitialize
+ *
+ * Description:
+ *   De-initialize the selected I2C port, and power down the device.
+ *
+ * Input Parameters:
+ *   Device structure as returned by ra_i2cbus_initialize()
+ *
+ * Returned Value:
+ *   OK on success, ERROR when internal reference count mismatch or dev
+ *   points to invalid hardware device.
+ *
+ ****************************************************************************/
+
+int ra_i2cbus_uninitialize(struct i2c_master_s *dev);
+
+/****************************************************************************
+ * Name: ra_i2c_slave_initialize
+ *
+ * Description:
+ *   Initialize the selected I2C port in slave mode. And return a unique
+ *   instance of struct i2c_slave_s.
+ *
+ * Input Parameters:
+ *   Port number (for hardware that has multiple I2C interfaces)
+ *
+ * Returned Value:
+ *   Valid I2C slave device structure reference on success; a NULL on failure
+ *
+ ****************************************************************************/
+
+struct i2c_slave_s *ra_i2c_slave_initialize(int port);
+
+/****************************************************************************
+ * Name: ra_i2c_slave_uninitialize
+ *
+ * Description:
+ *   De-initialize the selected I2C port in slave mode, and power down the device.
+ *
+ * Input Parameters:
+ *   Device structure as returned by ra_i2c_slave_initialize()
+ *
+ * Returned Value:
+ *   OK on success, ERROR when internal reference count mismatch or dev
+ *   points to invalid hardware device.
+ *
+ ****************************************************************************/
+
+int ra_i2c_slave_uninitialize(struct i2c_slave_s *dev);
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_RA_RA8_I2C_H */

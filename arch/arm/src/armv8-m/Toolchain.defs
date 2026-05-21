@@ -91,31 +91,92 @@ endif
 
 # Parametrization for ARCHCPUFLAGS
 
+ifeq ($(CONFIG_ARM_DSP),y)
+  EXTCPUFLAGS = +dsp
+endif
+
+ifeq ($(CONFIG_ARM_PACBTI),y)
+  EXTCPUFLAGS := $(EXTCPUFLAGS)+pacbti
+
+  # Protects branches using pointer authentication and Branch Target Identification.
+  #
+  # The default is -mbranch-protection=none.
+  #
+  # -mbranch-protection=standard:
+  #   Enables all types of branch protection to their standard values.
+  #   The standard protection is equivalent to -mbranch-protection=bti+pac-ret.
+  #
+  # -mbranch-protection=bti:
+  #   Enables branch protection using Branch Target Identification.
+  #
+  # -mbranch-protection=pac-ret:
+  #   Enables branch protection using pointer authentication using key A.
+  #
+  #   +leaf:
+  #   Enables pointer authentication on all leaf functions, including the leaf
+  #   functions that do not save the LR on the stack.
+  #
+  #   +b-key:
+  #   Enables pointer authentication with Key B, rather than Key A.
+
+  ARCHOPTIMIZATION += -mbranch-protection=standard
+endif
+
+ifeq ($(CONFIG_ARM_HAVE_MVE),y)
+  EXTCPUFLAGS := $(EXTCPUFLAGS)+mve.fp+fp.dp
+endif
+
+# Add BFloat16 support flags
+ifeq ($(CONFIG_ARM_BF16),y)
+  EXTCPUFLAGS := $(EXTCPUFLAGS)+bf16
+endif
+
+# Add Int8 Matrix Multiplication support flags
+ifeq ($(CONFIG_ARM_I8MM),y)
+  EXTCPUFLAGS := $(EXTCPUFLAGS)+i8mm
+endif
+
+# Add Performance Monitoring Unit flags
+ifeq ($(CONFIG_ARM_PMU_V3),y)
+  ARCHOPTIMIZATION += -DCONFIG_ARM_PMU_V3=1
+endif
+
+# Add Security Attribution Unit flags
+ifeq ($(CONFIG_ARM_TRUSTZONE_SAU),y)
+  ARCHOPTIMIZATION += -DCONFIG_ARM_TRUSTZONE_SAU=1
+endif
+
 ifeq ($(CONFIG_ARCH_CORTEXM23),y)
   TOOLCHAIN_MTUNE    := -mtune=cortex-m23
   TOOLCHAIN_MARCH    := -march=armv8-m.main
   TOOLCHAIN_MFLOAT   := -mfloat-abi=soft
 else ifeq ($(CONFIG_ARCH_CORTEXM33),y)
   TOOLCHAIN_MTUNE    := -mtune=cortex-m33
-  TOOLCHAIN_MARCH    := -march=armv8-m.main+dsp
+  TOOLCHAIN_MARCH    := -march=armv8-m.main$(EXTCPUFLAGS)
   ifeq ($(CONFIG_ARCH_FPU),y)
     TOOLCHAIN_MFLOAT := -mfpu=fpv5-sp-d16
   endif
 else ifeq ($(CONFIG_ARCH_CORTEXM35P),y)
   TOOLCHAIN_MTUNE    := -mtune=cortex-m35p
-  TOOLCHAIN_MARCH    := -march=armv8-m.main+dsp
+  TOOLCHAIN_MARCH    := -march=armv8-m.main$(EXTCPUFLAGS)
   ifeq ($(CONFIG_ARCH_FPU),y)
     TOOLCHAIN_MFLOAT := -mfpu=fpv5-sp-d16
   endif
 else ifeq ($(CONFIG_ARCH_CORTEXM55),y)
   TOOLCHAIN_MTUNE    := -mtune=cortex-m55
+  TOOLCHAIN_MARCH    := -march=armv8.1-m.main$(EXTCPUFLAGS)
+  ifeq ($(CONFIG_ARCH_FPU),y)
+          TOOLCHAIN_MFLOAT := -mfpu=fpv5-d16
+  endif
+else ifeq ($(CONFIG_ARCH_CORTEXM85),y)
+  TOOLCHAIN_MTUNE    := -mtune=cortex-m85
   ifeq ($(CONFIG_ARM_HAVE_MVE),y)
     TOOLCHAIN_MARCH  := -march=armv8.1-m.main+mve.fp+fp.dp
   else
     TOOLCHAIN_MARCH  := -march=armv8.1-m.main+dsp
   endif
   ifeq ($(CONFIG_ARCH_FPU),y)
-    TOOLCHAIN_MFLOAT := -mfpu=fpv5-d16
+      TOOLCHAIN_MFLOAT := -mfpu=fpv5-d16
   endif
 endif
 
@@ -148,6 +209,12 @@ ifeq ($(CONFIG_ARMV8M_TOOLCHAIN),CLANG)
       TOOLCHAIN_MARCH += --config armv8m.main_soft_nofp_nosys
     endif
   else ifeq ($(CONFIG_ARCH_CORTEXM55),y)
+    ifeq ($(CONFIG_ARCH_FPU),y)
+      TOOLCHAIN_MARCH += --config armv8.1m.main_hard_fp_nosys
+    else
+      TOOLCHAIN_MARCH += --config armv8.1m.main_soft_nofp_nomve_nosys
+    endif
+  else ifeq ($(CONFIG_ARCH_CORTEXM85),y)
     ifeq ($(CONFIG_ARCH_FPU),y)
       TOOLCHAIN_MARCH += --config armv8.1m.main_hard_fp_nosys
     else
@@ -293,4 +360,10 @@ endif
 
 ifeq ($(CONFIG_ARCH_COVERAGE),y)
   EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libgcov.a))
+endif
+
+# ARMv8-M Security Extensions
+
+ifeq ($(CONFIG_ARMV8M_CMSE),y)
+  ARCHCPUFLAGS += -mcmse
 endif

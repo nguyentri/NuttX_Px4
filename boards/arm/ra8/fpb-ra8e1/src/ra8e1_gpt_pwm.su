@@ -1,0 +1,3 @@
+ra8e1_gpt_pwm.c:88:12:ra8e1_gpt_pwm_test_device	96	static
+ra8e1_gpt_pwm.c:187:5:ra8e1_gpt_pwm_main	16	static
+ra8e1_gpt_pwm.c:254:5:ra8e1_gpt_pwm_initialize	16	static

@@ -1,0 +1,65 @@
+# ##############################################################################
+# boards/arm/rzv/rdk-rzv2h/Kconfig
+#
+# Kconfig for the RDK-RZV2H board support package for the RZV2H MPU.
+#
+if ARCH_BOARD_RDK_RZV2H
+
+config BOARD_RDK_RZV2H
+    bool "RDK-RZV2H Board Support"
+    help
+      Enable support for the RDK-RZV2H board based on the RZV2H MPU.
+
+endif
+
+config RZV2H_EXAMPLE_SUPPORT
+    bool "RDK-RZV2H Example Support"
+    default y
+    depends on ARCH_BOARD_RDK_RZV2H
+    help
+      Enable support for various application examples for the RDK-RZV2H board.
+      Disable when building with PX4 firmware.
+
+config RZV2H_SPI_LOOPBACK_EXAMPLE
+    bool "SPI loopback test example"
+    default n
+    depends on RZV_SPI && RZV2H_EXAMPLE_SUPPORT
+    ---help---
+      Enable SPI internal loopback test example for verifying
+      SPI driver functionality on RDK-RZV2H board.
+
+config RZV2H_PWM_ONESHOT_EXAMPLE
+    bool "GPT PWM oneshot mode example"
+    default n
+    depends on RZV_PWM && RZV2H_EXAMPLE_SUPPORT
+    ---help---
+      Enable GPT PWM oneshot mode example for verifying oneshot
+      functionality on RDK-RZV2H board.
+
+config RDK_RZV2H_XSPI_PARAMFS
+    bool "RDK-RZV2H XSPI LittleFS parameter storage"
+    default n
+    depends on ARCH_BOARD_RDK_RZV2H && FS_LITTLEFS
+    select MTD
+    ---help---
+      Enable the CR8-owned XSPI parameter MTD and mount it as LittleFS at
+      /fs. PX4 stores parameters at /fs/params when this option is enabled.
+
+config RZV2H_ADC_EXAMPLE
+    bool "ADC test example"
+    default n
+    depends on RZV_ADC && RZV2H_EXAMPLE_SUPPORT
+    ---help---
+      Enable ADC test example for verifying ADC driver functionality
+      on RDK-RZV2H board.
+
+config RZV2H_WDT_TEST
+    bool "Watchdog Timer (WDT) test application"
+    default n
+    depends on RZV_WDT && RZV2H_EXAMPLE_SUPPORT
+    ---help---
+      Enable WDT test application for verifying watchdog timer functionality
+      on RDK-RZV2H board. This application demonstrates watchdog initialization,
+      periodic refresh, timeout testing, and system reset behavior.
+
+# ##############################################################################

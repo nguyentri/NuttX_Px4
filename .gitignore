@@ -20,7 +20,6 @@
 *.obj
 *.profraw
 *.rel
-*.src
 *.srec
 *.swp
 *.sym
@@ -58,3 +57,4 @@ uImage
 .dirlinks
 .vscode
 .DS_Store
+plans/

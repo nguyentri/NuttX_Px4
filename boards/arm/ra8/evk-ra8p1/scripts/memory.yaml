@@ -1,0 +1,63 @@
+# Memory Configuration for Renesas RA8P1 Dual-Core System
+# Edit this file or use placement.py interactive tool
+
+cm85:
+  flash:
+    start: '0x02000000'
+    length: '0x00080000'
+    description: 512KB MRAM for CM85
+    permissions: rx
+  ram:
+    start: '0x22000000'
+    length: '0x000E2000'
+    description: 904KB SRAM for CM85
+    permissions: rwx
+  itcm:
+    start: '0x00000000'
+    length: '0x00020000'
+    description: 128KB ITCM for CM85
+    permissions: rwx
+  dtcm:
+    start: '0x20000000'
+    length: '0x00020000'
+    description: 128KB DTCM for CM85
+    permissions: rwx
+
+cm33:
+  flash:
+    start: '0x02080000'
+    length: '0x00080000'
+    description: 512KB MRAM for CM33
+    permissions: rx
+  ram:
+    start: '0x220EA000'
+    length: '0x000EA000'
+    description: 936KB SRAM for CM33
+    permissions: rwx
+  itcm:
+    start: '0x00000000'
+    length: '0x00010000'
+    description: 64KB ITCM for CM33
+    permissions: rwx
+  dtcm:
+    start: '0x20000000'
+    length: '0x00010000'
+    description: 64KB DTCM for CM33
+    permissions: rwx
+
+shared:
+  ipc:
+    start: '0x220E2000'
+    length: '0x00008000'
+    description: 32KB IPC shared memory (FIXED - non-cacheable)
+    permissions: rw
+  sdram:
+    start: '0x68000000'
+    length: '0x04000000'
+    description: 64MB external SDRAM for CM85 (CM33 at 0x6C000000)
+    permissions: rwx
+  ospi_flash:
+    start: '0x80000000'
+    length: '0x08000000'
+    description: 128MB OSPI Flash for CM85 (CM33 at 0x88000000, XIP enabled)
+    permissions: rx

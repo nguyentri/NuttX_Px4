@@ -1,0 +1,96 @@
+# ##############################################################################
+# boards/arm/rzv/evk-ra8p1/Kconfig
+#
+# Kconfig for the EVK-RA8P1 board support package for the RA8P1 MPU.
+#
+if ARCH_BOARD_EVK_RA8P1
+
+config RA8P1_EXAMPLE_SUPPORT
+    bool "EVK-RA8P1 Example Support"
+    default y
+    depends on ARCH_BOARD_EVK_RA8P1
+    help
+      Enable support for various application examples for the EVK-RA8P1 board.
+      Disable when building with PX4 firmware.
+
+config RA8P1_SPI_LOOPBACK_EXAMPLE
+	bool "SPI loopback test example"
+	default n
+	depends on RA_SPI && RA8P1_EXAMPLE_SUPPORT
+	---help---
+		Enable SPI internal loopback test example for verifying
+		SPI driver functionality on EVK-RA8P1 board.
+
+config RA8P1_OSPI_EXAMPLE
+	bool "OSPI test example"
+	default n
+	depends on RA_OSPI && RA8P1_EXAMPLE_SUPPORT
+	---help---
+		Enable OSPI test example for verifying OSPI driver functionality
+		on EVK-RA8P1 board.
+
+config RA8P1_USB_CDC_CONSOLE
+	bool "USB CDC/ACM console"
+	default n
+	depends on RA_USBDEV && CDCACM
+	select USBDEV_TRACE
+	---help---
+		Enable USB CDC/ACM virtual serial port as system console.
+		This allows nsh shell and other console output over USB.
+
+config RA8P1_SCI_SPI_EXAMPLE
+	bool "SCI SPI test example"
+	default n
+	depends on RA_SCI_SPI && RA8P1_EXAMPLE_SUPPORT
+	---help---
+		Enable SCI SPI test example for verifying SCI SPI driver functionality
+		on EVK-RA8P1 board.
+
+config RA8P1_ADC_HW_TRIGGER_EXAMPLE
+	bool "ELC GPT-triggered ADC example"
+	default n
+	depends on RA_ELC && RA_GPT && RA_ADC && RA8P1_EXAMPLE_SUPPORT
+	---help---
+		Enable ELC example that demonstrates GPT timer triggering ADC
+		conversions without CPU intervention. This configures:
+		- GPT0 counter overflow -> ADC0 scan trigger
+		- Software event 0 -> GPT A start trigger
+		- GPT0 overflow -> GPT B stop trigger
+
+config RA8P1_I3C_EXAMPLE
+	bool "I3C example"
+	default n
+	depends on RA_I3C && RA8P1_EXAMPLE_SUPPORT
+	---help---
+		Enable I3C test example for verifying I3C driver functionality
+		on EVK-RA8P1 board.
+
+config RA8P1_WDT_TEST
+	bool "WDT example "
+	default n
+	depends on RA_WDT && WATCHDOG && RA8P1_EXAMPLE_SUPPORT
+	---help---
+		Enable WDT test application that demonstrates watchdog timer
+		functionality similar to FSP reference example. The application:
+		- Initializes WDT with 2-second timeout
+		- Refreshes WDT every 1 second via periodic timer
+		- Prints refresh status every 3 seconds
+		- Pressing SW1 button stops refresh, triggering WDT reset
+		- LED indicates reset status and activity
+
+config RA8P1_IPC_TEST
+	bool "IPC dual-core communication test"
+	default n
+	depends on RA_IPC && RA8P1_EXAMPLE_SUPPORT
+	---help---
+		Enable IPC test application for dual-core communication testing.
+		This application demonstrates:
+		- Hardware semaphore operations
+		- Channel-based message passing
+		- Interrupt-driven communication
+		- IPC mutex synchronization
+
+		Build and flash this application on BOTH cores (CM85 and CM33)
+		to test inter-processor communication.
+
+endif
