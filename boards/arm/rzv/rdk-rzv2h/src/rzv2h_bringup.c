@@ -322,6 +322,21 @@ int board_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_RZV_SDHI
+  /* Initialize SDHI slot 0 → /dev/mmcsd0 */
+
+  ret = rzv2h_sdhi_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SDHI: %d\n", ret);
+      if (first_error == 0) first_error = ret;
+    }
+  else
+    {
+      syslog(LOG_INFO, "SDHI initialized (stub)\n");
+    }
+#endif
+
 #ifdef CONFIG_RZV2H_EXAMPLE_SUPPORT
   /* Run application examples */
 

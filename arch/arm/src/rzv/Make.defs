@@ -154,3 +154,8 @@ endif
 #ifeq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += rzv_idle.c
 #endif
+
+# SDHI (SD/eMMC) driver
+ifeq ($(CONFIG_RZV_SDHI),y)
+CHIP_CSRCS += rzv_sdhi.c
+endif

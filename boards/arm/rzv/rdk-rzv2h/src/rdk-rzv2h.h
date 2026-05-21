@@ -227,6 +227,19 @@ int board_canfd_initialize(void);
 #endif
 
 /****************************************************************************
+ * Name: rzv2h_sdhi_initialize
+ *
+ * Description:
+ *   Initialize the SD card slot (SDHI channel 0) and register with the
+ *   MMCSD upper-half.  Creates /dev/mmcsd0.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RZV_SDHI
+int rzv2h_sdhi_initialize(void);
+#endif
+
+/****************************************************************************
  * Name: rzv2h_app_examples
  *
  * Description:

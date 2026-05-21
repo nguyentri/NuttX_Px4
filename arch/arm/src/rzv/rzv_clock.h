@@ -199,6 +199,27 @@
 #define RZV_CPG_CLK_ADC0            (9 << 16 | 0)   /* ADC: 2-bit pair [1:0] */
 #define RZV_CPG_CLK_ADC1            RZV_CPG_CLK_ADC0
 
+/* SDHI clock and reset IDs -- decoded from FSP CPG enum values.
+ *
+ * FSP source: refs/rzv2h_gb_ether/drivers/r_cpg_api.h
+ *   CPG_CLK_SDHI_0_IMCLK = 0x00080628  -> offset=0x0628, mask_val=0x0008
+ *   CPG_RST_SDHI_0_IXRST = 0x00800928  -> offset=0x0928, mask_val=0x0080
+ *
+ * NuttX rzv_clock encoding: ((CLKON_reg_index << 16) | bit_position)
+ *   CLKON domain = (0x0628 - 0x05F0) / 4 = 14, bit = 3  (mask 0x0008 -> ffs-1=3)
+ *   RST   domain = (0x0928 - 0x08F0) / 4 = 14, bit = 7  (mask 0x0080 -> ffs-1=7)
+ *
+ * NuttX rzv_module_unreset() uses (domain<<16 | bit) with the same convention.
+ * NEEDS_VERIFY: confirm CPG_CLKON_14 bit 3 = SDHI0_IMCLK against RZ/V2H UM.
+ */
+#define RZV_CPG_CLK_SDHI0           (14 << 16 | 3)  /* SDHI0 IMCLK gate */
+#define RZV_CPG_CLK_SDHI1           (14 << 16 | 11) /* SDHI1 IMCLK gate (mask 0x0800) */
+#define RZV_CPG_CLK_SDHI2           (14 << 16 | 19) /* SDHI2 IMCLK gate (mask 0x08000000>>16?) */
+/* SDHI reset -- CPG_RST_14 bit 7 per FSP CPG_RST_SDHI_0_IXRST decode */
+#define RZV_CPG_RST_SDHI0           (14 << 16 | 7)  /* SDHI0 IXRST deassert */
+#define RZV_CPG_RST_SDHI1           (14 << 16 | 8)  /* SDHI1 IXRST */
+#define RZV_CPG_RST_SDHI2           (14 << 16 | 9)  /* SDHI2 IXRST */
+
 
 /* Maximum values ***********************************************************/
 
@@ -726,6 +747,30 @@ int rzv_clock_get_status(uint32_t clk_id,
  * provided in board-specific or chip-specific files.
  */
 void rzv_clock_config(void);
+
+/****************************************************************************
+ * Name: rzv_clock_enable_sdhi / rzv_reset_release_sdhi
+ *
+ * Description:
+ *   Enable the SDHI module clock and release its reset for the given channel.
+ *   Wraps rzv_clock_enable(RZV_CPG_CLK_SDHIn) and
+ *        rzv_module_unreset(RZV_CPG_RST_SDHIn).
+ *
+ *   CPG IDs derived from FSP enum values:
+ *     CPG_CLK_SDHI_0_IMCLK = 0x00080628 -> domain 14, bit 3
+ *     CPG_RST_SDHI_0_IXRST = 0x00800928 -> domain 14, bit 7
+ *   (NEEDS_VERIFY: confirm against RZ/V2H UM CPG chapter.)
+ *
+ * Input Parameters:
+ *   ch - SDHI channel (0 = SD0, 1 = SD1, 2 = SD2)
+ *
+ * Returned Value:
+ *   OK on success; negated errno on failure.
+ *
+ ****************************************************************************/
+
+int rzv_clock_enable_sdhi(int ch);
+int rzv_reset_release_sdhi(int ch);
 
 #ifdef __cplusplus
 }

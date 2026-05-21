@@ -748,6 +748,64 @@ int rzv_module_unreset(uint32_t clk_id)
 }
 
 /****************************************************************************
+ * Name: rzv_clock_enable_sdhi
+ *
+ * Description:
+ *   Enable IMCLK for one SDHI channel via CPG CLKON and release its reset.
+ *   CPG IDs decoded from FSP enum (NEEDS_VERIFY against RZ/V2H UM):
+ *     CH0: CPG_CLK_SDHI_0_IMCLK=0x00080628 -> domain 14, bit 3
+ *          CPG_RST_SDHI_0_IXRST=0x00800928 -> domain 14, bit 7
+ *   See rzv_clock.h RZV_CPG_CLK_SDHIn / RZV_CPG_RST_SDHIn macros.
+ *
+ ****************************************************************************/
+
+int rzv_clock_enable_sdhi(int ch)
+{
+  static const uint32_t clk_ids[3] =
+  {
+    RZV_CPG_CLK_SDHI0, RZV_CPG_CLK_SDHI1, RZV_CPG_CLK_SDHI2
+  };
+
+  if (ch < 0 || ch > 2)
+    {
+      clkerr("rzv_clock_enable_sdhi: invalid channel %d\n", ch);
+      return -EINVAL;
+    }
+
+  clkinfo("rzv_clock_enable_sdhi: enabling SDHI%d clock (CPG id=0x%08x)\n",
+          ch, clk_ids[ch]);
+
+  return rzv_clock_enable(clk_ids[ch]);
+}
+
+/****************************************************************************
+ * Name: rzv_reset_release_sdhi
+ *
+ * Description:
+ *   Deassert reset for one SDHI channel via CPG RST register.
+ *
+ ****************************************************************************/
+
+int rzv_reset_release_sdhi(int ch)
+{
+  static const uint32_t rst_ids[3] =
+  {
+    RZV_CPG_RST_SDHI0, RZV_CPG_RST_SDHI1, RZV_CPG_RST_SDHI2
+  };
+
+  if (ch < 0 || ch > 2)
+    {
+      clkerr("rzv_reset_release_sdhi: invalid channel %d\n", ch);
+      return -EINVAL;
+    }
+
+  clkinfo("rzv_reset_release_sdhi: releasing SDHI%d reset (CPG id=0x%08x)\n",
+          ch, rst_ids[ch]);
+
+  return rzv_module_unreset(rst_ids[ch]);
+}
+
+/****************************************************************************
  * Name: rzv_get_pclk_frequency
  *
  * Description:

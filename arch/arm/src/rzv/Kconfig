@@ -1657,6 +1657,19 @@ config RZV_CANFD_IRQ_PRIORITY
 
 endif # RZV_CANFD
 
+config RZV_SDHI
+   bool "SDHI (SD/eMMC) driver"
+   default n
+   select ARCH_HAVE_SDIO
+   select MMCSD
+   select MMCSD_SDIO
+   ---help---
+     Enable the RZ/V2H SDHI lower-half driver.
+     Supports SD0/SD1/SD2 channels on R9A09G057H.
+     RDK-RZV2H SD card connector uses SD0 (signals QSD0_*).
+     Phase 1: stub only (no hardware access).
+     Phase 2 will implement PIO data path.
+
 config RZV_WDT
    bool "Watchdog Timer (WDT)"
    default n

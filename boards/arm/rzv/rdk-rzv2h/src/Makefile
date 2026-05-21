@@ -138,6 +138,11 @@ ifeq ($(CONFIG_RZV2H_SPI_LOOPBACK_EXAMPLE),y)
 CSRCS += rzv2h_spi_loopback.c
 endif
 
+# SDHI (SD card) support
+ifeq ($(CONFIG_RZV_SDHI),y)
+CSRCS += rzv2h_sdhi.c
+endif
+
 # PWM oneshot example
 ifeq ($(CONFIG_RZV2H_PWM_ONESHOT_EXAMPLE),y)
 CSRCS += rzv2h_pwm_oneshot.c

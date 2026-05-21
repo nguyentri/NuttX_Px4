@@ -114,7 +114,6 @@ static int  rzv_scif_setup(struct uart_dev_s *dev);
 static void rzv_scif_shutdown(struct uart_dev_s *dev);
 static int  rzv_scif_attach(struct uart_dev_s *dev);
 static void rzv_scif_detach(struct uart_dev_s *dev);
-static int  rzv_scif_interrupt(int irq, void *context, void *arg);
 static int  rzv_scif_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  rzv_scif_receive(struct uart_dev_s *dev, unsigned int *status);
 static void rzv_scif_rxint(struct uart_dev_s *dev, bool enable);
@@ -417,6 +416,11 @@ static int rzv_scif_setup(struct uart_dev_s *dev)
   int timeout;
   int ret;
 
+  /* TODO: Resolve SCIF_RXD/SCIF_TXD pin setup later. Main risk: current
+   * rzv_gpioconfig() likely cannot configure 0xffff0600/0xffff0601 unless
+   * special-purpose port handling already exists or is added.
+   */
+
   /* CRITICAL: Enable peripheral clock first */
   ret = rzv_clock_enable(priv->clk_id);
   if (ret < 0)
@@ -671,7 +675,6 @@ static int rzv_scif_tei_interrupt(int irq, void *context, void *arg)
 static int rzv_scif_attach(struct uart_dev_s *dev)
 {
   struct rzv_scif_s *priv = (struct rzv_scif_s *)dev->priv;
-  int ret;
 
   /* Map ELC event 0x107 (UB1_RXI_EDGE_N) to RXI interrupt via ICU */
   priv->irq_rxi = rzv_icu_attach(RZV_ELC_UB1_RXI_EDGE_N,
