@@ -32,6 +32,7 @@
 #include <nuttx/config.h>
 
 #include <assert.h>
+#include <stdint.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/mm/circbuf.h>
@@ -320,8 +321,8 @@ ssize_t circbuf_peekat(FAR struct circbuf_s *circ, size_t pos,
       len = bytes;
     }
 
-  memcpy(dst, circ->base + off, len);
-  memcpy(dst + len, circ->base, bytes - len);
+  memcpy(dst, (FAR uint8_t *)circ->base + off, len);
+  memcpy((FAR uint8_t *)dst + len, circ->base, bytes - len);
 
   return bytes;
 }
@@ -468,8 +469,8 @@ ssize_t circbuf_write(FAR struct circbuf_s *circ,
       space = bytes;
     }
 
-  memcpy(circ->base + off, src, space);
-  memcpy(circ->base, src + space, bytes - space);
+  memcpy((FAR uint8_t *)circ->base + off, src, space);
+  memcpy(circ->base, (FAR const uint8_t *)src + space, bytes - space);
   circ->head += bytes;
 
   return bytes;
@@ -514,7 +515,7 @@ ssize_t circbuf_overwrite(FAR struct circbuf_s *circ,
 
   if (bytes > circ->size)
     {
-      src += bytes - circ->size;
+      src = (FAR const uint8_t *)src + bytes - circ->size;
       bytes = circ->size;
     }
 
@@ -531,8 +532,8 @@ ssize_t circbuf_overwrite(FAR struct circbuf_s *circ,
       space = bytes;
     }
 
-  memcpy(circ->base + off, src, space);
-  memcpy(circ->base, src + space, bytes - space);
+  memcpy((FAR uint8_t *)circ->base + off, src, space);
+  memcpy(circ->base, (FAR const uint8_t *)src + space, bytes - space);
   circ->head += bytes;
   circ->tail += overwrite;
 

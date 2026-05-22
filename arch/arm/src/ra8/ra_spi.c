@@ -231,8 +231,10 @@ static uint32_t ra_spi_readword(struct ra_spi_priv_s *priv);
 static int ra_spi_get_transfer_size(struct ra_spi_priv_s *priv);
 
 /* Interrupt handling */
+#ifdef CONFIG_RA_DMAC
 static int ra_spi_rxi_interrupt(int irq, void *context, void *arg);
 static int ra_spi_txi_interrupt(int irq, void *context, void *arg);
+#endif
 static int ra_spi_tei_interrupt(int irq, void *context, void *arg);
 static int ra_spi_eri_interrupt(int irq, void *context, void *arg);
 
@@ -1287,6 +1289,7 @@ static void ra_spi_dma_stop(struct ra_spi_priv_s *priv)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_RA_DMAC
 static int ra_spi_rxi_interrupt(int irq, void *context, void *arg)
 {
   struct ra_spi_priv_s *priv = (struct ra_spi_priv_s *)arg;
@@ -1372,6 +1375,7 @@ static int ra_spi_rxi_interrupt(int irq, void *context, void *arg)
 
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Name: ra_spi_txi_interrupt
@@ -1381,6 +1385,7 @@ static int ra_spi_rxi_interrupt(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_RA_DMAC
 static int ra_spi_txi_interrupt(int irq, void *context, void *arg)
 {
   struct ra_spi_priv_s *priv = (struct ra_spi_priv_s *)arg;
@@ -1426,6 +1431,7 @@ static int ra_spi_txi_interrupt(int irq, void *context, void *arg)
 
   return OK;
 }
+#endif
 
 /****************************************************************************
  * Name: ra_spi_tei_interrupt

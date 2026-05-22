@@ -24,6 +24,9 @@
 
 #include <nuttx/config.h>
 
+#include <stddef.h>
+#include <stdint.h>
+
 #include <nuttx/arch.h>
 
 #include "sched/sched.h"
@@ -80,6 +83,11 @@
  ****************************************************************************/
 
 static void **g_backtrace_code_regions;
+
+static inline void *backtrace_ptr_add(const void *ptr, size_t offset)
+{
+  return (void *)((uintptr_t)ptr + offset);
+}
 
 /****************************************************************************
  * Private Functions
@@ -367,13 +375,16 @@ __attribute__((no_sanitize_address))
 static int backtrace_branch(void *limit, void *sp,
                             void **buffer, int size, int *skip)
 {
+  uintptr_t limit_addr = (uintptr_t)limit;
+  uintptr_t sp_addr = (uintptr_t)sp;
   uint16_t ins16;
   uint32_t addr;
   int i;
 
-  for (i = 0; i < size && sp < limit; sp += sizeof(uint32_t))
+  for (i = 0; i < size && sp_addr < limit_addr;
+       sp_addr += sizeof(uint32_t))
     {
-      addr = *(uint32_t *)sp;
+      addr = *(uint32_t *)sp_addr;
       if (!in_code_region((void *)addr))
         {
           continue;
@@ -511,35 +522,35 @@ int up_backtrace(struct tcb_s *tcb,
 #  else
                                &g_intstacktop,
 #  endif /* CONFIG_SMP */
-                               &sp, (void *)up_backtrace + 10,
+                               &sp, backtrace_ptr_add(up_backtrace, 10),
                                buffer, size, &skip);
 #else
-          ret = backtrace_push(rtcb->stack_base_ptr +
-                               rtcb->adj_stack_size,
-                               &sp, (void *)up_backtrace + 10,
+          ret = backtrace_push(backtrace_ptr_add(rtcb->stack_base_ptr,
+                               rtcb->adj_stack_size),
+                               &sp, backtrace_ptr_add(up_backtrace, 10),
                                buffer, size, &skip);
 #endif
           if (ret < size)
             {
               sp = (void *)CURRENT_REGS[REG_SP];
-              ret += backtrace_push(rtcb->stack_base_ptr +
-                                    rtcb->adj_stack_size, &sp,
+              ret += backtrace_push(backtrace_ptr_add(rtcb->stack_base_ptr,
+                                    rtcb->adj_stack_size), &sp,
                                     (void *)CURRENT_REGS[REG_PC],
                                     &buffer[ret], size - ret, &skip);
             }
         }
       else
         {
-          ret = backtrace_push(rtcb->stack_base_ptr +
-                               rtcb->adj_stack_size, &sp,
-                               (void *)up_backtrace + 10,
+          ret = backtrace_push(backtrace_ptr_add(rtcb->stack_base_ptr,
+                               rtcb->adj_stack_size), &sp,
+                               backtrace_ptr_add(up_backtrace, 10),
                                buffer, size, &skip);
         }
 
       if (ret < size)
         {
-          ret += backtrace_branch(rtcb->stack_base_ptr +
-                                  rtcb->adj_stack_size, sp,
+          ret += backtrace_branch(backtrace_ptr_add(rtcb->stack_base_ptr,
+                                  rtcb->adj_stack_size), sp,
                                   &buffer[ret], size - ret, &skip);
         }
     }
@@ -554,15 +565,15 @@ int up_backtrace(struct tcb_s *tcb,
       if (ret < size)
         {
           sp = (void *)tcb->xcp.regs[REG_SP];
-          ret += backtrace_push(tcb->stack_base_ptr +
-                                tcb->adj_stack_size, &sp,
+          ret += backtrace_push(backtrace_ptr_add(tcb->stack_base_ptr,
+                                tcb->adj_stack_size), &sp,
                                 (void *)tcb->xcp.regs[REG_LR],
                                 &buffer[ret], size - ret, &skip);
 
           if (ret < size)
             {
-              ret += backtrace_branch(tcb->stack_base_ptr +
-                                      tcb->adj_stack_size, sp,
+              ret += backtrace_branch(backtrace_ptr_add(tcb->stack_base_ptr,
+                                      tcb->adj_stack_size), sp,
                                       &buffer[ret], size - ret, &skip);
             }
         }
