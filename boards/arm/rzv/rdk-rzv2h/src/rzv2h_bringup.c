@@ -312,13 +312,16 @@ int board_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_RZV_OPENAMP
-  /* Initialize CR8 to CA55 OpenAMP/IPCC transport. */
+#if defined(CONFIG_RZV_OPENAMP) || defined(CONFIG_RZV_IPC_RAW)
+  /* Initialize inter-core IPC: CA55 OpenAMP/IPCC (/dev/ipcc0) and/or the raw
+   * MHU+SHM links (/dev/ipcc1, /dev/ipcc2, /dev/ipccLB). Responder cores
+   * (e.g. CR8_1) have no OpenAMP but still register their raw links here.
+   */
 
   ret = board_ipc_initialize();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize OpenAMP/IPCC: %d\n",
+      syslog(LOG_ERR, "ERROR: Failed to initialize inter-core IPC: %d\n",
              ret);
       if (first_error == 0) first_error = ret;
     }

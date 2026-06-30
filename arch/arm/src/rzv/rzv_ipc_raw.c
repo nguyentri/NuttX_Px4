@@ -570,23 +570,39 @@ int rzv_ipc_raw_register(FAR const char *path,
     }
 
   /* Wire descriptor and compute ring pointers.
-   * SHM layout: [TX ring hdr (64B) | TX entries] [RX ring hdr | RX entries]
-   * Each half = shm_size / 2.
+   * SHM layout: [low half: ring hdr (64B) | entries] [high half: hdr | entries].
+   * Each half = shm_size / 2.  The two cores share one shm_base, so the
+   * responder must mirror the halves: the initiator's TX (low) is the
+   * responder's RX, and vice versa.  Without this swap both cores would
+   * write the low half and read the high half, so no data would cross.
+   * The loopback descriptor uses initiator=true and is unaffected.
    */
 
   half = desc->shm_size / 2u;
 
-  priv->desc    = desc;
-  priv->tx_hdr  = (FAR struct rzv_ipc_ring_hdr_s *)(uintptr_t)desc->shm_base;
-  priv->tx_data = (FAR uint8_t *)(uintptr_t)(desc->shm_base +
-                                              RZV_IPC_RING_HDR_SIZE);
-  priv->rx_hdr  = (FAR struct rzv_ipc_ring_hdr_s *)(uintptr_t)(desc->shm_base
-                                                               + half);
-  priv->rx_data = (FAR uint8_t *)(uintptr_t)(desc->shm_base + half +
-                                              RZV_IPC_RING_HDR_SIZE);
+  priv->desc = desc;
+
+  {
+    uintptr_t lo = (uintptr_t)desc->shm_base;
+    uintptr_t hi = (uintptr_t)desc->shm_base + half;
+    uintptr_t tx = desc->initiator ? lo : hi;
+    uintptr_t rx = desc->initiator ? hi : lo;
+
+    priv->tx_hdr  = (FAR struct rzv_ipc_ring_hdr_s *)tx;
+    priv->tx_data = (FAR uint8_t *)(tx + RZV_IPC_RING_HDR_SIZE);
+    priv->rx_hdr  = (FAR struct rzv_ipc_ring_hdr_s *)rx;
+    priv->rx_data = (FAR uint8_t *)(rx + RZV_IPC_RING_HDR_SIZE);
+  }
 
   /* Initiator zeros ring headers so both sides start from a known state.
    * Responder must NOT zero — it would clobber initiator's setup.
+   *
+   * BOOT-ORDER CONTRACT: the initiator (CR8_0 for Link 1; CR8_1 for Link 3)
+   * must run rzv_ipc_raw_register() before its responder peer issues the first
+   * read()/write(), otherwise the responder reads an uninitialised ring `mask`.
+   * This holds today via boot order (CR8_0 → CR8_1 → CM33). There is no
+   * handshake flag; if that ordering ever changes, add a responder spin on
+   * rx_hdr->flags == RZV_IPC_RING_ABI_VER before first use.
    */
 
   if (desc->initiator)

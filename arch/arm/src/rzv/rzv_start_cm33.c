@@ -126,6 +126,35 @@ const uintptr_t g_idle_topstack = (uintptr_t)&_estack;
  *
  ****************************************************************************/
 
+#if defined(CONFIG_ARM_MPU) && defined(CONFIG_RZV_IPC_RAW)
+#  include "mpu.h"
+
+/* The MHU NS register block (see hardware/rzv_mhu.h RZV_MHU0_NS_BASE) must be
+ * Device / non-cacheable so inter-core doorbell writes are not held in the M33
+ * D-cache.  Under the default ARMv8-M map the MHU sits in the (cacheable) Code
+ * region, so it needs an explicit override.  The SHM ring at 0x43820000 is
+ * already non-cacheable under the default map (Peripheral region), so only the
+ * MHU needs a region; everything else keeps the default map via PRIVDEFENA.
+ *
+ * NOTE: build-only verified.  Requires validation on real RZ/V2H hardware
+ * (MPU region attributes + that enabling the MPU does not disturb M33 boot).
+ */
+#  define RZV_CM33_MHU_NS_BASE   0x10480000ul
+#  define RZV_CM33_MHU_NS_SIZE   0x00010000ul   /* 64 KiB — covers all MHU NS channels */
+
+static void rzv_cm33_mpu_init(void)
+{
+  mpu_reset();
+  mpu_peripheral(RZV_CM33_MHU_NS_BASE, RZV_CM33_MHU_NS_SIZE);
+
+  /* enable=true, hfnmiena=false, privdefena=true:
+   * keep the architectural default memory map as the privileged background so
+   * code/data/stack/heap attributes are unchanged; only the MHU is overridden.
+   */
+  mpu_control(true, false, true);
+}
+#endif
+
 static void rzv_cm33_cpu_init(void)
 {
   uint32_t regval;
@@ -157,6 +186,11 @@ static void rzv_cm33_cpu_init(void)
   putreg32(regval, SCB_CCR);
   ARM_DSB();
   ARM_ISB();
+
+#if defined(CONFIG_ARM_MPU) && defined(CONFIG_RZV_IPC_RAW)
+  /* Configure the MPU (MHU = Device/non-cacheable) before enabling D-cache. */
+  rzv_cm33_mpu_init();
+#endif
 
 #ifdef CONFIG_ARMV8M_ICACHE
   /* Enable instruction cache if configured */

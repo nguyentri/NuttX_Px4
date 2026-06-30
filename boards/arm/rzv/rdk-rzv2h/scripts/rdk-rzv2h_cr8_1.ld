@@ -44,7 +44,9 @@ XSPIFLASH_PRV_LENGTH    = DEFINED(CR8_0) ? XSPIFLASH_CR8_0_LENGTH : XSPIFLASH_CR
 DDR_CACHE_PRV_START     = DEFINED(CR8_0) ? DDR0_CR8_0_START + 0x00800000 : DDR0_CR8_1_START + 0x01800000;
 DDR_CACHE_LENGTH        = DEFINED(CR8_0) ? 0x00F00000 : 0x00F00000;
 DDR_UNCACHE_PRV_START   = DEFINED(CR8_0) ? DDR0_CR8_0_START + 0x01800000 : DDR0_CR8_1_START + 0x02800000;
-DDR_UNCACHE_LENGTH      = DEFINED(CR8_0) ? 0x00800000 : 0x00800000;
+/* CR8_1 uncache capped to 7 MB so it ends at OPENAMP_RSCTBL_START and does not
+ * alias the OpenAMP resource table / MHU shmem. See RSCTBL-bound ASSERT below. */
+DDR_UNCACHE_LENGTH      = DEFINED(CR8_0) ? 0x00800000 : 0x00700000;
 
 /* Memory allocation OpenAMP using ddr. */
 OPENAMP_RSCTBL_START    = DEFINED(CR8_0) ? DDR0_CR8_0_START + 0x02f00000 : DDR0_CR8_1_START + 0x02f00000;
@@ -55,7 +57,7 @@ OPENAMP_VRING_START     = DEFINED(CR8_0) ? DDR0_CR8_0_START + 0x03000000 : DDR0_
 /* Shrink VRING to 8 MiB — see rdk-rzv2h_cr8_0.ld for rationale */
 OPENAMP_VRING_LENGTH    = 0x00800000;
 IPC_RAW_SHM_START       = DEFINED(CR8_0) ? DDR0_CR8_0_START + 0x03800000 : DDR0_CR8_1_START + 0x03800000;
-IPC_RAW_SHM_LENGTH      = 0x00020000;  /* 128 KiB */
+IPC_RAW_SHM_LENGTH      = 0x00040000;  /* 256 KiB (CR8↔CR8 64K @+0 + CR8↔CM33 32K @+0x10000 + LB 16K @+0x18000 + pad + CR8_1↔CM33 32K @+0x20000 + headroom) */
 
 /* Flash header infomation */
 ITCM_HEADER_START  = DEFINED(CR8_0) ? SRAM_CR8_0_START + 0x0001FE00 : SRAM_CR8_1_START + 0x0001FE00;
@@ -97,6 +99,8 @@ MEMORY
 
 ASSERT(DDR_UNCACHE_PRV_START >= DDR_CACHE_PRV_START + DDR_CACHE_LENGTH,
        "DDR_UNCACHE region overlaps DDR_CACHE - adjust DDR_CACHE_LENGTH or DDR_UNCACHE_PRV_START");
+ASSERT(DDR_UNCACHE_PRV_START + DDR_UNCACHE_LENGTH <= OPENAMP_RSCTBL_START,
+       "DDR_UNCACHE overruns OPENAMP_RSCTBL/MHU/VRING - reduce DDR_UNCACHE_LENGTH");
 /* HIGH-1 assertion: IPC_RAW_SHM must not overlap OPENAMP_VRING */
 ASSERT(IPC_RAW_SHM_START >= OPENAMP_VRING_START + OPENAMP_VRING_LENGTH,
        "IPC_RAW_SHM overlaps OPENAMP_VRING - check SHM and VRING sizes");
@@ -492,8 +496,12 @@ SECTIONS
 
     __tz_MHU_SHMEM = ABSOLUTE ( MHU_SHMEM_START ) ;
     . = __tz_MHU_SHMEM;
-    /* NEW-drop NOLOAD so ELF loader zero-fills on boot. */
-    .resource_table :
+    /* NOLOAD: OPENAMP_RSCTBL lives outside the flashed load image (not covered
+     * by the ITCM/SRAM/SDRAM header descriptors), so it is never carried in the
+     * split .bin nor copied by the boot loader. rzv_openamp_resource_table_init()
+     * populates it at runtime before CA55 reads it. Matches the FSP baseline.
+     */
+    .resource_table (NOLOAD) :
     {
         PROVIDE(__rsctbl_start = .);
         *  (  .resource_table  )

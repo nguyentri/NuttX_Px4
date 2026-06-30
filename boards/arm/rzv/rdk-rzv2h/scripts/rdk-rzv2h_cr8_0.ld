@@ -57,7 +57,7 @@ OPENAMP_VRING_START     = DEFINED(CR8_0) ? DDR0_CR8_0_START + 0x03000000 : DDR0_
  */
 OPENAMP_VRING_LENGTH    = 0x00800000;
 IPC_RAW_SHM_START       = DEFINED(CR8_0) ? DDR0_CR8_0_START + 0x03800000 : DDR0_CR8_1_START + 0x03800000;
-IPC_RAW_SHM_LENGTH      = 0x00020000;  /* 128 KiB (CR8↔CR8 64K + CR8↔CM33 32K + LB 16K + pad) */
+IPC_RAW_SHM_LENGTH      = 0x00040000;  /* 256 KiB (CR8↔CR8 64K @+0 + CR8↔CM33 32K @+0x10000 + LB 16K @+0x18000 + pad + CR8_1↔CM33 32K @+0x20000 + headroom) */
 
 /* Flash header infomation */
 ITCM_HEADER_START  = DEFINED(CR8_0) ? SRAM_CR8_0_START + 0x0001FE00 : SRAM_CR8_1_START + 0x0001FE00;
@@ -95,13 +95,12 @@ MEMORY
     INIT_WAIT_AREA_OTHER_CORE(rw) : ORIGIN = INIT_WAIT_AREA_OTHER_CORE_START, LENGTH = INIT_WAIT_AREA_LENGTH
 
     DUMMY : ORIGIN = DUMMY_START, LENGTH = DUMMY_LENGTH
-
-    /* IPC RAM for CR8-0 <-> CR8-1 <-> M33 communication (non-cacheable) */
-    IPC_RAM (rw) : ORIGIN = 0x70000000, LENGTH = 64K
 }
 
 ASSERT(DDR_UNCACHE_PRV_START >= DDR_CACHE_PRV_START + DDR_CACHE_LENGTH,
        "DDR_UNCACHE region overlaps DDR_CACHE - adjust DDR_CACHE_LENGTH or DDR_UNCACHE_PRV_START");
+ASSERT(DDR_UNCACHE_PRV_START + DDR_UNCACHE_LENGTH <= OPENAMP_RSCTBL_START,
+       "DDR_UNCACHE overruns OPENAMP_RSCTBL/MHU/VRING - reduce DDR_UNCACHE_LENGTH");
 /* HIGH-1 assertion: IPC_RAW_SHM must not overlap OPENAMP_VRING */
 ASSERT(IPC_RAW_SHM_START >= OPENAMP_VRING_START + OPENAMP_VRING_LENGTH,
        "IPC_RAW_SHM overlaps OPENAMP_VRING - check SHM and VRING sizes");
@@ -497,12 +496,12 @@ SECTIONS
 
     __tz_MHU_SHMEM = ABSOLUTE ( MHU_SHMEM_START ) ;
     . = __tz_MHU_SHMEM;
-    /* NEW-drop NOLOAD so the ELF loader zero-fills this region.
-     * g_rzv_resources is a C static (zero-init by default), and without
-     * NOLOAD the loader writes those zeros to DDR at boot — CA55 never
-     * sees garbage bytes before rzv_openamp_resource_table_init() runs.
+    /* NOLOAD: OPENAMP_RSCTBL lives outside the flashed load image (not covered
+     * by the ITCM/SRAM/SDRAM header descriptors), so it is never carried in the
+     * split .bin nor copied by the boot loader. rzv_openamp_resource_table_init()
+     * populates it at runtime before CA55 reads it. Matches the FSP baseline.
      */
-    .resource_table :
+    .resource_table (NOLOAD) :
     {
         PROVIDE(__rsctbl_start = .);
         *  (  .resource_table  )
@@ -524,18 +523,6 @@ SECTIONS
         . += OPENAMP_VRING_LENGTH;
         PROVIDE(__vring_end = .);
     } > OPENAMP_VRING : openamp_ph
-
-    /* IPC RAM Section for CR8-0 <-> CR8-1 communication (non-cacheable) */
-    .ipc_ram (NOLOAD) :
-    {
-        . = ALIGN(0x40);
-        PROVIDE(__ipc_ram_start = .);
-        PROVIDE(__ipc_cr8_cr8_base = .);
-        *(.ipc_ram)
-        *(.ipc_ram.*)
-        . = ALIGN(0x40);
-        PROVIDE(__ipc_ram_end = .);
-    } > IPC_RAM
 
     _itcm_load_addr = FLASH_DATA_START;
     _itcm_load_size = _itcm_load_end - _itcm_load_start;

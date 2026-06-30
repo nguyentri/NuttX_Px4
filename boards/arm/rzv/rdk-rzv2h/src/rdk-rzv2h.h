@@ -185,7 +185,10 @@ int board_timer_initialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_RZV_OPENAMP
+/* Defined in rzv2h_ipc.c whenever either the OpenAMP (/dev/ipcc0) or the raw
+ * MHU+SHM (/dev/ipcc1..3) IPC is enabled; the call site in rzv2h_bringup.c uses
+ * the same condition. Keep this guard in sync with both. */
+#if defined(CONFIG_RZV_OPENAMP) || defined(CONFIG_RZV_IPC_RAW)
 int board_ipc_initialize(void);
 #endif
 

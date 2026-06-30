@@ -45,19 +45,28 @@
 static const struct rzv_ipc_link_desc g_cr8_cr8_desc =
 {
   .mhu_base          = RZV_IPC_CR8CR8_MHU_BASE,
+#  ifdef CONFIG_RZV_IPC_ROLE_INITIATOR
+  /* Initiator (CR8_0): TX kicks ch4, RX listens on ch9. */
   .tx_chan           = RZV_IPC_CR8CR8_TX_CHAN,
   .rx_chan           = RZV_IPC_CR8CR8_RX_CHAN,
   .tx_irq            = RZV_IPC_CR8CR8_TX_IRQ,
   .rx_irq            = RZV_IPC_CR8CR8_RX_IRQ,
+  .initiator         = true,
+#  else
+  /* Responder (CR8_1): mirror — TX kicks ch9, RX listens on ch4, and IRQs
+   * swap accordingly. The driver mirrors the SHM ring halves for the
+   * responder, so TX/RX rings line up with the initiator.
+   */
+  .tx_chan           = RZV_IPC_CR8CR8_RX_CHAN,
+  .rx_chan           = RZV_IPC_CR8CR8_TX_CHAN,
+  .tx_irq            = RZV_IPC_CR8CR8_RESP_TX_IRQ,
+  .rx_irq            = RZV_IPC_CR8CR8_RESP_RX_IRQ,
+  .initiator         = false,
+#  endif
   .shm_base          = RZV_IPC_CR8CR8_SHM_BASE,
   .shm_size          = RZV_IPC_CR8CR8_SHM_SIZE,
   .ring_entries      = RZV_IPC_CR8CR8_RING_ENTRIES,
   .entry_size        = RZV_IPC_CR8CR8_RING_ENTRY_SZ,
-#  ifdef CONFIG_RZV_IPC_ROLE_INITIATOR
-  .initiator         = true,
-#  else
-  .initiator         = false,
-#  endif
   /* CR8↔CR8: both cores trusted; no TX-ACK timeout needed.
    * Use the global CONFIG_RZV_IPC_TX_TIMEOUT_MS (may be 0 = infinite).
    */
@@ -87,6 +96,41 @@ static const struct rzv_ipc_link_desc g_cr8_cm33_desc =
                          ? CONFIG_RZV_IPC_TX_TIMEOUT_MS : 100u,
 };
 #endif /* CONFIG_RZV_IPC_CR8_CM33 */
+
+#ifdef CONFIG_RZV_IPC_CR8_1_CM33
+/* ESC relay leg: CR8_1 (initiator) ↔ CM33 (responder), /dev/ipcc3. */
+static const struct rzv_ipc_link_desc g_cr8_1_cm33_desc =
+{
+  .mhu_base          = RZV_IPC_CR8_1_CM33_MHU_BASE,
+#ifdef CONFIG_RZV2H_BUILD_CM33
+  /* CM33 = responder: mirror channels/IRQs. The driver mirrors the SHM ring
+   * halves for the responder (initiator=false), so TX/RX line up with CR8_1.
+   */
+  .tx_chan           = RZV_IPC_CR8_1_CM33_RX_CHAN,   /* ch22: CM33 → CR8_1 */
+  .rx_chan           = RZV_IPC_CR8_1_CM33_TX_CHAN,   /* ch21: CR8_1 → CM33 */
+  .tx_irq            = RZV_IPC_CR8_1_CM33_RESP_TX_IRQ,
+  .rx_irq            = RZV_IPC_CR8_1_CM33_RESP_RX_IRQ,
+  .initiator         = false,
+#else
+  /* CR8_1 = initiator: TX kicks ch21, RX listens on ch22. */
+  .tx_chan           = RZV_IPC_CR8_1_CM33_TX_CHAN,   /* ch21: CR8_1 → CM33 */
+  .rx_chan           = RZV_IPC_CR8_1_CM33_RX_CHAN,   /* ch22: CM33 → CR8_1 */
+  .tx_irq            = RZV_IPC_CR8_1_CM33_TX_IRQ,
+  .rx_irq            = RZV_IPC_CR8_1_CM33_RX_IRQ,
+  .initiator         = true,
+#endif
+  .shm_base          = RZV_IPC_CR8_1_CM33_SHM_BASE,
+  .shm_size          = RZV_IPC_CR8_1_CM33_SHM_SIZE,
+  .ring_entries      = RZV_IPC_CR8_1_CM33_RING_ENTRIES,
+  .entry_size        = RZV_IPC_CR8_1_CM33_RING_ENTRY_SZ,
+
+  /* CM33 firmware may be absent (from CR8_1's view); mandatory TX-ACK
+   * timeout (clamp 0 → 100 ms).
+   */
+  .tx_ack_timeout_ms = (CONFIG_RZV_IPC_TX_TIMEOUT_MS > 0)
+                         ? CONFIG_RZV_IPC_TX_TIMEOUT_MS : 100u,
+};
+#endif /* CONFIG_RZV_IPC_CR8_1_CM33 */
 
 #ifdef CONFIG_RZV_IPC_CR8_CR8_LOOPBACK
 static const struct rzv_ipc_link_desc g_cr8_loopback_desc =
@@ -179,6 +223,22 @@ int board_ipc_initialize(void)
          "TX timeout %lu ms)\n",
          (unsigned long)g_cr8_cm33_desc.tx_ack_timeout_ms);
 #endif /* CONFIG_RZV_IPC_CR8_CM33 */
+
+  /* --- Link 3: CR8_1 ↔ CM33 raw IPCC (/dev/ipcc3, ESC relay leg) --- */
+
+#ifdef CONFIG_RZV_IPC_CR8_1_CM33
+  ret = rzv_ipc_raw_register("/dev/ipcc3", &g_cr8_1_cm33_desc);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: CR8_1↔CM33 IPCC init failed: %d\n", ret);
+      return ret;
+    }
+
+  syslog(LOG_INFO,
+         "RZ/V2H raw IPCC registered at /dev/ipcc3 (CR8_1-CM33, "
+         "TX timeout %lu ms)\n",
+         (unsigned long)g_cr8_1_cm33_desc.tx_ack_timeout_ms);
+#endif /* CONFIG_RZV_IPC_CR8_1_CM33 */
 
   /* --- Loopback: CR8_0 self-test (/dev/ipccLB) --- */
 

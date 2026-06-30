@@ -124,8 +124,9 @@ ifeq ($(CONFIG_RDK_RZV2H_XSPI_PARAMFS),y)
 CSRCS += rzv2h_xspi_paramfs.c
 endif
 
-# OpenAMP/IPCC registration
-ifeq ($(CONFIG_RZV_OPENAMP),y)
+# OpenAMP (/dev/ipcc0) and/or raw MHU+SHM IPCC (/dev/ipcc1..3) registration.
+# rzv2h_ipc.c is internally guarded by the same condition.
+ifneq ($(filter y,$(CONFIG_RZV_OPENAMP) $(CONFIG_RZV_IPC_RAW)),)
 CSRCS += rzv2h_ipc.c
 endif
 

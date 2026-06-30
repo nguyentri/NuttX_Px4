@@ -1332,7 +1332,7 @@ config RZV_IPC_CR8_CR8
    depends on RZV_IPC_RAW
    ---help---
      Register a raw IPCC character device at /dev/ipcc1 using MHU
-     channels 4/5 and DDR SHM at 0x43800000.
+     channels 4/9 and DDR SHM at 0x43800000.
 
 config RZV_IPC_ROLE_INITIATOR
    bool "This core is the ring initiator (zeros SHM on boot)"
@@ -1348,7 +1348,7 @@ config RZV_IPC_CR8_CR8_LOOPBACK
    default n
    depends on RZV_IPC_CR8_CR8
    ---help---
-     Wire MHU channel 8 TX back to channel 8 RX on CR8_0 alone.
+     Wire MHU channel 16 TX back to channel 16 RX on CR8_0 alone.
      Registers /dev/ipccLB.  Used to smoke-test the ring driver before
      CR8_1 firmware is available.
 
@@ -1360,6 +1360,18 @@ config RZV_IPC_CR8_CM33
      Register a raw IPCC character device at /dev/ipcc2 using MHU
      channels 10/15 and DDR SHM at 0x43810000.  Send path times out
      after CONFIG_RZV_IPC_TX_TIMEOUT_MS when CM33 firmware is absent.
+
+config RZV_IPC_CR8_1_CM33
+   bool "Instantiate /dev/ipcc3 for CR8_1 <-> CM33 (ESC relay leg)"
+   default n
+   depends on RZV_IPC_RAW
+   ---help---
+     Register a raw IPCC character device at /dev/ipcc3 using MHU
+     channels 21/22 and DDR SHM at 0x43820000 (32 KiB).  CR8_1 is the
+     initiator; the CM33 firmware is the responder.  This is the ESC leg
+     of the FMU->IO->ESC relay (the FMU<->IO leg is RZV_IPC_CR8_CR8).
+     Send path times out after CONFIG_RZV_IPC_TX_TIMEOUT_MS when CM33
+     firmware is absent.
 
 config RZV_MPU_PORT_FSP
    bool "RZ/V2H CR8 MPU region table"
