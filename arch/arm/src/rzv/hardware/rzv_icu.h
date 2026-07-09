@@ -51,7 +51,7 @@
 
 #define RZV_ICU_NSCNT_OFFSET        0x0000  /* NMI Status Control Register */
 #define RZV_ICU_NSCLR_OFFSET        0x0004  /* NMI Status Clear Register */
-#define RZV_ICU_NMITR_OFFSET        0x0008  /* NMI Trigger Selection (NITSAR) */
+#define RZV_ICU_NMITR_OFFSET        0x0008  /* NMI Trigger Selection (NITSR) */
 /* 0x000c: RESERVED — do NOT write (CRIT-4: was wrongly named NMIFLTC) */
 
 #define RZV_ICU_NSCNT               (RZV_ICU_BASE + RZV_ICU_NSCNT_OFFSET)
@@ -82,26 +82,30 @@
 #define RZV_ICU_TSCLR_OFFSET        0x0024  /* TINT Status Clear Register */
 #define RZV_ICU_TITSR0_OFFSET       0x0028  /* TINT Detection Method Selection 0 */
 #define RZV_ICU_TITSR1_OFFSET       0x002c  /* TINT Detection Method Selection 1 */
-#define RZV_ICU_TFLTC_OFFSET        0x0030  /* TINT Filter Control */
 
 #define RZV_ICU_TSCTR               (RZV_ICU_BASE + RZV_ICU_TSCTR_OFFSET)
 #define RZV_ICU_TSCLR               (RZV_ICU_BASE + RZV_ICU_TSCLR_OFFSET)
 #define RZV_ICU_TITSR0              (RZV_ICU_BASE + RZV_ICU_TITSR0_OFFSET)
 #define RZV_ICU_TITSR1              (RZV_ICU_BASE + RZV_ICU_TITSR1_OFFSET)
-#define RZV_ICU_TFLTC               (RZV_ICU_BASE + RZV_ICU_TFLTC_OFFSET)
 
-/* DMAC/DTC Activation Registers (for future use) */
+/* TINT Interrupt Source Select Registers (TSSR0-7), offsets 0x30-0x4c.
+ * Per RZ/V2H CMSIS intc_iodefine.h these are TSSRn — NOT the "TINT filter",
+ * "DMAC/DTC" or "Wakeup" registers previously named at these offsets; the
+ * INTC block has no such registers here.  Each TSSRn packs four TINT sources:
+ * TSSELn_k[6:0] selects the TINT source, TIENn_k enables slot k (k = 0..3).
+ * Field helper macros are added by the TINT external-interrupt driver phase.
+ */
 
-#define RZV_ICU_DSCTR_OFFSET        0x0034  /* DMAC/DTC Status Control */
-#define RZV_ICU_DSCLR_OFFSET        0x0038  /* DMAC/DTC Status Clear */
-#define RZV_ICU_DITSR_OFFSET        0x003c  /* DMAC/DTC Detection Method */
+#define RZV_ICU_TSSR0_OFFSET        0x0030  /* TINT Source Select 0 (TINT0-3) */
+#define RZV_ICU_TSSR1_OFFSET        0x0034  /* TINT Source Select 1 (TINT4-7) */
+#define RZV_ICU_TSSR2_OFFSET        0x0038  /* TINT Source Select 2 (TINT8-11) */
+#define RZV_ICU_TSSR3_OFFSET        0x003c  /* TINT Source Select 3 (TINT12-15) */
+#define RZV_ICU_TSSR4_OFFSET        0x0040  /* TINT Source Select 4 (TINT16-19) */
+#define RZV_ICU_TSSR5_OFFSET        0x0044  /* TINT Source Select 5 (TINT20-23) */
+#define RZV_ICU_TSSR6_OFFSET        0x0048  /* TINT Source Select 6 (TINT24-27) */
+#define RZV_ICU_TSSR7_OFFSET        0x004c  /* TINT Source Select 7 (TINT28-31) */
 
-/* Wakeup Interrupt Registers (for future use) */
-
-#define RZV_ICU_WSCTR_OFFSET        0x0040  /* Wakeup Status Control */
-#define RZV_ICU_WSCLR_OFFSET        0x0044  /* Wakeup Status Clear */
-#define RZV_ICU_WITSR_OFFSET        0x0048  /* Wakeup Detection Method */
-#define RZV_ICU_WFLTC_OFFSET        0x004c  /* Wakeup Filter Control */
+#define RZV_ICU_TSSR(n)             (RZV_ICU_BASE + RZV_ICU_TSSR0_OFFSET + ((n) * 4))
 
 /* Register Bit Definitions */
 
@@ -109,9 +113,14 @@
 
 #define ICU_NSCNT_NSTAT             (1 << 0)  /* NMI Status Flag */
 
-/* NMI Trigger Selection Register (NMITR) */
+/* NMI Trigger Selection Register (NITSR) */
 
-#define ICU_NMITR_NFLTEN            (1 << 0)  /* NMI Filter Enable */
+/* Bit 0 selects the NMI detection edge (NTSEL): 0 = falling, 1 = rising.
+ * There is no "filter enable" bit here (the prior ICU_NMITR_NFLTEN name was
+ * wrong per RZ/V2H CMSIS intc_iodefine.h NITSR_b).
+ */
+
+#define ICU_NMITR_NTSEL             (1 << 0)  /* NMI detection edge select */
 
 /* NMI Filter Control: REMOVED — 0x0C is RESERVED in INTC block.
  * CRIT-4: filter config lives in GPIO FILONOFF/FILNUM/FILCLKSEL registers.
@@ -161,10 +170,12 @@
 #define ICU_TITSR_RISING            2  /* Rising edge detection */
 #define ICU_TITSR_BOTH              3  /* Both edges detection */
 
-/* TINT Filter Control Register (TFLTC) */
-
-#define ICU_TFLTC_FCLKSEL_SHIFT(n)  ((n) * 2)  /* Filter Clock for TINT[n] */
-#define ICU_TFLTC_FCLKSEL_MASK(n)   (0x3 << ICU_TFLTC_FCLKSEL_SHIFT(n))
+/* TINT Interrupt Source Select Registers (TSSR0-7): 4 sources per register.
+ * TSSELn_k occupies bits [7*... ] — defined by the TINT external-interrupt
+ * driver when TINT routing is implemented.  (There is no TINT filter-clock
+ * register in the INTC block; the prior ICU_TFLTC_FCLKSEL macros were based
+ * on a non-existent register and have been removed.)
+ */
 
 /****************************************************************************
  * Public Types

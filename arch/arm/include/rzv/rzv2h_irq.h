@@ -538,41 +538,53 @@
  * generated vector_data.c, which currently reaches IRQ 455.
  */
 
-/* MHU-B Non-Secure MSG interrupt IDs (GIC SPI numbers).
+/* MHU-B Non-Secure MSG interrupt IDs (physical GIC INTIDs).
  * Source: RZ/V2H TRM Ch.11 / FSP bsp_irq_id.h MHU_MSGn_NS_IRQn.
+ * FSP "IRQ No" enums are SPI indices; the physical GIC INTID that hardware
+ * presents in ICCIAR is enum + BSP_CORTEX_VECTOR_TABLE_ENTRIES (32) — FSP
+ * applies this +32 to every GIC register access (bsp_irq.c).  NuttX IRQ
+ * numbers ARE physical INTIDs (arm_decodeirq dispatches the raw ICCIAR ID),
+ * so these must carry the +32.  MSG3_NS enum 314 -> INTID 346, etc.
  * Valid MHU-B-NS channels (BSP_FEATURE_MHU_B_NS_VALID_CHANNEL_MASK =
  * 0x030410618618): 3,4,9,10,15,16,21,22,28,34,40,41.
  * Channels 5–8 are NOT valid in MHU-B-NS.
  */
-#define RZV_IRQ_MHU_MSG3_NS                          (314)
-#define RZV_IRQ_MHU_MSG4_NS                          (315)
-#define RZV_IRQ_MHU_MSG9_NS                          (316)
-#define RZV_IRQ_MHU_MSG10_NS                         (317)
-#define RZV_IRQ_MHU_MSG15_NS                         (318)
-#define RZV_IRQ_MHU_MSG16_NS                         (319)
-#define RZV_IRQ_MHU_MSG21_NS                         (320)
-#define RZV_IRQ_MHU_MSG22_NS                         (321)
-#define RZV_IRQ_MHU_MSG28_NS                         (322)
-#define RZV_IRQ_MHU_MSG34_NS                         (323)
-#define RZV_IRQ_MHU_MSG40_NS                         (324)
-#define RZV_IRQ_MHU_MSG41_NS                         (325)
+#define RZV_IRQ_MHU_MSG3_NS                          (346)
+#define RZV_IRQ_MHU_MSG4_NS                          (347)
+#define RZV_IRQ_MHU_MSG9_NS                          (348)
+#define RZV_IRQ_MHU_MSG10_NS                         (349)
+#define RZV_IRQ_MHU_MSG15_NS                         (350)
+#define RZV_IRQ_MHU_MSG16_NS                         (351)
+#define RZV_IRQ_MHU_MSG21_NS                         (352)
+#define RZV_IRQ_MHU_MSG22_NS                         (353)
+#define RZV_IRQ_MHU_MSG28_NS                         (354)
+#define RZV_IRQ_MHU_MSG34_NS                         (355)
+#define RZV_IRQ_MHU_MSG40_NS                         (356)
+#define RZV_IRQ_MHU_MSG41_NS                         (357)
 
-/* MHU-B Non-Secure RSP (response/ACK) interrupt IDs */
-#define RZV_IRQ_MHU_RSP3_NS                          (326)
-#define RZV_IRQ_MHU_RSP4_NS                          (327)
-#define RZV_IRQ_MHU_RSP9_NS                          (328)
-#define RZV_IRQ_MHU_RSP10_NS                         (329)
-#define RZV_IRQ_MHU_RSP15_NS                         (330)
-#define RZV_IRQ_MHU_RSP16_NS                         (331)
-#define RZV_IRQ_MHU_RSP21_NS                         (332)
-#define RZV_IRQ_MHU_RSP22_NS                         (333)
-#define RZV_IRQ_MHU_RSP28_NS                         (334)
-#define RZV_IRQ_MHU_RSP34_NS                         (335)
-#define RZV_IRQ_MHU_RSP40_NS                         (336)
-#define RZV_IRQ_MHU_RSP41_NS                         (337)
+/* MHU-B Non-Secure RSP (response/ACK) interrupt IDs (physical GIC INTIDs) */
+#define RZV_IRQ_MHU_RSP3_NS                          (358)
+#define RZV_IRQ_MHU_RSP4_NS                          (359)
+#define RZV_IRQ_MHU_RSP9_NS                          (360)
+#define RZV_IRQ_MHU_RSP10_NS                         (361)
+#define RZV_IRQ_MHU_RSP15_NS                         (362)
+#define RZV_IRQ_MHU_RSP16_NS                         (363)
+#define RZV_IRQ_MHU_RSP21_NS                         (364)
+#define RZV_IRQ_MHU_RSP22_NS                         (365)
+#define RZV_IRQ_MHU_RSP28_NS                         (366)
+#define RZV_IRQ_MHU_RSP34_NS                         (367)
+#define RZV_IRQ_MHU_RSP40_NS                         (368)
+#define RZV_IRQ_MHU_RSP41_NS                         (369)
 
 #define RZV_IRQ_ICU_SLOTS                             (129)
-#define RZV_IRQ_GIC_SIZE                              (480)
+
+/* GIC IRQ-table span (NR_IRQS = RZV_IRQ_FIRST + RZV_IRQ_GIC_SIZE).
+ * Must cover the INTR8SEL selectable-interrupt window, whose physical GIC
+ * INTIDs run from RZV_INTC_SEL_SPI_BASE (385 = FIXED_INTSEL_COUNT 353 + 32)
+ * up to 385 + RZV_IRQ_ICU_SLOTS (514).  480 (old NR_IRQS 512) was too small;
+ * 512 gives NR_IRQS 544 with headroom above INTID 514.
+ */
+#define RZV_IRQ_GIC_SIZE                              (512)
 
 /* Total number of IRQ numbers */
 #define RZV_IRQ_NEXTINT                             RZV_IRQ_GIC_SIZE

@@ -49,16 +49,25 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* SELECT interrupt GIC SPI base.
- * BSP_FEATURE_ICU_FIXED_INTSEL_COUNT = 353.
- * INTR8SEL slot N routes to GIC SPI INTID (353 + N).
- * NuttX IRQ number == GIC INTID (RZV_IRQ_FIRST=32 is GIC SPI 0 offset,
- * so irq index = 32 + slot_gic_spi_offset = 32 + (353-32) + N = 353 + N).
- * Do NOT add RZV_IRQ_FIRST again — it is already baked into the INTID.
- * Fix: CRIT-1 — drop RZV_IRQ_FIRST from irq computation.
+/* SELECT interrupt (INTR8SEL) -> physical GIC INTID base.
+ *
+ * FSP computes this base as
+ *   BSP_FEATURE_ICU_FIXED_INTSEL_COUNT (353, the count of FIXED SPI sources,
+ *   i.e. SPI indices 0..352)
+ *   + BSP_SELECT_INT_START_ELEMENT (0)
+ *   + BSP_CORTEX_VECTOR_TABLE_ENTRIES (32, the SGI+PPI INTIDs 0..31)
+ *   = 385   (bsp_irq.c: irq_num used as the physical INTID subscript).
+ *
+ * So INTR8SEL slot N is delivered on physical GIC INTID (385 + N).  353 is a
+ * SPI-index count, NOT an INTID; adding the +32 SGI/PPI offset is required.
+ * NuttX IRQ numbers ARE physical INTIDs (arm_decodeirq dispatches the raw
+ * ICCIAR INTID with no translation, and the private timer attaches at raw
+ * PPI INTID 29), so the handler must be installed / the GIC line enabled at
+ * (385 + N).  Using 353 registered the handler on a line the hardware never
+ * raises, leaving every INTR8SEL-routed peripheral IRQ unserviced.
  */
 
-#define RZV_INTC_SEL_SPI_BASE   (353)
+#define RZV_INTC_SEL_SPI_BASE   (385)
 
 /****************************************************************************
  * Type Definitions
@@ -216,10 +225,11 @@ int rzv_icu_attach(int event, xcpt_t handler, void *arg, bool irq_enable)
 
   leave_critical_section(flags);
 
-  /* CRIT-1 fix: INTR8SEL slot N maps to GIC SPI INTID (353 + N).
-   * NuttX IRQ number == GIC INTID directly (irq table index == INTID).
-   * Do NOT add RZV_IRQ_FIRST; that would double-offset to 385+N where
-   * no handler is registered in the GIC distributor.
+  /* INTR8SEL slot N is delivered on physical GIC INTID
+   * (RZV_INTC_SEL_SPI_BASE + N) = 385 + N (see the base macro for the FSP
+   * derivation).  NuttX IRQ numbers are physical GIC INTIDs, so this value
+   * is what arm_decodeirq will dispatch and what irq_attach/up_enable_irq
+   * must use.
    */
 
   irq = RZV_INTC_SEL_SPI_BASE + slot;
@@ -283,7 +293,9 @@ int rzv_icu_detach(int icu_irq)
   int i;
   int highest_used;
 
-  /* CRIT-1 fix: IRQ base is SEL_SPI_BASE (not RZV_IRQ_FIRST + SEL_SPI_BASE) */
+  /* icu_irq is the physical GIC INTID (RZV_INTC_SEL_SPI_BASE + slot); the
+   * base already includes the SGI/PPI offset, so it is not added again.
+   */
 
   if (icu_irq < RZV_INTC_SEL_SPI_BASE ||
       icu_irq >= (RZV_INTC_SEL_SPI_BASE + RZV_IRQ_ICU_SLOTS))
@@ -583,7 +595,7 @@ int rzv_icu_set_irq_filter(int irq_num, uint8_t filter_clock)
  *   - Priority must be set before enabling the interrupt
  *   - Lower numerical values = higher priority
  *   - Priority 0 is reserved for critical system interrupts
- *   - GIC implements 5 bits of priority in bits[7:3]
+ *   - GIC implements 4 priority bits in bits[7:4] (0-15 logical levels)
  *
  ****************************************************************************/
 
@@ -597,24 +609,24 @@ int rzv_icu_set_priority(int icu_irq, int priority)
       return -EINVAL;
     }
 
-  /* Validate priority range (0-31 for GIC 5-bit priority)
-   * GIC uses bits[7:3] of the priority byte, so we have 32 levels
-   * Priority 0x00 = highest, 0xF8 = lowest
+  /* Validate priority range (0-15 for the 4 implemented GIC priority bits).
+   * R9A09G057H implements priority in bits [7:4] (FSP IRQ_PRIORITY_POS_BIT=4),
+   * and the CPU interface binary point (ICCBPR=0x03) uses [7:4] as the group
+   * priority for preemption — so 16 distinct preempting levels are available.
+   * Priority 0x00 = highest, 0xF0 = lowest.
    */
 
-  if (priority < 0 || priority > 31)
+  if (priority < 0 || priority > 15)
     {
       return -EINVAL;
     }
 
 #ifdef CONFIG_ARCH_IRQPRIO
-  /* Use the architecture-specific priority function
-   * up_prioritize_irq expects priority in the format used by GIC
-   * For GIC, priority is in bits [7:3] of the priority byte,
-   * so we need to shift left by 3
+  /* GIC priority occupies bits [7:4] of the priority byte; shift the logical
+   * 0-15 level into place.
    */
 
-  return up_prioritize_irq(icu_irq, priority << 3);
+  return up_prioritize_irq(icu_irq, priority << 4);
 #else
   /* Priority control not enabled in configuration */
 
@@ -772,11 +784,11 @@ bool rzv_icu_get_nmi_status(void)
 
 int rzv_icu_set_nmi_filter(bool filter_enable, uint8_t filter_clock)
 {
-  /* CRIT-4 fix: NMIFLTC at 0x0C is RESERVED in INTC block.
-   * NMI digital filter lives in GPIO peripheral (FILONOFF/FILNUM/FILCLKSEL).
-   * Only NMITR (0x08) is valid here — NMI trigger edge selection (NFLTEN
-   * bit in NMITR is NOT a filter-enable but a rising/falling edge select).
-   * This function is a no-op stub; NMI filter must be configured via GPIO.
+  /* 0x0C is RESERVED in the INTC block; the NMI digital filter lives in the
+   * GPIO peripheral (FILONOFF/FILNUM/FILCLKSEL).  Only NITSR (0x08) is valid
+   * here, and its bit 0 (NTSEL) is a rising/falling edge select, not a
+   * filter-enable.  This function is a no-op stub; configure the NMI filter
+   * via GPIO.
    */
 
   (void)filter_enable;

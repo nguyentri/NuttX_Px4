@@ -548,8 +548,13 @@ config ARCH_CHIP_RA8
 
 config ARCH_CHIP_RZV
 	bool "Renesas RZV"
+	select ARCH_HAVE_LOWVECTORS
 	---help---
 		Renesas RZV Architecture (ARM Cortex-R8).
+
+		Selects ARCH_HAVE_LOWVECTORS so CONFIG_ARCH_LOWVECTORS can keep the
+		CR8 exception vectors VBAR-relative (SCTLR.V=0) instead of the
+		high-vector base, matching rzv_set_vbar().
 
 config ARCH_CHIP_ARM_CUSTOM
 	bool "Custom ARM chip"

@@ -43,7 +43,7 @@
 /* INTC_GIC Register Offsets **********************************************/
 
 /* GICD_CIR%s Registers (0-3) */
-#define RZV_INTC_GIC_GICD_CIR_OFFSET(m)         (0x00001ed0 + ((m) * 0x00000004))  /* GICD_CIR Register %s */
+#define RZV_INTC_GIC_GICD_CIR_OFFSET(m)         (0x00001ef0 + ((m) * 0x00000004))  /* GICD_CIR Register %s */
 #define RZV_INTC_GIC_GICC_ICCICR_OFFSET                  0x0000  /* GICC_ICCICR */
 #define RZV_INTC_GIC_GICC_ICCPMR_OFFSET                  0x0004  /* GICC_ICCPMR */
 #define RZV_INTC_GIC_GICC_ICCBPR_OFFSET                  0x0008  /* GICC_ICCBPR */
@@ -63,14 +63,18 @@
 #define RZV_INTC_GIC_GICD_ICDIPR_OFFSET(n)               (0x1300 + ((n) * 0x04))
 #define RZV_INTC_GIC_GICD_ICDIPTR_OFFSET(n)              (0x1700 + ((n) * 0x04))
 #define RZV_INTC_GIC_GICD_ICDICFR_OFFSET(n)              (0x1B00 + ((n) * 0x04))
-#define RZV_INTC_GIC_GICD_PPI_OFFSET                     0x1BE0  /* GICD_PPI */
-#define RZV_INTC_GIC_GICD_SPI_OFFSET                     0x1BE4  /* GICD_SPI */
-#define RZV_INTC_GIC_GICD_ICDSGIR_OFFSET                 0x1DE0  /* GICD_ICDSGIR */
-#define RZV_INTC_GIC_GICD_PIR4_OFFSET                    0x1EB0  /* GICD_PIR4 */
-#define RZV_INTC_GIC_GICD_PIR0_OFFSET                    0x1EC0  /* GICD_PIR0 */
-#define RZV_INTC_GIC_GICD_PIR1_OFFSET                    0x1EC4  /* GICD_PIR1 */
-#define RZV_INTC_GIC_GICD_PIR2_OFFSET                    0x1EC8  /* GICD_PIR2 */
-#define RZV_INTC_GIC_GICD_PIR3_OFFSET                    0x1ECC  /* GICD_PIR3 */
+/* GICD extension registers (GIC-600).  Offsets corrected to match the RZ/V2H
+ * CMSIS intc_gic_iodefine.h struct layout; the prior values were 0x20 low.
+ * All are unused by the current single-core driver (SGIs/IPIs not issued).
+ */
+#define RZV_INTC_GIC_GICD_PPI_OFFSET                     0x1C00  /* GICD_PPI */
+#define RZV_INTC_GIC_GICD_SPI_OFFSET                     0x1C04  /* GICD_SPI */
+#define RZV_INTC_GIC_GICD_ICDSGIR_OFFSET                 0x1E00  /* GICD_ICDSGIR */
+#define RZV_INTC_GIC_GICD_PIR4_OFFSET                    0x1ED0  /* GICD_PIR4 */
+#define RZV_INTC_GIC_GICD_PIR0_OFFSET                    0x1EE0  /* GICD_PIR0 */
+#define RZV_INTC_GIC_GICD_PIR1_OFFSET                    0x1EE4  /* GICD_PIR1 */
+#define RZV_INTC_GIC_GICD_PIR2_OFFSET                    0x1EE8  /* GICD_PIR2 */
+#define RZV_INTC_GIC_GICD_PIR3_OFFSET                    0x1EEC  /* GICD_PIR3 */
 
 /* INTC_GIC Register Addresses *********************************************/
 

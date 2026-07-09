@@ -186,14 +186,76 @@ static inline void rzv_enable_caches(void)
 }
 
 /****************************************************************************
+ * Name: rzv_disable_dcache_early
+ *
+ * Description:
+ *   Disable the data cache for the early-boot window.  arm_head.S enables
+ *   I/D cache at reset (CPU_DCACHE_DISABLE is undefined for this port), but
+ *   the MPU is still off and the real kernel BSS now lives in cacheable DDR
+ *   (see rzv_ram_init).  Zeroing that BSS with the D-cache enabled while the
+ *   MPU is off is not coherent: the later invalidate in rzv_enable_caches()
+ *   would discard the zero lines.  Boot with the D-cache off, then enable it
+ *   deterministically after the MPU is programmed.
+ *
+ ****************************************************************************/
+
+static inline void rzv_disable_dcache_early(void)
+{
+  uint32_t sctlr;
+
+  __asm__ __volatile__
+  (
+    "mrc p15, 0, %0, c1, c0, 0"
+    : "=r" (sctlr)
+    :
+    : "memory"
+  );
+
+  sctlr &= ~SCTLR_C;
+
+  __asm__ __volatile__
+  (
+    "mcr p15, 0, %0, c1, c0, 0"
+    :
+    : "r" (sctlr)
+    : "memory"
+  );
+
+  ARM_DSB();
+  ARM_ISB();
+
+  /* Invalidate D-cache so no stale lines shadow the DDR we are about to
+   * initialize (safe: nothing has written cacheable memory this early).
+   */
+
+  cp15_invalidate_dcache_all();
+  ARM_DSB();
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/* DDR "user" BSS collected by the CR8 linker script.  The section globs in
+ * rdk-rzv2h_cr8_0.ld only match loose ./nuttx/**.o and ./apps/**.o objects,
+ * not lib*.a archive members, so all archive-member .bss/.sbss/COMMON
+ * (g_current_regs, the ICU handler table, the clock cache, libsched globals,
+ * ...) lands in this DDR region, not in the empty DTCM _sbss.._ebss range.
+ */
+
+extern uint32_t __bss_usr_start__;
+extern uint32_t __bss_usr_end__;
 
 /****************************************************************************
  * Name: rzv_ram_init
  *
  * Description:
- *   Initialize RAM sections (clear BSS, copy initialized data)
+ *   Initialize RAM sections (clear both BSS regions).
+ *
+ *   .data initialized values are copied flash->RAM by the Renesas boot
+ *   loader per the .header descriptors in the CR8 linker script before
+ *   __start runs; _sdata/_edata are image-metadata addresses, not a single
+ *   RAM run range, so no software .data copy is performed here.
  *
  ****************************************************************************/
 
@@ -201,16 +263,27 @@ void rzv_ram_init(void)
 {
   uint32_t *dest;
 
-  /* Clear .bss section - zero-initialized data */
+  /* Clear the DTCM BSS (_sbss.._ebss).  On the current CR8 link this range
+   * is empty, but clear it for correctness if future objects land there.
+   */
+
   for (dest = (uint32_t *)&_sbss; dest < (uint32_t *)&_ebss; )
     {
       *dest++ = 0;
     }
 
-  /* The CR8 linker script emits Renesas loader metadata for ITCM/SRAM/DDR
-   * copy ranges.  Those ranges are loaded before __start; _sdata/_edata are
-   * image metadata addresses, not a single RAM .data run range.
+  /* Clear the DDR "user" BSS (__bss_usr_start__.._bss_usr_end__).  This is
+   * where the kernel/arch globals actually reside on this link; without this
+   * loop they boot with garbage (e.g. g_current_regs != NULL -> crash on the
+   * first interrupt).  Mirrors the FSP CR reset handler which clears both
+   * BSS regions.
    */
+
+  for (dest = (uint32_t *)&__bss_usr_start__;
+       dest < (uint32_t *)&__bss_usr_end__; )
+    {
+      *dest++ = 0;
+    }
 
   ARM_DSB();
 }
@@ -309,6 +382,12 @@ void arm_boot(void)
 {
   /* Disable interrupts during early boot */
   __asm__ __volatile__ ("cpsid i" : : : "memory");
+
+  /* Boot with the D-cache off (MPU is still disabled here).  It is
+   * re-enabled by rzv_enable_caches() after the MPU is programmed.  This
+   * makes the BSS/DDR initialization below coherent.
+   */
+  rzv_disable_dcache_early();
 
   /* Route exceptions to linker-placed _vectors at ITCM 0 */
   rzv_set_vbar();

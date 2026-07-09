@@ -160,6 +160,12 @@ void up_timer_initialize(void)
         return;
     }
 
+  /* Clear any stale event flag left from a prior state so the first enabled
+   * tick is a real one, not an immediate spurious interrupt.
+   */
+
+  putreg32(PRIVATE_TIMER_PTISR_CLR, RZV_PRIVATE_TIMER_PTISR);
+
   up_enable_irq(RZV_IRQ_PRIVATE_TIMER);
 
   /* Enable the timer */

@@ -400,9 +400,10 @@
 
 /* INTC INTR8SEL Helper Macros **********************************************/
 
-/* INTR8SEL registers: 43 registers × 3 slots per register = 129 total slots
- * Each slot is 10 bits wide and can route an ELC event to a GIC SPI interrupt
- * Slot N maps to GIC SPI interrupt (32 + N)
+/* INTR8SEL registers: 43 registers × 3 slots per register = 129 total slots.
+ * Each slot is 10 bits wide and routes an ELC event to a GIC SPI interrupt.
+ * Slot N is delivered on physical GIC INTID (RZV_INTC_SEL_SPI_BASE + N) =
+ * 385 + N (= FIXED_INTSEL_COUNT 353 + SGI/PPI offset 32).  See rzv_icu.c.
  */
 
 #define RZV_INTC_INTR8SEL(m)        (RZV_INTC_BASE + RZV_INTC_INTR8SEL0_OFFSET + ((m) * 4))

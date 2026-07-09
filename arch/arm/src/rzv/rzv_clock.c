@@ -156,6 +156,12 @@ struct rzv_clock_cfg_entry_s
 static uint32_t g_clock_freq[RZV_CLOCK_MAX];
 static bool g_clock_freq_valid;
 
+/* CR8 CPU clock (I6CLK) decoded from CDDIV2.DIVCTL1 at boot; 0 = not decoded,
+ * in which case the compile-time default is used.
+ */
+
+static uint32_t g_i6clk_actual_hz;
+
 static const uint32_t g_clock_defaults[RZV_CLOCK_MAX] =
 {
   [RZV_CLOCK_OSCCLK]     = RZV_CLOCK_OSCCLK_HZ,
@@ -402,6 +408,16 @@ static void rzv_clock_init_frequency_table(void)
         {
           g_clock_freq[entry->id] = entry->hz;
         }
+    }
+
+  /* Override the CR8 CPU clock with the live CDDIV2 divider readback decoded
+   * in rzv_clock_divider_init(), so the scheduler tick and any I6CLK consumer
+   * track the actual programmed divider instead of the compile-time default.
+   */
+
+  if (g_i6clk_actual_hz != 0)
+    {
+      g_clock_freq[RZV_CLOCK_I6CLK] = g_i6clk_actual_hz;
     }
 
   g_clock_freq_valid = true;
@@ -1308,35 +1324,56 @@ static void rzv_pll_init(void)
 
 static void rzv_clock_divider_init(void)
 {
-  /* audit High-4: read back CDDIV/CSDIV from HW so g_clock_freq[] reflects
-   * actual hardware state rather than compile-time assumptions.
+  /* Decode the live CR8 CPU-clock (I6CLK) divider so g_clock_freq[] reflects
+   * the actual hardware state rather than the compile-time 800 MHz assumption.
    *
-   * Strategy: read CDDIV0 and CSDIV0; if they are non-zero (bootloader set
-   * them) extract divider fields to derive P0CLK and I6CLK, then update
-   * g_clock_freq[].  If zero (cold reset default), keep compile-time defaults.
+   * On R9A09G057H the CR8 clock is PLLDTY (1.6 GHz) divided by CDDIV2.DIVCTL1.
+   * Field position and encoding are verified against the RZ/V2H CMSIS headers,
+   * not guessed:
+   *   - cpg_iodefine.h CPG_CDDIV2_b: DIVCTL1 = bits[6:4]
+   *   - bsp_clocks.h BSP_CLOCKS_PLLDTY_CR8_DIV_*: 0=>/2, 1=>/4, 2=>/8,
+   *     3=>/16, 4=>/64  (FSP default /2 => 800 MHz)
+   * DIVCTL1 == 0 is both the cold-reset value and the FSP /2 setting, so it
+   * unambiguously yields 800 MHz.  A reserved code keeps the default.
    *
-   * CDDIV0 layout (RZ/V2H UM Table 9.x — UNVERIFIED field positions):
-   *   bits[2:0]  = DIVSEL_I6 (CR8 CPU divider from PLLCLN)
-   *   bits[7:4]  = DIVSEL_P0 (P0CLK divider from PLLCLN)
-   * Until HW manual field positions are confirmed, we log the raw values and
-   * use defaults.  Phase-04+ can refine once UM is available.
-   *
-   * Note: concurrent RMW on CDDIV/CSDIV requires CPG-wide spinlock if called
-   * at runtime; safe here because IRQs are disabled at boot.
+   * NuttX only reads these dividers (TF-A/the loader programs them), so no RMW
+   * or CPG lock is needed here.
    */
 
-  uint32_t cddiv0;
-  uint32_t csdiv0;
+  uint32_t cddiv2;
+  uint32_t divctl1;
+  uint32_t divider;
 
-  cddiv0 = rzv_cpg_getreg(RZV_CPG_CDDIV(0));
-  csdiv0 = rzv_cpg_getreg(RZV_CPG_CSDIV(0));
+  cddiv2  = rzv_cpg_getreg(RZV_CPG_CDDIV(2));
+  divctl1 = (cddiv2 >> 4) & 0x7;
 
-  clkinfo("Clock dividers: CDDIV0=0x%08x CSDIV0=0x%08x (readback; "
-          "divider field decode TODO pending RZ/V2H UM confirmation)\n",
-          (unsigned)cddiv0, (unsigned)csdiv0);
+  switch (divctl1)
+    {
+      case 0:  divider = 2;  break;
+      case 1:  divider = 4;  break;
+      case 2:  divider = 8;  break;
+      case 3:  divider = 16; break;
+      case 4:  divider = 64; break;
+      default: divider = 0;  break;  /* reserved -> keep compile-time default */
+    }
 
-  /* TODO(phase-04): decode CDDIV/CSDIV fields and update g_clock_freq[]
-   * entries for I6CLK, P0CLK, P5CLK, etc. from register values. */
+  if (divider != 0)
+    {
+      g_i6clk_actual_hz = RZV_CLOCK_PLLDTYCLK_HZ / divider;
+
+      /* If the frequency table was already built (lazy path), update it now;
+       * otherwise rzv_clock_init_frequency_table() applies the override.
+       */
+
+      if (g_clock_freq_valid)
+        {
+          g_clock_freq[RZV_CLOCK_I6CLK] = g_i6clk_actual_hz;
+        }
+    }
+
+  clkinfo("CR8 I6CLK divider: CDDIV2=0x%08x DIVCTL1=%u -> /%u = %u Hz\n",
+          (unsigned)cddiv2, (unsigned)divctl1, (unsigned)divider,
+          (unsigned)g_i6clk_actual_hz);
 }
 
 /****************************************************************************
