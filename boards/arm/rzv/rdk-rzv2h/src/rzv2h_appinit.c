@@ -16,14 +16,22 @@
  * Name: board_app_initialize
  *
  * Description:
- *   Perform application-specific initialization.  This is called from the
- *   board-level bring-up code.  Provide a minimal stub that returns
- *   success; later board-specific initialization can be added here.
+ *   Perform application-specific initialization.  Called through
+ *   boardctl(BOARDIOC_INIT) when CONFIG_NSH_ARCHINIT is set.
+ *
+ *   Without this call the board bring-up (procfs mount, LED/button
+ *   drivers, peripheral registration) never runs in configurations that
+ *   do not set CONFIG_BOARD_LATE_INITIALIZE.
  *
  ****************************************************************************/
 
 int board_app_initialize(uintptr_t arg)
 {
-  /* Nothing special to do yet */
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
+  /* Board initialization already performed by board_late_initialize() */
+
   return 0;
+#else
+  return board_bringup();
+#endif
 }

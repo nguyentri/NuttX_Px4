@@ -36,17 +36,13 @@
 #include "arm_internal.h"
 #include "rzv_gpio.h"
 
-#ifdef CONFIG_ARCH_LEDS
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/* This array maps LED numbers to GPIO configurations */
+/* This array maps LED numbers to GPIO configurations.
+ * Shared by the autoled (CONFIG_ARCH_LEDS) and user-LED variants.
+ */
 
 static const gpio_pinset_t g_led_gpio[BOARD_NLEDS] =
 {
@@ -55,6 +51,8 @@ static const gpio_pinset_t g_led_gpio[BOARD_NLEDS] =
   BOARD_LED3_GPIO,
   BOARD_LED4_GPIO,
 };
+
+#ifdef CONFIG_ARCH_LEDS
 
 /****************************************************************************
  * Private Functions
@@ -230,7 +228,7 @@ void board_autoled_off(int led)
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_LEDS
-void board_userled_initialize(void)
+uint32_t board_userled_initialize(void)
 {
   int i;
 
@@ -240,6 +238,8 @@ void board_userled_initialize(void)
     {
       rzv_gpioconfig(g_led_gpio[i]);
     }
+
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************

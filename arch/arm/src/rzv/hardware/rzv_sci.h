@@ -272,7 +272,8 @@
  * Old NuttX layout was entirely wrong — BRR at bits[0:7], CKS at bits[8:9],
  * MDDR at [16:23], ABCSE/ABCS/BGDM at 24/25/26, BFME at 27.
  * Correct layout: BCP=[2:0], BGDM=4, ABCS=5, ABCSE=6, BRR=[15:8],
- * BRME=16, CKS=[18:17], MDDR=[31:24].
+ * BRME=16, CKS=[21:20], MDDR=[31:24].
+ * (CKS position verified against sci_b_iobitmask.h R_SCI_B0_CCR2_CKS_Pos=20.)
  * Build CCR2 value with single write per pseudocode in phase plan.
  */
 
@@ -284,7 +285,7 @@
 #define SCI_CCR2_BRR_SHIFT      (8)       /* Bits 8-15: Bit Rate Register */
 #define SCI_CCR2_BRR_MASK       (0xff << SCI_CCR2_BRR_SHIFT)
 #define SCI_CCR2_BRME           (1 << 16) /* Bit Rate Modulation Enable */
-#define SCI_CCR2_CKS_SHIFT      (17)      /* Bits 17-18: Clock Select (n) */
+#define SCI_CCR2_CKS_SHIFT      (20)      /* Bits 20-21: Clock Select (n) — R_SCI_B0_CCR2_CKS_Pos=20 (sci_b_iobitmask.h) */
 #define SCI_CCR2_CKS_MASK       (0x3 << SCI_CCR2_CKS_SHIFT)
 #define SCI_CCR2_MDDR_SHIFT     (24)      /* Bits 24-31: Modulation Duty Register */
 #define SCI_CCR2_MDDR_MASK      (0xffu << SCI_CCR2_MDDR_SHIFT)

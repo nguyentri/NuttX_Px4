@@ -447,8 +447,7 @@
 #define BOARD_P7_2_GPIO   GPIO_TXD5_MOSI5_SDA5_P7_2_M1  /* SCI5 TX - Sik Tel v3 (GPIO14) */
 #define BOARD_P7_3_GPIO   GPIO_RXD5_MISO5_SCL5_P7_3_M1  /* SCI5 RX - Sik Tel v3 (GPIO15) */
 
-/* P7_4, P7_5, P7_6, P7_7 - Mixed GPIO/Peripheral functions */
-#define BOARD_P7_4_GPIO   GPIO_P7_4_OUTPUT_LOW  /* GPIO17 */
+#define BOARD_P7_4_GPIO	  GPIO_P7_4_OUTPUT_LOW
 #define BOARD_P7_5_GPIO   GPIO_RXD6_MISO6_SCL6_P7_5_M1  /* SCI6 RX - fs-a8s (GPIO04) */
 #define BOARD_P7_6_GPIO   GPIO_TXD7_MOSI7_SDA7_P7_6_M1  /* I2C7 SDA - BMP280 (GPIO02) */
 #define BOARD_P7_7_GPIO   GPIO_RXD7_MISO7_SCL7_P7_7_M1  /* I2C7 SCL - BMP280 (GPIO03) */
@@ -462,45 +461,6 @@
 #define BOARD_P9_1_GPIO   GPIO_MISO4_P9_1_M1  /* RSPI0 MISO - MPU9250 */
 #define BOARD_P9_2_GPIO   GPIO_RSPCK4_P9_2_M1 /* RSPI0 SCK - MPU9250 */
 #define BOARD_P9_3_GPIO   GPIO_SSLA0_P9_3_M1  /* RSPI0 SSLA0 - MPU9250 CS */
-
-/* Legacy GPIO pin definitions (from previous configuration) */
-
-/* P1_4 - configured as input with noise filter and TINT */
-#define BOARD_P1_4_GPIO   GPIO_P1_4_INPUT_PULLUP
-
-/* P2_0 and P2_1 - I2C2 peripheral function mode4 */
-#define BOARD_P2_0_GPIO   GPIO_SDA2_P2_0_M4
-#define BOARD_P2_1_GPIO   GPIO_SCL2_P2_1_M4
-
-/* P3_4 and P3_5 - peripheral function mode2 (fast slew) */
-#define BOARD_P3_4_GPIO   GPIO_TXD_MOSI4_SDA3_P3_4_M2
-#define BOARD_P3_5_GPIO   GPIO_RXD_MISO3_SCL3_P3_5_M2
-
-/* P3_6 - peripheral function mode5 */
-#define BOARD_P3_6_GPIO   GPIO_SSLA2_P3_6_M5
-
-/* P3_7 - peripheral function mode9 (slow slew) */
-#define BOARD_P3_7_GPIO   GPIO_GTIOC7B_P3_7_M9
-
-/* P4_0 and P4_6 - peripheral function mode9 (slow slew) */
-#define BOARD_P4_0_GPIO   GPIO_GTIOC0A_P4_0_M9
-#define BOARD_P4_6_GPIO   GPIO_GTIOC3A_P4_6_M9
-
-/* P6_3 - peripheral function mode11 (slow slew) */
-#define BOARD_P6_3_GPIO   GPIO_GTIOC11B_P6_3_M11
-
-/* P9_1, P9_2 - I2C6/SCI8 and SPI peripheral functions */
-#define BOARD_P9_1_GPIO   GPIO_RXD8_MISO8_SCL6_P9_1_M2  /* I2C6 SCL via SCI8 */
-#define BOARD_P9_2_GPIO   GPIO_RSPCK4_P9_2_M1   /* SPI4 clock */
-
-/* P6_0 - configured as output */
-#define BOARD_P6_0_GPIO   GPIO_P6_0_OUTPUT_LOW
-
-/* LED pins - aliases to existing NuttX LED macros */
-#define BOARD_P0_0_GPIO   GPIO_P0_0_OUTPUT_HIGH
-#define BOARD_P0_1_GPIO   GPIO_P0_1_OUTPUT_HIGH
-
-/* End of pin mappings */
 
 /* CAN-FD Pin Configuration *************************************************/
 

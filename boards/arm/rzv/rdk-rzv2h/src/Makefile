@@ -45,8 +45,11 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += rzv2h_buttons.c
 endif
 
-# LED support
+# LED support: rzv2h_auto_leds.c provides both the autoled (ARCH_LEDS)
+# and the user-LED (board_userled_*) implementations, selected by #ifdef.
 ifeq ($(CONFIG_ARCH_LEDS),y)
+CSRCS += rzv2h_auto_leds.c
+else ifeq ($(CONFIG_USERLED),y)
 CSRCS += rzv2h_auto_leds.c
 endif
 

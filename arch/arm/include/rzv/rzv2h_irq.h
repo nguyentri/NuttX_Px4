@@ -576,6 +576,24 @@
 #define RZV_IRQ_MHU_RSP40_NS                         (368)
 #define RZV_IRQ_MHU_RSP41_NS                         (369)
 
+/* RSCI (SCI-B) UART interrupts — dedicated GIC SPI lines.
+ *
+ * RSCI events are NOT routable through the INTR8SEL selectable-interrupt
+ * window (the SEL0-349 list contains GPIO TINT/CMTW/SCIF/GPT etc. but no
+ * RSCI sources).  Each RSCI channel owns six fixed SPIs:
+ *   ERI, RXI, TXI, TEI, AED, BFD = SPI 114+6*ch .. 119+6*ch.
+ * NuttX IRQ number == physical GIC INTID == SPI number + 32.
+ * Source: FSP bsp_irq_id.h (SCI0_ERI_IRQn=114, 6 per channel) and
+ * vector_data.c (table index == GIC INTID, 32-entry SGI/PPI prefix).
+ *
+ * Sense (FSP bsp_irq_sense.h): ERI=level, RXI=edge, TXI=edge, TEI=level.
+ */
+
+#define RZV_IRQ_SCI_ERI(ch)                          (32 + 114 + 6 * (ch))
+#define RZV_IRQ_SCI_RXI(ch)                          (RZV_IRQ_SCI_ERI(ch) + 1)
+#define RZV_IRQ_SCI_TXI(ch)                          (RZV_IRQ_SCI_ERI(ch) + 2)
+#define RZV_IRQ_SCI_TEI(ch)                          (RZV_IRQ_SCI_ERI(ch) + 3)
+
 #define RZV_IRQ_ICU_SLOTS                             (129)
 
 /* GIC IRQ-table span (NR_IRQS = RZV_IRQ_FIRST + RZV_IRQ_GIC_SIZE).

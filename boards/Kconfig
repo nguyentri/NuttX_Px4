@@ -2558,6 +2558,7 @@ config ARCH_BOARD_EVK_RA8P1
 config ARCH_BOARD_RDK_RZV2H
 	bool "Renesas RDK-RZV2H evaluation board"
 	depends on ARCH_CHIP_R9A09G057
+	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
     select ARCH_HAVE_IRQBUTTONS
 	---help---

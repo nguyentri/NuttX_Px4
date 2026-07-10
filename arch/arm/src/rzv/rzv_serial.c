@@ -1934,7 +1934,7 @@ static int rzv_setup(struct uart_dev_s *dev)
   /* Configure CCR2 with calculated baud rate settings.
    * P0-1 fix: use SCI_CCR2_BUILD() for a single write covering all fields at
    * their correct positions in CCR2_b layout (BCP=0 default,
-   * BGDM=4, ABCS=5, ABCSE=6, BRR=[15:8], BRME=16, CKS=[18:17], MDDR=[31:24]).
+   * BGDM=4, ABCS=5, ABCSE=6, BRR=[15:8], BRME=16, CKS=[21:20], MDDR=[31:24]).
    */
 
   ccr2 = SCI_CCR2_BUILD(baud_setting.mddr, baud_setting.cks,
@@ -2064,45 +2064,59 @@ static int rzv_attach(struct uart_dev_s *dev)
   struct rzv_uart_s *priv = (struct rzv_uart_s *)dev->priv;
   int ret = OK;
 
-  /* Attach RX interrupt using ICU dynamic slot allocation */
+  /* RSCI channels own dedicated GIC SPI lines (RZV_IRQ_SCI_* in
+   * rzv2h_irq.h).  They are NOT selectable through the INTR8SEL window,
+   * so rzv_icu_attach() cannot be used here: programming INTR8SEL with an
+   * ELC SC event code routes an unrelated source (e.g. GPT OVF) and the
+   * UART interrupts never fire.  Attach directly to the fixed INTIDs.
+   *
+   * GIC sense per FSP bsp_irq_sense.h: RXI/TXI edge, ERI/TEI level.
+   */
 
-  priv->irq_rxi = rzv_icu_attach(priv->evt_rxi, rzv_interrupt, dev, true);
-  if (priv->irq_rxi < 0)
+  priv->irq_rxi = RZV_IRQ_SCI_RXI(priv->channel);
+  priv->irq_txi = RZV_IRQ_SCI_TXI(priv->channel);
+  priv->irq_tei = RZV_IRQ_SCI_TEI(priv->channel);
+  priv->irq_eri = RZV_IRQ_SCI_ERI(priv->channel);
+
+  ret = irq_attach(priv->irq_rxi, rzv_interrupt, dev);
+  if (ret < 0)
     {
       serr("ERROR: Failed to attach RX interrupt for SCI%d\n", priv->channel);
-      ret = priv->irq_rxi;
       goto errout;
     }
 
-  /* Attach TX interrupt using ICU dynamic slot allocation */
-
-  priv->irq_txi = rzv_icu_attach(priv->evt_txi, rzv_interrupt, dev, true);
-  if (priv->irq_txi < 0)
+  ret = irq_attach(priv->irq_txi, rzv_interrupt, dev);
+  if (ret < 0)
     {
       serr("ERROR: Failed to attach TX interrupt for SCI%d\n", priv->channel);
-      ret = priv->irq_txi;
       goto errout_rxi;
     }
 
-  /* Attach TX end interrupt using ICU dynamic slot allocation */
-
-  priv->irq_tei = rzv_icu_attach(priv->evt_tei, rzv_interrupt, dev, true);
-  if (priv->irq_tei < 0)
+  ret = irq_attach(priv->irq_tei, rzv_interrupt, dev);
+  if (ret < 0)
     {
       serr("ERROR: Failed to attach TEI interrupt for SCI%d\n", priv->channel);
-      ret = priv->irq_tei;
       goto errout_txi;
     }
 
-  /* Attach error interrupt using ICU dynamic slot allocation */
-
-  priv->irq_eri = rzv_icu_attach(priv->evt_eri, rzv_interrupt, dev, true);
-  if (priv->irq_eri < 0)
+  ret = irq_attach(priv->irq_eri, rzv_interrupt, dev);
+  if (ret < 0)
     {
       serr("ERROR: Failed to attach ERI interrupt for SCI%d\n", priv->channel);
-      ret = priv->irq_eri;
       goto errout_tei;
     }
+
+  /* Configure GIC trigger type, then enable the four lines */
+
+  rzv_gic_set_irq_type(priv->irq_rxi, true);   /* edge */
+  rzv_gic_set_irq_type(priv->irq_txi, true);   /* edge */
+  rzv_gic_set_irq_type(priv->irq_tei, false);  /* level */
+  rzv_gic_set_irq_type(priv->irq_eri, false);  /* level */
+
+  up_enable_irq(priv->irq_rxi);
+  up_enable_irq(priv->irq_txi);
+  up_enable_irq(priv->irq_tei);
+  up_enable_irq(priv->irq_eri);
 
   sinfo("SCI%d: Attached interrupts RXI=%d TXI=%d TEI=%d ERI=%d\n",
         priv->channel, priv->irq_rxi, priv->irq_txi,
@@ -2141,31 +2155,16 @@ static int rzv_attach(struct uart_dev_s *dev)
   return OK;
 
 errout_tei:
-  /* H6 fix: only detach if the slot was successfully allocated (>= 0).
-   * When irq_tei attach failed, priv->irq_tei holds a negative errno.
-   * Calling rzv_icu_detach() with a negative value risks indexing a
-   * negative slot array position.
-   */
-
-  if (priv->irq_tei >= 0)
-    {
-      rzv_icu_detach(priv->irq_tei);
-      priv->irq_tei = -1;
-    }
+  irq_detach(priv->irq_tei);
+  priv->irq_tei = -1;
 
 errout_txi:
-  if (priv->irq_txi >= 0)
-    {
-      rzv_icu_detach(priv->irq_txi);
-      priv->irq_txi = -1;
-    }
+  irq_detach(priv->irq_txi);
+  priv->irq_txi = -1;
 
 errout_rxi:
-  if (priv->irq_rxi >= 0)
-    {
-      rzv_icu_detach(priv->irq_rxi);
-      priv->irq_rxi = -1;
-    }
+  irq_detach(priv->irq_rxi);
+  priv->irq_rxi = -1;
 
 errout:
   return ret;
@@ -2208,29 +2207,33 @@ static void rzv_detach(struct uart_dev_s *dev)
                 ~(SCI_CCR0_RIE | SCI_CCR0_TIE | SCI_CCR0_TEIE |
                   SCI_CCR0_RE  | SCI_CCR0_TE));
 
-  /* Detach and release ICU interrupt slots */
+  /* Disable and detach the four dedicated GIC SPI lines */
 
   if (priv->irq_rxi >= 0)
     {
-      rzv_icu_detach(priv->irq_rxi);
+      up_disable_irq(priv->irq_rxi);
+      irq_detach(priv->irq_rxi);
       priv->irq_rxi = -1;
     }
 
   if (priv->irq_txi >= 0)
     {
-      rzv_icu_detach(priv->irq_txi);
+      up_disable_irq(priv->irq_txi);
+      irq_detach(priv->irq_txi);
       priv->irq_txi = -1;
     }
 
   if (priv->irq_tei >= 0)
     {
-      rzv_icu_detach(priv->irq_tei);
+      up_disable_irq(priv->irq_tei);
+      irq_detach(priv->irq_tei);
       priv->irq_tei = -1;
     }
 
   if (priv->irq_eri >= 0)
     {
-      rzv_icu_detach(priv->irq_eri);
+      up_disable_irq(priv->irq_eri);
+      irq_detach(priv->irq_eri);
       priv->irq_eri = -1;
     }
 }
@@ -2695,40 +2698,13 @@ void arm_earlyserialinit(void)
   /* C5 fix: do NOT call rzv_shutdown on the console channel.
    * rzv_shutdown gates the clock; any up_putc() between shutdown and the
    * rzv_setup call below will hang on TDRE poll with clock off.
-   * Skip non-console channels only; console is already configured by lowputc.
-   * Non-console channels are shut down to reset state before full driver init.
+   *
+   * Non-console channels are NOT shut down here either: at this point
+   * their module clocks have never been enabled, and rzv_shutdown()
+   * busy-waits on CSR.TEND which reads 0 with the clock gated — an
+   * unconditional boot hang.  Unopened channels are already in reset
+   * state; rzv_setup() fully reinitializes them on first open.
    */
-
-#if defined(TTYS0_DEV) && !defined(CONFIG_SCI0_SERIAL_CONSOLE)
-  rzv_shutdown(&TTYS0_DEV);
-#endif
-#if defined(TTYS1_DEV) && !defined(CONFIG_SCI1_SERIAL_CONSOLE)
-  rzv_shutdown(&TTYS1_DEV);
-#endif
-#if defined(TTYS2_DEV) && !defined(CONFIG_SCI2_SERIAL_CONSOLE)
-  rzv_shutdown(&TTYS2_DEV);
-#endif
-#if defined(TTYS3_DEV) && !defined(CONFIG_SCI3_SERIAL_CONSOLE)
-  rzv_shutdown(&TTYS3_DEV);
-#endif
-#if defined(TTYS4_DEV) && !defined(CONFIG_SCI4_SERIAL_CONSOLE)
-  rzv_shutdown(&TTYS4_DEV);
-#endif
-#if defined(TTYS5_DEV) && !defined(CONFIG_SCI5_SERIAL_CONSOLE)
-  rzv_shutdown(&TTYS5_DEV);
-#endif
-#if defined(TTYS6_DEV) && !defined(CONFIG_SCI6_SERIAL_CONSOLE)
-  rzv_shutdown(&TTYS6_DEV);
-#endif
-#if defined(TTYS7_DEV) && !defined(CONFIG_SCI7_SERIAL_CONSOLE)
-  rzv_shutdown(&TTYS7_DEV);
-#endif
-#if defined(TTYS8_DEV) && !defined(CONFIG_SCI8_SERIAL_CONSOLE)
-  rzv_shutdown(&TTYS8_DEV);
-#endif
-#if defined(TTYS9_DEV) && !defined(CONFIG_SCI9_SERIAL_CONSOLE)
-  rzv_shutdown(&TTYS9_DEV);
-#endif
 
   /* Configure console channel */
 

@@ -426,6 +426,141 @@ static void rzv_clock_init_frequency_table(void)
 }
 
 /****************************************************************************
+ * Name: rzv_cpg_sci_channel
+ *
+ * Description:
+ *   Map an SCI clock ID to its RSCI channel number, or -1 if the ID is not
+ *   an SCI clock.  RSCI gating needs special handling: five consecutive
+ *   CLKON bits per channel spanning CPG_CLKON_5..8 (SCIPCLK, SCITCLK,
+ *   SCIPS3/2/1) and two consecutive CPG_RST_8/9 bits (SCIP, SCIT).
+ *   Source: FSP rzv2h bsp_override.h BSP_CLKON_*_FSP_IP_SCIP/SCIT/SCIPS*.
+ *
+ ****************************************************************************/
+
+static int rzv_cpg_sci_channel(uint32_t clk_id)
+{
+  static const uint32_t sci_ids[10] =
+  {
+    RZV_CPG_CLK_SCI0, RZV_CPG_CLK_SCI1, RZV_CPG_CLK_SCI2,
+    RZV_CPG_CLK_SCI3, RZV_CPG_CLK_SCI4, RZV_CPG_CLK_SCI5,
+    RZV_CPG_CLK_SCI6, RZV_CPG_CLK_SCI7, RZV_CPG_CLK_SCI8,
+    RZV_CPG_CLK_SCI9
+  };
+
+  int ch;
+
+  for (ch = 0; ch < 10; ch++)
+    {
+      if (sci_ids[ch] == clk_id)
+        {
+          return ch;
+        }
+    }
+
+  return -1;
+}
+
+/****************************************************************************
+ * Name: rzv_cpg_sci_clock_ctrl
+ *
+ * Description:
+ *   Gate all five RSCI clocks of one channel on or off.  The 5-bit span
+ *   starts at CLKON global bit (5*16 + 13 + 5*ch) and may cross into the
+ *   next CLKON register (SCI0 and SCI3).  Each register slice is written
+ *   as WEN[bit+16] | ON[bit] and confirmed via the matching CLKMON.
+ *
+ ****************************************************************************/
+
+static int rzv_cpg_sci_clock_ctrl(int ch, bool enable)
+{
+  uint32_t gstart = 5u * 16u + 13u + 5u * (uint32_t)ch;
+  uint32_t remaining = 5;
+  irqstate_t flags;
+  int ret = OK;
+
+  while (remaining > 0)
+    {
+      uint32_t domain = gstart / 16u;
+      uint32_t off    = gstart % 16u;
+      uint32_t n      = (16u - off < remaining) ? (16u - off) : remaining;
+      uint32_t bits   = ((1u << n) - 1u) << off;
+      uint32_t mask   = (bits << 16) | (enable ? bits : 0u);
+
+      flags = enter_critical_section();
+      rzv_cpg_putreg(mask, RZV_CPG_CLKON(domain));
+      leave_critical_section(flags);
+
+      ret = rzv_cpg_wait_bit(RZV_CPG_CLKMON(domain), bits, enable,
+                             enable ? CPG_TIMEOUT_CLOCK_ENABLE :
+                                      CPG_TIMEOUT_CLOCK_DISABLE);
+      if (ret < 0)
+        {
+          clkerr("ERROR: SCI%d clock %s failed: CLKON_%u mask=0x%04x\n",
+                 ch, enable ? "enable" : "disable",
+                 (unsigned int)domain, (unsigned int)bits);
+          rzv_cpg_dump_registers(domain, "sci_clock_ctrl_failure");
+          return ret;
+        }
+
+      gstart    += n;
+      remaining -= n;
+    }
+
+  clkinfo("SCI%d clocks %s\n", ch, enable ? "enabled" : "disabled");
+  return OK;
+}
+
+/****************************************************************************
+ * Name: rzv_cpg_sci_reset_ctrl
+ *
+ * Description:
+ *   Assert (assert_rst=true) or deassert both RSCI resets of one channel.
+ *   SCIP reset = CPG_RST global bit (8*16 + 1 + 2*ch), SCIT the next bit;
+ *   the pair crosses into CPG_RST_9 for channel 7.
+ *   Polarity follows rzv_module_reset/unreset: assert writes WEN only and
+ *   waits RSTMON clear; deassert writes WEN|bits and waits RSTMON set.
+ *
+ ****************************************************************************/
+
+static int rzv_cpg_sci_reset_ctrl(int ch, bool assert_rst)
+{
+  uint32_t gstart = 8u * 16u + 1u + 2u * (uint32_t)ch;
+  uint32_t remaining = 2;
+  irqstate_t flags;
+  int ret = OK;
+
+  while (remaining > 0)
+    {
+      uint32_t domain = gstart / 16u;
+      uint32_t off    = gstart % 16u;
+      uint32_t n      = (16u - off < remaining) ? (16u - off) : remaining;
+      uint32_t bits   = ((1u << n) - 1u) << off;
+      uint32_t mask   = (bits << 16) | (assert_rst ? 0u : bits);
+
+      flags = enter_critical_section();
+      rzv_cpg_putreg(mask, RZV_CPG_RST(domain));
+      leave_critical_section(flags);
+
+      ret = rzv_cpg_wait_bit(RZV_CPG_RSTMON(domain), bits, !assert_rst,
+                             assert_rst ? CPG_TIMEOUT_RESET_ASSERT :
+                                          CPG_TIMEOUT_RESET_RELEASE);
+      if (ret < 0)
+        {
+          clkerr("ERROR: SCI%d reset %s failed: RST_%u mask=0x%04x\n",
+                 ch, assert_rst ? "assert" : "release",
+                 (unsigned int)domain, (unsigned int)bits);
+          rzv_cpg_dump_registers(domain, "sci_reset_ctrl_failure");
+          return ret;
+        }
+
+      gstart    += n;
+      remaining -= n;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -449,6 +584,14 @@ int rzv_clock_enable(uint32_t clk_id)
   int ret;
   int retry;
   uint32_t delay_us;
+  int sci_ch = rzv_cpg_sci_channel(clk_id);
+
+  /* RSCI: five gate bits spanning CLKON_5..8 — handled by the SCI helper */
+
+  if (sci_ch >= 0)
+    {
+      return rzv_cpg_sci_clock_ctrl(sci_ch, true);
+    }
 
   /* audit Critical-3: DMAC uses a 5-bit mask (CLK0-CLK4 all required).
    * DMAC CPG_CLKON_0 bits [4:0] are all required per RZ/V2H UM CPG §CLKON.
@@ -542,6 +685,14 @@ int rzv_clock_disable(uint32_t clk_id)
   int ret;
   int retry;
   uint32_t delay_us;
+  int sci_ch = rzv_cpg_sci_channel(clk_id);
+
+  /* RSCI: five gate bits spanning CLKON_5..8 — handled by the SCI helper */
+
+  if (sci_ch >= 0)
+    {
+      return rzv_cpg_sci_clock_ctrl(sci_ch, false);
+    }
 
   /* audit Critical-3 / finding #5/#6: match 2-bit/5-bit pairs used in enable */
 
@@ -623,6 +774,14 @@ int rzv_module_reset(uint32_t clk_id)
   int ret;
   int retry;
   uint32_t delay_us;
+  int sci_ch = rzv_cpg_sci_channel(clk_id);
+
+  /* RSCI: SCIP+SCIT resets in CPG_RST_8/9 — handled by the SCI helper */
+
+  if (sci_ch >= 0)
+    {
+      return rzv_cpg_sci_reset_ctrl(sci_ch, true);
+    }
 
   /* DMAC special-case: reset lives in CPG_RST_3 bits 1..5 (RSTB1..RSTB5),
    * not in CLK domain 0 bit 0 per RZ/V2H UM CPG §RST. */
@@ -704,6 +863,14 @@ int rzv_module_unreset(uint32_t clk_id)
   int ret;
   int retry;
   uint32_t delay_us;
+  int sci_ch = rzv_cpg_sci_channel(clk_id);
+
+  /* RSCI: SCIP+SCIT resets in CPG_RST_8/9 — handled by the SCI helper */
+
+  if (sci_ch >= 0)
+    {
+      return rzv_cpg_sci_reset_ctrl(sci_ch, false);
+    }
 
   /* DMAC special-case: reset lives in CPG_RST_3 bits 1..5 (RSTB1..RSTB5),
    * not in CLK domain 0 bit 0 per RZ/V2H UM CPG §RST. */

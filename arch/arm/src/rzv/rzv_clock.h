@@ -74,21 +74,32 @@
 /* UNVERIFIED: ICU channel 0; needs RZ/V2H UM confirmation */
 #define RZV_CPG_CLK_ICU             (0 << 16 | 1)
 
-/* CLKON_11 - SCI_B (UART) channels 0-7
- * CPG_CLKON_11 CLK8=SCI0..CLK15=SCI7
- * UNVERIFIED: awaiting RZ/V2H UM cross-check */
-#define RZV_CPG_CLK_SCI0            (11 << 16 | 8)
-#define RZV_CPG_CLK_SCI1            (11 << 16 | 9)
-#define RZV_CPG_CLK_SCI2            (11 << 16 | 10)
-#define RZV_CPG_CLK_SCI3            (11 << 16 | 11)
-#define RZV_CPG_CLK_SCI4            (11 << 16 | 12)
-#define RZV_CPG_CLK_SCI5            (11 << 16 | 13)
-#define RZV_CPG_CLK_SCI6            (11 << 16 | 14)
-#define RZV_CPG_CLK_SCI7            (11 << 16 | 15)
-/* CLKON_12 CLK0=SCI8, CLK1=SCI9
- * bsp_clocks.c:804,827 CPG_CLKON_12 CLK0_ON=SCI8, CLK1_ON=SCI9 */
-#define RZV_CPG_CLK_SCI8            (12 << 16 | 0)
-#define RZV_CPG_CLK_SCI9            (12 << 16 | 1)
+/* RSCI (SCI-B) UART clock gates — CPG_CLKON_5..8, FIVE gate bits per
+ * channel (SCIPCLK, SCITCLK, SCIPS3, SCIPS2, SCIPS1) occupying five
+ * CONSECUTIVE bits in the CLKON bit space starting at CLKON_5 bit 13 for
+ * channel 0 (global bit 93 + 5*ch).  The span may cross a register
+ * boundary (SCI0: CLKON_5[15:13]+CLKON_6[1:0]; SCI3: CLKON_6[15:12]+
+ * CLKON_7[0]).
+ *
+ * The ID encodes the FIRST (SCIPCLK) bit; rzv_clock_enable/disable and
+ * rzv_module_reset/unreset special-case SCI IDs to control the full span
+ * (see rzv_cpg_sci_channel() in rzv_clock.c).
+ *
+ * Source: FSP rzv2h bsp_override.h R_BSP_MODULE_START_FSP_IP_SCI +
+ * BSP_CLKON_REG/BIT_FSP_IP_SCIP/SCIT/SCIPS1-3.
+ * Reset: CPG_RST_8/9, two bits per channel (SCIP=RSTB(1+2ch),
+ * SCIT=RSTB(2+2ch)) — also handled by the SCI special-case.
+ */
+#define RZV_CPG_CLK_SCI0            (5 << 16 | 13)
+#define RZV_CPG_CLK_SCI1            (6 << 16 | 2)
+#define RZV_CPG_CLK_SCI2            (6 << 16 | 7)
+#define RZV_CPG_CLK_SCI3            (6 << 16 | 12)
+#define RZV_CPG_CLK_SCI4            (7 << 16 | 1)
+#define RZV_CPG_CLK_SCI5            (7 << 16 | 6)
+#define RZV_CPG_CLK_SCI6            (7 << 16 | 11)
+#define RZV_CPG_CLK_SCI7            (8 << 16 | 0)
+#define RZV_CPG_CLK_SCI8            (8 << 16 | 5)
+#define RZV_CPG_CLK_SCI9            (8 << 16 | 10)
 
 /* SPI (RSPI/SPI_B) - UNVERIFIED: needs RZ/V2H UM confirmation */
 #define RZV_CPG_CLK_SPI0            (2 << 16 | 0)

@@ -88,25 +88,23 @@
 
 /* Per-port maximum pin count (HIGH-8 / H-9 fix).
  * GP ports P20-P2B (NuttX ports 0-11) have varying pin counts.
- * Source: RZ/V2H hardware manual iodefine bitfields for each port.
- * P20=8, P21=6, P22=2 confirmed; remainder set to 8 (safe upper
- * bound — HW ignores writes to non-existent pins but better to reject them).
- * UNVERIFIED for ports 3-11: mark as 8 until RZ/V2H UM Table 53.x is checked.
+ * Source: refs/rz_scripts_pi_pinmap/rzv2h_pin_mapping.csv (pin rows per
+ * port): P0x=8, P1x=6, P2x=2, P3x-PAx=8, PBx=6.
  */
 static const uint8_t g_rzv_port_pin_count[RZV_GPIO_MAX_PORT] =
 {
   8U,  /* PORT0  = P20: 8 pins */
   6U,  /* PORT1  = P21: 6 pins */
   2U,  /* PORT2  = P22: 2 pins */
-  8U,  /* PORT3  = P23: unverified, assume 8 */
-  8U,  /* PORT4  = P24: unverified, assume 8 */
-  8U,  /* PORT5  = P25: unverified, assume 8 */
-  8U,  /* PORT6  = P26: unverified, assume 8 */
-  8U,  /* PORT7  = P27: unverified, assume 8 */
-  8U,  /* PORT8  = P28: unverified, assume 8 */
-  8U,  /* PORT9  = P29: unverified, assume 8 */
-  8U,  /* PORT10 = P2A: unverified, assume 8 */
-  8U,  /* PORT11 = P2B: unverified, assume 8 */
+  8U,  /* PORT3  = P23: 8 pins */
+  8U,  /* PORT4  = P24: 8 pins */
+  8U,  /* PORT5  = P25: 8 pins */
+  8U,  /* PORT6  = P26: 8 pins */
+  8U,  /* PORT7  = P27: 8 pins */
+  8U,  /* PORT8  = P28: 8 pins */
+  8U,  /* PORT9  = P29: 8 pins */
+  8U,  /* PORT10 = P2A: 8 pins */
+  6U,  /* PORT11 = P2B: 6 pins */
 };
 
 /****************************************************************************
@@ -671,15 +669,14 @@ int rzv_gpioconfig(gpio_pinset_t cfgset)
       return -EINVAL;
     }
 
-  /* Phase-03 [Critical-4]: Enable GPIO module clock before any register
-   * access via rzv_clock_enable(RZV_CPG_CLK_GPIO).
-   * NOTE: RZV_CPG_CLK_GPIO bit index is UNVERIFIED for R9A09G057H.
-   * Phase-01 report confirmed mapping is a placeholder — value (domain=0,
-   * bit=0) is NOT confirmed against RZ/V2H Hardware User Manual Table 9.x.
-   * UNVERIFIED — needs RZ/V2H UM for R9A09G057H GPIO CLKON bit.
-   * The call is idempotent if clock already running (TF-A may have enabled).
+  /* No GPIO module clock gate is programmed here.  FSP r_ioport never
+   * gates a GPIO/PFC clock on RZ/V2H (bsp_override.h has no
+   * FSP_IP_GPIO CLKON mapping); the PFC block is clocked unconditionally.
+   * The previous rzv_clock_enable(RZV_CPG_CLK_GPIO) call used the
+   * placeholder ID (domain 0, bit 0), which matched the DMAC domain
+   * special-case in rzv_clock_enable() and gated all five DMAC clocks
+   * on as a side effect.
    */
-  rzv_clock_enable(RZV_CPG_CLK_GPIO);
 
   /* Phase-03 [High-11]: Critical section wraps the ENTIRE PMC/PFC/IOLH/PUPD/
    * PM RMW sequence to prevent concurrent config on the same port byte.

@@ -61,12 +61,16 @@
 void rzv2h_serial_setup(void)
 {
 #if defined(CONFIG_RZV_SCI3) || defined(CONFIG_SCI3_SERIAL_CONSOLE)
-  /* SCI3: NSH console on P3_4/P3_5 per RDK pinconfig. */
+  /* SCI3: NSH console on P3_4/P3_5 per RDK pinconfig.
+   * Pinmap SCI macros encode only PORT|PIN|PSEL; RZV_GPIO_PERIPH must be
+   * OR'ed in or rzv_gpioconfig() treats the pin as a plain GPIO input and
+   * never programs PMC/PFC (UART pins would stay unmuxed).
+   */
 
   sinfo("Configuring SCI3 pins for UART (NSH Console)\n");
 
-  rzv_gpioconfig(BOARD_SCI3_TXD_GPIO);
-  rzv_gpioconfig(BOARD_SCI3_RXD_GPIO);
+  rzv_gpioconfig(BOARD_SCI3_TXD_GPIO | RZV_GPIO_PERIPH);
+  rzv_gpioconfig(BOARD_SCI3_RXD_GPIO | RZV_GPIO_PERIPH);
 
   sinfo("SCI3 UART pins configured\n");
 #endif
@@ -76,8 +80,8 @@ void rzv2h_serial_setup(void)
 
   sinfo("Configuring SCI4 pins for UART (TFminiPlus)\n");
 
-  rzv_gpioconfig(BOARD_P7_0_GPIO);
-  rzv_gpioconfig(BOARD_P7_1_GPIO);
+  rzv_gpioconfig(BOARD_P7_0_GPIO | RZV_GPIO_PERIPH);
+  rzv_gpioconfig(BOARD_P7_1_GPIO | RZV_GPIO_PERIPH);
 
   sinfo("SCI4 UART pins configured\n");
 #endif
@@ -87,8 +91,8 @@ void rzv2h_serial_setup(void)
 
   sinfo("Configuring SCI5 pins for UART (MAVLink)\n");
 
-  rzv_gpioconfig(BOARD_P7_2_GPIO);
-  rzv_gpioconfig(BOARD_P7_3_GPIO);
+  rzv_gpioconfig(BOARD_P7_2_GPIO | RZV_GPIO_PERIPH);
+  rzv_gpioconfig(BOARD_P7_3_GPIO | RZV_GPIO_PERIPH);
 
   sinfo("SCI5 UART pins configured\n");
 #endif
@@ -98,7 +102,7 @@ void rzv2h_serial_setup(void)
 
   sinfo("Configuring SCI6 RX pin for UART (RC input)\n");
 
-  rzv_gpioconfig(BOARD_P7_5_GPIO);
+  rzv_gpioconfig(BOARD_P7_5_GPIO | RZV_GPIO_PERIPH);
 
   sinfo("SCI6 UART RX pin configured\n");
 #endif
@@ -108,8 +112,8 @@ void rzv2h_serial_setup(void)
 
   sinfo("Configuring SCI9 pins for UART (GPS)\n");
 
-  rzv_gpioconfig(BOARD_P8_2_GPIO);
-  rzv_gpioconfig(BOARD_P8_3_GPIO);
+  rzv_gpioconfig(BOARD_P8_2_GPIO | RZV_GPIO_PERIPH);
+  rzv_gpioconfig(BOARD_P8_3_GPIO | RZV_GPIO_PERIPH);
 
   sinfo("SCI9 UART pins configured\n");
 #endif

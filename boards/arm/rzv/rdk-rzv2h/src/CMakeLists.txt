@@ -35,10 +35,10 @@ if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS rzv2h_buttons.c)
 endif()
 
-if(CONFIG_ARCH_LEDS)
+# rzv2h_auto_leds.c provides both autoled (ARCH_LEDS) and user-LED
+# (board_userled_*) implementations, selected by #ifdef.
+if(CONFIG_ARCH_LEDS OR CONFIG_USERLED)
   list(APPEND SRCS rzv2h_auto_leds.c)
-else()
-  list(APPEND SRCS rzv2h_user_leds.c)
 endif()
 
 # Peripheral driver initialization

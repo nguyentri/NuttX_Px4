@@ -54,9 +54,23 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Select console channel — board uses SCI3 (BOARD_CONSOLE_UART=3) */
+/* Select console channel by CONFIG_SCIx_SERIAL_CONSOLE.
+ *
+ * SCI4 (P7_0=TXD, P7_1=RXD) is the confirmed console for the NuttX nsh
+ * sample configs: it maps to UART4 on the RDK 40-pin header (HARDWARE.md /
+ * FSP pin_data.c), so it is physically reachable during bring-up.
+ * SCI3 (P3_4/P3_5) remains the PX4 flight console (see boards/renesas/...),
+ * but its routing to the RDK debug header is UNCONFIRMED — do not default to
+ * it here.
+ */
 
-#if defined(CONFIG_SCI3_SERIAL_CONSOLE)
+#if defined(CONFIG_SCI4_SERIAL_CONSOLE)
+#  define CONSOLE_BASE   RZV_SCI4_BASE
+#  define CONSOLE_CLK_ID RZV_CPG_CLK_SCI4
+/* SCI4: P7_0 = TXD, P7_1 = RXD per board.h BOARD_P7_0/P7_1_GPIO */
+#  define CONSOLE_TXD_GPIO  GPIO_TXD4_MOSI4_SDA4_P7_0_M1
+#  define CONSOLE_RXD_GPIO  GPIO_RXD4_MISO4_SCL4_P7_1_M1
+#elif defined(CONFIG_SCI3_SERIAL_CONSOLE)
 #  define CONSOLE_BASE   RZV_SCI3_BASE
 #  define CONSOLE_CLK_ID RZV_CPG_CLK_SCI3
 /* SCI3: P3_4 = TXD, P3_5 = RXD per board.h BOARD_SCI3_TXD/RXD_GPIO */
@@ -68,7 +82,13 @@
 #  define CONSOLE_TXD_GPIO  GPIO_TXD0_MOSI0_DA0_P5_0_M1
 #  define CONSOLE_RXD_GPIO  GPIO_RXD0_MISO0_SCL0_P5_1_M1
 #else
-/* Default to SCI3 if no console explicitly selected */
+/* Default to SCI3 when no console is explicitly selected.
+ * The PX4 flight defconfig sets CONFIG_SERIAL_CONSOLE=y but no channel-
+ * specific CONFIG_SCIx_SERIAL_CONSOLE, and its src/init.c muxes the SCI3
+ * console pins — so the default MUST stay SCI3 to preserve the flight
+ * early-console behaviour.  The nsh sample configs opt into SCI4 explicitly
+ * via CONFIG_SCI4_SERIAL_CONSOLE above.
+ */
 #  define CONSOLE_BASE   RZV_SCI3_BASE
 #  define CONSOLE_CLK_ID RZV_CPG_CLK_SCI3
 #  define CONSOLE_TXD_GPIO  GPIO_TXD_MOSI4_SDA3_P3_4_M2
