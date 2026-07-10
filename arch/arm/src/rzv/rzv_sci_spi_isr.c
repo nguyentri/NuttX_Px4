@@ -9,13 +9,6 @@
  *   RXI — RDRF set: drain RDR into rxbuffer; when nrxwords hits 0 post done.
  *   TEI — TEND set: all bytes shifted out; mask TIE|TEIE, post completion.
  *   ERI — error: mask all IRQs first, log, clear, post error.
- *
- * Review fixes applied:
- *   #5  CRIT — rxi_isr: ack FIRST (CFCLR), then drain in a loop (#5)
- *   #6  CRIT — txi_isr: mask TIE when ntxwords==0, enable TEIE (#6)
- *   #17 IMP  — eri_isr: mask ALL IRQs before touching priv (#17)
- *   #19 IMP  — tei_isr: clear TEND via CFCLR, mask, post done (#19)
- *
  * Licensed under Apache License 2.0 — see top-level NOTICE.
  *
  ****************************************************************************/
@@ -109,7 +102,14 @@ int rzv_sci_spi_txi_isr(int irq, void *context, void *arg)
   (void)irq;
   (void)context;
 
-  if (priv == NULL || priv->state != SCI_SPI_STATE_BUSY)
+  if (priv == NULL)
+    {
+      /* Cannot touch registers without a valid instance — return. */
+
+      return OK;
+    }
+
+  if (priv->state != SCI_SPI_STATE_BUSY)
     {
       /* Clear flag and return — spurious or after timeout recovery */
 
@@ -165,7 +165,14 @@ int rzv_sci_spi_rxi_isr(int irq, void *context, void *arg)
   (void)irq;
   (void)context;
 
-  if (priv == NULL || priv->state != SCI_SPI_STATE_BUSY)
+  if (priv == NULL)
+    {
+      /* Cannot touch registers without a valid instance — return. */
+
+      return OK;
+    }
+
+  if (priv->state != SCI_SPI_STATE_BUSY)
     {
       CFCLR_WR(priv, SCI_CFCLR_RDRFC);
       return OK;

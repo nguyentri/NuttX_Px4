@@ -28,8 +28,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
-#include <string.h>
-#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -137,7 +135,8 @@ static int rzv_icu_interrupt(int irq, void *context, void *arg)
 
 void rzv_icu_clear_irq(int irq)
 {
-  /* caller passes GIC INTID (353..481 for SEL slots).
+  /* caller passes GIC INTID (385..514 for SEL slots: RZV_INTC_SEL_SPI_BASE +
+   * 0..RZV_IRQ_ICU_SLOTS).
    * rzv_icu_clear_irq_status clears ISCLR bits 0-15 for external IRQ0-15.
    * External IRQ pins are routed via ELC event IDs 0-15 which map to
    * GIC INTID = ELC_IRQ0_INTID + irq_line. We cannot safely reverse-map
@@ -601,7 +600,9 @@ int rzv_icu_set_irq_filter(int irq_num, uint8_t filter_clock)
 
 int rzv_icu_set_priority(int icu_irq, int priority)
 {
-  /* Validate IRQ range — SEL IRQs start at 353 (no RZV_IRQ_FIRST) */
+  /* Validate IRQ range — SEL INTIDs start at RZV_INTC_SEL_SPI_BASE (385 =
+   * FSP FIXED_INTSEL_COUNT 353 + RZV_IRQ_FIRST 32).
+   */
 
   if (icu_irq < RZV_INTC_SEL_SPI_BASE ||
       icu_irq >= (RZV_INTC_SEL_SPI_BASE + RZV_IRQ_ICU_SLOTS))

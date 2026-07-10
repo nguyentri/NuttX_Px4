@@ -11,6 +11,10 @@ CONFIG_ARCH_CHIP="rzv"
 CONFIG_ARCH_CHIP_RZV=y
 CONFIG_ARCH_CHIP_R9A09G057=y
 CONFIG_ARMV7R_TOOLCHAIN_GNU_EABI=y
+
+# Core Specific Configuration (selects the CR8-0 linker script; without a
+# core-select symbol Make.defs leaves LDSCRIPT empty and the link fails.)
+CONFIG_RZV2H_BUILD_CR8_0=y
 CONFIG_ARCH_STACKDUMP=y
 CONFIG_ARMV7R_DCACHE=y
 CONFIG_ARMV7R_DTCM=y
@@ -124,5 +128,9 @@ CONFIG_RZV_SCI0_SPI=y
 # Enable example support
 CONFIG_RZV2H_EXAMPLE_SUPPORT=y
 
-# SPI Loopback Demo Configuration
-CONFIG_RZV2H_SPI_LOOPBACK_EXAMPLE=y
+# NOTE: the built-in SPI loopback example (CONFIG_RZV2H_SPI_LOOPBACK_EXAMPLE)
+# is native-SPI only — it opens native buses 0/1 via rzv_spibus_initialize(),
+# which return NULL when only the SCI-SPI backend is built, causing a runtime
+# crash.  This config registers the SCI-SPI device through
+# board_sci_spi_initialize() instead; exercise it via the SPI char driver
+# (/dev/spi*) or spitool.  A dedicated SCI-SPI loopback app is deferred.

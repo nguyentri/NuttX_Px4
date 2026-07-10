@@ -11,6 +11,10 @@ CONFIG_ARCH_CHIP="rzv"
 CONFIG_ARCH_CHIP_RZV=y
 CONFIG_ARCH_CHIP_R9A09G057=y
 CONFIG_ARMV7R_TOOLCHAIN_GNU_EABI=y
+
+# Core Specific Configuration (selects the CR8-0 linker script; without a
+# core-select symbol Make.defs leaves LDSCRIPT empty and the link fails.)
+CONFIG_RZV2H_BUILD_CR8_0=y
 CONFIG_ARCH_STACKDUMP=y
 CONFIG_ARMV7R_DCACHE=y
 CONFIG_ARMV7R_DTCM=y

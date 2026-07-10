@@ -92,39 +92,12 @@ static struct spi_loopback_s g_spi_loopback;
  * Private Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: rzv_spi_select (strong override for loopback)
- *
- * Description:
- *   Enable/disable the SPI chip select for loopback test
- *   For loopback testing, CS is not used
- *
- ****************************************************************************/
-
-void rzv_spi_select(struct spi_dev_s *dev, uint32_t devid, bool selected)
-{
-  /* No CS control needed for loopback testing */
-  /* MOSI is connected directly to MISO for each SPI controller */
-  UNUSED(dev);
-  UNUSED(devid);
-  UNUSED(selected);
-}
-
-/****************************************************************************
- * Name: rzv_spi_status (strong override for loopback)
- *
- * Description:
- *   Return status information for loopback test
- *
- ****************************************************************************/
-
-uint8_t rzv_spi_status(struct spi_dev_s *dev, uint32_t devid)
-{
-  /* For loopback test, device is always present */
-  UNUSED(dev);
-  UNUSED(devid);
-  return SPI_STATUS_PRESENT;
-}
+/* rzv_spi_select() and rzv_spi_status() are provided by the board SPI
+ * integration file (rzv2h_spi.c), which owns the chip-select GPIO.  They are
+ * deliberately NOT redefined here — doing so caused a multiple-definition
+ * link error.  The board versions (CS on P9_3, status PRESENT) are correct
+ * for internal loopback (asserting an unused CS is harmless).
+ */
 
 /****************************************************************************
  * Name: rzv_spi_cmddata (strong override for loopback)

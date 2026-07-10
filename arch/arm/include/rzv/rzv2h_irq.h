@@ -36,6 +36,15 @@
  * Pre-processor Prototypes
  ****************************************************************************/
 
+/* Naming discipline (RZ/V2H interrupt identifiers):
+ *   RZV_ELC_*  = ELC / IRQSEL event id — the value programmed into an
+ *                INTR8SEL (CR8) / INTM33SEL (CM33) field; pass to rzv_icu_attach().
+ *   RZV_IRQ_*  = physical GIC INTID == NuttX IRQ number — pass to irq_attach() /
+ *                up_enable_irq().  For fixed sources INTID = FSP SPI index + 32.
+ * The two number spaces overlap numerically (e.g. 354 is both an ELC event and
+ * an INTID); never pass one where the other is expected.
+ */
+
 /* Event number definitions based on RZV2H HWM Event Table 13.4 */
 #define RZV_ELC_IRQ0                                  (0x0)  /* External pin interrupt 0 - Event 0x0 */
 #define RZV_ELC_IRQ1                                  (0x1)  /* External pin interrupt 1 - Event 0x1 */
@@ -594,6 +603,30 @@
 #define RZV_IRQ_SCI_TXI(ch)                          (RZV_IRQ_SCI_ERI(ch) + 2)
 #define RZV_IRQ_SCI_TEI(ch)                          (RZV_IRQ_SCI_ERI(ch) + 3)
 
+/* SPI-B fixed GIC SPI lines (per FSP rzv2h/cr/bsp_irq_id.h + rzv_gen/
+ * vector_data.c).  SPI-B uses a HYBRID interrupt topology on RZ/V2H CR8.
+ * Values below are FSP SPI *indices*; the physical GIC INTID (== NuttX IRQ)
+ * is index + 32 (32-entry SGI/PPI prefix), which the macros apply:
+ *
+ *   - ERI (SPEI)   SPI index 106 + 3*ch → FIXED, spi_b_eri_isr (INTID 138 + 3*ch)
+ *   - CE  (SPCEND) SPI index 107 + 3*ch → FIXED, spi_b_tei_isr (INTID 139 + 3*ch)
+ *   - RXI          FSP IRQn 353 (sel[0]) → SELECTABLE via INTR8SEL (rzv_icu_attach);
+ *                  NuttX INTID = RZV_INTC_SEL_SPI_BASE(385) + slot
+ *   - TXI          FSP IRQn 354 (sel[1]) → SELECTABLE via INTR8SEL (rzv_icu_attach)
+ *
+ * IDLE (SPI0_IDLE_IRQn=105+3*ch) is available in silicon but FSP r_spi_b
+ * does not use it — omit until a use case appears.
+ */
+
+#define RZV_IRQ_SPI_ERI(ch)                          (32 + 106 + 3 * (ch))
+#define RZV_IRQ_SPI_CE(ch)                           (32 + 107 + 3 * (ch))
+
+/* INTR8SEL selectable-slot count.  129 = the hardware field maximum
+ * (INTC_INTSEL_NUM 43 regs × 3 fields/reg).  FSP exposes only 127 usable
+ * SELECT entries (BSP_ICU_VECTOR_MAX_ENTRIES 480 − FIXED_INTSEL_COUNT 353),
+ * so slots 127/128 (INTID 512/513) have no FSP/event counterpart — harmless
+ * over-allocation of the g_icu_handlers[] table, never routed.
+ */
 #define RZV_IRQ_ICU_SLOTS                             (129)
 
 /* GIC IRQ-table span (NR_IRQS = RZV_IRQ_FIRST + RZV_IRQ_GIC_SIZE).

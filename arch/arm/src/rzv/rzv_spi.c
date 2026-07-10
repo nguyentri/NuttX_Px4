@@ -109,10 +109,17 @@ struct rzv_spi_config_s
   uint8_t   port;          /* SPI port number (0-2) */
   uint32_t  clk_id;        /* CPG clock gate ID */
   enum rzv_clock_id_e spi_clock; /* SPI clock source for baud rate calc */
-  uint16_t  elc_rxi;       /* ELC event: RX buffer full */
-  uint16_t  elc_txi;       /* ELC event: TX buffer empty */
-  uint16_t  elc_tei;       /* ELC event: transfer end (CEND) */
-  uint16_t  elc_eri;       /* ELC event: error */
+  /* Only RXI/TXI are INTR8SEL-selectable on RZ/V2H SPI-B; ERI (SPEI) and
+   * TEI (SPCEND) have dedicated fixed GIC INTIDs derived from `port` via
+   * RZV_IRQ_SPI_ERI(port)/RZV_IRQ_SPI_CE(port).  Attach ERI/TEI directly
+   * with irq_attach() — do NOT push them through rzv_icu_attach(): fixed
+   * lines cannot be re-routed by INTR8SEL and doing so returns a phantom
+   * INTID (see FSP rzv_gen/vector_data.c: spi_b_eri_isr on INTID 106,
+   * spi_b_tei_isr on INTID 107).
+   */
+
+  uint16_t  elc_rxi;       /* ELC event: RX buffer full (INTR8SEL) */
+  uint16_t  elc_txi;       /* ELC event: TX buffer empty (INTR8SEL) */
 };
 
 /* SPI Device Private Data */
@@ -269,14 +276,13 @@ static const struct rzv_spi_config_s g_spi0_config =
   .frequency = SPI_DEFAULT_FREQUENCY,
   .port      = 0,
   .clk_id    = RZV_CPG_CLK_SPI0,
-  /* [C1] SPI-B clock source is P4CLK (200 MHz) per RZ/V2H hardware manual.
-   * SPI0CLK (266 MHz) is the wrong source; baud would be off by ~33%.
+  /* SPI-B channel 0 functional clock is SPI0CLK (266.67 MHz), the dedicated
+   * SCISPICLK-derived clock per FSP bsp_clock_cfg.h and r_spi_b.c.  P4CLK
+   * (200 MHz) is NOT the SPI clock tree; using it made the baud rate ~25% low.
    */
-  .spi_clock = RZV_CLOCK_P4CLK,
+  .spi_clock = RZV_CLOCK_SPI0CLK,
   .elc_rxi   = RZV_ELC_SP_ELCRDRF_0,
   .elc_txi   = RZV_ELC_SP_ELCTDRE_0,
-  .elc_tei   = RZV_ELC_SP_ELCCEND_0,
-  .elc_eri   = RZV_ELC_SP_ELCERR_0,
 };
 
 static struct rzv_spi_priv_s g_spi0_priv =
@@ -297,12 +303,13 @@ static const struct rzv_spi_config_s g_spi1_config =
   .frequency = SPI_DEFAULT_FREQUENCY,
   .port      = 1,
   .clk_id    = RZV_CPG_CLK_SPI1,
-  /* [C1] Same P4CLK source as SPI0; all SPI-B instances use P4CLK. */
-  .spi_clock = RZV_CLOCK_P4CLK,
+  /* SPI-B channel 1 functional clock is SPI1CLK (133.33 MHz) per FSP
+   * bsp_clock_cfg.h.  Each SPI-B channel has its own SPInCLK; they are not
+   * all P4CLK.
+   */
+  .spi_clock = RZV_CLOCK_SPI1CLK,
   .elc_rxi   = RZV_ELC_SP_ELCRDRF_1,
   .elc_txi   = RZV_ELC_SP_ELCTDRE_1,
-  .elc_tei   = RZV_ELC_SP_ELCCEND_1,
-  .elc_eri   = RZV_ELC_SP_ELCERR_1,
 };
 
 static struct rzv_spi_priv_s g_spi1_priv =
@@ -357,11 +364,16 @@ static uint32_t rzv_spi_get_clk_hz(struct rzv_spi_priv_s *priv)
 
   if (hz == 0)
     {
-      /* Fallback — should not happen if CPG was initialised */
+      /* Fallback — should not happen if CPG was initialised.  Use the
+       * channel's true SPInCLK value, not a generic magic number, so the
+       * baud-rate divider stays correct even on this path.
+       */
 
-      spierr("SPI%d: clock rate is 0, using 100 MHz fallback\n",
-             priv->config->port);
-      hz = 100000000u;
+      hz = (priv->config->port == 0) ? RZV_CLOCK_SPI0CLK_HZ :
+           (priv->config->port == 1) ? RZV_CLOCK_SPI1CLK_HZ :
+                                       RZV_CLOCK_SPI2CLK_HZ;
+      spierr("SPI%d: clock rate is 0, using %lu Hz fallback\n",
+             priv->config->port, (unsigned long)hz);
     }
 
   return hz;
@@ -652,11 +664,17 @@ static uint32_t rzv_spi_send(struct spi_dev_s *dev, uint32_t wd)
   uint32_t spsr;
   uint32_t rxdata = 0xffffffffu;
   uint32_t timeout;
+  bool     ready;
 
-  /* Wait for TX FIFO space (SPTFSR.TFDN > 0 means FIFO has empty slots) */
+  /* Wait for TX FIFO space (SPTFSR.TFDN > 0 means FIFO has empty slots).
+   * Note: earlier code used `while (timeout-- > 0)` and then checked
+   * `if (timeout == 0)` on exit — that check is dead because the post-
+   * decrement wraps `timeout` to UINT32_MAX after the final loop iteration.
+   * Use an explicit "ready" flag instead so the timeout branch actually fires.
+   */
 
-  timeout = SPI_TIMEOUT_CYCLES;
-  while (timeout-- > 0)
+  ready = false;
+  for (timeout = 0; timeout < SPI_TIMEOUT_CYCLES; timeout++)
     {
       spsr = rzv_spi_getreg32(priv, RZV_SPI_SPSR_OFFSET);
 
@@ -672,11 +690,12 @@ static uint32_t rzv_spi_send(struct spi_dev_s *dev, uint32_t wd)
 
       if (spsr & SPI_SPSR_SPTEF)
         {
+          ready = true;
           break;
         }
     }
 
-  if (timeout == 0)
+  if (!ready)
     {
       spierr("SPI%d: TX timeout\n", priv->config->port);
       return 0xffffffffu;
@@ -701,8 +720,8 @@ static uint32_t rzv_spi_send(struct spi_dev_s *dev, uint32_t wd)
    * RFDN reflects every received word without needing RTRG threshold match.
    */
 
-  timeout = SPI_TIMEOUT_CYCLES;
-  while (timeout-- > 0)
+  ready = false;
+  for (timeout = 0; timeout < SPI_TIMEOUT_CYCLES; timeout++)
     {
       spsr = rzv_spi_getreg32(priv, RZV_SPI_SPSR_OFFSET);
 
@@ -717,11 +736,12 @@ static uint32_t rzv_spi_send(struct spi_dev_s *dev, uint32_t wd)
       if (rzv_spi_getreg32(priv, RZV_SPI_SPRFSR_OFFSET) &
           SPI_SPRFSR_RFDN_MASK)
         {
+          ready = true;
           break;
         }
     }
 
-  if (timeout == 0)
+  if (!ready)
     {
       spierr("SPI%d: RX timeout\n", priv->config->port);
       return 0xffffffffu;
@@ -1161,7 +1181,16 @@ struct spi_dev_s *rzv_spibus_initialize(int port)
 
   rzv_spi_setfrequency(priv, priv->config->frequency);
 
-  /* Attach interrupt handlers (irq_* already -1 from static init) */
+  /* Attach interrupt handlers (irq_* already -1 from static init).
+   *
+   * Hybrid topology per FSP: RXI/TXI are INTR8SEL-selectable (allocate a
+   * slot via rzv_icu_attach); ERI (SPEI) and TEI (SPCEND) are fixed GIC
+   * INTIDs — attach directly with irq_attach.  Enable disabled until a
+   * transfer arms interrupts.  ISRs are left with false so the GIC line is
+   * NOT enabled at init (avoids startup interrupt storm with SPTIE cleared).
+   */
+
+  /* Selectable: RXI */
 
   priv->irq_rxi = rzv_icu_attach(priv->config->elc_rxi,
                                   rzv_spi_rxi_interrupt, priv, false);
@@ -1172,6 +1201,8 @@ struct spi_dev_s *rzv_spibus_initialize(int port)
       goto errout_clock;
     }
 
+  /* Selectable: TXI */
+
   priv->irq_txi = rzv_icu_attach(priv->config->elc_txi,
                                   rzv_spi_txi_interrupt, priv, false);
   if (priv->irq_txi < 0)
@@ -1181,23 +1212,37 @@ struct spi_dev_s *rzv_spibus_initialize(int port)
       goto errout_rxi;
     }
 
-  priv->irq_tei = rzv_icu_attach(priv->config->elc_tei,
-                                  rzv_spi_tei_interrupt, priv, false);
-  if (priv->irq_tei < 0)
+  /* Fixed: TEI (SPCEND / communication end).  INTID = 32 + 107 + 3*port. */
+
+  priv->irq_tei = RZV_IRQ_SPI_CE(priv->config->port);
+  ret = irq_attach(priv->irq_tei, rzv_spi_tei_interrupt, priv);
+  if (ret < 0)
     {
-      spierr("SPI%d: TEI attach failed %d\n",
-             priv->config->port, priv->irq_tei);
+      spierr("SPI%d: TEI(irq=%d) attach failed %d\n",
+             priv->config->port, priv->irq_tei, ret);
+      priv->irq_tei = -1;
       goto errout_txi;
     }
 
-  priv->irq_eri = rzv_icu_attach(priv->config->elc_eri,
-                                  rzv_spi_eri_interrupt, priv, false);
-  if (priv->irq_eri < 0)
+  /* Fixed: ERI (SPEI / error).  INTID = 32 + 106 + 3*port. */
+
+  priv->irq_eri = RZV_IRQ_SPI_ERI(priv->config->port);
+  ret = irq_attach(priv->irq_eri, rzv_spi_eri_interrupt, priv);
+  if (ret < 0)
     {
-      spierr("SPI%d: ERI attach failed %d\n",
-             priv->config->port, priv->irq_eri);
+      spierr("SPI%d: ERI(irq=%d) attach failed %d\n",
+             priv->config->port, priv->irq_eri, ret);
+      priv->irq_eri = -1;
       goto errout_tei;
     }
+
+  /* Enable the fixed GIC lines now — ISRs are re-entrancy-safe and only
+   * fire on real hardware events (SPCEND on end-of-frame; SPEI on error).
+   * RXI/TXI stay disabled until a transfer arms SPRIE/SPTIE.
+   */
+
+  up_enable_irq(priv->irq_tei);
+  up_enable_irq(priv->irq_eri);
 
   /* Write SPCR: SPE=0 initially (set all except SPE then MSTR).
    * read back SPCR after write for 1-TCLK sync (RZ/V2H UM §SPI).
@@ -1234,9 +1279,12 @@ struct spi_dev_s *rzv_spibus_initialize(int port)
   return (struct spi_dev_s *)priv;
 
 errout_tei:
-  rzv_icu_detach(priv->irq_tei);
+  /* Fixed line: disable + detach (mirror of the fixed-line attach). */
+  up_disable_irq(priv->irq_tei);
+  irq_detach(priv->irq_tei);
   priv->irq_tei = -1;
 errout_txi:
+  /* Selectable line: rzv_icu_detach handles slot release + irq_detach. */
   rzv_icu_detach(priv->irq_txi);
   priv->irq_txi = -1;
 errout_rxi:
@@ -1267,17 +1315,23 @@ int rzv_spibus_uninitialize(struct spi_dev_s *dev)
 
   rzv_spi_putreg32(priv, RZV_SPI_SPCR_OFFSET, 0);
 
-  /* Detach IRQs — guard with >=0 check */
+  /* Detach IRQs — guard with >=0 check.
+   * Fixed lines (ERI/TEI): up_disable_irq + irq_detach.
+   * Selectable lines (RXI/TXI): rzv_icu_detach releases the INTR8SEL slot
+   * and internally calls irq_detach + up_disable_irq for that slot.
+   */
 
   if (priv->irq_eri >= 0)
     {
-      rzv_icu_detach(priv->irq_eri);
+      up_disable_irq(priv->irq_eri);
+      irq_detach(priv->irq_eri);
       priv->irq_eri = -1;
     }
 
   if (priv->irq_tei >= 0)
     {
-      rzv_icu_detach(priv->irq_tei);
+      up_disable_irq(priv->irq_tei);
+      irq_detach(priv->irq_tei);
       priv->irq_tei = -1;
     }
 

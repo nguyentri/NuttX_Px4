@@ -38,20 +38,24 @@
  *    - Receives SPI interrupts from INTC
  *    - Handles priority, masking, acknowledgment
  *
- * Interrupt Flow:
- *   Peripheral Event → INTC INTR8SEL[slot] → GIC SPI[353+slot] → CPU → Handler
+ * Interrupt Flow (selectable):
+ *   Peripheral event → INTC INTR8SEL[slot] → GIC SPI INTID (385+slot) → CPU → Handler
  *
- * Slot→IRQ mapping:
- *   ICU_FIXED_INTSEL_COUNT = 353 (first SELECT SPI INTID per RZ/V2H UM).
- *   INTR8SEL slot N → GIC SPI INTID (353+N) → NuttX IRQ index == GIC INTID.
- *   rzv_icu_attach() returns NuttX IRQ (= GIC INTID = 353+N); callers must
- *   use that value for up_enable_irq/up_disable_irq and irq_detach.
- *   Do NOT add RZV_IRQ_FIRST — it was already double-counted.
+ * NuttX IRQ number == physical GIC INTID throughout.
  *
- * Usage Example:
- *   int irq = rzv_icu_attach(RZV_ELC_SCI0_RXI, uart_handler, &dev, true);
- *   // Later:
- *   rzv_icu_detach(irq);
+ * Selectable slot→INTID mapping:
+ *   FSP FIXED_INTSEL_COUNT = 353 (first SELECT entry, FSP IRQn space).
+ *   NuttX SEL base = 353 + RZV_IRQ_FIRST(32) = 385 (RZV_INTC_SEL_SPI_BASE in
+ *   rzv_icu.c).  INTR8SEL slot N → GIC INTID (385 + N).  rzv_icu_attach()
+ *   returns that INTID; pass it to up_enable_irq/up_disable_irq and
+ *   rzv_icu_detach().
+ *
+ * Two registration idioms (see rzv2h_irq.h naming discipline):
+ *   Fixed source:      int irq = RZV_IRQ_SPI_ERI(ch);   // RZV_IRQ_* = INTID
+ *                      irq_attach(irq, isr, arg); up_enable_irq(irq);
+ *                      // edge sources also: rzv_gic_set_irq_type(irq, true);
+ *   Selectable source: int irq = rzv_icu_attach(RZV_ELC_SCI0_RXI, isr, arg, true);
+ *                      // RZV_ELC_* = event id;  ... later: rzv_icu_detach(irq);
  */
 
 #ifndef __ARCH_ARM_SRC_RZV_ICU_H
@@ -117,6 +121,33 @@ extern "C"
 
 /* ICU Core API */
 
+/* Helper-API surface, CR8 (this file / rzv_icu.c + rzv_irq.c, GIC) vs
+ * CM33 (rzv_icu_cm33.h / rzv_icu_cm33.c + rzv_irq_cm33.c, NVIC).  The
+ * rzv_icu_* names are shared (portable); the two cores are alternate
+ * translation units selected by CONFIG_RZV2H_BUILD_CR8_x / _CM33 and never
+ * linked together.
+ *
+ *   Concern         CR8 (GIC)                       CM33 (NVIC)
+ *   --------------  ------------------------------  ---------------------------
+ *   init            rzv_icu_initialize              rzv_icu_initialize
+ *                                                     → rzv_icu_m33_initialize
+ *   attach          rzv_icu_attach                  rzv_icu_attach
+ *                                                     → rzv_icu_m33_attach
+ *   detach          rzv_icu_detach                  rzv_icu_detach
+ *                                                     → rzv_icu_m33_detach
+ *   set event       rzv_icu_set_event (INTR8SEL)    rzv_icu_set_event (INTM33SEL)
+ *   enable/disable  up_enable_irq/up_disable_irq    up_enable_irq/up_disable_irq
+ *                     (GICD ISER/ICER, rzv_irq.c)     (NVIC ISER/ICER, −RZV_IRQ_FIRST)
+ *   priority        rzv_icu_set_priority 0-15        rzv_icu_set_priority
+ *                     (GICD ICDIPR, <<4)              (NVIC IPR)
+ *   sense/trigger   rzv_gic_set_irq_type +           NVIC edge/level (SCB); n/a
+ *                     rzv_icu_set_irq_detect          for INTM33SEL SEL sources
+ *   ack / EOI       arm_decodeirq→ICCEOIR;           up_ack_irq no-op
+ *                     up_ack_irq (API only)           (NVIC auto-acks)
+ *   SEL base        RZV_INTC_SEL_SPI_BASE (385)      RZV_INTC_M33SEL_SPI_BASE
+ *                                                     (rzv_icu_cm33.c; see plan P4)
+ */
+
 /****************************************************************************
  * Name: rzv_icu_initialize
  *
@@ -158,7 +189,7 @@ void rzv_icu_clear_irq(int irq);
  *   irq_enable - If true, enable the IRQ immediately
  *
  * Returned Value:
- *   On success, returns NuttX IRQ (GIC INTID = 353 + slot).
+ *   On success, returns NuttX IRQ (GIC INTID = 385 + slot).
  *   On failure, returns a negated errno value:
  *     -ENOMEM: No more slots available
  *
@@ -195,8 +226,9 @@ int rzv_icu_detach(int icu_irq);
  *
  * Input Parameters:
  *   icu_irq  - IRQ number returned by rzv_icu_attach()
- *   priority - Priority level (0-31, where 0 = highest priority)
- *              GIC implements 5-bit priority in bits[7:3]
+ *   priority - Priority level (0-15, where 0 = highest priority)
+ *              GIC implements 4 priority bits in bits[7:4]; the value is
+ *              shifted left by 4 internally.
  *
  * Returned Value:
  *   OK on success; negated errno on failure:

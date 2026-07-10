@@ -11,16 +11,6 @@
  *   RXI  – Not used in CPU-mode (RIE never enabled). Kept for future DTC
  *           support. Handler is a no-op if fired spuriously.
  *
- * Review fixes applied:
- *   #1  CRIT — RX data moved into TXI (do_dummy_read pattern)
- *   #2  CRIT — 1-byte read: RXDATA state handled in TXI with dummy-read skip
- *   #4  CRIT — NACK during read = normal end; read RDR then issue stop/restart
- *   #7  HIGH — TEI: read ISR before clearing ICFCLR
- *   #13 MED  — Restart bookkeeping: HW serialises STIF→TXI (invariant noted)
- *   #14 MED  — Redundant dead branch in rxi_isr collapsed
- *   #16 MED  — STATE_RESTART_PENDING separate from STATE_STOP
- *   #17 MED  — rxi_isr kept for ICU slot / future DTC; annotated as no-op
- *
  * Licensed under Apache License 2.0 — see top-level NOTICE.
  *
  ****************************************************************************/
