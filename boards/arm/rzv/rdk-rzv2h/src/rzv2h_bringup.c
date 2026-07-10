@@ -73,7 +73,7 @@
 int board_bringup(void)
 {
   int ret = 0;
-  int first_error = 0;  /* audit finding #10: preserve first failure; ret is
+  int first_error = 0;  /* preserve first failure; ret is
                          * overwritten by each subsystem so errors are swallowed.
                          * first_error captures the earliest non-zero status. */
 
@@ -82,7 +82,7 @@ int board_bringup(void)
   syslog(LOG_INFO, "NuttX: RDK-RZV2H Board bring-up starting...\n");
 
 #ifdef CONFIG_RZV_GPIO_IRQ
-  /* Phase-03 [High-12, audit §4]: Initialize GPIO IRQ slot table.
+  /* Initialize GPIO IRQ slot table.
    * Sets icu_slot sentinel to -1 in all entries. BSS zero-init leaves
    * icu_slot=0, which equals a valid NuttX IRQ causing false "attached" state.
    * Must be called before any rzv_gpiosetevent() invocation.
@@ -350,7 +350,7 @@ int board_bringup(void)
 
   syslog(LOG_INFO, "NuttX: RDK-RZV2H Board bring-up complete\n");
 
-  /* audit finding #10: return first error seen, not the last subsystem's ret */
+  /* return first error seen, not the last subsystem's ret */
 
   return first_error;
 }

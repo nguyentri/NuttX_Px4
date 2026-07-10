@@ -44,7 +44,7 @@
 #include <nuttx/arch.h>
 
 /* up_udelay() is declared in <nuttx/arch.h> included above.
- * audit finding #20: explicit extern removed — redundant with <nuttx/arch.h>
+ * explicit extern removed — redundant with <nuttx/arch.h>
  * and its presence was a red flag that the header chain was not trusted.
  */
 
@@ -63,7 +63,7 @@
 #  define putreg32(v,a)  (*(volatile uint32_t *)(a) = (v))
 #endif
 
-/* audit finding #17: stdio.h printf fallback removed — printf is unsafe from
+/* stdio.h printf fallback removed — printf is unsafe from
  * early-boot context (no FS, no console driver initialized yet).  If <debug.h>
  * is genuinely absent the build must fail loudly rather than silently use an
  * unsafe logging path that would crash at the first clkerr() call during boot. */
@@ -335,7 +335,7 @@ static void rzv_cpg_dump_registers(uint32_t domain, const char *context)
  * Description:
  *   Wait for a bit to be set/cleared in a monitor register.
  *   MUST be called with IRQs ENABLED (outside critical section).
- *   audit High-5: poll moved outside enter_critical_section so HRT ISR
+ * poll moved outside enter_critical_section so HRT ISR
  *   is not blocked during up to 10ms of up_udelay spins.
  *
  * Input Parameters:
@@ -517,8 +517,9 @@ static int rzv_cpg_sci_clock_ctrl(int ch, bool enable)
  *   Assert (assert_rst=true) or deassert both RSCI resets of one channel.
  *   SCIP reset = CPG_RST global bit (8*16 + 1 + 2*ch), SCIT the next bit;
  *   the pair crosses into CPG_RST_9 for channel 7.
- *   Polarity follows rzv_module_reset/unreset: assert writes WEN only and
- *   waits RSTMON clear; deassert writes WEN|bits and waits RSTMON set.
+ *   Per FSP bsp_clocks.h (RZ/V2H), RSTMON bit == 1 while held in reset and
+ *   == 0 once released: assert writes WEN only (control=0) and waits RSTMON
+ *   set; deassert writes WEN|bits (control=1) and waits RSTMON clear.
  *
  ****************************************************************************/
 
@@ -541,7 +542,11 @@ static int rzv_cpg_sci_reset_ctrl(int ch, bool assert_rst)
       rzv_cpg_putreg(mask, RZV_CPG_RST(domain));
       leave_critical_section(flags);
 
-      ret = rzv_cpg_wait_bit(RZV_CPG_RSTMON(domain), bits, !assert_rst,
+      /* RSTMON polarity per FSP bsp_clocks.h (RZ/V2H): RSTMON bit == 1 while
+       * the module is held in reset, == 0 once the reset is released.
+       * So wait for SET after assert, CLEAR after deassert.
+       */
+      ret = rzv_cpg_wait_bit(RZV_CPG_RSTMON(domain), bits, assert_rst,
                              assert_rst ? CPG_TIMEOUT_RESET_ASSERT :
                                           CPG_TIMEOUT_RESET_RELEASE);
       if (ret < 0)
@@ -593,9 +598,9 @@ int rzv_clock_enable(uint32_t clk_id)
       return rzv_cpg_sci_clock_ctrl(sci_ch, true);
     }
 
-  /* audit Critical-3: DMAC uses a 5-bit mask (CLK0-CLK4 all required).
+  /* DMAC uses a 5-bit mask (CLK0-CLK4 all required).
    * DMAC CPG_CLKON_0 bits [4:0] are all required per RZ/V2H UM CPG §CLKON.
-   * audit finding #5/#6: ADC also needs a 2-bit pair (CLK0+CLK1).
+   * ADC also needs a 2-bit pair (CLK0+CLK1).
    * ADC requires 3U << CLK0_ON_Pos (both clock bits) per RZ/V2H UM.
    * Both are detected by domain here so any ID within that domain is gated
    * correctly regardless of which per-unit alias was passed. */
@@ -640,14 +645,14 @@ int rzv_clock_enable(uint32_t clk_id)
           up_udelay(delay_us);
         }
 
-      /* audit High-5: write under CS, poll OUTSIDE CS so HRT ISR not blocked.
+      /* write under CS, poll OUTSIDE CS so HRT ISR not blocked.
        * CPG write-enable gating makes concurrent per-bit writes safe. */
 
       flags = enter_critical_section();
       rzv_cpg_putreg(mask, clkon_addr);
       leave_critical_section(flags);
 
-      /* Poll with IRQs enabled — timeout per audit Medium-11 */
+      /* Poll with IRQs enabled — timeout */
 
       ret = rzv_cpg_wait_bit(clkmon_addr, mon_mask, true,
                               CPG_TIMEOUT_CLOCK_ENABLE);
@@ -694,7 +699,7 @@ int rzv_clock_disable(uint32_t clk_id)
       return rzv_cpg_sci_clock_ctrl(sci_ch, false);
     }
 
-  /* audit Critical-3 / finding #5/#6: match 2-bit/5-bit pairs used in enable */
+  /* match 2-bit/5-bit pairs used in enable */
 
   if (domain == RZV_CPG_DOMAIN(RZV_CPG_CLK_DMAC))
     {
@@ -732,7 +737,7 @@ int rzv_clock_disable(uint32_t clk_id)
           up_udelay(delay_us);
         }
 
-      /* audit High-5: write under CS, poll outside */
+      /* write under CS, poll outside */
 
       flags = enter_critical_section();
       rzv_cpg_putreg(mask, clkon_addr);
@@ -816,17 +821,20 @@ int rzv_module_reset(uint32_t clk_id)
         }
 
       /* Assert reset: WEN only, control=0 → reset asserted.
-       * audit High-5: write under CS, poll outside. */
+       * write under CS, poll outside. */
 
       mask = (bitmask << 16);
       flags = enter_critical_section();
       rzv_cpg_putreg(mask, mrst_addr);
       leave_critical_section(flags);
 
-      /* Wait until RSTMON bit(s) clear (= reset propagated).
-       * audit Medium-11: use per-op timeout CPG_TIMEOUT_RESET_ASSERT. */
+      /* Wait until RSTMON bit(s) SET (= reset asserted/propagated).
+       * RSTMON polarity per FSP bsp_clocks.h (RZ/V2H): 1 = in reset,
+       * 0 = released.  (FSP's R_BSP_MODULE_RSTON does not poll; polling for
+       * the asserted state here is a harmless, more conservative confirm.)
+       * use per-op timeout CPG_TIMEOUT_RESET_ASSERT. */
 
-      ret = rzv_cpg_wait_bit(mrstmon_addr, bitmask, false,
+      ret = rzv_cpg_wait_bit(mrstmon_addr, bitmask, true,
                               CPG_TIMEOUT_RESET_ASSERT);
       if (ret >= 0)
         {
@@ -905,17 +913,20 @@ int rzv_module_unreset(uint32_t clk_id)
         }
 
       /* Deassert reset: WEN + control=1 → reset released.
-       * audit High-5: write under CS, poll outside.
-       * audit Critical-1: wait for RSTMON==1 (set=true), not !=0 inverted. */
+       * write under CS, poll outside.
+       * RSTMON polarity per FSP bsp_clocks.h R_BSP_MODULE_RSTOFF (RZ/V2H):
+       * after deassert, wait for RSTMON bit == 0 (released).  The earlier
+       * "wait for RSTMON==1" convention was inverted vs the FSP reference and
+       * caused a spurious CPG_TIMEOUT_RESET_RELEASE spin on every unreset. */
 
       mask = (bitmask << 16) | bitmask;
       flags = enter_critical_section();
       rzv_cpg_putreg(mask, mrst_addr);
       leave_critical_section(flags);
 
-      /* audit Medium-11: use per-op timeout CPG_TIMEOUT_RESET_RELEASE */
+      /* use per-op timeout CPG_TIMEOUT_RESET_RELEASE */
 
-      ret = rzv_cpg_wait_bit(mrstmon_addr, bitmask, true,
+      ret = rzv_cpg_wait_bit(mrstmon_addr, bitmask, false,
                               CPG_TIMEOUT_RESET_RELEASE);
       if (ret >= 0)
         {
@@ -997,7 +1008,7 @@ int rzv_reset_release_sdhi(int ch)
  *   Get P0CLK frequency (100 MHz).  Use only for P0CLK peripherals (OSTM,
  *   GTM, WDT).  SPI and GPT require P4CLK (200 MHz) — use
  *   rzv_get_p4clk_frequency() or rzv_clock_get_rate(RZV_CLOCK_P4CLK).
- *   audit finding #4: callers that assumed this returns a generic "pclk"
+ * callers that assumed this returns a generic "pclk"
  *   and use it for P4CLK peripherals will get half the correct frequency.
  *
  ****************************************************************************/
@@ -1020,7 +1031,7 @@ uint32_t rzv_get_pclk_frequency(void)
  * Description:
  *   Get P4CLK frequency (200 MHz).  Used by SPI, GPT, and other P4 peripherals
  *   on RZ/V2H per the hardware manual clock tree.
- *   audit finding #4: added to prevent callers from erroneously using
+ * added to prevent callers from erroneously using
  *   rzv_get_pclk_frequency() (P0CLK = 100 MHz) for P4CLK peripherals.
  *
  ****************************************************************************/
@@ -1100,7 +1111,7 @@ static void rzv_pll_init(void)
 
   clkinfo("Initializing PLLs...\n");
 
-  /* audit High-6: PLLCM33 init under CONFIG_RZV2H_BUILD_CM33.
+  /* PLLCM33 init under CONFIG_RZV2H_BUILD_CM33.
    * On CR8 boot, CM33 may not be active; TF-A may own PLLCM33 startup.
    * Only attempt to start PLLCM33 when building for the CM33 core to avoid
    * interfering with TF-A's initialization on the CR8 path. */
@@ -1127,7 +1138,7 @@ static void rzv_pll_init(void)
   clkinfo("PLLCM33: CR8 build — skipping (TF-A/CM33 owns PLLCM33)\n");
 #endif /* CONFIG_RZV2H_BUILD_CM33 */
 
-  /* audit Low-12: PLL init order = PLLCLN→PLLDTY→PLLCA55→PLLVDO→PLLETH→
+  /* PLL init order = PLLCLN→PLLDTY→PLLCA55→PLLVDO→PLLETH→
    * PLLDSI→PLLGPU→PLLDRP.  Order is cosmetic; PLLs are independent. */
 
   /* Initialize PLLCLN (1.6 GHz) if not already running */
@@ -1348,7 +1359,7 @@ static void rzv_pll_init(void)
       clkinfo("PLLDRP already locked\n");
     }
 
-  /* audit Low-13: PLLDDR0/1 init gated under Kconfig.
+  /* PLLDDR0/1 init gated under Kconfig.
    * DDR is typically initialized by TF-A before NuttX runs.
    * If TF-A owns DDR, NuttX must NOT re-initialize PLLDDR to avoid
    * corrupting DDR timing.  Only init if explicitly enabled in Kconfig. */
@@ -1554,7 +1565,7 @@ static void rzv_clock_divider_init(void)
 
 static void rzv_clock_selector_init(void)
 {
-  /* audit High-4: read back SSEL registers to verify bootloader configuration.
+  /* read back SSEL registers to verify bootloader configuration.
    * SSEL selects clock source for muxed domains (e.g. CA55 SCLK, GBE TX/RX).
    * We do not reprogram them here — TF-A/U-Boot is expected to configure them.
    * Log values so bring-up trace can be compared against bsp_clock_cfg.h. */
@@ -1692,7 +1703,7 @@ static void rzv_clock_verify_frequencies(void)
     }
 
   /* Verify DDR PLLs are locked.
-   * audit finding #13: under !CONFIG_RZV_INIT_PLLDDR TF-A owns DDR; a
+   * under !CONFIG_RZV_INIT_PLLDDR TF-A owns DDR; a
    * "not locked" here is noise (TF-A may have them gated/remapped).
    * Downgrade to clkinfo so boot log is not polluted with false ERRORs.
    * Under CONFIG_RZV_INIT_PLLDDR NuttX owns DDR init → escalate to ERROR. */
@@ -1815,7 +1826,7 @@ uint32_t rzv_clock_get_rate(enum rzv_clock_id_e clock_id)
 
   freq = g_clock_freq[clock_id];
 
-  /* audit finding #8: warn if a valid clock_id maps to 0 Hz so callers
+  /* warn if a valid clock_id maps to 0 Hz so callers
    * are alerted to a missing g_clock_defaults[] entry rather than silently
    * using 0 as a divisor (baud/frequency calculation would be wrong). */
 
@@ -1866,7 +1877,7 @@ const char *rzv_clock_get_name(enum rzv_clock_id_e clock_id)
 
 int rzv_clock_set_lowpower_mode(uint32_t clk_id, bool enable)
 {
-  /* audit High-7: was silently returning OK without doing anything.
+  /* was silently returning OK without doing anything.
    * LP_CTL registers not implemented; return -ENOSYS so callers know. */
 
   (void)clk_id;
@@ -1892,7 +1903,7 @@ int rzv_clock_set_lowpower_mode(uint32_t clk_id, bool enable)
 
 int rzv_clock_enable_monitoring(enum rzv_clock_id_e clock_id, bool enable)
 {
-  /* audit High-7: was silently returning OK without configuring CLMA registers.
+  /* was silently returning OK without configuring CLMA registers.
    * CLMA0-14 not implemented; return -ENOSYS. */
 
   if (clock_id >= RZV_CLOCK_MAX)
@@ -1928,8 +1939,8 @@ int rzv_clock_enable_monitoring(enum rzv_clock_id_e clock_id, bool enable)
 int rzv_clock_set_frequency(enum rzv_clock_id_e clock_id,
                             uint32_t frequency_hz)
 {
-  /* audit High-7: was silently returning OK without touching hardware.
-   * audit Medium-9: current_freq==0 when clock_id unknown → 0*2==0 → any
+  /* was silently returning OK without touching hardware.
+   * current_freq==0 when clock_id unknown → 0*2==0 → any
    * nonzero frequency_hz rejected with -EINVAL (masking bug).
    * Fix: return -ENOSYS (unimplemented) before any validation so callers
    * know dynamic frequency change is not supported, not that the argument
@@ -1985,7 +1996,7 @@ int rzv_clock_get_status(uint32_t clk_id,
   /* Read current hardware state */
 
   clkmon = rzv_cpg_getreg(RZV_CPG_CLKMON(domain));
-  /* audit finding #15: use 1u to avoid signed-int left-shift UB for bit>=16 */
+  /* use 1u to avoid signed-int left-shift UB for bit>=16 */
   status->enabled = (clkmon & (1u << bit)) != 0;
 
   if (domain <= RZV_CPG_MAX_RST)

@@ -6,7 +6,7 @@
  * Board integration ABI
  * ---------------------
  * For each CONFIG_RZV_SCIn_I2C=y channel, the board header (board.h) MUST
- * define the following GPIO pinset macros using the Phase-03 encoding
+ * define the following GPIO pinset macros using the encoding
  * (port[31:28] | pin[27:24] | mode[23:16] | psel[3:0]):
  *
  *   #define BOARD_SCIn_I2C_SDA_GPIO   GPIO_TXDn_MOSIn_SDAn_Pxx_Mm
@@ -53,7 +53,7 @@
  *
  * Notes:
  *   - Call once per channel; subsequent calls return the same pointer.
- *   - Pass the returned pointer to i2c_register() (board glue, Phase 04).
+ * - Pass the returned pointer to i2c_register() (board glue).
  *   - Driver is CPU-mode only (no DMAC); returns -ENOSYS for polling path.
  *   - 10-bit address messages return -ENOTSUP from transfer().
  *

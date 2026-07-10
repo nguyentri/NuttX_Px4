@@ -55,7 +55,7 @@
  * HARDWARE HEADER
  * ===============
  * All register addresses and bit masks from hardware/rzv_canfd.h
- * (820 LOC, Phase 1 deliverable — DO NOT modify here).
+ * (820 LOC, deliverable — DO NOT modify here).
  */
 
 /****************************************************************************

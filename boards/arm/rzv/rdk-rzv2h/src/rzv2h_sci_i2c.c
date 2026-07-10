@@ -8,7 +8,7 @@
  * Bus numbering: SCI0→10, SCI1→11, SCI2→12, SCI3→13
  * (RIIC buses 0..2 already taken; 10+ avoids collisions)
  *
- * Audit: Phase 04 — board glue / defconfig / smoke
+ * — board glue / defconfig / smoke
  * Ref: boards/arm/rzv/rdk-rzv2h/src/rzv2h_bringup.c (RIIC pattern)
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -82,7 +82,7 @@
  *   Pin configuration is handled inside rzv_sci_i2c_initialize() via the
  *   BOARD_SCIn_I2C_SDA_GPIO / BOARD_SCIn_I2C_SCL_GPIO macros from board.h.
  *
- *   Schematic note (audit dim 15): RDK-RZV2H GY-912 connector routes to
+ * Schematic note: RDK-RZV2H GY-912 connector routes to
  *   RIIC2, NOT to any SCI channel. The sci-i2c-gy912 defconfig therefore
  *   exercises SCI3 as a synthetic smoke target (no slave expected on bus);
  *   i2c_probe will return empty or -ENXIO, which is acceptable.

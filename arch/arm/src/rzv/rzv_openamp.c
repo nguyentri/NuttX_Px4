@@ -3,8 +3,8 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  *
- * Phase 01: single resource table, vring stride 0x100000, dcache clean.
- * Phase 03: rptun device registration (ops + rptun_initialize call).
+ * single resource table, vring stride 0x100000, dcache clean.
+ * rptun device registration (ops + rptun_initialize call).
  *
  ****************************************************************************/
 
@@ -46,7 +46,7 @@
  * the log_trace slot in rptun_rsc_s is at a lower offset but is NOT
  * referenced by any offset[] entry, so the CA55 OpenAMP parser never
  * touches it.  This avoids a zeroed RSC_CARVEOUT (type=0) being parsed
- * when offset[0] pointed at log_trace (C2 fix).
+ * when offset[0] pointed at log_trace.
  *
  * An RSC_RPROC_MEM entry is omitted: rptun_rsc_s has no rproc_mem
  * field (slave-only, CA55 owns memory).
@@ -156,7 +156,7 @@ void rzv_openamp_resource_table_init(void)
   memset(rsc, 0, sizeof(*rsc));
 
   /* Resource table header: single entry (num=1) — only the rpmsg vdev.
-   * C2 fix: do not point any offset[] at the log_trace slot (type=0 =
+   * do not point any offset at the log_trace slot (type=0 =
    * RSC_CARVEOUT, not "skip").  num=1 with offset[0] → rpmsg_vdev is
    * the YAGNI-compatible option from the Stage-2 review recommendation.
    */
@@ -241,7 +241,7 @@ int rzv_openamp_initialize(void)
 
   /* Step 3: register rptun device — this spawns the RPTUN worker thread
    * (CONFIG_RPTUN_THREAD=y) and eventually calls register_callback which
-   * wires rzv_rproc_register_callback → g_notify (phase 02 hook).
+   * wires rzv_rproc_register_callback → g_notify (hook).
    */
 
   g_rzv_rptun_dev.ops = &g_rzv_rptun_ops;

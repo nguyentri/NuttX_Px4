@@ -337,7 +337,7 @@ static int rzv_dmac_interrupt_handler(int irq, void *context, void *arg)
  *
  * Description:
  *   Initialize DMAC unit for the given global channel.
- *   - Enables CPG clock (RZV_CPG_CLK_DMAC, 2-bit pair encoding from Phase 01)
+ * - Enables CPG clock (RZV_CPG_CLK_DMAC, 2-bit pair encoding)
  *   - Releases module reset
  *   - Initialises both group DCTRL registers (round-robin priority)
  *   - Zeroes channel control structures for this unit
@@ -380,7 +380,7 @@ int rzv_dmac_channel_initialize(int channel)
       }
   }
 
-  /* Enable DMAC CPG clock (Phase 01 API).
+  /* Enable DMAC CPG clock (API).
    * RZV_CPG_CLK_DMAC uses 2-bit pair encoding; rzv_clock_enable handles it.
    * All units share one clock gate; enabling it multiple times is safe.
    */
@@ -519,7 +519,7 @@ int rzv_dmac_channel_configure(int channel,
  *
  * Description:
  *   Update N[0] SA/TB for the next transfer.  Satisfies the
- *   TODO(phase-04-dep) in rzv_serial.c rzv_dma_send.
+ * TODO(-dep) in rzv_serial.c rzv_dma_send.
  *   Performs TX cache clean (up_clean_dcache) when source address increments.
  *
  ****************************************************************************/

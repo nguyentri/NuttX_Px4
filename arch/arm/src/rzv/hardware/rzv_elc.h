@@ -26,7 +26,7 @@
  * This header provides:
  *   1. ELC_EVENT_* aliases (enum-style defines) so that driver code written
  *      against those names compiles under NuttX.
- *   2. Per-peripheral event groups for Phase 04-09 drivers.
+ * 2. Per-peripheral event groups for -09 drivers.
  *
  * Usage:
  *   #include "hardware/rzv_elc.h"
@@ -34,8 +34,8 @@
  *   // or alias:
  *   rzv_icu_attach(ELC_EVENT_GTM0_INT, handler, arg, true);
  *
- * Consumers: Phase 04 (DMAC), Phase 05 (UART/SCI), Phase 06 (SCI-I2C),
- *            Phase 07 (SPI), Phase 08 (GPT), Phase 09 (GTM/HRT).
+ * Consumers: (DMAC), (UART/SCI), (SCI-I2C),
+ * (SPI), (GPT), (GTM/HRT).
  */
 
 #ifndef __ARCH_ARM_SRC_RZV_HARDWARE_RZV_ELC_H
@@ -80,13 +80,13 @@
 /* TINT0-31 (GPIO trigger input pins)
  * Note: TINT pins are NOT ELC events routed via INTR8SEL.
  * They are handled via INTC TSSR/TITSR registers → GIC SPI directly.
- * Phase 03 (GPIO) owns TINT routing; no ELC_EVENT_TINT* aliases here.
+ * (GPIO) owns TINT routing; no ELC_EVENT_TINT* aliases here.
  * GPIO_TINT0_IRQn = 355 (first TINT SPI = 355).
  */
 #define RZV_INTC_TINT_SPI_BASE        (355)  /* GPIO_TINT0_IRQn */
 #define RZV_ICU_TINT_TO_IRQ(n)        (RZV_IRQ_FIRST + RZV_INTC_TINT_SPI_BASE + (n))
 
-/* GTM timer interrupts (Phase 09 — HRT) */
+/* GTM timer interrupts (— HRT) */
 
 #define ELC_EVENT_GTM0_INT            RZV_ELC_GTM0_GTMTINT
 #define ELC_EVENT_GTM1_INT            RZV_ELC_GTM1_GTMTINT
@@ -97,7 +97,7 @@
 #define ELC_EVENT_GTM6_INT            RZV_ELC_GTM6_GTMTINT
 #define ELC_EVENT_GTM7_INT            RZV_ELC_GTM7_GTMTINT
 
-/* DMAC1 completion (Phase 04) */
+/* DMAC1 completion */
 
 #define ELC_EVENT_DMAC1_END0          RZV_ELC_DMAC1_DMAEND_0
 #define ELC_EVENT_DMAC1_END1          RZV_ELC_DMAC1_DMAEND_1
@@ -116,7 +116,7 @@
 #define ELC_EVENT_DMAC1_END14         RZV_ELC_DMAC1_DMAEND_14
 #define ELC_EVENT_DMAC1_END15         RZV_ELC_DMAC1_DMAEND_15
 
-/* RSCI/SCI-B UART events (Phase 05/06) */
+/* RSCI/SCI-B UART events (/06) */
 
 #define ELC_EVENT_SCI0_ERI            RZV_ELC_SC_ELCER_0    /* RSCI0 receive error */
 #define ELC_EVENT_SCI0_RXI            RZV_ELC_SC_ELCRDRF_0  /* RSCI0 receive data full */
@@ -143,7 +143,7 @@
 #define ELC_EVENT_SCI4_TXI            RZV_ELC_SC_ELCTDRE_4
 #define ELC_EVENT_SCI4_TEI            RZV_ELC_SC_ELCTEND_4
 
-/* RIIC/I2C events (Phase 06) */
+/* RIIC/I2C events */
 
 #define ELC_EVENT_RIIC0_ERI           RZV_ELC_RIIC_CH0_IIC_ELCERRP
 #define ELC_EVENT_RIIC0_TXI           RZV_ELC_RIIC_CH0_IIC_ELCTDREP
@@ -155,14 +155,14 @@
 #define ELC_EVENT_RIIC1_RXI           RZV_ELC_RIIC_CH1_IIC_ELCRDRFP
 #define ELC_EVENT_RIIC1_TEI           RZV_ELC_RIIC_CH1_IIC_ELCTENDP
 
-/* SCIF UART events (Phase 05, if using SCIF instead of SCI-B) */
+/* SCIF UART events (if using SCIF instead of SCI-B) */
 
 #define ELC_EVENT_SCIF_TEI            RZV_ELC_UB1_TEI_N
 #define ELC_EVENT_SCIF_RXI            RZV_ELC_UB1_RXI_EDGE_N
 #define ELC_EVENT_SCIF_TXI            RZV_ELC_UB1_TXI_EDGE_N
 
 /* -------------------------------------------------------------------------
- * SELECT interrupt GIC SPI constants (for Phase 04-09 reference)
+ * SELECT interrupt GIC SPI constants (for -09 reference)
  * BSP_FEATURE_ICU_FIXED_INTSEL_COUNT = 353
  * -------------------------------------------------------------------------
  */

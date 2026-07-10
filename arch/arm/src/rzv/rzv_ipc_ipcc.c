@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  *
- * Phase 04: real cleanup — unregister rpmsg cb, NULL upper, mutex guard
+ * real cleanup — unregister rpmsg cb, NULL upper, mutex guard
  *           against UAF on concurrent dispatch (IPC-API-001, IPC-API-007).
  *
  ****************************************************************************/

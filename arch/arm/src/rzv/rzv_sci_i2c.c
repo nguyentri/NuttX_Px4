@@ -80,7 +80,7 @@
 
 /* Board must define BOARD_SCIn_I2C_SDA_GPIO / SCL_GPIO for enabled channels.
  * A missing definition causes a compile-time error here — fail fast.
- * (Phase 03 GPIO ABI requirement, dim 6)
+ * (GPIO ABI requirement, dim 6)
  */
 
 #ifdef CONFIG_RZV_SCI0_I2C
@@ -322,7 +322,7 @@ static int sci_i2c_transfer(struct i2c_master_s *dev,
       return -EINVAL;
     }
 
-  /* Reject 10-bit addressing (dim 17 / audit dim 19) */
+  /* Reject 10-bit addressing (dim 17 / ) */
 
   for (int i = 0; i < count; i++)
     {
@@ -459,7 +459,7 @@ static int sci_i2c_reset(struct i2c_master_s *dev)
  *
  * Description:
  *   Initialise SCI channel as I2C master. Returns i2c_master_s * or NULL.
- *   Channel must be enabled via CONFIG_RZV_SCIn_I2C Kconfig (Phase 03).
+ * Channel must be enabled via CONFIG_RZV_SCIn_I2C Kconfig.
  *
  *   dim 4  — clock enable + module unreset
  *   dim 5  — rzv_icu_attach × 3; returns NULL (not -ENOSYS) on failure

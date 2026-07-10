@@ -50,7 +50,7 @@
 #define ARMV7R_PERIPHERAL_INTERRUPTS  RZV_IRQ_NEXTINT
 
 /* CHIP_MPCORE_VBASE — required by armv7-r/mpcore.h / gic.h framework.
- * audit Critical-1: CR8 has no MMU so there is no virtual→physical mapping
+ * CR8 has no MMU so there is no virtual→physical mapping
  * for 0xF1000000. rzv_irq.c does NOT use MPCORE_ICD/ICC_VBASE — it uses
  * RZV_INTC_GIC_* macros at physical 0x12C10100 directly.  This definition
  * is retained only to satisfy the armv7-r header chain that includes mpcore.h.

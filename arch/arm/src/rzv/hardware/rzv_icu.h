@@ -52,7 +52,7 @@
 #define RZV_ICU_NSCNT_OFFSET        0x0000  /* NMI Status Control Register */
 #define RZV_ICU_NSCLR_OFFSET        0x0004  /* NMI Status Clear Register */
 #define RZV_ICU_NMITR_OFFSET        0x0008  /* NMI Trigger Selection (NITSR) */
-/* 0x000c: RESERVED — do NOT write (CRIT-4: was wrongly named NMIFLTC) */
+/* 0x000c: RESERVED — do NOT write (was wrongly named NMIFLTC) */
 
 #define RZV_ICU_NSCNT               (RZV_ICU_BASE + RZV_ICU_NSCNT_OFFSET)
 #define RZV_ICU_NSCLR               (RZV_ICU_BASE + RZV_ICU_NSCLR_OFFSET)
@@ -61,7 +61,7 @@
 /* NMI/IRQ digital filter registers do NOT exist in the INTC block.
  * Per RZ/V2H hardware manual they live in the GPIO peripheral (FILONOFF/
  * FILNUM/FILCLKSEL).  Writing 0x0C or 0x1C in INTC hits RESERVED space.
- * CRIT-4: RZV_ICU_NMIFLTC and RZV_ICU_IFLTC are REMOVED.
+ * RZV_ICU_NMIFLTC and RZV_ICU_IFLTC are REMOVED.
  * Filter configuration must be done via GPIO FILONOFF/FILNUM/FILCLKSEL regs.
  */
 
@@ -70,7 +70,7 @@
 #define RZV_ICU_ISCTR_OFFSET        0x0010  /* IRQ Status Control Register */
 #define RZV_ICU_ISCLR_OFFSET        0x0014  /* IRQ Status Clear Register */
 #define RZV_ICU_IITSR_OFFSET        0x0018  /* IRQ Detection Method Selection */
-/* 0x001c: RESERVED1 — do NOT write (CRIT-4: was wrongly named IFLTC) */
+/* 0x001c: RESERVED1 — do NOT write (was wrongly named IFLTC) */
 
 #define RZV_ICU_ISCTR               (RZV_ICU_BASE + RZV_ICU_ISCTR_OFFSET)
 #define RZV_ICU_ISCLR               (RZV_ICU_BASE + RZV_ICU_ISCLR_OFFSET)
@@ -123,7 +123,7 @@
 #define ICU_NMITR_NTSEL             (1 << 0)  /* NMI detection edge select */
 
 /* NMI Filter Control: REMOVED — 0x0C is RESERVED in INTC block.
- * CRIT-4: filter config lives in GPIO FILONOFF/FILNUM/FILCLKSEL registers.
+ * filter config lives in GPIO FILONOFF/FILNUM/FILCLKSEL registers.
  */
 
 /* IRQ Status Control Register (ISCTR) - 16 bits, one per IRQ0-15 */
@@ -144,7 +144,7 @@
 #define ICU_IITSR_BOTH              3  /* Both edges detection */
 
 /* IRQ Filter Control: REMOVED — 0x1C is RESERVED1 in INTC block.
- * CRIT-4: filter clock selection lives in GPIO peripheral (FILCLKSEL).
+ * filter clock selection lives in GPIO peripheral (FILCLKSEL).
  * Filter clock constants kept for future GPIO filter implementation.
  */
 

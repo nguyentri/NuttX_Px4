@@ -67,13 +67,13 @@
 #define RZV_BOARD_XTAL_FREQUENCY  24000000  /* 24 MHz */
 
 /* Board clock frequency aliases — NuttX convention.
- * audit finding #22: board.h previously only defined XTAL; drivers expecting
+ * board.h previously only defined XTAL; drivers expecting
  * BOARD_CPU_FREQ or BOARD_PCLK_* would fall back to rzv_clock_get_rate() which
  * returns 0 for many IDs (see review finding #3).  Define authoritative values
  * here to match EVK defaults in rzv_clock.h.
  * NOTE: These are compile-time defaults.  If TF-A reprogrammed CDDIV/CSDIV
  * the actual frequencies may differ — update when divider readback is
- * implemented (rzv_clock_divider_init phase-04+). */
+ * implemented (rzv_clock_divider_init). */
 
 #define BOARD_CPU_FREQ           800000000  /* CR8 I6CLK 800 MHz */
 #define BOARD_PCLK0_FREQ         100000000  /* P0CLK 100 MHz */
@@ -237,7 +237,7 @@
  * numbered SCI-I2C alternates overlap GPS or PWM pins and are intentionally
  * not exposed as board defaults.
  *
- * Schematic verification status (Phase 04, audit dim 14):
+ * Schematic verification status:
  *   - No schematic PDF available in refs/ at time of this implementation.
  *   - GY-912 socket on RDK-RZV2H is wired to RIIC (see i2c-gy912 defconfig).
  *   - SCI0-3 I2C pin macros below are derived from rzv2h_pinmap.h symbols

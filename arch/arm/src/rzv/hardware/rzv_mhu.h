@@ -39,7 +39,7 @@
  *   S_CR8 (Secure, CR8):       base + 0x000800
  *   S_CM33 (Secure, CM33):     base + 0x001000
  *
- * Bug fix (Phase 01): the original header wrapped each alias in
+ * Bug fix: the original header wrapped each alias in
  *   #ifndef RZV_MHU<n>_BASE ... #endif
  * using the SAME symbol name for all three, so only the first definition
  * ever survived.  This rewrite names each domain alias distinctly and

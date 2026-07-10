@@ -32,11 +32,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* gpio_pinset_t Encoding (Phase-03 canonical ABI — single authoritative def).
+/* gpio_pinset_t Encoding (canonical ABI — single authoritative def).
  *
- * Phase-03 [Critical-2, Low-18]: Documents and enforces single encoding.
+ * Documents and enforces single encoding.
  * The old encoding had PSEL at [18:15] in rzv_gpio.h AND at [3:0] here —
- * two incompatible locations. Phase-03 removes the [18:15] field entirely.
+ * two incompatible locations. removes the [18:15] field entirely.
  *
  *   Bit layout:
  *     [31:28] Port  — PORT0..PORT11 = (port << 28)
@@ -54,8 +54,8 @@
  *   Driver (rzv_gpioconfig) ORs in RZV_GPIO_PERIPH | drive | pull as needed.
  *
  * PSEL field location: bits [3:0] ONLY. The old GPIO_PSEL_SHIFT=15 field in
- * the original rzv_gpio.h is REMOVED in Phase-03. Any code using bits[18:15]
- * for PSEL was already dead code (driver read [3:0] only). Source: audit §8.
+ * the original rzv_gpio.h is REMOVED in . Any code using bits[18:15]
+ * for PSEL was already dead code (driver read [3:0] only). Source: .
  */
 
 /* RZV2H Peripheral Selection (PSEL) Values - IOPORT_PERIPHERAL_MODE mapping */
@@ -98,7 +98,7 @@
 #define PIN5                                   (5 <<  24)
 #define PIN6                                   (6 <<  24)
 #define PIN7                                   (7 <<  24)
-/* LOW-20 note: PIN8-PIN15 encoded here but NO GP port has >= 8 pins.
+/* PIN8-PIN15 encoded here but NO GP port has >= 8 pins.
  * rzv_gpio_pin_valid() rejects pin >= 8 at runtime.
  * These macros are retained for completeness but must not be used with
  * any GP port (PORT0-PORT11 = P20-P2B); doing so returns -EINVAL.
@@ -1449,7 +1449,7 @@
 #define GPIO_OUTPUT_HIGH                (RZV_GPIO_INITIAL_HIGH)
 #define GPIO_OUTPUT_LOW                 (RZV_GPIO_INITIAL_LOW)
 #define GPIO_PULLUP                     (RZV_GPIO_PULLUP)
-#define GPIO_PULLDOWN                   (RZV_GPIO_PULLDOWN)  /* Phase-03 [Low-18]: was missing */
+#define GPIO_PULLDOWN                   (RZV_GPIO_PULLDOWN)  /* was missing */
 #define GPIO_FLOAT                      (RZV_GPIO_FLOAT)     /* no pull — explicit alias */
 #define GPIO_OPENDRAIN                  (RZV_GPIO_OPENDRAIN)
 

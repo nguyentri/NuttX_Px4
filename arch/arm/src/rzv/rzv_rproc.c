@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  *
- * Phase 02: bind MHU ISR → rptun notify (RPTUN_NOTIFY_ALL);
+ * bind MHU ISR → rptun notify (RPTUN_NOTIFY_ALL);
  *           remove unbacked shmem-inbox notifyid read (IPC-RPMSG-002,
  *           IPC-IRQ-001).
  *
@@ -156,7 +156,7 @@ int rzv_rproc_initialize(void)
  *
  * Description:
  *   Install the rptun notify callback.  Called by rptun core via the
- *   register_callback op (phase 03).  DMB ensures the ISR sees the new
+ * register_callback op.  DMB ensures the ISR sees the new
  *   pointer after this function returns.
  *
  ****************************************************************************/
@@ -165,7 +165,7 @@ int rzv_rproc_register_callback(rptun_callback_t callback, FAR void *arg)
 {
   irqstate_t flags;
 
-  /* NEW-MEDIUM-2 fix: protect both volatile stores atomically so that an
+  /* NEW-protect both volatile stores atomically so that an
    * ISR racing a stop/restart never sees new g_notify with stale g_notify_arg
    * or vice versa.  A critical section is the minimal correct approach here
    * because both stores must appear as a single indivisible update to the ISR.

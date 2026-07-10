@@ -352,7 +352,7 @@ static int gpt_compute_period(FAR struct rzv_gpt_lowerhalf_s *priv,
       return -EINVAL;
     }
 
-  /* Frequency range check (Step Low-10):
+  /* Frequency range check (Step ):
    * Maximum: clk / (div1 * 2) — minimum 2-count period, div=1.
    * Minimum: clk / (div8192 * UINT32_MAX) — largest possible period.
    * Both limits checked implicitly by the best_period==0 sentinel below,

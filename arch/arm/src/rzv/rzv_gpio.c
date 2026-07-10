@@ -46,12 +46,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* GPIO Pinmap Encoding — Phase-03 canonical ABI (rzv_gpio.h GPIO_PORT/PIN_SHIFT).
+/* GPIO Pinmap Encoding — canonical ABI (rzv_gpio.h GPIO_PORT/PIN_SHIFT).
  *
  * Port: bits [31:28] — relative port 0-11 (matches PORT0..PORT11 << 28)
  * Pin:  bits [27:24] — pin 0-15 within port (matches PIN0..PIN15 << 24)
  *
- * Phase-03 [Critical-2]: unified encoding; rzv_gpio.c and rzv_gpio.h now
+ * unified encoding; rzv_gpio.c and rzv_gpio.h now
  * agree on GPIO_PORT_SHIFT=28, GPIO_PIN_SHIFT=24 matching pinmap macros.
  * Source: rzv2h_pinmap.h PORT0=(0x00<<28), PIN0=(0<<24).
  */
@@ -81,12 +81,12 @@
 #define GPIO_PIN_ALIGN_4BIT    4U
 
 /* Maximum supported ports: NuttX PORT0-PORT11 = HW P20-P2B.
- * TODO(phase-03): True HW port count for R9A09G057H unconfirmed. Ports 12+
+ * TODO: True HW port count for R9A09G057H unconfirmed. Ports 12+
  * (P2C..) not verified. Needs RZ/V2H UM datasheet check.
  */
 #define RZV_GPIO_MAX_PORT      12U
 
-/* Per-port maximum pin count (HIGH-8 / H-9 fix).
+/* Per-port maximum pin count.
  * GP ports P20-P2B (NuttX ports 0-11) have varying pin counts.
  * Source: refs/rz_scripts_pi_pinmap/rzv2h_pin_mapping.csv (pin rows per
  * port): P0x=8, P1x=6, P2x=2, P3x-PAx=8, PBx=6.
@@ -168,7 +168,7 @@ static int rzv_gpio_irq_handler_shim(int irq, void *context, void *arg);
  *
  * Description:
  *   Extract port/pin from canonical 32-bit pinset.
- *   Phase-03 [Critical-2]: use GPIO_PORT_SHIFT=28, GPIO_PIN_SHIFT=24.
+ * use GPIO_PORT_SHIFT=28, GPIO_PIN_SHIFT=24.
  *   Source: rzv_gpio.h unified ABI; pinmap PORT0=(0<<28), PIN0=(0<<24).
  *
  ****************************************************************************/
@@ -206,7 +206,7 @@ static uintptr_t rzv_gpio_get_port_base(unsigned int port)
  * Name: rzv_gpio_pin_valid
  *
  * Description:
- *   HIGH-8 / H-9 fix: validate pin against per-port pin count.
+ * validate pin against per-port pin count.
  *   GP ports have varying widths (P20=8, P21=6, P22=2, ...).
  *   PMC is 8-bit (1 bit/pin, max 8 pins) and PM is 16-bit (2 bits/pin,
  *   max 8 pins) so any pin >= 8 is structurally invalid.
@@ -222,8 +222,8 @@ static bool rzv_gpio_pin_valid(unsigned int port, unsigned int pin)
       return false;
     }
 
-  /* HIGH-7: PMC is 8-bit; pin >= 8 would truncate mask to 0 */
-  /* HIGH-6: PM is 16-bit; pin*2 >= 16 would overflow the 16-bit shift */
+  /* PMC is 8-bit; pin >= 8 would truncate mask to 0 */
+  /* PM is 16-bit; pin*2 >= 16 would overflow the 16-bit shift */
 
   if (pin >= 8U)
     {
@@ -272,7 +272,7 @@ static void rzv_gpio_regwrite_32(volatile uint32_t *ioreg, uint32_t write_value,
  * Description:
  *   Enable/disable PFC and PMC write protection via PWPR register.
  *
- *   Phase-03 fix [High-5, audit §2/§8]:
+ * fix:
  *   RZV2H PWPR is 32-bit and uses REGWE_A (bit 6) semantics, NOT RA-style
  *   BOWI/PFSWE (bit 7/6 two-phase sequence). The old code wrote 8-bit values
  *   0x00/0x40 (enable) and 0x00/0x80 (disable) which:
@@ -303,7 +303,7 @@ static void rzv_gpio_pwpr_enable(void)
         (volatile uint32_t *)(RZV_GPIO_BASE + RZV_GPIO_PWPR_OFFSET);
 
       /* 32-bit RMW: set REGWE_A (bit 6), preserve REGWE_B (bit 5) and all
-       * reserved bits. Phase-03 [High-5].
+       * reserved bits.
        */
       *pwpr = (*pwpr & RZV_GPIO_PWPR_REGWE_A_MASK) | RZV_GPIO_PWPR_REGWE_A_BIT;
     }
@@ -327,7 +327,7 @@ static void rzv_gpio_pwpr_disable(void)
         (volatile uint32_t *)(RZV_GPIO_BASE + RZV_GPIO_PWPR_OFFSET);
 
       /* 32-bit RMW: clear REGWE_A (bit 6), preserve REGWE_B (bit 5).
-       * Phase-03 [High-5]: old code wrote 0x80 to bits[7] — undefined on RZV2H.
+       * old code wrote 0x80 to bits[7] — undefined on RZV2H.
        */
       *pwpr = (*pwpr & RZV_GPIO_PWPR_REGWE_A_MASK);
     }
@@ -341,7 +341,7 @@ static void rzv_gpio_pwpr_disable(void)
  * Description:
  *   Configure pull-up/pull-down via PUPD GP-group registers.
  *
- *   Phase-03 fix [High-7, audit §2]:
+ * fix:
  *   Old code: skipped ports 0-4 (returned early), used formula
  *     0x1C10 + (port-5)*8 for ports 5-11 — wrong for port 5 offset and
  *     wrong uniform-stride assumption (missing gap at PUPDD in SP group).
@@ -368,14 +368,14 @@ static int rzv_gpioconfigure_pull(unsigned int port, unsigned int pin,
   uint32_t           shift;
   uint32_t           mask;
 
-  /* HIGH-8: validate pin against per-port pin count (max 7 for GP ports) */
+  /* validate pin against per-port pin count (max 7 for GP ports) */
 
   if (base == 0 || !rzv_gpio_pin_valid(port, pin))
     {
       return -EINVAL;
     }
 
-  /* CRIT-2 fix: 4 pins per 32-bit register, 8 bits per pin (RZ/V2H UM GPIO).
+  /* 4 pins per 32-bit register, 8 bits per pin (RZ/V2H UM GPIO).
    * _L holds pins 0-3, _H holds pins 4-7.  Shift = (pin % 4) * 8.
    * Old code: split at pin<8 with shift=pin*2 — wrong register AND wrong shift.
    * Source: hardware/rzv_gpio.h GPIO_PUPD20_L_IOLH_SHIFT(n) = n*8.
@@ -416,7 +416,7 @@ static int rzv_gpioconfigure_pull(unsigned int port, unsigned int pin,
  * Description:
  *   Configure drive strength via IOLH GP-group registers.
  *
- *   Phase-03 fix [High-6, audit §2]:
+ * fix:
  *   Old code:
  *     port 0-2: iolh_offset = 0x0FFC + (port+3)*8  → SP-group base (wrong)
  *     port 3-11: iolh_offset = 0x1014 + (port-3)*8 → skips gap at IOLHD
@@ -440,14 +440,14 @@ static int rzv_gpioconfigure_drive(unsigned int port, unsigned int pin,
   uint32_t           shift;
   uint32_t           mask;
 
-  /* HIGH-8: validate pin; IOLH is 2-bit field per pin, 4 pins per reg */
+  /* validate pin; IOLH is 2-bit field per pin, 4 pins per reg */
 
   if (base == 0 || drive > 3U || !rzv_gpio_pin_valid(port, pin))
     {
       return -EINVAL;
     }
 
-  /* CRIT-2 fix: _L = pins 0-3, _H = pins 4-7, shift = (pin%4)*8.
+  /* _L = pins 0-3, _H = pins 4-7, shift = (pin%4)*8.
    * bitpos_align = (pin & 3) * 8 per RZ/V2H UM GPIO §IOLH.
    * Source: hardware/rzv_gpio.h GPIO_IOLH20_L_IOLH_SHIFT(n) = n*8.
    */
@@ -474,16 +474,16 @@ static int rzv_gpioconfigure_drive(unsigned int port, unsigned int pin,
  *   Configure peripheral function: PMC=1, PFC=psel, NOD (open-drain).
  *   Slew rate (SR) is not written — caller passes default (keep reset value).
  *
- *   Phase-03 fix [Medium-13, audit §3]:
+ * fix:
  *   Peripheral mode pin configuration programs PFC, IOLH, PUPD, SR, NOD, IEN.
  *   This implementation adds NOD (open-drain) for I2C compatibility.
  *   SR and IEN are deferred (no pinset encoding yet, safe to leave at reset).
- *   TODO(phase-03): Encode SR/IEN in pinset GPIO_FUNC bits and apply here.
+ * TODO: Encode SR/IEN in pinset GPIO_FUNC bits and apply here.
  *
  *   Caller (rzv_gpioconfig) has already written PMC=0 before calling here.
  *   We write PMC=1 inside to complete the PFC programming window.
  *
- *   Phase-03 [Medium-14]: PFC is programmed before PM per RZ/V2H UM ordering.
+ * PFC is programmed before PM per RZ/V2H UM ordering.
  *   Caller sets PM=Hi-Z after this function returns.
  *
  ****************************************************************************/
@@ -498,7 +498,7 @@ static int rzv_gpioconfigure_peripheral(unsigned int port, unsigned int pin,
   uint32_t           shift;
   uint32_t           mask;
 
-  /* HIGH-8: validate pin; HIGH-7: PMC is 8-bit, pin>=8 truncates mask */
+  /* validate pin; PMC is 8-bit, pin>=8 truncates mask */
 
   if (base == 0 || !rzv_gpio_pin_valid(port, pin))
     {
@@ -519,7 +519,7 @@ static int rzv_gpioconfigure_peripheral(unsigned int port, unsigned int pin,
   rzv_gpio_regwrite_32(p_pfc, psel & 0xFU, shift, mask);
 
   /* NOD: N-channel open-drain mode for I2C/SMBus pins.
-   * CRIT-2 fix: same 4-pins-per-reg, 8-bits-per-pin layout as IOLH/PUPD.
+   * same 4-pins-per-reg, 8-bits-per-pin layout as IOLH/PUPD.
    * _L = pins 0-3, _H = pins 4-7, shift = (pin % 4) * 8.
    * Source: hardware/rzv_gpio.h NOD macros (4-pins-per-reg, 8-bits-per-pin layout).
    */
@@ -561,7 +561,7 @@ static int rzv_gpioconfigure_mode_input(unsigned int port, unsigned int pin)
   volatile uint16_t *p_pm;
   uint16_t           pm_mask;
 
-  /* HIGH-6/7: validate pin; PM is 16-bit (max shift 14 for pin 7) */
+  /* validate pin; PM is 16-bit (max shift 14 for pin 7) */
 
   if (base == 0 || !rzv_gpio_pin_valid(port, pin))
     {
@@ -622,15 +622,15 @@ static int rzv_gpio_irq_handler_shim(int irq, void *context, void *arg)
  * Description:
  *   Configure a GPIO pin based on the gpio_pinset_t encoding.
  *
- *   Phase-03 fixes applied:
- *   [Critical-4]: GPIO module clock gate before first register access.
- *   [High-5]:     32-bit RMW PWPR (REGWE_A semantics).
- *   [High-6]:     IOLH via GP-group lookup (not hand-rolled formula).
- *   [High-7]:     PUPD via GP-group lookup.
- *   [High-11]:    Full PMC/PFC/PM/IOLH/PUPD RMW under critical section.
- *   [Medium-13]:  NOD (open-drain) written in peripheral mode.
- *   [Medium-14]:  Correct order per RZ/V2H UM: PMC(0) → PFC → IOLH → PUPD → P → PM.
- *   [Low-17]:     P register written BEFORE PM=OUTPUT to avoid glitch.
+ * fixes applied:
+ * GPIO module clock gate before first register access.
+ * 32-bit RMW PWPR (REGWE_A semantics).
+ * IOLH via GP-group lookup (not hand-rolled formula).
+ * PUPD via GP-group lookup.
+ * Full PMC/PFC/PM/IOLH/PUPD RMW under critical section.
+ * NOD (open-drain) written in peripheral mode.
+ * Correct order per RZ/V2H UM: PMC(0) → PFC → IOLH → PUPD → P → PM.
+ * P register written BEFORE PM=OUTPUT to avoid glitch.
  *
  ****************************************************************************/
 
@@ -651,7 +651,7 @@ int rzv_gpioconfig(gpio_pinset_t cfgset)
   uint16_t           pm_mask;
   int                ret = OK;
 
-  /* Decode pinset using Phase-03 canonical ABI */
+  /* Decode pinset using canonical ABI */
   port  = rzv_gpio_extract_port(cfgset);
   pin   = rzv_gpio_extract_pin(cfgset);
   mode  = cfgset & GPIO_MODE_MASK;
@@ -662,7 +662,7 @@ int rzv_gpioconfig(gpio_pinset_t cfgset)
 
   base = rzv_gpio_get_port_base(port);
 
-  /* HIGH-8: validate pin against per-port count; HIGH-6/7: pin>=8 UB */
+  /* validate pin against per-port count; pin>=8 UB */
 
   if (base == 0 || !rzv_gpio_pin_valid(port, pin))
     {
@@ -678,13 +678,13 @@ int rzv_gpioconfig(gpio_pinset_t cfgset)
    * on as a side effect.
    */
 
-  /* Phase-03 [High-11]: Critical section wraps the ENTIRE PMC/PFC/IOLH/PUPD/
+  /* Critical section wraps the ENTIRE PMC/PFC/IOLH/PUPD/
    * PM RMW sequence to prevent concurrent config on the same port byte.
    */
   flags = enter_critical_section();
-  rzv_gpio_pwpr_enable();  /* Phase-03 [High-5]: 32-bit RMW PWPR */
+  rzv_gpio_pwpr_enable();  /* 32-bit RMW PWPR */
 
-  /* Phase-03 [Medium-14] step 1: PMC=0 (force GPIO mode).
+  /* step 1: PMC=0 (force GPIO mode).
    * This must precede PFC programming per RZ/V2H UM GPIO §PMC.
    */
   p_pmc = (volatile uint8_t *)(base + RZV_GPIO_PMC_OFFSET(port));
@@ -692,7 +692,7 @@ int rzv_gpioconfig(gpio_pinset_t cfgset)
                       (uint8_t)(1U << pin));
 
   /* Step 2: PFC + PMC=1 (only if peripheral mode).
-   * Phase-03 [Medium-14]: PFC written before PM per RZ/V2H UM ordering.
+   * PFC written before PM per RZ/V2H UM ordering.
    */
   if (mode == RZV_GPIO_PERIPH)
     {
@@ -704,7 +704,7 @@ int rzv_gpioconfig(gpio_pinset_t cfgset)
     }
 
   /* Step 3: Drive strength (IOLH).
-   * Phase-03 [High-6]: GP-group lookup, not SP-group formula.
+   * GP-group lookup, not SP-group formula.
    */
   ret = rzv_gpioconfigure_drive(port, pin, drive);
   if (ret < 0)
@@ -713,7 +713,7 @@ int rzv_gpioconfig(gpio_pinset_t cfgset)
     }
 
   /* Step 4: Pull configuration (PUPD).
-   * Phase-03 [High-7]: GP-group lookup, covers all ports 0-11.
+   * GP-group lookup, covers all ports 0-11.
    */
   ret = rzv_gpioconfigure_pull(port, pin, pull);
   if (ret < 0)
@@ -722,7 +722,7 @@ int rzv_gpioconfig(gpio_pinset_t cfgset)
     }
 
   /* Step 5: Set output latch (P register) BEFORE enabling output in PM.
-   * Phase-03 [Low-17]: avoids glitch on active-high-idle pins (e.g. SPI CS).
+   * avoids glitch on active-high-idle pins (e.g. SPI CS).
    * Writing P before PM avoids output glitch per RZ/V2H GPIO timing requirements.
    */
   if (mode == RZV_GPIO_OUTPUT)
@@ -770,8 +770,8 @@ out:
  *
  * Description:
  *   Write high/low to a GPIO output pin.
- *   Phase-03 [Low-16]: returns int (OK/-EINVAL) instead of void so that
- *   callers can detect invalid port. Source: audit §6 Low-16.
+ * returns int (OK/-EINVAL) instead of void so that
+ * callers can detect invalid port. Source: .
  *
  ****************************************************************************/
 
@@ -897,18 +897,18 @@ void rzv_gpiosetdrivestrength(gpio_pinset_t pinset, uint8_t strength)
  * Description:
  *   Attach or detach a GPIO interrupt callback via IRQ0-15 direct lines.
  *
- *   Phase-03 fixes:
- *   [Critical-1, audit §4]: Fixed undeclared `cfg` at original line 909.
+ * fixes:
+ * Fixed undeclared `cfg` at original line 909.
  *     The find-slot call used `cfg` (undefined); correct variable is `pinset`.
- *   [High-8]:  ISEL offset via GP-group lookup (hardware/rzv_gpio.h macro),
+ * ISEL offset via GP-group lookup (hardware/rzv_gpio.h macro),
  *     not unsourced magic 0x2CE8+port*8 (which was coincidentally correct
  *     but had no traceability to RZ/V2H UM). Source: RZV_GPIO_GP_ISEL_L/H_OFFSET.
- *   [High-9]:  Only IRQ0-15 direct lines supported. TINT routing via TSSR0-7
+ * Only IRQ0-15 direct lines supported. TINT routing via TSSR0-7
  *     requires additional TSSR programming and is deferred.
- *     TODO(phase-03): Add TINT if PX4 RC-IN or sensor IRQs require it.
- *   [High-10]: IRQ number extracted from pinset bits [7:4] (GPIO_FUNC field).
+ * TODO: Add TINT if PX4 RC-IN or sensor IRQs require it.
+ * IRQ number extracted from pinset bits [7:4] (GPIO_FUNC field).
  *     This is a defined workaround — bits [3:0] are PSEL, not IRQ number.
- *     TODO(phase-03): Add GPIO_IRQ_SHIFT/GPIO_IRQ_MASK field to rzv_gpio.h
+ * TODO: Add GPIO_IRQ_SHIFT/GPIO_IRQ_MASK field to rzv_gpio.h
  *     and update call-sites to pass explicit IRQ line number.
  *
  ****************************************************************************/
@@ -933,17 +933,17 @@ int rzv_gpiosetevent(gpio_pinset_t pinset, bool rising, bool falling,
 
   base = rzv_gpio_get_port_base(port);
 
-  /* HIGH-8: validate pin against per-port count; HIGH-6/7: pin>=8 UB */
+  /* validate pin against per-port count; pin>=8 UB */
 
   if (base == 0 || !rzv_gpio_pin_valid(port, pin))
     {
       return -EINVAL;
     }
 
-  /* Phase-03 [High-10]: IRQ line number from GPIO_FUNC field bits [7:4].
+  /* IRQ line number from GPIO_FUNC field bits [7:4].
    * This is the defined workaround for this phase.
    * Callers encode IRQ0-15 as: pinset |= (irq_num << GPIO_FUNC_SHIFT)
-   * TODO(phase-03): Replace with dedicated GPIO_IRQ_SHIFT field.
+   * TODO: Replace with dedicated GPIO_IRQ_SHIFT field.
    */
   irq_num = (int)((pinset >> GPIO_FUNC_SHIFT) & 0x0FU);
   if (irq_num < 0 || irq_num >= MAX_GPIO_IRQS)
@@ -954,8 +954,8 @@ int rzv_gpiosetevent(gpio_pinset_t pinset, bool rising, bool falling,
   if (func == NULL)
     {
       /* Detach: find existing slot by pinset.
-       * Phase-03 [Critical-1]: original code used undeclared `cfg` here.
-       * Correct variable is `pinset`. Source: audit §4 Critical-1.
+       * original code used undeclared `cfg` here.
+       * Correct variable is `pinset`. Source: .
        */
       slot = -1;
       for (i = 0; i < MAX_GPIO_IRQS; i++)
@@ -978,7 +978,7 @@ int rzv_gpiosetevent(gpio_pinset_t pinset, bool rising, bool falling,
           rzv_icu_detach(g_gpio_irqs[slot].icu_slot);
         }
 
-      /* Disable ISEL — CRIT-2 fix: 4-pins-per-reg, 8-bits-per-pin layout.
+      /* Disable ISEL — 4-pins-per-reg, 8-bits-per-pin layout.
        * _L = pins 0-3, _H = pins 4-7, shift = (pin % 4) * 8.
        */
       flags = enter_critical_section();
@@ -1039,7 +1039,7 @@ int rzv_gpiosetevent(gpio_pinset_t pinset, bool rising, bool falling,
       return ret;
     }
 
-  /* Enable ISEL — CRIT-2 fix: 4-pins-per-reg, 8-bits-per-pin layout.
+  /* Enable ISEL — 4-pins-per-reg, 8-bits-per-pin layout.
    * _L = pins 0-3, _H = pins 4-7, shift = (pin % 4) * 8.
    * bitpos_align = (pin & 3) * 8 per RZ/V2H UM GPIO §ISEL.
    */
@@ -1105,7 +1105,7 @@ int rzv_gpiosetevent(gpio_pinset_t pinset, bool rising, bool falling,
       return icu_irq;
     }
 
-  /* MED-9 fix: configure GIC ICDICFR to match ICU edge/level setting.
+  /* configure GIC ICDICFR to match ICU edge/level setting.
    * Edge sources require GIC edge-sensitive mode; level sources need
    * level-sensitive mode.  rzv_gic_set_irq_type operates on GIC INTID
    * which is exactly what rzv_icu_attach() returned.
@@ -1138,7 +1138,7 @@ int rzv_gpiosetevent(gpio_pinset_t pinset, bool rising, bool falling,
  *   Initialize the GPIO interrupt slot table. Sets icu_slot to -1 sentinel
  *   in all entries so that slot 0 is never mistaken for "valid".
  *
- *   Phase-03 [High-12, audit §4]: BSS zero-init leaves icu_slot=0, which
+ * BSS zero-init leaves icu_slot=0, which
  *   equals a valid NuttX IRQ, causing false "slot attached" detection.
  *   Must be called from rzv2h_bringup.c under CONFIG_RZV_GPIO_IRQ=y.
  *
@@ -1168,7 +1168,7 @@ void rzv_gpio_irq_enable(int irq)
 {
   int i;
 
-  /* MED-16 / M-12 fix: `irq` from caller is GIC INTID (returned by
+  /* `irq` from caller is GIC INTID (returned by
    * rzv_icu_attach and stored in icu_slot).  `irq_num` is the ELC IRQ
    * line 0-15 — a completely different namespace.  Match on icu_slot.
    */
@@ -1187,7 +1187,7 @@ void rzv_gpio_irq_disable(int irq)
 {
   int i;
 
-  /* MED-16 fix: match on icu_slot (GIC INTID), not irq_num (ELC line) */
+  /* match on icu_slot (GIC INTID), not irq_num (ELC line) */
 
   for (i = 0; i < MAX_GPIO_IRQS; i++)
     {

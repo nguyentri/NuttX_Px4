@@ -136,7 +136,7 @@
 #define SCI_CCR_MPIE(m)                                   (1 << 8)  /* Mpie */
 #define SCI_CCR_DCME(m)                                   (1 << 9)  /* Dcme */
 #define SCI_CCR_IDSEL(m)                                  (1 << 10) /* Idsel (CCR0 bit 10) */
-/* NOTE: SCI_CCR3_IDSEL removed — IDSEL lives in CCR0 bit 10, not CCR3 (P0-3 fix) */
+/* NOTE: SCI_CCR3_IDSEL removed — IDSEL lives in CCR0 bit 10, not CCR3 */
 #define SCI_CCR_RIE(m)                                    (1 << 16) /* Rie */
 #define SCI_CCR_TIE(m)                                    (1 << 20) /* Tie */
 #define SCI_CCR_TEIE(m)                                   (1 << 21) /* Teie */
@@ -248,7 +248,7 @@
 #define SCI_CCR0_CKE_MASK       (0x3 << SCI_CCR0_CKE_SHIFT)
 
 /* SCI Common Control Register 1 (CCR1) ************************************/
-/* P0-4 fix: corrected all bit positions per RZ/V2H SCI-B hardware manual CCR1.
+/* corrected all bit positions per RZ/V2H SCI-B hardware manual CCR1.
  * STOP, LSBF removed (live in CCR3.STP=14, CCR3.LSBF=12)
  * CTSINV, RTSINV removed (not present in RZ/V2H SCI-B CCR1)
  */
@@ -268,7 +268,7 @@
 #define SCI_CCR1_NFEN           (1 << 28) /* Noise Filter Enable */
 
 /* SCI Common Control Register 2 (CCR2) ************************************/
-/* P0-1 fix: complete rewrite per RZ/V2H SCI-B hardware manual CCR2 layout.
+/* complete rewrite per RZ/V2H SCI-B hardware manual CCR2 layout.
  * Old NuttX layout was entirely wrong — BRR at bits[0:7], CKS at bits[8:9],
  * MDDR at [16:23], ABCSE/ABCS/BGDM at 24/25/26, BFME at 27.
  * Correct layout: BCP=[2:0], BGDM=4, ABCS=5, ABCSE=6, BRR=[15:8],
@@ -310,16 +310,16 @@
    SCI_CCR2_BGDM      | SCI_CCR2_BCP_MASK)
 
 /* SCI Common Control Register 3 (CCR3) ************************************/
-/* P0-3, P0-5, Low-17 fixes: corrected bit positions per RZ/V2H SCI-B hardware manual CCR3.
- * BPEN moved from bit 0 to bit 7 (Low-17).
- * FM (FIFO mode enable) added at bit 20 — was missing entirely (P0-5).
+/* corrected bit positions per RZ/V2H SCI-B hardware manual CCR3.
+ * BPEN moved from bit 0 to bit 7.
+ * FM (FIFO mode enable) added at bit 20 — was missing entirely.
  * LSBF added at bit 12 (removed from CCR1 where it was wrong).
  * SINV, RXDESEL, MP, DEN, CKE, GM, BLK added per RZ/V2H SCI-B UM.
  */
 
 #define SCI_CCR3_CPHA           (1 << 0)  /* SPI clock phase */
 #define SCI_CCR3_CPOL           (1 << 1)  /* SPI clock polarity */
-#define SCI_CCR3_BPEN           (1 << 7)  /* Base Pointer Enable (Low-17 fix: was bit 0) */
+#define SCI_CCR3_BPEN           (1 << 7)  /* Base Pointer Enable (was bit 0) */
 #define SCI_CCR3_CHR_SHIFT      (8)       /* Bits 8-9: Character Length */
 #define SCI_CCR3_CHR_MASK       (0x3 << SCI_CCR3_CHR_SHIFT)
 #  define SCI_CCR3_CHR_7BIT     (0x3 << SCI_CCR3_CHR_SHIFT)  /* 7-bit data */
@@ -338,7 +338,7 @@
 #  define SCI_CCR3_MOD_SPI      (0x3 << SCI_CCR3_MOD_SHIFT)  /* Simple SPI mode */
 #  define SCI_CCR3_MOD_I2C      (0x4 << SCI_CCR3_MOD_SHIFT)  /* Simple I2C mode */
 #define SCI_CCR3_MP             (1 << 19) /* Multi-Processor mode */
-#define SCI_CCR3_FM             (1 << 20) /* FIFO Mode Enable (P0-5 fix: was FCR bit 7 — wrong) */
+#define SCI_CCR3_FM             (1 << 20) /* FIFO Mode Enable (was FCR bit 7 — wrong) */
 #define SCI_CCR3_DEN            (1 << 21) /* Driver Enable (RS-485 DE signal) */
 #define SCI_CCR3_CKE_SHIFT      (24)      /* Bits 24-25: Clock Enable for synchronous */
 #define SCI_CCR3_CKE_MASK       (0x3 << SCI_CCR3_CKE_SHIFT)
@@ -346,7 +346,7 @@
 #define SCI_CCR3_BLK            (1 << 29) /* Block transfer mode */
 
 /* SCI Common Control Register 4 (CCR4) ************************************/
-/* Low-16 fix: corrected all CCR4 bit names per RZ/V2H SCI-B hardware manual.
+/* corrected all CCR4 bit names per RZ/V2H SCI-B hardware manual.
  * CPHA/CPOL/MFF/MSS do NOT live here — they are CCR3 fields in SCI-B.
  * CCR4 is used for auto-baud detection and compare-data features.
  */
@@ -404,7 +404,7 @@
 #define SCI_DCR_DENGT_MASK                      (0x1f << SCI_DCR_DENGT_SHIFT)
 
 /* SCI FCR Register Bit Definitions **********************************/
-/* P0-5 fix: SCI_FCR_FM (bit 7) removed — bit 7 is RESERVED in FCR for SCI-B.
+/* SCI_FCR_FM (bit 7) removed — bit 7 is RESERVED in FCR for SCI-B.
  * FIFO mode enable lives in CCR3.FM (bit 20). Use SCI_CCR3_FM instead.
  */
 
@@ -517,7 +517,7 @@
 
 #define SCI_RDR_FER                             (1 << 28)  /* Fer */
 
-/* L3 fix: SCI_RDR_BY_RDAT is the same bit as SCI_RDR_FER (both bit 28).
+/* SCI_RDR_BY_RDAT is the same bit as SCI_RDR_FER (both bit 28).
  * They are aliases; BY_RDAT is removed to avoid misleading code. Use SCI_RDR_FER. */
 /* #define SCI_RDR_BY_RDAT (1 << 28) -- alias of SCI_RDR_FER, removed (L3) */
 

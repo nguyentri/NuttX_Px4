@@ -114,7 +114,7 @@ static void rzv_gic_initialize(void)
     }
 
   /* Set all SPIs to level-sensitive by default.
-   * MED-9: edge-triggered IRQs MUST call rzv_gic_set_irq_type(irq, true)
+   * edge-triggered IRQs MUST call rzv_gic_set_irq_type(irq, true)
    * after attach; failing to do so hangs the GIC line on first edge.
    */
   for (i = 32; i < num_interrupts; i += 16)
@@ -125,7 +125,7 @@ static void rzv_gic_initialize(void)
   /* Initialize CPU interface BEFORE enabling distributor.
    * ARM GIC spec: ICCPMR and ICCBPR must be set before ICCICR.EN=1.
    * Distributor enable (ICDDCR) should come last.
-   * audit: Medium-14 — reorder, High-8 — ICCBPR=0x03 for PX4 preemption.
+   * — reorder, — ICCBPR=0x03 for PX4 preemption.
    */
 
   /* Set priority mask to allow all interrupts */
@@ -158,7 +158,7 @@ static void rzv_gic_initialize(void)
 
 void up_irqinitialize(void)
 {
-  /* audit High-6: Ensure INTC/ICU clocks are live before GIC init.
+  /* Ensure INTC/ICU clocks are live before GIC init.
    * RZV_CPG_CLK_ICU gates the ICU peripheral (domain 0, bit 1).
    * The INTC block (GIC-600) is clocked by the always-on fabric;
    * no separate CLKON gate found in available headers — verify UM.
@@ -195,7 +195,7 @@ void up_disable_irq(int irq)
   uint32_t regaddr;
   uint32_t bit;
 
-  /* audit Medium-16: bound on NR_IRQS, not GIC_NUM_INTERRUPTS */
+  /* bound on NR_IRQS, not GIC_NUM_INTERRUPTS */
 
   if (irq >= 0 && irq < NR_IRQS)
     {
@@ -224,7 +224,7 @@ void up_enable_irq(int irq)
   uint32_t regaddr;
   uint32_t bit;
 
-  /* audit Medium-16: bound on NR_IRQS, not GIC_NUM_INTERRUPTS */
+  /* bound on NR_IRQS, not GIC_NUM_INTERRUPTS */
 
   if (irq >= 0 && irq < NR_IRQS)
     {
@@ -250,7 +250,7 @@ void up_enable_irq(int irq)
 
 void up_ack_irq(int irq)
 {
-  /* audit Medium-12: ICCEOIR must be written with the FULL ICCIAR value
+  /* ICCEOIR must be written with the FULL ICCIAR value
    * (including CPUID bits [12:10]), not just the IRQ number.
    * arm_decodeirq() does this correctly by preserving regval from ICCIAR.
    * This standalone up_ack_irq() should NOT be called from driver ISRs —
@@ -361,7 +361,7 @@ uint32_t *arm_decodeirq(uint32_t *regs)
  * Function: rzv_gic_set_irq_type
  *
  * Description:
- *   MED-9 fix: Configure GIC ICDICFR for edge or level sensitivity.
+ * Configure GIC ICDICFR for edge or level sensitivity.
  *   GIC is initialized with all SPIs level-sensitive (ICDICFR=0).
  *   Edge-triggered ICU external IRQ pins require the corresponding GIC
  *   SPI to also be configured edge-sensitive; otherwise GIC waits for

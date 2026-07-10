@@ -25,7 +25,7 @@
  ****************************************************************************/
 
 /* =========================================================================
- * CM33 FIRMWARE ABI (FROZEN — see Phase 04)
+ * CM33 FIRMWARE ABI (FROZEN)
  *
  * Ring header layout (little-endian, located at SHM_BASE):
  *
@@ -198,7 +198,7 @@
  * Compile-time sanity checks (pulled in by any TU that includes this header)
  * -------------------------------------------------------------------------
  */
-/* HIGH-2 fix: compile-time channel validity check.
+/* compile-time channel validity check.
  * BSP_FEATURE_MHU_B_NS_VALID_CHANNEL_MASK = 0x030410618618 (48-bit).
  * Macro expands to 1 if channel N is a valid MHU-B-NS channel, 0 otherwise.
  * Valid set: 3,4,9,10,15,16,21,22,28,34,40,41.
@@ -230,7 +230,7 @@ _Static_assert(RZV_IPC_CR8CM33_TX_CHAN != RZV_IPC_CA55_TX_CHAN, "ch3 reserved fo
 _Static_assert(RZV_IPC_CR8CM33_RX_CHAN != RZV_IPC_CA55_RX_CHAN, "ch3 reserved for rptun");
 _Static_assert(RZV_IPC_LOOPBACK_TX_CHAN != RZV_IPC_CA55_TX_CHAN, "ch3 reserved for rptun");
 
-/* HIGH-2: all channels must be valid MHU-B-NS channels */
+/* all channels must be valid MHU-B-NS channels */
 _Static_assert(RZV_MHU_B_NS_CH_VALID(RZV_IPC_CR8CR8_TX_CHAN),
                "CR8CR8 TX channel not valid in MHU-B-NS");
 _Static_assert(RZV_MHU_B_NS_CH_VALID(RZV_IPC_CR8CR8_RX_CHAN),

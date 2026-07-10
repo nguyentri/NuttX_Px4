@@ -28,7 +28,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-/* ARM_DSB() for barrier after CLKON/RST writes (audit Medium-8).
+/* ARM_DSB() for barrier after CLKON/RST writes.
  * Included from arch-specific barriers.h via arm_internal.h if available;
  * provide a fallback inline asm for files that include this header standalone.
  */
@@ -64,8 +64,8 @@
  * NOTE: R9A09G057H uses only numbered CPG_CLKON_N registers (no named
  * aliases like CPG_CLKON_GPIO).  The mapping below is UNVERIFIED against
  * hardware documentation; it needs confirmation from the RZ/V2H HW manual.
- * TODO(phase-01): validate each entry against RZ/V2H UM Table 9.x.
- * See audit finding Critical-2.
+ * TODO: validate each entry against RZ/V2H UM Table 9.x.
+ * See .
  */
 
 /* CLKON_0 - GPIO, CA55 core clocks */
@@ -147,7 +147,7 @@
  * Previous code erroneously aliased GTM0-2 to OSTM0-2 and put GTM3-7 in
  * domain 4 bits 11-15 (conflicting with OSTM entries above).
  * Corrected: GTM0-7 assigned to domain 5 (placeholder) pending verification.
- * TODO(phase-01): confirm CPG_CLKON_N register for GTM on R9A09G057H. */
+ * TODO: confirm CPG_CLKON_N register for GTM on R9A09G057H. */
 #define RZV_CPG_CLK_GTM0            (5 << 16 | 0)
 #define RZV_CPG_CLK_GTM1            (5 << 16 | 1)
 #define RZV_CPG_CLK_GTM2            (5 << 16 | 2)
@@ -163,7 +163,7 @@
  * The rzv_clock_enable/disable DMAC special-case uses 0x1F mask (5 units). */
 #define RZV_CPG_CLK_DMAC            (0 << 16 | 0)   /* DMAC: CPG_CLKON_0 bits[4:0], 5-unit mask */
 
-/* Legacy per-unit aliases (Phase 04 DMAC driver compatibility).
+/* Legacy per-unit aliases (DMAC driver compatibility).
  * All resolve to the same CLKON entry — there is one gate for all DMAC. */
 #define RZV_CPG_CLK_DMAC0           RZV_CPG_CLK_DMAC
 #define RZV_CPG_CLK_DMAC1           RZV_CPG_CLK_DMAC
@@ -346,9 +346,9 @@
 /* DEPRECATED: prefer rzv_clock_enable/disable and rzv_module_reset/unreset
  * C functions which add retry, diagnostics, and proper critical-section
  * handling.  These macros are kept for legacy boot-path only.
- * audit: Critical-1 — RZV_MODULE_RSTOFF had compile-breaking typo
+ * — RZV_MODULE_RSTOFF had compile-breaking typo
  * (RZV_CPG_RST_MON) and inverted wait condition; DELETED (see below).
- * audit: Medium-8 — ARM_DSB() added after CLKON/RST write.
+ * — ARM_DSB() added after CLKON/RST write.
  */
 
 /* Start clock supply to a module (boot-path fast path only).
@@ -381,15 +381,15 @@
     ARM_DSB();                                                               \
   } while (0)
 
-/* RZV_MODULE_RSTOFF DELETED — audit Critical-1.
+/* RZV_MODULE_RSTOFF DELETED.
  * Was: referenced RZV_CPG_RST_MON (compile error; correct is RZV_CPG_RSTMON)
  * and polled "!= 0" (inverted; should be "== 0" for reset-asserted wait).
  * Use rzv_module_unreset() instead — it polls RSTMON correctly. */
 
 /* Default clock frequencies ************************************************/
 /* Prefer Kconfig overrides (CONFIG_RZV_CPU_CLOCK_HZ etc.) when provided.
- * audit: Low-14 — Kconfig overrides now consumed here.
- * audit: High — hardcoded HZ used as fallback when divider readback not done.
+ * — Kconfig overrides now consumed here.
+ * High — hardcoded HZ used as fallback when divider readback not done.
  */
 
 #ifndef RZV_MAIN_CLOCK_HZ
@@ -629,7 +629,7 @@ uint32_t rzv_get_cpu_frequency(void);
  *
  * Description:
  *   Get P4CLK frequency (200 MHz default).  Used by SPI and GPT peripherals.
- *   audit finding #4: rzv_get_pclk_frequency() only returns P0CLK (100 MHz);
+ * rzv_get_pclk_frequency() only returns P0CLK (100 MHz);
  *   callers needing P4CLK must use this function instead.
  *
  * Returned Value:

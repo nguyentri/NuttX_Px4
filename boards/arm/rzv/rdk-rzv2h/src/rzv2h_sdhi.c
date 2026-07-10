@@ -24,7 +24,7 @@
  * (the RDK SD card connector, signals QSD0_*), then registers it with the
  * NuttX MMCSD upper-half via mmcsd_slotinitialize().
  *
- * SD0 Pin Configuration (Phase 5):
+ * SD0 Pin Configuration:
  *   The six main SD0 signals are dedicated IOPORT pins on R9A09G057H; they
  *   are NOT normal PORT/PIN/PSEL multiplexed IOs and cannot be configured
  *   via rzv_gpio_config().
@@ -46,7 +46,7 @@
  *     (b) The struct layout spans >6000 lines and requires CMSIS headers.
  *     (c) u-boot / TF-A may already configure these pins before NuttX starts.
  *
- *   TODO (Phase 6 follow-up): implement rzv2h_sdhi_pin_setup() using one of:
+ * TODO (follow-up): implement rzv2h_sdhi_pin_setup() using one of:
  *     Option A: Extract the 6 IEN3/IOLH3 register write addresses from the
  *               R_GPIO_Type struct in gpio_iodefine.h and hard-code them.
  *               NEEDS_VERIFY: confirm R_GPIO_BASE=0x10410020 is CA55-visible.

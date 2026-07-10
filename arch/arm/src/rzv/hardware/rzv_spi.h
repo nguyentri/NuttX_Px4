@@ -19,7 +19,7 @@
  ****************************************************************************/
 
 /* Register offsets confirmed against spi_b_iodefine.h (R9A09G057H).
- * Phase-07 fix: dropped false SPBR_OFFSET=0x10; SPBR now lives in SPCR3[15:8].
+ * fix: dropped false SPBR_OFFSET=0x10; SPBR now lives in SPCR3[15:8].
  *               SPCR2 (0x0C) and SPCR3 (0x10) added.
  *               RMFM/RMEDTG/RMSTTG/SPDRC/SPLP/MOIFV moved to SPCR2 section.
  */
@@ -158,7 +158,7 @@
 #define SPI_SPCR_BPEN                           (1u << 31)  /* Synchronization Circuit Bypass Enable */
 
 /* SPCR2 Register Bit Definitions (spi_b_iodefine.h SPCR2_b at 0x0C) ****/
-/* Phase-07 fix: these bits were WRONGLY listed under SPCR in old header.  */
+/* fix: these bits were WRONGLY listed under SPCR in old header.  */
 
 #define SPI_SPCR2_RMFM_SHIFT                    (0)
 #define SPI_SPCR2_RMFM_MASK                     (0x1fu << SPI_SPCR2_RMFM_SHIFT)

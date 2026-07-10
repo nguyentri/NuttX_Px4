@@ -408,7 +408,7 @@
 #define RZV_GPIO_PWPR_OFFSET                             0x3BE4  /* PWPR (32-bit) */
 
 /* PWPR Register bit definitions for RZV2H.
- * Phase-03 fix [High-5, audit §2, §8]: RZV2H uses REGWE_A/REGWE_B semantics,
+ * fix: RZV2H uses REGWE_A/REGWE_B semantics,
  * NOT RA-style BOWI/PFSWE. PWPR is a 32-bit register (8-bit writes may be
  * silently dropped on AXI bus). Always use 32-bit RMW.
  *
@@ -437,7 +437,7 @@
 
 /* GP-group register offset macros for NuttX ports 0-11 (= HW ports 20-2B).
  *
- * Phase-03 fix [High-6, High-7, High-8, audit §2]: Replace hand-rolled
+ * fix: Replace hand-rolled
  * IOLH/PUPD formulas in rzv_gpio.c with these lookup macros.
  *
  * Source: bsp_feature.h (rzv2h/cr):

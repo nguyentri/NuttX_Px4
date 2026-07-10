@@ -18,7 +18,7 @@
  *
  ****************************************************************************/
 
-/* Phase-07 [Crit-2]: Implement board SPI GPIO MUX for RZ/V2H RDK.
+/* Implement board SPI GPIO MUX for RZ/V2H RDK.
  *
  * SPI0 (RSPI4) on PORT9 — pin assignments from rzv2h_pinmap.h:
  *   MOSA  (MOSI): P9_0  MODE1  GPIO_MOSA_P9_0_M1
@@ -30,7 +30,7 @@
  * SPI0 at 0x12800000).  UNVERIFIED against RDK-RZV2H schematic — board bring-up
  * engineer must confirm physical routing before enabling.
  *
- * Phase-07 [High-7]: rzv_spi_select() override uses GPIO CS for SPI0.
+ * rzv_spi_select() override uses GPIO CS for SPI0.
  * SSLA0 driven manually (GPIO output) rather than hardware-SSL so that
  * the board file can assert different polarity / pre/post delays as needed.
  */
@@ -101,7 +101,7 @@ static struct spi_dev_s *g_spi0_dev;
  *
  * Description:
  *   Assert or deassert the chip-select for the given device on SPI0.
- *   Phase-07 [High-7]: board file provides GPIO CS rather than hardware SSL.
+ * board file provides GPIO CS rather than hardware SSL.
  *
  *   devid == SPIDEV_USER(0) → SPI0 CS0 (P9_3, active-low).
  *   Other devids: no-op with warning.

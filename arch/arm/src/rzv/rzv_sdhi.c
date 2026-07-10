@@ -18,10 +18,10 @@
  *
  ****************************************************************************/
 
-/* RZ/V2H (R9A09G057H) SDHI lower-half driver -- PHASE 2: PIO implementation.
+/* RZ/V2H (R9A09G057H) SDHI lower-half driver -- PIO implementation.
  *
  * Implements 1-bit PIO data path, IRQ-driven command/data completion,
- * 400 kHz init clock, and basic error handling.  DMA deferred to Phase 6.
+ * 400 kHz init clock, and basic error handling.  DMA deferred.
  *
  * Register references:
  *   arch/arm/src/rzv/hardware/rzv_sdhi.h   (UM-derived, 8-byte stride)
@@ -183,7 +183,7 @@ struct rzv_sdhi_dev_s
   sdio_eventset_t    wkupevent;    /* Event that triggered wakeup */
   struct wdog_s      waitwdog;     /* Watchdog for event timeout */
 
-  /* Callback (card insert/remove -- wired in Phase 6) */
+  /* Callback (card insert/remove) */
 
   worker_t           callback;
   void              *cbarg;
@@ -379,7 +379,7 @@ static void rzv_sdhi_eventtimeout(wdparm_t arg)
  * Name: rzv_sdhi_interrupt
  *
  * Description:
- *   Combined ISR for SDHI CH0 OXMNIRQ (Phase 2: handles command done, data
+ * Combined ISR for SDHI CH0 OXMNIRQ (handles command done, data
  *   done, PIO read/write, and errors).  Demux INFO1 and INFO2 bits.
  *
  *   Clear rule (UM s6.2.3.3.1):
@@ -678,7 +678,7 @@ static void rzv_sdhi_reset(FAR struct sdio_dev_s *dev)
 static sdio_capset_t rzv_sdhi_capabilities(FAR struct sdio_dev_s *dev)
 {
   /* SDIO_CAPS_4BIT: hardware supports 4-bit bus; widebus() op configures it.
-   * SDIO_CAPS_DMASUPPORTED: not set -- DMA deferred to Phase 6.
+   * SDIO_CAPS_DMASUPPORTED: not set -- DMA deferred.
    * SDIO_CAPS_8BIT: not set -- 8-bit eMMC not supported in MVP.
    */
 
@@ -711,7 +711,7 @@ static sdio_statset_t rzv_sdhi_status(FAR struct sdio_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: rzv_sdhi_widebus (Phase 5)
+ * Name: rzv_sdhi_widebus
  *
  * Description:
  *   Configure bus width via SD_OPTION register.
@@ -719,7 +719,7 @@ static sdio_statset_t rzv_sdhi_status(FAR struct sdio_dev_s *dev)
  *   SD_OPTION bit 15 (WIDTH1): 0 = 4-bit bus, 1 = 1-bit bus (reset default).
  *   RZ/V2H uses only this single bit for SD-mode width; no WIDTH8/WIDTH4
  *   compound field -- SD0 supports 1/4/8-bit but 8-bit uses HOST_MODE, not
- *   OPTION.WIDTH (Phase 5 MVP: 1-bit and 4-bit only, no 8-bit eMMC).
+ * OPTION.WIDTH (MVP: 1-bit and 4-bit only, no 8-bit eMMC).
  *   Source: UM s6.2.2.1 SD_OPTION description + FSP r_sdhi.c OPTION writes.
  *   NEEDS_VERIFY: confirm WIDTH8 is irrelevant for SD-mode (eMMC-only concern).
  *
@@ -1439,14 +1439,14 @@ static int rzv_sdhi_registercallback(FAR struct sdio_dev_s *dev,
 }
 
 /****************************************************************************
- * DMA stubs (Phase 6)
+ * DMA stubs
  ****************************************************************************/
 
 #ifdef CONFIG_SDIO_DMA
 static int rzv_sdhi_dmarecvsetup(FAR struct sdio_dev_s *dev,
                                  FAR uint8_t *buffer, size_t buflen)
 {
-  /* Phase 6: configure integrated DMAC RX (CC_EXT_MODE + DM_CM_DTRAN_*) */
+  /* configure integrated DMAC RX (CC_EXT_MODE + DM_CM_DTRAN_*) */
 
   (void)buffer;
   (void)buflen;
@@ -1456,7 +1456,7 @@ static int rzv_sdhi_dmarecvsetup(FAR struct sdio_dev_s *dev,
 static int rzv_sdhi_dmasendsetup(FAR struct sdio_dev_s *dev,
                                  FAR const uint8_t *buffer, size_t buflen)
 {
-  /* Phase 6: configure integrated DMAC TX */
+  /* configure integrated DMAC TX */
 
   (void)buffer;
   (void)buflen;

@@ -42,7 +42,7 @@
 
 /* GPIO pin encoding ABI (single authoritative definition).
  *
- * Phase-03 fix [Critical-2, audit §9]: Unified encoding with pinmap.
+ * fix: Unified encoding with pinmap.
  * Pinmap uses PORT=(port<<28) and PIN=(pin<<24); driver decodes identically.
  * All previous header/driver/pinmap disagreements are now resolved here.
  *
@@ -133,7 +133,7 @@ typedef uint32_t gpio_pinset_t;
 
 /* Helper macros to construct gpio_pinset_t constants.
  * Port is at bits [31:28], pin at [27:24] — matching pinmap PORT/PIN macros.
- * Phase-03 [Critical-2]: GPIO_PIN and GPIO_PERIPH_PIN now use the canonical
+ * GPIO_PIN and GPIO_PERIPH_PIN now use the canonical
  * shifts. All callers must use PORT0..PORT11 and PIN0..PIN15 from pinmap,
  * not raw hardware port numbers (e.g., 0x20 is wrong; PORT0 is correct).
  */
@@ -166,7 +166,7 @@ typedef uint32_t gpio_pinset_t;
 #endif
 
 /* GPIO_PERIPH_PIN: psel is placed at bits [3:0] ONLY.
- * Phase-03 [Critical-2]: old PSEL at bits [18:15] (GPIO_PSEL_SHIFT=15) is
+ * old PSEL at bits [18:15] (GPIO_PSEL_SHIFT=15) is
  * REMOVED — that field was dead (rzv_gpioconfig read from [3:0] only).
  * Use RZV_PFS_PSEL_MODEx constants from rzv2h_pinmap.h for psel values.
  */
@@ -206,7 +206,7 @@ int rzv_gpioconfig(gpio_pinset_t cfgset);
  *
  * Description:
  *   Write a value to a GPIO output pin.
- *   Phase-03 [Low-16]: return int so callers see port-validation failures.
+ * return int so callers see port-validation failures.
  *
  * Input Parameters:
  *   pinset - GPIO pin configuration
@@ -286,7 +286,7 @@ int rzv_gpioconfiglist(const gpio_pinset_t *cfgset, size_t count);
  *
  * Description:
  *   Configure GPIO pin for external interrupt/event detection.
- *   Phase-03 [High-9]: Only IRQ0-15 direct lines supported. Pins requiring
+ * Only IRQ0-15 direct lines supported. Pins requiring
  *   TINT routing are NOT supported (returns -ENOTSUP). To support TINT,
  *   TSSR0-7 programming and ELC_EVENT_IOPORT_GROUP* routing via rzv_elc.h
  *   must be added in a follow-on phase.
@@ -312,7 +312,7 @@ int rzv_gpiosetevent(gpio_pinset_t pinset, bool rising, bool falling,
  *
  * Description:
  *   Initialize GPIO interrupt subsystem. Must be called from bringup when
- *   CONFIG_RZV_GPIO_IRQ=y. Phase-03 [High-12].
+ * CONFIG_RZV_GPIO_IRQ=y.
  *
  ****************************************************************************/
 

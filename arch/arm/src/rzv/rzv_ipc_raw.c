@@ -16,19 +16,19 @@
  *   - No malloc anywhere in driver lifetime.
  *
  * Concurrency model:
- *   - TX: serialised per-instance via txlock mutex (MED-1 fix).
+ * - TX: serialised per-instance via txlock mutex.
  *   - RX: single reader (task context). ISR posts rxsem; task drains ring.
  *   - TX-ACK: ISR posts txsem; task unblocks and returns to caller.
  *   - Ring indices (head/tail) are volatile uint32_t; dmb ish orders stores.
  *
  * Cycle-2 fixes applied:
- *   HIGH-3 — loopback ISR now posts both rxsem and txsem.
- *   MED-1  — per-instance txlock mutex serialises concurrent writers.
- *   MED-2  — txsem drained (reset to 0) before each MHU kick to prevent
+ * — loopback ISR now posts both rxsem and txsem.
+ * per-instance txlock mutex serialises concurrent writers.
+ * txsem drained (reset to 0) before each MHU kick to prevent
  *             stale ACK false-match.
- *   MED-3  — read() returns -EMSGSIZE when buflen < entry_size; head
+ * read() returns -EMSGSIZE when buflen < entry_size; head
  *             pointer is NOT advanced so the entry is not lost.
- *   MED-5  — register() validates entry_size % RZV_CACHELINE_BYTES == 0.
+ * register() validates entry_size % RZV_CACHELINE_BYTES == 0.
  *
  ****************************************************************************/
 
@@ -122,7 +122,7 @@ struct rzv_ipc_raw_s
 
   /* Synchronization */
 
-  mutex_t txlock;  /* MED-1: serialise concurrent writers (one TX at a time) */
+  mutex_t txlock;  /* serialise concurrent writers (one TX at a time) */
   sem_t   rxsem;   /* posted by rx_isr when new data arrives                 */
   sem_t   txsem;   /* posted by tx_ack_isr when peer ACKs                    */
 
@@ -240,7 +240,7 @@ static int rzv_ipc_raw_tx_ack_isr(int irq, FAR void *context, FAR void *arg)
  * Name: rzv_ipc_raw_loopback_isr
  *
  * Description:
- *   HIGH-3 fix: combined ISR for loopback (tx_chan == rx_chan).
+ * combined ISR for loopback (tx_chan == rx_chan).
  *   A single channel's MSG interrupt fires for both the incoming data kick
  *   and, after the receiver ACKs via RSP, the TX-ACK.  This ISR checks
  *   both MSG and RSP status bits and posts the appropriate semaphore(s).
@@ -289,7 +289,7 @@ static int rzv_ipc_raw_loopback_isr(int irq, FAR void *context,
  *   Lower-half read op.  Non-blocking: returns 0 if ring is empty.
  *   Copies exactly entry_size bytes from the next ring entry.
  *
- *   MED-3 fix: if buflen < entry_size, return -EMSGSIZE without advancing
+ * if buflen < entry_size, return -EMSGSIZE without advancing
  *   head — the entry is preserved for a retry with a large-enough buffer.
  *   This is consistent with SOCK_DGRAM semantics used by NuttX IPCC.
  *
@@ -314,7 +314,7 @@ static ssize_t rzv_ipc_raw_read(FAR struct ipcc_lower_s *lower,
       return 0;
     }
 
-  /* MED-3: reject undersized buffer; leave head intact so entry survives */
+  /* reject undersized buffer; leave head intact so entry survives */
 
   if (buflen < d->entry_size)
     {
@@ -359,9 +359,9 @@ static ssize_t rzv_ipc_raw_read(FAR struct ipcc_lower_s *lower,
  *   peer via MHU, then waits for TX-ACK with timeout.
  *   Returns -EAGAIN if ring full, -ETIMEDOUT if ACK not received in time.
  *
- *   MED-1 fix: entire TX critical section is guarded by txlock mutex to
+ * entire TX critical section is guarded by txlock mutex to
  *              prevent concurrent writers racing on tail.
- *   MED-2 fix: txsem is reset to 0 before the MHU kick so a stale ACK
+ * txsem is reset to 0 before the MHU kick so a stale ACK
  *              from a previous send cannot masquerade as the current ACK.
  *
  ****************************************************************************/
@@ -377,7 +377,7 @@ static ssize_t rzv_ipc_raw_write(FAR struct ipcc_lower_s *lower,
   uintptr_t dst;
   int       ret;
 
-  /* MED-1: serialise concurrent writers */
+  /* serialise concurrent writers */
 
   ret = nxmutex_lock(&priv->txlock);
   if (ret < 0)
@@ -424,7 +424,7 @@ static ssize_t rzv_ipc_raw_write(FAR struct ipcc_lower_s *lower,
   up_clean_dcache((uintptr_t)priv->tx_hdr,
                   (uintptr_t)priv->tx_hdr + RZV_IPC_RING_HDR_SIZE);
 
-  /* MED-2: drain stale ACKs before kick so we wait for the real ACK */
+  /* drain stale ACKs before kick so we wait for the real ACK */
 
   nxsem_reset(&priv->txsem, 0);
 
@@ -544,7 +544,7 @@ int rzv_ipc_raw_register(FAR const char *path,
       return -EINVAL;
     }
 
-  /* MED-5: entry_size must be an integer multiple of the cacheline size.
+  /* entry_size must be an integer multiple of the cacheline size.
    * Sub-cacheline cache ops can clobber adjacent entries' dirty state.
    */
 
@@ -632,7 +632,7 @@ int rzv_ipc_raw_register(FAR const char *path,
                            (uintptr_t)priv->rx_hdr + RZV_IPC_RING_HDR_SIZE);
     }
 
-  /* MED-1: init per-instance TX mutex */
+  /* init per-instance TX mutex */
 
   nxmutex_init(&priv->txlock);
 
@@ -643,7 +643,7 @@ int rzv_ipc_raw_register(FAR const char *path,
 
   /* Attach ISRs.
    *
-   * HIGH-3 fix: two sub-cases for the loopback configuration:
+   * two sub-cases for the loopback configuration:
    *
    *   (a) tx_chan == rx_chan AND tx_irq == rx_irq (old single-vector design):
    *       Use the combined loopback ISR which checks both MSG and RSP bits on

@@ -20,21 +20,21 @@
 
 /* RZ/V2H SPI-B (r_spi_b) native driver.
  *
- * Phase-07 fixes applied:
- *   [Crit-1]  SPBR written via 32-bit SPCR3[15:8] RMW (not dead SPBR_OFFSET).
- *   [Crit-3]  Clock source from rzv_clock_get_rate(RZV_CLOCK_SPI0/1/2CLK).
- *   [High-5]  SPEIE|SPRIE|SPTIE|CENDIE ORed into final SPCR write.
- *   [High-6]  setmode/setbits/setfrequency use RMW; SPCR not wiped to SPE|MSTR.
- *   [High-8]  send/exchange use 32-bit SPDR exclusively; FIFO fill loop.
- *   [High-9]  priv->irq_* initialised to -1 before attach calls.
- *   [Med-11]  SPSRC bits cleared after each frame (SPTEFC, SPRFC, CENDFC).
- *   [Med-12]  enter_critical_section wraps setbits/setfrequency RMW.
- *   [Med-13]  setbits validates nbits; returns -EINVAL for unsupported width.
- *   [Med-14]  SPCR read-back after first write (1-TCLK sync, RZ/V2H UM §SPI).
- *   [Low-17]  CONFIG_SPI_TRIGGER symbol references guarded.
- *   [Low-18]  SPI_FIFO_SIZE replaced with SPI_FIFO_DEPTH (16).
- *   [Low-19]  Dead SPI_TIMEOUT_LOOPS heuristic removed.
- *   Board GPIO MUX is done by rzv2h_spi.c board init (Phase-07, [Crit-2]).
+ * fixes applied:
+ * SPBR written via 32-bit SPCR3[15:8] RMW (not dead SPBR_OFFSET).
+ * Clock source from rzv_clock_get_rate(RZV_CLOCK_SPI0/1/2CLK).
+ * SPEIE|SPRIE|SPTIE|CENDIE ORed into final SPCR write.
+ * setmode/setbits/setfrequency use RMW; SPCR not wiped to SPE|MSTR.
+ * send/exchange use 32-bit SPDR exclusively; FIFO fill loop.
+ * priv->irq_* initialised to -1 before attach calls.
+ * SPSRC bits cleared after each frame (SPTEFC, SPRFC, CENDFC).
+ * enter_critical_section wraps setbits/setfrequency RMW.
+ * setbits validates nbits; returns -EINVAL for unsupported width.
+ * SPCR read-back after first write (1-TCLK sync, RZ/V2H UM §SPI).
+ * CONFIG_SPI_TRIGGER symbol references guarded.
+ * SPI_FIFO_SIZE replaced with SPI_FIFO_DEPTH (16).
+ * Dead SPI_TIMEOUT_LOOPS heuristic removed.
+ * Board GPIO MUX is done by rzv2h_spi.c board init.
  *
  * Review-fix-260515 findings applied (review-spi-260515-1600.md):
  *   [C1]  spi_clock changed to RZV_CLOCK_P4CLK (200 MHz) for all channels;
@@ -91,7 +91,7 @@
 
 /* Polled wait iterations — each iteration is ~2-3 instructions, so
  * 1000 ms * 10000 gives a generous ceiling without floating division.
- * Phase-07: replaced the old SPI_TIMEOUT_LOOPS heuristic (ms*1000) with
+ * replaced the old SPI_TIMEOUT_LOOPS heuristic (ms*1000) with
  * a cycle-count estimate that is at least proportional to real time.
  */
 #define SPI_TIMEOUT_CYCLES        (SPI_TIMEOUT_MS * 10000u)
@@ -325,7 +325,7 @@ static struct rzv_spi_priv_s g_spi1_priv =
  *
  * Description:
  *   32-bit register access only.  All SPDR accesses use 32-bit width;
- *   AXI bridge support for sub-word writes is unconfirmed (phase-07 §6).
+ * AXI bridge support for sub-word writes is unconfirmed (§6).
  ****************************************************************************/
 
 static inline uint32_t rzv_spi_getreg32(struct rzv_spi_priv_s *priv,
@@ -345,9 +345,9 @@ static inline void rzv_spi_putreg32(struct rzv_spi_priv_s *priv,
  *
  * Description:
  *   Return the SPI peripheral input clock in Hz.
- *   Phase-07 [Crit-3]: use per-channel SPI clock, not generic P0CLK.
+ * use per-channel SPI clock, not generic P0CLK.
  *   rzv_clock_get_rate() returns compile-time default if HW readback is
- *   not yet decoded (Phase-01 concern); that is still more accurate than
+ * not yet decoded (concern); that is still more accurate than
  *   P0CLK which is the wrong clock tree entirely.
  ****************************************************************************/
 
@@ -376,9 +376,9 @@ static uint32_t rzv_spi_get_clk_hz(struct rzv_spi_priv_s *priv)
  *   Baud = spi_clk / (2 * (SPBR + 1) * 2^BRDV)
  *   → SPBR = spi_clk / (2 * baud * 2^BRDV) - 1
  *
- *   Phase-07 [High-6]: RMW only; SPCR not wiped.
- *   Phase-07 [Crit-1]: SPBR written to SPCR3[15:8], not a phantom register.
- *   Phase-07 [Med-12]: critical section wraps register RMW.
+ * RMW only; SPCR not wiped.
+ * SPBR written to SPCR3[15:8], not a phantom register.
+ * critical section wraps register RMW.
  ****************************************************************************/
 
 static void rzv_spi_setfrequency(struct rzv_spi_priv_s *priv,
@@ -469,8 +469,8 @@ static void rzv_spi_setfrequency(struct rzv_spi_priv_s *priv,
  *
  * Description:
  *   Configure CPOL/CPHA in SPCMD0 via RMW.
- *   Phase-07 [High-6]: does NOT wipe SPCR to SPE|MSTR.
- *   Phase-07 [Med-12]: critical section.
+ * does NOT wipe SPCR to SPE|MSTR.
+ * critical section.
  *
  * Returns OK or -EINVAL.
  ****************************************************************************/
@@ -526,9 +526,9 @@ static int rzv_spi_setmode(struct rzv_spi_priv_s *priv, uint8_t mode)
  *
  * Description:
  *   Configure SPCMD0.SPB for the given word width.
- *   Phase-07 [Med-13]: validate nbits.
- *   Phase-07 [High-6]: RMW only.
- *   Phase-07 [Med-12]: critical section.
+ * validate nbits.
+ * RMW only.
+ * critical section.
  *
  * Returns OK or -EINVAL.
  ****************************************************************************/
@@ -640,8 +640,8 @@ static int rzv_spi_hwfeatures(struct spi_dev_s *dev,
  *
  * Description:
  *   Send one word (8/16/32-bit) using FIFO polling.
- *   Phase-07 [High-8]: 32-bit SPDR access only.
- *   Phase-07 [Med-11]: clear SPTEFC and SPRFC after each exchange.
+ * 32-bit SPDR access only.
+ * clear SPTEFC and SPRFC after each exchange.
  *
  * Returns received word or 0xffffffff on error.
  ****************************************************************************/
@@ -754,7 +754,7 @@ static uint32_t rzv_spi_send(struct spi_dev_s *dev, uint32_t wd)
  *
  * Description:
  *   Full-duplex exchange of nwords.
- *   Phase-07 [High-8]: fill TX FIFO up to FIFO depth, drain RX in step.
+ * fill TX FIFO up to FIFO depth, drain RX in step.
  *   For small transfers (nwords < SPI_FIFO_DEPTH), word-by-word polled loop
  *   keeps code simple while still using 32-bit SPDR.
  ****************************************************************************/
@@ -832,8 +832,8 @@ static void rzv_spi_recvblock(struct spi_dev_s *dev,
  *
  * Description:
  *   RX buffer full — drain one word from SPDR.
- *   Phase-07 [High-8]: 32-bit SPDR.
- *   Phase-07 [Med-11]: clear SPRFC after read.
+ * 32-bit SPDR.
+ * clear SPRFC after read.
  ****************************************************************************/
 
 static int rzv_spi_rxi_interrupt(int irq, void *context, void *arg)
@@ -903,9 +903,9 @@ static int rzv_spi_rxi_interrupt(int irq, void *context, void *arg)
  *
  * Description:
  *   TX buffer empty — load next word into SPDR.
- *   Phase-07 [High-8]: 32-bit SPDR.
- *   Phase-07 [Med-11]: clear SPTEFC after write.
- *   Phase-07 [High-5]: enable CENDIE on last word to arm communication-end interrupt.
+ * 32-bit SPDR.
+ * clear SPTEFC after write.
+ * enable CENDIE on last word to arm communication-end interrupt.
  ****************************************************************************/
 
 static int rzv_spi_txi_interrupt(int irq, void *context, void *arg)
@@ -976,7 +976,7 @@ static int rzv_spi_txi_interrupt(int irq, void *context, void *arg)
  *
  * Description:
  *   Communication end (CEND) — signal transfer completion.
- *   Phase-07 [Med-11]: clear CENDFC.
+ * clear CENDFC.
  ****************************************************************************/
 
 static int rzv_spi_tei_interrupt(int irq, void *context, void *arg)
@@ -1035,12 +1035,12 @@ static int rzv_spi_eri_interrupt(int irq, void *context, void *arg)
  * Description:
  *   Initialize the selected SPI-B channel.
  *
- * Phase-07 changes:
- *   [Crit-1]  SPBR programmed via rzv_spi_setfrequency → SPCR3 RMW.
- *   [Crit-3]  spi_clock field used, not P0CLK.
- *   [High-5]  SPCR written with SPEIE|SPRIE|SPTIE (CENDIE armed per-transfer).
- *   [High-9]  irq_* fields pre-set to -1 in static init; checked before detach.
- *   [Med-14]  SPCR read-back after first write for 1-TCLK sync.
+ * changes:
+ * SPBR programmed via rzv_spi_setfrequency → SPCR3 RMW.
+ * spi_clock field used, not P0CLK.
+ * SPCR written with SPEIE|SPRIE|SPTIE (CENDIE armed per-transfer).
+ * irq_* fields pre-set to -1 in static init; checked before detach.
+ * SPCR read-back after first write for 1-TCLK sync.
  ****************************************************************************/
 
 struct spi_dev_s *rzv_spibus_initialize(int port)
@@ -1200,7 +1200,7 @@ struct spi_dev_s *rzv_spibus_initialize(int port)
     }
 
   /* Write SPCR: SPE=0 initially (set all except SPE then MSTR).
-   * Phase-07 [Med-14]: read back SPCR after write for 1-TCLK sync (RZ/V2H UM §SPI).
+   * read back SPCR after write for 1-TCLK sync (RZ/V2H UM §SPI).
    * [H4/M10] SPTIE and SPRIE must NOT be set here.  With SPE=1 and TX FIFO
    * empty, SPTIE causes TXI to fire immediately with no transfer pending →
    * interrupt storm.  SPEIE (error) is safe to keep always-on.
@@ -1267,7 +1267,7 @@ int rzv_spibus_uninitialize(struct spi_dev_s *dev)
 
   rzv_spi_putreg32(priv, RZV_SPI_SPCR_OFFSET, 0);
 
-  /* Detach IRQs — guard with >=0 check (phase-07 [High-9]) */
+  /* Detach IRQs — guard with >=0 check */
 
   if (priv->irq_eri >= 0)
     {
@@ -1307,7 +1307,7 @@ int rzv_spibus_uninitialize(struct spi_dev_s *dev)
  * Description:
  *   Enable or disable the internal SPI loopback mode (SPCR2.SPLP).
  *   When enable=true, MOSI is internally connected to MISO — no external
- *   wire required.  Phase-07 [Low-20].
+ * wire required.
  *
  * Input Parameters:
  *   dev    - SPI device structure from rzv_spibus_initialize()

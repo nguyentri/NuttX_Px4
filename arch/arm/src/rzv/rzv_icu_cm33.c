@@ -18,7 +18,7 @@
  *
  ****************************************************************************/
 
-/* CRIT-5 fix: This file diverged from rzv_icu.c (CR8) to use:
+/* This file diverged from rzv_icu.c (CR8) to use:
  *   - INTM33SEL registers (base 0x01EC) instead of INTR8SEL (0x012C)
  *   - RZV_INTC_M33SEL_SPI_BASE instead of RZV_INTC_SEL_SPI_BASE
  *
@@ -217,11 +217,11 @@ int rzv_icu_m33_attach(int event, xcpt_t handler, void *arg, bool irq_enable)
 
   leave_critical_section(flags);
 
-  /* CRIT-5 fix: irq = M33SEL base + slot (NOT RZV_IRQ_FIRST + slot) */
+  /* irq = M33SEL base + slot (NOT RZV_IRQ_FIRST + slot) */
 
   irq = RZV_INTC_M33SEL_SPI_BASE + slot;
 
-  /* MED-11 fix: store handler before programming selector */
+  /* store handler before programming selector */
 
   g_icu_m33_handlers[slot].handler = handler;
   g_icu_m33_handlers[slot].arg     = arg;

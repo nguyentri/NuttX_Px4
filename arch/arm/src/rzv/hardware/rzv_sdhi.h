@@ -88,7 +88,7 @@
 #define RZV_SDHI_SD_STATUS_OFFSET       0x3c8  /* Status (CBSY check before CLK write) */
                                                /* gap: 0x3d0 to 0x81f */
 
-/* Integrated DMAC sub-block (Phase 6 only -- not used in MVP PIO path) */
+/* Integrated DMAC sub-block (only -- not used in MVP PIO path) */
 
 #define RZV_SDHI_DM_CM_DTRAN_MODE_OFFSET  0x820  /* DMAC mode (init=0x0030) */
 #define RZV_SDHI_DM_CM_DTRAN_CTRL_OFFSET  0x828  /* DMAC control (init=0) */

@@ -75,7 +75,7 @@
 
 typedef struct
 {
-  /* audit Medium-17: removed unused 'el' field — never consulted after set */
+  /* removed unused 'el' field — never consulted after set */
   xcpt_t handler;   /* Handler function */
   void *arg;        /* Argument for handler */
 } rzv_icu_handler_t;
@@ -137,7 +137,7 @@ static int rzv_icu_interrupt(int irq, void *context, void *arg)
 
 void rzv_icu_clear_irq(int irq)
 {
-  /* CRIT-3 fix: caller passes GIC INTID (353..481 for SEL slots).
+  /* caller passes GIC INTID (353..481 for SEL slots).
    * rzv_icu_clear_irq_status clears ISCLR bits 0-15 for external IRQ0-15.
    * External IRQ pins are routed via ELC event IDs 0-15 which map to
    * GIC INTID = ELC_IRQ0_INTID + irq_line. We cannot safely reverse-map
@@ -234,7 +234,7 @@ int rzv_icu_attach(int event, xcpt_t handler, void *arg, bool irq_enable)
 
   irq = RZV_INTC_SEL_SPI_BASE + slot;
 
-  /* MED-11 / M15 fix: Correct attach order to close handler-NULL race.
+  /* Correct attach order to close handler-NULL race.
    * If the event line is already asserted (level pin held active), the GIC
    * may dispatch immediately between set_event and irq_attach → NULL deref.
    *
@@ -327,7 +327,7 @@ int rzv_icu_detach(int icu_irq)
   g_icu_handlers[slot].handler = NULL;
   g_icu_handlers[slot].arg = NULL;
 
-  /* audit High-10: slot compaction under critical section.
+  /* slot compaction under critical section.
    * Always re-scan all slots to find true highest-used; never regress
    * g_icu_slot while a higher-numbered slot is still live.
    */
@@ -386,7 +386,7 @@ int rzv_icu_set_event(int icu_slot, int event)
     }
 
   /* Each INTR8SEL register holds 3 x 10-bit slot fields.
-   * audit High-9: RMW must be under critical section — concurrent writes
+   * RMW must be under critical section — concurrent writes
    * to different slots sharing the same 32-bit register would clobber each.
    */
 
@@ -483,7 +483,7 @@ int rzv_icu_set_irq_detect(int irq_num, uint8_t mode)
 
   putreg32(regval, RZV_ICU_IITSR);
 
-  /* MED-9 fix: propagate edge/level config to GIC ICDICFR.
+  /* propagate edge/level config to GIC ICDICFR.
    * External IRQ0-15 pins route through ELC; the GIC SPI for each external
    * IRQ line is at a fixed INTID.  We only know the ICU IRQ line number
    * (0-15) here, not the GIC INTID — that mapping requires the UM Table 12.x
@@ -563,7 +563,7 @@ uint16_t rzv_icu_get_irq_status(void)
 
 int rzv_icu_set_irq_filter(int irq_num, uint8_t filter_clock)
 {
-  /* CRIT-4 fix: IFLTC at 0x1C is RESERVED in INTC block.
+  /* IFLTC at 0x1C is RESERVED in INTC block.
    * IRQ digital filter lives in GPIO peripheral (FILONOFF/FILNUM/FILCLKSEL).
    * This function is a no-op stub; filter must be configured via GPIO driver.
    * Return -ENOSYS to signal that the operation is not available here.
@@ -601,7 +601,7 @@ int rzv_icu_set_irq_filter(int irq_num, uint8_t filter_clock)
 
 int rzv_icu_set_priority(int icu_irq, int priority)
 {
-  /* Validate IRQ range — CRIT-1: SEL IRQs start at 353 (no RZV_IRQ_FIRST) */
+  /* Validate IRQ range — SEL IRQs start at 353 (no RZV_IRQ_FIRST) */
 
   if (icu_irq < RZV_INTC_SEL_SPI_BASE ||
       icu_irq >= (RZV_INTC_SEL_SPI_BASE + RZV_IRQ_ICU_SLOTS))
@@ -687,7 +687,7 @@ int rzv_icu_filter_config(int icu_irq, uint8_t mode, bool filter_enable,
 
 void rzv_icu_enable_wakeup(uint32_t mask)
 {
-  /* audit Low-19: wakeup not implemented on RZV2H CR8 target */
+  /* wakeup not implemented on RZV2H CR8 target */
 
   (void)mask;
 }
@@ -707,7 +707,7 @@ void rzv_icu_enable_wakeup(uint32_t mask)
 
 void rzv_icu_disable_wakeup(uint32_t mask)
 {
-  /* audit Low-19: wakeup not implemented on RZV2H CR8 target */
+  /* wakeup not implemented on RZV2H CR8 target */
 
   (void)mask;
 }
@@ -740,7 +740,7 @@ void rzv_icu_disable_wakeup(uint32_t mask)
 
 void rzv_icu_clear_nmi_status(uint16_t mask)
 {
-  /* audit Low-18: honor mask parameter.
+  /* honor mask parameter.
    * RZV2H NSCLR bit 0 = NCLR (write-1-to-clear).  The NMI is single-bit
    * on this SoC, so only bit 0 of mask is relevant.
    */
@@ -810,7 +810,7 @@ int rzv_icu_set_nmi_filter(bool filter_enable, uint8_t filter_clock)
 
 void rzv_icu_enable_nmi(uint16_t mask)
 {
-  /* audit Low-19: NMI enable unimplemented on RZV2H CR8 (single-bit NMI,
+  /* NMI enable unimplemented on RZV2H CR8 (single-bit NMI,
    * always enabled by hardware at reset). No register write needed. */
 
   (void)mask;
@@ -830,7 +830,7 @@ void rzv_icu_enable_nmi(uint16_t mask)
 
 void rzv_icu_disable_nmi(uint16_t mask)
 {
-  /* audit Low-19: NMI disable not supported on RZV2H (NMI is non-maskable). */
+  /* NMI disable not supported on RZV2H (NMI is non-maskable). */
 
   (void)mask;
 }

@@ -29,7 +29,7 @@
  *   POEG unit 0 (channels A-D) → protects GPT0-7  (unit0, 0x13010xxx)
  *   POEG unit 1 (channels A-D) → protects GPT10-17 (unit1, 0x13020xxx)
  *
- * Source: RZ/V2H hardware manual POEG chapter and phase-08 spec.
+ * Source: RZ/V2H hardware manual POEG chapter and spec.
  *
  * Usage:
  *   1. Call rzv_poeg_configure() once per POEG channel needed.
