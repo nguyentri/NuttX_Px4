@@ -596,6 +596,16 @@
 #define RZV_IRQ_SCI_TXI(ch)                          (RZV_IRQ_SCI_ERI(ch) + 2)
 #define RZV_IRQ_SCI_TEI(ch)                          (RZV_IRQ_SCI_ERI(ch) + 3)
 
+/* External GPIO IRQ pins IRQ0-15: FIXED GIC INTIDs (NOT selectable via
+ * INTR8SEL).  Per FSP rzv2h/cr/bsp_irq_id.h, external IRQ N maps to
+ * FSP IRQn = 1 + N (NMI at 0 is INTID 32), so NuttX INTID = 32 + 1 + N =
+ * 33 + N (range 33..48).  Attach these with `irq_attach()`/`up_enable_irq()`
+ * on the returned INTID — DO NOT route them through `rzv_icu_attach()`.
+ * Edge/level sense goes via `rzv_icu_set_irq_detect(N, mode)` (IITSR) plus
+ * `rzv_gic_set_irq_type(intid, edge)` on the GIC line.
+ */
+#define RZV_IRQ_EXT_IRQ(n)                           (32 + 1 + (n))
+
 /* SPI-B fixed GIC SPI lines (per FSP rzv2h/cr/bsp_irq_id.h + rzv_gen/
  * vector_data.c).  SPI-B uses a HYBRID interrupt topology on RZ/V2H CR8.
  * Values below are FSP SPI *indices*; the physical GIC INTID (== NuttX IRQ)

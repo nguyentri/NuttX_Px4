@@ -1177,12 +1177,21 @@ int rzv_gpiosetevent(gpio_pinset_t pinset, bool rising, bool falling,
           return -ENODEV;
         }
 
-      /* Tear down GIC/INTR8SEL routing first so no interrupt can be
-       * delivered into a slot with a NULL callback.
+      /* Tear down GIC first so no interrupt can be delivered into a slot
+       * with a NULL callback.  IRQ0-15 use fixed GIC INTIDs (irq_attach);
+       * TINT uses dynamic INTR8SEL slots (rzv_icu_attach).
        */
       if (g_gpio_irqs[slot].icu_slot >= 0)
         {
-          rzv_icu_detach(g_gpio_irqs[slot].icu_slot);
+          if (g_gpio_irqs[slot].path == RZV_GPIO_IRQ_PATH_TINT)
+            {
+              rzv_icu_detach(g_gpio_irqs[slot].icu_slot);
+            }
+          else
+            {
+              up_disable_irq(g_gpio_irqs[slot].icu_slot);
+              irq_detach(g_gpio_irqs[slot].icu_slot);
+            }
         }
 
       if (g_gpio_irqs[slot].path == RZV_GPIO_IRQ_PATH_TINT)
@@ -1311,6 +1320,7 @@ int rzv_gpiosetevent(gpio_pinset_t pinset, bool rising, bool falling,
           irq_mode = RZV_ICU_IRQ_EDGE_BOTH;
         }
 
+      /* Program IITSR (edge/level trigger) for this IRQ line. */
       ret = rzv_icu_filter_config(irq_num, irq_mode, false,
                                   RZV_ICU_FILTER_PCLK_DIV_1);
       if (ret < 0)
@@ -1318,14 +1328,27 @@ int rzv_gpiosetevent(gpio_pinset_t pinset, bool rising, bool falling,
           return ret;
         }
 
-      icu_irq = rzv_icu_attach(irq_num, rzv_gpio_irq_handler_shim,
-                               &g_gpio_irqs[slot], true);
-      if (icu_irq < 0)
+      /* External IRQ0-15 are FIXED GIC INTIDs on RZ/V2H (per FSP
+       * bsp_irq_id.h GPIO_IRQ<n>_IRQn = n+1, INTID = RZV_IRQ_FIRST(32)+n+1).
+       * They are NOT selectable via INTR8SEL — using rzv_icu_attach() would
+       * write the line number into a SEL slot's TSSEL field, which selects
+       * TINT<n> (an unrelated, disabled source) and silently drops the
+       * interrupt.  Attach directly on the fixed INTID instead.
+       */
+      icu_irq = RZV_IRQ_EXT_IRQ(irq_num);
+
+      ret = irq_attach(icu_irq, rzv_gpio_irq_handler_shim, &g_gpio_irqs[slot]);
+      if (ret < 0)
         {
-          return icu_irq;
+          return ret;
         }
 
+      /* GIC edge/level sensitivity: LEVEL_LOW is the only level mode this
+       * IRQ path supports (mirrors IITSR encoding).
+       */
       rzv_gic_set_irq_type(icu_irq, (irq_mode != RZV_ICU_IRQ_LEVEL_LOW));
+
+      up_enable_irq(icu_irq);
 
       g_gpio_irqs[slot].irq_num      = (uint8_t)irq_num;
       g_gpio_irqs[slot].tint_channel = 0;
@@ -1391,6 +1414,15 @@ int rzv_gpiosetevent(gpio_pinset_t pinset, bool rising, bool falling,
         }
 
       gpioint = rzv_gpio_pin_to_gpioint(port, pin);
+
+      /* The pin→GPIOINT source formula is a cumulative-sum by bonded pin
+       * count (P0=[0..7], P1=[8..13], P2=[14..15], P3-PA=8 each, PB=[80..85]).
+       * Independently verified against exactly one FSP data point (P5_0 →
+       * gpioint 32, hal_data.c:496).  Log the mapping so first-time HW users
+       * can cross-check with a scope on the expected pin.
+       */
+      gpioinfo("TINT attach: port=%u pin=%u -> gpioint=%u channel=%d trig=%u\n",
+               port, pin, (unsigned)gpioint, channel, (unsigned)trig);
 
       ret = rzv_icu_tint_set_source(channel, gpioint, true);
       if (ret < 0)
