@@ -41,11 +41,14 @@
  *   Bit layout:
  *     [31:28] Port  — PORT0..PORT11 = (port << 28)
  *     [27:24] Pin   — PIN0..PIN15   = (pin << 24)
- *     [23]    Initial output value  (bit 23 of rzv_gpio.h GPIO_OUTPUT_SHIFT)
+ *     [23:20] Out/IRQ — bit 23 = initial output value (OUTPUT-mode pins);
+ *                       bits [23:20] = external IRQ line 0-15 (interrupt pins,
+ *                       IRQ0..IRQ15 macros = rzv_gpio.h GPIO_IRQ_SHIFT=20).
+ *                       Roles are mutually exclusive (see rzv_gpio.h).
  *     [19:16] Mode  — RZV_GPIO_INPUT/OUTPUT/PERIPH/ANALOG (rzv_gpio.h)
  *     [15:12] Drive — RZV_GPIO_DRVSTR_* (rzv_gpio.h GPIO_DRVSTR_SHIFT=12)
  *     [11:8]  Pull  — RZV_GPIO_FLOAT/PULLUP/PULLDOWN (rzv_gpio.h GPIO_PULL_SHIFT=8)
- *     [7:4]   Func  — RZV_GPIO_OPENDRAIN; also IRQ line 0-15 for gpiosetevent
+ *     [7:4]   Func  — RZV_GPIO_OPENDRAIN (open-drain only; no longer IRQ line)
  *     [3:0]   PSEL  — RZV_PFS_PSEL_MODE1..15 (peripheral function select)
  *                     BSP_FEATURE_IOPORT_PFC_REG_BITFIELD=0xF
  *
@@ -113,23 +116,27 @@
 #define PIN15                                  (15 << 24)
 #define PIN_MAX                                (16)
 
-/* IRQ Pin Definitions */
-#define IRQ0                                   (0)
-#define IRQ1                                   (1)
-#define IRQ2                                   (2)
-#define IRQ3                                   (3)
-#define IRQ4                                   (4)
-#define IRQ5                                   (5)
-#define IRQ6                                   (6)
-#define IRQ7                                   (7)
-#define IRQ8                                   (8)
-#define IRQ9                                   (9)
-#define IRQ10                                  (10)
-#define IRQ11                                  (11)
-#define IRQ12                                  (12)
-#define IRQ13                                  (13)
-#define IRQ14                                  (14)
-#define IRQ15                                  (15)
+/* IRQ Pin Definitions — external IRQ line number in the dedicated GPIO_IRQ
+ * field bits [23:20] (rzv_gpio.h GPIO_IRQ_SHIFT=20).  Literal "<< 20" matches
+ * the PORT/PIN literal-shift style here and avoids depending on rzv_gpio.h
+ * macro visibility / include order.  Consumed by rzv_gpiosetevent().
+ */
+#define IRQ0                                   (0  << 20)
+#define IRQ1                                   (1  << 20)
+#define IRQ2                                   (2  << 20)
+#define IRQ3                                   (3  << 20)
+#define IRQ4                                   (4  << 20)
+#define IRQ5                                   (5  << 20)
+#define IRQ6                                   (6  << 20)
+#define IRQ7                                   (7  << 20)
+#define IRQ8                                   (8  << 20)
+#define IRQ9                                   (9  << 20)
+#define IRQ10                                  (10 << 20)
+#define IRQ11                                  (11 << 20)
+#define IRQ12                                  (12 << 20)
+#define IRQ13                                  (13 << 20)
+#define IRQ14                                  (14 << 20)
+#define IRQ15                                  (15 << 20)
 #define MAX_GPIO_IRQS                          (16)
 
 /* Alternative Function Pin Definitions */

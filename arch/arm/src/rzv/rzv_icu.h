@@ -317,6 +317,31 @@ void rzv_icu_clear_nmi_status(uint16_t mask);
 bool rzv_icu_get_nmi_status(void);
 int rzv_icu_set_nmi_filter(bool filter_enable, uint8_t filter_clock);
 
+/****************************************************************************
+ * TINT (GPIO-source interrupt) helpers
+ *
+ * Program the RZ/V2H TINT block so a GPIO pin can raise an interrupt through
+ * one of 32 channels.  The TINT channel's output feeds INTR8SEL as ELC event
+ * (channel number 0-31, per FSP GPIO_TINT<n>_IRQSELn), so higher-level code
+ * routes it through rzv_icu_attach() like any other selectable source.
+ *
+ * Typical use:
+ *   int ch  = rzv_icu_tint_alloc();
+ *   rzv_icu_tint_set_trigger(ch, ICU_TITSR_RISING);
+ *   rzv_icu_tint_set_source (ch, gpioint, true);
+ *   int irq = rzv_icu_attach(ch, handler, arg, true);  // event = channel
+ *   // in ISR (edge triggers only): rzv_icu_tint_clear_flag(ch)
+ *
+ * Both-edge is NOT supported natively by TINT hardware — reject the request
+ * or emulate at the caller.
+ ****************************************************************************/
+
+int  rzv_icu_tint_alloc(void);
+void rzv_icu_tint_free(int channel);
+int  rzv_icu_tint_set_trigger(int channel, uint8_t trigger);
+int  rzv_icu_tint_set_source(int channel, uint8_t gpioint, bool enable);
+void rzv_icu_tint_clear_flag(int channel);
+
 /* Legacy NMI functions (placeholders) */
 
 void rzv_icu_enable_nmi(uint16_t mask);

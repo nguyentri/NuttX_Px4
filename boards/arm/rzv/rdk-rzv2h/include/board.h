@@ -480,10 +480,17 @@
 #define BOARD_CANFD1_TX_GPIO  GPIO_CTX3_P8_6_M5   /* P86 CH1 TX, PSEL=5 */
 #define BOARD_CANFD1_RX_GPIO  GPIO_CRX3_P8_7_M5   /* P87 CH1 RX, PSEL=5 */
 
+#if defined(CONFIG_RZV_SCI1_I2C) && defined(CONFIG_RZV_PWM)
+#  error "RDK-RZV2H: RZV_SCI1_I2C (SCL on P5_3 M1) and RZV_PWM (CH3 on P5_3 M11) both drive P5_3. Disable one."
+#endif
+
 /* Board Capabilities *******************************************************/
 
 #define BOARD_HAS_LEDS        1
-#define BOARD_HAS_BUTTONS     1
+/* RDK-RZV2H has no dedicated user buttons wired to a GPIO header; the
+ * NuttX button API is present but reports zero buttons.  See rzv2h_buttons.c.
+ */
+#define BOARD_HAS_BUTTONS     0
 #define BOARD_HAS_I2C         1
 #define BOARD_HAS_SPI         1
 #define BOARD_HAS_PWM         1

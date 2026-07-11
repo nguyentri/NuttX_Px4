@@ -40,6 +40,7 @@
 #include "rzv_icu.h"
 #include "rzv_clock.h"
 #include "hardware/rzv_gpio.h"
+#include "hardware/rzv_icu.h"
 #include "hardware/rzv_pinmap.h"
 
 /****************************************************************************
@@ -81,15 +82,19 @@
 #define GPIO_PIN_ALIGN_4BIT    4U
 
 /* Maximum supported ports: NuttX PORT0-PORT11 = HW P20-P2B.
- * TODO: True HW port count for R9A09G057H unconfirmed. Ports 12+
- * (P2C..) not verified. Needs RZ/V2H UM datasheet check.
+ * Confirmed against FSP CMSIS R9A09G057H gpio_iodefine.h/gpio_iobitmask.h:
+ * the R_GPIO_Type struct defines output-data registers P20..P2B only (12
+ * ports); there is no P2C (grep of R_GPIO_P2C_ in gpio_iobitmask.h = 0
+ * matches). The pin-mapping CSV likewise lists 12 physical ports (P0..PB).
+ * So 12 is the true HW port count for this part — no ports 12+ exist.
  */
 #define RZV_GPIO_MAX_PORT      12U
 
 /* Per-port maximum pin count.
  * GP ports P20-P2B (NuttX ports 0-11) have varying pin counts.
- * Source: refs/rz_scripts_pi_pinmap/rzv2h_pin_mapping.csv (pin rows per
- * port): P0x=8, P1x=6, P2x=2, P3x-PAx=8, PBx=6.
+ * Source: refs/rzv2h_scripts_pinmap/rzv2h_pin_mapping.csv bonded-pin rows
+ * per port (verified 2026-07-11): P0=8, P1=6, P2=2, P3=8, P4=8, P5=8, P6=8,
+ * P7=8, P8=8, P9=8, PA=8, PB=6 (86 bonded pins total).
  */
 static const uint8_t g_rzv_port_pin_count[RZV_GPIO_MAX_PORT] =
 {
@@ -116,18 +121,63 @@ static volatile uint32_t g_pwpr_protect_counter;
 
 /* GPIO interrupt slot table */
 #ifdef CONFIG_RZV_GPIO_IRQ
+
+enum rzv_gpio_irq_path_e
+{
+  RZV_GPIO_IRQ_PATH_NONE = 0,
+  RZV_GPIO_IRQ_PATH_IRQ  = 1,  /* Dedicated external IRQ0-15 line */
+  RZV_GPIO_IRQ_PATH_TINT = 2,  /* TINT channel (any GPIO pin)     */
+};
+
 struct rzv_gpio_irq_s
 {
   gpio_pinset_t pinset;       /* GPIO pin configuration */
   xcpt_t        callback;     /* User interrupt callback */
   void         *arg;          /* Callback argument */
   int           icu_slot;     /* NuttX IRQ from rzv_icu_attach() (-1=unused) */
-  uint8_t       irq_num;      /* External IRQ line number 0-15 */
+  uint8_t       irq_num;      /* External IRQ line number 0-15 (IRQ path) */
+  uint8_t       tint_channel; /* TINT channel 0-31 (TINT path) */
+  uint8_t       trigger;      /* Configured trigger (edge/level enum) */
+  uint8_t       path;         /* enum rzv_gpio_irq_path_e */
   bool          allocated;    /* Slot in use */
 };
 
 /* All icu_slot fields initialised to -1 by rzv_gpio_irq_initialize(). */
 static struct rzv_gpio_irq_s g_gpio_irqs[MAX_GPIO_IRQS];
+
+/* Cumulative GPIOINT source index per port for RZ/V2H, matching the FSP pin
+ * → gpioint numbering used by the vendor r_intc_tint driver.  Formula:
+ *
+ *     gpioint(port, pin) = g_rzv_port_gpioint_base[port] + pin
+ *
+ * where the base is the sum of bonded pin counts for all lower-numbered
+ * ports (P0=8, P1=6, P2=2, P3-P4=8 each ⇒ P5 base = 8+6+2+8+8 = 32).  This
+ * was cross-verified against FSP hal_data.c:496, which sets
+ * ".gpioint = 32" for the P5_0 MPU9250 DRDY input.  Total = 86 valid source
+ * numbers, well inside the 7-bit TSSEL field.
+ */
+
+static const uint8_t g_rzv_port_gpioint_base[RZV_GPIO_MAX_PORT] =
+{
+  0U,   /* P0 base (P0=8 pins) */
+  8U,   /* P1 base (P1=6 pins) */
+  14U,  /* P2 base (P2=2 pins) */
+  16U,  /* P3 base */
+  24U,  /* P4 base */
+  32U,  /* P5 base */
+  40U,  /* P6 base */
+  48U,  /* P7 base */
+  56U,  /* P8 base */
+  64U,  /* P9 base */
+  72U,  /* PA base */
+  80U,  /* PB base */
+};
+
+static inline uint8_t rzv_gpio_pin_to_gpioint(unsigned int port,
+                                              unsigned int pin)
+{
+  return (uint8_t)(g_rzv_port_gpioint_base[port] + pin);
+}
 #endif
 
 /****************************************************************************
@@ -602,7 +652,26 @@ static int rzv_gpio_irq_handler_shim(int irq, void *context, void *arg)
 {
   struct rzv_gpio_irq_s *gpio_irq = (struct rzv_gpio_irq_s *)arg;
 
-  if (gpio_irq != NULL && gpio_irq->callback != NULL)
+  if (gpio_irq == NULL)
+    {
+      return OK;
+    }
+
+  /* TINT edge triggers: clear the TINT status flag BEFORE invoking the user
+   * callback, matching FSP r_intc_tint_isr: an edge arriving while the ISR
+   * is active must be captured for the next dispatch, not lost.  Level-
+   * triggered TINT tracks the pin state directly and does not use TSCLR.
+   * IRQ0-15 lines: GIC edge-cleared on ack; no ISCLR walk needed here.
+   */
+
+  if (gpio_irq->path == RZV_GPIO_IRQ_PATH_TINT &&
+      (gpio_irq->trigger == ICU_TITSR_RISING ||
+       gpio_irq->trigger == ICU_TITSR_FALLING))
+    {
+      rzv_icu_tint_clear_flag(gpio_irq->tint_channel);
+    }
+
+  if (gpio_irq->callback != NULL)
     {
       return gpio_irq->callback(irq, context, gpio_irq->arg);
     }
@@ -665,6 +734,25 @@ int rzv_gpioconfig(gpio_pinset_t cfgset)
   /* validate pin against per-port count; pin>=8 UB */
 
   if (base == 0 || !rzv_gpio_pin_valid(port, pin))
+    {
+      return -EINVAL;
+    }
+
+  /* Reject out-of-range field values instead of silently degrading.
+   * mode: only INPUT/OUTPUT/PERIPH/ANALOG (0-3) are defined; a larger value
+   *   previously fell through to PM_HIZ with no diagnostic.
+   * pull: only FLOAT/PULLUP/PULLDOWN (0-2) are defined; a larger value
+   *   previously mapped silently to PUPD_DISABLE.
+   * drive: 0-3, already range-checked in rzv_gpioconfigure_drive().
+   * psel:  bits [3:0], every value 0-F is a valid peripheral select, so no
+   *   additional check is required.
+   */
+  if ((mode >> GPIO_MODE_SHIFT) > (RZV_GPIO_ANALOG >> GPIO_MODE_SHIFT))
+    {
+      return -EINVAL;
+    }
+
+  if ((pull >> GPIO_PULL_SHIFT) > (RZV_GPIO_PULLDOWN >> GPIO_PULL_SHIFT))
     {
       return -EINVAL;
     }
@@ -781,6 +869,7 @@ int rzv_gpiowrite(gpio_pinset_t pinset, bool value)
   unsigned int      pin;
   uintptr_t         base;
   volatile uint8_t *p_p;
+  irqstate_t        flags;
 
   port = rzv_gpio_extract_port(pinset);
   pin  = rzv_gpio_extract_pin(pinset);
@@ -791,9 +880,22 @@ int rzv_gpiowrite(gpio_pinset_t pinset, bool value)
       return -EINVAL;
     }
 
+  /* The per-port P (output data) register is a shared byte: one bit per pin.
+   * Two threads/ISRs toggling different pins of the same port each do an
+   * 8-bit read-modify-write, so without mutual exclusion one update can be
+   * lost.  Wrap the RMW in a critical section.
+   *
+   * No PWPR unlock is used here: the P register is NOT write-protected on
+   * RZ/V2H (only PFC/PMC and the pin-config registers are gated by PWPR).
+   * Verified against FSP r_ioport.c R_IOPORT_PinWrite/PortWrite, which write
+   * the P register directly with no PinAccessEnable/Disable window.
+   */
   p_p = (volatile uint8_t *)(base + RZV_GPIO_P_OFFSET(port));
+
+  flags = enter_critical_section();
   rzv_gpio_regwrite_8(p_p, value ? 1U : 0U, (uint8_t)pin,
                       (uint8_t)(1U << pin));
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -824,6 +926,110 @@ bool rzv_gpioread(gpio_pinset_t pinset)
 
   p_pin = (volatile const uint8_t *)(base + RZV_GPIO_PIN_OFFSET(port));
   return ((*p_pin >> pin) & 0x1U) != 0;
+}
+
+/****************************************************************************
+ * Name: rzv_unconfiggpio
+ *
+ * Description:
+ *   Release a pin back to a safe, inert default (NuttX unconfig semantics,
+ *   cf. stm32_unconfiggpio): GPIO mode, high-impedance (no input/output
+ *   driver), no peripheral function, no pull, default drive, push-pull, and
+ *   interrupt-input select disabled.  After this call the pin drives nothing
+ *   and generates no interrupt.
+ *
+ *   The whole sequence runs under one critical section + PWPR window (PMC/PFC
+ *   are write-protected by PWPR; the remaining config registers are written
+ *   in the same window, matching rzv_gpioconfig()).
+ *
+ * Input Parameters:
+ *   pinset - GPIO pin configuration (only port/pin are used)
+ *
+ * Returned Value:
+ *   Zero (OK) on success; -EINVAL on invalid port/pin.
+ *
+ ****************************************************************************/
+
+int rzv_unconfiggpio(gpio_pinset_t pinset)
+{
+  unsigned int       port;
+  unsigned int       pin;
+  uintptr_t          base;
+  irqstate_t         flags;
+  volatile uint8_t  *p_pmc;
+  volatile uint16_t *p_pm;
+  volatile uint32_t *p_pfc;
+  volatile uint32_t *p_nod;
+  volatile uint32_t *p_isel;
+  uint32_t           shift;
+  uint32_t           mask;
+  uint16_t           pm_mask;
+
+  port = rzv_gpio_extract_port(pinset);
+  pin  = rzv_gpio_extract_pin(pinset);
+
+  base = rzv_gpio_get_port_base(port);
+  if (base == 0 || !rzv_gpio_pin_valid(port, pin))
+    {
+      return -EINVAL;
+    }
+
+  flags = enter_critical_section();
+  rzv_gpio_pwpr_enable();
+
+  /* PM = Hi-Z first: stop driving the pin before anything else changes. */
+  p_pm    = (volatile uint16_t *)(base + RZV_GPIO_PM_OFFSET(port));
+  pm_mask = (uint16_t)(0x3U << (pin * GPIO_PIN_ALIGN_2BIT));
+  rzv_gpio_regwrite_16(p_pm, PM_HIZ,
+                       (uint16_t)(pin * GPIO_PIN_ALIGN_2BIT), pm_mask);
+
+  /* PMC = 0: return the pin to GPIO mode (also required before PFC clear). */
+  p_pmc = (volatile uint8_t *)(base + RZV_GPIO_PMC_OFFSET(port));
+  rzv_gpio_regwrite_8(p_pmc, PMC_GPIO_MODE, (uint8_t)pin,
+                      (uint8_t)(1U << pin));
+
+  /* PFC = 0: clear the 4-bit peripheral function select for this pin. */
+  p_pfc = (volatile uint32_t *)(base + RZV_GPIO_PFC_OFFSET(port));
+  shift = pin * GPIO_PIN_ALIGN_4BIT;
+  mask  = 0xFU << shift;
+  rzv_gpio_regwrite_32(p_pfc, 0U, shift, mask);
+
+  /* ISEL = 0: disable interrupt-input selection (4-pins/reg, 8-bit/pin). */
+  if (pin < 4U)
+    {
+      p_isel = (volatile uint32_t *)(base + RZV_GPIO_GP_ISEL_L_OFFSET(port));
+    }
+  else
+    {
+      p_isel = (volatile uint32_t *)(base + RZV_GPIO_GP_ISEL_H_OFFSET(port));
+    }
+
+  shift = (pin & 3U) * 8U;
+  mask  = 0x3U << shift;
+  rzv_gpio_regwrite_32(p_isel, ISEL_DISABLE, shift, mask);
+
+  /* NOD = 0: push-pull (clear open-drain). */
+  if (pin < 4U)
+    {
+      p_nod = (volatile uint32_t *)(base + RZV_GPIO_GP_NOD_L_OFFSET(port));
+    }
+  else
+    {
+      p_nod = (volatile uint32_t *)(base + RZV_GPIO_GP_NOD_H_OFFSET(port));
+    }
+
+  rzv_gpio_regwrite_32(p_nod, 0U, shift, mask);
+
+  /* PUPD = float, IOLH = default (0) via the shared helpers.  These are
+   * lock-free by design and run inside the critical section + PWPR window
+   * already held here, exactly as rzv_gpioconfig() calls them.
+   */
+  rzv_gpioconfigure_pull(port, pin, RZV_GPIO_FLOAT);
+  rzv_gpioconfigure_drive(port, pin, 0U);
+
+  rzv_gpio_pwpr_disable();
+  leave_critical_section(flags);
+  return OK;
 }
 
 /****************************************************************************
@@ -895,21 +1101,21 @@ void rzv_gpiosetdrivestrength(gpio_pinset_t pinset, uint8_t strength)
  * Name: rzv_gpiosetevent
  *
  * Description:
- *   Attach or detach a GPIO interrupt callback via IRQ0-15 direct lines.
+ *   Attach or detach a GPIO interrupt callback.  Two routing paths:
  *
- * fixes:
- * Fixed undeclared `cfg` at original line 909.
- *     The find-slot call used `cfg` (undefined); correct variable is `pinset`.
- * ISEL offset via GP-group lookup (hardware/rzv_gpio.h macro),
- *     not unsourced magic 0x2CE8+port*8 (which was coincidentally correct
- *     but had no traceability to RZ/V2H UM). Source: RZV_GPIO_GP_ISEL_L/H_OFFSET.
- * Only IRQ0-15 direct lines supported. TINT routing via TSSR0-7
- *     requires additional TSSR programming and is deferred.
- * TODO: Add TINT if PX4 RC-IN or sensor IRQs require it.
- * IRQ number extracted from pinset bits [7:4] (GPIO_FUNC field).
- *     This is a defined workaround — bits [3:0] are PSEL, not IRQ number.
- * TODO: Add GPIO_IRQ_SHIFT/GPIO_IRQ_MASK field to rzv_gpio.h
- *     and update call-sites to pass explicit IRQ line number.
+ *   - IRQ0-15 direct lines (default): dedicated external IRQ lines usable
+ *     only on IRQ-capable pins.  Encode the line number in the pinset via
+ *     GPIO_IRQ(n) or the IRQ0..IRQ15 pinmap macros (bits [23:20]).
+ *
+ *   - TINT channel (any GPIO pin): set the RZV_GPIO_TINT flag in the pinset
+ *     to route through one of 32 shared TINT channels.  Trigger mode is
+ *     rising / falling / high-level / low-level; both-edge is NOT supported
+ *     natively by TINT hardware and returns -EINVAL — emulate at the caller
+ *     if needed.
+ *
+ *   The IRQ-line field [23:20] and the open-drain flag [4] no longer share
+ *   bits (Phase 1 encoding fix), and TINT selection lives in the Func field
+ *   at bit 5 (RZV_GPIO_TINT) so the two routing paths are unambiguous.
  *
  ****************************************************************************/
 
@@ -920,13 +1126,13 @@ int rzv_gpiosetevent(gpio_pinset_t pinset, bool rising, bool falling,
   unsigned int port;
   unsigned int pin;
   uintptr_t    base;
-  int          irq_num;
   int          slot;
   int          icu_irq;
-  uint8_t      irq_mode;
   irqstate_t   flags;
   int          ret;
   int          i;
+  bool         use_tint;
+  int          irq_num = 0;
 
   port = rzv_gpio_extract_port(pinset);
   pin  = rzv_gpio_extract_pin(pinset);
@@ -940,23 +1146,22 @@ int rzv_gpiosetevent(gpio_pinset_t pinset, bool rising, bool falling,
       return -EINVAL;
     }
 
-  /* IRQ line number from GPIO_FUNC field bits [7:4].
-   * This is the defined workaround for this phase.
-   * Callers encode IRQ0-15 as: pinset |= (irq_num << GPIO_FUNC_SHIFT)
-   * TODO: Replace with dedicated GPIO_IRQ_SHIFT field.
-   */
-  irq_num = (int)((pinset >> GPIO_FUNC_SHIFT) & 0x0FU);
-  if (irq_num < 0 || irq_num >= MAX_GPIO_IRQS)
+  use_tint = ((pinset & RZV_GPIO_TINT) != 0U);
+
+  if (!use_tint)
     {
-      return -EINVAL;
+      /* IRQ0-15 direct-line path. Line number from GPIO_IRQ field [23:20]. */
+      irq_num = (int)((pinset & GPIO_IRQ_MASK) >> GPIO_IRQ_SHIFT);
+      if (irq_num < 0 || irq_num >= MAX_GPIO_IRQS)
+        {
+          return -EINVAL;
+        }
     }
+
+  /* -------------------- DETACH -------------------- */
 
   if (func == NULL)
     {
-      /* Detach: find existing slot by pinset.
-       * original code used undeclared `cfg` here.
-       * Correct variable is `pinset`. Source: .
-       */
       slot = -1;
       for (i = 0; i < MAX_GPIO_IRQS; i++)
         {
@@ -972,15 +1177,97 @@ int rzv_gpiosetevent(gpio_pinset_t pinset, bool rising, bool falling,
           return -ENODEV;
         }
 
-      /* Disable GIC/ICU */
+      /* Tear down GIC/INTR8SEL routing first so no interrupt can be
+       * delivered into a slot with a NULL callback.
+       */
       if (g_gpio_irqs[slot].icu_slot >= 0)
         {
           rzv_icu_detach(g_gpio_irqs[slot].icu_slot);
         }
 
-      /* Disable ISEL — 4-pins-per-reg, 8-bits-per-pin layout.
-       * _L = pins 0-3, _H = pins 4-7, shift = (pin % 4) * 8.
-       */
+      if (g_gpio_irqs[slot].path == RZV_GPIO_IRQ_PATH_TINT)
+        {
+          /* Disable TIEN before freeing the channel so a late edge cannot
+           * latch after the SEL routing is gone.
+           */
+          rzv_icu_tint_set_source(g_gpio_irqs[slot].tint_channel, 0U, false);
+          rzv_icu_tint_clear_flag(g_gpio_irqs[slot].tint_channel);
+          rzv_icu_tint_free(g_gpio_irqs[slot].tint_channel);
+        }
+      else
+        {
+          /* IRQ path: disable ISEL to release the pin's IRQ input. */
+          flags = enter_critical_section();
+          rzv_gpio_pwpr_enable();
+          {
+            volatile uint32_t *p_isel;
+            uint32_t isel_shift;
+            uint32_t isel_mask;
+
+            if (pin < 4U)
+              {
+                p_isel = (volatile uint32_t *)(base +
+                           RZV_GPIO_GP_ISEL_L_OFFSET(port));
+              }
+            else
+              {
+                p_isel = (volatile uint32_t *)(base +
+                           RZV_GPIO_GP_ISEL_H_OFFSET(port));
+              }
+
+            isel_shift = (pin & 3U) * 8U;
+            isel_mask  = 0x3U << isel_shift;
+            rzv_gpio_regwrite_32(p_isel, ISEL_DISABLE, isel_shift, isel_mask);
+          }
+
+          rzv_gpio_pwpr_disable();
+          leave_critical_section(flags);
+        }
+
+      g_gpio_irqs[slot].allocated    = false;
+      g_gpio_irqs[slot].callback     = NULL;
+      g_gpio_irqs[slot].arg          = NULL;
+      g_gpio_irqs[slot].icu_slot     = -1;
+      g_gpio_irqs[slot].irq_num      = 0;
+      g_gpio_irqs[slot].tint_channel = 0;
+      g_gpio_irqs[slot].trigger      = 0;
+      g_gpio_irqs[slot].path         = RZV_GPIO_IRQ_PATH_NONE;
+
+      return OK;
+    }
+
+  /* -------------------- ATTACH -------------------- */
+
+  /* Find free slot */
+  slot = -1;
+  for (i = 0; i < MAX_GPIO_IRQS; i++)
+    {
+      if (!g_gpio_irqs[i].allocated)
+        {
+          slot = i;
+          break;
+        }
+    }
+
+  if (slot < 0)
+    {
+      return -ENOMEM;
+    }
+
+  /* Every path starts by putting the pin into GPIO input mode. */
+  ret = rzv_gpioconfigure_mode_input(port, pin);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  if (!use_tint)
+    {
+      /* --------------- IRQ0-15 direct-line path --------------- */
+
+      uint8_t irq_mode;
+
+      /* Enable ISEL — GP-group 4-pins-per-reg, 8-bits-per-pin layout. */
       flags = enter_critical_section();
       rzv_gpio_pwpr_enable();
       {
@@ -1001,125 +1288,158 @@ int rzv_gpiosetevent(gpio_pinset_t pinset, bool rising, bool falling,
 
         isel_shift = (pin & 3U) * 8U;
         isel_mask  = 0x3U << isel_shift;
-        rzv_gpio_regwrite_32(p_isel, ISEL_DISABLE, isel_shift, isel_mask);
+        rzv_gpio_regwrite_32(p_isel, ISEL_IRQ_MODE, isel_shift, isel_mask);
       }
 
       rzv_gpio_pwpr_disable();
       leave_critical_section(flags);
 
-      g_gpio_irqs[slot].allocated = false;
-      g_gpio_irqs[slot].callback  = NULL;
-      g_gpio_irqs[slot].arg       = NULL;
-      g_gpio_irqs[slot].icu_slot  = -1;
-      g_gpio_irqs[slot].irq_num   = 0;
-
-      return OK;
-    }
-
-  /* Attach: find free slot */
-  slot = -1;
-  for (i = 0; i < MAX_GPIO_IRQS; i++)
-    {
-      if (!g_gpio_irqs[i].allocated)
+      if (rising && falling)
         {
-          slot = i;
-          break;
+          irq_mode = RZV_ICU_IRQ_EDGE_BOTH;
         }
-    }
+      else if (rising)
+        {
+          irq_mode = RZV_ICU_IRQ_EDGE_RISING;
+        }
+      else if (falling)
+        {
+          irq_mode = RZV_ICU_IRQ_EDGE_FALLING;
+        }
+      else
+        {
+          irq_mode = RZV_ICU_IRQ_EDGE_BOTH;
+        }
 
-  if (slot < 0)
-    {
-      return -ENOMEM;
-    }
+      ret = rzv_icu_filter_config(irq_num, irq_mode, false,
+                                  RZV_ICU_FILTER_PCLK_DIV_1);
+      if (ret < 0)
+        {
+          return ret;
+        }
 
-  /* Set pin to GPIO input for interrupt reception */
-  ret = rzv_gpioconfigure_mode_input(port, pin);
-  if (ret < 0)
-    {
-      return ret;
-    }
+      icu_irq = rzv_icu_attach(irq_num, rzv_gpio_irq_handler_shim,
+                               &g_gpio_irqs[slot], true);
+      if (icu_irq < 0)
+        {
+          return icu_irq;
+        }
 
-  /* Enable ISEL — 4-pins-per-reg, 8-bits-per-pin layout.
-   * _L = pins 0-3, _H = pins 4-7, shift = (pin % 4) * 8.
-   * bitpos_align = (pin & 3) * 8 per RZ/V2H UM GPIO §ISEL.
-   */
-  flags = enter_critical_section();
-  rzv_gpio_pwpr_enable();
-  {
-    volatile uint32_t *p_isel;
-    uint32_t isel_shift;
-    uint32_t isel_mask;
+      rzv_gic_set_irq_type(icu_irq, (irq_mode != RZV_ICU_IRQ_LEVEL_LOW));
 
-    if (pin < 4U)
-      {
-        p_isel = (volatile uint32_t *)(base +
-                   RZV_GPIO_GP_ISEL_L_OFFSET(port));
-      }
-    else
-      {
-        p_isel = (volatile uint32_t *)(base +
-                   RZV_GPIO_GP_ISEL_H_OFFSET(port));
-      }
-
-    isel_shift = (pin & 3U) * 8U;
-    isel_mask  = 0x3U << isel_shift;
-    rzv_gpio_regwrite_32(p_isel, ISEL_IRQ_MODE, isel_shift, isel_mask);
-  }
-
-  rzv_gpio_pwpr_disable();
-  leave_critical_section(flags);
-
-  /* Determine edge trigger mode */
-  if (rising && falling)
-    {
-      irq_mode = RZV_ICU_IRQ_EDGE_BOTH;
-    }
-  else if (rising)
-    {
-      irq_mode = RZV_ICU_IRQ_EDGE_RISING;
-    }
-  else if (falling)
-    {
-      irq_mode = RZV_ICU_IRQ_EDGE_FALLING;
+      g_gpio_irqs[slot].irq_num      = (uint8_t)irq_num;
+      g_gpio_irqs[slot].tint_channel = 0;
+      g_gpio_irqs[slot].trigger      = irq_mode;
+      g_gpio_irqs[slot].path         = RZV_GPIO_IRQ_PATH_IRQ;
     }
   else
     {
-      irq_mode = RZV_ICU_IRQ_EDGE_BOTH;
-    }
+      /* --------------- TINT channel path --------------- */
 
-  /* Configure ICU edge detection for this IRQ line */
-  ret = rzv_icu_filter_config(irq_num, irq_mode, false,
-                              RZV_ICU_FILTER_PCLK_DIV_1);
-  if (ret < 0)
-    {
-      return ret;
-    }
+      int     channel;
+      uint8_t gpioint;
+      uint8_t trig;
+      bool    edge;
 
-  /* Attach handler via ICU dynamic slot allocation.
-   * rzv_icu_attach() returns GIC INTID (NuttX IRQ number).
-   */
-  icu_irq = rzv_icu_attach(irq_num, rzv_gpio_irq_handler_shim,
-                           &g_gpio_irqs[slot], true);
-  if (icu_irq < 0)
-    {
-      return icu_irq;
-    }
+      if (rising && falling)
+        {
+          /* TINT hardware has no native both-edge trigger (FSP
+           * r_intc_tint.h intc_tint_trigger_t defines only RISING /
+           * FALLING / LEVEL_HIGH / LEVEL_LOW).  Emit a diagnostic so the
+           * -EINVAL isn't silent — callers that need press+release on a
+           * TINT-only pin must either use the dedicated IRQ0-15 path
+           * (which does support both-edge via IITSR=BOTH) or emulate by
+           * flipping TITSR between RISING and FALLING inside their ISR.
+           */
+          gpioerr("ERROR: TINT both-edge unsupported (port=%u pin=%u)\n",
+                  port, pin);
+          return -EINVAL;
+        }
 
-  /* configure GIC ICDICFR to match ICU edge/level setting.
-   * Edge sources require GIC edge-sensitive mode; level sources need
-   * level-sensitive mode.  rzv_gic_set_irq_type operates on GIC INTID
-   * which is exactly what rzv_icu_attach() returned.
-   */
-  rzv_gic_set_irq_type(icu_irq, (irq_mode != RZV_ICU_IRQ_LEVEL_LOW));
+      if (rising)
+        {
+          trig = ICU_TITSR_RISING;
+          edge = true;
+        }
+      else if (falling)
+        {
+          trig = ICU_TITSR_FALLING;
+          edge = true;
+        }
+      else
+        {
+          /* Neither edge requested: default to high-level.  Callers wanting
+           * low-level can pass rising=false, falling=false, event=true; the
+           * `event` argument is otherwise unused here and doubles as a
+           * "prefer LEVEL_LOW over LEVEL_HIGH" hint.
+           */
+          trig = event ? ICU_TITSR_LEVEL_LOW : ICU_TITSR_LEVEL_HIGH;
+          edge = false;
+        }
+
+      channel = rzv_icu_tint_alloc();
+      if (channel < 0)
+        {
+          return channel;
+        }
+
+      ret = rzv_icu_tint_set_trigger(channel, trig);
+      if (ret < 0)
+        {
+          rzv_icu_tint_free(channel);
+          return ret;
+        }
+
+      gpioint = rzv_gpio_pin_to_gpioint(port, pin);
+
+      ret = rzv_icu_tint_set_source(channel, gpioint, true);
+      if (ret < 0)
+        {
+          rzv_icu_tint_free(channel);
+          return ret;
+        }
+
+      /* Clear a stale TINT status flag BEFORE routing to the GIC.
+       * Programming TITSR + TSSR(TIEN=1) can latch an edge event in TSCTR
+       * from the trigger-mode transition or a pin transient; enabling the
+       * GIC immediately after would dispatch that stale flag as a spurious
+       * first interrupt.  FSP r_intc_tint.c:138-148 clears here for the
+       * same reason ("Precaution when Changing Interrupt Settings" per UM).
+       * Level triggers track the live pin — no clear needed.
+       */
+      if (edge)
+        {
+          rzv_icu_tint_clear_flag(channel);
+        }
+
+      /* Route TINT channel N via INTR8SEL as event N (per FSP
+       * GPIO_TINT<n>_IRQSELn = n in bsp_irq_id.h).
+       */
+      icu_irq = rzv_icu_attach(channel, rzv_gpio_irq_handler_shim,
+                               &g_gpio_irqs[slot], true);
+      if (icu_irq < 0)
+        {
+          rzv_icu_tint_set_source(channel, 0U, false);
+          rzv_icu_tint_free(channel);
+          return icu_irq;
+        }
+
+      /* GIC line sensitivity: edge for RISING/FALLING, level otherwise. */
+      rzv_gic_set_irq_type(icu_irq, edge);
+
+      g_gpio_irqs[slot].irq_num      = 0;
+      g_gpio_irqs[slot].tint_channel = (uint8_t)channel;
+      g_gpio_irqs[slot].trigger      = trig;
+      g_gpio_irqs[slot].path         = RZV_GPIO_IRQ_PATH_TINT;
+    }
 
   g_gpio_irqs[slot].pinset    = pinset;
   g_gpio_irqs[slot].callback  = func;
   g_gpio_irqs[slot].arg       = arg;
   g_gpio_irqs[slot].icu_slot  = icu_irq;
-  g_gpio_irqs[slot].irq_num   = (uint8_t)irq_num;
   g_gpio_irqs[slot].allocated = true;
 
-  (void)event;  /* compatibility parameter — unused */
+  (void)event;  /* falls through to TINT LEVEL_LOW hint above */
   return OK;
 
 #else  /* !CONFIG_RZV_GPIO_IRQ */
@@ -1150,12 +1470,15 @@ void rzv_gpio_irq_initialize(void)
 
   for (i = 0; i < MAX_GPIO_IRQS; i++)
     {
-      g_gpio_irqs[i].pinset    = 0;
-      g_gpio_irqs[i].callback  = NULL;
-      g_gpio_irqs[i].arg       = NULL;
-      g_gpio_irqs[i].icu_slot  = -1;  /* -1 = unallocated sentinel */
-      g_gpio_irqs[i].irq_num   = 0;
-      g_gpio_irqs[i].allocated = false;
+      g_gpio_irqs[i].pinset       = 0;
+      g_gpio_irqs[i].callback     = NULL;
+      g_gpio_irqs[i].arg          = NULL;
+      g_gpio_irqs[i].icu_slot     = -1;  /* -1 = unallocated sentinel */
+      g_gpio_irqs[i].irq_num      = 0;
+      g_gpio_irqs[i].tint_channel = 0;
+      g_gpio_irqs[i].trigger      = 0;
+      g_gpio_irqs[i].path         = RZV_GPIO_IRQ_PATH_NONE;
+      g_gpio_irqs[i].allocated    = false;
     }
 }
 

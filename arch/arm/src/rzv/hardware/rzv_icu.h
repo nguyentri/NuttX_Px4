@@ -157,25 +157,50 @@
 
 #define ICU_TSCTR_STAT(n)           (1 << (n))  /* TINT[n] Status Flag */
 
-/* TINT Detection Method Selection Registers (TITSR0/1) - 2 bits per TINT */
+/* TINT Detection Method Selection Registers (TITSR0/1) - 2 bits per TINT.
+ * TITSR0 covers TINT0-15, TITSR1 covers TINT16-31.  Field index within a
+ * register is (channel % 16); shift is field_index * 2.
+ */
 
 #define ICU_TITSR_TITSEL_SHIFT(n)   (((n) % 16) * 2)
 #define ICU_TITSR_TITSEL_MASK(n)    (0x3 << ICU_TITSR_TITSEL_SHIFT(n))
 #define ICU_TITSR_TITSEL(n, val)    (((val) & 0x3) << ICU_TITSR_TITSEL_SHIFT(n))
 
-/* TITSR0 is for TINT0-15, TITSR1 is for TINT16-31 */
-
-#define ICU_TITSR_LOWLEVEL          0  /* Low level detection */
-#define ICU_TITSR_FALLING           1  /* Falling edge detection */
-#define ICU_TITSR_RISING            2  /* Rising edge detection */
-#define ICU_TITSR_BOTH              3  /* Both edges detection */
-
-/* TINT Interrupt Source Select Registers (TSSR0-7): 4 sources per register.
- * TSSELn_k occupies bits [7*... ] — defined by the TINT external-interrupt
- * driver when TINT routing is implemented.  (There is no TINT filter-clock
- * register in the INTC block; the prior ICU_TFLTC_FCLKSEL macros were based
- * on a non-existent register and have been removed.)
+/* TITSR trigger encoding matches FSP r_intc_tint.c which writes the driver
+ * trigger enum directly into the register (RISING=0, FALLING=1, LEVEL_HIGH=2,
+ * LEVEL_LOW=3).  This is NOT the same encoding as IITSR (IRQ0-15) above; do
+ * not conflate the two.  There is NO native both-edge trigger for TINT.
+ * Source: refs/px4-freertos-posix-renesas-fsp/rzv/fsp/inc/instances/r_intc_tint.h
+ * intc_tint_trigger_t; r_intc_tint.c:118-124.
  */
+
+#define ICU_TITSR_RISING            0  /* Rising edge detection */
+#define ICU_TITSR_FALLING           1  /* Falling edge detection */
+#define ICU_TITSR_LEVEL_HIGH        2  /* High level detection */
+#define ICU_TITSR_LEVEL_LOW         3  /* Low level detection */
+
+/* TINT Interrupt Source Select Registers (TSSR0-7): 4 channels per register,
+ * each channel occupies one 8-bit lane.  Within a channel's lane:
+ *   bits[6:0] = TSSEL (7-bit GPIOINT source number — pin→source cumsum by
+ *               bonded pin count, per FSP hal_data.c convention)
+ *   bit [7]   = TIEN  (1 = enable this TINT channel)
+ * Register selection: TSSR(channel/4), lane = channel%4, shift = lane*8.
+ * Source: r_intc_tint.c:127-136 (TSSEL_TIEN_WIDTH=8, TIEN_WIDTH=7).
+ */
+
+#define ICU_TSSR_LANE_WIDTH         8U
+#define ICU_TSSR_LANE_SHIFT(ch)     (((ch) & 3U) * ICU_TSSR_LANE_WIDTH)
+#define ICU_TSSR_LANE_MASK(ch)      (0xFFU << ICU_TSSR_LANE_SHIFT(ch))
+#define ICU_TSSR_TSSEL_MASK         0x7FU     /* 7-bit source number */
+#define ICU_TSSR_TIEN_BIT           0x80U     /* bit 7 within lane */
+#define ICU_TSSR_LANE_VAL(gpioint, en) \
+  ((uint32_t)(((gpioint) & ICU_TSSR_TSSEL_MASK) | ((en) ? ICU_TSSR_TIEN_BIT : 0U)))
+
+/* Number of TINT channels available on RZ/V2H (all 32 valid per
+ * BSP_FEATURE_INTC_TINT_VALID_CHANNEL_MASK = 0xFFFFFFFF).
+ */
+
+#define RZV_ICU_TINT_CHANNELS       32U
 
 /****************************************************************************
  * Public Types

@@ -1396,6 +1396,16 @@ config RZV_MPU_CR8_CORE_NUM
 
 endmenu
 
+config RZV_GPIO_IRQ
+   bool "GPIO external interrupt support (IRQ0-15 / TINT)"
+   default n
+   ---help---
+     Enable GPIO pin interrupt support (rzv_gpiosetevent / rzv_gpio_irq_*).
+     Routes GPIO pins to the GIC through the ICU: the 16 dedicated external
+     IRQ lines (IRQ0-15) and, for any other GPIO-capable pin, the TINT
+     channels.  Required by board layers that attach edge/level callbacks to
+     input pins (e.g. sensor data-ready, user buttons).
+
 config RZV_GPT
    bool "General PWM Timer (GPT)"
    default n

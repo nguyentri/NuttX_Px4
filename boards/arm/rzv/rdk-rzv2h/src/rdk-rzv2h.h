@@ -78,7 +78,7 @@ int board_bringup(void);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_BUTTONS
-void board_button_initialize(void);
+uint32_t board_button_initialize(void);
 #endif
 
 /****************************************************************************

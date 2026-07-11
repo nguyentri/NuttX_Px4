@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rzv2h/common/src/rzv_buttons.c
+ * boards/arm/rzv/rdk-rzv2h/src/rzv2h_buttons.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,6 +18,19 @@
  *
  ****************************************************************************/
 
+/* RDK-RZV2H has no user buttons wired to the GPIO header (see board.h
+ * BOARD_HAS_BUTTONS = 0, BOARD_NBUTTONS = 0).  This translation unit exists
+ * only so the NuttX board_button_* API contract is satisfied when
+ * CONFIG_ARCH_BUTTONS is enabled — every call is a well-behaved no-op that
+ * reports "zero buttons present".
+ *
+ * If a future board revision adds physical buttons, define BOARD_NBUTTONS
+ * plus per-button BOARD_BUTTON<n>_GPIO pinsets in board.h (input pull-up,
+ * plus either an IRQ0..IRQ15 field via GPIO_IRQ(n) or the RZV_GPIO_TINT
+ * flag for TINT routing) and this file's guarded body will pick them up
+ * with no further changes.
+ */
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -26,7 +39,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <assert.h>
 #include <errno.h>
 
 #include <nuttx/board.h>
@@ -34,49 +46,47 @@
 #include <arch/board/board.h>
 
 #include "rzv_gpio.h"
-#include "rzv_icu.h"
+#include "rdk-rzv2h.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/* This array maps button numbers to GPIO configurations */
+#if BOARD_NBUTTONS > 0
+
+/* Pinset per button (defined in board.h when buttons are present). */
 
 static const gpio_pinset_t g_button_gpio[BOARD_NBUTTONS] =
 {
+#  ifdef BOARD_BUTTON1_GPIO
   BOARD_BUTTON1_GPIO,
+#  endif
+#  ifdef BOARD_BUTTON2_GPIO
   BOARD_BUTTON2_GPIO,
+#  endif
+#  ifdef BOARD_BUTTON3_GPIO
   BOARD_BUTTON3_GPIO,
+#  endif
+#  ifdef BOARD_BUTTON4_GPIO
   BOARD_BUTTON4_GPIO,
+#  endif
 };
 
-#ifdef CONFIG_ARCH_IRQBUTTONS
-/* Button IRQ handlers */
+#  ifdef CONFIG_ARCH_IRQBUTTONS
+
+/* User-registered per-button handler + arg. */
 
 static xcpt_t g_button_handlers[BOARD_NBUTTONS];
-static void *g_button_args[BOARD_NBUTTONS];
+static void  *g_button_args[BOARD_NBUTTONS];
 
-/* ICU IRQ numbers for buttons */
-
-static int g_button_irqs[BOARD_NBUTTONS] = {-1, -1, -1, -1};
-#endif
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-#ifdef CONFIG_ARCH_IRQBUTTONS
 /****************************************************************************
  * Name: button_interrupt
  *
  * Description:
- *   Common button interrupt handler
+ *   Trampoline installed via rzv_gpiosetevent(); dispatches to the
+ *   user-registered handler for this button.
  *
  ****************************************************************************/
 
@@ -84,155 +94,88 @@ static int button_interrupt(int irq, void *context, void *arg)
 {
   int button = (int)(uintptr_t)arg;
 
-  DEBUGASSERT(button >= 0 && button < BOARD_NBUTTONS);
-
-  /* Call the registered handler */
-
-  if (g_button_handlers[button] != NULL)
+  if ((unsigned)button < BOARD_NBUTTONS &&
+      g_button_handlers[button] != NULL)
     {
-      return g_button_handlers[button](irq, context,
-                                      g_button_args[button]);
+      return g_button_handlers[button](irq, context, g_button_args[button]);
     }
 
   return OK;
 }
-#endif
+
+#  endif /* CONFIG_ARCH_IRQBUTTONS */
+
+#endif /* BOARD_NBUTTONS > 0 */
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: board_button_initialize
- *
- * Description:
- *   board_button_initialize() must be called to initialize button resources.
- *   After that, board_buttons() may be called to collect the current state
- *   of all buttons or board_button_irq() may be called to register button
- *   interrupt handlers.
- *
- ****************************************************************************/
-
 uint32_t board_button_initialize(void)
 {
+#if BOARD_NBUTTONS > 0
   int i;
-
-  /* Configure button GPIOs as inputs with pull-ups */
 
   for (i = 0; i < BOARD_NBUTTONS; i++)
     {
       rzv_gpioconfig(g_button_gpio[i]);
     }
+#endif
 
   return BOARD_NBUTTONS;
 }
 
-/****************************************************************************
- * Name: board_buttons
- *
- * Description:
- *   After board_button_initialize() has been called, board_buttons() may be
- *   called to collect the state of all buttons.  board_buttons() returns an
- *   32-bit bit set with each bit associated with a button.  See the
- *   BUTTON_*_BIT definitions in board.h for the meaning of each bit.
- *
- ****************************************************************************/
-
 uint32_t board_buttons(void)
 {
+#if BOARD_NBUTTONS > 0
   uint32_t ret = 0;
   int i;
 
-  /* Read each button state
-   * Buttons are active low, so invert the reading
-   */
+  /* Buttons wired active-low with pull-up; invert the reading. */
 
   for (i = 0; i < BOARD_NBUTTONS; i++)
     {
-      bool pressed = !rzv_gpioread(g_button_gpio[i]);
-      if (pressed)
+      if (!rzv_gpioread(g_button_gpio[i]))
         {
-          ret |= (1 << i);
+          ret |= (1U << i);
         }
     }
 
   return ret;
+#else
+  return 0;
+#endif
 }
-
-/****************************************************************************
- * Name: board_button_irq
- *
- * Description:
- *   board_button_irq() may be called to register an interrupt handler that
- *   will be called when a button is pressed or released.  The ID value is a
- *   button enumeration value that uniquely identifies a button resource.
- *   See the BUTTON_* definitions in board.h for the meaning of enumeration
- *   value.
- *
- * Input Parameters:
- *   id      - Button ID (see BUTTON_* definitions)
- *   irqhandler - Interrupt handler to call when button is pressed/released
- *   arg     - Argument to pass to interrupt handler
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
 int board_button_irq(int id, xcpt_t irqhandler, void *arg)
 {
-  int ret = -EINVAL;
-
-  /* Validate the button ID */
-
-  if ((unsigned)id < BOARD_NBUTTONS)
+#if BOARD_NBUTTONS > 0
+  if ((unsigned)id >= BOARD_NBUTTONS)
     {
-      /* Save the handler information */
-
-      g_button_handlers[id] = irqhandler;
-      g_button_args[id] = arg;
-
-      if (irqhandler != NULL)
-        {
-          /* Attach interrupt on both edges (press and release) */
-          /* Map button to ICU event (IRQ0-15) */
-
-          int icu_event = ICU_EVENT_PORT_IRQ0 + id;
-
-          /* Attach ICU interrupt */
-
-          int irq = rzv_icu_attach(icu_event, button_interrupt,
-                                  (void *)(uintptr_t)id, true);
-          if (irq < 0)
-            {
-              return irq;
-            }
-
-          g_button_irqs[id] = irq;
-
-          /* Configure interrupt mode (both edges) */
-
-          ret = rzv_icu_filter_config(id, ICU_IRQCR_IRQMD_BOTH,
-                                      true, 0);
-        }
-      else
-        {
-          /* Detach interrupt */
-
-          if (g_button_irqs[id] >= 0)
-            {
-              ret = rzv_icu_detach(g_button_irqs[id]);
-              g_button_irqs[id] = -1;
-            }
-          else
-            {
-              ret = OK;
-            }
-        }
+      return -EINVAL;
     }
 
-  return ret;
+  g_button_handlers[id] = irqhandler;
+  g_button_args[id]     = arg;
+
+  /* Route through the unified GPIO interrupt API.  Both edges wanted for
+   * press+release; rzv_gpiosetevent handles IRQ0-15 lines and TINT channels
+   * transparently based on the pinset encoding (GPIO_IRQ field or
+   * RZV_GPIO_TINT flag).
+   */
+
+  return rzv_gpiosetevent(g_button_gpio[id],
+                          true /* rising */, true /* falling */,
+                          false /* event */,
+                          (irqhandler != NULL) ? button_interrupt : NULL,
+                          (void *)(uintptr_t)id);
+#else
+  (void)id;
+  (void)irqhandler;
+  (void)arg;
+  return -ENOSYS;
+#endif
 }
 #endif /* CONFIG_ARCH_IRQBUTTONS */
 

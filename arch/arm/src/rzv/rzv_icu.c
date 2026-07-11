@@ -309,12 +309,25 @@ int rzv_icu_detach(int icu_irq)
       return -ENOENT;
     }
 
-  /* Disable and detach before clearing handler */
+  /* Disable and detach before clearing handler.  The GIC line is masked
+   * FIRST so no interrupt can be dispatched into this slot once teardown
+   * begins.
+   */
 
   up_disable_irq(icu_irq);
   irq_detach(icu_irq);
 
-  /* Clear the INTR8SEL routing slot */
+  /* Clear the INTR8SEL routing slot.
+   *
+   * Writing event 0 here is NOT ambiguous with a live IRQ0 routing, even
+   * though ELC event 0 == external IRQ0: slot occupancy is tracked solely by
+   * g_icu_handlers[slot].handler (set below to NULL), never by reading back
+   * INTR8SEL content, so a residual event-0 selection on a freed slot is
+   * never mistaken for "in use".  And because the GIC line was masked above,
+   * a residual event-0 route on this slot cannot deliver a spurious
+   * interrupt.  A subsequent attach that reuses this slot fully reprograms
+   * INTR8SEL via rzv_icu_set_event(), so nothing stale survives reuse.
+   */
 
   rzv_icu_set_event(slot, 0);
 
@@ -447,6 +460,7 @@ int rzv_icu_set_event(int icu_slot, int event)
 
 int rzv_icu_set_irq_detect(int irq_num, uint8_t mode)
 {
+  irqstate_t flags;
   uint32_t regval;
   uint32_t shift;
 
@@ -460,13 +474,22 @@ int rzv_icu_set_irq_detect(int irq_num, uint8_t mode)
       return -EINVAL;
     }
 
+  /* IITSR holds a 2-bit detection field for each of IRQ0-15 in one 32-bit
+   * register.  The read-modify-write must run under a critical section so a
+   * concurrent set on a different IRQ line (or an ISR) cannot clobber this
+   * update — same rationale as rzv_icu_set_event()'s INTR8SEL RMW.
+   */
+
+  shift = irq_num * 2;
+
+  flags = enter_critical_section();
+
   /* Read current IITSR value */
 
   regval = getreg32(RZV_ICU_IITSR);
 
   /* Clear the detection bits for this IRQ */
 
-  shift = irq_num * 2;
   regval &= ~(0x3 << shift);
 
   /* Set new detection mode */
@@ -476,6 +499,8 @@ int rzv_icu_set_irq_detect(int irq_num, uint8_t mode)
   /* Write back to register */
 
   putreg32(regval, RZV_ICU_IITSR);
+
+  leave_critical_section(flags);
 
   /* propagate edge/level config to GIC ICDICFR.
    * External IRQ0-15 pins route through ELC; the GIC SPI for each external
@@ -829,4 +854,143 @@ void rzv_icu_disable_nmi(uint16_t mask)
   /* NMI disable not supported on RZV2H (NMI is non-maskable). */
 
   (void)mask;
+}
+
+/****************************************************************************
+ * TINT (GPIO-source) support
+ *
+ * Any GPIO-capable pin can raise an interrupt via one of 32 TINT channels.
+ * Each channel selects a 7-bit GPIOINT source (pin identity) and one of four
+ * trigger modes (rising/falling/high-level/low-level — no native both-edge).
+ * The TINT channel's output presents itself to INTR8SEL as ELC event 0-31
+ * (see FSP bsp_irq_id.h GPIO_TINT<n>_IRQSELn), so channel N is routed to a
+ * GIC line by feeding "event N" into rzv_icu_attach() — the same dynamic
+ * slot allocator used for every other selectable source.
+ *
+ * Register-programming recipe follows FSP r_intc_tint.c exactly (TITSR
+ * trigger, TSSR TSSEL|TIEN, TSCLR-with-dummy-reads).
+ ****************************************************************************/
+
+/* Bitmap allocator: bit N = channel N in use. */
+static uint32_t g_tint_channel_bitmap;
+
+int rzv_icu_tint_alloc(void)
+{
+  irqstate_t flags;
+  int ch;
+
+  flags = enter_critical_section();
+  for (ch = 0; ch < (int)RZV_ICU_TINT_CHANNELS; ch++)
+    {
+      if ((g_tint_channel_bitmap & (1U << ch)) == 0U)
+        {
+          g_tint_channel_bitmap |= (1U << ch);
+          leave_critical_section(flags);
+          return ch;
+        }
+    }
+
+  leave_critical_section(flags);
+  return -EBUSY;
+}
+
+void rzv_icu_tint_free(int channel)
+{
+  irqstate_t flags;
+
+  if (channel < 0 || channel >= (int)RZV_ICU_TINT_CHANNELS)
+    {
+      return;
+    }
+
+  flags = enter_critical_section();
+  g_tint_channel_bitmap &= ~(1U << channel);
+  leave_critical_section(flags);
+}
+
+/* Program TITSR trigger for `channel`.  Accepts driver trigger values
+ * ICU_TITSR_RISING / _FALLING / _LEVEL_HIGH / _LEVEL_LOW.  Both-edge is not
+ * native; caller must reject it before reaching here.
+ */
+
+int rzv_icu_tint_set_trigger(int channel, uint8_t trigger)
+{
+  irqstate_t flags;
+  uintptr_t  regaddr;
+  uint32_t   regval;
+  uint32_t   shift;
+
+  if (channel < 0 || channel >= (int)RZV_ICU_TINT_CHANNELS)
+    {
+      return -EINVAL;
+    }
+
+  if (trigger > ICU_TITSR_LEVEL_LOW)
+    {
+      return -EINVAL;
+    }
+
+  regaddr = (channel < 16) ? RZV_ICU_TITSR0 : RZV_ICU_TITSR1;
+  shift   = (channel % 16) * 2U;
+
+  flags = enter_critical_section();
+  regval  = getreg32(regaddr);
+  regval &= ~(0x3U << shift);
+  regval |= ((uint32_t)trigger << shift);
+  putreg32(regval, regaddr);
+  leave_critical_section(flags);
+
+  return OK;
+}
+
+/* Program TSSR for `channel`: TSSEL=gpioint (7-bit), TIEN=enable. */
+
+int rzv_icu_tint_set_source(int channel, uint8_t gpioint, bool enable)
+{
+  irqstate_t flags;
+  uintptr_t  regaddr;
+  uint32_t   regval;
+  uint32_t   shift;
+
+  if (channel < 0 || channel >= (int)RZV_ICU_TINT_CHANNELS)
+    {
+      return -EINVAL;
+    }
+
+  regaddr = RZV_ICU_TSSR(channel / 4);
+  shift   = ICU_TSSR_LANE_SHIFT(channel);
+
+  flags = enter_critical_section();
+  regval  = getreg32(regaddr);
+  regval &= ~ICU_TSSR_LANE_MASK(channel);
+  regval |= (ICU_TSSR_LANE_VAL(gpioint, enable) << shift);
+  putreg32(regval, regaddr);
+  leave_critical_section(flags);
+
+  return OK;
+}
+
+/* Clear TINT status flag for `channel`.  For edge triggers only — level
+ * triggers reflect the pin state and do not need clearing.  Matches FSP
+ * BSP_INTC_TINT_CLR_STATE_FLAG: read TSCTR (dummy) → write TSCLR bit → read
+ * TSCTR (dummy) to guard against a re-fire of the just-cleared source.
+ * Source: bsp_override.h:2574-2586.
+ */
+
+void rzv_icu_tint_clear_flag(int channel)
+{
+  volatile uint32_t dummy;
+
+  if (channel < 0 || channel >= (int)RZV_ICU_TINT_CHANNELS)
+    {
+      return;
+    }
+
+  dummy = getreg32(RZV_ICU_TSCTR);
+  (void)dummy;
+
+  putreg32(1U << channel, RZV_ICU_TSCLR);
+
+  dummy = getreg32(RZV_ICU_TSCTR);
+  (void)dummy;
 }
