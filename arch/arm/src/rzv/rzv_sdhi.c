@@ -134,10 +134,9 @@
 #  endif
 #endif
 
-/* IRQ array indexed by slot.
- * Uses canonical names from hardware/rzv_sdhi.h (DRY -- no local aliases).
- * GIC SPI 735 -> NuttX IRQ 767 (INTC_SPI_BASE_NUMBER = 32).
- * NEEDS_VERIFY: confirm INTC_SPI_BASE_NUMBER=32 is used by this NuttX port.
+/* IRQ array indexed by slot.  Uses canonical names from hardware/rzv_sdhi.h
+ * (DRY -- no local aliases).  GIC SPI 735 -> NuttX INTID 767, per
+ * RZV_IRQ_FIRST = 32 in rzv2h_irq.h.
  */
 
 static const int g_rzv_sdhi_irq[RZV_SDHI_NSLOTS] =

@@ -47,11 +47,9 @@
 #  define TIMER_PRESCALER 0
 #endif
 
-/* The CR8 private timer is a GIC private peripheral interrupt (PPI[2],
- * INTID 29).  It is not routed through the RZ/V2H INTC INTR8SEL slots.
+/* RZV_IRQ_PRIVATE_TIMER (PPI[2], INTID 29) is defined in
+ * arch/arm/include/rzv/rzv2h_irq.h and reached via <nuttx/irq.h>.
  */
-
-#define RZV_IRQ_PRIVATE_TIMER 29
 
 /* The CR8 ARM private timer is clocked by PERIPHCLK = CPU_CLK / 2.
  * This is an ARM Cortex-R8 MPCore architecture invariant (TRM §3.2):

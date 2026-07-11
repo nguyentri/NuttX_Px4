@@ -227,17 +227,17 @@
 #define RZV_SDHI_SD_INFO1_MASK_INIT     0x0001031du
 #define RZV_SDHI_SD_INFO2_MASK_INIT     0x00008b7fu
 
-/* IRQ numbers (GIC SPI base = 32) -- rzv2h_irq.h + UM s6.2.3.3
- * CH0 OXMNIRQ:   GIC SPI 735 -> NuttX IRQ 767  NEEDS_VERIFY (rzv_icu.c)
- * CH0 OXASIOIRQ: GIC SPI 736 -> NuttX IRQ 768  NEEDS_VERIFY
- * CH1 OXMNIRQ:   GIC SPI 737 -> NuttX IRQ 769  NEEDS_VERIFY
- * CH2 OXMNIRQ:   GIC SPI 739 -> NuttX IRQ 771  NEEDS_VERIFY
- * These are the canonical definitions -- do NOT duplicate in rzv_sdhi.c.
+/* IRQ numbers (NuttX INTID = GIC SPI + RZV_IRQ_FIRST(32); UM s6.2.3.3).
+ * CH0 OXMNIRQ:   GIC SPI 735 -> NuttX INTID 767
+ * CH0 OXASIOIRQ: GIC SPI 736 -> NuttX INTID 768
+ * CH1 OXMNIRQ:   GIC SPI 737 -> NuttX INTID 769
+ * CH2 OXMNIRQ:   GIC SPI 739 -> NuttX INTID 771
+ * Canonical -- do NOT duplicate in rzv_sdhi.c.
  */
 
-#define RZV_SDHI_CH0_OXMN_IRQ          767   /* NEEDS_VERIFY */
-#define RZV_SDHI_CH0_OXASIO_IRQ        768   /* NEEDS_VERIFY */
-#define RZV_SDHI_CH1_OXMN_IRQ          769   /* NEEDS_VERIFY */
-#define RZV_SDHI_CH2_OXMN_IRQ          771   /* NEEDS_VERIFY */
+#define RZV_SDHI_CH0_OXMN_IRQ          767
+#define RZV_SDHI_CH0_OXASIO_IRQ        768
+#define RZV_SDHI_CH1_OXMN_IRQ          769
+#define RZV_SDHI_CH2_OXMN_IRQ          771
 
 #endif /* __ARCH_ARM_SRC_RZV_HARDWARE_RZV_SDHI_H */

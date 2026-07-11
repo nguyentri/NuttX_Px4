@@ -71,16 +71,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* GBETH DMA status interrupt event IDs from the RZ/V2H reference IRQ list.
- * These are INTC event selectors, not PPS events.
- * TODO: move to arch/arm/include/rzv/rzv2h_irq.h next to the other
- * RZV_ELC_GBETH_* defines once the exact symbol naming is agreed.
- * Values 0x2FD / 0x30C are the GBETH0/1 SBD_PERCH_TX/RX_0 event IDs.
- */
-
-#define RZV_ELC_GBETH0_INT  0x2FD  /* 765 */
-#define RZV_ELC_GBETH1_INT  0x30C  /* 780 */
-
 #define RZV_ETHER_TX_TIMEOUT (2 * CLOCKS_PER_SEC)
 #define RZV_ETHER_PKTSIZE    (MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE)
 
@@ -1024,7 +1014,8 @@ int rzv_ether_initialize(int intf)
   memset(priv, 0, sizeof(struct rzv_eth_s));
   priv->intf = intf;
   priv->base = (intf == 0) ? RZV_ETHER0_BASE : RZV_ETHER1_BASE;
-  priv->event = (intf == 0) ? RZV_ELC_GBETH0_INT : RZV_ELC_GBETH1_INT;
+  priv->event = (intf == 0) ? RZV_ELC_GBETH_PORT0_MACIRQ
+                            : RZV_ELC_GBETH_PORT1_MACIRQ;
   priv->irq = -1;
   priv->phy_addr = -1;
 

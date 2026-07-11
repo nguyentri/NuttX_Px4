@@ -127,6 +127,14 @@ uint32_t rzv_mhu_rsp_sts(uintptr_t base, uint32_t channel);
  *   Attach an interrupt handler to the given MHU IRQ and enable it.
  *   Thin wrapper over irq_attach() + up_enable_irq().
  *
+ *   MHU IRQs are fixed GIC SPIs (not routed through INTR8SEL), and every
+ *   RZ/V2H MHU line is level-triggered with the GIC default configuration.
+ *   As a result the canonical fixed-INTID sequence
+ *     irq_attach -> rzv_gic_set_irq_type -> up_enable_irq
+ *   collapses to irq_attach -> up_enable_irq here; there is no priority or
+ *   trigger-type step to insert.  Callers needing custom priority/type must
+ *   inline the sequence rather than extending this wrapper.
+ *
  * Input Parameters:
  *   irq     - GIC SPI number (e.g. RZV_IPC_CR8CR8_RX_IRQ)
  *   handler - ISR function pointer (xcpt_t)

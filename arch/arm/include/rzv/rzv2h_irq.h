@@ -520,19 +520,12 @@
 #define RZV_ELC_CANFD_CH4_TRX                         (372)  /* CANFD4 TX (can_tx_int_4) */
 #define RZV_ELC_CANFD_CH5_TRX                         (373)  /* CANFD5 TX (can_tx_int_5) */
 
-/* TODO(rzv2h-gbeth-irq): the GBETH MAC/DMA combined interrupt event IDs are
- * not yet captured here.  arch/arm/src/rzv/rzv_ether.c currently passes the
- * raw FSP vector_data.c numbers (0x2FD for GBETH0, 0x30C for GBETH1) directly
- * to rzv_icu_attach().  Replace the magic numbers in rzv_ether.c with named
- * symbols defined here once the RZ/V2H User's Manual ICU event-ID table is
- * cross-checked.  Expected additions (event IDs taken from FSP vector tables,
- * unverified against the UM):
- *   RZV_ELC_GBETH_PORT0_MACIRQ                  (0x2FD)
- *   RZV_ELC_GBETH_PORT1_MACIRQ                  (0x30C)
- * If GBETH exposes separate per-channel TX/RX DMA event IDs in addition to
- * the combined MAC IRQ, add them in the same pass so the driver can route
- * RX/TX completion to dedicated handlers in a future revision.
+/* GBETH MAC/DMA combined interrupt event IDs (FSP vector_data.c).  If the
+ * MAC exposes separate per-channel TX/RX DMA event IDs, add them here and
+ * route them from rzv_ether.c to dedicated handlers.
  */
+#define RZV_ELC_GBETH_PORT0_MACIRQ                    (0x2FD)  /* GBETH0 combined MAC/DMA */
+#define RZV_ELC_GBETH_PORT1_MACIRQ                    (0x30C)  /* GBETH1 combined MAC/DMA */
 
 #define RZV_ELC_ISU_INT_FRE0                          (0x1C1)  /* ISU Frame end interrupt 0 - Event 0x1C1 */
 #define RZV_ELC_ISU_INT_FRE1                          (0x1C2)  /* ISU Frame end interrupt 1 - Event 0x1C2 */
@@ -628,6 +621,12 @@
  * over-allocation of the g_icu_handlers[] table, never routed.
  */
 #define RZV_IRQ_ICU_SLOTS                             (129)
+
+/* ARM Cortex-R8 MPCore private peripheral interrupts (PPI, INTID 16..31).
+ * PPI[2] = private timer (INTID 29).  Not routed through INTR8SEL.
+ * See ARM Cortex-R8 TRM §11.6.
+ */
+#define RZV_IRQ_PRIVATE_TIMER                         (29)
 
 /* GIC IRQ-table span (NR_IRQS = RZV_IRQ_FIRST + RZV_IRQ_GIC_SIZE).
  * Must cover the INTR8SEL selectable-interrupt window, whose physical GIC
