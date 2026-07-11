@@ -26,11 +26,11 @@
  * Same 10-bit-per-field, 3-per-reg layout as INTR8SEL (confirmed from
  * hardware/rzv_intc.h INTM33SEL bit definitions).
  *
- * RZV_INTC_M33SEL_SPI_BASE: GIC SPI INTID for CM33 SEL slot 0.
- * Value UNVERIFIED — not found in available hardware documentation.
- * Placeholder (481) assumes SELECT_IRQ_MAX=128 for CR8 ending at 481,
- * with CM33 slots following. MUST be verified from
- * RZ/V2H Hardware User Manual before CM33 build is exercised.
+ * RZV_INTC_M33SEL_SPI_BASE: NVIC INTID for CM33 SEL slot 0 = 385, FSP-verified
+ * (CM33 bsp_feature.h SELECT_IRQ_MIN = FIXED_INTSEL_COUNT = 353, same as CR8;
+ * NuttX IRQ = RZV_IRQ_FIRST(32) + NVIC index).  See the interrupt-unification
+ * plan (Phase 4 / §11a) for the full derivation.  NOT yet exercised on a real
+ * CM33 target — validate on hardware/sim before relying on it.
  */
 
 /****************************************************************************
@@ -55,9 +55,7 @@
 #include <arch/irq.h>
 
 #include "arm_internal.h"
-#include "hardware/rzv_intc_gic.h"
 #include "hardware/rzv_intc.h"
-#include "hardware/rzv_icu.h"
 #include "rzv_icu.h"
 
 /****************************************************************************
@@ -75,13 +73,27 @@
 #define RZV_INTC_INTM33SEL_SHIFT(idx)  ((idx) * 10)
 #define RZV_INTC_INTM33SEL_MASK        0x3FF
 
-/* GIC SPI INTID base for CM33 INTM33SEL slot 0.
- * UNVERIFIED — placeholder value. Confirm from RZ/V2H UM Table 12.x
- * (CM33 interrupt assignment table) before enabling CM33 build.
+/* NVIC INTID base for CM33 INTM33SEL slot 0 (FSP-verified, see file banner).
+ * 385 = FSP FIXED_INTSEL_COUNT(353) + RZV_IRQ_FIRST(32); identical to the CR8
+ * RZV_INTC_SEL_SPI_BASE because NuttX numbering is core-independent — only the
+ * SEL register block (INTM33SEL vs INTR8SEL) and delivery (NVIC vs GIC) differ.
  */
 #ifndef RZV_INTC_M33SEL_SPI_BASE
-#  define RZV_INTC_M33SEL_SPI_BASE     (481)
+#  define RZV_INTC_M33SEL_SPI_BASE     (385)
 #endif
+
+/* CM33 pending-clear goes through the NVIC (this core has no GIC).
+ * NVIC external index = NuttX IRQ - RZV_IRQ_FIRST; ICPR0 @ 0xE000E280
+ * (matches rzv_irq_cm33.c NVIC_BASE 0xE000E100 + ICPR offset 0x180).
+ */
+#define RZV_NVIC_ICPR_BASE  0xE000E280u
+
+static inline void rzv_cm33_nvic_clear_pending(int irq)
+{
+  uint32_t nvic_irq = (uint32_t)(irq - RZV_IRQ_FIRST);
+  putreg32(1u << (nvic_irq & 31u),
+           RZV_NVIC_ICPR_BASE + ((nvic_irq >> 5) << 2));
+}
 
 /****************************************************************************
  * Type Definitions
@@ -195,7 +207,7 @@ void rzv_icu_m33_initialize(void)
  *   Uses INTM33SEL routing (not INTR8SEL).
  *
  * Returns:
- *   NuttX IRQ number (GIC INTID) on success, negated errno on failure.
+ *   NuttX IRQ number (NVIC INTID) on success, negated errno on failure.
  *
  ****************************************************************************/
 
@@ -217,7 +229,7 @@ int rzv_icu_m33_attach(int event, xcpt_t handler, void *arg, bool irq_enable)
 
   leave_critical_section(flags);
 
-  /* irq = M33SEL base + slot (NOT RZV_IRQ_FIRST + slot) */
+  /* irq = M33SEL SEL base + slot (base 385 already includes RZV_IRQ_FIRST) */
 
   irq = RZV_INTC_M33SEL_SPI_BASE + slot;
 
@@ -228,9 +240,9 @@ int rzv_icu_m33_attach(int event, xcpt_t handler, void *arg, bool irq_enable)
 
   irq_attach(irq, rzv_icu_m33_interrupt, (void *)(uintptr_t)slot);
 
-  /* Clear stale GIC pending, then route event */
+  /* Clear stale NVIC pending, then route event */
 
-  putreg32(1u << (irq % 32), RZV_INTC_GIC_GICD_ICDICPR(irq >> 5));
+  rzv_cm33_nvic_clear_pending(irq);
 
   rzv_icu_m33_set_event(slot, event);
 
@@ -348,7 +360,7 @@ void rzv_icu_clear_irq(int irq)
   if (irq >= RZV_INTC_M33SEL_SPI_BASE &&
       irq < (RZV_INTC_M33SEL_SPI_BASE + RZV_IRQ_ICU_SLOTS))
     {
-      putreg32(1u << (irq % 32), RZV_INTC_GIC_GICD_ICDICPR(irq >> 5));
+      rzv_cm33_nvic_clear_pending(irq);
     }
 }
 

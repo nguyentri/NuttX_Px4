@@ -135,38 +135,33 @@ static int rzv_icu_interrupt(int irq, void *context, void *arg)
 
 void rzv_icu_clear_irq(int irq)
 {
-  /* caller passes GIC INTID (385..514 for SEL slots: RZV_INTC_SEL_SPI_BASE +
-   * 0..RZV_IRQ_ICU_SLOTS).
-   * rzv_icu_clear_irq_status clears ISCLR bits 0-15 for external IRQ0-15.
-   * External IRQ pins are routed via ELC event IDs 0-15 which map to
-   * GIC INTID = ELC_IRQ0_INTID + irq_line. We cannot safely reverse-map
-   * a generic SEL slot back to an ELC IRQ line here without a table lookup,
-   * so we skip ISCLR for SEL-routed IRQs (GIC EOI handles level clearing).
-   * Only write ISCLR when the GIC INTID falls in the direct ELC IRQ0-15
-   * SPI range. RZV_ELC_IRQ_SPI_BASE is the GIC INTID for ELC IRQ0.
+  /* Intentional no-op today.  Retained for API compatibility with existing
+   * board glue that calls it after up_enable_irq(); safe because every current
+   * NuttX IRQ source on this SoC (fixed SPI-B/RSCI/MHU, selectable INTR8SEL
+   * SEL slots) is either edge-triggered or level-cleared by peripheral
+   * deassert + GIC EOI — none of them need INTC ISCLR.
    *
-   * Note: for edge-triggered external IRQ pins the GIC line deasserts
-   * automatically on EOI; ISCLR write is required only for level-triggered
-   * external IRQ pins to drop the ICU sticky flag.
-   * Until RZV_ELC_IRQ_SPI_BASE is confirmed from the UM, guard this path
-   * so it is a no-op rather than writing to a random GIC line.
+   * F5 background — the sticky-flag path this function *would* implement if
+   * an external-IRQ pin driver ever landed (FSP-verified from
+   * refs/intc_irq_rzv2h_evk_cr8_0_ep, not from the RZ/V2H UM Table):
+   *
+   *   INTID map (fixed, from bsp_irq_id.h:62-77):
+   *     external IRQ pin n (0..15) → FSP GPIO_IRQn_IRQn = n+1
+   *                                → NuttX INTID = 33 + n  (i.e. +RZV_IRQ_FIRST)
+   *   Sticky-flag register (from bsp_override.h:2547):
+   *     INTC->ISCLR |= (1u << pin_channel)   -- indexed by pin, NOT INTID
+   *   Call-site rules (from r_intc_irq.c:150, 321):
+   *     - EDGE pins only (skip for LEVEL_LOW — HWM precaution)
+   *     - Written at Open() after IITSR setup AND in the ISR *before* the
+   *       user callback (so a re-arm mid-ISR is not lost)
+   *
+   * So a correct future implementation is not a one-liner in this generic
+   * helper — it belongs in a dedicated external-IRQ pin driver, mirroring
+   * r_intc_irq.c.  TINT32_00..31 does NOT use ISCLR (selectable via INTR8SEL,
+   * covered by rzv_icu_attach).  See plans/rzv2h_interrupt_unification.md §F5.
    */
 
-#ifdef RZV_ELC_IRQ_SPI_BASE
-  if (irq >= RZV_ELC_IRQ_SPI_BASE &&
-      irq < (RZV_ELC_IRQ_SPI_BASE + 16))
-    {
-      rzv_icu_clear_irq_status(
-        (uint16_t)(1u << (unsigned)(irq - RZV_ELC_IRQ_SPI_BASE)));
-    }
-#else
-  /* Without a confirmed GIC INTID base for ELC IRQ0-15, suppress ISCLR
-   * write. Edge-triggered external IRQs will work; level-triggered will
-   * re-fire until the source deasserts.  Define RZV_ELC_IRQ_SPI_BASE in
-   * rzv_icu.h once confirmed from RZ/V2H UM Table 12.x.
-   */
   (void)irq;
-#endif
 }
 
 /****************************************************************************

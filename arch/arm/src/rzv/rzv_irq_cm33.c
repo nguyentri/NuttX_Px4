@@ -97,19 +97,24 @@ static void rzv_cm33_nvic_init(void)
   int i;
 
   /* Disable all interrupts */
-  for (i = 0; i < (NR_IRQS - NVIC_IRQ_FIRST) / 32; i++)
+  for (i = 0; i < (NR_IRQS - RZV_IRQ_FIRST) / 32; i++)
     {
       putreg32(0xFFFFFFFF, NVIC_ICER(i));
     }
 
   /* Clear all pending interrupts */
-  for (i = 0; i < (NR_IRQS - NVIC_IRQ_FIRST) / 32; i++)
+  for (i = 0; i < (NR_IRQS - RZV_IRQ_FIRST) / 32; i++)
     {
       putreg32(0xFFFFFFFF, NVIC_ICPR(i));
     }
 
   /* Set all interrupt priorities to default */
-  for (i = 0; i < (NR_IRQS - NVIC_IRQ_FIRST); i++)
+  /* One IPR byte per external IRQ: NR_IRQS - RZV_IRQ_FIRST = 512 (NVIC index
+   * range). Using RZV_IRQ_FIRST (the NuttX external-IRQ base) not the generic
+   * Cortex-M NVIC_IRQ_FIRST(16) avoids writing 16 IPR bytes past the range.
+   */
+
+  for (i = 0; i < (NR_IRQS - RZV_IRQ_FIRST); i++)
     {
       putreg8(NVIC_SYSH_PRIORITY_DEFAULT, NVIC_IPR(i));
     }
