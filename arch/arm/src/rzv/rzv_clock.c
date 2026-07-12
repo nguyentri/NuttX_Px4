@@ -1770,11 +1770,17 @@ void rzv_clock_config(void)
 {
   clkinfo("Starting clock configuration...\n");
 
-  /* The external loader or CM33 owns global PLL programming. */
+  /* Only the CM33 build programs the global PLLs; CR8 cores inherit the PLL
+   * state set by the external loader or CM33.  Keep this selector symmetric
+   * with the rzv_pll_init() definition guard (CONFIG_RZV2H_BUILD_CM33) so a
+   * future build variant cannot fall through to an undefined rzv_pll_init().
+   */
 #if defined(CONFIG_RZV2H_BUILD_CR8_0) || defined(CONFIG_RZV2H_BUILD_CR8_1)
   clkinfo("CR8 build: global PLL configuration owned by loader/CM33\n");
-#else
+#elif defined(CONFIG_RZV2H_BUILD_CM33)
   rzv_pll_init();
+#else
+#  error "RZ/V2H build must select CR8_0, CR8_1, or CM33"
 #endif
 
   /* Configure clock dividers */

@@ -403,9 +403,23 @@ int rzv_icu_set_event(int icu_slot, int event)
       return -EINVAL;
     }
 
-  /* Each INTR8SEL register holds 3 x 10-bit slot fields.
-   * RMW must be under critical section — concurrent writes
-   * to different slots sharing the same 32-bit register would clobber each.
+  /* Each INTR8SEL register holds 3 x 10-bit slot fields, so programming one
+   * slot is a read-modify-write of a register shared with two neighbours.
+   * The critical section makes this atomic against other code ON THIS CORE.
+   *
+   * INTR8SEL is a single INTC register bank shared by both CR8 cores, and the
+   * FSP slot partition splits mid-register: CR8-0 owns physical slots 0..84,
+   * CR8-1 owns 85..126, so register 28 holds CR8-0 slot 84 and CR8-1 slots
+   * 85..86.  enter_critical_section() does NOT serialise the sibling core, so a
+   * truly concurrent RMW of register 28 from both cores could clobber a field.
+   *
+   * This is safe under the port's boot-order contract (CR8_0 -> CR8_1 -> CM33,
+   * see rzv_ipc_raw.c): the cores run their interrupt setup sequentially, not
+   * concurrently, and CR8-0 only touches register 28 once it allocates its 85th
+   * selectable interrupt (slot 84), which the I/O coprocessor never approaches.
+   * If either assumption changes (concurrent boot, or CR8-0 nears slot 84 while
+   * CR8-1 reprograms at runtime), guard this RMW with a cross-core hardware
+   * semaphore.
    */
 
   physical_slot = RZV_INTC_SEL_SLOT_FIRST + icu_slot;

@@ -140,11 +140,22 @@ __start:
 
 	/* RZ/V2H CR8 starts with DTCM disabled.  The initial stack is linker-
 	 * placed in DTCM, so enable its local 128 KiB window before loading SP.
+	 *
+	 * These constants encode the Cortex-R8 DTCM Region Register (CP15 c9,c1,0)
+	 * and MUST match the linker DTCM region (DTCM_PRV_START / DTCM_PRV_LENGTH,
+	 * core-local for both CR8-0 and CR8-1).  CP15 region encodings cannot
+	 * reference linker symbols, so if the linker DTCM base/size changes, update
+	 * these to match:
+	 *   base = 0x00020000  core-local SRAM base (0x0) + 0x20000   -> bits[31:12]
+	 *   enc  = 0x21        size 0b01000 (128 KiB) << 2 | enable   -> bits[6:0]
 	 */
 
+#define RZV_DTCM_RGN_BASE	0x00020000
+#define RZV_DTCM_RGN_ENC	0x21
+
 #ifdef CONFIG_ARCH_CHIP_RZV
-	mov		r0, #0x00020000
-	orr		r0, r0, #0x21
+	mov		r0, #RZV_DTCM_RGN_BASE
+	orr		r0, r0, #RZV_DTCM_RGN_ENC
 	mcr		p15, #0, r0, c9, c1, 0
 	isb
 #endif
