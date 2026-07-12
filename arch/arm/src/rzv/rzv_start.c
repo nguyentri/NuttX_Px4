@@ -44,7 +44,7 @@
 #include "rzv_clock.h"
 #include "rzv_lowputc.h"
 
-#ifdef CONFIG_RZV_MPU_PORT_FSP
+#ifdef CONFIG_RZV_MPU
 /* Declared in rzv_mpu_regions.c */
 void rzv_mpu_init(void);
 #endif
@@ -413,7 +413,7 @@ void arm_boot(void)
    * This must run after RAM init (region table is in .data/.rodata) but
    * before caches are enabled so the D$ is clean at MPU enable time.
    */
-#ifdef CONFIG_RZV_MPU_PORT_FSP
+#ifdef CONFIG_RZV_MPU
   rzv_mpu_init();
 #endif
 
@@ -421,6 +421,12 @@ void arm_boot(void)
 
   /* Enable caches and branch prediction */
   rzv_enable_caches();
+
+  /* Enable the FPU (FPEXC.EN + CPACR cp10/cp11).  Must run before any VFP
+   * instruction — PX4 is float-heavy and the ARMv7-R context switch emits
+   * VFP save/restore under CONFIG_ARCH_FPU.
+   */
+  arm_fpuconfig();
 
   /* Configure low-level serial for early debug output */
   rzv_lowsetup();

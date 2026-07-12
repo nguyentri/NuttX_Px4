@@ -20,11 +20,11 @@
  *   4: Peripheral   0x10000000  256 MiB  Device Shareable, XN
  *   5: xSPI         0x20000000  256 MiB  Normal, outer-NC / inner-WB, RO
  *   6: DDR-cache    0x40800000    8 MiB  Normal, outer-NC / inner-WB
- *   7: DDR-NC       0x41800000    8 MiB  Normal, outer-NC / inner-NC
+ *   7: DDR-NC       0x41000000    8 MiB  Normal, outer-NC / inner-NC
  *   8: OA RSCTBL+MHU SHMEM 0x42F00000  8 KiB  Normal-NC, Shareable
  *   9: OA VRING     0x43000000   16 MiB  Normal-NC, Shareable
  *                               ↑ covers IPC raw SHM at 0x43800000
- *  10: DDR-cache2   0x41000000    8 MiB  Normal, outer-NC / inner-WB
+ *  10: unused (disabled) — see cr8_0.ld cross-core partition
  *  11-15: unused (disabled)
  *
  *  CR8_1:
@@ -32,10 +32,9 @@
  *   2: SRAM-cache   0x081C0000
  *   3: SRAM-NC      0x081E0000
  *   6: DDR-cache    0x41800000
- *   7: DDR-NC       0x42800000
- *  10: DDR-cache2   0x42000000
+ *   7: DDR-NC       0x42000000
  *
- * This file is compiled only when CONFIG_RZV_MPU_PORT_FSP=y.
+ * This file is compiled only when CONFIG_RZV_MPU=y.
  *
  ****************************************************************************/
 
@@ -45,7 +44,7 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_RZV_MPU_PORT_FSP
+#ifdef CONFIG_RZV_MPU
 
 #include <stdint.h>
 #include "mpu.h"
@@ -131,16 +130,18 @@ static const struct rzv_mpu_region_s g_rzv_mpu_cr8_0[] =
   { 5u, 0x20000000u, DRSR_VAL(RZV_MPU_LOG2_256MB), ATTR_NORMAL_WB_RO },
   /* region 6: DDR cacheable 8 MiB */
   { 6u, 0x40800000u, DRSR_VAL(RZV_MPU_LOG2_8MB),   ATTR_NORMAL_WB },
-  /* region 7: DDR non-cacheable 8 MiB */
-  { 7u, 0x41800000u, DRSR_VAL(RZV_MPU_LOG2_8MB),   ATTR_NORMAL_NC },
+  /* region 7: DDR non-cacheable 8 MiB (CR8-0 private uncached slot) */
+  { 7u, 0x41000000u, DRSR_VAL(RZV_MPU_LOG2_8MB),   ATTR_NORMAL_NC },
   /* region 8: OpenAMP RSCTBL + MHU SHMEM 8 KiB, non-cacheable Shareable */
   { 8u, 0x42F00000u, DRSR_VAL(RZV_MPU_LOG2_8KB),   ATTR_NORMAL_NC_S },
   /* region 9: OpenAMP VRING 16 MiB, non-cacheable Shareable
    * NOTE: 0x43000000 + 16 MiB = 0x44000000; covers IPC raw SHM at 0x43800000
    */
   { 9u, 0x43000000u, DRSR_VAL(RZV_MPU_LOG2_16MB),  ATTR_NORMAL_NC_S },
-  /* region 10: DDR cacheable extension 8 MiB */
-  { 10u, 0x41000000u, DRSR_VAL(RZV_MPU_LOG2_8MB),  ATTR_NORMAL_WB },
+  /* region 10: unused — 0x41000000 is now CR8-0 uncached DDR (see cr8_0.ld
+   * cross-core partition); covered by region 7 attributes.
+   */
+  { 10u, 0u, 0u, 0u },
   /* regions 11-15: unused — leave MPU region disabled (DRSR EN=0) */
   { 11u, 0u, 0u, 0u },
   { 12u, 0u, 0u, 0u },
@@ -166,16 +167,16 @@ static const struct rzv_mpu_region_s g_rzv_mpu_cr8_1[]
   { 4u, 0x10000000u, DRSR_VAL(RZV_MPU_LOG2_256MB), ATTR_DEVICE_S_XN },
   /* region 5: xSPI flash 256 MiB, read-only */
   { 5u, 0x20000000u, DRSR_VAL(RZV_MPU_LOG2_256MB), ATTR_NORMAL_WB_RO },
-  /* region 6: DDR cacheable 8 MiB (CR8_1 offset) */
+  /* region 6: DDR cacheable 8 MiB (CR8_1 private cached slot) */
   { 6u, 0x41800000u, DRSR_VAL(RZV_MPU_LOG2_8MB),   ATTR_NORMAL_WB },
-  /* region 7: DDR non-cacheable 8 MiB (CR8_1 offset) */
-  { 7u, 0x42800000u, DRSR_VAL(RZV_MPU_LOG2_8MB),   ATTR_NORMAL_NC },
+  /* region 7: DDR non-cacheable 8 MiB (CR8_1 private uncached slot) */
+  { 7u, 0x42000000u, DRSR_VAL(RZV_MPU_LOG2_8MB),   ATTR_NORMAL_NC },
   /* region 8: OpenAMP RSCTBL + MHU SHMEM 8 KiB, non-cacheable Shareable */
   { 8u, 0x42F00000u, DRSR_VAL(RZV_MPU_LOG2_8KB),   ATTR_NORMAL_NC_S },
   /* region 9: OpenAMP VRING 16 MiB, non-cacheable Shareable */
   { 9u, 0x43000000u, DRSR_VAL(RZV_MPU_LOG2_16MB),  ATTR_NORMAL_NC_S },
-  /* region 10: DDR cacheable extension 8 MiB (CR8_1 offset) */
-  { 10u, 0x42000000u, DRSR_VAL(RZV_MPU_LOG2_8MB),  ATTR_NORMAL_WB },
+  /* region 10: unused (was DDR-cache2 extension; removed for cross-core partition) */
+  { 10u, 0u, 0u, 0u },
   /* regions 11-15: unused */
   { 11u, 0u, 0u, 0u },
   { 12u, 0u, 0u, 0u },
@@ -243,4 +244,4 @@ void rzv_mpu_init(void)
   ARM_ISB();
 }
 
-#endif /* CONFIG_RZV_MPU_PORT_FSP */
+#endif /* CONFIG_RZV_MPU */

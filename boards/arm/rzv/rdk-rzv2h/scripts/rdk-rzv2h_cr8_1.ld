@@ -41,12 +41,22 @@ SRAM_UNCACHE_PRV_START  = DEFINED(CR8_0) ? SRAM_CR8_0_START + 0x081A0000 : SRAM_
 SRAM_UNCACHE_PRV_LENGTH = DEFINED(CR8_0) ? 0x0001FFFC : 0x0001FFFC;
 XSPIFLASH_PRV_START     = DEFINED(CR8_0) ? XSPIFLASH_CR8_0_START : XSPIFLASH_CR8_1_START;
 XSPIFLASH_PRV_LENGTH    = DEFINED(CR8_0) ? XSPIFLASH_CR8_0_LENGTH : XSPIFLASH_CR8_1_LENGTH;
+/* CR8-0 / CR8-1 private DDR partition (shared invariant with rdk-rzv2h_cr8_0.ld)
+ * Each core: 8 MiB cache + 8 MiB uncache, contiguous, non-overlapping.
+ *   CR8-0 cache   : 0x40800000..0x41000000
+ *   CR8-0 uncache : 0x41000000..0x41800000
+ *   CR8-1 cache   : 0x41800000..0x42000000
+ *   CR8-1 uncache : 0x42000000..0x42800000
+ * OpenAMP/MHU/VRING at 0x42F00000+ stay shared (unchanged).
+ * Keep in lockstep with rdk-rzv2h_cr8_0.ld; the ASSERTs below fail-fast on drift.
+ */
 DDR_CACHE_PRV_START     = DEFINED(CR8_0) ? DDR0_CR8_0_START + 0x00800000 : DDR0_CR8_1_START + 0x01800000;
-DDR_CACHE_LENGTH        = DEFINED(CR8_0) ? 0x00F00000 : 0x00F00000;
-DDR_UNCACHE_PRV_START   = DEFINED(CR8_0) ? DDR0_CR8_0_START + 0x01800000 : DDR0_CR8_1_START + 0x02800000;
-/* CR8_1 uncache capped to 7 MB so it ends at OPENAMP_RSCTBL_START and does not
- * alias the OpenAMP resource table / MHU shmem. See RSCTBL-bound ASSERT below. */
-DDR_UNCACHE_LENGTH      = DEFINED(CR8_0) ? 0x00800000 : 0x00700000;
+DDR_CACHE_LENGTH        = 0x00800000;
+DDR_UNCACHE_PRV_START   = DEFINED(CR8_0) ? DDR0_CR8_0_START + 0x01000000 : DDR0_CR8_1_START + 0x02000000;
+DDR_UNCACHE_LENGTH      = 0x00800000;
+
+/* Sibling core private DDR end (must match cr8_0.ld DDR_UNCACHE_PRV_START + LENGTH for CR8-0). */
+DDR_CR8_0_PRIV_END      = 0x41800000;
 
 /* Memory allocation OpenAMP using ddr. */
 OPENAMP_RSCTBL_START    = DEFINED(CR8_0) ? DDR0_CR8_0_START + 0x02f00000 : DDR0_CR8_1_START + 0x02f00000;
@@ -104,6 +114,9 @@ ASSERT(DDR_UNCACHE_PRV_START + DDR_UNCACHE_LENGTH <= OPENAMP_RSCTBL_START,
 /* HIGH-1 assertion: IPC_RAW_SHM must not overlap OPENAMP_VRING */
 ASSERT(IPC_RAW_SHM_START >= OPENAMP_VRING_START + OPENAMP_VRING_LENGTH,
        "IPC_RAW_SHM overlaps OPENAMP_VRING - check SHM and VRING sizes");
+/* Cross-core: CR8-1 private DDR must start at or after CR8-0 private DDR end */
+ASSERT(DDR_CACHE_PRV_START >= DDR_CR8_0_PRIV_END,
+       "CR8-1 private DDR overlaps CR8-0 private DDR - repartition rdk-rzv2h_cr8_0.ld/cr8_1.ld");
 
 PHDRS
 {

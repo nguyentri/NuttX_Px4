@@ -65,3 +65,21 @@ HOSTCC = gcc
 HOSTINCLUDES = -I.
 HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
 HOSTLDFLAGS =
+
+# Post-build: emit the Renesas split image (header+itcm+sram+sdram) + SREC.
+# The flat nuttx.bin that Unix.mk creates is unusable for CR8 boot (huge
+# padding across DDR VMAs); the split image + SREC below is what the CA55
+# SCIF-boot / ATF loader consumes.
+ifeq ($(CONFIG_RZV2H_BUILD_CR8_0),y)
+  RZV_CORE_TAG = cr8_0
+else ifeq ($(CONFIG_RZV2H_BUILD_CR8_1),y)
+  RZV_CORE_TAG = cr8_1
+endif
+
+ifneq ($(RZV_CORE_TAG),)
+define POSTBUILD
+	$(Q) OBJCOPY="$(OBJCOPY)" \
+	    $(BOARD_DIR)$(DELIM)scripts$(DELIM)rzv2h-cr8-split-image-postbuild.sh \
+	    $(BIN) $(RZV_CORE_TAG)
+endef
+endif

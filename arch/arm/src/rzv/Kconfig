@@ -1373,7 +1373,7 @@ config RZV_IPC_CR8_1_CM33
      Send path times out after CONFIG_RZV_IPC_TX_TIMEOUT_MS when CM33
      firmware is absent.
 
-config RZV_MPU_PORT_FSP
+config RZV_MPU
    bool "RZ/V2H CR8 MPU region table"
    default y if RZV_IPC_RAW
    depends on !RZV2H_BUILD_CM33
@@ -1389,7 +1389,7 @@ config RZV_MPU_CR8_CORE_NUM
    int "CR8 core number for MPU table selection (0 or 1)"
    default 0
    range 0 1
-   depends on RZV_MPU_PORT_FSP
+   depends on RZV_MPU
    ---help---
      Selects which MPU region table variant to use.  0 = CR8_0 addresses,
      1 = CR8_1 addresses (SRAM cache/non-cache regions differ).

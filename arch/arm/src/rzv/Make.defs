@@ -131,7 +131,7 @@ CHIP_CSRCS += rzv_ipc_raw.c
 endif
 
 # MPU region table
-ifeq ($(CONFIG_RZV_MPU_PORT_FSP),y)
+ifeq ($(CONFIG_RZV_MPU),y)
 CHIP_CSRCS += rzv_mpu_regions.c
 endif
 
