@@ -202,6 +202,8 @@ static int rzv_gpioconfigure_pull(unsigned int port, unsigned int pin,
                                   uint32_t pull);
 static int rzv_gpioconfigure_drive(unsigned int port, unsigned int pin,
                                    uint32_t drive);
+static int rzv_gpioconfigure_opendrain(unsigned int port, unsigned int pin,
+                                       uint32_t func);
 static int rzv_gpioconfigure_peripheral(unsigned int port, unsigned int pin,
                                         uint32_t psel, uint32_t func);
 #ifdef CONFIG_RZV_GPIO_IRQ
@@ -518,32 +520,18 @@ static int rzv_gpioconfigure_drive(unsigned int port, unsigned int pin,
 }
 
 /****************************************************************************
- * Name: rzv_gpioconfigure_peripheral
+ * Name: rzv_gpioconfigure_opendrain
  *
  * Description:
- *   Configure peripheral function: PMC=1, PFC=psel, NOD (open-drain).
- *   Slew rate (SR) is not written — caller passes default (keep reset value).
- *
- * fix:
- *   Peripheral mode pin configuration programs PFC, IOLH, PUPD, SR, NOD, IEN.
- *   This implementation adds NOD (open-drain) for I2C compatibility.
- *   SR and IEN are deferred (no pinset encoding yet, safe to leave at reset).
- * TODO: Encode SR/IEN in pinset GPIO_FUNC bits and apply here.
- *
- *   Caller (rzv_gpioconfig) has already written PMC=0 before calling here.
- *   We write PMC=1 inside to complete the PFC programming window.
- *
- * PFC is programmed before PM per RZ/V2H UM ordering.
- *   Caller sets PM=Hi-Z after this function returns.
+ *   Configure N-channel open-drain independently of GPIO/peripheral mode.
+ *   Recovery uses GPIO output mode while normal SCI-I2C uses peripheral mode.
  *
  ****************************************************************************/
 
-static int rzv_gpioconfigure_peripheral(unsigned int port, unsigned int pin,
-                                        uint32_t psel, uint32_t func)
+static int rzv_gpioconfigure_opendrain(unsigned int port, unsigned int pin,
+                                       uint32_t func)
 {
   uintptr_t         base = rzv_gpio_get_port_base(port);
-  volatile uint8_t  *p_pmc;
-  volatile uint32_t *p_pfc;
   volatile uint32_t *p_nod;
   uint32_t           shift;
   uint32_t           mask;
@@ -554,19 +542,6 @@ static int rzv_gpioconfigure_peripheral(unsigned int port, unsigned int pin,
     {
       return -EINVAL;
     }
-
-  /* PMC=1: enable peripheral mode for this pin */
-  p_pmc = (volatile uint8_t *)(base + RZV_GPIO_PMC_OFFSET(port));
-  rzv_gpio_regwrite_8(p_pmc, PMC_PERIPH_MODE, (uint8_t)pin,
-                      (uint8_t)(1U << pin));
-
-  /* PFC: set peripheral function select (4 bits per pin).
-   * Per RZ/V2H UM GPIO §PFC: 4-bit field at pin*4 in 32-bit reg (field mask = 0xF).
-   */
-  p_pfc = (volatile uint32_t *)(base + RZV_GPIO_PFC_OFFSET(port));
-  shift = pin * GPIO_PIN_ALIGN_4BIT;
-  mask  = 0xFU << shift;
-  rzv_gpio_regwrite_32(p_pfc, psel & 0xFU, shift, mask);
 
   /* NOD: N-channel open-drain mode for I2C/SMBus pins.
    * same 4-pins-per-reg, 8-bits-per-pin layout as IOLH/PUPD.
@@ -590,6 +565,40 @@ static int rzv_gpioconfigure_peripheral(unsigned int port, unsigned int pin,
                        shift, mask);
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: rzv_gpioconfigure_peripheral
+ *
+ * Description:
+ *   Configure peripheral function: PMC=1 and PFC=psel.
+ *   Open-drain is configured separately so GPIO recovery pins can use it.
+ ****************************************************************************/
+
+static int rzv_gpioconfigure_peripheral(unsigned int port, unsigned int pin,
+                                        uint32_t psel, uint32_t func)
+{
+  uintptr_t         base = rzv_gpio_get_port_base(port);
+  volatile uint8_t  *p_pmc;
+  volatile uint32_t *p_pfc;
+  uint32_t           shift;
+  uint32_t           mask;
+
+  if (base == 0 || !rzv_gpio_pin_valid(port, pin))
+    {
+      return -EINVAL;
+    }
+
+  p_pmc = (volatile uint8_t *)(base + RZV_GPIO_PMC_OFFSET(port));
+  rzv_gpio_regwrite_8(p_pmc, PMC_PERIPH_MODE, (uint8_t)pin,
+                      (uint8_t)(1U << pin));
+
+  p_pfc = (volatile uint32_t *)(base + RZV_GPIO_PFC_OFFSET(port));
+  shift = pin * GPIO_PIN_ALIGN_4BIT;
+  mask  = 0xFU << shift;
+  rzv_gpio_regwrite_32(p_pfc, psel & 0xFU, shift, mask);
+
+  return rzv_gpioconfigure_opendrain(port, pin, func);
 }
 
 #ifdef CONFIG_RZV_GPIO_IRQ
@@ -785,6 +794,15 @@ int rzv_gpioconfig(gpio_pinset_t cfgset)
   if (mode == RZV_GPIO_PERIPH)
     {
       ret = rzv_gpioconfigure_peripheral(port, pin, psel, func);
+      if (ret < 0)
+        {
+          goto out;
+        }
+    }
+
+  if (mode == RZV_GPIO_OUTPUT)
+    {
+      ret = rzv_gpioconfigure_opendrain(port, pin, func);
       if (ret < 0)
         {
           goto out;

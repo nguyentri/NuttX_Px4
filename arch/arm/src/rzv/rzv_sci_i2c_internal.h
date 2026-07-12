@@ -38,9 +38,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Transfer timeout (ms) */
+/* Transfer timeout bounds (ms) */
 
-#define SCI_I2C_TIMEOUT_MS          1000
+#define SCI_I2C_TIMEOUT_MIN_MS      10u
+#define SCI_I2C_TIMEOUT_MAX_MS      1000u
 
 /* TDR mask: upper 24 bits must be 0xFF on write (DATA_REG_MASK) */
 
@@ -64,6 +65,7 @@ enum sci_i2c_state_e
   SCI_I2C_STATE_TXDATA,        /* Sending data bytes */
   SCI_I2C_STATE_RXDATA,        /* Receiving data bytes (in TXI, CPU-mode) */
   SCI_I2C_STATE_STOP,          /* STOP issued, awaiting STIF */
+  SCI_I2C_STATE_START_PENDING, /* STOP complete; issue next START */
   SCI_I2C_STATE_RESTART_PENDING, /* RESTART issued, awaiting STIF (#16 fix) */
   SCI_I2C_STATE_DONE,          /* Transfer complete (success or error) */
 };
@@ -78,7 +80,7 @@ struct rzv_sci_i2c_priv_s
 
   /* Channel configuration (compile-time) */
 
-  uint8_t                   channel;    /* 0..3 */
+  uint8_t                   channel;    /* SCI channel */
   uint32_t                  base;       /* SCI base address */
   uint32_t                  clk_id;    /* RZV_CPG_CLK_SCIn */
   int                       evt_txi;   /* ELC event for TXI */
@@ -90,6 +92,13 @@ struct rzv_sci_i2c_priv_s
   int                       irq_txi;
   int                       irq_tei;
   int                       irq_rxi;
+
+  /* Pin descriptors for peripheral operation and GPIO bus recovery */
+
+  uint32_t                  scl_gpio;
+  uint32_t                  sda_gpio;
+  uint32_t                  scl_reset_gpio;
+  uint32_t                  sda_reset_gpio;
 
   /* Exclusive-access semaphore (mutex) and completion semaphore */
 
@@ -106,6 +115,7 @@ struct rzv_sci_i2c_priv_s
   bool                      do_dummy_read; /* Skip first RDR read (addr ACK) */
   int                       result;    /* Transfer result code */
   volatile enum sci_i2c_state_e state;
+  uint32_t                  cur_scl_hz;
 
   bool                      initialized;
 };

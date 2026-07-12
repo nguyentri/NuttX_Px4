@@ -104,6 +104,13 @@ static void sci_i2c_issue_restart(struct rzv_sci_i2c_priv_s *priv)
   priv->state = SCI_I2C_STATE_RESTART_PENDING; /* #16 fix: not STATE_STOP */
 }
 
+static void sci_i2c_issue_start(struct rzv_sci_i2c_priv_s *priv)
+{
+  uint32_t icr = ICR_VAL(priv);
+  ICR_SET(priv, SCI_I2C_REQ(icr, 1, 1, SCI_ICR_IICSTAREQ));
+  priv->state = SCI_I2C_STATE_ADDR;
+}
+
 /****************************************************************************
  * Name: sci_i2c_next_msg
  *
@@ -129,6 +136,94 @@ static bool sci_i2c_next_msg(struct rzv_sci_i2c_priv_s *priv)
   priv->do_read       = (priv->msgs[priv->msg_idx].flags & I2C_M_READ) != 0;
   priv->do_dummy_read = priv->do_read; /* Reset dummy-read flag for new msg */
   return true;
+}
+
+static uint32_t sci_i2c_read_remaining(struct rzv_sci_i2c_priv_s *priv)
+{
+  uint32_t bytes = 0;
+  int index;
+
+  for (index = priv->msg_idx; index < priv->msg_count; index++)
+    {
+      if (index != priv->msg_idx &&
+          (priv->msgs[index].flags & I2C_M_NOSTART) == 0)
+        {
+          break;
+        }
+
+      bytes += priv->msgs[index].length;
+    }
+
+  if (bytes >= priv->msgs[priv->msg_idx].length - priv->byte_idx)
+    {
+      return bytes - priv->byte_idx;
+    }
+
+  return 0;
+}
+
+/* Complete the current message according to the NuttX START/STOP contract. */
+
+static void sci_i2c_complete_message(struct rzv_sci_i2c_priv_s *priv)
+{
+  struct i2c_msg_s *current = &priv->msgs[priv->msg_idx];
+  struct i2c_msg_s *next;
+
+  if (priv->msg_idx + 1 >= priv->msg_count)
+    {
+      sci_i2c_issue_stop(priv);
+      return;
+    }
+
+  next = &priv->msgs[priv->msg_idx + 1];
+  if (next->flags & I2C_M_NOSTART)
+    {
+      /* NOSTART is a same-direction continuation. */
+
+      if (((current->flags ^ next->flags) & I2C_M_READ) != 0 ||
+          current->addr != next->addr)
+        {
+          priv->result = -EINVAL;
+          sci_i2c_issue_stop(priv);
+          return;
+        }
+
+      sci_i2c_next_msg(priv);
+      if (priv->do_read)
+        {
+          priv->state = SCI_I2C_STATE_RXDATA;
+          if (sci_i2c_read_remaining(priv) > 1u)
+            {
+              ICR_SET(priv, ICR_VAL(priv) & ~SCI_ICR_IICACKT);
+            }
+          else
+            {
+              ICR_SET(priv, ICR_VAL(priv) | SCI_ICR_IICACKT);
+            }
+          TDR_WR(priv, 0xffu);
+        }
+      else if (next->length > 0)
+        {
+          priv->state = SCI_I2C_STATE_TXDATA;
+          TDR_WR(priv, next->buffer[priv->byte_idx++]);
+        }
+      else
+        {
+          sci_i2c_complete_message(priv);
+        }
+      return;
+    }
+
+  if (current->flags & I2C_M_NOSTOP)
+    {
+      sci_i2c_next_msg(priv);
+      sci_i2c_issue_restart(priv);
+    }
+  else
+    {
+      /* STOP completion will advance and issue the next START. */
+      sci_i2c_issue_stop(priv);
+    }
 }
 
 /****************************************************************************
@@ -157,6 +252,18 @@ int sci_i2c_txi_isr(int irq, void *context, void *arg)
   /* Clear TDR empty flag (CFCLR.TDREC — write-1-clear) */
 
   CFCLR_WR(priv, SCI_CFCLR_TDREC);
+
+  if ((getreg32(REG(priv, RZV_SCI_CSR_OFFSET)) & SCI_CSR_ORER) != 0u)
+    {
+      CFCLR_WR(priv, SCI_CFCLR_ORERC);
+      if (priv->state != SCI_I2C_STATE_IDLE &&
+          priv->state != SCI_I2C_STATE_DONE)
+        {
+          priv->result = -EIO;
+          sci_i2c_issue_stop(priv);
+          return OK;
+        }
+    }
 
   if (priv->state == SCI_I2C_STATE_DONE ||
       priv->state == SCI_I2C_STATE_IDLE)
@@ -195,15 +302,7 @@ int sci_i2c_txi_isr(int irq, void *context, void *arg)
               msg->buffer[priv->byte_idx++] = data;
             }
 
-          bool more = sci_i2c_next_msg(priv);
-          if (more)
-            {
-              sci_i2c_issue_restart(priv);
-            }
-          else
-            {
-              sci_i2c_issue_stop(priv);
-            }
+          sci_i2c_complete_message(priv);
         }
 
       return OK;
@@ -264,15 +363,7 @@ int sci_i2c_txi_isr(int irq, void *context, void *arg)
             {
               /* Zero-length write — issue stop or restart */
 
-              bool more = sci_i2c_next_msg(priv);
-              if (more)
-                {
-                  sci_i2c_issue_restart(priv);
-                }
-              else
-                {
-                  sci_i2c_issue_stop(priv);
-                }
+              sci_i2c_complete_message(priv);
             }
         }
 
@@ -292,15 +383,7 @@ int sci_i2c_txi_isr(int irq, void *context, void *arg)
         {
           /* Message complete — check for more messages */
 
-          bool more = sci_i2c_next_msg(priv);
-          if (more)
-            {
-              sci_i2c_issue_restart(priv);
-            }
-          else
-            {
-              sci_i2c_issue_stop(priv);
-            }
+          sci_i2c_complete_message(priv);
         }
 
       return OK;
@@ -329,15 +412,7 @@ int sci_i2c_txi_isr(int irq, void *context, void *arg)
            * but handle gracefully.
            */
 
-          bool more = sci_i2c_next_msg(priv);
-          if (more)
-            {
-              sci_i2c_issue_restart(priv);
-            }
-          else
-            {
-              sci_i2c_issue_stop(priv);
-            }
+          sci_i2c_complete_message(priv);
         }
       else
         {
@@ -345,7 +420,7 @@ int sci_i2c_txi_isr(int irq, void *context, void *arg)
 
           irqstate_t flags = enter_critical_section();
           uint32_t icr = ICR_VAL(priv);
-          if ((msg->length - priv->byte_idx) == 1u)
+          if (sci_i2c_read_remaining(priv) == 1u)
             {
               ICR_SET(priv, icr | SCI_ICR_IICACKT);  /* NACK last byte */
             }
@@ -388,6 +463,17 @@ int sci_i2c_tei_isr(int irq, void *context, void *arg)
    */
 
   uint32_t isr = ISR_VAL(priv);
+
+  if ((getreg32(REG(priv, RZV_SCI_CSR_OFFSET)) & SCI_CSR_ORER) != 0u)
+    {
+      CFCLR_WR(priv, SCI_CFCLR_ORERC);
+      if (priv->state != SCI_I2C_STATE_IDLE &&
+          priv->state != SCI_I2C_STATE_DONE)
+        {
+          priv->result = -EIO;
+          sci_i2c_issue_stop(priv);
+        }
+    }
 
   if (!(isr & SCI_ISR_IICSTIF))
     {
@@ -437,11 +523,19 @@ int sci_i2c_tei_isr(int irq, void *context, void *arg)
       ICR_SET(priv, icr | SCI_ICR_IICSDAS_MASK | SCI_ICR_IICSCLS_MASK);
       leave_critical_section(flags);
 
-      /* Disable TE/RE */
-
-      CCR0_SET(priv, 0u);
-
-      sci_i2c_post_done(priv, priv->result);
+      if (priv->result == OK && priv->msg_idx + 1 < priv->msg_count &&
+          (priv->msgs[priv->msg_idx + 1].flags & I2C_M_NOSTART) == 0)
+        {
+          sci_i2c_next_msg(priv);
+          priv->state = SCI_I2C_STATE_ADDR;
+          sci_i2c_issue_start(priv);
+        }
+      else
+        {
+          /* Disable TE/RE */
+          CCR0_SET(priv, 0u);
+          sci_i2c_post_done(priv, priv->result);
+        }
       return OK;
     }
 

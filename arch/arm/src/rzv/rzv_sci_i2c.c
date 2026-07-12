@@ -78,6 +78,8 @@
 
 #define SCI_I2C_CCR2_BCP           4u
 
+#define SCI_I2C_RECOVERY_DELAY_US  10u
+
 /* Board must define BOARD_SCIn_I2C_SDA_GPIO / SCL_GPIO for enabled channels.
  * A missing definition causes a compile-time error here — fail fast.
  * (GPIO ABI requirement, dim 6)
@@ -125,6 +127,8 @@
 
 static int sci_i2c_transfer(struct i2c_master_s *dev,
                             struct i2c_msg_s *msgs, int count);
+static int sci_i2c_hw_init(struct rzv_sci_i2c_priv_s *priv,
+                           uint32_t scl_hz);
 #ifdef CONFIG_I2C_RESET
 static int sci_i2c_reset(struct i2c_master_s *dev);
 #endif
@@ -181,6 +185,163 @@ static struct rzv_sci_i2c_priv_s g_sci_i2c_priv[4];
  * Private Functions
  ****************************************************************************/
 
+static int sci_i2c_wait_idle(struct rzv_sci_i2c_priv_s *priv)
+{
+  uint32_t timeout;
+
+  for (timeout = SCI_I2C_CESR_TIMEOUT; timeout > 0; timeout--)
+    {
+      if ((getreg32(priv->base + RZV_SCI_CESR_OFFSET) &
+           (SCI_CESR_RIST | SCI_CESR_TIST)) == 0u)
+        {
+          return OK;
+        }
+    }
+
+  i2cerr("SCI%u: CESR timeout on disable\n", priv->channel);
+  return -ETIMEDOUT;
+}
+
+static void sci_i2c_clear_status(struct rzv_sci_i2c_priv_s *priv)
+{
+  putreg32(SCI_CFCLR_RDRFC | SCI_CFCLR_TDREC | SCI_CFCLR_ERSC |
+           SCI_CFCLR_DCMFC | SCI_CFCLR_DPERC | SCI_CFCLR_DFERC |
+           SCI_CFCLR_ORERC | SCI_CFCLR_MFFC  | SCI_CFCLR_PERC  |
+           SCI_CFCLR_FERC,
+           priv->base + RZV_SCI_CFCLR_OFFSET);
+  putreg32(SCI_ICFCLR_IICSTIFC, priv->base + RZV_SCI_ICFCLR_OFFSET);
+}
+
+static int sci_i2c_quiesce(struct rzv_sci_i2c_priv_s *priv)
+{
+  irqstate_t flags;
+  uint32_t icr;
+  int ret;
+
+  flags = enter_critical_section();
+  putreg32(0u, priv->base + RZV_SCI_CCR0_OFFSET);
+  ret = sci_i2c_wait_idle(priv);
+  sci_i2c_clear_status(priv);
+  icr = getreg32(priv->base + RZV_SCI_ICR_OFFSET);
+  putreg32(icr | SCI_ICR_IICSDAS_MASK | SCI_ICR_IICSCLS_MASK,
+           priv->base + RZV_SCI_ICR_OFFSET);
+  priv->state = SCI_I2C_STATE_IDLE;
+  leave_critical_section(flags);
+  return ret;
+}
+
+#if defined(CONFIG_I2C_RESET) || defined(CONFIG_RZV_SCI0_I2C) || \
+    defined(CONFIG_RZV_SCI1_I2C) || defined(CONFIG_RZV_SCI2_I2C) || \
+    defined(CONFIG_RZV_SCI3_I2C)
+static int sci_i2c_config_pins(struct rzv_sci_i2c_priv_s *priv)
+{
+  int ret = rzv_gpioconfig(priv->scl_gpio);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  return rzv_gpioconfig(priv->sda_gpio);
+}
+#endif
+
+#ifdef CONFIG_I2C_RESET
+static int sci_i2c_recover_bus(struct rzv_sci_i2c_priv_s *priv)
+{
+  int ret;
+
+  ret = rzv_gpioconfig(priv->scl_reset_gpio);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = rzv_gpioconfig(priv->sda_reset_gpio);
+  if (ret < 0)
+    {
+      int remux_ret = sci_i2c_config_pins(priv);
+      return remux_ret < 0 ? remux_ret : ret;
+    }
+
+  /* A slave holding SCL low cannot be recovered by clock pulses. */
+
+  rzv_gpiowrite(priv->scl_reset_gpio, true);
+  if (!rzv_gpioread(priv->scl_reset_gpio))
+    {
+      ret = sci_i2c_config_pins(priv);
+      return ret < 0 ? ret : -EBUSY;
+    }
+
+  for (unsigned int pulse = 0; pulse < 9; pulse++)
+    {
+      rzv_gpiowrite(priv->scl_reset_gpio, false);
+      up_udelay(SCI_I2C_RECOVERY_DELAY_US);
+      rzv_gpiowrite(priv->scl_reset_gpio, true);
+      up_udelay(SCI_I2C_RECOVERY_DELAY_US);
+      if (rzv_gpioread(priv->sda_reset_gpio))
+        {
+          break;
+        }
+    }
+
+  if (!rzv_gpioread(priv->sda_reset_gpio))
+    {
+      ret = sci_i2c_config_pins(priv);
+      return ret < 0 ? ret : -EBUSY;
+    }
+
+  /* STOP: SDA low while SCL is high, then release SDA. */
+
+  rzv_gpiowrite(priv->sda_reset_gpio, false);
+  up_udelay(SCI_I2C_RECOVERY_DELAY_US);
+  rzv_gpiowrite(priv->scl_reset_gpio, true);
+  up_udelay(SCI_I2C_RECOVERY_DELAY_US);
+  rzv_gpiowrite(priv->sda_reset_gpio, true);
+  up_udelay(SCI_I2C_RECOVERY_DELAY_US);
+
+  ret = sci_i2c_config_pins(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  return sci_i2c_hw_init(priv, priv->cur_scl_hz);
+}
+#endif
+
+static uint32_t sci_i2c_timeout_ms(struct i2c_msg_s *msgs, int count,
+                                   uint32_t scl_hz)
+{
+  uint64_t bits = 2u;
+  uint64_t timeout_ms;
+  int i;
+
+  for (i = 0; i < count; i++)
+    {
+      if ((msgs[i].flags & I2C_M_NOSTART) == 0)
+        {
+          bits += 9u;
+        }
+
+      bits += (uint64_t)msgs[i].length * 9u;
+    }
+
+  timeout_ms = ((bits * 1000u) + scl_hz - 1u) / scl_hz;
+  timeout_ms += 5u;
+
+  if (timeout_ms < SCI_I2C_TIMEOUT_MIN_MS)
+    {
+      return SCI_I2C_TIMEOUT_MIN_MS;
+    }
+
+  if (timeout_ms > SCI_I2C_TIMEOUT_MAX_MS)
+    {
+      return SCI_I2C_TIMEOUT_MAX_MS;
+    }
+
+  return (uint32_t)timeout_ms;
+}
+
 /****************************************************************************
  * Name: sci_i2c_hw_init
  *
@@ -197,7 +358,6 @@ static int sci_i2c_hw_init(struct rzv_sci_i2c_priv_s *priv,
 {
   uint32_t base = priv->base;
   struct sci_i2c_clock_s clk;
-  uint32_t timeout;
   int ret;
 
   /* Step 1: Set CCR0=0 (disable TE/RE/TIE/RIE/TEIE) */
@@ -206,19 +366,10 @@ static int sci_i2c_hw_init(struct rzv_sci_i2c_priv_s *priv,
 
   /* Step 2: Wait for CESR.{RIST,TIST} == 0 (transfers idle) */
 
-  for (timeout = SCI_I2C_CESR_TIMEOUT; timeout > 0; timeout--)
+  ret = sci_i2c_wait_idle(priv);
+  if (ret < 0)
     {
-      if ((getreg32(base + RZV_SCI_CESR_OFFSET) &
-           (SCI_CESR_RIST | SCI_CESR_TIST)) == 0u)
-        {
-          break;
-        }
-    }
-
-  if (timeout == 0u)
-    {
-      i2cerr("SCI%u: CESR timeout on disable\n", priv->channel);
-      return -ETIMEDOUT;
+      return ret;
     }
 
   /* Step 3: Compute baud settings (dim 3).
@@ -282,12 +433,8 @@ static int sci_i2c_hw_init(struct rzv_sci_i2c_priv_s *priv,
 
   /* Step 9: Clear all status flags (write-1-clear CFCLR/ICFCLR) */
 
-  putreg32(SCI_CFCLR_RDRFC | SCI_CFCLR_TDREC | SCI_CFCLR_ERSC |
-           SCI_CFCLR_DCMFC | SCI_CFCLR_DPERC | SCI_CFCLR_DFERC |
-           SCI_CFCLR_ORERC | SCI_CFCLR_MFFC  | SCI_CFCLR_PERC  |
-           SCI_CFCLR_FERC,
-           base + RZV_SCI_CFCLR_OFFSET);
-  putreg32(SCI_ICFCLR_IICSTIFC, base + RZV_SCI_ICFCLR_OFFSET);
+  sci_i2c_clear_status(priv);
+  priv->cur_scl_hz = scl_hz;
 
   /* Note: CCR0 (TE|RE) written in transfer() just before START */
 
@@ -330,6 +477,24 @@ static int sci_i2c_transfer(struct i2c_master_s *dev,
         {
           return -ENOTSUP;
         }
+
+      if (i == 0 && (msgs[i].flags & I2C_M_NOSTART))
+        {
+          return -EINVAL;
+        }
+
+      if (i == count - 1 && (msgs[i].flags & I2C_M_NOSTOP))
+        {
+          /* This lower half cannot retain an active bus between calls. */
+          return -ENOTSUP;
+        }
+
+      if (i > 0 && (msgs[i].flags & I2C_M_NOSTART) &&
+          (msgs[i].addr != msgs[i - 1].addr ||
+           ((msgs[i].flags ^ msgs[i - 1].flags) & I2C_M_READ) != 0))
+        {
+          return -EINVAL;
+        }
     }
 
   /* Acquire bus mutex */
@@ -340,17 +505,31 @@ static int sci_i2c_transfer(struct i2c_master_s *dev,
       return ret;
     }
 
-  /* Set up ISR transfer context.
-   * hw_init runs once in rzv_sci_i2c_initialize (#10 fix: no re-init per xfer).
-   * CCR2 baud is constant for the channel; frequency changes are not hot-swapped.
-   * (Note: if per-xfer frequency change is required, add a per-call CCR2 update
-   * here guarded by a scl_hz != priv->cur_scl_hz check — YAGNI for now.)
-   */
+  /* Quiesce the previous source and fence any stale completion before reuse. */
+
+  ret = sci_i2c_quiesce(priv);
+  if (ret < 0)
+    {
+      goto out_unlock;
+    }
+
+  ret = nxsem_reset(&priv->sem_isr, 0);
+  if (ret < 0)
+    {
+      goto out_unlock;
+    }
 
   scl_hz = (msgs[0].frequency > 0) ?
             msgs[0].frequency : SCI_I2C_DEFAULT_SCL_HZ;
 
-  (void)scl_hz; /* Frequency already applied at init time */
+  if (scl_hz != priv->cur_scl_hz)
+    {
+      ret = sci_i2c_hw_init(priv, scl_hz);
+      if (ret < 0)
+        {
+          goto out_unlock;
+        }
+    }
 
   priv->msgs         = msgs;
   priv->msg_count    = count;
@@ -383,7 +562,7 @@ static int sci_i2c_transfer(struct i2c_master_s *dev,
       /* TE/RE never became active — bail before issuing START (#9 fix) */
 
       i2cerr("SCI%u: CESR timeout on enable\n", priv->channel);
-      putreg32(0u, priv->base + RZV_SCI_CCR0_OFFSET);
+      (void)sci_i2c_quiesce(priv);
       ret = -ETIMEDOUT;
       goto out_unlock;
     }
@@ -396,9 +575,10 @@ static int sci_i2c_transfer(struct i2c_master_s *dev,
 
   /* Wait for ISR completion with timeout (dim 17) */
 
+  uint32_t timeout_ms = sci_i2c_timeout_ms(msgs, count, scl_hz);
   clock_gettime(CLOCK_REALTIME, &abstime);
-  abstime.tv_sec  += SCI_I2C_TIMEOUT_MS / 1000;
-  abstime.tv_nsec += (SCI_I2C_TIMEOUT_MS % 1000) * 1000000L;
+  abstime.tv_sec  += timeout_ms / 1000;
+  abstime.tv_nsec += (timeout_ms % 1000) * 1000000L;
   if (abstime.tv_nsec >= 1000000000L)
     {
       abstime.tv_sec++;
@@ -408,10 +588,11 @@ static int sci_i2c_transfer(struct i2c_master_s *dev,
   ret = nxsem_timedwait_uninterruptible(&priv->sem_isr, &abstime);
   if (ret == -ETIMEDOUT)
     {
-      /* Hardware abort: disable TE/RE and force idle */
+      /* Hardware abort: quiesce at the SCI source, clear stale flags, and
+       * release the bus pins. Never mask the shared GIC line here.
+       */
 
-      putreg32(0u, priv->base + RZV_SCI_CCR0_OFFSET);
-      priv->state = SCI_I2C_STATE_IDLE;
+      (void)sci_i2c_quiesce(priv);
       i2cerr("SCI%u: transfer timeout\n", priv->channel);
     }
   else
@@ -441,12 +622,24 @@ out_unlock:
 
 static int sci_i2c_reset(struct i2c_master_s *dev)
 {
-  /* Recovery requires board-defined GPIO macros.
-   * Returning -ENOSYS is honest: no phantom GPIO-bit-bang implementation.
-   */
+  struct rzv_sci_i2c_priv_s *priv =
+    (struct rzv_sci_i2c_priv_s *)dev;
+  int ret;
 
-  i2cwarn("SCI-I2C: reset requested (bus recovery not yet implemented)\n");
-  return -ENOSYS;
+  ret = nxsem_wait_uninterruptible(&priv->sem_excl);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = sci_i2c_quiesce(priv);
+  if (ret >= 0)
+    {
+      ret = sci_i2c_recover_bus(priv);
+    }
+
+  nxsem_post(&priv->sem_excl);
+  return ret;
 }
 #endif /* CONFIG_I2C_RESET */
 
@@ -511,6 +704,44 @@ struct i2c_master_s *rzv_sci_i2c_initialize(int channel)
   priv->evt_rxi   = g_sci_i2c_events[channel].rxi;
   priv->state     = SCI_I2C_STATE_IDLE;
 
+  switch (channel)
+    {
+#ifdef CONFIG_RZV_SCI0_I2C
+      case 0:
+        priv->scl_gpio       = BOARD_SCI0_I2C_SCL_GPIO;
+        priv->sda_gpio       = BOARD_SCI0_I2C_SDA_GPIO;
+        priv->scl_reset_gpio = BOARD_SCI0_I2C_SCL_RESET_GPIO;
+        priv->sda_reset_gpio = BOARD_SCI0_I2C_SDA_RESET_GPIO;
+        break;
+#endif
+#ifdef CONFIG_RZV_SCI1_I2C
+      case 1:
+        priv->scl_gpio       = BOARD_SCI1_I2C_SCL_GPIO;
+        priv->sda_gpio       = BOARD_SCI1_I2C_SDA_GPIO;
+        priv->scl_reset_gpio = BOARD_SCI1_I2C_SCL_RESET_GPIO;
+        priv->sda_reset_gpio = BOARD_SCI1_I2C_SDA_RESET_GPIO;
+        break;
+#endif
+#ifdef CONFIG_RZV_SCI2_I2C
+      case 2:
+        priv->scl_gpio       = BOARD_SCI2_I2C_SCL_GPIO;
+        priv->sda_gpio       = BOARD_SCI2_I2C_SDA_GPIO;
+        priv->scl_reset_gpio = BOARD_SCI2_I2C_SCL_RESET_GPIO;
+        priv->sda_reset_gpio = BOARD_SCI2_I2C_SDA_RESET_GPIO;
+        break;
+#endif
+#ifdef CONFIG_RZV_SCI3_I2C
+      case 3:
+        priv->scl_gpio       = BOARD_SCI3_I2C_SCL_GPIO;
+        priv->sda_gpio       = BOARD_SCI3_I2C_SDA_GPIO;
+        priv->scl_reset_gpio = BOARD_SCI3_I2C_SCL_RESET_GPIO;
+        priv->sda_reset_gpio = BOARD_SCI3_I2C_SDA_RESET_GPIO;
+        break;
+#endif
+      default:
+        return NULL;
+    }
+
   /* Semaphores: excl starts unlocked (1), isr starts locked (0) */
 
   nxsem_init(&priv->sem_excl, 0, 1);
@@ -543,26 +774,34 @@ struct i2c_master_s *rzv_sci_i2c_initialize(int channel)
     {
 #ifdef CONFIG_RZV_SCI0_I2C
       case 0:
-        rzv_gpioconfig(BOARD_SCI0_I2C_SCL_GPIO);
-        rzv_gpioconfig(BOARD_SCI0_I2C_SDA_GPIO);
+        if (sci_i2c_config_pins(priv) < 0)
+          {
+            return NULL;
+          }
         break;
 #endif
 #ifdef CONFIG_RZV_SCI1_I2C
       case 1:
-        rzv_gpioconfig(BOARD_SCI1_I2C_SCL_GPIO);
-        rzv_gpioconfig(BOARD_SCI1_I2C_SDA_GPIO);
+        if (sci_i2c_config_pins(priv) < 0)
+          {
+            return NULL;
+          }
         break;
 #endif
 #ifdef CONFIG_RZV_SCI2_I2C
       case 2:
-        rzv_gpioconfig(BOARD_SCI2_I2C_SCL_GPIO);
-        rzv_gpioconfig(BOARD_SCI2_I2C_SDA_GPIO);
+        if (sci_i2c_config_pins(priv) < 0)
+          {
+            return NULL;
+          }
         break;
 #endif
 #ifdef CONFIG_RZV_SCI3_I2C
       case 3:
-        rzv_gpioconfig(BOARD_SCI3_I2C_SCL_GPIO);
-        rzv_gpioconfig(BOARD_SCI3_I2C_SDA_GPIO);
+        if (sci_i2c_config_pins(priv) < 0)
+          {
+            return NULL;
+          }
         break;
 #endif
     }
