@@ -52,9 +52,10 @@
  * FSP computes this base as
  *   BSP_FEATURE_ICU_FIXED_INTSEL_COUNT (353, the count of FIXED SPI sources,
  *   i.e. SPI indices 0..352)
- *   + BSP_SELECT_INT_START_ELEMENT (0)
- *   + BSP_CORTEX_VECTOR_TABLE_ENTRIES (32, the SGI+PPI INTIDs 0..31)
- *   = 385   (bsp_irq.c: irq_num used as the physical INTID subscript).
+ *   + BSP_SELECT_INT_START_ELEMENT (0 for CR8-0, 85 for CR8-1)
+ *   + BSP_CORTEX_VECTOR_TABLE_ENTRIES (32, the SGI+PPI INTIDs 0..31).
+ * The first selectable GIC INTID is therefore 385; each CR8 core adds its
+ * own FSP-assigned select-slot offset.
  *
  * So INTR8SEL slot N is delivered on physical GIC INTID (385 + N).  353 is a
  * SPI-index count, NOT an INTID; adding the +32 SGI/PPI offset is required.
@@ -65,7 +66,18 @@
  * raises, leaving every INTR8SEL-routed peripheral IRQ unserviced.
  */
 
-#define RZV_INTC_SEL_SPI_BASE   (385)
+#if defined(CONFIG_RZV2H_BUILD_CR8_0)
+#  define RZV_INTC_SEL_SLOT_FIRST  (0)
+#  define RZV_INTC_SEL_SLOT_COUNT  (85)
+#elif defined(CONFIG_RZV2H_BUILD_CR8_1)
+#  define RZV_INTC_SEL_SLOT_FIRST  (85)
+#  define RZV_INTC_SEL_SLOT_COUNT  (42)
+#else
+#  error "RZ/V2H CR8 ICU requires a selected CR8 core"
+#endif
+
+#define RZV_INTC_SEL_SPI_BASE \
+  (385 + RZV_INTC_SEL_SLOT_FIRST)
 
 /****************************************************************************
  * Type Definitions
@@ -85,7 +97,7 @@ typedef struct
  * registration
  ****************************************************************************/
 
-static rzv_icu_handler_t g_icu_handlers[RZV_IRQ_ICU_SLOTS];
+static rzv_icu_handler_t g_icu_handlers[RZV_INTC_SEL_SLOT_COUNT];
 static uint32_t g_icu_slot = 0; /* next available slot */
 
 /****************************************************************************
@@ -178,7 +190,7 @@ void rzv_icu_initialize(void)
 
   /* Initialize the handlers structure */
 
-  for (i = 0; i < RZV_IRQ_ICU_SLOTS; i++)
+  for (i = 0; i < RZV_INTC_SEL_SLOT_COUNT; i++)
     {
       g_icu_handlers[i].handler = NULL;
       g_icu_handlers[i].arg = NULL;
@@ -209,7 +221,7 @@ int rzv_icu_attach(int event, xcpt_t handler, void *arg, bool irq_enable)
 
   flags = enter_critical_section();
 
-  if (g_icu_slot >= RZV_IRQ_ICU_SLOTS)
+  if (g_icu_slot >= RZV_INTC_SEL_SLOT_COUNT)
     {
       leave_critical_section(flags);
       return -ENOMEM;
@@ -219,11 +231,9 @@ int rzv_icu_attach(int event, xcpt_t handler, void *arg, bool irq_enable)
 
   leave_critical_section(flags);
 
-  /* INTR8SEL slot N is delivered on physical GIC INTID
-   * (RZV_INTC_SEL_SPI_BASE + N) = 385 + N (see the base macro for the FSP
-   * derivation).  NuttX IRQ numbers are physical GIC INTIDs, so this value
-   * is what arm_decodeirq will dispatch and what irq_attach/up_enable_irq
-   * must use.
+  /* The FSP-assigned INTR8SEL range starts at RZV_INTC_SEL_SLOT_FIRST.
+   * NuttX IRQ numbers are physical GIC INTIDs, so the per-core base is what
+   * arm_decodeirq dispatches and irq_attach/up_enable_irq must use.
    */
 
   irq = RZV_INTC_SEL_SPI_BASE + slot;
@@ -292,14 +302,14 @@ int rzv_icu_detach(int icu_irq)
    */
 
   if (icu_irq < RZV_INTC_SEL_SPI_BASE ||
-      icu_irq >= (RZV_INTC_SEL_SPI_BASE + RZV_IRQ_ICU_SLOTS))
+      icu_irq >= (RZV_INTC_SEL_SPI_BASE + RZV_INTC_SEL_SLOT_COUNT))
     {
       return -EINVAL;
     }
 
   slot = icu_irq - RZV_INTC_SEL_SPI_BASE;
 
-  if (slot < 0 || slot >= RZV_IRQ_ICU_SLOTS)
+  if (slot < 0 || slot >= RZV_INTC_SEL_SLOT_COUNT)
     {
       return -EINVAL;
     }
@@ -342,7 +352,7 @@ int rzv_icu_detach(int icu_irq)
   flags = enter_critical_section();
 
   highest_used = -1;
-  for (i = 0; i < (int)RZV_IRQ_ICU_SLOTS; i++)
+  for (i = 0; i < (int)RZV_INTC_SEL_SLOT_COUNT; i++)
     {
       if (g_icu_handlers[i].handler != NULL)
         {
@@ -381,8 +391,9 @@ int rzv_icu_set_event(int icu_slot, int event)
   int reg_num;
   int slot_idx;
   int shift;
+  int physical_slot;
 
-  if (icu_slot < 0 || icu_slot >= RZV_IRQ_ICU_SLOTS)
+  if (icu_slot < 0 || icu_slot >= RZV_INTC_SEL_SLOT_COUNT)
     {
       return -EINVAL;
     }
@@ -397,8 +408,9 @@ int rzv_icu_set_event(int icu_slot, int event)
    * to different slots sharing the same 32-bit register would clobber each.
    */
 
-  reg_num = RZV_INTC_INTR8SEL_REG(icu_slot);
-  slot_idx = RZV_INTC_INTR8SEL_IDX(icu_slot);
+  physical_slot = RZV_INTC_SEL_SLOT_FIRST + icu_slot;
+  reg_num = RZV_INTC_INTR8SEL_REG(physical_slot);
+  slot_idx = RZV_INTC_INTR8SEL_IDX(physical_slot);
   shift = RZV_INTC_INTR8SEL_SHIFT(slot_idx);
 
   regaddr = RZV_INTC_INTR8SEL(reg_num);
@@ -625,7 +637,7 @@ int rzv_icu_set_priority(int icu_irq, int priority)
    */
 
   if (icu_irq < RZV_INTC_SEL_SPI_BASE ||
-      icu_irq >= (RZV_INTC_SEL_SPI_BASE + RZV_IRQ_ICU_SLOTS))
+      icu_irq >= (RZV_INTC_SEL_SPI_BASE + RZV_INTC_SEL_SLOT_COUNT))
     {
       return -EINVAL;
     }

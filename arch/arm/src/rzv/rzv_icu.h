@@ -45,10 +45,10 @@
  *
  * Selectable slot→INTID mapping:
  *   FSP FIXED_INTSEL_COUNT = 353 (first SELECT entry, FSP IRQn space).
- *   NuttX SEL base = 353 + RZV_IRQ_FIRST(32) = 385 (RZV_INTC_SEL_SPI_BASE in
- *   rzv_icu.c).  INTR8SEL slot N → GIC INTID (385 + N).  rzv_icu_attach()
- *   returns that INTID; pass it to up_enable_irq/up_disable_irq and
- *   rzv_icu_detach().
+ *   NuttX SEL base = 353 + RZV_IRQ_FIRST(32) = 385.  CR8-0 owns slots
+ *   0..84; CR8-1 owns slots 85..126.  rzv_icu_attach() returns the physical
+ *   GIC INTID for the selected core's next available slot; pass it to
+ *   up_enable_irq/up_disable_irq and rzv_icu_detach().
  *
  * Two registration idioms (see rzv2h_irq.h naming discipline):
  *   Fixed source:      int irq = RZV_IRQ_SPI_ERI(ch);   // RZV_IRQ_* = INTID
@@ -253,7 +253,7 @@ int rzv_icu_set_priority(int icu_irq, int priority);
  *   directly for advanced use cases.
  *
  * Input Parameters:
- *   icu_slot - Slot number (0-95)
+ *   icu_slot - Core-local selectable slot number
  *   event    - ELC event number to route to this slot
  *
  * Returned Value:

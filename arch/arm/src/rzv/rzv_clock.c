@@ -1101,6 +1101,7 @@ uint32_t rzv_get_gpt_clock_hz(void)
  *
  ****************************************************************************/
 
+#if defined(CONFIG_RZV2H_BUILD_CM33)
 static void rzv_pll_init(void)
 {
   uint32_t pll_mon;
@@ -1490,6 +1491,7 @@ static void rzv_pll_init(void)
 
   clkinfo("PLL initialization complete\n");
 }
+#endif
 
 /****************************************************************************
  * Name: rzv_clock_divider_init
@@ -1768,9 +1770,12 @@ void rzv_clock_config(void)
 {
   clkinfo("Starting clock configuration...\n");
 
-  /* Initialize PLLs first */
-
+  /* The external loader or CM33 owns global PLL programming. */
+#if defined(CONFIG_RZV2H_BUILD_CR8_0) || defined(CONFIG_RZV2H_BUILD_CR8_1)
+  clkinfo("CR8 build: global PLL configuration owned by loader/CM33\n");
+#else
   rzv_pll_init();
+#endif
 
   /* Configure clock dividers */
 

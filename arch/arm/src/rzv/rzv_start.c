@@ -109,11 +109,11 @@ static volatile uint32_t g_protect_counters[3] =
  * Name: rzv_enable_tcm
  *
  * Description:
- *   Enable ITCM and DTCM with ECC if supported
+ *   Enable TCM ECC after assembly startup has enabled the DTCM window
  *
  ****************************************************************************/
 
-static inline void rzv_enable_tcm(void)
+static inline void rzv_enable_tcm_ecc(void)
 {
   uint32_t actlr;
 
@@ -394,8 +394,8 @@ void arm_boot(void)
 
   showprogress('A');
 
-  /* Enable TCM with ECC */
-  rzv_enable_tcm();
+  /* Enable TCM ECC after the DTCM window is available to the initial stack. */
+  rzv_enable_tcm_ecc();
 
   showprogress('B');
 

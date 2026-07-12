@@ -138,6 +138,17 @@ __start:
 
 	cpsid		if, #PSR_MODE_SYS
 
+	/* RZ/V2H CR8 starts with DTCM disabled.  The initial stack is linker-
+	 * placed in DTCM, so enable its local 128 KiB window before loading SP.
+	 */
+
+#ifdef CONFIG_ARCH_CHIP_RZV
+	mov		r0, #0x00020000
+	orr		r0, r0, #0x21
+	mcr		p15, #0, r0, c9, c1, 0
+	isb
+#endif
+
 	/* Set up the stack pointer and clear the frame pointer. */
 
 	ldr		sp, .Lstackpointer
