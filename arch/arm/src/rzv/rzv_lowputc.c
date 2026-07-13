@@ -57,7 +57,7 @@
 /* Select console channel by CONFIG_SCIx_SERIAL_CONSOLE.
  *
  * SCI4 (P7_0=TXD, P7_1=RXD) is the confirmed console for the NuttX nsh
- * sample configs: it maps to UART4 on the RDK 40-pin header (HARDWARE.md /
+ * sample configs: it maps to UART4 on the RDK 40-pin header (RDK-RZ/V2H pinout /
  * FSP pin_data.c), so it is physically reachable during bring-up.
  * SCI3 (P3_4/P3_5) remains the PX4 flight console (see boards/renesas/...),
  * but its routing to the RDK debug header is UNCONFIRMED — do not default to

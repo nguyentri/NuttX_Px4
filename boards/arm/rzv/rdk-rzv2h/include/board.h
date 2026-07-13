@@ -312,7 +312,7 @@
 
 /* SPI bus configuration (per PX4 board_config.h)
  *
- * RSPI0 = single bus for MPU9250 IMU. Single-IMU per HARDWARE.md BOM.
+ * RSPI0 = single bus for MPU9250 IMU. Single-IMU per RDK-RZ/V2H pinout BOM.
  * P94/SSLA1 is routed but unused (no second IMU wired).
  */
 

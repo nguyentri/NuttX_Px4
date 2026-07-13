@@ -1,5 +1,5 @@
 #
-# HWTEST HIL full — real PX4 drone sensors per HARDWARE.md.
+# HWTEST HIL full — real PX4 drone sensors per RDK-RZ/V2H pinout.
 # MPU9250 (SPI Pin19/21/23/24), BMP280 (I2C7 Pin3/5), GPS-M10 (UART9),
 # TFmini (UART4), Sik (UART5 optional).
 #
