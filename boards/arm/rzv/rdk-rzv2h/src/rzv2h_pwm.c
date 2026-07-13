@@ -22,19 +22,21 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #ifdef CONFIG_RZV_PWM
 
 #include <errno.h>
 #include <stdbool.h>
 
 #include <nuttx/board.h>
-#include <nuttx/errno.h>
 #include <nuttx/timers/pwm.h>
+
+#include <arch/board/board.h>
 
 #include "rzv_gpio.h"
 #include "rzv_gpt.h"
 #include "rdk-rzv2h.h"
-#include "board.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -68,18 +70,12 @@ struct rzv2h_pwm_channel_s
 
 int rzv2h_pwm_setup(void)
 {
-  /* Logical channel mapping (after phantom GPT8/9 removal):
-   *   logical 6  = physical GPT6  (unit0, base 0x13010600)
-   *   logical 7  = physical GPT7  (unit0, base 0x13010700)
-   *   logical 8  = physical GPT10 (unit1, base 0x13020000) ← was wrongly "9"
-   *   logical 9  = physical GPT11 (unit1, base 0x13020100) ← was wrongly "10"
-   * Old channel 9 accessed RZV_GPT9_BASE = 0x13010900 (BUS FAULT, now removed). */
   static const struct rzv2h_pwm_channel_s channels[RZV2H_PWM_CHANNEL_COUNT] =
   {
     { "/dev/pwm0", 6, BOARD_PWM_CH0_GPIO },
     { "/dev/pwm1", 7, BOARD_PWM_CH1_GPIO },
-    { "/dev/pwm2", 8, BOARD_PWM_CH2_GPIO },  /* physical GPT10 */
-    { "/dev/pwm3", 9, BOARD_PWM_CH3_GPIO },  /* physical GPT11 */
+    { "/dev/pwm2", 9, BOARD_PWM_CH2_GPIO },
+    { "/dev/pwm3", 10, BOARD_PWM_CH3_GPIO },
   };
 
   static bool initialized;

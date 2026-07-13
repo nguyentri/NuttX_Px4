@@ -76,7 +76,6 @@ struct rzv_gpt_lowerhalf_s
 {
   struct pwm_lowerhalf_s dev;
   uintptr_t              base;
-  uint32_t               clkid;
   uint32_t               pclk;
   uint32_t               period;
   uint8_t                channel;   /* Logical channel index (0-15) */
@@ -154,55 +153,6 @@ static const struct pwm_ops_s g_rzv_gpt_ops =
   .ioctl    = rzv_gpt_ioctl,
 };
 
-/* Base address table indexed by the hardware GPT number. */
-static const uintptr_t g_rzv_gpt_base[RZV_GPT_MAX_CHANNELS] =
-{
-  RZV_GPT0_BASE,
-  RZV_GPT1_BASE,
-  RZV_GPT2_BASE,
-  RZV_GPT3_BASE,
-  RZV_GPT4_BASE,
-  RZV_GPT5_BASE,
-  RZV_GPT6_BASE,
-  RZV_GPT7_BASE,
-  RZV_GPT8_BASE,
-  RZV_GPT9_BASE,
-  RZV_GPT10_BASE,
-  RZV_GPT11_BASE,
-  RZV_GPT12_BASE,
-  RZV_GPT13_BASE,
-  RZV_GPT14_BASE,
-  RZV_GPT15_BASE,
-  RZV_GPT16_BASE,
-  RZV_GPT17_BASE,
-};
-
-/* Clock-enable IDs for each logical channel.
- * GPT0-7 (unit0) share CPG gate at domain 4 bits 0-7 (UNVERIFIED).
- * GPT10-17 (unit1) assumed same domain, bits 8-15 as placeholder.
- * Actual mapping requires RZ/V2H UM Table 9.x confirmation. */
-static const uint32_t g_rzv_gpt_clkid[RZV_GPT_MAX_CHANNELS] =
-{
-  RZV_CPG_CLK_GPT0,
-  RZV_CPG_CLK_GPT1,
-  RZV_CPG_CLK_GPT2,
-  RZV_CPG_CLK_GPT3,
-  RZV_CPG_CLK_GPT4,
-  RZV_CPG_CLK_GPT5,
-  RZV_CPG_CLK_GPT6,
-  RZV_CPG_CLK_GPT7,
-  RZV_CPG_CLK_GPT8,
-  RZV_CPG_CLK_GPT9,
-  RZV_CPG_CLK_GPT10,
-  RZV_CPG_CLK_GPT11,
-  RZV_CPG_CLK_GPT12,
-  RZV_CPG_CLK_GPT13,
-  RZV_CPG_CLK_GPT14,
-  RZV_CPG_CLK_GPT15,
-  RZV_CPG_CLK_GPT16,
-  RZV_CPG_CLK_GPT17,
-};
-
 static const struct rzv_gpt_divider_s g_rzv_gpt_dividers[] =
 {
   { 1,  GPT_TPCS_DIV1 },
@@ -225,7 +175,7 @@ static const struct rzv_gpt_divider_s g_rzv_gpt_dividers[] =
 /* Overflow ELC event IDs per logical channel.
  * Unit0 (logical 0-7) → U0 events; Unit1 (logical 8-15) → U1 events.
  * U1 events for GPT10-17 are indexed 0-7 within unit1. */
-static const uint16_t g_rzv_gpt_overflow_event[RZV_GPT_MAX_CHANNELS] =
+static const uint16_t g_rzv_gpt_overflow_event[RZV_GPT_LOGICAL_CHANNELS] =
 {
   RZV_ELC_GPT_U0_GPT_ELCOVF_0,  /* logical 0  */
   RZV_ELC_GPT_U0_GPT_ELCOVF_1,  /* logical 1  */
@@ -262,10 +212,9 @@ static const uint16_t g_rzv_gpt_overflow_event[RZV_GPT_MAX_CHANNELS] =
 #define RZV_GPT_LOWER_INIT(ch)                                 \
   {                                                             \
     .dev       = { .ops = &g_rzv_gpt_ops },                     \
-    .base      = g_rzv_gpt_base[ch],                            \
-    .clkid     = g_rzv_gpt_clkid[ch],                           \
+    .base      = RZV_GPT_LOGICAL_BASE(ch),                       \
     .channel   = (ch),                                          \
-    .hw_ch     = ((ch) >= 10 ? ((ch) - 10u) : (ch)),             \
+    .hw_ch     = RZV_GPT_LOGICAL_UNIT_CHANNEL(ch),               \
     .pclk      = 0,                                             \
     .period    = 0,                                             \
     .divsel    = 0,                                             \
@@ -570,22 +519,7 @@ static int rzv_gpt_setup(FAR struct pwm_lowerhalf_s *dev)
       return OK;
     }
 
-  ret = rzv_clock_enable(priv->clkid);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  ret = rzv_module_reset(priv->clkid);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  /* Deassert reset so module exits reset state before register programming.
-   * Mirror HRT pattern (rzv_hrt.c:274): reset pulse = assert + deassert.
-   * Without unreset, all register writes after this point are no-ops. */
-  ret = rzv_module_unreset(priv->clkid);
+  ret = rzv_gpt_module_start(priv->channel);
   if (ret < 0)
     {
       return ret;
@@ -639,7 +573,7 @@ static int rzv_gpt_shutdown(FAR struct pwm_lowerhalf_s *dev)
     }
 #endif
 
-  rzv_clock_disable(priv->clkid);
+  (void)rzv_gpt_module_stop(priv->channel);
   priv->initialized = false;
   return OK;
 }

@@ -27,6 +27,8 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -81,17 +83,22 @@
 #ifndef RZV_GPT7_BASE
 #  define RZV_GPT7_BASE               0x13010700
 #endif
-#ifndef RZV_GPT8_BASE
-#  define RZV_GPT8_BASE               0x13010800
-#endif
-#ifndef RZV_GPT9_BASE
-#  define RZV_GPT9_BASE               0x13010900
-#endif
+/* FSP exposes 16 contiguous GPT channel IDs.  The second GPT unit begins at
+ * physical GPT10, so logical channels 8-15 map to physical GPT10-17. */
+#define RZV_GPT_LOGICAL_CHANNELS       16u
+#define RZV_GPT_LOGICAL_CHANNEL_VALID(ch) \
+  ((unsigned int)(ch) < RZV_GPT_LOGICAL_CHANNELS)
+#define RZV_GPT_LOGICAL_UNIT_CHANNEL(ch) \
+  ((unsigned int)(ch) < 8u ? (unsigned int)(ch) : (unsigned int)(ch) - 8u)
+#define RZV_GPT_LOGICAL_BASE(ch) \
+  ((uintptr_t)((unsigned int)(ch) < 8u ? \
+    RZV_GPT0_BASE + ((unsigned int)(ch) * 0x100u) : \
+    RZV_GPT10_BASE + (((unsigned int)(ch) - 8u) * 0x100u)))
 
-/* RZV_GPT_UNIT_BIT: produce a single-bit mask for a unit-local hw channel.
- * Input hw_ch MUST be 0-7 (unit-local, NOT the logical driver channel 0-15).
- * Used for GTSTR/GTSTP/GTCLR — value is 1U << (channel % 8). */
-#define RZV_GPT_UNIT_BIT(hw_ch)       (1u << (hw_ch))
+/* Produce the unit-local bit used by GTSTR, GTSTP, and GTCLR. */
+#define RZV_GPT_UNIT_BIT(unit_ch)      (1u << (unit_ch))
+#define RZV_GPT_LOGICAL_UNIT_BIT(ch)   \
+  RZV_GPT_UNIT_BIT(RZV_GPT_LOGICAL_UNIT_CHANNEL(ch))
 
 /* GPT Register Offsets ***************************************************/
 

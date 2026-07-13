@@ -77,6 +77,7 @@
 #endif
 
 #include "rzv_clock.h"
+#include "hardware/rzv_gpt.h"
 
 
 
@@ -143,6 +144,13 @@
 /* Legacy timeout for compatibility */
 #define CPG_TIMEOUT_COUNT         CPG_TIMEOUT_CLOCK_ENABLE
 
+#define RZV_GPT_UNIT_COUNT        2u
+#define RZV_GPT_CLKON_BIT(unit)   (1u << (1u + (unit)))
+#define RZV_GPT_CLKMON_BIT(unit)  (1u << (17u + (unit)))
+#define RZV_GPT_MSTOP_BIT(unit)   (1u << (11u + (unit)))
+#define RZV_GPT_RST_BIT(unit)     (3u << (9u + ((unit) * 2u)))
+#define RZV_GPT_RSTMON_BIT(unit)  (3u << (10u + ((unit) * 2u)))
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -155,6 +163,7 @@ struct rzv_clock_cfg_entry_s
 
 static uint32_t g_clock_freq[RZV_CLOCK_MAX];
 static bool g_clock_freq_valid;
+static uint16_t g_rzv_gpt_unit_users[RZV_GPT_UNIT_COUNT];
 
 /* CR8 CPU clock (I6CLK) decoded from CDDIV2.DIVCTL1 at boot; 0 = not decoded,
  * in which case the compile-time default is used.
@@ -561,6 +570,138 @@ static int rzv_cpg_sci_reset_ctrl(int ch, bool assert_rst)
       gstart    += n;
       remaining -= n;
     }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: rzv_gpt_clock_ctrl
+ ****************************************************************************/
+
+static int rzv_gpt_clock_ctrl(unsigned int unit, bool enable)
+{
+  uint32_t clkon_bit = RZV_GPT_CLKON_BIT(unit);
+  uint32_t clkmon_bit = RZV_GPT_CLKMON_BIT(unit);
+  uint32_t mask = (clkon_bit << 16) | (enable ? clkon_bit : 0u);
+  irqstate_t flags;
+  int ret;
+  int retry;
+
+  for (retry = 0; retry <= CPG_MAX_RETRIES; retry++)
+    {
+      flags = enter_critical_section();
+      rzv_cpg_putreg(mask, RZV_CPG_CLKON(3));
+      leave_critical_section(flags);
+
+      ret = rzv_cpg_wait_bit(RZV_CPG_CLKMON(1), clkmon_bit, enable,
+                             enable ? CPG_TIMEOUT_CLOCK_ENABLE :
+                                      CPG_TIMEOUT_CLOCK_DISABLE);
+      if (ret >= 0)
+        {
+          return OK;
+        }
+
+      if (retry < CPG_MAX_RETRIES)
+        {
+          up_udelay(CPG_RETRY_DELAY_US << retry);
+        }
+    }
+
+  clkerr("ERROR: GPT unit %u clock %s failed\n", unit,
+         enable ? "enable" : "disable");
+  return ret;
+}
+
+/****************************************************************************
+ * Name: rzv_gpt_module_start
+ ****************************************************************************/
+
+int rzv_gpt_module_start(unsigned int channel)
+{
+  unsigned int unit;
+  uint32_t mstop_bit;
+  uint32_t reset_bit;
+  irqstate_t flags;
+  int ret;
+  int retry;
+
+  if (!RZV_GPT_LOGICAL_CHANNEL_VALID(channel))
+    {
+      return -EINVAL;
+    }
+
+  unit = channel / 8u;
+
+  /* Claim the unit before touching CPG so a shutdown of another channel in
+   * the same unit cannot gate the clock while this start is in progress. */
+
+  flags = enter_critical_section();
+  g_rzv_gpt_unit_users[unit]++;
+  leave_critical_section(flags);
+
+  ret = rzv_gpt_clock_ctrl(unit, true);
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+  mstop_bit = RZV_GPT_MSTOP_BIT(unit);
+  flags = enter_critical_section();
+  rzv_cpg_putreg(mstop_bit << 16, RZV_CPG_BUS_6_MSTOP);
+  (void)rzv_cpg_getreg(RZV_CPG_BUS_6_MSTOP);
+  leave_critical_section(flags);
+
+  reset_bit = RZV_GPT_RST_BIT(unit);
+  for (retry = 0; retry <= CPG_MAX_RETRIES; retry++)
+    {
+      flags = enter_critical_section();
+      rzv_cpg_putreg((reset_bit << 16) | reset_bit, RZV_CPG_RST(5));
+      leave_critical_section(flags);
+
+      ret = rzv_cpg_wait_bit(RZV_CPG_RSTMON(2), RZV_GPT_RSTMON_BIT(unit),
+                             false, CPG_TIMEOUT_RESET_RELEASE);
+      if (ret >= 0)
+        {
+          return OK;
+        }
+
+      if (retry < CPG_MAX_RETRIES)
+        {
+          up_udelay(CPG_RETRY_DELAY_US << retry);
+        }
+    }
+
+  clkerr("ERROR: GPT unit %u reset release failed\n", unit);
+
+errout:
+  flags = enter_critical_section();
+  g_rzv_gpt_unit_users[unit]--;
+  leave_critical_section(flags);
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: rzv_gpt_module_stop
+ ****************************************************************************/
+
+int rzv_gpt_module_stop(unsigned int channel)
+{
+  unsigned int unit;
+  irqstate_t flags;
+
+  if (!RZV_GPT_LOGICAL_CHANNEL_VALID(channel))
+    {
+      return -EINVAL;
+    }
+
+  unit = channel / 8u;
+  flags = enter_critical_section();
+  if (g_rzv_gpt_unit_users[unit] > 0)
+    {
+      g_rzv_gpt_unit_users[unit]--;
+    }
+  leave_critical_section(flags);
 
   return OK;
 }

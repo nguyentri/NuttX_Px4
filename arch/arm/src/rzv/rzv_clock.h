@@ -112,28 +112,6 @@
 #define RZV_CPG_CLK_I2C2            (3 << 16 | 2)
 #define RZV_CPG_CLK_I2C3            (3 << 16 | 3)
 
-/* GPT timers - UNVERIFIED: needs RZ/V2H UM confirmation.
- * CPG_CLKON_GPT named alias not present in R9A09G057H iobitmask → numeric
- * mapping TBD. */
-#define RZV_CPG_CLK_GPT0            (4 << 16 | 0)
-#define RZV_CPG_CLK_GPT1            (4 << 16 | 1)
-#define RZV_CPG_CLK_GPT2            (4 << 16 | 2)
-#define RZV_CPG_CLK_GPT3            (4 << 16 | 3)
-#define RZV_CPG_CLK_GPT4            (4 << 16 | 4)
-#define RZV_CPG_CLK_GPT5            (4 << 16 | 5)
-#define RZV_CPG_CLK_GPT6            (4 << 16 | 6)
-#define RZV_CPG_CLK_GPT7            (4 << 16 | 7)
-#define RZV_CPG_CLK_GPT8            (4 << 16 | 8)
-#define RZV_CPG_CLK_GPT9            (4 << 16 | 9)
-#define RZV_CPG_CLK_GPT10           (4 << 16 | 10)
-#define RZV_CPG_CLK_GPT11           (4 << 16 | 11)
-#define RZV_CPG_CLK_GPT12           (4 << 16 | 12)
-#define RZV_CPG_CLK_GPT13           (4 << 16 | 13)  /* UNVERIFIED — placeholder, needs RZ/V2H UM */
-#define RZV_CPG_CLK_GPT14           (4 << 16 | 14)  /* UNVERIFIED — placeholder, needs RZ/V2H UM */
-#define RZV_CPG_CLK_GPT15           (4 << 16 | 15)  /* UNVERIFIED — placeholder, needs RZ/V2H UM */
-#define RZV_CPG_CLK_GPT16           (4 << 16 | 16)  /* UNVERIFIED — placeholder, needs RZ/V2H UM */
-#define RZV_CPG_CLK_GPT17           (4 << 16 | 17)  /* UNVERIFIED — placeholder, needs RZ/V2H UM */
-
 /* OSTM timers - UNVERIFIED: needs RZ/V2H UM confirmation.
  * GPT and OSTM likely share CPG_CLKON_4 but bit offsets unknown. */
 #define RZV_CPG_CLK_OSTM0           (4 << 16 | 11)
@@ -597,6 +575,28 @@ int rzv_module_reset(uint32_t clk_id);
  ****************************************************************************/
 
 int rzv_module_unreset(uint32_t clk_id);
+
+/****************************************************************************
+ * Name: rzv_gpt_module_start
+ *
+ * Description:
+ *   Start the GPT hardware unit containing a logical GPT channel.  The
+ *   RZ/V2H CPG controls GPT0-7 and GPT10-17 as two shared units.
+ *
+ ****************************************************************************/
+
+int rzv_gpt_module_start(unsigned int channel);
+
+/****************************************************************************
+ * Name: rzv_gpt_module_stop
+ *
+ * Description:
+ *   Release a GPT channel user. The shared unit clock remains enabled, as
+ *   required by the FSP GPT module-stop sequence.
+ *
+ ****************************************************************************/
+
+int rzv_gpt_module_stop(unsigned int channel);
 
 /****************************************************************************
  * Name: rzv_get_pclk_frequency
