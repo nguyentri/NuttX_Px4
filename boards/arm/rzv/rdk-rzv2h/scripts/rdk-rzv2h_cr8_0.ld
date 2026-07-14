@@ -238,7 +238,6 @@ SECTIONS
         . = ALIGN(0x04);
 
 
-      /* Project/user data placed in ITCM when necessary */
         ./nuttx/**/*.obj (.data .data.*)
         ./nuttx/**/*.o    (.data .data.*)
         ./apps/**/*.obj   (.data .data.*)

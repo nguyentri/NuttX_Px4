@@ -236,11 +236,8 @@ static inline void rzv_disable_dcache_early(void)
  * Public Functions
  ****************************************************************************/
 
-/* DDR "user" BSS collected by the CR8 linker script.  The section globs in
- * rdk-rzv2h_cr8_0.ld only match loose ./nuttx/**.o and ./apps/**.o objects,
- * not lib*.a archive members, so all archive-member .bss/.sbss/COMMON
- * (g_current_regs, the ICU handler table, the clock cache, libsched globals,
- * ...) lands in this DDR region, not in the empty DTCM _sbss.._ebss range.
+/*
+ * DDR "user" BSS collected by the CR8 linker script.
  */
 
 extern uint32_t __bss_usr_start__;
