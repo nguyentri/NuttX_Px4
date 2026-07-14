@@ -387,24 +387,16 @@ void arm_boot(void)
   rzv_disable_dcache_early();
 
   /* Route exceptions to linker-placed _vectors at ITCM 0 */
-  rzv_set_vbar();
-
-  showprogress('A');
+  //rzv_set_vbar();
 
   /* Enable TCM ECC after the DTCM window is available to the initial stack. */
   rzv_enable_tcm_ecc();
 
-  showprogress('B');
-
   /* Configure clocks early - needed for peripherals */
   rzv_clock_config();
 
-  showprogress('C');
-
   /* Initialize RAM sections (BSS and DATA) */
   rzv_ram_init();
-
-  showprogress('D');
 
   /* Programme MPU regions before enabling caches.
    * This must run after RAM init (region table is in .data/.rodata) but
@@ -413,8 +405,6 @@ void arm_boot(void)
 #ifdef CONFIG_RZV_MPU
   rzv_mpu_init();
 #endif
-
-  showprogress('E');
 
   /* Enable caches and branch prediction */
   rzv_enable_caches();
@@ -428,19 +418,17 @@ void arm_boot(void)
   /* Configure low-level serial for early debug output */
   rzv_lowsetup();
 
-  showprogress('F');
-
   /* Perform early serial initialization if configured */
 #ifdef USE_EARLYSERIALINIT
   rzv_earlyserialinit();
 #endif
 
-  showprogress('G');
+  showprogress('A');
 
   /* Initialize board-specific hardware */
   rzv_board_initialize();
 
-  showprogress('H');
+  showprogress('B');
 
   /* Then start NuttX */
   showprogress('\r');
