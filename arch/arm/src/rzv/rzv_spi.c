@@ -52,6 +52,24 @@
  *   [M12] rzv_spi_setbits_dev guard removed; HW always programmed on call.
  *   [L13] SSLA(0) explicit in SPCMD0 init.
  *   [L14] LSBF implicitly 0 via full mask; comment added.
+ *
+ * Re-audit-260718 findings applied (from-ck-plan-audit-260718-2052-nuttx-spi-native-reaudit-report):
+ *   [9.1 HIGH] rzv_spibus_initialize() is now idempotent: an `initialized`
+ *              flag on the priv struct short-circuits repeat calls.  Any
+ *              caller ordering (bringup + example wrapper) is safe.
+ *   [9.2 MED]  Dead IRQ-driven path deleted: rxi/txi/tei/eri ISRs, their
+ *              attach block, and the IRQ-only priv-state fields
+ *              (waitsem, txbuffer, rxbuffer, ntxwords, nrxwords, error,
+ *              irq_rxi/txi/tei/eri) are removed.  Polled send()/exchange()
+ *              are the only transfer paths.  If IRQ mode is needed later
+ *              it must be added purposefully (likely bundled with DMA).
+ *   [9.3 MED]  CENDIE arming site died with the ISR delete.
+ *   [9.4 MED]  priv->error latching site died with the eri ISR delete.
+ *   [9.5 MED]  See boards/arm/rzv/rdk-rzv2h/src/rzv2h_spi.c:
+ *              board_spi_initialize() now iterates every CONFIG_RZV_SPIn
+ *              channel via a per-channel bringup helper.
+ *   NOTE: SPEIE is dropped from the init SPCR write — no error ISR remains.
+ *   Polled send()/exchange() detect OVRF/UDRF/MODF via direct SPSR reads.
  */
 
 /****************************************************************************
@@ -77,7 +95,6 @@
 #include "arm_internal.h"
 #include "chip.h"
 #include "rzv_clock.h"
-#include "rzv_icu.h"
 #include "rzv_gpio.h"
 #include "hardware/rzv_spi.h"
 #include "rzv_spi.h"
@@ -109,17 +126,6 @@ struct rzv_spi_config_s
   uint8_t   port;          /* SPI port number (0-2) */
   uint32_t  clk_id;        /* CPG clock gate ID */
   enum rzv_clock_id_e spi_clock; /* SPI clock source for baud rate calc */
-  /* Only RXI/TXI are INTR8SEL-selectable on RZ/V2H SPI-B; ERI (SPEI) and
-   * TEI (SPCEND) have dedicated fixed GIC INTIDs derived from `port` via
-   * RZV_IRQ_SPI_ERI(port)/RZV_IRQ_SPI_CE(port).  Attach ERI/TEI directly
-   * with irq_attach() — do NOT push them through rzv_icu_attach(): fixed
-   * lines cannot be re-routed by INTR8SEL and doing so returns a phantom
-   * INTID (see FSP rzv_gen/vector_data.c: spi_b_eri_isr on INTID 106,
-   * spi_b_tei_isr on INTID 107).
-   */
-
-  uint16_t  elc_rxi;       /* ELC event: RX buffer full (INTR8SEL) */
-  uint16_t  elc_txi;       /* ELC event: TX buffer empty (INTR8SEL) */
 };
 
 /* SPI Device Private Data */
@@ -129,27 +135,12 @@ struct rzv_spi_priv_s
   struct spi_dev_s          spidev;   /* Externally visible part */
   const struct rzv_spi_config_s *config;
   sem_t  exclsem;                     /* Mutual exclusion semaphore */
-  sem_t  waitsem;                     /* IRQ transfer completion sem */
 
   uint32_t frequency;                 /* Requested clock frequency */
   uint32_t actual;                    /* Achieved clock frequency */
   uint8_t  nbits;                     /* Current word width (8/16/32) */
   uint8_t  mode;                      /* Current SPI mode */
-
-  /* IRQ slots — kept as -1 until successfully attached */
-
-  int  irq_rxi;
-  int  irq_txi;
-  int  irq_tei;
-  int  irq_eri;
-
-  /* IRQ-driven transfer state */
-
-  const void *txbuffer;
-  void       *rxbuffer;
-  size_t      ntxwords;
-  size_t      nrxwords;
-  bool        error;
+  bool     initialized;               /* Idempotency guard (finding 9.1) */
 };
 
 /****************************************************************************
@@ -170,13 +161,6 @@ static void rzv_spi_setfrequency(struct rzv_spi_priv_s *priv,
                                  uint32_t frequency);
 static int  rzv_spi_setmode(struct rzv_spi_priv_s *priv, uint8_t mode);
 static int  rzv_spi_setbits(struct rzv_spi_priv_s *priv, int nbits);
-
-/* Interrupt handlers */
-
-static int rzv_spi_rxi_interrupt(int irq, void *context, void *arg);
-static int rzv_spi_txi_interrupt(int irq, void *context, void *arg);
-static int rzv_spi_tei_interrupt(int irq, void *context, void *arg);
-static int rzv_spi_eri_interrupt(int irq, void *context, void *arg);
 
 /* NuttX SPI ops */
 
@@ -281,18 +265,12 @@ static const struct rzv_spi_config_s g_spi0_config =
    * (200 MHz) is NOT the SPI clock tree; using it made the baud rate ~25% low.
    */
   .spi_clock = RZV_CLOCK_SPI0CLK,
-  .elc_rxi   = RZV_ELC_SP_ELCRDRF_0,
-  .elc_txi   = RZV_ELC_SP_ELCTDRE_0,
 };
 
 static struct rzv_spi_priv_s g_spi0_priv =
 {
   .spidev.ops = &g_spi_ops,
   .config     = &g_spi0_config,
-  .irq_rxi    = -1,
-  .irq_txi    = -1,
-  .irq_tei    = -1,
-  .irq_eri    = -1,
 };
 #endif /* CONFIG_RZV_SPI0 */
 
@@ -308,18 +286,12 @@ static const struct rzv_spi_config_s g_spi1_config =
    * all P4CLK.
    */
   .spi_clock = RZV_CLOCK_SPI1CLK,
-  .elc_rxi   = RZV_ELC_SP_ELCRDRF_1,
-  .elc_txi   = RZV_ELC_SP_ELCTDRE_1,
 };
 
 static struct rzv_spi_priv_s g_spi1_priv =
 {
   .spidev.ops = &g_spi_ops,
   .config     = &g_spi1_config,
-  .irq_rxi    = -1,
-  .irq_txi    = -1,
-  .irq_tei    = -1,
-  .irq_eri    = -1,
 };
 #endif /* CONFIG_RZV_SPI1 */
 
@@ -848,204 +820,6 @@ static void rzv_spi_recvblock(struct spi_dev_s *dev,
 #endif
 
 /****************************************************************************
- * Name: rzv_spi_rxi_interrupt
- *
- * Description:
- *   RX buffer full — drain one word from SPDR.
- * 32-bit SPDR.
- * clear SPRFC after read.
- ****************************************************************************/
-
-static int rzv_spi_rxi_interrupt(int irq, void *context, void *arg)
-{
-  struct rzv_spi_priv_s *priv = (struct rzv_spi_priv_s *)arg;
-  uint32_t data;
-
-  UNUSED(irq);
-  UNUSED(context);
-
-  if (priv->nrxwords > 0)
-    {
-      data = rzv_spi_getreg32(priv, RZV_SPI_SPDR_OFFSET);
-
-      if (priv->rxbuffer != NULL)
-        {
-          if (priv->nbits <= 8)
-            {
-              uint8_t *p8 = (uint8_t *)priv->rxbuffer;
-              *p8++ = (uint8_t)data;
-              priv->rxbuffer = p8;
-            }
-          else if (priv->nbits <= 16)
-            {
-              uint16_t *p16 = (uint16_t *)priv->rxbuffer;
-              *p16++ = (uint16_t)data;
-              priv->rxbuffer = p16;
-            }
-          else
-            {
-              uint32_t *p32 = (uint32_t *)priv->rxbuffer;
-              *p32++ = data;
-              priv->rxbuffer = p32;
-            }
-        }
-
-      priv->nrxwords--;
-    }
-
-  /* Clear RX full flag (SPRFC) */
-
-  rzv_spi_putreg32(priv, RZV_SPI_SPSRC_OFFSET, SPI_SPSRC_SPRFC);
-
-  /* When all RX done, enable CENDIE to arm the communication-end interrupt.
-   * [H7] Protect SPCR RMW with critical section: rxi and txi run at
-   * different priorities and setfrequency/setmode also RMW SPCR — racy
-   * without serialisation.
-   */
-
-  if (priv->nrxwords == 0)
-    {
-      uint32_t spcr;
-      irqstate_t flags = enter_critical_section();
-
-      spcr  = rzv_spi_getreg32(priv, RZV_SPI_SPCR_OFFSET);
-      spcr |= SPI_SPCR_CENDIE;
-      rzv_spi_putreg32(priv, RZV_SPI_SPCR_OFFSET, spcr);
-
-      leave_critical_section(flags);
-    }
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: rzv_spi_txi_interrupt
- *
- * Description:
- *   TX buffer empty — load next word into SPDR.
- * 32-bit SPDR.
- * clear SPTEFC after write.
- * enable CENDIE on last word to arm communication-end interrupt.
- ****************************************************************************/
-
-static int rzv_spi_txi_interrupt(int irq, void *context, void *arg)
-{
-  struct rzv_spi_priv_s *priv = (struct rzv_spi_priv_s *)arg;
-  uint32_t data = 0xffffffffu;
-
-  UNUSED(irq);
-  UNUSED(context);
-
-  if (priv->ntxwords > 0)
-    {
-      if (priv->txbuffer != NULL)
-        {
-          if (priv->nbits <= 8)
-            {
-              const uint8_t *p8 = (const uint8_t *)priv->txbuffer;
-              data = *p8++;
-              priv->txbuffer = p8;
-            }
-          else if (priv->nbits <= 16)
-            {
-              const uint16_t *p16 = (const uint16_t *)priv->txbuffer;
-              data = *p16++;
-              priv->txbuffer = p16;
-            }
-          else
-            {
-              const uint32_t *p32 = (const uint32_t *)priv->txbuffer;
-              data = *p32++;
-              priv->txbuffer = p32;
-            }
-        }
-
-      rzv_spi_putreg32(priv, RZV_SPI_SPDR_OFFSET, data);
-      priv->ntxwords--;
-
-      /* [M8] Clear SPTEFC once after filling the FIFO slot, not per-word
-       * inside a larger fill loop.  For the single-word ISR case this
-       * occurs once per invocation, which is correct.
-       */
-
-      rzv_spi_putreg32(priv, RZV_SPI_SPSRC_OFFSET, SPI_SPSRC_SPTEFC);
-
-      /* On last word: arm CENDIE for communication-end interrupt.
-       * [H7] Critical section protects SPCR RMW against concurrent
-       * rxi ISR (different priority) and non-ISR callers.
-       */
-
-      if (priv->ntxwords == 0)
-        {
-          uint32_t spcr;
-          irqstate_t flags = enter_critical_section();
-
-          spcr  = rzv_spi_getreg32(priv, RZV_SPI_SPCR_OFFSET);
-          spcr |= SPI_SPCR_CENDIE;
-          rzv_spi_putreg32(priv, RZV_SPI_SPCR_OFFSET, spcr);
-
-          leave_critical_section(flags);
-        }
-    }
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: rzv_spi_tei_interrupt
- *
- * Description:
- *   Communication end (CEND) — signal transfer completion.
- * clear CENDFC.
- ****************************************************************************/
-
-static int rzv_spi_tei_interrupt(int irq, void *context, void *arg)
-{
-  struct rzv_spi_priv_s *priv = (struct rzv_spi_priv_s *)arg;
-
-  UNUSED(irq);
-  UNUSED(context);
-
-  /* Clear communication end flag (CENDFC) */
-
-  rzv_spi_putreg32(priv, RZV_SPI_SPSRC_OFFSET, SPI_SPSRC_CENDFC);
-
-  nxsem_post(&priv->waitsem);
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: rzv_spi_eri_interrupt
- *
- * Description:
- *   Error interrupt handler — clear flags, signal waiter.
- ****************************************************************************/
-
-static int rzv_spi_eri_interrupt(int irq, void *context, void *arg)
-{
-  struct rzv_spi_priv_s *priv = (struct rzv_spi_priv_s *)arg;
-  uint32_t spsr;
-
-  UNUSED(irq);
-  UNUSED(context);
-
-  spsr = rzv_spi_getreg32(priv, RZV_SPI_SPSR_OFFSET);
-
-  spierr("SPI%d: error IRQ SPSR=0x%08lx\n",
-         priv->config->port, (unsigned long)spsr);
-
-  /* Clear all error flags */
-
-  rzv_spi_putreg32(priv, RZV_SPI_SPSRC_OFFSET, SPI_ERROR_CLEAR_FLAGS);
-
-  priv->error = true;
-  nxsem_post(&priv->waitsem);
-
-  return OK;
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -1053,19 +827,16 @@ static int rzv_spi_eri_interrupt(int irq, void *context, void *arg)
  * Name: rzv_spibus_initialize
  *
  * Description:
- *   Initialize the selected SPI-B channel.
- *
- * changes:
- * SPBR programmed via rzv_spi_setfrequency → SPCR3 RMW.
- * spi_clock field used, not P0CLK.
- * SPCR written with SPEIE|SPRIE|SPTIE (CENDIE armed per-transfer).
- * irq_* fields pre-set to -1 in static init; checked before detach.
- * SPCR read-back after first write for 1-TCLK sync.
+ *   Initialize the selected SPI-B channel.  Idempotent: a repeat call for
+ *   the same port returns the existing device without re-running init
+ *   (fixes re-audit finding 9.1 — double init from bringup + example
+ *   wrapper leaked state and, historically, duplicated the ICU slot).
  ****************************************************************************/
 
 struct spi_dev_s *rzv_spibus_initialize(int port)
 {
   struct rzv_spi_priv_s *priv = NULL;
+  irqstate_t flags;
   int ret;
 
   switch (port)
@@ -1085,11 +856,23 @@ struct spi_dev_s *rzv_spibus_initialize(int port)
         return NULL;
     }
 
-  /* Semaphores */
+  /* Idempotency guard: claim ownership under a critical section so a
+   * re-entrant caller sees an already-initialised device instead of
+   * racing us into a second init pass.  Cleared on error-unwind.
+   */
+
+  flags = enter_critical_section();
+  if (priv->initialized)
+    {
+      leave_critical_section(flags);
+      return (struct spi_dev_s *)priv;
+    }
+  priv->initialized = true;
+  leave_critical_section(flags);
+
+  /* Mutex for lock()/unlock() */
 
   nxsem_init(&priv->exclsem, 0, 1);
-  nxsem_init(&priv->waitsem, 0, 0);
-  nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
 
   /* Enable module clock and deassert reset */
 
@@ -1171,93 +954,20 @@ struct spi_dev_s *rzv_spibus_initialize(int port)
 
   priv->nbits     = 8;
   priv->mode      = SPIDEV_MODE0;
-  priv->error     = false;
-  priv->txbuffer  = NULL;
-  priv->rxbuffer  = NULL;
-  priv->ntxwords  = 0;
-  priv->nrxwords  = 0;
 
   /* Program requested default frequency (writes SPCR3.SPBR) */
 
   rzv_spi_setfrequency(priv, priv->config->frequency);
 
-  /* Attach interrupt handlers (irq_* already -1 from static init).
-   *
-   * Hybrid topology per FSP: RXI/TXI are INTR8SEL-selectable (allocate a
-   * slot via rzv_icu_attach); ERI (SPEI) and TEI (SPCEND) are fixed GIC
-   * INTIDs — attach directly with irq_attach.  Enable disabled until a
-   * transfer arms interrupts.  ISRs are left with false so the GIC line is
-   * NOT enabled at init (avoids startup interrupt storm with SPTIE cleared).
-   */
-
-  /* Selectable: RXI */
-
-  priv->irq_rxi = rzv_icu_attach(priv->config->elc_rxi,
-                                  rzv_spi_rxi_interrupt, priv, false);
-  if (priv->irq_rxi < 0)
-    {
-      spierr("SPI%d: RXI attach failed %d\n",
-             priv->config->port, priv->irq_rxi);
-      goto errout_clock;
-    }
-
-  /* Selectable: TXI */
-
-  priv->irq_txi = rzv_icu_attach(priv->config->elc_txi,
-                                  rzv_spi_txi_interrupt, priv, false);
-  if (priv->irq_txi < 0)
-    {
-      spierr("SPI%d: TXI attach failed %d\n",
-             priv->config->port, priv->irq_txi);
-      goto errout_rxi;
-    }
-
-  /* Fixed: TEI (SPCEND / communication end).  INTID = 32 + 107 + 3*port. */
-
-  priv->irq_tei = RZV_IRQ_SPI_CE(priv->config->port);
-  ret = irq_attach(priv->irq_tei, rzv_spi_tei_interrupt, priv);
-  if (ret < 0)
-    {
-      spierr("SPI%d: TEI(irq=%d) attach failed %d\n",
-             priv->config->port, priv->irq_tei, ret);
-      priv->irq_tei = -1;
-      goto errout_txi;
-    }
-
-  /* Fixed: ERI (SPEI / error).  INTID = 32 + 106 + 3*port. */
-
-  priv->irq_eri = RZV_IRQ_SPI_ERI(priv->config->port);
-  ret = irq_attach(priv->irq_eri, rzv_spi_eri_interrupt, priv);
-  if (ret < 0)
-    {
-      spierr("SPI%d: ERI(irq=%d) attach failed %d\n",
-             priv->config->port, priv->irq_eri, ret);
-      priv->irq_eri = -1;
-      goto errout_tei;
-    }
-
-  /* Enable the fixed GIC lines now — ISRs are re-entrancy-safe and only
-   * fire on real hardware events (SPCEND on end-of-frame; SPEI on error).
-   * RXI/TXI stay disabled until a transfer arms SPRIE/SPTIE.
-   */
-
-  up_enable_irq(priv->irq_tei);
-  up_enable_irq(priv->irq_eri);
-
-  /* Write SPCR: SPE=0 initially (set all except SPE then MSTR).
-   * read back SPCR after write for 1-TCLK sync (RZ/V2H UM §SPI).
-   * [H4/M10] SPTIE and SPRIE must NOT be set here.  With SPE=1 and TX FIFO
-   * empty, SPTIE causes TXI to fire immediately with no transfer pending →
-   * interrupt storm.  SPEIE (error) is safe to keep always-on.
-   * SPRIE/SPTIE/CENDIE are armed only when an IRQ-driven transfer begins.
-   * [H5] SCKASE: master mode enables SCK auto-stop to prevent RX overflow
+  /* Write SPCR: SPE=0 initially, then set SPE after 1-TCLK settle.
+   * No IRQ-enable bits — the driver is polled-only.  SPEIE is dropped
+   * because no error ISR is attached; polled send()/exchange() detect
+   * OVRF/UDRF/MODF via direct SPSR reads.
    * SCKASE enables SCK Auto Stop in master mode to prevent RX overflow.
    */
 
   {
-    uint32_t spcr = SPI_SPCR_MSTR |
-                    SPI_SPCR_SCKASE |
-                    SPI_SPCR_SPEIE;
+    uint32_t spcr = SPI_SPCR_MSTR | SPI_SPCR_SCKASE;
 
     /* Write without SPE to let 1-TCLK settle */
 
@@ -1278,23 +988,9 @@ struct spi_dev_s *rzv_spibus_initialize(int port)
 
   return (struct spi_dev_s *)priv;
 
-errout_tei:
-  /* Fixed line: disable + detach (mirror of the fixed-line attach). */
-  up_disable_irq(priv->irq_tei);
-  irq_detach(priv->irq_tei);
-  priv->irq_tei = -1;
-errout_txi:
-  /* Selectable line: rzv_icu_detach handles slot release + irq_detach. */
-  rzv_icu_detach(priv->irq_txi);
-  priv->irq_txi = -1;
-errout_rxi:
-  rzv_icu_detach(priv->irq_rxi);
-  priv->irq_rxi = -1;
-errout_clock:
-  rzv_clock_disable(priv->config->clk_id);
 errout_sem:
-  nxsem_destroy(&priv->waitsem);
   nxsem_destroy(&priv->exclsem);
+  priv->initialized = false;
   return NULL;
 }
 
@@ -1315,41 +1011,9 @@ int rzv_spibus_uninitialize(struct spi_dev_s *dev)
 
   rzv_spi_putreg32(priv, RZV_SPI_SPCR_OFFSET, 0);
 
-  /* Detach IRQs — guard with >=0 check.
-   * Fixed lines (ERI/TEI): up_disable_irq + irq_detach.
-   * Selectable lines (RXI/TXI): rzv_icu_detach releases the INTR8SEL slot
-   * and internally calls irq_detach + up_disable_irq for that slot.
-   */
-
-  if (priv->irq_eri >= 0)
-    {
-      up_disable_irq(priv->irq_eri);
-      irq_detach(priv->irq_eri);
-      priv->irq_eri = -1;
-    }
-
-  if (priv->irq_tei >= 0)
-    {
-      up_disable_irq(priv->irq_tei);
-      irq_detach(priv->irq_tei);
-      priv->irq_tei = -1;
-    }
-
-  if (priv->irq_txi >= 0)
-    {
-      rzv_icu_detach(priv->irq_txi);
-      priv->irq_txi = -1;
-    }
-
-  if (priv->irq_rxi >= 0)
-    {
-      rzv_icu_detach(priv->irq_rxi);
-      priv->irq_rxi = -1;
-    }
-
   rzv_clock_disable(priv->config->clk_id);
-  nxsem_destroy(&priv->waitsem);
   nxsem_destroy(&priv->exclsem);
+  priv->initialized = false;
 
   spiinfo("SPI%d uninitialized\n", priv->config->port);
   return OK;

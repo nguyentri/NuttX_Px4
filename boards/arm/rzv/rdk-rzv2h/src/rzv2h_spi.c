@@ -91,6 +91,9 @@
 #ifdef CONFIG_RZV_SPI0
 static struct spi_dev_s *g_spi0_dev;
 #endif
+#ifdef CONFIG_RZV_SPI1
+static struct spi_dev_s *g_spi1_dev;
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -144,23 +147,18 @@ uint8_t rzv_spi_status(struct spi_dev_s *dev, uint32_t devid)
 }
 
 /****************************************************************************
- * Name: board_spi_initialize
+ * Name: rzv2h_board_spi0_pinmux
  *
  * Description:
- *   Called by rzv2h_bringup.c under CONFIG_RZV_SPI.
- *   1. Configure GPIO MUX for SPI peripheral pins (MOSI/MISO/SCK).
- *   2. Configure CS pin as GPIO output, deasserted.
- *   3. Call rzv_spibus_initialize() to init the controller.
- *   4. Register SPI device with /dev/spiN if CONFIG_SPI_DRIVER is set.
+ *   Configure PORT9 pin mux for SPI0 (RSPI4 function) MOSI/MISO/SCK and
+ *   drive CS0 as an active-low GPIO output.
  *
  ****************************************************************************/
 
-int board_spi_initialize(void)
-{
-  int ret = OK;
-
 #ifdef CONFIG_RZV_SPI0
-  /* Step 1: Configure peripheral-mux pins for SPI0 */
+static int rzv2h_board_spi0_pinmux(void)
+{
+  int ret;
 
   ret = rzv_gpioconfig(SPI0_MOSI_PIN);
   if (ret < 0)
@@ -183,8 +181,6 @@ int board_spi_initialize(void)
       return ret;
     }
 
-  /* Step 2: CS pin as GPIO output, drive high (CS deasserted) */
-
   ret = rzv_gpioconfig(SPI0_CS0_GPIO);
   if (ret < 0)
     {
@@ -193,35 +189,106 @@ int board_spi_initialize(void)
     }
 
   rzv_gpiowrite(SPI0_CS0_GPIO, true);  /* Deassert (active-low) */
+  return OK;
+}
+#endif
 
-  /* Step 3: Initialise SPI0 controller */
+/****************************************************************************
+ * Name: rzv2h_board_spi_bringup
+ *
+ * Description:
+ *   Per-channel SPI bring-up: pin mux (channel-specific), call
+ *   rzv_spibus_initialize(port), optionally register /dev/spiN.
+ *   SPI1 currently has no external pin routing on RDK-RZV2H so pin mux
+ *   is skipped for that channel — it is usable only via internal
+ *   loopback (SPCR2.SPLP) until the board provides external routing.
+ *
+ ****************************************************************************/
 
-  g_spi0_dev = rzv_spibus_initialize(0);
-  if (g_spi0_dev == NULL)
+static int rzv2h_board_spi_bringup(int port, struct spi_dev_s **out_dev)
+{
+  struct spi_dev_s *dev;
+  int ret;
+
+  switch (port)
     {
-      syslog(LOG_ERR, "rzv_spibus_initialize(0) failed\n");
+#ifdef CONFIG_RZV_SPI0
+      case 0:
+        ret = rzv2h_board_spi0_pinmux();
+        if (ret < 0)
+          {
+            return ret;
+          }
+        break;
+#endif
+#ifdef CONFIG_RZV_SPI1
+      case 1:
+        /* No external pin routing for SPI1 on RDK-RZV2H — internal
+         * loopback (SPCR2.SPLP) is the only usable mode until board
+         * routing is added.
+         */
+        break;
+#endif
+      default:
+        return -EINVAL;
+    }
+
+  dev = rzv_spibus_initialize(port);
+  if (dev == NULL)
+    {
+      syslog(LOG_ERR, "rzv_spibus_initialize(%d) failed\n", port);
       return -ENODEV;
     }
 
-  syslog(LOG_INFO, "SPI0 initialized (PORT9: MOSI=P9_0, MISO=P9_1,"
-         " SCK=P9_2, CS=P9_3)\n");
+  *out_dev = dev;
+  syslog(LOG_INFO, "SPI%d initialized\n", port);
 
 #ifdef CONFIG_SPI_DRIVER
-  /* Register as character device /dev/spi0 */
-
-  ret = spi_register(g_spi0_dev, 0);
+  ret = spi_register(dev, port);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "spi_register(0) failed: %d\n", ret);
+      syslog(LOG_ERR, "spi_register(%d) failed: %d\n", port, ret);
       return ret;
     }
 
-  syslog(LOG_INFO, "Registered /dev/spi0\n");
-#endif /* CONFIG_SPI_DRIVER */
+  syslog(LOG_INFO, "Registered /dev/spi%d\n", port);
+#endif
 
-#endif /* CONFIG_RZV_SPI0 */
+  return OK;
+}
 
-  return ret;
+/****************************************************************************
+ * Name: board_spi_initialize
+ *
+ * Description:
+ *   Called by rzv2h_bringup.c under CONFIG_RZV_SPI.  Iterates every
+ *   Kconfig-enabled SPI channel and brings it up.  Repeat calls
+ *   (e.g., from a sample wrapper) are safe: rzv_spibus_initialize()
+ *   is idempotent.
+ *
+ ****************************************************************************/
+
+int board_spi_initialize(void)
+{
+  int ret;
+
+#ifdef CONFIG_RZV_SPI0
+  ret = rzv2h_board_spi_bringup(0, &g_spi0_dev);
+  if (ret < 0)
+    {
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_RZV_SPI1
+  ret = rzv2h_board_spi_bringup(1, &g_spi1_dev);
+  if (ret < 0)
+    {
+      return ret;
+    }
+#endif
+
+  return OK;
 }
 
 #endif /* CONFIG_RZV_SPI */
