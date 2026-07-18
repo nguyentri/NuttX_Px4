@@ -386,6 +386,82 @@ static int rzv_cpg_wait_bit(uintptr_t addr, uint32_t bit, bool set,
 }
 
 /****************************************************************************
+ * Name: rzv_cpg_wait_clkmon / rzv_cpg_wait_rstmon
+ *
+ * Description:
+ *   Poll CPG monitor registers using the FSP-verified register packing,
+ *   which DIFFERS from the control registers (anchors: bsp_override.h
+ *   SCI/GTM/DMAC macros in refs/px4-freertos-posix-renesas-fsp):
+ *
+ *   - CLKON_m / RST_m pack 16 control bits + 16 write-enable bits per
+ *     register, so the global control index is g = 16*m + b.
+ *   - CLKMON_m packs 32 monitor bits per register with the SAME global
+ *     numbering: monitor reg = g/32, bit = g%32.
+ *     (SCI4 gates CLKON_7[5:1] = g 113..117 -> CLKMON_3[21:17];
+ *      GTMn gate CLKON_4[3+n] = g 67+n -> CLKMON_2[3+n].)
+ *   - RSTMON_m packs 32 monitor bits with the global numbering OFFSET BY
+ *     -15: monitor reg = (r-15)/32, bit = (r-15)%32.
+ *     (SCI0 SCIP r=129 -> RSTMON_3.RST18=114; GTM0 r=109 -> RSTMON_2.RST30
+ *      =94; DMAC r=49..53 -> RSTMON_1.RST2..RST6=34..38. All -15.)
+ *
+ *   A monitor span may straddle a 32-bit register boundary (e.g. SCI0
+ *   clocks g=93..97 span CLKMON_2/CLKMON_3); both helpers slice on 32-bit
+ *   boundaries.  Returns OK or -ETIMEDOUT from the first failing slice.
+ *
+ ****************************************************************************/
+
+static int rzv_cpg_wait_clkmon(uint32_t g, uint32_t nbits, bool set,
+                               int timeout)
+{
+  int ret = OK;
+
+  while (nbits > 0)
+    {
+      uint32_t reg  = g / 32u;
+      uint32_t off  = g % 32u;
+      uint32_t n    = (32u - off < nbits) ? (32u - off) : nbits;
+      uint32_t bits = ((1u << n) - 1u) << off;
+
+      ret = rzv_cpg_wait_bit(RZV_CPG_CLKMON(reg), bits, set, timeout);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      g     += n;
+      nbits -= n;
+    }
+
+  return ret;
+}
+
+static int rzv_cpg_wait_rstmon(uint32_t r, uint32_t nbits, bool set,
+                               int timeout)
+{
+  uint32_t g = r - 15u;  /* RSTMON global numbering = RST global - 15 */
+  int ret = OK;
+
+  while (nbits > 0)
+    {
+      uint32_t reg  = g / 32u;
+      uint32_t off  = g % 32u;
+      uint32_t n    = (32u - off < nbits) ? (32u - off) : nbits;
+      uint32_t bits = ((1u << n) - 1u) << off;
+
+      ret = rzv_cpg_wait_bit(RZV_CPG_RSTMON(reg), bits, set, timeout);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      g     += n;
+      nbits -= n;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: rzv_clock_init_frequency_table
  *
  * Description:
@@ -480,17 +556,56 @@ static int rzv_cpg_sci_channel(uint32_t clk_id)
  *
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: rzv_cpg_mstop_write
+ *
+ * Description:
+ *   Release (release=true) or assert the CPG BUS_m_MSTOP bits for a module.
+ *   MSTOP gates the module's BUS/REGISTER interface independently of the
+ *   CLKON clock gates: while asserted, register reads return zero and
+ *   writes are dropped — even with clocks gated on and resets released
+ *   (verified on silicon: BUS_11_MSTOP resets to 0x1ffe, leaving every
+ *   RSCI register interface dead).  Mirrors FSP R_BSP_MSTP_START/STOP
+ *   (bsp_module_stop.h): WEN in [31:16], data 0 = released, 1 = stopped.
+ *   No monitor register exists for MSTOP; the readback orders the write.
+ *
+ ****************************************************************************/
+
+static void rzv_cpg_mstop_write(uintptr_t reg, uint32_t bits, bool release)
+{
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+  rzv_cpg_putreg(release ? (bits << 16) : ((bits << 16) | bits), reg);
+  (void)rzv_cpg_getreg(reg);
+  leave_critical_section(flags);
+}
+
 static int rzv_cpg_sci_clock_ctrl(int ch, bool enable)
 {
   uint32_t gstart = 5u * 16u + 13u + 5u * (uint32_t)ch;
+  uint32_t g = gstart;
   uint32_t remaining = 5;
   irqstate_t flags;
-  int ret = OK;
+  int ret;
+
+  /* On disable, stop the bus interface first (mirror of FSP MODULE_STOP:
+   * MSTP assert precedes clock gating).
+   */
+
+  if (!enable)
+    {
+      rzv_cpg_mstop_write(RZV_CPG_BUS_11_MSTOP, 1u << (3 + ch), false);
+    }
+
+  /* Write all CLKON slices first (16 control + 16 WEN bits per register;
+   * a 5-bit channel span may straddle two CLKON registers).
+   */
 
   while (remaining > 0)
     {
-      uint32_t domain = gstart / 16u;
-      uint32_t off    = gstart % 16u;
+      uint32_t domain = g / 16u;
+      uint32_t off    = g % 16u;
       uint32_t n      = (16u - off < remaining) ? (16u - off) : remaining;
       uint32_t bits   = ((1u << n) - 1u) << off;
       uint32_t mask   = (bits << 16) | (enable ? bits : 0u);
@@ -499,20 +614,35 @@ static int rzv_cpg_sci_clock_ctrl(int ch, bool enable)
       rzv_cpg_putreg(mask, RZV_CPG_CLKON(domain));
       leave_critical_section(flags);
 
-      ret = rzv_cpg_wait_bit(RZV_CPG_CLKMON(domain), bits, enable,
-                             enable ? CPG_TIMEOUT_CLOCK_ENABLE :
-                                      CPG_TIMEOUT_CLOCK_DISABLE);
-      if (ret < 0)
-        {
-          clkerr("ERROR: SCI%d clock %s failed: CLKON_%u mask=0x%04x\n",
-                 ch, enable ? "enable" : "disable",
-                 (unsigned int)domain, (unsigned int)bits);
-          rzv_cpg_dump_registers(domain, "sci_clock_ctrl_failure");
-          return ret;
-        }
-
-      gstart    += n;
+      g         += n;
       remaining -= n;
+    }
+
+  /* Then confirm via CLKMON, which is 32-bit packed with the same global
+   * numbering (see rzv_cpg_wait_clkmon) — NOT the CLKON register index.
+   */
+
+  ret = rzv_cpg_wait_clkmon(gstart, 5, enable,
+                            enable ? CPG_TIMEOUT_CLOCK_ENABLE :
+                                     CPG_TIMEOUT_CLOCK_DISABLE);
+  if (ret < 0)
+    {
+      clkerr("ERROR: SCI%d clock %s failed: CLKMON g=%u..%u\n",
+             ch, enable ? "enable" : "disable",
+             (unsigned int)gstart, (unsigned int)(gstart + 4));
+      rzv_cpg_dump_registers(gstart / 16u, "sci_clock_ctrl_failure");
+      return ret;
+    }
+
+  /* Release the RSCI bus-interface module stop: BUS_11_MSTOP bit (3 + ch)
+   * (RSPI0-2 own bits 0-2, RSCI0-9 own bits 3-12).  Without this every
+   * RSCI register reads as zero and CSR.TDRE never asserts.  FSP parity:
+   * R_BSP_MODULE_START_FSP_IP_SCI = 5x CLKON + MSTP_START + 2x RSTOFF.
+   */
+
+  if (enable)
+    {
+      rzv_cpg_mstop_write(RZV_CPG_BUS_11_MSTOP, 1u << (3 + ch), true);
     }
 
   clkinfo("SCI%d clocks %s\n", ch, enable ? "enabled" : "disabled");
@@ -535,14 +665,19 @@ static int rzv_cpg_sci_clock_ctrl(int ch, bool enable)
 static int rzv_cpg_sci_reset_ctrl(int ch, bool assert_rst)
 {
   uint32_t gstart = 8u * 16u + 1u + 2u * (uint32_t)ch;
+  uint32_t g = gstart;
   uint32_t remaining = 2;
   irqstate_t flags;
-  int ret = OK;
+  int ret;
+
+  /* Write all RST slices first (16 control + 16 WEN bits per register;
+   * the SCIP/SCIT pair crosses into CPG_RST_9 for channel 7).
+   */
 
   while (remaining > 0)
     {
-      uint32_t domain = gstart / 16u;
-      uint32_t off    = gstart % 16u;
+      uint32_t domain = g / 16u;
+      uint32_t off    = g % 16u;
       uint32_t n      = (16u - off < remaining) ? (16u - off) : remaining;
       uint32_t bits   = ((1u << n) - 1u) << off;
       uint32_t mask   = (bits << 16) | (assert_rst ? 0u : bits);
@@ -551,24 +686,26 @@ static int rzv_cpg_sci_reset_ctrl(int ch, bool assert_rst)
       rzv_cpg_putreg(mask, RZV_CPG_RST(domain));
       leave_critical_section(flags);
 
-      /* RSTMON polarity per FSP bsp_clocks.h (RZ/V2H): RSTMON bit == 1 while
-       * the module is held in reset, == 0 once the reset is released.
-       * So wait for SET after assert, CLEAR after deassert.
-       */
-      ret = rzv_cpg_wait_bit(RZV_CPG_RSTMON(domain), bits, assert_rst,
-                             assert_rst ? CPG_TIMEOUT_RESET_ASSERT :
-                                          CPG_TIMEOUT_RESET_RELEASE);
-      if (ret < 0)
-        {
-          clkerr("ERROR: SCI%d reset %s failed: RST_%u mask=0x%04x\n",
-                 ch, assert_rst ? "assert" : "release",
-                 (unsigned int)domain, (unsigned int)bits);
-          rzv_cpg_dump_registers(domain, "sci_reset_ctrl_failure");
-          return ret;
-        }
-
-      gstart    += n;
+      g         += n;
       remaining -= n;
+    }
+
+  /* RSTMON polarity per FSP bsp_clocks.h (RZ/V2H): RSTMON bit == 1 while
+   * the module is held in reset, == 0 once the reset is released.
+   * RSTMON is 32-bit packed with global numbering = RST global - 15
+   * (see rzv_cpg_wait_rstmon) — NOT the RST register index.
+   */
+
+  ret = rzv_cpg_wait_rstmon(gstart, 2, assert_rst,
+                            assert_rst ? CPG_TIMEOUT_RESET_ASSERT :
+                                         CPG_TIMEOUT_RESET_RELEASE);
+  if (ret < 0)
+    {
+      clkerr("ERROR: SCI%d reset %s failed: RSTMON r=%u..%u\n",
+             ch, assert_rst ? "assert" : "release",
+             (unsigned int)gstart, (unsigned int)(gstart + 1));
+      rzv_cpg_dump_registers(gstart / 16u, "sci_reset_ctrl_failure");
+      return ret;
     }
 
   return OK;
@@ -723,9 +860,9 @@ int rzv_clock_enable(uint32_t clk_id)
   uint32_t domain = RZV_CPG_DOMAIN(clk_id);
   uint32_t bit = RZV_CPG_BIT(clk_id);
   uint32_t mask;
-  uint32_t mon_mask;
+  uint32_t mon_lsb;
+  uint32_t mon_n;
   uintptr_t clkon_addr = RZV_CPG_CLKON(domain);
-  uintptr_t clkmon_addr = RZV_CPG_CLKMON(domain);
   irqstate_t flags;
   int ret;
   int retry;
@@ -750,15 +887,17 @@ int rzv_clock_enable(uint32_t clk_id)
     {
       /* DMAC gate: 5-bit mask [4:0] — all five DMA unit clocks together */
 
-      mask     = (0x1fu << 16) | 0x1fu;  /* WEN[20:16] + ON[4:0] */
-      mon_mask = 0x1fu;
+      mask    = (0x1fu << 16) | 0x1fu;  /* WEN[20:16] + ON[4:0] */
+      mon_lsb = 0;
+      mon_n   = 5;
     }
   else if (domain == RZV_CPG_DOMAIN(RZV_CPG_CLK_ADC0))
     {
       /* ADC gate: 2-bit pair [1:0] — both CLK0+CLK1 must be set */
 
-      mask     = (0x3u << 16) | 0x3u;  /* WEN[17:16] + ON[1:0] */
-      mon_mask = 0x3u;
+      mask    = (0x3u << 16) | 0x3u;  /* WEN[17:16] + ON[1:0] */
+      mon_lsb = 0;
+      mon_n   = 2;
     }
   else if (clk_id == RZV_CPG_CLK_CANFD)
     {
@@ -767,13 +906,15 @@ int rzv_clock_enable(uint32_t clk_id)
        * bit==12, span 3 bits → bits[14:12].
        */
 
-      mask     = (0x7u << (bit + 16)) | (0x7u << bit);
-      mon_mask = (0x7u << bit);
+      mask    = (0x7u << (bit + 16)) | (0x7u << bit);
+      mon_lsb = bit;
+      mon_n   = 3;
     }
   else
     {
-      mask     = (1u << (bit + 16)) | (1u << bit);
-      mon_mask = (1u << bit);
+      mask    = (1u << (bit + 16)) | (1u << bit);
+      mon_lsb = bit;
+      mon_n   = 1;
     }
 
   for (retry = 0; retry <= CPG_MAX_RETRIES; retry++)
@@ -793,12 +934,30 @@ int rzv_clock_enable(uint32_t clk_id)
       rzv_cpg_putreg(mask, clkon_addr);
       leave_critical_section(flags);
 
-      /* Poll with IRQs enabled — timeout */
+      /* Poll with IRQs enabled — timeout.  CLKMON is 32-bit packed with
+       * the same global numbering as CLKON (16*domain + bit); see
+       * rzv_cpg_wait_clkmon.
+       */
 
-      ret = rzv_cpg_wait_bit(clkmon_addr, mon_mask, true,
-                              CPG_TIMEOUT_CLOCK_ENABLE);
+      ret = rzv_cpg_wait_clkmon(domain * 16u + mon_lsb, mon_n, true,
+                                CPG_TIMEOUT_CLOCK_ENABLE);
       if (ret >= 0)
         {
+          /* Release the module's bus-interface MSTOP where known.
+           * RSPI0-2: BUS_11_MSTOP bits 0-2 (RSCI handled in the SCI
+           * helper; GPT in rzv_gpt_module_start).  Other IPs default
+           * released or are opened by the boot chain; extend this map
+           * per FSP BSP_MSTP_REG/BIT_* as peripherals are brought up.
+           */
+
+          if (clk_id == RZV_CPG_CLK_SPI0 ||
+              clk_id == RZV_CPG_CLK_SPI1 ||
+              clk_id == RZV_CPG_CLK_SPI2)
+            {
+              rzv_cpg_mstop_write(RZV_CPG_BUS_11_MSTOP,
+                                  1u << RZV_CPG_BIT(clk_id), true);
+            }
+
           clkinfo("Clock enabled: domain=%u bit=%u\n", (unsigned int)domain, (unsigned int)bit);
           return OK;
         }
@@ -824,9 +983,9 @@ int rzv_clock_disable(uint32_t clk_id)
   uint32_t domain = RZV_CPG_DOMAIN(clk_id);
   uint32_t bit = RZV_CPG_BIT(clk_id);
   uint32_t mask;
-  uint32_t mon_mask;
+  uint32_t mon_lsb;
+  uint32_t mon_n;
   uintptr_t clkon_addr = RZV_CPG_CLKON(domain);
-  uintptr_t clkmon_addr = RZV_CPG_CLKMON(domain);
   irqstate_t flags;
   int ret;
   int retry;
@@ -844,13 +1003,15 @@ int rzv_clock_disable(uint32_t clk_id)
 
   if (domain == RZV_CPG_DOMAIN(RZV_CPG_CLK_DMAC))
     {
-      mask     = 0x1fu << 16;  /* WEN[20:16] only, ON[4:0]=0 → disable all 5 */
-      mon_mask = 0x1fu;
+      mask    = 0x1fu << 16;  /* WEN[20:16] only, ON[4:0]=0 → disable all 5 */
+      mon_lsb = 0;
+      mon_n   = 5;
     }
   else if (domain == RZV_CPG_DOMAIN(RZV_CPG_CLK_ADC0))
     {
-      mask     = 0x3u << 16;   /* WEN[17:16] only, ON[1:0]=0 → disable both */
-      mon_mask = 0x3u;
+      mask    = 0x3u << 16;   /* WEN[17:16] only, ON[1:0]=0 → disable both */
+      mon_lsb = 0;
+      mon_n   = 2;
     }
   else if (clk_id == RZV_CPG_CLK_CANFD)
     {
@@ -859,13 +1020,15 @@ int rzv_clock_disable(uint32_t clk_id)
        * Symmetric to rzv_clock_enable CAN-FD case.
        */
 
-      mask     = (0x7u << (bit + 16)) | (0x0u << bit);
-      mon_mask = (0x7u << bit);
+      mask    = (0x7u << (bit + 16)) | (0x0u << bit);
+      mon_lsb = bit;
+      mon_n   = 3;
     }
   else
     {
-      mask     = (1u << (bit + 16));  /* write-enable only, ON=0 */
-      mon_mask = (1u << bit);
+      mask    = (1u << (bit + 16));  /* write-enable only, ON=0 */
+      mon_lsb = bit;
+      mon_n   = 1;
     }
 
   for (retry = 0; retry <= CPG_MAX_RETRIES; retry++)
@@ -884,8 +1047,8 @@ int rzv_clock_disable(uint32_t clk_id)
       rzv_cpg_putreg(mask, clkon_addr);
       leave_critical_section(flags);
 
-      ret = rzv_cpg_wait_bit(clkmon_addr, mon_mask, false,
-                              CPG_TIMEOUT_CLOCK_DISABLE);
+      ret = rzv_cpg_wait_clkmon(domain * 16u + mon_lsb, mon_n, false,
+                                CPG_TIMEOUT_CLOCK_DISABLE);
       if (ret >= 0)
         {
           clkinfo("Clock disabled: domain=%u bit=%u\n", (unsigned int)domain, (unsigned int)bit);
@@ -915,7 +1078,6 @@ int rzv_module_reset(uint32_t clk_id)
   uint32_t bitmask = (1u << bit);
   uint32_t mask;
   uintptr_t mrst_addr;
-  uintptr_t mrstmon_addr;
   irqstate_t flags;
   int ret;
   int retry;
@@ -949,7 +1111,6 @@ int rzv_module_reset(uint32_t clk_id)
     }
 
   mrst_addr = RZV_CPG_RST(domain);
-  mrstmon_addr = RZV_CPG_RSTMON(domain);
 
   for (retry = 0; retry <= CPG_MAX_RETRIES; retry++)
     {
@@ -975,8 +1136,10 @@ int rzv_module_reset(uint32_t clk_id)
        * the asserted state here is a harmless, more conservative confirm.)
        * use per-op timeout CPG_TIMEOUT_RESET_ASSERT. */
 
-      ret = rzv_cpg_wait_bit(mrstmon_addr, bitmask, true,
-                              CPG_TIMEOUT_RESET_ASSERT);
+      ret = rzv_cpg_wait_rstmon(domain * 16u +
+                                (uint32_t)__builtin_ctz(bitmask),
+                                (uint32_t)__builtin_popcount(bitmask), true,
+                                CPG_TIMEOUT_RESET_ASSERT);
       if (ret >= 0)
         {
           clkinfo("Reset asserted: domain=%u mask=0x%x\n",
@@ -1007,7 +1170,6 @@ int rzv_module_unreset(uint32_t clk_id)
   uint32_t bitmask = (1u << bit);
   uint32_t mask;
   uintptr_t mrst_addr;
-  uintptr_t mrstmon_addr;
   irqstate_t flags;
   int ret;
   int retry;
@@ -1041,7 +1203,6 @@ int rzv_module_unreset(uint32_t clk_id)
     }
 
   mrst_addr = RZV_CPG_RST(domain);
-  mrstmon_addr = RZV_CPG_RSTMON(domain);
 
   for (retry = 0; retry <= CPG_MAX_RETRIES; retry++)
     {
@@ -1067,8 +1228,10 @@ int rzv_module_unreset(uint32_t clk_id)
 
       /* use per-op timeout CPG_TIMEOUT_RESET_RELEASE */
 
-      ret = rzv_cpg_wait_bit(mrstmon_addr, bitmask, false,
-                              CPG_TIMEOUT_RESET_RELEASE);
+      ret = rzv_cpg_wait_rstmon(domain * 16u +
+                                (uint32_t)__builtin_ctz(bitmask),
+                                (uint32_t)__builtin_popcount(bitmask), false,
+                                CPG_TIMEOUT_RESET_RELEASE);
       if (ret >= 0)
         {
           clkinfo("Reset deasserted: domain=%u mask=0x%x\n",

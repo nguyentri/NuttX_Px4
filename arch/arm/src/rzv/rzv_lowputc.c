@@ -43,12 +43,26 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "arm_internal.h"
 #include "rzv_lowputc.h"
 #include "rzv_clock.h"
 #include "rzv_gpio.h"
 #include "hardware/rzv_sci.h"
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* Guards up_putc()/early console output against being used before the console
+ * SCI channel is clocked and its transmitter enabled.  Set true at the end of
+ * rzv_lowsetup() (both the bootloader-pre-configured and full-init paths).
+ * Lives in .bss, so rzv_ram_init() must run before rzv_lowsetup() (see
+ * arm_boot() ordering) or this flag would be zeroed after being set.
+ */
+
+volatile bool g_rzv_console_ready = false;
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -134,6 +148,7 @@ void rzv_lowsetup(void)
     {
       /* Bootloader left SCI configured and running — nothing to do */
 
+      g_rzv_console_ready = true;
       return;
     }
 
@@ -173,6 +188,8 @@ void rzv_lowsetup(void)
 
   putreg32(SCI_CCR0_TE | SCI_CCR0_IDSE,
            CONSOLE_BASE + RZV_SCI_CCR0_OFFSET);
+
+  g_rzv_console_ready = true;
 }
 
 /****************************************************************************

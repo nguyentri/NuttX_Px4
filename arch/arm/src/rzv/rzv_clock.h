@@ -332,11 +332,23 @@
 /* Start clock supply to a module (boot-path fast path only).
  * Write includes write-enable bits [31:16]; poll CLKMON until bit set.
  * ARM_DSB() after poll ensures subsequent IP register writes are ordered. */
+/* CLKMON packs 32 monitor bits per register with the same GLOBAL numbering
+ * as the 16-bit-packed CLKON control registers (FSP bsp_override.h anchors:
+ * SCI, GTM).  Monitor register/bit therefore derive from the global index
+ * g = 16*domain + bit, NOT from the CLKON register index.
+ */
+
+#define RZV_CPG_CLKMON_REG(domain, bit)                                      \
+  RZV_CPG_CLKMON((16u * (domain) + (bit)) / 32u)
+#define RZV_CPG_CLKMON_BIT(domain, bit)                                      \
+  (1u << ((16u * (domain) + (bit)) % 32u))
+
 #define RZV_MODULE_CLKON(domain, bit)                                        \
   do {                                                                       \
     putreg32((1 << (bit)) | (1 << ((bit) + 16)),                           \
              RZV_CPG_CLKON(domain));                                         \
-    while ((getreg32(RZV_CPG_CLKMON(domain)) & (1 << (bit))) == 0)        \
+    while ((getreg32(RZV_CPG_CLKMON_REG(domain, bit)) &                      \
+            RZV_CPG_CLKMON_BIT(domain, bit)) == 0)                           \
       {                                                                      \
       }                                                                      \
     ARM_DSB();                                                               \
@@ -346,7 +358,8 @@
 #define RZV_MODULE_CLKOFF(domain, bit)                                       \
   do {                                                                       \
     putreg32((1 << ((bit) + 16)), RZV_CPG_CLKON(domain));                  \
-    while ((getreg32(RZV_CPG_CLKMON(domain)) & (1 << (bit))) != 0)        \
+    while ((getreg32(RZV_CPG_CLKMON_REG(domain, bit)) &                      \
+            RZV_CPG_CLKMON_BIT(domain, bit)) != 0)                           \
       {                                                                      \
       }                                                                      \
     ARM_DSB();                                                               \

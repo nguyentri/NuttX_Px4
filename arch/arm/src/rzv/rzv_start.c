@@ -392,11 +392,35 @@ void arm_boot(void)
   /* Enable TCM ECC after the DTCM window is available to the initial stack. */
   rzv_enable_tcm_ecc();
 
-  /* Configure clocks early - needed for peripherals */
-  rzv_clock_config();
-
-  /* Initialize RAM sections (BSS and DATA) */
+  /* Initialize RAM sections (BSS and DATA) FIRST.
+   *
+   * This must precede rzv_lowsetup() and rzv_clock_config() for two reasons:
+   *   1. The console-ready flag set by rzv_lowsetup() lives in .bss; zeroing
+   *      BSS afterwards would clobber it back to false.
+   *   2. rzv_clock_config() populates the g_clock_freq[] table (.bss); if BSS
+   *      were zeroed after clock config, the frequency table (and therefore
+   *      the OS-tick and HRT frequencies derived from it) would be wiped.
+   */
   rzv_ram_init();
+
+  /* Bring the low-level console up BEFORE any clock/peripheral configuration
+   * so early syslog/clkinfo output has a working TX path.  rzv_lowsetup()
+   * self-gates the console SCI clock, uses a compile-time baud constant, and
+   * has no dependency on rzv_clock_config(); it also sets the console-ready
+   * flag that guards up_putc().  Previously clock config ran first and its
+   * clkinfo() spun forever in up_putc() on an unclocked, un-enabled SCI.
+   */
+  rzv_lowsetup();
+
+  /* Perform early serial initialization if configured */
+#ifdef USE_EARLYSERIALINIT
+  rzv_earlyserialinit();
+#endif
+
+  /* Configure clocks - console is now live so clkinfo() output is visible,
+   * and BSS is initialized so the frequency table persists.
+   */
+  rzv_clock_config();
 
   /* Programme MPU regions before enabling caches.
    * This must run after RAM init (region table is in .data/.rodata) but
@@ -414,14 +438,6 @@ void arm_boot(void)
    * VFP save/restore under CONFIG_ARCH_FPU.
    */
   arm_fpuconfig();
-
-  /* Configure low-level serial for early debug output */
-  rzv_lowsetup();
-
-  /* Perform early serial initialization if configured */
-#ifdef USE_EARLYSERIALINIT
-  rzv_earlyserialinit();
-#endif
 
   showprogress('A');
 

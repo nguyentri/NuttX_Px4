@@ -2807,6 +2807,17 @@ void arm_serialinit(void)
 int up_putc(int ch)
 {
 #ifdef CONSOLE_DEV
+  /* Drop output until the low-level console is up (rzv_lowsetup() sets this).
+   * Prevents an infinite spin in rzv_txready() when early boot code emits
+   * syslog/clkinfo before the console SCI channel is clocked and enabled.
+   */
+
+  extern volatile bool g_rzv_console_ready;
+  if (!g_rzv_console_ready)
+    {
+      return ch;
+    }
+
   /* Wait for transmit buffer to be ready */
 
   while (!rzv_txready(&CONSOLE_DEV));
