@@ -41,10 +41,8 @@
 #include "chip.h"
 #include "hardware/rzv_cpg.h"
 #include "hardware/rzv_dmac.h"
-#include "hardware/rzv_elc.h"
 #include "rzv_dmac.h"
 #include "rzv_clock.h"
-#include "rzv_icu.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -54,14 +52,22 @@
 
 /* Stop timeout: 1000 polls × 10 µs = 10 ms maximum */
 
+#define DMAC_START_TIMEOUT_POLLS 100
 #define DMAC_STOP_TIMEOUT_POLLS  1000
+#define DMAC_CACHE_LINE_SIZE     32u
+
+#define DMAC_CR8_ITCM_CPU_BASE   0x00000000u
+#define DMAC_CR8_ITCM_BUS_BASE   0x12040000u
+#define DMAC_CR8_DTCM_CPU_BASE   0x00020000u
+#define DMAC_CR8_DTCM_BUS_BASE   0x12060000u
+#define DMAC_CR8_TCM_SIZE        0x00020000u
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
 /* Per-channel state. Embedded statically in g_dmac_channels[].
- * No kmm_zalloc — avoids ISR-vs-free TOCTOU race (H5).
+ * No kmm_zalloc avoids ownership races during channel reuse.
  */
 
 struct rzv_dmac_ctrl_s
@@ -70,9 +76,24 @@ struct rzv_dmac_ctrl_s
   uint8_t                   unit;      /* DMAC unit (0-4) */
   uint8_t                   local_ch;  /* Channel within unit (0-15) */
   bool                      in_use;    /* True when configured */
-  bool                      enabled;   /* True when transfer started */
+  bool                      configuring;
+  bool                      enabled;   /* True when one-shot is claimed */
+  bool                      operating; /* Register operation in progress */
   struct rzv_dmac_config_s  config;    /* Embedded config (no heap) */
-  int                       irq;       /* NuttX IRQ from rzv_icu_attach */
+};
+
+enum rzv_dmac_unit_state_e
+{
+  RZV_DMAC_UNIT_UNINITIALIZED = 0,
+  RZV_DMAC_UNIT_INITIALIZING,
+  RZV_DMAC_UNIT_READY
+};
+
+struct rzv_dmac_address_region_s
+{
+  uintptr_t cpu_base;
+  uint32_t  bus_base;
+  uint32_t  size;
 };
 
 /****************************************************************************
@@ -85,13 +106,61 @@ struct rzv_dmac_ctrl_s
 
 static struct rzv_dmac_ctrl_s g_dmac_channels[RZV_DMAC_MAX_CHANNELS];
 
-/* Unit initialised flags (one per DMAC unit 0-4) */
+/* Unit lifecycle state (one per DMAC unit 0-4) */
 
-static bool g_dmac_unit_initialized[RZV_DMAC_NUM_UNITS];
+static uint8_t g_dmac_unit_state[RZV_DMAC_NUM_UNITS];
+
+static const struct rzv_dmac_address_region_s g_dmac_address_regions[] =
+{
+  {DMAC_CR8_ITCM_CPU_BASE, DMAC_CR8_ITCM_BUS_BASE, DMAC_CR8_TCM_SIZE},
+  {DMAC_CR8_DTCM_CPU_BASE, DMAC_CR8_DTCM_BUS_BASE, DMAC_CR8_TCM_SIZE}
+};
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: rzv_dmac_convert_cpu_address
+ ****************************************************************************/
+
+static int rzv_dmac_convert_cpu_address(uintptr_t cpu_addr, uint32_t length,
+                                        uint32_t *bus_addr)
+{
+  unsigned int i;
+
+  if (bus_addr == NULL || length == 0 ||
+      cpu_addr > (uintptr_t)UINT32_MAX - length)
+    {
+      return -EINVAL;
+    }
+
+  for (i = 0; i < sizeof(g_dmac_address_regions) /
+       sizeof(g_dmac_address_regions[0]); i++)
+    {
+      const struct rzv_dmac_address_region_s *region =
+        &g_dmac_address_regions[i];
+      uintptr_t offset;
+
+      if (cpu_addr < region->cpu_base ||
+          cpu_addr >= region->cpu_base + region->size)
+        {
+          continue;
+        }
+
+      offset = cpu_addr - region->cpu_base;
+      if (length > region->size - offset)
+        {
+          return -EINVAL;
+        }
+
+      *bus_addr = region->bus_base + (uint32_t)offset;
+      return OK;
+    }
+
+  *bus_addr = (uint32_t)cpu_addr;
+  return OK;
+}
 
 /****************************************************************************
  * Name: rzv_dmac_validate_config
@@ -99,21 +168,20 @@ static bool g_dmac_unit_initialized[RZV_DMAC_NUM_UNITS];
 
 static int rzv_dmac_validate_config(const struct rzv_dmac_config_s *config)
 {
-  if (config == NULL)
+  uint32_t width;
+  uint32_t src_bus;
+  uint32_t dst_bus;
+
+  if (config == NULL || config->length == 0)
     {
       return -EINVAL;
     }
 
-  /* Length must be non-zero; uint32_t can never exceed 0xFFFFFFFF so the
-   * old `> 0xFFFFFFFF` dead-check is simply omitted (M5).
-   */
-
-  if (config->length == 0)
+  if (config->trigger != RZV_DMAC_TRIGGER_SW ||
+      config->callback != NULL || config->elc_event >= 0)
     {
-      return -EINVAL;
+      return -ENOTSUP;
     }
-
-  /* Validate transfer sizes */
 
   if (config->src_size > RZV_DMAC_SIZE_128BYTE ||
       config->dst_size > RZV_DMAC_SIZE_128BYTE)
@@ -121,22 +189,35 @@ static int rzv_dmac_validate_config(const struct rzv_dmac_config_s *config)
       return -EINVAL;
     }
 
-  /* Address alignment: each size n means 2^n byte alignment required */
-
-  uint32_t src_align = 1u << (uint32_t)config->src_size;
-  uint32_t dst_align = 1u << (uint32_t)config->dst_size;
-
-  if ((config->src_addr & (src_align - 1u)) != 0u ||
-      (config->dst_addr & (dst_align - 1u)) != 0u)
+  if (config->src_size != config->dst_size ||
+      config->src_addr_mode != RZV_DMAC_ADDR_INCREMENT ||
+      config->dst_addr_mode != RZV_DMAC_ADDR_INCREMENT)
     {
-      dmaerr("Alignment error: src=0x%08" PRIx32 " (align=%" PRIu32 "), "
-             "dst=0x%08" PRIx32 " (align=%" PRIu32 ")\n",
-             config->src_addr, src_align,
-             config->dst_addr, dst_align);
+      return -ENOTSUP;
+    }
+
+  width = 1u << (uint32_t)config->src_size;
+
+  if ((config->src_addr & (width - 1u)) != 0u ||
+      (config->dst_addr & (width - 1u)) != 0u ||
+      (config->length & (width - 1u)) != 0u ||
+      (config->src_addr & (DMAC_CACHE_LINE_SIZE - 1u)) != 0u ||
+      (config->dst_addr & (DMAC_CACHE_LINE_SIZE - 1u)) != 0u ||
+      (config->length & (DMAC_CACHE_LINE_SIZE - 1u)) != 0u)
+    {
+      dmaerr("DMAC buffer alignment or length error\n");
       return -EINVAL;
     }
 
   if (config->priority > 7)
+    {
+      return -EINVAL;
+    }
+
+  if (rzv_dmac_convert_cpu_address(config->src_addr, config->length,
+                                   &src_bus) < 0 ||
+      rzv_dmac_convert_cpu_address(config->dst_addr, config->length,
+                                   &dst_bus) < 0)
     {
       return -EINVAL;
     }
@@ -149,8 +230,7 @@ static int rzv_dmac_validate_config(const struct rzv_dmac_config_s *config)
  *
  * Description:
  *   Write CHCFG / CHEXT / CHITVL and N[0] SA/DA/TB registers.
- *   No DMARS write — peripheral source selection belongs in DMACKSEL
- *   (rzv_dmac_set_peripheral_source).
+ *   No peripheral source routing is configured in the polling-only path.
  *   Uses N[0] for initial transfer, N[1] zeroed (no double-buffer reload).
  *
  ****************************************************************************/
@@ -162,6 +242,9 @@ static int rzv_dmac_setup_channel(struct rzv_dmac_ctrl_s *ctrl)
   uint8_t  local_ch = ctrl->local_ch;
   uint32_t chcfg    = 0;
   uint32_t chext    = 0;
+  uint32_t src_bus;
+  uint32_t dst_bus;
+  int ret;
 
   /* --- CHCFG ---
    * SDS[15:12] = source data size
@@ -186,20 +269,14 @@ static int rzv_dmac_setup_channel(struct rzv_dmac_ctrl_s *ctrl)
       chcfg |= DMAC_CHCFG_DAD; /* DAD = 1 */
     }
 
-  /* D4-fix: REN must NOT be set for one-shot transfers — with REN=1 and
+  /* REN must remain clear for one-shot transfers: with REN=1 and
    * N[1] zeroed (no reload buffer) the HW re-executes a zero-byte transfer
    * to address 0 after the first END, causing faults.  This driver supports
    * only one-shot register-mode transfers; REN is left 0.
-   * RSW/REN are only for CONTINUOUS_SETTING mode. */
+   * RSW/REN are only for CONTINUOUS_SETTING mode.
+   */
 
-  if (config->callback != NULL)
-    {
-      chcfg &= ~DMAC_CHCFG_DEM; /* DEM = 0: enable DMAEND interrupt */
-    }
-  else
-    {
-      chcfg |= DMAC_CHCFG_DEM;  /* DEM = 1: mask interrupt */
-    }
+  chcfg |= DMAC_CHCFG_DEM; /* Polling path: mask DMAEND interrupt */
 
   /* --- CHEXT ---
    * SPR[2:0] = source port priority
@@ -216,22 +293,27 @@ static int rzv_dmac_setup_channel(struct rzv_dmac_ctrl_s *ctrl)
   putreg32((uint32_t)config->transfer_interval & 0xffffu,
            RZV_DMAC_CHITVL(unit, local_ch));
 
-  /* D8-fix: TX cache clean before writing descriptors.
-   * configure→start is a legal sequence; channel_set_buffer may not be
-   * called, so we must clean here too.  Only needed when source is the
-   * incrementing (memory) side.  Identity mapping: VA == PA on CR8 boot. */
-
-  if (config->src_addr_mode == RZV_DMAC_ADDR_INCREMENT &&
-      config->src_addr != 0 && config->length != 0)
+  ret = rzv_dmac_convert_cpu_address(config->src_addr, config->length,
+                                     &src_bus);
+  if (ret < 0)
     {
-      up_clean_dcache(config->src_addr,
-                      config->src_addr + config->length);
+      return ret;
     }
+
+  ret = rzv_dmac_convert_cpu_address(config->dst_addr, config->length,
+                                     &dst_bus);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  up_clean_dcache(config->src_addr, config->src_addr + config->length);
+  up_invalidate_dcache(config->dst_addr, config->dst_addr + config->length);
 
   /* N[0]: initial transfer addresses and byte count */
 
-  putreg32(config->src_addr, RZV_DMAC_N0SA(unit, local_ch));
-  putreg32(config->dst_addr, RZV_DMAC_N0DA(unit, local_ch));
+  putreg32(src_bus, RZV_DMAC_N0SA(unit, local_ch));
+  putreg32(dst_bus, RZV_DMAC_N0DA(unit, local_ch));
   putreg32(config->length,   RZV_DMAC_N0TB(unit, local_ch));
 
   /* N[1]: zero (no double-buffer reload in this configuration) */
@@ -240,90 +322,11 @@ static int rzv_dmac_setup_channel(struct rzv_dmac_ctrl_s *ctrl)
   putreg32(0, RZV_DMAC_N1DA(unit, local_ch));
   putreg32(0, RZV_DMAC_N1TB(unit, local_ch));
 
-  dmainfo("DMAC%d CH%d (global %d) cfg: src=0x%08" PRIx32
+  dmainfo("DMAC%d CH%d (global %d) src=0x%08" PRIx32
           " dst=0x%08" PRIx32 " len=%" PRIu32 "\n",
           unit, local_ch,
           (int)(unit * RZV_DMAC_CHANNELS_PER_UNIT + local_ch),
-          config->src_addr, config->dst_addr, config->length);
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: rzv_dmac_interrupt_handler
- *
- * Description:
- *   DMAC_B channel-end interrupt handler.  Invokes user callback from ISR
- *   context (see callback-from-ISR contract in rzv_dmac.h).
- *   For RX transfers: calls up_invalidate_dcache() before callback so the
- *   CPU sees fresh DMA data.
- *
- ****************************************************************************/
-
-static int rzv_dmac_interrupt_handler(int irq, void *context, void *arg)
-{
-  struct rzv_dmac_ctrl_s *ctrl = (struct rzv_dmac_ctrl_s *)arg;
-  uint32_t status;
-  int global_ch;
-
-  if (ctrl == NULL || ctrl->open_id != DMAC_OPEN_ID)
-    {
-      return OK;
-    }
-
-  status    = getreg32(RZV_DMAC_CHSTAT(ctrl->unit, ctrl->local_ch));
-  global_ch = ctrl->unit * RZV_DMAC_CHANNELS_PER_UNIT + ctrl->local_ch;
-
-  if (status & DMAC_CHSTAT_END)
-    {
-      /* Clear END flag */
-
-      putreg32(DMAC_CHCTRL_CLREND,
-               RZV_DMAC_CHCTRL(ctrl->unit, ctrl->local_ch));
-
-      /* RX cache invalidation: ensure CPU reads DMA-written data (H3).
-       * Only needed when destination address increments (memory is dest).
-       * Identity mapping assumed (VA == PA on CR8 boot).
-       */
-
-      if (ctrl->config.dst_addr_mode == RZV_DMAC_ADDR_INCREMENT &&
-          ctrl->config.dst_addr != 0 && ctrl->config.length != 0)
-        {
-          up_invalidate_dcache(ctrl->config.dst_addr,
-                               ctrl->config.dst_addr + ctrl->config.length);
-        }
-
-      if (ctrl->config.callback != NULL)
-        {
-          ctrl->config.callback(global_ch, RZV_DMAC_EVENT_COMPLETE,
-                                ctrl->config.user_data);
-        }
-
-      dmainfo("DMAC%d CH%d: complete\n", ctrl->unit, ctrl->local_ch);
-    }
-
-  if (status & DMAC_CHSTAT_ER)
-    {
-      dmaerr("DMAC%d CH%d: error, CHSTAT=0x%08" PRIx32 "\n",
-             ctrl->unit, ctrl->local_ch, status);
-
-      /* D11-fix: Software reset clears CHCFG/CHCTRL/CHSTAT in HW.
-       * Mark channel as not-in-use so the caller must reconfigure before
-       * the next channel_start — otherwise channel_start runs on zeroed
-       * descriptors and DMA reads/writes address 0. */
-
-      putreg32(DMAC_CHCTRL_SWRST,
-               RZV_DMAC_CHCTRL(ctrl->unit, ctrl->local_ch));
-
-      ctrl->enabled = false;
-      ctrl->in_use  = false;
-
-      if (ctrl->config.callback != NULL)
-        {
-          ctrl->config.callback(global_ch, RZV_DMAC_EVENT_ERROR,
-                                ctrl->config.user_data);
-        }
-    }
+          src_bus, dst_bus, config->length);
 
   return OK;
 }
@@ -349,6 +352,8 @@ int rzv_dmac_channel_initialize(int channel)
   int unit;
   int i;
   int global_base;
+  irqstate_t flags;
+  uint8_t state;
 
   if (channel < 0 || channel >= RZV_DMAC_MAX_CHANNELS)
     {
@@ -357,28 +362,23 @@ int rzv_dmac_channel_initialize(int channel)
 
   unit = RZV_DMAC_UNIT(channel);
 
-  /* D10-fix: guard the initialized check and flag assignment under a
-   * critical section to prevent two threads from racing through the gate
-   * and double-initialising the same unit (double CPG writes + memset race
-   * with in-flight channel_configure on the same unit). */
+  flags = enter_critical_section();
+  state = g_dmac_unit_state[unit];
 
-  {
-    irqstate_t flags = enter_critical_section();
-    bool already_done = g_dmac_unit_initialized[unit];
-    if (!already_done)
-      {
-        /* Set flag inside CS so no other thread can race past */
+  if (state == RZV_DMAC_UNIT_READY)
+    {
+      leave_critical_section(flags);
+      return OK;
+    }
 
-        g_dmac_unit_initialized[unit] = true;
-      }
+  if (state == RZV_DMAC_UNIT_INITIALIZING)
+    {
+      leave_critical_section(flags);
+      return -EBUSY;
+    }
 
-    leave_critical_section(flags);
-
-    if (already_done)
-      {
-        return OK; /* Idempotent */
-      }
-  }
+  g_dmac_unit_state[unit] = RZV_DMAC_UNIT_INITIALIZING;
+  leave_critical_section(flags);
 
   /* Enable DMAC CPG clock (API).
    * RZV_CPG_CLK_DMAC uses 2-bit pair encoding; rzv_clock_enable handles it.
@@ -388,7 +388,7 @@ int rzv_dmac_channel_initialize(int channel)
   rzv_clock_enable(RZV_CPG_CLK_DMAC);
   rzv_module_unreset(RZV_CPG_CLK_DMAC);
 
-  /* D6-fix: Unmask AXI/AHB bus interface (MSTP) for all 5 DMAC units.
+  /* Unmask AXI/AHB bus interface (MSTP) for all five DMAC units.
    * Per RZ/V2H hardware manual, bus stop bits are:
    *   BUS_5_MSTOP  bit 9  (DMAC0)
    *   BUS_3_MSTOP  bit 2  (DMAC1)
@@ -396,7 +396,8 @@ int rzv_dmac_channel_initialize(int channel)
    *   BUS_10_MSTOP bit 11 (DMAC3)
    *   BUS_10_MSTOP bit 12 (DMAC4)
    * Write WEN=1 + data=0 to clear the MSTOP bit (allow bus access).
-   * Format: bit[N+16]=WEN, bit[N]=value.  To clear: write (1<<(N+16)). */
+   * Format: bit[N+16]=WEN, bit[N]=value.  To clear: write (1<<(N+16)).
+   */
 
   putreg32(1u << (9 + 16),  RZV_CPG_BUS_5_MSTOP);  /* DMAC0 */
   putreg32((1u << (2 + 16)) | (1u << (3 + 16)),
@@ -418,8 +419,11 @@ int rzv_dmac_channel_initialize(int channel)
       memset(ctrl, 0, sizeof(*ctrl));
       ctrl->unit     = (uint8_t)unit;
       ctrl->local_ch = (uint8_t)i;
-      ctrl->irq      = -1;
     }
+
+  flags = enter_critical_section();
+  g_dmac_unit_state[unit] = RZV_DMAC_UNIT_READY;
+  leave_critical_section(flags);
 
   dmainfo("DMAC unit %d initialized\n", unit);
   return OK;
@@ -433,19 +437,12 @@ int rzv_dmac_channel_configure(int channel,
                                const struct rzv_dmac_config_s *config)
 {
   struct rzv_dmac_ctrl_s *ctrl;
+  irqstate_t flags;
   int ret;
 
   if (channel < 0 || channel >= RZV_DMAC_MAX_CHANNELS || config == NULL)
     {
       return -EINVAL;
-    }
-
-  /* Auto-initialize unit if needed */
-
-  ret = rzv_dmac_channel_initialize(channel);
-  if (ret < 0)
-    {
-      return ret;
     }
 
   ret = rzv_dmac_validate_config(config);
@@ -454,60 +451,53 @@ int rzv_dmac_channel_configure(int channel,
       return ret;
     }
 
+  /* Auto-initialize only after the request is known to be valid. */
+
+  ret = rzv_dmac_channel_initialize(channel);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   ctrl = &g_dmac_channels[channel];
 
-  /* D14-fix: guard the in_use check + set under a critical section so
-   * two concurrent configure calls on the same channel cannot both pass
-   * the gate and race to write ctrl->config / attach the IRQ. */
+  /* Reserve descriptor setup without making a usable channel visible. */
 
-  {
-    irqstate_t flags = enter_critical_section();
+  flags = enter_critical_section();
 
-    if (ctrl->in_use)
-      {
-        leave_critical_section(flags);
-        dmaerr("Channel %d already in use\n", channel);
-        return -EBUSY;
-      }
+  if (ctrl->in_use || ctrl->configuring)
+    {
+      leave_critical_section(flags);
+      dmaerr("Channel %d already in use\n", channel);
+      return -EBUSY;
+    }
 
-    /* Claim the slot atomically */
+  ctrl->configuring = true;
+  leave_critical_section(flags);
 
-    ctrl->open_id = DMAC_OPEN_ID;
-    ctrl->in_use  = true;
-    leave_critical_section(flags);
-  }
-
-  /* Embed configuration — no heap allocation (H5) */
+  /* Embed configuration; no heap allocation. */
 
   memcpy(&ctrl->config, config, sizeof(ctrl->config));
 
   ret = rzv_dmac_setup_channel(ctrl);
   if (ret < 0)
     {
-      ctrl->in_use  = false;
-      ctrl->open_id = 0;
+      putreg32(DMAC_CHCTRL_SWRST,
+               RZV_DMAC_CHCTRL(ctrl->unit, ctrl->local_ch));
+
+      flags = enter_critical_section();
+      memset(&ctrl->config, 0, sizeof(ctrl->config));
+      ctrl->configuring = false;
+      leave_critical_section(flags);
+
       return ret;
     }
 
-  /* Wire interrupt if callback provided (H1).
-   * ELC event for DMAEND is provided by caller in config->elc_event.
-   * rzv_icu_attach returns the NuttX IRQ number for use by up_enable_irq.
-   */
-
-  if (config->callback != NULL && config->elc_event >= 0)
-    {
-      ctrl->irq = rzv_icu_attach(config->elc_event,
-                                 rzv_dmac_interrupt_handler,
-                                 ctrl, true);
-      if (ctrl->irq < 0)
-        {
-          dmaerr("Channel %d: IRQ attach failed for ELC event %d: %d\n",
-                 channel, config->elc_event, ctrl->irq);
-          /* Non-fatal: polling mode still possible */
-
-          ctrl->irq = -1;
-        }
-    }
+  flags = enter_critical_section();
+  ctrl->open_id = DMAC_OPEN_ID;
+  ctrl->in_use = true;
+  ctrl->configuring = false;
+  leave_critical_section(flags);
 
   dmainfo("Channel %d configured (unit=%d local=%d)\n",
           channel, ctrl->unit, ctrl->local_ch);
@@ -518,16 +508,19 @@ int rzv_dmac_channel_configure(int channel,
  * Name: rzv_dmac_channel_set_buffer
  *
  * Description:
- *   Update N[0] SA/TB for the next transfer.  Satisfies the
- * TODO(-dep) in rzv_serial.c rzv_dma_send.
- *   Performs TX cache clean (up_clean_dcache) when source address increments.
+ *   Update N[0] SA/TB and clean the source cache range for the next
+ *   transfer.
  *
  ****************************************************************************/
 
-int rzv_dmac_channel_set_buffer(int channel, uint32_t src_addr,
+int rzv_dmac_channel_set_buffer(int channel, uintptr_t src_addr,
                                 uint32_t length)
 {
   struct rzv_dmac_ctrl_s *ctrl;
+  irqstate_t flags;
+  uint32_t src_bus;
+  uint32_t width;
+  int ret = OK;
 
   if (channel < 0 || channel >= RZV_DMAC_MAX_CHANNELS)
     {
@@ -536,14 +529,53 @@ int rzv_dmac_channel_set_buffer(int channel, uint32_t src_addr,
 
   ctrl = &g_dmac_channels[channel];
 
+  /* Claim the register update before inspecting the saved configuration.
+   * start() and stop() use the same claim, so N0SA/N0TB cannot change while
+   * a transfer is being armed or released.
+   */
+
+  flags = enter_critical_section();
   if (ctrl->open_id != DMAC_OPEN_ID || !ctrl->in_use)
     {
+      leave_critical_section(flags);
       return -EINVAL;
     }
 
+  if (ctrl->enabled || ctrl->operating)
+    {
+      leave_critical_section(flags);
+      return -EBUSY;
+    }
+
+  ctrl->operating = true;
+  leave_critical_section(flags);
+
   if (length == 0)
     {
-      return -EINVAL;
+      ret = -EINVAL;
+      goto out;
+    }
+
+  /* N0DA remains configured for the channel lifetime.  Keeping the byte
+   * count fixed ensures a replacement source range cannot exceed the
+   * destination range validated during configuration.
+   */
+
+  if (length != ctrl->config.length)
+    {
+      ret = -ENOTSUP;
+      goto out;
+    }
+
+  width = 1u << (uint32_t)ctrl->config.src_size;
+  if ((src_addr & (width - 1u)) != 0u ||
+      (length & (width - 1u)) != 0u ||
+      (src_addr & (DMAC_CACHE_LINE_SIZE - 1u)) != 0u ||
+      (length & (DMAC_CACHE_LINE_SIZE - 1u)) != 0u ||
+      rzv_dmac_convert_cpu_address(src_addr, length, &src_bus) < 0)
+    {
+      ret = -EINVAL;
+      goto out;
     }
 
   /* Check not currently active */
@@ -551,28 +583,22 @@ int rzv_dmac_channel_set_buffer(int channel, uint32_t src_addr,
   if (getreg32(RZV_DMAC_CHSTAT(ctrl->unit, ctrl->local_ch)) &
       DMAC_CHSTAT_TACT)
     {
-      return -EBUSY;
+      ret = -EBUSY;
+      goto out;
     }
 
-  /* TX cache maintenance: clean D-cache so DMA reads coherent data (H3).
-   * Only applies when source is the incrementing (memory) side.
-   * Caller is responsible for cache-line alignment (see contract in header).
-   * Identity mapping: VA == PA on CR8 boot, so src_addr IS the PA.
-   */
-
-  if (ctrl->config.src_addr_mode == RZV_DMAC_ADDR_INCREMENT &&
-      src_addr != 0)
-    {
-      up_clean_dcache(src_addr, src_addr + length);
-    }
+  up_clean_dcache(src_addr, src_addr + length);
 
   ctrl->config.src_addr = src_addr;
-  ctrl->config.length   = length;
 
-  putreg32(src_addr, RZV_DMAC_N0SA(ctrl->unit, ctrl->local_ch));
+  putreg32(src_bus, RZV_DMAC_N0SA(ctrl->unit, ctrl->local_ch));
   putreg32(length,   RZV_DMAC_N0TB(ctrl->unit, ctrl->local_ch));
 
-  return OK;
+out:
+  flags = enter_critical_section();
+  ctrl->operating = false;
+  leave_critical_section(flags);
+  return ret;
 }
 
 /****************************************************************************
@@ -582,7 +608,10 @@ int rzv_dmac_channel_set_buffer(int channel, uint32_t src_addr,
 int rzv_dmac_channel_start(int channel)
 {
   struct rzv_dmac_ctrl_s *ctrl;
+  irqstate_t flags;
   uint32_t status;
+  int poll;
+  int ret;
 
   if (channel < 0 || channel >= RZV_DMAC_MAX_CHANNELS)
     {
@@ -591,29 +620,47 @@ int rzv_dmac_channel_start(int channel)
 
   ctrl = &g_dmac_channels[channel];
 
+  /* Claim the one-shot transfer before touching the hardware.  The claim
+   * serializes this sequence against buffer replacement and stop().
+   */
+
+  flags = enter_critical_section();
   if (ctrl->open_id != DMAC_OPEN_ID || !ctrl->in_use)
     {
+      leave_critical_section(flags);
       return -EINVAL;
     }
+
+  if (ctrl->enabled || ctrl->operating)
+    {
+      leave_critical_section(flags);
+      return -EBUSY;
+    }
+
+  ctrl->enabled = true;
+  ctrl->operating = true;
+  leave_critical_section(flags);
 
   status = getreg32(RZV_DMAC_CHSTAT(ctrl->unit, ctrl->local_ch));
   if (status & DMAC_CHSTAT_TACT)
     {
-      return -EBUSY;
+      ret = -EBUSY;
+      goto out;
     }
 
-  /* D7-fix: SWRST before SETEN to clear any stale END/ER flags from a
+  /* Reset before SETEN to clear stale END/ER flags from a
    * previous transfer.  SWRST must be issued first; without it, stale flags
-   * can re-trigger callbacks or corrupt the channel state machine. */
+   * can re-trigger callbacks or corrupt the channel state machine.
+   */
 
   putreg32(DMAC_CHCTRL_SWRST,
            RZV_DMAC_CHCTRL(ctrl->unit, ctrl->local_ch));
 
-  /* D12-fix: ARM DSB to drain the store buffer before asserting SETEN.
+  /* Drain the store buffer before asserting SETEN.
    * The Cortex-R8 store buffer may reorder the descriptor register writes
    * (N0SA/N0DA/N0TB) relative to SETEN unless Device-nGnRE mapping is
    * guaranteed.  Insert DSB as a defensive barrier.
-   * Reference: ARMv7-R Architecture Reference Manual §A3.8.3. */
+   */
 
   ARM_DSB();
 
@@ -622,41 +669,50 @@ int rzv_dmac_channel_start(int channel)
   putreg32(DMAC_CHCTRL_SETEN,
            RZV_DMAC_CHCTRL(ctrl->unit, ctrl->local_ch));
 
-  /* D15 note: TRM requires CHSTAT.EN==1 before STG for SW trigger.
-   * Polling EN here is defensive and avoids a dropped STG on cold start.
-   * Loop is bounded (EN should set within a few cycles after SETEN). */
+  /* The hardware requires EN before STG.  Do not issue the trigger when
+   * SETEN did not take effect; reset leaves the owner available for stop().
+   */
 
-  /* Software trigger for SW-mode transfers */
-
-  if (ctrl->config.trigger == RZV_DMAC_TRIGGER_SW)
+  for (poll = 0; poll < DMAC_START_TIMEOUT_POLLS; poll++)
     {
-      int poll;
-      for (poll = 0; poll < 100; poll++)
+      if (getreg32(RZV_DMAC_CHSTAT(ctrl->unit, ctrl->local_ch)) &
+          DMAC_CHSTAT_EN)
         {
-          if (getreg32(RZV_DMAC_CHSTAT(ctrl->unit, ctrl->local_ch)) &
-              DMAC_CHSTAT_EN)
-            {
-              break;
-            }
+          break;
         }
-
-      putreg32(DMAC_CHCTRL_STG,
-               RZV_DMAC_CHCTRL(ctrl->unit, ctrl->local_ch));
     }
 
-  ctrl->enabled = true;
+  if (poll == DMAC_START_TIMEOUT_POLLS)
+    {
+      putreg32(DMAC_CHCTRL_SWRST,
+               RZV_DMAC_CHCTRL(ctrl->unit, ctrl->local_ch));
+      ret = -ETIMEDOUT;
+      goto out;
+    }
+
+  putreg32(DMAC_CHCTRL_STG,
+           RZV_DMAC_CHCTRL(ctrl->unit, ctrl->local_ch));
+
+  flags = enter_critical_section();
+  ctrl->operating = false;
+  leave_critical_section(flags);
 
   dmainfo("Channel %d started\n", channel);
   return OK;
+
+out:
+  flags = enter_critical_section();
+  ctrl->operating = false;
+  leave_critical_section(flags);
+  return ret;
 }
 
 /****************************************************************************
  * Name: rzv_dmac_channel_stop
  *
  * Description:
- *   Stop a transfer.  Critical section (M2): irqsave/restore wraps the
- *   entire stop sequence so that CLREN and SWRST are not interleaved with
- *   a concurrent DMAEND ISR delivery.
+ *   Stop a polling transfer and release channel ownership after reset and
+ *   destination cache invalidation complete.
  *
  ****************************************************************************/
 
@@ -666,7 +722,7 @@ int rzv_dmac_channel_stop(int channel)
   uint32_t status;
   irqstate_t flags;
   int timeout;
-  int saved_irq; /* D9-fix: snapshot irq inside CS before slot is released */
+  int ret = OK;
 
   if (channel < 0 || channel >= RZV_DMAC_MAX_CHANNELS)
     {
@@ -675,14 +731,25 @@ int rzv_dmac_channel_stop(int channel)
 
   ctrl = &g_dmac_channels[channel];
 
+  /* Claim stop before issuing CLREN.  Do not keep interrupts disabled while
+   * polling hardware or maintaining the data cache.
+   */
+
+  flags = enter_critical_section();
   if (ctrl->open_id != DMAC_OPEN_ID)
     {
+      leave_critical_section(flags);
       return -EINVAL;
     }
 
-  /* Critical section: stop register sequence must be atomic (M2) */
+  if (ctrl->operating)
+    {
+      leave_critical_section(flags);
+      return -EBUSY;
+    }
 
-  flags = enter_critical_section();
+  ctrl->operating = true;
+  leave_critical_section(flags);
 
   /* Disable channel */
 
@@ -700,17 +767,22 @@ int rzv_dmac_channel_stop(int channel)
           break;
         }
 
-      leave_critical_section(flags);
       up_udelay(10);
-      flags = enter_critical_section();
     }
   while (--timeout > 0);
 
   if (timeout == 0)
     {
       dmaerr("Channel %d stop timeout — forcing reset\n", channel);
-      putreg32(DMAC_CHCTRL_SWRST,
-               RZV_DMAC_CHCTRL(ctrl->unit, ctrl->local_ch));
+      ret = -ETIMEDOUT;
+    }
+
+  if (status & DMAC_CHSTAT_ER ||
+      getreg32(RZV_DMAC_DSTAT_ER(ctrl->unit,
+                                 RZV_DMAC_GRP(ctrl->local_ch))) &
+      (1u << RZV_DMAC_GRP_CH(ctrl->local_ch)))
+    {
+      ret = -EIO;
     }
 
   /* Clear pending flags */
@@ -718,30 +790,23 @@ int rzv_dmac_channel_stop(int channel)
   putreg32(DMAC_CHCTRL_CLREND | DMAC_CHCTRL_CLRTC,
            RZV_DMAC_CHCTRL(ctrl->unit, ctrl->local_ch));
 
-  ctrl->enabled = false;
-  ctrl->in_use  = false;
-  ctrl->open_id = 0;
+  putreg32(DMAC_CHCTRL_SWRST,
+           RZV_DMAC_CHCTRL(ctrl->unit, ctrl->local_ch));
 
-  /* D9-fix: snapshot ctrl->irq before leaving the critical section.
-   * Once in_use=false / open_id=0 are visible outside CS a concurrent
-   * channel_configure can reclaim this slot and overwrite ctrl->irq.
-   * Detaching the wrong IRQ would break the new owner's channel.
-   * Snapshot here (still inside CS) and detach the local copy outside. */
+  up_invalidate_dcache(ctrl->config.dst_addr,
+                       ctrl->config.dst_addr + ctrl->config.length);
 
-  saved_irq  = ctrl->irq;
-  ctrl->irq  = -1;
+  flags = enter_critical_section();
+  ctrl->enabled     = false;
+  ctrl->in_use      = false;
+  ctrl->configuring = false;
+  ctrl->operating   = false;
+  ctrl->open_id     = 0;
 
   leave_critical_section(flags);
 
-  /* Detach the IRQ we held when we owned the channel (outside CS) */
-
-  if (saved_irq >= 0)
-    {
-      rzv_icu_detach(saved_irq);
-    }
-
   dmainfo("Channel %d stopped\n", channel);
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -751,6 +816,7 @@ int rzv_dmac_channel_stop(int channel)
 uint32_t rzv_dmac_channel_status(int channel)
 {
   struct rzv_dmac_ctrl_s *ctrl;
+  uint32_t status;
 
   if (channel < 0 || channel >= RZV_DMAC_MAX_CHANNELS)
     {
@@ -764,7 +830,15 @@ uint32_t rzv_dmac_channel_status(int channel)
       return 0;
     }
 
-  return getreg32(RZV_DMAC_CHSTAT(ctrl->unit, ctrl->local_ch));
+  status = getreg32(RZV_DMAC_CHSTAT(ctrl->unit, ctrl->local_ch));
+  if (getreg32(RZV_DMAC_DSTAT_ER(ctrl->unit,
+                                 RZV_DMAC_GRP(ctrl->local_ch))) &
+      (1u << RZV_DMAC_GRP_CH(ctrl->local_ch)))
+    {
+      status |= DMAC_CHSTAT_ER;
+    }
+
+  return status;
 }
 
 /****************************************************************************
@@ -794,63 +868,13 @@ uint32_t rzv_dmac_get_remaining_bytes(int channel)
  * Name: rzv_dmac_set_peripheral_source
  *
  * Description:
- *   Program INTC DMACKSEL to route ELC event → DMAC channel (H1b).
- *   Returns -ENOSYS until DMACKSEL0 offset is confirmed vs RZV2H UM.
- *   See hardware/rzv_dmac.h RZV_INTC_DMACKSEL0_OFFSET note.
+ *   Hardware-trigger routing is intentionally unavailable in this driver.
  *
  ****************************************************************************/
 
 int rzv_dmac_set_peripheral_source(int channel, int elc_event)
 {
-  /* D5-fix: DMACKSEL0 offset 0x0BCC is confirmed derivable from
-   * intc_iodefine.h (R9A09G057H CR variant): DMACKSEL0 field follows
-   * DMRCLR2 + RESERVED13[36 bytes] in R_INTC_Type at base 0x10400000.
-   * The offset ~0x0BCC is consistent with the struct layout enumeration.
-   * Register write is now enabled — HW-triggered DMA requires this path.
-   * Reference: refs/.../R9A09G057H/cr/iodefines/intc_iodefine.h line 2986.
-   */
-
-  struct rzv_dmac_ctrl_s *ctrl;
-  uint32_t reg_idx;
-  uint32_t shift;
-  uint32_t val;
-  uint32_t regval;
-  irqstate_t flags;
-
-  if (channel < 0 || channel >= RZV_DMAC_MAX_CHANNELS)
-    {
-      return -EINVAL;
-    }
-
-  ctrl = &g_dmac_channels[channel];
-
-  /* DMACKSEL channel index.
-   * For DMAC units 1-4: global slot = (unit-1)*16 + local_ch
-   * For DMAC unit 0:    global slot = 4*16 + local_ch (= 64 + local_ch)
-   * DMACKSEL register n covers slots n*4 .. n*4+3.
-   */
-
-  reg_idx = (uint32_t)channel / 4u;
-  shift   = (((uint32_t)channel % 4u)) * 8u;
-
-  if (elc_event < 0)
-    {
-      val = 0;
-    }
-  else
-    {
-      val = RZV_INTC_DMACKSEL_VAL(ctrl->unit, ctrl->local_ch) &
-            RZV_INTC_DMACKSEL_MASK;
-    }
-
-  flags  = enter_critical_section();
-  regval = getreg32(RZV_INTC_DMACKSEL(reg_idx));
-  regval &= ~((uint32_t)RZV_INTC_DMACKSEL_MASK << shift);
-  regval |= (val << shift);
-  putreg32(regval, RZV_INTC_DMACKSEL(reg_idx));
-  leave_critical_section(flags);
-
-  dmainfo("Channel %d: DMACKSEL%d[%d] = 0x%02" PRIx32 "\n",
-          channel, (int)reg_idx, (int)shift, val);
-  return OK;
+  (void)channel;
+  (void)elc_event;
+  return -ENOTSUP;
 }

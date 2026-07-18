@@ -962,27 +962,18 @@ config RZV_SCI3_I2C
 
 endif # RZV_SCI_I2C
 
-config RZV_DMA
-   bool "DMA support"
-   default n
-   depends on RZV_HAVE_DMAC
-   select ARCH_DMA
-
 config RZV_DMAC
    bool "DMAC_B (Direct Memory Access Controller)"
    default n
-   depends on RZV_HAVE_DMAC
+   depends on RZV_HAVE_DMAC && RZV2H_BUILD_CR8_0
    select ARCH_DMA
    ---help---
-     Enable support for the RZV2H DMAC_B (Direct Memory Access Controller).
-     The DMAC_B provides 80 DMA channels (5 units x 16 channels) supporting
-     register mode and link mode transfers with hardware and software triggers.
-     Features include:
-     - Transfer sizes from 1 to 128 bytes
-     - Address increment/fixed modes
-     - Hardware trigger via ELC events
-     - Interrupt-driven operation
-     - Priority control per channel
+     Enable the CR8-0 RZ/V2H DMAC_B driver for one-shot, software-triggered,
+     polling memory transfers.  The supported path accepts CPU addresses and
+     converts CR8-0 ITCM/DTCM addresses to DMAC bus aliases.
+
+     Hardware-triggered transfers, callbacks, link mode, peripheral channel
+     allocation, and non-CR8-0 use are not supported by this configuration.
 
 if RZV_DMAC
 

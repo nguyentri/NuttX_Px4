@@ -24,33 +24,15 @@
  * unit, 5 units total = 80 channels.  Register layout is NOT a flat
  * ch*0x40 array; see hardware/rzv_dmac.h for full decomposition.
  *
- * Callback-from-ISR contract:
- *   rzv_dmac_callback_t is invoked directly from the DMAC interrupt handler
- *   (hard IRQ context).  Callbacks MUST NOT:
- *     - block or call any sleeping function
- *     - take mutexes or semaphores that could be held by non-ISR code
- *     - call rzv_dmac_channel_configure() or rzv_dmac_channel_stop()
- *   Callbacks MAY:
- *     - post a semaphore or send a work-queue item
- *     - call rzv_dmac_channel_start() to re-arm a prepared channel
- *     - call rzv_dmac_channel_set_buffer() to update addresses then start
+ * Supported scope: CR8-0 one-shot register mode with software-triggered,
+ * polling memory transfers.  Hardware triggers, callbacks, link mode, and
+ * peripheral channel allocation are rejected by the driver.
  *
- * Cache alignment contract for callers:
- *   TX buffers: caller must ensure the buffer is D-cache line aligned
- *     (32 bytes for Cortex-R8) before calling rzv_dmac_channel_set_buffer().
- *     rzv_dmac_channel_set_buffer() will call up_clean_dcache() internally.
- *   RX buffers: provided buffer must be D-cache line aligned and sized to a
- *     cache line multiple.  The DMAC ISR calls up_invalidate_dcache() on
- *     completion before invoking the user callback.
- *
- * Link mode: NOT supported by this driver.  DMAC_B N[0]/N[1] double-buffer
- *   reload is used instead (register mode with RSEL auto-swap).  The old
- *   RZV_DMAC_MODE_LINK enum has been removed to prevent misuse.
- *
- * VA→PA translation assumption:
- *   CR8 boot on RDK-RZV2H uses identity mapping for DDR (VA == PA).
- *   No up_addrenv_va_to_pa() call is made.  If user-space DMA buffers are
- *   ever required, callers must translate before passing addresses.
+ * CPU-address and cache contract:
+ *   Callers pass CPU addresses.  The driver converts CR8-0 ITCM/DTCM views
+ *   to DMAC bus aliases and maintains cache ranges using the original CPU
+ *   addresses.  Buffers must meet the documented cache-line and transfer
+ *   width alignment requirements.
  */
 
 #ifndef __ARCH_ARM_SRC_RZV_DMAC_H
@@ -83,7 +65,7 @@
 #define RZV_DMAC_CHANNEL_6          6
 #define RZV_DMAC_CHANNEL_7          7
 
-/* DMAC Event codes passed to callbacks */
+/* DMAC event codes reserved for a future callback-capable driver. */
 
 #define RZV_DMAC_EVENT_COMPLETE     (0)  /* Transfer complete (END flag) */
 #define RZV_DMAC_EVENT_ERROR        (1)  /* Transfer error (ER flag) */
@@ -137,7 +119,7 @@ typedef enum
 } rzv_dmac_trigger_t;
 
 /* DMAC callback function type.
- * Called from ISR context — see callback-from-ISR contract above.
+ * Callbacks are not supported by this polling-only driver and must be NULL.
  * Parameters:
  *   channel   - global channel number (0..79)
  *   event     - RZV_DMAC_EVENT_COMPLETE or RZV_DMAC_EVENT_ERROR
@@ -158,17 +140,17 @@ struct rzv_dmac_config_s
   rzv_dmac_addr_mode_t  dst_addr_mode;   /* Destination address mode */
   rzv_dmac_trigger_t    trigger;         /* Trigger mode */
 
-  uint32_t              src_addr;        /* Source address (PA on CR8) */
-  uint32_t              dst_addr;        /* Destination address (PA on CR8) */
+  uintptr_t             src_addr;        /* Source CPU address */
+  uintptr_t             dst_addr;        /* Destination CPU address */
   uint32_t              length;          /* Transfer length in bytes */
 
   uint8_t               priority;        /* Channel priority (0-7) */
-  uint16_t              transfer_interval; /* Transfer interval (CHITVL) */
+  uint16_t              transfer_interval;
 
   int                   elc_event;       /* ELC event for HW trigger (-1=none) */
 
-  rzv_dmac_callback_t   callback;        /* Transfer complete/error callback */
-  void                 *user_data;       /* Opaque pointer passed to callback */
+  rzv_dmac_callback_t   callback;        /* Must be NULL */
+  void                 *user_data;       /* Reserved; ignored */
 };
 
 /****************************************************************************
@@ -204,12 +186,12 @@ int rzv_dmac_channel_initialize(int channel);
  *
  * Description:
  *   Configure a DMAC channel for transfer.  Writes CHCFG, CHEXT, CHITVL
- *   and the N[0] address/count registers.  Attaches the DMAEND interrupt
- *   via rzv_icu_attach() if a callback is provided.  No heap allocation.
+ *   and the N[0] address/count registers.  The supported path is polling
+ *   only; callbacks and hardware triggers are rejected.  No heap allocation.
  *
  * Input Parameters:
  *   channel - Global channel (0..79).
- *   config  - Configuration structure; must remain valid until channel_stop.
+ *   config  - Configuration structure; copied during configuration.
  *
  * Returned Value:
  *   Zero (OK) on success; -EINVAL on bad parameters; -EBUSY if already
@@ -224,9 +206,9 @@ int rzv_dmac_channel_configure(int channel,
  * Name: rzv_dmac_channel_set_buffer
  *
  * Description:
- *   Update the source address and byte count for the next transfer without
- *   reconfiguring the channel.  Intended for use by peripheral drivers
- *   (e.g., rzv_serial.c rzv_dma_send) to re-arm a pre-configured channel.
+ *   Update the source address for the next memory transfer without
+ *   reconfiguring the channel.  The byte count must match the configured
+ *   transfer length because the destination range is not changed.
  *
  *   Performs up_clean_dcache() on [src_addr, src_addr+length) for TX
  *   channels (i.e., when src_addr_mode == INCREMENT).  Caller is responsible
@@ -234,24 +216,25 @@ int rzv_dmac_channel_configure(int channel,
  *
  * Input Parameters:
  *   channel  - Global channel (0..79); must be configured and not active.
- *   src_addr - New source physical address.
- *   length   - New transfer length in bytes.
+ *   src_addr - New source CPU address.
+ *   length   - Configured transfer length in bytes.
  *
  * Returned Value:
  *   Zero (OK) on success; -EINVAL if channel not configured; -EBUSY if
- *   transfer is active.
+ *   transfer is active; -ENOTSUP if length differs from the configured
+ *   transfer length.
  *
  ****************************************************************************/
 
-int rzv_dmac_channel_set_buffer(int channel, uint32_t src_addr,
+int rzv_dmac_channel_set_buffer(int channel, uintptr_t src_addr,
                                 uint32_t length);
 
 /****************************************************************************
  * Name: rzv_dmac_channel_start
  *
  * Description:
- *   Enable the channel (SETEN) and, for software trigger, issue STG.
- *   For hardware trigger the transfer begins when the peripheral event fires.
+ *   Enable the channel (SETEN) and issue STG for the supported software
+ *   trigger path.
  *
  * Input Parameters:
  *   channel - Global channel (0..79).
@@ -267,9 +250,7 @@ int rzv_dmac_channel_start(int channel);
  * Name: rzv_dmac_channel_stop
  *
  * Description:
- *   Disable the channel, wait for TACT to clear (up to 10 ms), and detach
- *   the interrupt.  Runs under enter_critical_section() to prevent
- *   concurrent IRQ delivery during the stop sequence.
+ *   Disable the channel and wait for TACT to clear (up to 10 ms).
  *
  * Input Parameters:
  *   channel - Global channel (0..79).
@@ -317,20 +298,15 @@ uint32_t rzv_dmac_get_remaining_bytes(int channel);
  * Name: rzv_dmac_set_peripheral_source
  *
  * Description:
- *   Program the INTC DMACKSEL register to route an ELC peripheral event to
- *   this DMAC channel.  Required for hardware-triggered DMA (e.g., SCI TXI
- *   event → DMAC channel for UART TX).
- *
- *   DMACKSEL0 offset (0x0BCC) is derived from intc_iodefine.h
- *   (R9A09G057H CR variant) struct layout.  Register write is active.
+ *   Hardware-trigger routing is outside the supported driver scope.  This
+ *   function returns -ENOTSUP without programming a peripheral selector.
  *
  * Input Parameters:
  *   channel   - Global DMAC channel (0..79).
- *   elc_event - ELC event number (from hardware/rzv_elc.h ELC_EVENT_* or
- *               RZV_ELC_* values).  Use -1 to clear.
+ *   elc_event - Reserved for a future hardware-trigger implementation.
  *
  * Returned Value:
- *   Zero (OK) on success; -EINVAL on bad channel.
+ *   -ENOTSUP.
  *
  ****************************************************************************/
 

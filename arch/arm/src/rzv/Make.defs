@@ -72,7 +72,7 @@ CHIP_CSRCS += rzv_i2c.c
 endif
 
 # DMAC driver
-ifeq ($(CONFIG_RZV_DMA),y)
+ifeq ($(CONFIG_RZV_DMAC),y)
 CHIP_CSRCS += rzv_dmac.c
 endif
 

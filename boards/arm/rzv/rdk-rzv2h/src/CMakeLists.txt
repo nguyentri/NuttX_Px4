@@ -70,6 +70,10 @@ if(CONFIG_RZV_ADC)
   list(APPEND SRCS rzv2h_adc.c)
 endif()
 
+if(CONFIG_RZV_DMAC)
+  list(APPEND SRCS rzv2h_dmac.c)
+endif()
+
 if(CONFIG_RZV_ETHERNET)
   list(APPEND SRCS rzv2h_ether.c)
 endif()
