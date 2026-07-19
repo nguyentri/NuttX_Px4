@@ -28,6 +28,7 @@
 #include <nuttx/config.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/phy.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/wqueue.h>
 #include <stdint.h>
 
@@ -52,7 +53,13 @@
  * Public Types
  ****************************************************************************/
 
-/* The DMA descriptor structure */
+/* The DMA descriptor structure.
+ *
+ * Padded and aligned to a full cacheline so each descriptor owns its own
+ * line.  Otherwise up_invalidate_dcache() on a 16-byte descriptor discards
+ * pending writes to the neighboring descriptors that share the same 64-byte
+ * line, corrupting the OWN bookkeeping under DMA traffic.
+ */
 
 struct rzv_eth_desc_s
 {
@@ -60,7 +67,8 @@ struct rzv_eth_desc_s
   volatile uint32_t des1;
   volatile uint32_t des2;
   volatile uint32_t des3;
-};
+  uint32_t reserved[12]; /* Pad to 64 bytes */
+} __attribute__((aligned(RZV_ETHER_DMA_ALIGN)));
 
 /* The driver state structure */
 
@@ -73,7 +81,8 @@ struct rzv_eth_s
   bool bifup;               /* true:ifup false:ifdown */
   struct wdog_s txtimeout;  /* TX timeout watchdog */
   struct work_s irqwork;    /* For deferring interrupt work to the work queue */
-  struct work_s pollwork;   /* For polling PHY status */
+  struct work_s pollwork;   /* Periodic PHY link polling */
+  struct work_s txavail_work; /* Deferred devif poll from txavail */
   struct work_s txtimeout_work; /* For deferring TX timeout work */
 
   /* Hardware resources */
@@ -94,6 +103,7 @@ struct rzv_eth_s
   unsigned int txinflight;   /* Number of TX descriptors owned by DMA */
   unsigned int rxndx;       /* Next RX descriptor to check */
   volatile uint32_t intpending; /* Deferred DMA interrupt status (ISR <-> work) */
+  spinlock_t lock;          /* Serializes ISR<->work exchange of intpending */
 
   /* PHY state */
   int phy_addr;             /* PHY address */

@@ -74,7 +74,22 @@
 #define RZV_ETHER_TX_TIMEOUT (2 * CLOCKS_PER_SEC)
 #define RZV_ETHER_PKTSIZE    (MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE)
 
+/* PHY link status is re-polled at this cadence while ifup so cable events
+ * (hot-plug, partner speed change) are noticed and the board layer can
+ * reprogram the RGMII divider.
+ */
+
+#define RZV_ETHER_PHY_POLL_PERIOD (SEC2TICK(1))
+
 #define BUF ((FAR struct eth_hdr_s *)priv->dev.d_buf)
+
+/* Buffer descriptor DMA addresses are written into the DMA 32-bit low
+ * registers with HI=0.  The truncation is safe only on 32-bit builds; catch
+ * accidental 64-bit builds at compile time.
+ */
+
+_Static_assert(sizeof(uintptr_t) == sizeof(uint32_t),
+               "rzv_ether descriptor addressing assumes 32-bit uintptr_t");
 
 /****************************************************************************
  * Private Types
@@ -300,10 +315,12 @@ static int rzv_configure_link(struct rzv_eth_s *priv)
                MAC_CONF_FES | MAC_CONF_PS);
 
   /* Enable Automatic Pad/CRC Stripping and CRC stripping for Type frames so
-   * the network stack does not receive the 4-byte FCS tail.
+   * the network stack does not receive the 4-byte FCS tail.  Also merge in
+   * the FSP validated baseline (Jabber/Watchdog disables, gigabit burst)
+   * that keeps legitimate frames from being dropped by the MAC.
    */
 
-  macconf |= MAC_CONF_ACS | MAC_CONF_CST;
+  macconf |= MAC_CONF_ACS | MAC_CONF_CST | MAC_CONF_FSP_BASELINE;
 
   switch (link)
     {
@@ -594,14 +611,21 @@ static void rzv_receive(struct rzv_eth_s *priv)
       rzv_invalidate_dcache_region(rxdesc, sizeof(*rxdesc));
     }
 
-  /* Bump RX tail pointer once to the last returned-to-DMA descriptor so the
-   * engine knows new buffers are available. RX_CTRL.SR is already set in
-   * ifup; the DMA resumes automatically when tail advances.
+  /* Bump RX tail pointer past the last descriptor returned to DMA.  EQOS
+   * treats TAIL as exclusive: the DMA runs while TAIL != current descriptor,
+   * so the tail must point one slot beyond the last CPU-owned descriptor to
+   * expose the full ring; otherwise the last returned slot stays idle.
    */
 
   if (processed)
     {
-      putreg32((uint32_t)(uintptr_t)&priv->rxdesc[last_returned],
+      unsigned int next = last_returned + 1;
+      if (next >= CONFIG_RZV_ETHER_RXDESC)
+        {
+          next = 0;
+        }
+
+      putreg32((uint32_t)(uintptr_t)&priv->rxdesc[next],
                priv->base + RZV_ETH_DMA_CH0_RXDESC_TAIL);
     }
 }
@@ -658,13 +682,21 @@ static int rzv_interrupt(int irq, void *context, void *arg)
 {
   struct rzv_eth_s *priv = (struct rzv_eth_s *)arg;
   uint32_t status;
+  irqstate_t flags;
 
   /* Read status */
   status = getreg32(priv->base + RZV_ETH_DMA_CH0_STATUS);
 
   /* Clear status */
   putreg32(status, priv->base + RZV_ETH_DMA_CH0_STATUS);
+
+  /* Merge new status into deferred bitmap under lock so the bottom half
+   * cannot clear bits that arrive between its read and clear.
+   */
+
+  flags = spin_lock_irqsave(&priv->lock);
   priv->intpending |= status;
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   /* Mask channel interrupts until the bottom half drains pending work. */
 
@@ -683,9 +715,14 @@ static void rzv_work(void *arg)
 {
   struct rzv_eth_s *priv = (struct rzv_eth_s *)arg;
   uint32_t pending;
+  irqstate_t flags;
 
+  /* Atomically consume the deferred bitmap. */
+
+  flags = spin_lock_irqsave(&priv->lock);
   pending = priv->intpending;
   priv->intpending = 0;
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   /* Handle RX */
 
@@ -787,6 +824,13 @@ static int rzv_ifup(struct net_driver_s *dev)
            priv->base + RZV_ETH_MTL_RXQ0_OP_MODE);
   putreg32(MTL_RXQ_DMA_MAP_Q0DDMACH, priv->base + RZV_ETH_MTL_RXQ_DMA_MAP0);
 
+  /* 4b. Route RXQ0 into the DMA path.  On EQOS the MAC leaves RXQ0EN=00 at
+   * reset which silently drops every ingress frame before it ever reaches
+   * MTL/DMA.  FSP writes RXQ0EN=DCB (0b10); mirror that here.
+   */
+
+  putreg32(MAC_RXQ_CTRL0_RXQ0EN_DCB, priv->base + RZV_ETH_MAC_RXQ_CTRL0);
+
   /* 5. Configure DMA channel 0 */
 
   putreg32(DMA_SYSBUS_MODE_AAL, priv->base + RZV_ETH_DMA_SYSBUS_MODE);
@@ -804,6 +848,10 @@ static int rzv_ifup(struct net_driver_s *dev)
            priv->base + RZV_ETH_DMA_CH0_TXDESC_TAIL);
   putreg32((uint32_t)(uintptr_t)&priv->rxdesc[CONFIG_RZV_ETHER_RXDESC - 1],
            priv->base + RZV_ETH_DMA_CH0_RXDESC_TAIL);
+
+  /* Enable PBLx8 to match the FSP burst tuning (effective PBL = 32 * 8). */
+
+  putreg32(DMA_CH0_CTRL_PBLX8, priv->base + RZV_ETH_DMA_CH0_CTRL);
 
   putreg32(DMA_CH0_TX_CTRL_TXPBL(32) | DMA_CH0_TX_CTRL_OSP,
            priv->base + RZV_ETH_DMA_CH0_TX_CTRL);
@@ -854,6 +902,12 @@ static int rzv_ifup(struct net_driver_s *dev)
            priv->base + RZV_ETH_MAC_CONF);
 
   priv->bifup = true;
+
+  /* 11. Start periodic PHY polling so link changes after ifup are noticed. */
+
+  work_queue(LPWORK, &priv->pollwork, rzv_phy_poll_work, priv,
+             RZV_ETHER_PHY_POLL_PERIOD);
+
   return OK;
 }
 
@@ -882,9 +936,10 @@ static int rzv_ifdown(struct net_driver_s *dev)
 
   putreg32(0, priv->base + RZV_ETH_MAC_CONF);
 
-  /* 5. Cancel pending watchdog and clear deferred state. */
+  /* 5. Cancel pending watchdog, PHY poll, and clear deferred state. */
 
   wd_cancel(&priv->txtimeout);
+  work_cancel(LPWORK, &priv->pollwork);
   priv->intpending = 0;
   priv->bifup = false;
   priv->linkup = false;
@@ -917,12 +972,62 @@ static int rzv_txavail(struct net_driver_s *dev)
    * in the caller's (possibly user) context.
    */
 
-  if (work_available(&priv->pollwork))
+  if (work_available(&priv->txavail_work))
     {
-      work_queue(LPWORK, &priv->pollwork, rzv_txavail_work, priv, 0);
+      work_queue(LPWORK, &priv->txavail_work, rzv_txavail_work, priv, 0);
     }
 
   return OK;
+}
+
+/* Periodic PHY link polling.  Re-reads PHY status while the interface is up
+ * and, on a speed/duplex or link-state transition, updates the driver state
+ * and notifies the board layer so the RGMII reference clock divider stays
+ * in sync.  Rescheduled on the LP work queue until ifdown cancels it.
+ */
+
+static void rzv_phy_poll_work(void *arg)
+{
+  struct rzv_eth_s *priv = (struct rzv_eth_s *)arg;
+  int link;
+
+  if (!priv->bifup)
+    {
+      return;
+    }
+
+  link = rzv_phy_linkstatus(priv->base, priv->phy_addr);
+  if (link >= 0)
+    {
+      bool linkup = (link != PHY_LINK_DOWN);
+      int  speed  = 0;
+      bool duplex = false;
+
+      switch (link)
+        {
+          case PHY_LINK_1000FD: speed = 1000; duplex = true;  break;
+          case PHY_LINK_100FD:  speed = 100;  duplex = true;  break;
+          case PHY_LINK_100HD:  speed = 100;  duplex = false; break;
+          case PHY_LINK_10FD:   speed = 10;   duplex = true;  break;
+          case PHY_LINK_10HD:   speed = 10;   duplex = false; break;
+          default: break;
+        }
+
+      if (linkup != priv->linkup || speed != priv->speed ||
+          duplex != priv->duplex)
+        {
+          ninfo("GBETH%d link change: %s %dMbps %s-duplex\n",
+                priv->intf, linkup ? "up" : "down", speed,
+                duplex ? "full" : "half");
+          priv->linkup = linkup;
+          priv->speed  = speed;
+          priv->duplex = duplex;
+          rzv_ether_board_set_speed(priv->intf, linkup ? speed : 0);
+        }
+    }
+
+  work_queue(LPWORK, &priv->pollwork, rzv_phy_poll_work, priv,
+             RZV_ETHER_PHY_POLL_PERIOD);
 }
 
 #ifdef CONFIG_NET_MCASTGROUP

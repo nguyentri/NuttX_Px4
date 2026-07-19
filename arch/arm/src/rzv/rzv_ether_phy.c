@@ -308,10 +308,27 @@ int rzv_phy_probe(uintptr_t base, int fixed_phyaddr, uint8_t *phyaddr,
 int rzv_phy_autonegotiate(uintptr_t base, uint8_t phyaddr)
 {
   uint16_t regval;
+  uint16_t btcr;
   uint32_t timeout = PHY_AUTONEG_TIMEOUT_MS;
   int ret;
 
   ninfo("Starting PHY auto-negotiation\n");
+
+  /* Advertise 1000BASE-T full duplex before restarting auto-negotiation so
+   * the link partner can actually resolve to gigabit; without this the
+   * local BTCR default (typically 0) forces a 100M cap regardless of
+   * partner capability.
+   */
+
+  ret = rzv_phy_read(base, phyaddr, PHY_REG_1000BTCR, &btcr);
+  if (ret == OK)
+    {
+      uint16_t updated = btcr | PHY_1000BTCR_ADV_1000FD;
+      if (updated != btcr)
+        {
+          rzv_phy_write(base, phyaddr, PHY_REG_1000BTCR, updated);
+        }
+    }
 
   /* Read current control register value */
 

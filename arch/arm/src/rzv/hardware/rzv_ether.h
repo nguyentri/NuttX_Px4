@@ -45,7 +45,13 @@
 #define RZV_ETH_MAC_HASH_LO         0x0014 /* MAC Hash Table Low */
 #define RZV_ETH_MAC_MII_ADDR        0x0200 /* MAC MDIO Address */
 #define RZV_ETH_MAC_MII_DATA        0x0204 /* MAC MDIO Data */
-#define RZV_ETH_MAC_FLOW_CTRL       0x0090 /* MAC Flow Control */
+#define RZV_ETH_MAC_TX_FLOW_CTRL    0x0070 /* MAC TX Flow Control */
+#define RZV_ETH_MAC_RX_FLOW_CTRL    0x0090 /* MAC RX Flow Control */
+#define RZV_ETH_MAC_FLOW_CTRL       0x0090 /* Legacy alias for RX flow control */
+#define RZV_ETH_MAC_RXQ_CTRL0       0x00A0 /* MAC RX Queue 0 Control */
+#define RZV_ETH_MAC_RXQ_CTRL1       0x00A4 /* MAC RX Queue 1 Control */
+#define RZV_ETH_MAC_RXQ_CTRL2       0x00A8 /* MAC RX Queue Priority Mapping 0 */
+#define RZV_ETH_MAC_RXQ_CTRL3       0x00AC /* MAC RX Queue Priority Mapping 1 */
 #define RZV_ETH_MAC_INT_STAT        0x00B0 /* MAC Interrupt Status */
 #define RZV_ETH_MAC_INT_EN          0x00B4 /* MAC Interrupt Enable */
 #define RZV_ETH_MAC_ADDR0_HI        0x0300 /* MAC Address 0 High */
@@ -101,7 +107,30 @@
 #define MAC_CONF_JE                 (1 << 16) /* Jumbo Frame Enable */
 #define MAC_CONF_JD                 (1 << 17) /* Jabber Disable */
 #define MAC_CONF_WD                 (1 << 23) /* Watchdog Disable */
+#define MAC_CONF_BE                 (1 << 18) /* Burst Enable for gigabit */
+#define MAC_CONF_S2KP               (1 << 22) /* Support 2K Packets */
 #define MAC_CONF_CST                (1 << 25) /* CRC Stripping for Type frames */
+
+/* Baseline MAC_CONFIGURATION bits programmed by the FSP reference at power-on
+ * (JE|JD|BE|WD|GPSLCE family = 0x009B0000).  Merging these into MAC_CONF
+ * matches the validated register profile and disables the jabber/watchdog
+ * behavior that can otherwise drop legitimate frames.
+ */
+
+#define MAC_CONF_FSP_BASELINE       (MAC_CONF_JE | MAC_CONF_JD | \
+                                     MAC_CONF_BE | MAC_CONF_WD)
+
+/* MAC RX Queue 0 Control (0x00A0): route RXQ0 into the DMA path.
+ * RXQ0EN field (bits 1:0):
+ *   00 = Disabled (packets dropped in MAC)
+ *   01 = AV enabled
+ *   10 = DCB enabled  <-- FSP default
+ */
+
+#define MAC_RXQ_CTRL0_RXQ0EN_SHIFT  (0)
+#define MAC_RXQ_CTRL0_RXQ0EN_MASK   (0x3 << MAC_RXQ_CTRL0_RXQ0EN_SHIFT)
+#define MAC_RXQ_CTRL0_RXQ0EN_DCB    (0x2 << MAC_RXQ_CTRL0_RXQ0EN_SHIFT)
+#define MAC_RXQ_CTRL0_RXQ0EN_AV     (0x1 << MAC_RXQ_CTRL0_RXQ0EN_SHIFT)
 
 /* DMA Mode Register */
 #define DMA_MODE_SWR                (1 << 0)  /* Software Reset */
@@ -126,6 +155,9 @@
 #define DMA_CH0_INT_EN_RBUE         (1 << 7)  /* Receive Buffer Unavailable Enable */
 #define DMA_CH0_INT_EN_AISE         (1 << 15) /* Abnormal Interrupt Summary Enable */
 #define DMA_CH0_INT_EN_NISE         (1 << 16) /* Normal Interrupt Summary Enable */
+
+/* DMA Channel 0 Control Register (0x1100) */
+#define DMA_CH0_CTRL_PBLX8          (1 << 16) /* Multiply PBL by 8 */
 
 /* DMA Channel TX/RX Control Registers */
 #define DMA_CH0_TX_CTRL_ST          (1 << 0)  /* Start/Stop Transmission */
