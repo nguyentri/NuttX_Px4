@@ -63,16 +63,18 @@
 
 /* RIIC Register Offsets **************************************************/
 
-/* ICCR%s Registers (1-2) */
-#define RZV_RIIC_ICCR_OFFSET(m)                 (0x00000000 + ((m) * 0x00000001))  /* ICCR Register %s */
-/* ICMR%s Registers (1-3) */
-#define RZV_RIIC_ICMR_OFFSET(m)                 (0x00000002 + ((m) * 0x00000001))  /* ICMR Register %s */
+/* ICCR%s Registers (1-2). Registers are numbered from 1 and the first
+ * (ICCR1) sits at offset 0x00, so the 1-based index must be biased by -1.
+ */
+#define RZV_RIIC_ICCR_OFFSET(m)                 (0x00000000 + (((m) - 1) * 0x00000001))  /* ICCR Register %s */
+/* ICMR%s Registers (1-3). ICMR1 is at offset 0x02; bias the 1-based index. */
+#define RZV_RIIC_ICMR_OFFSET(m)                 (0x00000002 + (((m) - 1) * 0x00000001))  /* ICMR Register %s */
 /* ICSAR%s Registers (0-2) */
 #define RZV_RIIC_ICSAR_OFFSET(m)                (0x0000000a + ((m) * 0x00000002))  /* ICSAR Register %s */
 /* ICSARU%s Registers (0-2) */
 #define RZV_RIIC_ICSARU_OFFSET(m)               (0x0000000b + ((m) * 0x00000002))  /* ICSARU Register %s */
-/* ICSR%s Registers (1-2) */
-#define RZV_RIIC_ICSR_OFFSET(m)                 (0x00000008 + ((m) * 0x00000001))  /* ICSR Register %s */
+/* ICSR%s Registers (1-2). ICSR1 is at offset 0x08; bias the 1-based index. */
+#define RZV_RIIC_ICSR_OFFSET(m)                 (0x00000008 + (((m) - 1) * 0x00000001))  /* ICSR Register %s */
 #define RZV_RIIC_ICFER_OFFSET                            0x0005  /* I2C Bus Function Enable Register */
 #define RZV_RIIC_ICSER_OFFSET                            0x0006  /* I2C Bus Status Enable Register */
 #define RZV_RIIC_ICIER_OFFSET                            0x0007  /* I2C Bus Interrupt Enable Register */

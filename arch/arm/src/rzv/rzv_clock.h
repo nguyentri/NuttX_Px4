@@ -71,8 +71,13 @@
 /* CLKON_0 - GPIO, CA55 core clocks */
 /* UNVERIFIED: GPIO channel 0; needs RZ/V2H UM confirmation */
 #define RZV_CPG_CLK_GPIO            (0 << 16 | 0)
-/* UNVERIFIED: ICU channel 0; needs RZ/V2H UM confirmation */
-#define RZV_CPG_CLK_ICU             (0 << 16 | 1)
+/* ICU clock gate - CPG_CLKON_0 bit 5, reset CPG_RST_3 bit 6.
+ * Verified vs FSP r_cpg enum CPG_CLK_ICU_0_PCLK=0x00200600 (CLKON_0, mask
+ * 0x0020) and CPG_RST_ICU_0_PRESETN_I=0x0040090C (RST_3, mask 0x0040).
+ * Reset applied via the ICU special-case in rzv_module_reset/unreset.
+ * (Previous bit 1 fell inside the DMAC 5-bit field in CPG_CLKON_0.)
+ */
+#define RZV_CPG_CLK_ICU             (0 << 16 | 5)
 
 /* RSCI (SCI-B) UART clock gates — CPG_CLKON_5..8, FIVE gate bits per
  * channel (SCIPCLK, SCITCLK, SCIPS3, SCIPS2, SCIPS1) occupying five
@@ -101,16 +106,32 @@
 #define RZV_CPG_CLK_SCI8            (8 << 16 | 5)
 #define RZV_CPG_CLK_SCI9            (8 << 16 | 10)
 
-/* SPI (RSPI/SPI_B) - UNVERIFIED: needs RZ/V2H UM confirmation */
-#define RZV_CPG_CLK_SPI0            (2 << 16 | 0)
-#define RZV_CPG_CLK_SPI1            (2 << 16 | 1)
-#define RZV_CPG_CLK_SPI2            (2 << 16 | 2)
+/* SPI (RSPI) clock gates - CPG_CLKON_5, 3-bit group per channel.
+ * Verified vs FSP bsp_override.h BSP_CLKON_REG/BIT_FSP_IP_RSPI (R9A09G057H):
+ *   RSPI(ch) = CPG_CLKON_5, 7U << (CLK4_ON_Pos + 3*ch); CLK4_ON_Pos = 4.
+ *   SPI0 = bits[6:4], SPI1 = bits[9:7], SPI2 = bits[12:10].
+ * The 3-bit enable/disable is handled in rzv_clock_enable/disable.
+ * Reset lives in CPG_RST_7 (RSPIP+RSPIT, 2 bits at RSTB(11+2*ch)); applied
+ * via the RSPI special-case in rzv_module_reset/unreset.  SPI2's RSPIT
+ * spans into CPG_RST_8 and is not covered (SPI0/1 only).
+ * (Previous domain 2 bits 0-2, 1-bit, were wrong for both clock and reset.)
+ */
+#define RZV_CPG_CLK_SPI0            (5 << 16 | 4)
+#define RZV_CPG_CLK_SPI1            (5 << 16 | 7)
+#define RZV_CPG_CLK_SPI2            (5 << 16 | 10)
 
-/* I2C (RIIC) - UNVERIFIED: needs RZ/V2H UM confirmation */
-#define RZV_CPG_CLK_I2C0            (3 << 16 | 0)
-#define RZV_CPG_CLK_I2C1            (3 << 16 | 1)
-#define RZV_CPG_CLK_I2C2            (3 << 16 | 2)
-#define RZV_CPG_CLK_I2C3            (3 << 16 | 3)
+/* I2C (RIIC) clock gates - CPG_CLKON_9.
+ * Verified vs FSP bsp_override.h BSP_CLKON_REG/BIT_FSP_IP_RIIC (R9A09G057H):
+ *   RIIC(ch) = CPG_CLKON_9, bit = CLK4_ON_Pos + ch  (RIIC8 = CLK3).
+ *   CLK4_ON_Pos = 4, so RIIC0-3 = bits 4-7.
+ * Cross-checked via CLKMON: RIIC0 global 16*9+4=148 -> CLKMON_4 bit20,
+ *   matching BSP_CLKMON_BIT_FSP_IP_RIIC (CLK20_MON).
+ * (Previous domain 3 bits 0-3 were wrong.)
+ */
+#define RZV_CPG_CLK_I2C0            (9 << 16 | 4)
+#define RZV_CPG_CLK_I2C1            (9 << 16 | 5)
+#define RZV_CPG_CLK_I2C2            (9 << 16 | 6)
+#define RZV_CPG_CLK_I2C3            (9 << 16 | 7)
 
 /* OSTM timers - UNVERIFIED: needs RZ/V2H UM confirmation.
  * GPT and OSTM likely share CPG_CLKON_4 but bit offsets unknown. */
@@ -118,22 +139,23 @@
 #define RZV_CPG_CLK_OSTM1           (4 << 16 | 12)
 #define RZV_CPG_CLK_OSTM2           (4 << 16 | 13)
 
-/* GTM (General Timer Module) clocks.
- * CPG_CLKON_GTM covers all 8 GTM channels as bits 0-7.  The named alias
- * CPG_CLKON_GTM is NOT in R9A09G057H iobitmask (only in R9A07G054L).
- * UNVERIFIED: mapping to CPG_CLKON_N pending RZ/V2H UM verification.
- * Previous code erroneously aliased GTM0-2 to OSTM0-2 and put GTM3-7 in
- * domain 4 bits 11-15 (conflicting with OSTM entries above).
- * Corrected: GTM0-7 assigned to domain 5 (placeholder) pending verification.
- * TODO: confirm CPG_CLKON_N register for GTM on R9A09G057H. */
-#define RZV_CPG_CLK_GTM0            (5 << 16 | 0)
-#define RZV_CPG_CLK_GTM1            (5 << 16 | 1)
-#define RZV_CPG_CLK_GTM2            (5 << 16 | 2)
-#define RZV_CPG_CLK_GTM3            (5 << 16 | 3)
-#define RZV_CPG_CLK_GTM4            (5 << 16 | 4)
-#define RZV_CPG_CLK_GTM5            (5 << 16 | 5)
-#define RZV_CPG_CLK_GTM6            (5 << 16 | 6)
-#define RZV_CPG_CLK_GTM7            (5 << 16 | 7)
+/* GTM (General Timer Module) clock gates - CPG_CLKON_4.
+ * Verified vs FSP bsp_override.h BSP_CLKON_REG/BIT_FSP_IP_GTM (R9A09G057H):
+ *   GTM(ch) = CPG_CLKON_4, bit = CLK3_ON_Pos + ch = 3 + ch  (GTM0-7 = 3..10).
+ * Cross-checked via CLKMON: GTM7 global 16*4+10=74 -> CLKMON_2 bit10,
+ *   matching BSP_CLKMON_BIT_FSP_IP_GTM (CLK3_MON + ch).
+ * Reset lives in a DIFFERENT bank (CPG_RST_6/7) and is applied via the GTM
+ * special-case in rzv_module_reset/unreset — do NOT assume RST index == 4.
+ * (Previous domain 5 bits 0-7 were wrong for both clock and reset.)
+ */
+#define RZV_CPG_CLK_GTM0            (4 << 16 | 3)
+#define RZV_CPG_CLK_GTM1            (4 << 16 | 4)
+#define RZV_CPG_CLK_GTM2            (4 << 16 | 5)
+#define RZV_CPG_CLK_GTM3            (4 << 16 | 6)
+#define RZV_CPG_CLK_GTM4            (4 << 16 | 7)
+#define RZV_CPG_CLK_GTM5            (4 << 16 | 8)
+#define RZV_CPG_CLK_GTM6            (4 << 16 | 9)
+#define RZV_CPG_CLK_GTM7            (4 << 16 | 10)
 
 /* DMAC_B - CPG_CLKON_0 (domain 0), 5-bit mask [4:0] for 5 units.
  *   CLK0_ON_Pos = 0 (cpg_iobitmask.h).
@@ -156,7 +178,8 @@
  * Encoding: (CLKON_reg_index << 16 | bit_position) = (9 << 16 | 12)
  * CORRECTED from previous wrong value (7 << 16 | 0).
  * Reset: CPG_RST_10 bits[2:1] (3U<<1). Same encoding → (10 << 16 | 1).
- * Module-stop: CPG_BUS_MCPU2_MSTOP bit 9 (MSTOP9).
+ * Module-stop: CPG_BUS_10_MSTOP bit 14 (RZ/V2H UM Table 4.4-38); released
+ * via g_rzv_mstop_map in rzv_clock.c.
  */
 #define RZV_CPG_CLK_CANFD           (9 << 16 | 12)
 #define RZV_CPG_CLK_CAN0            RZV_CPG_CLK_CANFD  /* CAN0 shares CANFD gate */
@@ -200,13 +223,31 @@
  * NuttX rzv_module_unreset() uses (domain<<16 | bit) with the same convention.
  * NEEDS_VERIFY: confirm CPG_CLKON_14 bit 3 = SDHI0_IMCLK against RZ/V2H UM.
  */
-#define RZV_CPG_CLK_SDHI0           (14 << 16 | 3)  /* SDHI0 IMCLK gate */
-#define RZV_CPG_CLK_SDHI1           (14 << 16 | 11) /* SDHI1 IMCLK gate (mask 0x0800) */
-#define RZV_CPG_CLK_SDHI2           (14 << 16 | 19) /* SDHI2 IMCLK gate (mask 0x08000000>>16?) */
-/* SDHI reset -- CPG_RST_14 bit 7 per FSP CPG_RST_SDHI_0_IXRST decode */
-#define RZV_CPG_RST_SDHI0           (14 << 16 | 7)  /* SDHI0 IXRST deassert */
-#define RZV_CPG_RST_SDHI1           (14 << 16 | 8)  /* SDHI1 IXRST */
-#define RZV_CPG_RST_SDHI2           (14 << 16 | 9)  /* SDHI2 IXRST */
+/* SDHI IMCLK gates - CPG_CLKON_14, decoded from FSP r_cpg CPG_CLK_SDHI_n_IMCLK
+ * enum (offset 0x0628 = CLKON_14; upper16 = clock bitmask):
+ *   SDHI0 IMCLK 0x00080628 -> mask 0x0008 -> bit 3
+ *   SDHI1 IMCLK 0x00800628 -> mask 0x0080 -> bit 7
+ *   SDHI2 IMCLK 0x08000628 -> mask 0x0800 -> bit 11
+ * (Previous SDHI1 bit 11 / SDHI2 bit 19 were wrong; bit 19 even fell into the
+ * write-enable half of the 16-bit control field.)
+ */
+/* SDHI IMCLK gates - CPG_CLKON_10; reset CPG_RST_10.  Decoded from FSP
+ * r_cpg enum with HWM-absolute offsets (CLKON_0=0x600, RST_0=0x900):
+ *   CPG_CLK_SDHI_n_IMCLK 0x0628 -> CLKON_10, masks 0x0008/0x0080/0x0800
+ *     -> SDHI0/1/2 = bits 3/7/11.
+ *   CPG_RST_SDHI_n_IXRST 0x0928 -> RST_10, masks 0x0080/0x0100/0x0200
+ *     -> SDHI0/1/2 = bits 7/8/9.
+ * (Previous domain 14 used 0x5F0 as the CLKON/RST base, i.e. it ignored the
+ *  +0x10 already folded into RZV_CPG_BASE, landing 4 registers too high.)
+ * NOTE: only IMCLK is gated here; full SDHI bring-up also needs IMCLK2,
+ * CLK_HS and ACLK (CPG_CLKON_10 bits 4-6/8-10/12-14).
+ */
+#define RZV_CPG_CLK_SDHI0           (10 << 16 | 3)  /* SDHI0 IMCLK gate */
+#define RZV_CPG_CLK_SDHI1           (10 << 16 | 7)  /* SDHI1 IMCLK gate */
+#define RZV_CPG_CLK_SDHI2           (10 << 16 | 11) /* SDHI2 IMCLK gate */
+#define RZV_CPG_RST_SDHI0           (10 << 16 | 7)  /* SDHI0 IXRST deassert */
+#define RZV_CPG_RST_SDHI1           (10 << 16 | 8)  /* SDHI1 IXRST */
+#define RZV_CPG_RST_SDHI2           (10 << 16 | 9)  /* SDHI2 IXRST */
 
 
 /* Maximum values ***********************************************************/

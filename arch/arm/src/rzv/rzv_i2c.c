@@ -146,7 +146,9 @@ static struct rzv_i2c_priv_s g_riic_priv[RZV_RIIC_MAX_CHANNELS] =
     .irq_rxi = -1,
     .irq_txi = -1,
     .irq_tei = -1,
-    .irq_err = -1
+    .irq_err = -1,
+    .irq_stp = -1,
+    .mstp = RZV_CPG_CLK_I2C0
   },
   {
     .dev = { .ops = &rzv_i2c_ops },

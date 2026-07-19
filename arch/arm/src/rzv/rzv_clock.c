@@ -635,6 +635,78 @@ static void rzv_cpg_mstop_write(uintptr_t reg, uint32_t bits, bool release)
   leave_critical_section(flags);
 }
 
+/* Peripheral bus-interface module-stop (MSTOP) map.
+ *
+ * MSTOP gates the module BUS/REGISTER interface independently of the CLKON
+ * clock gates (see rzv_cpg_mstop_write above).  Per RZ/V2H UM Tables
+ * 4.4-36..4.4-38 several of these bits reset to "stopped" (BUS_1 resets to
+ * 0xAFFF -> RIIC0-3 stopped; BUS_12 to 0x0201 -> GTM7 stopped; BUS_8 to
+ * 0x077D -> SD0-2/GBETH stopped), so the module bus interface must be
+ * released once its clock is confirmed or every register read returns 0.
+ *
+ * DMAC (5-unit mask, rzv_dmac.c), RSCI (5-bit CLKON span, rzv_cpg_sci_*)
+ * and GPT (per-unit, rzv_gpt_module_start) own dedicated release paths and
+ * are intentionally absent here.  Entries not yet exercised on silicon are
+ * spec-derived and need on-target confirmation during bring-up.
+ */
+
+struct rzv_mstop_entry_s
+{
+  uint32_t  clk_id;
+  uintptr_t reg;
+  uint8_t   bit;
+};
+
+static const struct rzv_mstop_entry_s g_rzv_mstop_map[] =
+{
+  { RZV_CPG_CLK_I2C0,  RZV_CPG_BUS_1_MSTOP,   1 },  /* RIIC0  */
+  { RZV_CPG_CLK_I2C1,  RZV_CPG_BUS_1_MSTOP,   2 },  /* RIIC1  */
+  { RZV_CPG_CLK_I2C2,  RZV_CPG_BUS_1_MSTOP,   3 },  /* RIIC2  */
+  { RZV_CPG_CLK_I2C3,  RZV_CPG_BUS_1_MSTOP,   4 },  /* RIIC3  */
+  { RZV_CPG_CLK_SPI0,  RZV_CPG_BUS_11_MSTOP,  0 },  /* RSPI0  */
+  { RZV_CPG_CLK_SPI1,  RZV_CPG_BUS_11_MSTOP,  1 },  /* RSPI1  */
+  { RZV_CPG_CLK_SPI2,  RZV_CPG_BUS_11_MSTOP,  2 },  /* RSPI2  */
+  { RZV_CPG_CLK_ADC0,  RZV_CPG_BUS_3_MSTOP,   9 },  /* ADC    */
+  { RZV_CPG_CLK_CANFD, RZV_CPG_BUS_10_MSTOP, 14 },  /* CAN-FD */
+  /* GBETH0/1 (BUS_8 MSTOP5/6) intentionally omitted: RZV_CPG_CLK_ETH0
+   * currently aliases RZV_CPG_CLK_SCI7 (both (8<<16|0)) so it can never
+   * reach this map, and rzv_ether.c does not call rzv_clock_enable().
+   * Add once a distinct GBETH clock ID exists (see rzv_clock.h ETH TODO).
+   */
+  { RZV_CPG_CLK_SDHI0, RZV_CPG_BUS_8_MSTOP,   2 },  /* SD0    */
+  { RZV_CPG_CLK_SDHI1, RZV_CPG_BUS_8_MSTOP,   3 },  /* SD1    */
+  { RZV_CPG_CLK_SDHI2, RZV_CPG_BUS_8_MSTOP,   4 },  /* SD2    */
+  { RZV_CPG_CLK_GTM0,  RZV_CPG_BUS_5_MSTOP,  10 },  /* GTM0   */
+  { RZV_CPG_CLK_GTM1,  RZV_CPG_BUS_5_MSTOP,  11 },  /* GTM1   */
+  { RZV_CPG_CLK_GTM2,  RZV_CPG_BUS_1_MSTOP,  13 },  /* GTM2   */
+  { RZV_CPG_CLK_GTM3,  RZV_CPG_BUS_1_MSTOP,  14 },  /* GTM3   */
+  { RZV_CPG_CLK_GTM4,  RZV_CPG_BUS_11_MSTOP, 13 },  /* GTM4   */
+  { RZV_CPG_CLK_GTM5,  RZV_CPG_BUS_11_MSTOP, 14 },  /* GTM5   */
+  { RZV_CPG_CLK_GTM6,  RZV_CPG_BUS_11_MSTOP, 15 },  /* GTM6   */
+  { RZV_CPG_CLK_GTM7,  RZV_CPG_BUS_12_MSTOP,  0 },  /* GTM7   */
+};
+
+/* Release the module bus-interface MSTOP for clk_id, if it has a mapping.
+ * Release-only: mirrors the pre-existing SPI/ADC behaviour and never
+ * re-asserts MSTOP on disable, so a shared-bus module is not gated off
+ * from under another user.
+ */
+
+static void rzv_cpg_mstop_release(uint32_t clk_id)
+{
+  unsigned int i;
+
+  for (i = 0; i < sizeof(g_rzv_mstop_map) / sizeof(g_rzv_mstop_map[0]); i++)
+    {
+      if (g_rzv_mstop_map[i].clk_id == clk_id)
+        {
+          rzv_cpg_mstop_write(g_rzv_mstop_map[i].reg,
+                              1u << g_rzv_mstop_map[i].bit, true);
+          return;
+        }
+    }
+}
+
 static int rzv_cpg_sci_clock_ctrl(int ch, bool enable)
 {
   uint32_t gstart = 5u * 16u + 13u + 5u * (uint32_t)ch;
@@ -937,7 +1009,7 @@ int rzv_clock_enable(uint32_t clk_id)
    * DMAC CPG_CLKON_0 bits [4:0] are all required per RZ/V2H UM CPG §CLKON.
    * ADC also needs a 2-bit pair (CLK0+CLK1). */
 
-  if (domain == RZV_CPG_DOMAIN(RZV_CPG_CLK_DMAC))
+  if (clk_id == RZV_CPG_CLK_DMAC)
     {
       /* DMAC gate: 5-bit mask [4:0] — all five DMA unit clocks together */
 
@@ -950,6 +1022,18 @@ int rzv_clock_enable(uint32_t clk_id)
       /* CAN-FD gate: 3-bit field CLK12/13/14 in CPG_CLKON_9 per RZ/V2H UM.
        * global + ch0 + ch1 clocks all required.
        * bit==12, span 3 bits → bits[14:12].
+       */
+
+      mask    = (0x7u << (bit + 16)) | (0x7u << bit);
+      mon_lsb = bit;
+      mon_n   = 3;
+    }
+  else if (clk_id == RZV_CPG_CLK_SPI0 ||
+           clk_id == RZV_CPG_CLK_SPI1 ||
+           clk_id == RZV_CPG_CLK_SPI2)
+    {
+      /* RSPI gate: 3-bit group in CPG_CLKON_5 (7U << (CLK4 + 3*ch)); all
+       * three clocks of the channel are required.  bit is the group base.
        */
 
       mask    = (0x7u << (bit + 16)) | (0x7u << bit);
@@ -997,24 +1081,11 @@ int rzv_clock_enable(uint32_t clk_id)
                                 CPG_TIMEOUT_CLOCK_ENABLE);
       if (ret >= 0)
         {
-          /* Release the module's bus-interface MSTOP where known.
-           * RSPI0-2: BUS_11_MSTOP bits 0-2 (RSCI handled in the SCI
-           * helper; GPT in rzv_gpt_module_start).  Other IPs default
-           * released or are opened by the boot chain; extend this map
-           * per FSP BSP_MSTP_REG/BIT_* as peripherals are brought up.
+          /* Release the module's bus-interface MSTOP where mapped (see
+           * g_rzv_mstop_map).  RSCI/DMAC/GPT own dedicated release paths.
            */
 
-          if (clk_id == RZV_CPG_CLK_SPI0 ||
-              clk_id == RZV_CPG_CLK_SPI1 ||
-              clk_id == RZV_CPG_CLK_SPI2)
-            {
-              rzv_cpg_mstop_write(RZV_CPG_BUS_11_MSTOP,
-                                  1u << RZV_CPG_BIT(clk_id), true);
-            }
-          else if (clk_id == RZV_CPG_CLK_ADC0)
-            {
-              rzv_cpg_mstop_write(RZV_CPG_BUS_3_MSTOP, 1u << 9, true);
-            }
+          rzv_cpg_mstop_release(clk_id);
 
           clkinfo("Clock enabled: domain=%u bit=%u\n", (unsigned int)domain, (unsigned int)bit);
           return OK;
@@ -1060,7 +1131,7 @@ int rzv_clock_disable(uint32_t clk_id)
 
   /* match 2-bit/5-bit pairs used in enable */
 
-  if (domain == RZV_CPG_DOMAIN(RZV_CPG_CLK_DMAC))
+  if (clk_id == RZV_CPG_CLK_DMAC)
     {
       mask    = 0x1fu << 16;  /* WEN[20:16] only, ON[4:0]=0 → disable all 5 */
       mon_lsb = 0;
@@ -1080,6 +1151,18 @@ int rzv_clock_disable(uint32_t clk_id)
        */
 
       mask    = (0x7u << (bit + 16)) | (0x0u << bit);
+      mon_lsb = bit;
+      mon_n   = 3;
+    }
+  else if (clk_id == RZV_CPG_CLK_SPI0 ||
+           clk_id == RZV_CPG_CLK_SPI1 ||
+           clk_id == RZV_CPG_CLK_SPI2)
+    {
+      /* RSPI gate: 3-bit group in CPG_CLKON_5 — write-enable upper half,
+       * data 0 → gate off all three channel clocks.  Symmetric to enable.
+       */
+
+      mask    = (0x7u << (bit + 16));
       mon_lsb = bit;
       mon_n   = 3;
     }
@@ -1173,6 +1256,50 @@ int rzv_module_reset(uint32_t clk_id)
     {
       domain  = 15;
       bitmask = (1u << 6);
+    }
+  else if (clk_id >= RZV_CPG_CLK_GTM0 && clk_id <= RZV_CPG_CLK_GTM7)
+    {
+      /* GTM reset bank differs from its CPG_CLKON_4 clock bank.  Per FSP
+       * BSP_RST_*_FSP_IP_GTM: ch<3 -> CPG_RST_6 RSTB(13+ch);
+       * ch>=3 -> CPG_RST_7 RSTB(ch-3).  ch = CLKON bit - 3 (base CLK3).
+       * RSTMON cross-checks under the wait_rstmon global scheme (GTM0 ->
+       * RSTMON_2 bit30, GTM7 -> RSTMON_3 bit5).
+       */
+
+      uint32_t gch = RZV_CPG_BIT(clk_id) - 3u;
+      if (gch < 3u)
+        {
+          domain  = 6;
+          bitmask = 1u << (13u + gch);
+        }
+      else
+        {
+          domain  = 7;
+          bitmask = 1u << (gch - 3u);
+        }
+    }
+  else if (clk_id == RZV_CPG_CLK_SPI0 || clk_id == RZV_CPG_CLK_SPI1)
+    {
+      /* RSPI reset: RSPIP + RSPIT are adjacent in CPG_RST_7.  ch =
+       * (CLKON bit - 4)/3; bits = RSTB(11+2*ch)..RSTB(12+2*ch).
+       * SPI0 -> RST_7 b11-12, SPI1 -> b13-14.  RSTMON cross-checks:
+       * SPI0 -> RSTMON_3 b12-13, SPI1 -> b14-15.  (SPI2's RSPIT is in
+       * CPG_RST_8 and is not handled by this single-register override.)
+       */
+
+      uint32_t sch = (RZV_CPG_BIT(clk_id) - 4u) / 3u;
+      domain  = 7;
+      bitmask = 0x3u << (11u + 2u * sch);
+    }
+  else if (clk_id == RZV_CPG_CLK_ICU)
+    {
+      /* ICU reset bank differs from its CPG_CLKON_0 clock bank: FSP
+       * CPG_RST_ICU_0_PRESETN_I = CPG_RST_3 bit 6.  RSTMON cross-check
+       * under the wait_rstmon global scheme: RST_3 b6 -> RSTMON_1 b7.
+       */
+
+      domain  = 3;
+      bitmask = 1u << 6;
     }
 
   mrst_addr = RZV_CPG_RST(domain);
@@ -1273,6 +1400,50 @@ int rzv_module_unreset(uint32_t clk_id)
     {
       domain  = 15;
       bitmask = (1u << 6);
+    }
+  else if (clk_id >= RZV_CPG_CLK_GTM0 && clk_id <= RZV_CPG_CLK_GTM7)
+    {
+      /* GTM reset bank differs from its CPG_CLKON_4 clock bank.  Per FSP
+       * BSP_RST_*_FSP_IP_GTM: ch<3 -> CPG_RST_6 RSTB(13+ch);
+       * ch>=3 -> CPG_RST_7 RSTB(ch-3).  ch = CLKON bit - 3 (base CLK3).
+       * RSTMON cross-checks under the wait_rstmon global scheme (GTM0 ->
+       * RSTMON_2 bit30, GTM7 -> RSTMON_3 bit5).
+       */
+
+      uint32_t gch = RZV_CPG_BIT(clk_id) - 3u;
+      if (gch < 3u)
+        {
+          domain  = 6;
+          bitmask = 1u << (13u + gch);
+        }
+      else
+        {
+          domain  = 7;
+          bitmask = 1u << (gch - 3u);
+        }
+    }
+  else if (clk_id == RZV_CPG_CLK_SPI0 || clk_id == RZV_CPG_CLK_SPI1)
+    {
+      /* RSPI reset: RSPIP + RSPIT are adjacent in CPG_RST_7.  ch =
+       * (CLKON bit - 4)/3; bits = RSTB(11+2*ch)..RSTB(12+2*ch).
+       * SPI0 -> RST_7 b11-12, SPI1 -> b13-14.  RSTMON cross-checks:
+       * SPI0 -> RSTMON_3 b12-13, SPI1 -> b14-15.  (SPI2's RSPIT is in
+       * CPG_RST_8 and is not handled by this single-register override.)
+       */
+
+      uint32_t sch = (RZV_CPG_BIT(clk_id) - 4u) / 3u;
+      domain  = 7;
+      bitmask = 0x3u << (11u + 2u * sch);
+    }
+  else if (clk_id == RZV_CPG_CLK_ICU)
+    {
+      /* ICU reset bank differs from its CPG_CLKON_0 clock bank: FSP
+       * CPG_RST_ICU_0_PRESETN_I = CPG_RST_3 bit 6.  RSTMON cross-check
+       * under the wait_rstmon global scheme: RST_3 b6 -> RSTMON_1 b7.
+       */
+
+      domain  = 3;
+      bitmask = 1u << 6;
     }
 
   mrst_addr = RZV_CPG_RST(domain);
