@@ -273,21 +273,14 @@
 #define BOARD_SCI3_I2C_SCL_RESET_GPIO  (GPIO_P5_7_OUTPUT_HIGH | GPIO_OPENDRAIN)
 #define BOARD_SCI3_I2C_SDA_RESET_GPIO  (GPIO_P5_6_OUTPUT_HIGH | GPIO_OPENDRAIN)
 
-/* SCI-SPI GPIO pin assignments *********************************************
- *
- * SCI0 SPI (sci-spi-loopback config):
- *   MOSI = TXD0 = P50 (Mode1)
- *   MISO = RXD0 = P51 (Mode1)
- *   SCK  = SCK0 = P52 (Mode2)
- *
- * Note: SCI0 SPI and SCI0 I2C use the same P50/P51 physical pins — they
- * are mutually exclusive at the Kconfig level (RZV_SCI0_SPI && RZV_SCI0_I2C
- * is rejected by Kconfig depends).
+/* RDK-RZV2H exposes only SCI0 in Simple-SPI mode. SCI1-3 require board
+ * routing and chip-select definitions before they can be supported.
  */
 
-#define BOARD_SCI0_SPI_MOSI_GPIO  GPIO_TXD0_MOSI0_DA0_P5_0_M1    /* P50 Mode1 */
-#define BOARD_SCI0_SPI_MISO_GPIO  GPIO_RXD0_MISO0_SCL0_P5_1_M1   /* P51 Mode1 */
-#define BOARD_SCI0_SPI_SCK_GPIO   GPIO_SCK0_P5_2_M2               /* P52 Mode2 */
+#if defined(CONFIG_RZV_SCI1_SPI) || defined(CONFIG_RZV_SCI2_SPI) || \
+    defined(CONFIG_RZV_SCI3_SPI)
+#  error "RDK-RZV2H: SCI Simple-SPI supports SCI0 only"
+#endif
 
 /* Ethernet (GBETH0 RGMII) Configuration ************************************/
 

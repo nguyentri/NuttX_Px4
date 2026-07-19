@@ -29,6 +29,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include "hardware/rzv_sci_spi.h"
 #include "rzv_sci_spi_internal.h"
 
 /****************************************************************************
@@ -66,6 +67,17 @@ static uint32_t sci_spi_div_shift(uint8_t cks)
   return 1u << (2u * (uint32_t)cks);
 }
 
+static uint32_t sci_spi_error_ppm(uint32_t actual, uint32_t target)
+{
+  uint64_t delta;
+  uint64_t error;
+
+  delta = actual >= target ? (uint64_t)actual - target :
+          (uint64_t)target - actual;
+  error = delta * 1000000u / target;
+  return error > UINT32_MAX ? UINT32_MAX : (uint32_t)error;
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -76,7 +88,7 @@ static uint32_t sci_spi_div_shift(uint8_t cks)
  * Description:
  *   Compute CCR2 clock settings for a target SPI bit rate.
  *   Tries CKS = 0..3, picks the (cks, brr) pair with minimum |error|.
- *   If residual error > 2%, enables MDDR fractional correction.
+ *   Uses MDDR fractional correction when it improves the selected rate.
  *
  *   SPI formula (no BCP factor unlike I2C):
  *     actual = PCLK / (2 * div * (BRR + 1))
@@ -90,8 +102,7 @@ static uint32_t sci_spi_div_shift(uint8_t cks)
  *   mddr    - Output: MDDR value [128..255] if BRME=1, else 0
  *
  * Returned Value:
- *   0 on success, -EINVAL if no valid setting found within ±2% or
- *   if bitrate==0 / pclk_hz==0.
+ *   0 on success, -EINVAL if no supported setting is within ±2%.
  *
  ****************************************************************************/
 
@@ -100,13 +111,15 @@ int rzv_sci_spi_calc_bitrate(uint32_t pclk_hz, uint32_t bitrate,
 {
   uint8_t  best_cks  = 0;
   uint8_t  best_brr  = 0;
+  uint8_t  best_mddr = 0;
   uint32_t best_err  = UINT32_MAX;
   bool     found     = false;
   uint8_t  k;
 
   /* (#10 fix) Reject degenerate inputs up front */
 
-  if (bitrate == 0u || pclk_hz == 0u)
+  if (bitrate < RZV_SCI_SPI_MIN_FREQUENCY ||
+      bitrate > RZV_SCI_SPI_MAX_FREQUENCY || pclk_hz == 0u)
     {
       return -EINVAL;
     }
@@ -153,24 +166,63 @@ int rzv_sci_spi_calc_bitrate(uint32_t pclk_hz, uint32_t bitrate,
       uint8_t  b      = (uint8_t)brr64;
       uint32_t actual = (uint32_t)(pclk_hz / (2u * div * (b + 1u)));
 
-      /* Error in ppm */
-
-      uint32_t err;
-      if (actual >= bitrate)
-        {
-          err = (actual - bitrate) * 1000000u / bitrate;
-        }
-      else
-        {
-          err = (bitrate - actual) * 1000000u / bitrate;
-        }
+      uint32_t err = sci_spi_error_ppm(actual, bitrate);
 
       if (err < best_err)
         {
           best_err = err;
           best_cks = k;
           best_brr = b;
+          best_mddr = 0;
           found    = true;
+        }
+
+      if (actual >= bitrate)
+        {
+          uint32_t modulation =
+            (uint32_t)(((uint64_t)256u * bitrate + actual / 2u) / actual);
+
+          if (modulation >= SCI_SPI_MDDR_MIN && modulation <= 255u)
+            {
+              uint32_t modulated =
+                (uint32_t)(((uint64_t)actual * modulation) / 256u);
+
+              err = sci_spi_error_ppm(modulated, bitrate);
+              if (err < best_err)
+                {
+                  best_err = err;
+                  best_cks = k;
+                  best_brr = b;
+                  best_mddr = (uint8_t)modulation;
+                  found = true;
+                }
+            }
+        }
+
+      if (b > 0u)
+        {
+          uint8_t higher_brr = b - 1u;
+          uint32_t higher_actual =
+            (uint32_t)(pclk_hz / (2u * div * ((uint32_t)higher_brr + 1u)));
+          uint32_t modulation =
+            (uint32_t)(((uint64_t)256u * bitrate + higher_actual / 2u) /
+                       higher_actual);
+
+          if (modulation >= SCI_SPI_MDDR_MIN && modulation <= 255u)
+            {
+              uint32_t modulated =
+                (uint32_t)(((uint64_t)higher_actual * modulation) / 256u);
+
+              err = sci_spi_error_ppm(modulated, bitrate);
+              if (err < best_err)
+                {
+                  best_err = err;
+                  best_cks = k;
+                  best_brr = higher_brr;
+                  best_mddr = (uint8_t)modulation;
+                  found = true;
+                }
+            }
         }
     }
 
@@ -181,28 +233,14 @@ int rzv_sci_spi_calc_bitrate(uint32_t pclk_hz, uint32_t bitrate,
       return -EINVAL;
     }
 
-  *cks  = best_cks;
-  *brr  = best_brr;
-  *mddr = 0u;
-
-  /* Apply MDDR fractional correction if error exceeds threshold.
-   * mddr = round(256 * bitrate / actual)   must be in [128..255].
-   */
-
   if (best_err > SCI_SPI_ERR_PPM_MAX)
     {
-      uint32_t div    = sci_spi_div_shift(best_cks);
-      uint32_t actual = pclk_hz / (2u * div * ((uint32_t)best_brr + 1u));
-
-      if (actual > 0u)
-        {
-          uint32_t m = (256u * bitrate + actual / 2u) / actual;
-          if (m >= SCI_SPI_MDDR_MIN && m <= 255u)
-            {
-              *mddr = (uint8_t)m;
-            }
-        }
+      return -EINVAL;
     }
+
+  *cks  = best_cks;
+  *brr  = best_brr;
+  *mddr = best_mddr;
 
   spiinfo("SCI-SPI clock: pclk=%u bitrate=%u → cks=%u brr=%u mddr=%u"
           " err=%uppm\n",
@@ -210,4 +248,22 @@ int rzv_sci_spi_calc_bitrate(uint32_t pclk_hz, uint32_t bitrate,
           best_cks, best_brr, *mddr, (unsigned)best_err);
 
   return 0;
+}
+
+/****************************************************************************
+ * Name: rzv_sci_spi_actual_bitrate
+ ****************************************************************************/
+
+uint32_t rzv_sci_spi_actual_bitrate(uint32_t pclk_hz, uint8_t brr,
+                                    uint8_t cks, uint8_t mddr)
+{
+  uint32_t div = sci_spi_div_shift(cks);
+  uint32_t actual = pclk_hz / (2u * div * ((uint32_t)brr + 1u));
+
+  if (mddr != 0u)
+    {
+      actual = (uint32_t)(((uint64_t)actual * mddr) / 256u);
+    }
+
+  return actual;
 }

@@ -4,7 +4,7 @@
  * RZ/V2H SCI-B SPI master driver (Simple-SPI mode, interrupt-driven).
  * Mirrors rzv_sci_i2c.c structure exactly.
  *
- * Supported: 8-bit word, modes 0-3, MSB/LSB first, up to 50 MHz.
+ * Supported: 8-bit word, modes 0-3, MSB/LSB first, up to 25 MHz.
  * Not supported: slave mode, DMA/DTC, >8-bit words (returns spierr).
  *
  * Fixes from code-review (findings #1-#32):
@@ -46,14 +46,11 @@
 #include <nuttx/mutex.h>
 #include <nuttx/spi/spi.h>
 
-#include <arch/board/board.h>
-
 #include "arm_internal.h"
 #include "hardware/rzv_sci.h"
 #include "hardware/rzv_sci_spi.h"
 #include "hardware/rzv_elc.h"
 #include "rzv_clock.h"
-#include "rzv_gpio.h"
 #include "rzv_icu.h"
 #include "rzv_sci_spi.h"
 #include "rzv_sci_spi_internal.h"
@@ -63,59 +60,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* Board must define BOARD_SCIn_SPI_{MOSI,MISO,SCK}_GPIO for each enabled
- * channel.  Missing definitions cause a compile-time error — fail fast.
- * Pattern mirrors sci_i2c.c:88-122.
- */
-
-#ifdef CONFIG_RZV_SCI0_SPI
-#  ifndef BOARD_SCI0_SPI_MOSI_GPIO
-#    error "CONFIG_RZV_SCI0_SPI requires BOARD_SCI0_SPI_MOSI_GPIO in board.h"
-#  endif
-#  ifndef BOARD_SCI0_SPI_MISO_GPIO
-#    error "CONFIG_RZV_SCI0_SPI requires BOARD_SCI0_SPI_MISO_GPIO in board.h"
-#  endif
-#  ifndef BOARD_SCI0_SPI_SCK_GPIO
-#    error "CONFIG_RZV_SCI0_SPI requires BOARD_SCI0_SPI_SCK_GPIO in board.h"
-#  endif
-#endif
-
-#ifdef CONFIG_RZV_SCI1_SPI
-#  ifndef BOARD_SCI1_SPI_MOSI_GPIO
-#    error "CONFIG_RZV_SCI1_SPI requires BOARD_SCI1_SPI_MOSI_GPIO in board.h"
-#  endif
-#  ifndef BOARD_SCI1_SPI_MISO_GPIO
-#    error "CONFIG_RZV_SCI1_SPI requires BOARD_SCI1_SPI_MISO_GPIO in board.h"
-#  endif
-#  ifndef BOARD_SCI1_SPI_SCK_GPIO
-#    error "CONFIG_RZV_SCI1_SPI requires BOARD_SCI1_SPI_SCK_GPIO in board.h"
-#  endif
-#endif
-
-#ifdef CONFIG_RZV_SCI2_SPI
-#  ifndef BOARD_SCI2_SPI_MOSI_GPIO
-#    error "CONFIG_RZV_SCI2_SPI requires BOARD_SCI2_SPI_MOSI_GPIO in board.h"
-#  endif
-#  ifndef BOARD_SCI2_SPI_MISO_GPIO
-#    error "CONFIG_RZV_SCI2_SPI requires BOARD_SCI2_SPI_MISO_GPIO in board.h"
-#  endif
-#  ifndef BOARD_SCI2_SPI_SCK_GPIO
-#    error "CONFIG_RZV_SCI2_SPI requires BOARD_SCI2_SPI_SCK_GPIO in board.h"
-#  endif
-#endif
-
-#ifdef CONFIG_RZV_SCI3_SPI
-#  ifndef BOARD_SCI3_SPI_MOSI_GPIO
-#    error "CONFIG_RZV_SCI3_SPI requires BOARD_SCI3_SPI_MOSI_GPIO in board.h"
-#  endif
-#  ifndef BOARD_SCI3_SPI_MISO_GPIO
-#    error "CONFIG_RZV_SCI3_SPI requires BOARD_SCI3_SPI_MISO_GPIO in board.h"
-#  endif
-#  ifndef BOARD_SCI3_SPI_SCK_GPIO
-#    error "CONFIG_RZV_SCI3_SPI requires BOARD_SCI3_SPI_SCK_GPIO in board.h"
-#  endif
-#endif
 
 /****************************************************************************
  * Private Function Prototypes
@@ -333,12 +277,7 @@ static int sci_spi_hw_configure(struct rzv_sci_spi_priv_s *priv)
          (mddr ? SCI_CCR2_BRME : 0u);
   putreg32(ccr2, base + RZV_SCI_CCR2_OFFSET);
 
-  /* Record actual frequency for setfrequency() return value */
-
-  {
-    uint32_t div = 1u << (2u * (uint32_t)cks);
-    priv->actual = pclk / (2u * div * ((uint32_t)brr + 1u));
-  }
+  priv->actual = rzv_sci_spi_actual_bitrate(pclk, brr, cks, mddr);
 
   /* Step 5: CCR1 = 0 (no noise filter needed in SPI mode) */
 
@@ -410,7 +349,6 @@ static uint32_t sci_spi_setfrequency(struct spi_dev_s *dev,
   uint8_t  mddr;
   uint32_t pclk;
   uint32_t ccr2;
-  uint32_t div;
 
   DEBUGASSERT(priv != NULL);
 
@@ -446,8 +384,7 @@ static uint32_t sci_spi_setfrequency(struct spi_dev_s *dev,
     }
 
   priv->frequency = frequency;
-  div = 1u << (2u * (uint32_t)cks);
-  priv->actual = pclk / (2u * div * ((uint32_t)brr + 1u));
+  priv->actual = rzv_sci_spi_actual_bitrate(pclk, brr, cks, mddr);
 
   /* Patch CCR2 only — CCR3/FIFO unchanged */
 
@@ -755,16 +692,18 @@ int weak_function rzv_sci_spi_cmddata(struct spi_dev_s *dev,
  *     3. Populate compile-time fields
  *     4. nxmutex_init + nxsem_init (one-shot)
  *     5. rzv_clock_enable + rzv_module_unreset  ← MANDATORY before MMIO
- *     6. Configure GPIO pins
- *     7. sci_spi_hw_configure()
- *     8. rzv_icu_attach × 4
- *     9. initialized = true
+ *     6. sci_spi_hw_configure()
+ *     7. rzv_icu_attach × 4
+ *     8. initialized = true
  *
  ****************************************************************************/
 
 struct spi_dev_s *rzv_sci_spi_initialize(int channel)
 {
   struct rzv_sci_spi_priv_s *priv;
+  irqstate_t flags;
+  bool clock_enabled = false;
+  bool module_unreset = false;
 
   /* Validate channel against compile-time-enabled set (#13 fix) */
 
@@ -789,12 +728,22 @@ struct spi_dev_s *rzv_sci_spi_initialize(int channel)
 
   priv = &g_sci_spi_priv[channel];
 
-  /* (#22 fix) Return existing device on second call */
-
+  flags = enter_critical_section();
   if (priv->initialized)
     {
+      leave_critical_section(flags);
       return &priv->dev;
     }
+
+  if (priv->initializing)
+    {
+      leave_critical_section(flags);
+      spierr("SCI%d: initialization already in progress\n", channel);
+      return NULL;
+    }
+
+  priv->initializing = true;
+  leave_critical_section(flags);
 
   /* Populate channel-invariant fields */
 
@@ -808,7 +757,7 @@ struct spi_dev_s *rzv_sci_spi_initialize(int channel)
   priv->evt_eri  = g_sci_spi_events[channel][3];
   priv->state    = SCI_SPI_STATE_IDLE;
 
-  /* Set defaults BEFORE hw_configure (prevents div-by-zero in calc_bitrate) */
+  /* Set defaults before calculating the initial bit rate. */
 
   priv->frequency = SCI_SPI_DEFAULT_HZ;
   priv->actual    = 0;
@@ -821,68 +770,26 @@ struct spi_dev_s *rzv_sci_spi_initialize(int channel)
   nxmutex_init(&priv->lock);
   nxsem_init(&priv->sem_isr, 0, 0);
 
-  /* (#3 fix) Enable peripheral clock and deassert module reset BEFORE MMIO.
-   * Capture return values; if either fails, resources committed so far are
-   * mutex + sem (trivially cleaned up by re-init on retry), no MMIO yet,
-   * no IRQs — NULL return is safe.  (A11 fix)
-   */
-
   if (rzv_clock_enable(priv->clk_id) < 0)
     {
       spierr("SCI%d: clock enable failed\n", channel);
-      return NULL;
+      goto fail_sync;
     }
+
+  clock_enabled = true;
 
   if (rzv_module_unreset(priv->clk_id) < 0)
     {
       spierr("SCI%d: module unreset failed\n", channel);
-      return NULL;
+      goto fail_clock;
     }
 
-  /* Configure GPIO pins */
-
-  switch (channel)
-    {
-#ifdef CONFIG_RZV_SCI0_SPI
-      case 0:
-        rzv_gpioconfig(BOARD_SCI0_SPI_MOSI_GPIO);
-        rzv_gpioconfig(BOARD_SCI0_SPI_MISO_GPIO);
-        rzv_gpioconfig(BOARD_SCI0_SPI_SCK_GPIO);
-        break;
-#endif
-#ifdef CONFIG_RZV_SCI1_SPI
-      case 1:
-        rzv_gpioconfig(BOARD_SCI1_SPI_MOSI_GPIO);
-        rzv_gpioconfig(BOARD_SCI1_SPI_MISO_GPIO);
-        rzv_gpioconfig(BOARD_SCI1_SPI_SCK_GPIO);
-        break;
-#endif
-#ifdef CONFIG_RZV_SCI2_SPI
-      case 2:
-        rzv_gpioconfig(BOARD_SCI2_SPI_MOSI_GPIO);
-        rzv_gpioconfig(BOARD_SCI2_SPI_MISO_GPIO);
-        rzv_gpioconfig(BOARD_SCI2_SPI_SCK_GPIO);
-        break;
-#endif
-#ifdef CONFIG_RZV_SCI3_SPI
-      case 3:
-        rzv_gpioconfig(BOARD_SCI3_SPI_MOSI_GPIO);
-        rzv_gpioconfig(BOARD_SCI3_SPI_MISO_GPIO);
-        rzv_gpioconfig(BOARD_SCI3_SPI_SCK_GPIO);
-        break;
-#endif
-    }
-
-  /* One-shot hardware initialisation.
-   * hw_configure failure at this point: clock enabled, GPIO configured, but
-   * no IRQs attached yet — NULL return is clean; no rollback needed for
-   * mutex/sem (static storage; re-init on next call is safe).  (A12 fix)
-   */
+  module_unreset = true;
 
   if (sci_spi_hw_configure(priv) < 0)
     {
       spierr("SCI%d: hw_configure failed\n", channel);
-      return NULL;
+      goto fail_module;
     }
 
   /* (#1 fix) Attach interrupts via INTR8SEL — no critical_section needed
@@ -923,9 +830,10 @@ struct spi_dev_s *rzv_sci_spi_initialize(int channel)
       goto irq_fail;
     }
 
-  /* All resources committed — mark as initialised last (A12 fix) */
-
+  flags = enter_critical_section();
   priv->initialized = true;
+  priv->initializing = false;
+  leave_critical_section(flags);
   spiinfo("SCI%d SPI initialized (freq=%u)\n",
           channel, (unsigned)priv->frequency);
   return &priv->dev;
@@ -963,6 +871,27 @@ irq_fail:
       priv->irq_eri = -1;
     }
 
+fail_module:
+  putreg32(0u, priv->base + RZV_SCI_CCR0_OFFSET);
+  if (module_unreset)
+    {
+      rzv_module_reset(priv->clk_id);
+    }
+
+fail_clock:
+  if (clock_enabled)
+    {
+      rzv_clock_disable(priv->clk_id);
+    }
+
+fail_sync:
+  nxsem_destroy(&priv->sem_isr);
+  nxmutex_destroy(&priv->lock);
+  flags = enter_critical_section();
+  priv->state = SCI_SPI_STATE_IDLE;
+  priv->initialized = false;
+  priv->initializing = false;
+  leave_critical_section(flags);
   return NULL;
 }
 

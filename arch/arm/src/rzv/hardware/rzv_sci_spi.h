@@ -57,7 +57,7 @@
  * Used by rzv_sci_spi.c and board-level code.
  */
 
-#define RZV_SCI_SPI_MAX_FREQUENCY   50000000u  /* 50 MHz max */
+#define RZV_SCI_SPI_MAX_FREQUENCY   25000000u  /* 25 MHz max */
 #define RZV_SCI_SPI_MIN_FREQUENCY   1000u      /* 1 kHz min */
 
 /* FIFO depth — used in FCR trigger-level calculations */

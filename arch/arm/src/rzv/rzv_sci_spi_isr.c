@@ -40,6 +40,7 @@
 #define REG(p, off)         ((p)->base + (off))
 #define CSR_VAL(p)          getreg32(REG(p, RZV_SCI_CSR_OFFSET))
 #define CCR0_VAL(p)         getreg32(REG(p, RZV_SCI_CCR0_OFFSET))
+#define FRSR_VAL(p)         getreg32(REG(p, RZV_SCI_FRSR_OFFSET))
 #define CCR0_SET(p, v)      putreg32((v), REG(p, RZV_SCI_CCR0_OFFSET))
 #define TDR_WR(p, v)        putreg32((uint32_t)(v) & 0xffu, \
                                      REG(p, RZV_SCI_TDR_OFFSET))
@@ -77,6 +78,28 @@ static void spi_post_done(struct rzv_sci_spi_priv_s *priv,
 
   priv->state = result;
   nxsem_post(&priv->sem_isr);
+}
+
+/****************************************************************************
+ * Name: sci_spi_drain_rx_fifo
+ ****************************************************************************/
+
+static void sci_spi_drain_rx_fifo(struct rzv_sci_spi_priv_s *priv)
+{
+  while (((FRSR_VAL(priv) & SCI_FRSR_R_MASK) >> SCI_FRSR_R_SHIFT) > 0u &&
+         priv->nrxwords > 0)
+    {
+      uint8_t data = RDR_RD(priv);
+
+      if (priv->rxbuffer != NULL)
+        {
+          *priv->rxbuffer++ = data;
+        }
+
+      priv->nrxwords--;
+    }
+
+  CFCLR_WR(priv, SCI_CFCLR_RDRFC);
 }
 
 /****************************************************************************
@@ -150,17 +173,14 @@ int rzv_sci_spi_txi_isr(int irq, void *context, void *arg)
  *
  * Description:
  *   RXI: RDRF set — drain RDR into rxbuffer.
- *   (#5 fix: ack CFCLR first, then loop to drain FIFO; old code read one
- *   byte then cleared — missed bytes when FIFO depth > 1)
- *   When nrxwords reaches 0: post done (TEI also posts; first one wins
- *   because state is checked in spi_post_done via the mask).
+ *   Drain according to FIFO occupancy, then acknowledge RDRF. When nrxwords
+ *   reaches 0, post completion.
  *
  ****************************************************************************/
 
 int rzv_sci_spi_rxi_isr(int irq, void *context, void *arg)
 {
   struct rzv_sci_spi_priv_s *priv = (struct rzv_sci_spi_priv_s *)arg;
-  uint8_t data;
 
   (void)irq;
   (void)context;
@@ -178,25 +198,7 @@ int rzv_sci_spi_rxi_isr(int irq, void *context, void *arg)
       return OK;
     }
 
-  /* Ack RDRF first (#5 fix: clear before read to minimise re-assert window) */
-
-  CFCLR_WR(priv, SCI_CFCLR_RDRFC);
-
-  /* Drain all available bytes from RDR / FIFO (#5 fix: loop).
-   * The pre-loop CFCLR_WR above already acked RDRFC; per-byte ack
-   * inside the loop is redundant W1C on a clear bit — removed (A23 fix).
-   */
-
-  while ((CSR_VAL(priv) & SCI_CSR_RDRF) && priv->nrxwords > 0)
-    {
-      data = RDR_RD(priv);
-      if (priv->rxbuffer != NULL)
-        {
-          *priv->rxbuffer++ = data;
-        }
-
-      priv->nrxwords--;
-    }
+  sci_spi_drain_rx_fifo(priv);
 
   /* If RX done and TX also done: signal completion */
 
@@ -245,30 +247,14 @@ int rzv_sci_spi_tei_isr(int irq, void *context, void *arg)
       return OK;
     }
 
-  /* Drain any remainder bytes in RX FIFO before declaring done.
-   * With RTRG=8, the last (nwords % 8) received bytes do not trigger RXI;
-   * they sit in the FIFO until we drain them here.  (A9 fix)
-   * CFCLR.RDRFC is acked inside the loop after each byte per RSCI-B manual
-   * (FIFO-mode: one ack per FIFO pop).
-   */
-
-  while ((CSR_VAL(priv) & SCI_CSR_RDRF) && priv->nrxwords > 0)
+  sci_spi_drain_rx_fifo(priv);
+  if (priv->nrxwords != 0u)
     {
-      uint8_t rxbyte = RDR_RD(priv);
-      if (priv->rxbuffer != NULL)
-        {
-          *priv->rxbuffer++ = rxbyte;
-        }
-
-      priv->nrxwords--;
-      CFCLR_WR(priv, SCI_CFCLR_RDRFC);
+      spierr("SCI%u: transmit ended with %zu RX words pending\n",
+             priv->channel, priv->nrxwords);
+      spi_post_done(priv, SCI_SPI_STATE_ERROR);
+      return OK;
     }
-
-  /* TEIE has been disabled by spi_post_done; TEND clears automatically on
-   * next TDR write.  Post done — all bytes shifted out and RX remainder
-   * drained above.  If RXI already posted (race), spi_post_done masks IRQs
-   * so only the first posting matters.
-   */
 
   spi_post_done(priv, SCI_SPI_STATE_DONE);
   return OK;

@@ -107,6 +107,7 @@ struct rzv_sci_spi_priv_s
   volatile enum rzv_sci_spi_state_e state;
 
   bool                      initialized;
+  bool                      initializing;
 };
 
 /****************************************************************************
@@ -117,6 +118,8 @@ struct rzv_sci_spi_priv_s
 
 int rzv_sci_spi_calc_bitrate(uint32_t pclk_hz, uint32_t bitrate,
                              uint8_t *brr, uint8_t *cks, uint8_t *mddr);
+uint32_t rzv_sci_spi_actual_bitrate(uint32_t pclk_hz, uint8_t brr,
+                                    uint8_t cks, uint8_t mddr);
 
 /* rzv_sci_spi_isr.c */
 

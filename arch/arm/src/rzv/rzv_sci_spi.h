@@ -6,14 +6,9 @@
  *
  * Board integration ABI
  * ---------------------
- * For each CONFIG_RZV_SCIn_SPI=y channel the board header (board.h) MUST
- * define the following GPIO pinset macros:
- *
- *   #define BOARD_SCIn_SPI_MOSI_GPIO   GPIO_...
- *   #define BOARD_SCIn_SPI_MISO_GPIO   GPIO_...
- *   #define BOARD_SCIn_SPI_SCK_GPIO    GPIO_...
- *
- * Missing macros for an enabled channel cause a compile-time #error.
+ * The board configures MOSI, MISO, SCK, and chip-select before calling
+ * rzv_sci_spi_initialize(). Pin routing is board-specific and is not
+ * selected by this lower-half.
  *
  * The board must also provide weak overrides for:
  *   void rzv_sci_spi_select(struct spi_dev_s *, uint32_t devid, bool sel)

@@ -877,6 +877,7 @@ config RZV_SCI_SPI
 config RZV_SCI0_SPI
    bool "SCI0 SPI mode"
    default n
+   depends on !RZV_SCI0 && !RZV_SCI0_I2C
    select RZV_SCI_SPI
    select SPI
    ---help---
@@ -886,6 +887,7 @@ config RZV_SCI0_SPI
 config RZV_SCI1_SPI
    bool "SCI1 SPI mode"
    default n
+   depends on !RZV_SCI1 && !RZV_SCI1_I2C
    select RZV_SCI_SPI
    select SPI
    ---help---
@@ -895,6 +897,7 @@ config RZV_SCI1_SPI
 config RZV_SCI2_SPI
    bool "SCI2 SPI mode"
    default n
+   depends on !RZV_SCI2 && !RZV_SCI2_I2C
    select RZV_SCI_SPI
    select SPI
    ---help---
@@ -904,6 +907,7 @@ config RZV_SCI2_SPI
 config RZV_SCI3_SPI
    bool "SCI3 SPI mode"
    default n
+   depends on !RZV_SCI3 && !RZV_SCI3_I2C
    select RZV_SCI_SPI
    select SPI
    ---help---
@@ -918,8 +922,8 @@ menuconfig RZV_SCI_I2C
    select I2C
    ---help---
      Enables RZ/V2H SCI-B block in Simple-I2C master mode.
-     Each channel is mutually exclusive with UART (RZV_SCIn) and
-     SPI (RZV_SCIn_SPI) — enforced at config time via depends on.
+     Each channel is mutually exclusive with UART (RZV_SCIn) and SPI
+     (RZV_SCIn_SPI). Selecting I2C disables the matching SPI selection.
      CPU-mode only (no DMAC). Slave mode not supported.
 
 if RZV_SCI_I2C
@@ -927,37 +931,41 @@ if RZV_SCI_I2C
 config RZV_SCI0_I2C
    bool "SCI0 as I2C master"
    default n
-   depends on !RZV_SCI0 && !RZV_SCI0_SPI
+   depends on !RZV_SCI0
    ---help---
      Enable SCI0 in Simple-I2C master mode.
-     Mutually exclusive with RZV_SCI0 (UART) and RZV_SCI0_SPI.
+     Mutually exclusive with RZV_SCI0 (UART). Selecting this option disables
+     RZV_SCI0_SPI.
      Board must define BOARD_SCI0_I2C_SDA_GPIO / BOARD_SCI0_I2C_SCL_GPIO.
 
 config RZV_SCI1_I2C
    bool "SCI1 as I2C master"
    default n
-   depends on !RZV_SCI1 && !RZV_SCI1_SPI
+   depends on !RZV_SCI1
    ---help---
      Enable SCI1 in Simple-I2C master mode.
-     Mutually exclusive with RZV_SCI1 (UART) and RZV_SCI1_SPI.
+     Mutually exclusive with RZV_SCI1 (UART). Selecting this option disables
+     RZV_SCI1_SPI.
      Board must define BOARD_SCI1_I2C_SDA_GPIO / BOARD_SCI1_I2C_SCL_GPIO.
 
 config RZV_SCI2_I2C
    bool "SCI2 as I2C master"
    default n
-   depends on !RZV_SCI2 && !RZV_SCI2_SPI
+   depends on !RZV_SCI2
    ---help---
      Enable SCI2 in Simple-I2C master mode.
-     Mutually exclusive with RZV_SCI2 (UART) and RZV_SCI2_SPI.
+     Mutually exclusive with RZV_SCI2 (UART). Selecting this option disables
+     RZV_SCI2_SPI.
      Board must define BOARD_SCI2_I2C_SDA_GPIO / BOARD_SCI2_I2C_SCL_GPIO.
 
 config RZV_SCI3_I2C
    bool "SCI3 as I2C master"
    default n
-   depends on !RZV_SCI3 && !RZV_SCI3_SPI
+   depends on !RZV_SCI3
    ---help---
      Enable SCI3 in Simple-I2C master mode.
-     Mutually exclusive with RZV_SCI3 (UART) and RZV_SCI3_SPI.
+     Mutually exclusive with RZV_SCI3 (UART). Selecting this option disables
+     RZV_SCI3_SPI.
      Board must define BOARD_SCI3_I2C_SDA_GPIO / BOARD_SCI3_I2C_SCL_GPIO.
 
 endif # RZV_SCI_I2C
