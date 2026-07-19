@@ -266,12 +266,40 @@ static int gtm_interrupt(int irq, void *context, void *arg)
 
   rzv_icu_clear_irq(irq);
 
-  /* Invoke user callback if registered */
+  /* Invoke user callback if registered. NuttX tccb_t contract:
+   *   - Return TRUE: keep running; if *next_interval_us is non-zero and
+   *     differs from the current period, adopt it as the new period.
+   *   - Return FALSE: stop the timer.
+   * Seed next_interval_us with the current period so a callback that
+   * leaves it untouched keeps the existing cadence.
+   */
 
   if (priv->callback != NULL)
     {
-      uint32_t next_interval_us = 0;
-      priv->callback(&next_interval_us, priv->arg);
+      uint32_t next_interval_us = priv->timeout;
+      bool keep_running = priv->callback(&next_interval_us, priv->arg);
+
+      if (!keep_running)
+        {
+          /* Callback asked to stop the timer */
+
+          gtm_putreg8(priv, RZV_GTM_OSTMTT_OFFSET, GTM_OSTMTT_OSTMTT);
+        }
+      else if (next_interval_us != 0 && next_interval_us != priv->timeout)
+        {
+          /* Adopt the new period. Interval mode auto-reloads OSTMCMP on
+           * every match, so a running write of OSTMCMP takes effect from
+           * the next cycle onward — no stop/start required.
+           */
+
+          uint64_t ticks = ((uint64_t)next_interval_us * priv->frequency) /
+                            1000000ULL;
+          if (ticks > 0 && ticks <= UINT32_MAX)
+            {
+              priv->timeout = next_interval_us;
+              gtm_putreg32(priv, RZV_GTM_OSTMCMP_OFFSET, (uint32_t)ticks);
+            }
+        }
     }
 
   return OK;
