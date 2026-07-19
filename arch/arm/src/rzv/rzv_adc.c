@@ -412,8 +412,6 @@ int rzv_adc_initialize(const char *devpath, const uint8_t *chanlist,
   struct adc_dev_s *dev = &g_adc0_dev;
   struct rzv_adc_priv_s *priv = &g_adc0_priv;
   uint32_t chanmask = 0;
-  uint32_t domain;
-  uint32_t bit;
   int ret;
   int i;
 
@@ -441,12 +439,20 @@ int rzv_adc_initialize(const char *devpath, const uint8_t *chanlist,
    * Upper-half adc_register() will call ao_reset() during registration,
    * which writes ADCSR/ADCER/etc. — without the clock those writes bus
    * fault.
+   *
+   * Use rzv_clock_enable() rather than the deprecated single-bit
+   * RZV_MODULE_CLKON macro: the RZ/V2H ADC gate requires BOTH CPG clock
+   * bits [1:0], which only the C path sets and monitors (see the ADC
+   * branch in rzv_clock_enable()).  The macro drives/monitors one bit
+   * only, leaving the block half-clocked.
    */
 
-  domain = RZV_CPG_DOMAIN(priv->config->clk);
-  bit = RZV_CPG_BIT(priv->config->clk);
-  RZV_MODULE_CLKON(domain, bit);
-  up_udelay(10);
+  ret = rzv_clock_enable(priv->config->clk);
+  if (ret < 0)
+    {
+      aerr("ERROR: Failed to enable ADC clock: %d\n", ret);
+      return ret;
+    }
 
   /* One-shot semaphore init (ao_setup/ao_shutdown may be invoked multiple
    * times across open/close; the semaphore must persist).
