@@ -20,14 +20,8 @@
 
 /* RZ/V2H CAN-FD lower-half driver (arch-level).
  *
- * DESIGN DECISIONS (see brainstorm-260520-1324-rzv2h-canfd-design.md)
- * ===================================================================
- * A — Reference : RA8 driver skeleton + register cross-check
- * B — Channel   : CH0 enabled; CH1 framework compiled, not registered at v1
- * C — Mode      : CAN-FD (CONFIG_CAN_FD=y required)
- * D — TX        : single TX mailbox #0 per channel
- * E — Bring-up  : internal loopback as boot default (CTME+CTMS=INT_LOOP)
- * F — Layout    : monolithic single file
+ * Uses one global RX FIFO per channel, one TX mailbox per channel, and
+ * internal loopback as the boot default.
  *
  * TIMING (CANFDCLK=80MHz)
  * =======================
@@ -41,16 +35,14 @@
  * 3.  Global config (CFDGCFG)
  * 4.  RX MB count/payload = 0 (RX FIFO path only)
  * 5.  RX FIFO 0 config  (CFDRFCC[0])
- * 6.  Common FIFO 0 config  (CFDCFCC[ch*3])
- * 7.  Channel → Reset mode (CFDCnCTR.CHMDC=1)
- * 8.  Nominal + Data bit timing (CFDCnNCFG, CFDC2nDCFG)
- * 9.  CAN-FD enable (CFDC2nFDCFG.FDOE=1)
- * 10. AFL: one accept-all rule per channel
- * 11. Channel interrupt enables (CFDCnCTR)
- * 12. TX MB 0 interrupt enable (CFDTMIEC0)
- * 13. Channel → Comm mode; Global → Op mode
- * 14. Internal loopback (CTME=1, CTMS=INT_LOOP) — toggle via ioctl
- * 15. ICU attach 4 IRQs
+ * 6.  Channel → Reset mode (CFDCnCTR.CHMDC=1)
+ * 7.  Nominal + Data bit timing (CFDCnNCFG, CFDC2nDCFG)
+ * 8.  AFL: one accept-all rule per channel
+ * 9.  Channel interrupt enables (CFDCnCTR)
+ * 10. TX MB 0 interrupt enable (CFDTMIEC0)
+ * 11. Channel → Comm mode; Global → Op mode
+ * 12. Internal loopback (CTME=1, CTMS=INT_LOOP) — toggle via ioctl
+ * 13. ICU attach shared RX/global-error plus per-channel TX/error IRQs
  *
  * HARDWARE HEADER
  * ===============
@@ -68,6 +60,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 #include <inttypes.h>
 #include <errno.h>
 #include <debug.h>
@@ -102,10 +95,6 @@
 /* Per-channel TX mailbox 0 global index */
 
 #define TXMB0(ch)         RZV_CANFD_TXMB_CH(ch)   /* ch*16 */
-
-/* Common FIFO 0 for channel ch (ch0→CF0, ch1→CF3) */
-
-#define CFIFO0(ch)        RZV_CANFD_CFIFO_CH(ch)  /* ch*3 */
 
 /* Watchdog spin limit for mode transitions (iterations, not timed) */
 
@@ -148,7 +137,6 @@ struct rzv_canfd_s
   const struct rzv_canfd_config_s *config; /* Immutable channel config    */
   uint8_t  channel;                        /* Channel index (0 or 1)      */
   int      tx_irq;                         /* IRQ from rzv_icu_attach TX  */
-  int      rx_irq;                         /* IRQ from rzv_icu_attach RX  */
   int      err_irq;                        /* IRQ from rzv_icu_attach ERR */
   bool     initialized;                    /* True after first setup()    */
   bool     loopback;                       /* True = internal loopback    */
@@ -160,9 +148,7 @@ struct rzv_canfd_config_s
 {
   uint8_t  channel;           /* 0 or 1                             */
   int      elc_tx;            /* ELC event: channel TX              */
-  int      elc_rx;            /* ELC event: common FIFO RX          */
   int      elc_err;           /* ELC event: channel error           */
-  int      elc_glerr;         /* ELC event: global error            */
 };
 
 /****************************************************************************
@@ -193,8 +179,8 @@ static int rzv_canfd_glerr_isr(int irq, void *context, void *arg);
 /* Internal helpers */
 
 static int  rzv_canfd_global_init(void);
-static void rzv_canfd_ch_init(struct rzv_canfd_s *priv);
-static void rzv_canfd_set_loopback(struct rzv_canfd_s *priv, bool enable);
+static int  rzv_canfd_ch_init(struct rzv_canfd_s *priv);
+static int  rzv_canfd_set_loopback(struct rzv_canfd_s *priv, bool enable);
 
 /****************************************************************************
  * Private Data
@@ -229,8 +215,6 @@ static const struct can_ops_s g_rzv_canfd_ops =
  * Per-FIFO dispatch: FIFO k -> channel k (identity mapping).
  */
 
-#define RZV_CANFD_RXF_FIFO_FOR_CH(ch) (ch)   /* identity mapping, 0..1 */
-
 static int g_rxf_irq  = -1;                   /* attached once in global_init */
 static int g_glerr_irq = -1;                  /* attached once in global_init */
 static struct rzv_canfd_s *g_priv_by_fifo[2]; /* fifo 0..1 -> priv           */
@@ -241,9 +225,7 @@ static const struct rzv_canfd_config_s g_rzv_canfd0_config =
 {
   .channel  = 0,
   .elc_tx   = RZV_ELC_CANFD_CH0_TRX,
-  .elc_rx   = RZV_ELC_CANFD_CH0_REC,  /* common FIFO RX ch0 */
   .elc_err  = RZV_ELC_CANFD_CH0_ERR,
-  .elc_glerr = RZV_ELC_CANFD_GLERR,
 };
 
 static struct rzv_canfd_s g_rzv_canfd0_priv =
@@ -256,7 +238,6 @@ static struct rzv_canfd_s g_rzv_canfd0_priv =
   .config   = &g_rzv_canfd0_config,
   .channel  = 0,
   .tx_irq   = -1,
-  .rx_irq   = -1,
   .err_irq  = -1,
   .initialized = false,
   .loopback = true,  /* boot default: internal loopback */
@@ -270,9 +251,7 @@ static const struct rzv_canfd_config_s g_rzv_canfd1_config =
 {
   .channel  = 1,
   .elc_tx   = RZV_ELC_CANFD_CH1_TRX,
-  .elc_rx   = RZV_ELC_CANFD_CH1_REC,  /* common FIFO RX ch1 */
   .elc_err  = RZV_ELC_CANFD_CH1_ERR,
-  .elc_glerr = RZV_ELC_CANFD_GLERR,
 };
 
 static struct rzv_canfd_s g_rzv_canfd1_priv =
@@ -285,7 +264,6 @@ static struct rzv_canfd_s g_rzv_canfd1_priv =
   .config   = &g_rzv_canfd1_config,
   .channel  = 1,
   .tx_irq   = -1,
-  .rx_irq   = -1,
   .err_irq  = -1,
   .initialized = false,
   .loopback = true,
@@ -369,13 +347,13 @@ static int rzv_canfd_global_init(void)
   rzv_wr32(0, RZV_CANFD_CFDRMNB);
 
   /* Step 5a: RX FIFO 0 config (channel 0 destination)
-   * depth=8, payload=64B, interrupt enable, threshold=3
+   * depth=8, payload=64B, threshold=3.  co_rxint enables RFIE on open.
    */
 
   val = CANFD_RFCC_RFE                                    /* FIFO enable */
-      | CANFD_RFCC_RFIE                                   /* interrupt enable */
       | CANFD_RFCC_RFPLS_64B                              /* 64-byte payload */
       | CANFD_RFCC_RFDC_8                                 /* depth = 8 */
+      | CANFD_RFCC_RFIM                                   /* threshold mode */
       | (2u << CANFD_RFCC_RFIGCV_SHIFT);                 /* threshold = 3 */
   rzv_wr32(val, RZV_CANFD_CFDRFCC(0));
 
@@ -441,7 +419,14 @@ static int rzv_canfd_global_init(void)
   if (g_rxf_irq < 0)
     {
       canerr("CANFD: rxf icu_attach failed %d\n", g_rxf_irq);
-      /* non-fatal: RX disabled */
+      ret = g_rxf_irq;
+      if (g_glerr_irq >= 0)
+        {
+          rzv_icu_detach(g_glerr_irq);
+          g_glerr_irq = -1;
+        }
+
+      return ret;
     }
 
   /* Global error interrupt enables */
@@ -471,10 +456,11 @@ static int rzv_canfd_global_init(void)
  * Called from rzv_canfd_setup(); channel must not be in comm mode.
  */
 
-static void rzv_canfd_ch_init(struct rzv_canfd_s *priv)
+static int rzv_canfd_ch_init(struct rzv_canfd_s *priv)
 {
   uint8_t ch = priv->channel;
   uint32_t val;
+  int ret;
 
   /* Channel → Reset mode */
 
@@ -482,8 +468,13 @@ static void rzv_canfd_ch_init(struct rzv_canfd_s *priv)
   val = (val & ~CANFD_CFDC_CTR_CHMDC_MASK) | CANFD_CFDC_CTR_CHMDC_RESET;
   rzv_wr32(val, RZV_CANFD_CFDC_CTR(ch));
 
-  rzv_canfd_wait_mode(RZV_CANFD_CFDC_STS(ch),
-                      CANFD_CFDC_STS_CRSTSTS, CANFD_CFDC_STS_CRSTSTS);
+  ret = rzv_canfd_wait_mode(RZV_CANFD_CFDC_STS(ch),
+                            CANFD_CFDC_STS_CRSTSTS,
+                            CANFD_CFDC_STS_CRSTSTS);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Nominal bit timing — NBRP, NSJW, NTSEG1, NTSEG2
    * NCFG register: bits[9:0]=NBRP, [16:10]=NSJW, [24:17]=NTSEG1,
@@ -504,20 +495,11 @@ static void rzv_canfd_ch_init(struct rzv_canfd_s *priv)
       | ((uint32_t)DCFG_DSJW   << CANFD_CFDC2_DCFG_DSJW_SHIFT);
   rzv_wr32(val, RZV_CANFD_CFDC2_DCFG(ch));
 
-  /* CAN-FD mode enable (FDOE bit) — allow FD frames */
+  /* Permit both Classical CAN and CAN-FD frames. */
 
   val = rzv_rd32(RZV_CANFD_CFDC2_FDCFG(ch));
-  val |= CANFD_CFDC2_FDCFG_FDOE;
+  val &= ~CANFD_CFDC2_FDCFG_FDOE;
   rzv_wr32(val, RZV_CANFD_CFDC2_FDCFG(ch));
-
-  /* Common FIFO ch*3 config: RX mode, depth=8, payload=64B, IE=on */
-
-  val = CANFD_CFCC_CFE                                    /* FIFO enable */
-      | CANFD_CFCC_CFRXIE                                 /* RX interrupt */
-      | CANFD_CFCC_CFPLS_64B                              /* 64-byte payload */
-      | CANFD_CFCC_CFM_RX                                 /* RX FIFO mode */
-      | (2u << CANFD_CFCC_CFDC_SHIFT);                   /* depth=8 */
-  rzv_wr32(val, RZV_CANFD_CFDCFCC(CFIFO0(ch)));
 
   /* TX mailbox 0 interrupt enable */
 
@@ -548,8 +530,9 @@ static void rzv_canfd_ch_init(struct rzv_canfd_s *priv)
   val = (val & ~CANFD_CFDC_CTR_CHMDC_MASK) | CANFD_CFDC_CTR_CHMDC_COMM;
   rzv_wr32(val, RZV_CANFD_CFDC_CTR(ch));
 
-  rzv_canfd_wait_mode(RZV_CANFD_CFDC_STS(ch),
-                      CANFD_CFDC_STS_CRSTSTS | CANFD_CFDC_STS_CHLTSTS, 0);
+  return rzv_canfd_wait_mode(RZV_CANFD_CFDC_STS(ch),
+                              CANFD_CFDC_STS_CRSTSTS
+                              | CANFD_CFDC_STS_CHLTSTS, 0);
 }
 
 /* rzv_canfd_set_loopback: enable/disable internal loopback test mode.
@@ -557,18 +540,24 @@ static void rzv_canfd_ch_init(struct rzv_canfd_s *priv)
  * (CHMDC=01).  We transition Comm → Reset → set bits → Comm.
  */
 
-static void rzv_canfd_set_loopback(struct rzv_canfd_s *priv, bool enable)
+static int rzv_canfd_set_loopback(struct rzv_canfd_s *priv, bool enable)
 {
   uint8_t ch = priv->channel;
   uint32_t ctr;
+  int ret;
 
   /* Enter Reset mode (CTME/CTMS require Reset mode per RSCAN-FD spec) */
 
   ctr = rzv_rd32(RZV_CANFD_CFDC_CTR(ch));
   ctr = (ctr & ~CANFD_CFDC_CTR_CHMDC_MASK) | CANFD_CFDC_CTR_CHMDC_RESET;
   rzv_wr32(ctr, RZV_CANFD_CFDC_CTR(ch));
-  rzv_canfd_wait_mode(RZV_CANFD_CFDC_STS(ch),
-                      CANFD_CFDC_STS_CRSTSTS, CANFD_CFDC_STS_CRSTSTS);
+  ret = rzv_canfd_wait_mode(RZV_CANFD_CFDC_STS(ch),
+                            CANFD_CFDC_STS_CRSTSTS,
+                            CANFD_CFDC_STS_CRSTSTS);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   ctr = rzv_rd32(RZV_CANFD_CFDC_CTR(ch));
 
@@ -591,10 +580,16 @@ static void rzv_canfd_set_loopback(struct rzv_canfd_s *priv, bool enable)
   ctr = rzv_rd32(RZV_CANFD_CFDC_CTR(ch));
   ctr = (ctr & ~CANFD_CFDC_CTR_CHMDC_MASK) | CANFD_CFDC_CTR_CHMDC_COMM;
   rzv_wr32(ctr, RZV_CANFD_CFDC_CTR(ch));
-  rzv_canfd_wait_mode(RZV_CANFD_CFDC_STS(ch),
-                      CANFD_CFDC_STS_CRSTSTS | CANFD_CFDC_STS_CHLTSTS, 0);
+  ret = rzv_canfd_wait_mode(RZV_CANFD_CFDC_STS(ch),
+                            CANFD_CFDC_STS_CRSTSTS
+                            | CANFD_CFDC_STS_CHLTSTS, 0);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   priv->loopback = enable;
+  return OK;
 }
 
 /****************************************************************************
@@ -613,14 +608,19 @@ static void rzv_canfd_reset(struct can_dev_s *dev)
   ctr = (ctr & ~CANFD_CFDC_CTR_CHMDC_MASK) | CANFD_CFDC_CTR_CHMDC_RESET;
   rzv_wr32(ctr, RZV_CANFD_CFDC_CTR(ch));
 
-  rzv_canfd_wait_mode(RZV_CANFD_CFDC_STS(ch),
-                      CANFD_CFDC_STS_CRSTSTS, CANFD_CFDC_STS_CRSTSTS);
+  if (rzv_canfd_wait_mode(RZV_CANFD_CFDC_STS(ch),
+                           CANFD_CFDC_STS_CRSTSTS,
+                           CANFD_CFDC_STS_CRSTSTS) < 0)
+    {
+      canerr("CAN%d: reset mode timeout\n", ch);
+    }
 }
 
 static int rzv_canfd_setup(struct can_dev_s *dev)
 {
   struct rzv_canfd_s *priv = (struct rzv_canfd_s *)dev->cd_priv;
   const struct rzv_canfd_config_s *cfg = priv->config;
+  int ret;
 
   if (priv->initialized)
     {
@@ -629,13 +629,21 @@ static int rzv_canfd_setup(struct can_dev_s *dev)
 
   /* Per-channel hardware init */
 
-  rzv_canfd_ch_init(priv);
+  ret = rzv_canfd_ch_init(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Apply boot-default loopback mode */
 
   if (priv->loopback)
     {
-      rzv_canfd_set_loopback(priv, true);
+      ret = rzv_canfd_set_loopback(priv, true);
+      if (ret < 0)
+        {
+          return ret;
+        }
     }
 
   /* Attach interrupt handlers via ICU */
@@ -649,16 +657,6 @@ static int rzv_canfd_setup(struct can_dev_s *dev)
       return priv->tx_irq;
     }
 
-  priv->rx_irq = rzv_icu_attach(cfg->elc_rx,
-                                  rzv_canfd_rx_isr, priv, true);
-  if (priv->rx_irq < 0)
-    {
-      canerr("CAN%d: rx icu_attach failed %d\n",
-             priv->channel, priv->rx_irq);
-      rzv_icu_detach(priv->tx_irq);
-      return priv->rx_irq;
-    }
-
   priv->err_irq = rzv_icu_attach(cfg->elc_err,
                                    rzv_canfd_err_isr, priv, true);
   if (priv->err_irq < 0)
@@ -666,10 +664,13 @@ static int rzv_canfd_setup(struct can_dev_s *dev)
       canerr("CAN%d: err icu_attach failed %d\n",
              priv->channel, priv->err_irq);
       rzv_icu_detach(priv->tx_irq);
-      rzv_icu_detach(priv->rx_irq);
+      priv->tx_irq = -1;
       return priv->err_irq;
     }
 
+  /* The shared RX ISR needs this mapping before the upper half enables RFIE. */
+
+  g_priv_by_fifo[priv->channel] = priv;
   priv->initialized = true;
   return OK;
 }
@@ -678,18 +679,15 @@ static void rzv_canfd_shutdown(struct can_dev_s *dev)
 {
   struct rzv_canfd_s *priv = (struct rzv_canfd_s *)dev->cd_priv;
 
+  /* Ensure the shared RX ISR cannot dispatch this FIFO during teardown. */
+
+  rzv_canfd_rxint(dev, false);
   rzv_canfd_reset(dev);
 
   if (priv->tx_irq >= 0)
     {
       rzv_icu_detach(priv->tx_irq);
       priv->tx_irq = -1;
-    }
-
-  if (priv->rx_irq >= 0)
-    {
-      rzv_icu_detach(priv->rx_irq);
-      priv->rx_irq = -1;
     }
 
   if (priv->err_irq >= 0)
@@ -711,17 +709,18 @@ static void rzv_canfd_rxint(struct can_dev_s *dev, bool enable)
 {
   struct rzv_canfd_s *priv = (struct rzv_canfd_s *)dev->cd_priv;
 
-  if (priv->rx_irq >= 0)
+  uint32_t val = rzv_rd32(RZV_CANFD_CFDRFCC(priv->channel));
+
+  if (enable)
     {
-      if (enable)
-        {
-          up_enable_irq(priv->rx_irq);
-        }
-      else
-        {
-          up_disable_irq(priv->rx_irq);
-        }
+      val |= CANFD_RFCC_RFIE;
     }
+  else
+    {
+      val &= ~CANFD_RFCC_RFIE;
+    }
+
+  rzv_wr32(val, RZV_CANFD_CFDRFCC(priv->channel));
 }
 
 static void rzv_canfd_txint(struct can_dev_s *dev, bool enable)
@@ -755,8 +754,7 @@ static int rzv_canfd_ioctl(struct can_dev_s *dev, int cmd,
       case CANIOC_RZV_LOOPBACK:
         /* Enable (arg=1) or disable (arg=0) internal loopback mode */
 
-        rzv_canfd_set_loopback(priv, arg != 0);
-        return OK;
+        return rzv_canfd_set_loopback(priv, arg != 0);
 
       default:
         return -ENOTTY;
@@ -793,18 +791,22 @@ static int rzv_canfd_send(struct can_dev_s *dev, struct can_msg_s *msg)
 
   /* Build ID register */
 
-  id_reg = (uint32_t)(msg->cm_hdr.ch_id) & CANFD_TMID_TMID_MASK;
+#ifdef CONFIG_CAN_EXTID
+  if (msg->cm_hdr.ch_extid)
+    {
+      id_reg = (uint32_t)msg->cm_hdr.ch_id & 0x1fffffffu;
+      id_reg |= CANFD_TMID_TMIDE;
+    }
+  else
+#endif
+    {
+      id_reg = ((uint32_t)msg->cm_hdr.ch_id & 0x7ffu) << 18;
+    }
+
   if (msg->cm_hdr.ch_rtr)
     {
       id_reg |= CANFD_TMID_TMRTR;
     }
-
-#ifdef CONFIG_CAN_EXTID
-  if (msg->cm_hdr.ch_extid)
-    {
-      id_reg |= CANFD_TMID_TMIDE;
-    }
-#endif
 
   rzv_wr32(id_reg, RZV_CANFD_BASE + RZV_CANFD_CFDTMID_OFFSET(mb));
 
@@ -813,9 +815,25 @@ static int rzv_canfd_send(struct can_dev_s *dev, struct can_msg_s *msg)
   ptr_reg = (uint32_t)dlc << CANFD_TMPTR_TMDLC_SHIFT;
   rzv_wr32(ptr_reg, RZV_CANFD_BASE + RZV_CANFD_CFDTMPTR_OFFSET(mb));
 
-  /* FD control: BRS=1 (bit-rate switch), FDF=1 (FD frame) */
+  /* Frame format follows the upper-half header. */
 
-  fdctr_reg = CANFD_TMFDCTR_TMBRS | CANFD_TMFDCTR_TMFDF;
+  fdctr_reg = 0;
+#ifdef CONFIG_CAN_FD
+  if ((!msg->cm_hdr.ch_edl && dlc > 8)
+      || (msg->cm_hdr.ch_brs && !msg->cm_hdr.ch_edl))
+    {
+      return -EINVAL;
+    }
+
+  if (msg->cm_hdr.ch_edl)
+    {
+      fdctr_reg |= CANFD_TMFDCTR_TMFDF;
+      if (msg->cm_hdr.ch_brs)
+        {
+          fdctr_reg |= CANFD_TMFDCTR_TMBRS;
+        }
+    }
+#endif
   rzv_wr32(fdctr_reg, RZV_CANFD_BASE + RZV_CANFD_CFDTMFDCTR_OFFSET(mb));
 
   /* Write data bytes — hardware expects 32-bit little-endian words */
@@ -873,9 +891,10 @@ static int rzv_canfd_tx_isr(int irq, void *context, void *arg)
 
   if ((sts & CANFD_TMSTS_TMTRF_MASK) == CANFD_TMSTS_TMTRF_TX_OK)
     {
-      /* Clear completion status by writing 0 */
+      /* Acknowledge the writable per-mailbox result flag. */
 
-      rzv_wr8(0, RZV_CANFD_CFDTMSTS(mb));
+      rzv_wr8(sts & ~CANFD_TMSTS_TMTRF_MASK,
+              RZV_CANFD_CFDTMSTS(mb));
 
       /* Notify NuttX upper half: TX done */
 
@@ -883,19 +902,10 @@ static int rzv_canfd_tx_isr(int irq, void *context, void *arg)
     }
   else if ((sts & CANFD_TMSTS_TMTRF_MASK) == CANFD_TMSTS_TMTRF_ABORT)
     {
-      rzv_wr8(0, RZV_CANFD_CFDTMSTS(mb));
+      rzv_wr8(sts & ~CANFD_TMSTS_TMTRF_MASK,
+              RZV_CANFD_CFDTMSTS(mb));
       canerr("CAN%d: TX aborted\n", priv->channel);
       can_txdone(&priv->dev);
-    }
-
-  /* Clear global TX-complete status bit.
-   * CFDTMTCSTS0 is W1C: write 1 to the bit to clear it.
-   * Writing ~(1<<mb) would clear all OTHER pending completions.
-   */
-
-  if (rzv_rd32(RZV_CANFD_CFDTMTCSTS0) & (1u << mb))
-    {
-      rzv_wr32((1u << mb), RZV_CANFD_CFDTMTCSTS0);
     }
 
   return OK;
@@ -1002,7 +1012,7 @@ static int rzv_canfd_rx_isr(int irq, void *context, void *arg)
           rfsts = rzv_rd32(RZV_CANFD_CFDRFSTS(k));
         }
 
-      /* W1C: clear RFIF flag, preserve other status bits */
+      /* Write-zero/RMW clear of RFIF; preserve other status bits. */
 
       rzv_wr32(rzv_rd32(RZV_CANFD_CFDRFSTS(k)) & ~CANFD_RFSTS_RFIF,
                RZV_CANFD_CFDRFSTS(k));
@@ -1142,11 +1152,6 @@ int rzv_canfd_register(const char *devpath, int channel)
       default:
         return -ENODEV;
     }
-
-  /* Map this channel's priv to its dedicated RX FIFO */
-
-  DEBUGASSERT(priv->channel < (sizeof(g_priv_by_fifo) / sizeof(g_priv_by_fifo[0])));
-  g_priv_by_fifo[priv->channel] = priv;
 
   ret = can_register(devpath, &priv->dev);
   if (ret < 0)

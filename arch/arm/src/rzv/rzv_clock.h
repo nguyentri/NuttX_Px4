@@ -183,9 +183,8 @@
  */
 #define RZV_CPG_CLK_ETH0            (8 << 16 | 0)
 
-/* ADC - 2-bit pair (3U << CLK0_ON_Pos)
- * UNVERIFIED: CPG_CLKON_N index for ADC on R9A09G057H. */
-#define RZV_CPG_CLK_ADC0            (9 << 16 | 0)   /* ADC: 2-bit pair [1:0] */
+/* ADC - CPG_CLKON_16 bits [8:7] (2-bit pair). */
+#define RZV_CPG_CLK_ADC0            (16 << 16 | 7)
 #define RZV_CPG_CLK_ADC1            RZV_CPG_CLK_ADC0
 
 /* SDHI clock and reset IDs -- decoded from FSP CPG enum values.
@@ -213,6 +212,7 @@
 /* Maximum values ***********************************************************/
 
 #define RZV_CPG_MAX_CLKON     24    /* CLKON0-CLKON24 */
+#define RZV_CPG_MAX_CLKMON    10    /* CLKMON0-CLKMON10 */
 #define RZV_CPG_MAX_RST       17    /* RST0-RST17 */
 #define RZV_CPG_MAX_RSTMON    8     /* RSTMON0-RSTMON8 */
 

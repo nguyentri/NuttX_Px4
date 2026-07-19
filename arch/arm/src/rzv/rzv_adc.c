@@ -39,6 +39,7 @@
 #include "rzv_clock.h"
 #include "rzv_adc.h"
 #include "hardware/rzv_adc.h"
+#include "hardware/rzv_sysc.h"
 /* ICU API for dynamic event -> IRQ routing */
 #include "rzv_icu.h"
 /* ADC register bit definitions (map to ADC_E bits) */
@@ -442,7 +443,7 @@ int rzv_adc_initialize(const char *devpath, const uint8_t *chanlist,
    *
    * Use rzv_clock_enable() rather than the deprecated single-bit
    * RZV_MODULE_CLKON macro: the RZ/V2H ADC gate requires BOTH CPG clock
-   * bits [1:0], which only the C path sets and monitors (see the ADC
+   * bits [8:7], which only the C path sets and monitors (see the ADC
    * branch in rzv_clock_enable()).  The macro drives/monitors one bit
    * only, leaving the block half-clocked.
    */
@@ -453,6 +454,17 @@ int rzv_adc_initialize(const char *devpath, const uint8_t *chanlist,
       aerr("ERROR: Failed to enable ADC clock: %d\n", ret);
       return ret;
     }
+
+  ret = rzv_module_unreset(priv->config->clk);
+  if (ret < 0)
+    {
+      aerr("ERROR: Failed to release ADC reset: %d\n", ret);
+      return ret;
+    }
+
+  putreg32(getreg32(RZV_SYSC_SYS_ADC_CFG) & ~SYSC_SYS_ADC_CFG_sy_mstp_ada,
+           RZV_SYSC_SYS_ADC_CFG);
+  up_udelay(20);
 
   /* One-shot semaphore init (ao_setup/ao_shutdown may be invoked multiple
    * times across open/close; the semaphore must persist).

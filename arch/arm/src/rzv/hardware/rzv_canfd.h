@@ -214,7 +214,7 @@
 #define RZV_CANFD_CFDTMTRSTS1_OFFSET      0x0cd4  /* TX Transmission Req Status [31:16] */
 #define RZV_CANFD_CFDTMTARSTS0_OFFSET     0x0d70  /* TX Abort Req Status [15:0] */
 #define RZV_CANFD_CFDTMTARSTS1_OFFSET     0x0d74  /* TX Abort Req Status [31:16] */
-#define RZV_CANFD_CFDTMTCSTS0_OFFSET      0x0e10  /* TX Completion Status [15:0] */
+#define RZV_CANFD_CFDTMTCSTS0_OFFSET      0x0e10  /* TX Completion Status [15:0], read-only */
 #define RZV_CANFD_CFDTMTCSTS1_OFFSET      0x0e14  /* TX Completion Status [31:16] */
 #define RZV_CANFD_CFDTMTASTS0_OFFSET      0x0eb0  /* TX Abort Status [15:0] */
 #define RZV_CANFD_CFDTMTASTS1_OFFSET      0x0eb4  /* TX Abort Status [31:16] */

@@ -143,6 +143,7 @@
 
 /* Legacy timeout for compatibility */
 #define CPG_TIMEOUT_COUNT         CPG_TIMEOUT_CLOCK_ENABLE
+#define RZV_CPG_DUMP_NONE         UINT32_MAX
 
 #define RZV_GPT_UNIT_COUNT        2u
 #define RZV_GPT_CLKON_BIT(unit)   (1u << (1u + (unit)))
@@ -297,20 +298,79 @@ static inline void rzv_cpg_putreg(uint32_t val, uintptr_t addr)
 }
 
 /****************************************************************************
- * Name: rzv_cpg_dump_registers
+ * Name: rzv_cpg_dump_monitor_range
  *
  * Description:
- *   Dump CPG register state for debugging. Shows CLKON, CLKMON, RST,
- *   and RSTMON registers for a given domain.
+ *   Dump the exact packed monitor range used by a failed CPG operation.
  *
  ****************************************************************************/
 
-static void rzv_cpg_dump_registers(uint32_t domain, const char *context)
+static void rzv_cpg_dump_monitor_range(bool reset, uint32_t start,
+                                       uint32_t nbits)
+{
+  uint32_t g;
+
+  if (start == RZV_CPG_DUMP_NONE || nbits == 0)
+    {
+      return;
+    }
+
+  if (reset)
+    {
+      if (start < 15u)
+        {
+          clkerr("  RSTMON unavailable for RST g=%u\n", start);
+          return;
+        }
+
+      g = start - 15u;
+    }
+  else
+    {
+      g = start;
+    }
+
+  while (nbits > 0)
+    {
+      uint32_t monitor = g / 32u;
+      uint32_t off = g % 32u;
+      uint32_t n = (32u - off < nbits) ? (32u - off) : nbits;
+      uint32_t value;
+
+      if (monitor > (reset ? RZV_CPG_MAX_RSTMON : RZV_CPG_MAX_CLKMON))
+        {
+          clkerr("  %sMON%u unavailable\n", reset ? "RST" : "CLK",
+                 monitor);
+          return;
+        }
+
+      value = rzv_cpg_getreg(reset ? RZV_CPG_RSTMON(monitor) :
+                                           RZV_CPG_CLKMON(monitor));
+      clkerr("  %sMON%u [%u:%u] = 0x%08x\n",
+             reset ? "RST" : "CLK", monitor, off + n - 1u, off, value);
+
+      g += n;
+      nbits -= n;
+    }
+}
+
+/****************************************************************************
+ * Name: rzv_cpg_dump_registers
+ *
+ * Description:
+ *   Dump CPG control-register state and the exact monitor ranges for a
+ *   failed operation.
+ *
+ ****************************************************************************/
+
+static void rzv_cpg_dump_registers(uint32_t domain, uint32_t clkmon_start,
+                                   uint32_t clkmon_nbits,
+                                   uint32_t rstmon_start,
+                                   uint32_t rstmon_nbits,
+                                   const char *context)
 {
   uint32_t clkon;
-  uint32_t clkmon;
   uint32_t rst;
-  uint32_t rstmon;
 
   if (domain > RZV_CPG_MAX_CLKON)
     {
@@ -319,22 +379,16 @@ static void rzv_cpg_dump_registers(uint32_t domain, const char *context)
     }
 
   clkon = rzv_cpg_getreg(RZV_CPG_CLKON(domain));
-  clkmon = rzv_cpg_getreg(RZV_CPG_CLKMON(domain));
 
   clkerr("CPG Register Dump [%s] Domain %u:\n", context, domain);
   clkerr("  CLKON%u  = 0x%08x\n", domain, clkon);
-  clkerr("  CLKMON%u = 0x%08x\n", domain, clkmon);
+  rzv_cpg_dump_monitor_range(false, clkmon_start, clkmon_nbits);
 
   if (domain <= RZV_CPG_MAX_RST)
     {
       rst = rzv_cpg_getreg(RZV_CPG_RST(domain));
       clkerr("  RST%u    = 0x%08x\n", domain, rst);
-
-      if (domain <= RZV_CPG_MAX_RSTMON)
-        {
-          rstmon = rzv_cpg_getreg(RZV_CPG_RSTMON(domain));
-          clkerr("  RSTMON%u = 0x%08x\n", domain, rstmon);
-        }
+      rzv_cpg_dump_monitor_range(true, rstmon_start, rstmon_nbits);
     }
 }
 
@@ -630,7 +684,9 @@ static int rzv_cpg_sci_clock_ctrl(int ch, bool enable)
       clkerr("ERROR: SCI%d clock %s failed: CLKMON g=%u..%u\n",
              ch, enable ? "enable" : "disable",
              (unsigned int)gstart, (unsigned int)(gstart + 4));
-      rzv_cpg_dump_registers(gstart / 16u, "sci_clock_ctrl_failure");
+      rzv_cpg_dump_registers(gstart / 16u, gstart, 5,
+                             RZV_CPG_DUMP_NONE, 0,
+                             "sci_clock_ctrl_failure");
       return ret;
     }
 
@@ -704,7 +760,8 @@ static int rzv_cpg_sci_reset_ctrl(int ch, bool assert_rst)
       clkerr("ERROR: SCI%d reset %s failed: RSTMON r=%u..%u\n",
              ch, assert_rst ? "assert" : "release",
              (unsigned int)gstart, (unsigned int)(gstart + 1));
-      rzv_cpg_dump_registers(gstart / 16u, "sci_reset_ctrl_failure");
+      rzv_cpg_dump_registers(gstart / 16u, RZV_CPG_DUMP_NONE, 0,
+                             gstart, 2, "sci_reset_ctrl_failure");
       return ret;
     }
 
@@ -878,10 +935,7 @@ int rzv_clock_enable(uint32_t clk_id)
 
   /* DMAC uses a 5-bit mask (CLK0-CLK4 all required).
    * DMAC CPG_CLKON_0 bits [4:0] are all required per RZ/V2H UM CPG §CLKON.
-   * ADC also needs a 2-bit pair (CLK0+CLK1).
-   * ADC requires 3U << CLK0_ON_Pos (both clock bits) per RZ/V2H UM.
-   * Both are detected by domain here so any ID within that domain is gated
-   * correctly regardless of which per-unit alias was passed. */
+   * ADC also needs a 2-bit pair (CLK0+CLK1). */
 
   if (domain == RZV_CPG_DOMAIN(RZV_CPG_CLK_DMAC))
     {
@@ -890,14 +944,6 @@ int rzv_clock_enable(uint32_t clk_id)
       mask    = (0x1fu << 16) | 0x1fu;  /* WEN[20:16] + ON[4:0] */
       mon_lsb = 0;
       mon_n   = 5;
-    }
-  else if (domain == RZV_CPG_DOMAIN(RZV_CPG_CLK_ADC0))
-    {
-      /* ADC gate: 2-bit pair [1:0] — both CLK0+CLK1 must be set */
-
-      mask    = (0x3u << 16) | 0x3u;  /* WEN[17:16] + ON[1:0] */
-      mon_lsb = 0;
-      mon_n   = 2;
     }
   else if (clk_id == RZV_CPG_CLK_CANFD)
     {
@@ -909,6 +955,14 @@ int rzv_clock_enable(uint32_t clk_id)
       mask    = (0x7u << (bit + 16)) | (0x7u << bit);
       mon_lsb = bit;
       mon_n   = 3;
+    }
+  else if (domain == RZV_CPG_DOMAIN(RZV_CPG_CLK_ADC0))
+    {
+      /* ADC gate: 2-bit pair [8:7] — both clocks must be set. */
+
+      mask    = (0x3u << (bit + 16)) | (0x3u << bit);
+      mon_lsb = bit;
+      mon_n   = 2;
     }
   else
     {
@@ -957,6 +1011,10 @@ int rzv_clock_enable(uint32_t clk_id)
               rzv_cpg_mstop_write(RZV_CPG_BUS_11_MSTOP,
                                   1u << RZV_CPG_BIT(clk_id), true);
             }
+          else if (clk_id == RZV_CPG_CLK_ADC0)
+            {
+              rzv_cpg_mstop_write(RZV_CPG_BUS_3_MSTOP, 1u << 9, true);
+            }
 
           clkinfo("Clock enabled: domain=%u bit=%u\n", (unsigned int)domain, (unsigned int)bit);
           return OK;
@@ -965,7 +1023,8 @@ int rzv_clock_enable(uint32_t clk_id)
 
   clkerr("ERROR: Clock enable failed after %d attempts: domain=%u bit=%u\n",
          CPG_MAX_RETRIES + 1, (unsigned int)domain, (unsigned int)bit);
-  rzv_cpg_dump_registers(domain, "clock_enable_failure");
+  rzv_cpg_dump_registers(domain, domain * 16u + mon_lsb, mon_n,
+                         RZV_CPG_DUMP_NONE, 0, "clock_enable_failure");
 
   return ret;
 }
@@ -1009,8 +1068,8 @@ int rzv_clock_disable(uint32_t clk_id)
     }
   else if (domain == RZV_CPG_DOMAIN(RZV_CPG_CLK_ADC0))
     {
-      mask    = 0x3u << 16;   /* WEN[17:16] only, ON[1:0]=0 → disable both */
-      mon_lsb = 0;
+      mask    = 0x3u << (bit + 16);  /* Disable both ADC clock bits. */
+      mon_lsb = bit;
       mon_n   = 2;
     }
   else if (clk_id == RZV_CPG_CLK_CANFD)
@@ -1058,7 +1117,8 @@ int rzv_clock_disable(uint32_t clk_id)
 
   clkerr("ERROR: Clock disable failed after %d attempts: domain=%u bit=%u\n",
          CPG_MAX_RETRIES + 1, (unsigned int)domain, (unsigned int)bit);
-  rzv_cpg_dump_registers(domain, "clock_disable_failure");
+  rzv_cpg_dump_registers(domain, domain * 16u + mon_lsb, mon_n,
+                         RZV_CPG_DUMP_NONE, 0, "clock_disable_failure");
 
   return ret;
 }
@@ -1109,6 +1169,11 @@ int rzv_module_reset(uint32_t clk_id)
       domain  = 10;
       bitmask = (0x3u << 1);
     }
+  else if (clk_id == RZV_CPG_CLK_ADC0)
+    {
+      domain  = 15;
+      bitmask = (1u << 6);
+    }
 
   mrst_addr = RZV_CPG_RST(domain);
 
@@ -1150,7 +1215,10 @@ int rzv_module_reset(uint32_t clk_id)
 
   clkerr("ERROR: Reset assert failed after %d attempts: domain=%u mask=0x%x\n",
          CPG_MAX_RETRIES + 1, (unsigned int)domain, (unsigned int)bitmask);
-  rzv_cpg_dump_registers(domain, "reset_assert_failure");
+  rzv_cpg_dump_registers(domain, RZV_CPG_DUMP_NONE, 0,
+                         domain * 16u + (uint32_t)__builtin_ctz(bitmask),
+                         (uint32_t)__builtin_popcount(bitmask),
+                         "reset_assert_failure");
 
   return ret;
 }
@@ -1201,6 +1269,11 @@ int rzv_module_unreset(uint32_t clk_id)
       domain  = 10;
       bitmask = (0x3u << 1);
     }
+  else if (clk_id == RZV_CPG_CLK_ADC0)
+    {
+      domain  = 15;
+      bitmask = (1u << 6);
+    }
 
   mrst_addr = RZV_CPG_RST(domain);
 
@@ -1242,7 +1315,10 @@ int rzv_module_unreset(uint32_t clk_id)
 
   clkerr("ERROR: Reset release failed after %d attempts: domain=%u mask=0x%x\n",
          CPG_MAX_RETRIES + 1, (unsigned int)domain, (unsigned int)bitmask);
-  rzv_cpg_dump_registers(domain, "reset_release_failure");
+  rzv_cpg_dump_registers(domain, RZV_CPG_DUMP_NONE, 0,
+                         domain * 16u + (uint32_t)__builtin_ctz(bitmask),
+                         (uint32_t)__builtin_popcount(bitmask),
+                         "reset_release_failure");
 
   return ret;
 }
