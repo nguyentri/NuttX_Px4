@@ -37,23 +37,13 @@
  *     BSP_IO_SD0DAT2 = 0xFFFF0A02   (pin AP37, SD0 data group A, index 2)
  *     BSP_IO_SD0DAT3 = 0xFFFF0A03   (pin AR37, SD0 data group A, index 3)
  *
- *   The FSP configures these via r_ioport_dedicated_port_cfg() which writes
- *   IEN3_L/H and IOLH3_L/H registers within R_GPIO (base 0x10410020 for
- *   CR8 core, confirmed from R9A09G057H/cr/iodefines/gpio_iodefine.h).
- *   The register offsets within R_GPIO depend on the full R_GPIO_Type struct
- *   layout from the FSP CMSIS iodefine — not replicated here because:
- *     (a) FSP sources are in refs/ only, not in the NuttX build tree.
- *     (b) The struct layout spans >6000 lines and requires CMSIS headers.
- *     (c) u-boot / TF-A may already configure these pins before NuttX starts.
- *
- * TODO (follow-up): implement rzv2h_sdhi_pin_setup() using one of:
- *     Option A: Extract the 6 IEN3/IOLH3 register write addresses from the
- *               R_GPIO_Type struct in gpio_iodefine.h and hard-code them.
- *               NEEDS_VERIFY: confirm R_GPIO_BASE=0x10410020 is CA55-visible.
- *     Option B: Teach rzv_gpio_config() to handle the 0xFFFF09xx/0xFFFF0Axx
- *               encoding by routing to a new rzv_gpio_dedicated_config().
- *     Option C: Confirm that the boot firmware (u-boot/TF-A) already sets
- *               these pins and document that NuttX need not touch them.
+ *   These dedicated pins are configured by the boot firmware (u-boot / TF-A)
+ *   before NuttX starts, so NuttX intentionally does NOT program them.
+ *   (The FSP path r_ioport_dedicated_port_cfg() writes IEN3/IOLH3 within
+ *   R_GPIO; that is the boot-firmware's responsibility here, not NuttX's.)
+ *   If a future board revision ships firmware that leaves SD0 pins
+ *   unconfigured, add an rzv2h_sdhi_pin_setup() that writes the six
+ *   IEN3/IOLH3 fields for the pins listed above.
  */
 
 
@@ -110,12 +100,8 @@ int rzv2h_sdhi_initialize(void)
    * (arch driver level).  No duplicate call needed here.
    */
 
-  /* SD0 dedicated pin-mux: see file-level TODO comment.
-   * The six pins (AN37/AN36/AP35/AN35/AP37/AR37) use FSP dedicated-pin
-   * encoding 0xFFFF09xx / 0xFFFF0Axx and require IEN3/IOLH3 register writes
-   * inside R_GPIO.  Not yet implemented; see the file-level TODO above.
-   * NEEDS_VERIFY: confirm boot firmware state of these pins before adding
-   * pin-mux code (u-boot may already enable them).
+  /* SD0 dedicated pin-mux is done by the boot firmware (u-boot / TF-A);
+   * NuttX does not program the six SD0 pins.  See the file-level comment.
    */
 
   /* Obtain the SDIO lower-half interface */

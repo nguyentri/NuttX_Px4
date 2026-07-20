@@ -40,10 +40,16 @@
  * - NuttX upper-half uses waitenable()/eventwait() model (not waitresponse for
  *   data transfers); waitresponse() used only for command-phase.
  *
- * CPG clock IDs:
- *   SDHI0 IMCLK: domain 14, bit 3 (FSP CPG_CLK_SDHI_0_IMCLK=0x00080628,
- *                NEEDS_VERIFY against RZ/V2H UM CPG chapter)
- *   SDHI0 IXRST: domain 14, bit 7 (FSP CPG_RST_SDHI_0_IXRST=0x00800928)
+ * CPG clock/reset IDs (authoritative decode lives in rzv_clock.h; see
+ * RZV_CPG_CLK_SDHIn / RZV_CPG_RST_SDHIn):
+ *   SDHI0 IMCLK: CLKON domain 10, bit 3
+ *   SDHI0 IXRST: RST   domain 10, bit 7
+ *   (The earlier "domain 14" figure was a base-offset double-count bug,
+ *    corrected in rzv_clock.h.)
+ *   By design NuttX gates IMCLK only.  The additional SDHI clocks
+ *   (IMCLK2/CLK_HS/ACLK in CPG_CLKON_10) are enabled by the boot firmware
+ *   (u-boot/TF-A) before NuttX starts, so they are intentionally not
+ *   re-gated here.
  *
  * IRQ:
  *   SDHI CH0 OXMNIRQ = GIC SPI 735 = NuttX IRQ 767 (base 32)
@@ -636,7 +642,7 @@ static void rzv_sdhi_reset(FAR struct sdio_dev_s *dev)
   /* Set 400 kHz clock:
    *   UM rule: clear SCLKEN -> write DIV -> set SCLKEN.
    *   SDCLK = (IMCLK/4)/128 = (200MHz/4)/128 = 390.6 kHz
-   *   (NEEDS_VERIFY: IMCLK assumed 200 MHz)
+   *   (IMCLK = 200 MHz, confirmed for RDK-RZV2H)
    */
 
   reg = getreg16(RZV_SDHI_REG16(priv->base, RZV_SDHI_SD_CLK_CTRL_OFFSET));
@@ -697,8 +703,8 @@ static sdio_statset_t rzv_sdhi_status(FAR struct sdio_dev_s *dev)
 
   mcinfo("SDHI%d: status INFO1=0x%08" PRIx32 "\n", priv->slot, info1);
 
-  /* INFO1.INFO3 = card insertion flag.  Bit set when card present.
-   * NEEDS_VERIFY: confirm polarity for RDK board (no-CD resistor?).
+  /* INFO1.INFO3 (SDCDIN) = card insertion flag; bit set when card present.
+   * Controller card-detect is the RDK-RZV2H detection path (confirmed).
    */
 
   if (info1 & RZV_SDHI_SD_INFO1_SDCDIN)
@@ -759,11 +765,11 @@ static void rzv_sdhi_widebus(FAR struct sdio_dev_s *dev, bool enable)
  * Name: rzv_sdhi_clock (task 2.2)
  *
  * Description:
- *   Set SDCLK frequency.  Lookup table based on IMCLK=200 MHz assumption.
- *   Must wait for CBSY=0 before changing divider (UM requirement).
+ *   Set SDCLK frequency.  Lookup table based on IMCLK=200 MHz (confirmed
+ *   for RDK-RZV2H).  Must wait for CBSY=0 before changing divider (UM req).
  *
  *   Divider formula: SDCLK = (IMCLK/4)/N, one-hot DIV[7:0].
- *   Lookup table: (NEEDS_VERIFY: IMCLK = 200 MHz)
+ *   Lookup table (IMCLK = 200 MHz):
  *     CLOCK_IDMODE        -> DIV=0x20 -> ~391 kHz
  *     CLOCK_SD_TRANSFER_1BIT,
  *     CLOCK_SD_TRANSFER_4BIT -> DIV=0x00 -> 25 MHz
@@ -782,8 +788,7 @@ static void rzv_sdhi_clock(FAR struct sdio_dev_s *dev,
     {
       case CLOCK_SD_TRANSFER_1BIT:
       case CLOCK_SD_TRANSFER_4BIT:
-        /* 25 MHz: DIV=0x00 -> SDCLK=(200MHz/4)/2=25 MHz
-         * NEEDS_VERIFY: IMCLK=200 MHz */
+        /* 25 MHz: DIV=0x00 -> SDCLK=(200MHz/4)/2=25 MHz (IMCLK=200 MHz) */
 
         div = RZV_SDHI_SD_CLK_CTRL_DIV_2;
         mcinfo("SDHI%d: clock -> 25 MHz (DIV=0x00)\n", priv->slot);
@@ -1523,9 +1528,9 @@ static void rzv_sdhi_bind_ops(FAR struct rzv_sdhi_dev_s *priv)
  *     4. Bind function pointers
  *     5. Call rzv_sdhi_reset() to configure controller state
  *
- *   CPG IDs:
- *     SDHI0 IMCLK: domain 14 bit 3  (FSP 0x00080628, NEEDS_VERIFY UM)
- *     SDHI0 IXRST: domain 14 bit 7  (FSP 0x00800928, NEEDS_VERIFY UM)
+ *   CPG IDs (see rzv_clock.h for the authoritative decode):
+ *     SDHI0 IMCLK: CLKON domain 10 bit 3
+ *     SDHI0 IXRST: RST   domain 10 bit 7
  *
  * Input Parameters:
  *   slot - 0 = SD0 (RDK card slot), 1 = SD1, 2 = SD2
@@ -1570,9 +1575,8 @@ FAR struct sdio_dev_s *rzv_sdhi_initialize(int slot)
 
   nxsem_init(&priv->waitsem, 0, 0);
 
-  /* Step 1: Enable SDHI CPG clock.
-   * CPG_CLK_SDHI_0_IMCLK=0x00080628 -> domain 14, bit 3
-   * (NEEDS_VERIFY: confirm against RZ/V2H UM CPG chapter)
+  /* Step 1: Enable SDHI CPG clock (CLKON domain 10, bit 3 = IMCLK).
+   * IMCLK2/CLK_HS/ACLK are provided by the boot firmware (see file header).
    */
 
   ret = rzv_clock_enable_sdhi(slot);
@@ -1587,10 +1591,7 @@ FAR struct sdio_dev_s *rzv_sdhi_initialize(int slot)
             "u-boot may have pre-enabled)\n", slot, ret);
     }
 
-  /* Step 2: Release SDHI reset.
-   * CPG_RST_SDHI_0_IXRST=0x00800928 -> domain 14, bit 7
-   * (NEEDS_VERIFY: confirm against RZ/V2H UM CPG chapter)
-   */
+  /* Step 2: Release SDHI reset (RST domain 10, bit 7). */
 
   ret = rzv_reset_release_sdhi(slot);
   if (ret < 0)

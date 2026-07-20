@@ -338,7 +338,7 @@ int board_bringup(void)
     }
   else
     {
-      syslog(LOG_INFO, "SDHI initialized (stub)\n");
+      syslog(LOG_INFO, "SDHI initialized (/dev/mmcsd0)\n");
     }
 #endif
 
