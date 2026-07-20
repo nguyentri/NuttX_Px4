@@ -91,7 +91,6 @@ struct rzv_scif_s
   uint8_t   channel;     /* Channel number (0-4) */
   uint8_t   irq_rxi;     /* RX interrupt number */
   uint8_t   irq_txi;     /* TX interrupt number */
-  uint8_t   irq_tei;     /* TX end interrupt number */
   uint8_t   irq_eri;     /* Error interrupt number */
   uint8_t   parity;      /* 0=none, 1=odd, 2=even */
   uint8_t   bits;        /* Number of data bits (7 or 8) */
@@ -146,6 +145,16 @@ static const struct uart_ops_s g_scif_ops =
   .txempty        = rzv_scif_txempty,
 };
 
+/* Console-ready gate for up_putc(). Cleared until rzv_scif_setup() has
+ * enabled the clock and TE/RE. Early syslog before the console is opened
+ * would otherwise spin forever polling FSR.TDFE on an un-setup (clock-gated)
+ * SCIFA0. The SCI sibling guards the same hazard via g_rzv_console_ready,
+ * but that flag tracks the low-level SCI console (a different channel), so
+ * SCIFA0 needs its own gate.
+ */
+
+static volatile bool g_scif_console_ready = false;
+
 /* I/O buffers */
 
 #ifdef CONFIG_RZV_SCIF0
@@ -164,7 +173,6 @@ static struct rzv_scif_s g_scif0priv =
   .channel        = 0,
   .irq_rxi        = 0,  /* Set dynamically via ICU */
   .irq_txi        = 0,
-  .irq_tei        = 0,
   .irq_eri        = 0,
   .parity         = CONFIG_SCIF0_PARITY,
   .bits           = CONFIG_SCIF0_BITS,
@@ -345,6 +353,8 @@ static void rzv_scif_setbaud(struct rzv_scif_s *priv)
       best_brr = 0;
       best_cks = 0;
       best_brme = false;
+      best_bgdm = 0;   /* Do not leave stale modulation bits in SEMR */
+      best_abcs = 0;
     }
 
   /* Write order:
@@ -518,6 +528,12 @@ static int rzv_scif_setup(struct uart_dev_s *dev)
   scr = SCIF_SCR_TE | SCIF_SCR_RE;
   putreg16(scr, priv->base + RZV_SCIF_SCR_OFFSET);
 
+  /* TX/RX are live; up_putc() may now poll FSR.TDFE without risk of
+   * spinning on a clock-gated peripheral.
+   */
+
+  g_scif_console_ready = true;
+
   _info("SCIF%d: Setup complete (base=0x%08lx, baud=%lu)\n",
         priv->channel, priv->base, priv->baud);
 
@@ -533,6 +549,13 @@ static void rzv_scif_shutdown(struct uart_dev_s *dev)
   struct rzv_scif_s *priv = (struct rzv_scif_s *)dev->priv;
   uint16_t scr;
   int timeout;
+
+  /* Close the up_putc() gate first, before TE/RE and the clock are torn
+   * down. Otherwise a reentrant up_putc() (ISR/panic-path syslog) between
+   * disable and clock-gate would pass the guard and spin on a dead TDFE.
+   */
+
+  g_scif_console_ready = false;
 
   /* Drain TX (bounded) before disabling: TEND is meaningful here because
    * TE was still enabled when shutdown was called. Worst case 16 bytes
@@ -645,30 +668,6 @@ static int rzv_scif_txi_interrupt(int irq, void *context, void *arg)
 }
 
 /****************************************************************************
- * Name: rzv_scif_tei_interrupt
- *
- * Description:
- *   Transmit-end interrupt. Fires after the last byte has fully clocked out
- *   of the TX shifter. Clear FSR.TEND (W0C) and disable TEIE so the
- *   interrupt does not re-assert until the next transmission completes.
- ****************************************************************************/
-
-static int rzv_scif_tei_interrupt(int irq, void *context, void *arg)
-{
-  struct uart_dev_s *dev = (struct uart_dev_s *)arg;
-  struct rzv_scif_s *priv = (struct rzv_scif_s *)dev->priv;
-  uint16_t scr;
-
-  rzv_scif_fsr_clear(priv->base, SCIF_FSR_TEND);
-
-  scr = getreg16(priv->base + RZV_SCIF_SCR_OFFSET);
-  scr &= ~SCIF_SCR_TEIE;
-  putreg16(scr, priv->base + RZV_SCIF_SCR_OFFSET);
-
-  return OK;
-}
-
-/****************************************************************************
  * Name: rzv_scif_attach
  ****************************************************************************/
 
@@ -695,22 +694,13 @@ static int rzv_scif_attach(struct uart_dev_s *dev)
       return priv->irq_txi;
     }
 
-  /* Map ELC event 0x106 (UB1_TEI_N) to TEI (transmit end) interrupt.
-   * Required for clean shutdown drain; failure here is non-fatal — the
-   * driver still functions without TEND notification, just less precise
-   * about TX completion.
+  /* No TEI (transmit-end) interrupt is attached: SCR.TEIE is never set, so
+   * the TEI ELC event would never fire. Clean shutdown drains TX by polling
+   * FSR.TEND directly (see rzv_scif_shutdown).
    */
-  priv->irq_tei = rzv_icu_attach(RZV_ELC_UB1_TEI_N,
-                                  rzv_scif_tei_interrupt, dev, true);
-  if (priv->irq_tei < 0)
-    {
-      _warn("SCIF%d: TEI attach failed (%d); continuing\n",
-            priv->channel, priv->irq_tei);
-      priv->irq_tei = 0;
-    }
 
-  _info("SCIF%d: Interrupts attached (RXI=%d, TXI=%d, TEI=%d)\n",
-        priv->channel, priv->irq_rxi, priv->irq_txi, priv->irq_tei);
+  _info("SCIF%d: Interrupts attached (RXI=%d, TXI=%d)\n",
+        priv->channel, priv->irq_rxi, priv->irq_txi);
 
   return OK;
 }
@@ -734,12 +724,6 @@ static void rzv_scif_detach(struct uart_dev_s *dev)
     {
       rzv_icu_detach(priv->irq_txi);
       priv->irq_txi = 0;
-    }
-
-  if (priv->irq_tei > 0)
-    {
-      rzv_icu_detach(priv->irq_tei);
-      priv->irq_tei = 0;
     }
 
   _info("SCIF%d: Interrupts detached\n", priv->channel);
@@ -1029,6 +1013,16 @@ int up_putc(int ch)
   struct uart_dev_s *dev = &CONSOLE_DEV;
   uint16_t scr;
   irqstate_t flags;
+
+  /* Drop output until the console channel has been set up. Prevents an
+   * infinite spin in rzv_scif_txready() (FSR.TDFE) when early boot code
+   * emits syslog before SCIFA0 is clocked and enabled.
+   */
+
+  if (!g_scif_console_ready)
+    {
+      return ch;
+    }
 
   /* Disable UART interrupts */
 
