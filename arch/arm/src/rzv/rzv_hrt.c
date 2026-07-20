@@ -55,6 +55,7 @@
 
 #include "arm_internal.h"
 #include "hardware/rzv_gtm.h"
+#include "rzv_gtm.h"
 #include "rzv_icu.h"
 #include "rzv_clock.h"
 #include "rzv_hrt.h"
