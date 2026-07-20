@@ -24,9 +24,9 @@
  * unit, 5 units total = 80 channels.  Register layout is NOT a flat
  * ch*0x40 array; see hardware/rzv_dmac.h for full decomposition.
  *
- * Supported scope: CR8-0 one-shot register mode with software-triggered,
- * polling memory transfers.  Hardware triggers, callbacks, link mode, and
- * peripheral channel allocation are rejected by the driver.
+ * Supported scope: CR8-0 one-shot register mode with software-triggered
+ * memory transfers or INTC-routed hardware-triggered memory-to-peripheral
+ * transfers. Callbacks, link mode, and dynamic allocation are unsupported.
  *
  * CPU-address and cache contract:
  *   Callers pass CPU addresses.  The driver converts CR8-0 ITCM/DTCM views
@@ -64,6 +64,7 @@
 #define RZV_DMAC_CHANNEL_5          5
 #define RZV_DMAC_CHANNEL_6          6
 #define RZV_DMAC_CHANNEL_7          7
+#define RZV_DMAC_CHANNEL_COUNT      80
 
 /* DMAC event codes reserved for a future callback-capable driver. */
 
@@ -115,7 +116,7 @@ typedef enum
 typedef enum
 {
   RZV_DMAC_TRIGGER_SW = 0,  /* Software trigger (STG bit) */
-  RZV_DMAC_TRIGGER_HW = 1   /* Hardware trigger via DMACKSEL peripheral event */
+  RZV_DMAC_TRIGGER_HW = 1   /* Hardware trigger via INTC DMkSEL event route */
 } rzv_dmac_trigger_t;
 
 /* DMAC callback function type.
@@ -185,9 +186,9 @@ int rzv_dmac_channel_initialize(int channel);
  * Name: rzv_dmac_channel_configure
  *
  * Description:
- *   Configure a DMAC channel for transfer.  Writes CHCFG, CHEXT, CHITVL
- *   and the N[0] address/count registers.  The supported path is polling
- *   only; callbacks and hardware triggers are rejected.  No heap allocation.
+ *   Configure a DMAC channel for transfer. Writes CHCFG, CHEXT, CHITVL,
+ *   the N[0] address/count registers, and any requested INTC event route.
+ *   Completion is polled; no heap allocation is used.
  *
  * Input Parameters:
  *   channel - Global channel (0..79).
@@ -233,8 +234,8 @@ int rzv_dmac_channel_set_buffer(int channel, uintptr_t src_addr,
  * Name: rzv_dmac_channel_start
  *
  * Description:
- *   Enable the channel (SETEN) and issue STG for the supported software
- *   trigger path.
+ *   Re-arm the channel and issue STG for software-triggered transfers.
+ *   Hardware-triggered transfers wait for the configured peripheral event.
  *
  * Input Parameters:
  *   channel - Global channel (0..79).
@@ -247,10 +248,21 @@ int rzv_dmac_channel_set_buffer(int channel, uintptr_t src_addr,
 int rzv_dmac_channel_start(int channel);
 
 /****************************************************************************
+ * Name: rzv_dmac_channel_disable
+ *
+ * Description:
+ *   Disable a transfer while retaining the configured channel and hardware
+ *   trigger route. The channel may be started again without reconfiguration.
+ *
+ ****************************************************************************/
+
+int rzv_dmac_channel_disable(int channel);
+
+/****************************************************************************
  * Name: rzv_dmac_channel_stop
  *
  * Description:
- *   Disable the channel and wait for TACT to clear (up to 10 ms).
+ *   Disable the channel, clear its trigger route, and release ownership.
  *
  * Input Parameters:
  *   channel - Global channel (0..79).

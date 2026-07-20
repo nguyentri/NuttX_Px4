@@ -650,10 +650,20 @@ static int rzv_gpt_start(FAR struct pwm_lowerhalf_s *dev,
   /* Set period register directly (used immediately since counter is stopped). */
   gpt_putreg(priv, RZV_GPT_GTPR_OFFSET, period - 1u);
 
-  /* Set compare registers for duty cycle (active registers for initial values). */
-  gpt_putreg(priv, RZV_GPT_GTCCRA_OFFSET, duty_a_counts);
+  /* Compare = high-time - 1: with GTBER buffered saw-wave output the GTIOC pin
+   * transitions one cycle after compare match, so the register holds
+   * (duty_counts - 1) to realise duty_counts of high-time (matches FSP
+   * gpt_calculate_duty_cycle). 0%/100% are forced via GTUDDTYC, so 0 never
+   * reaches compare mode; guard the subtraction anyway. */
+  uint32_t ccr_a = (duty_a_counts > 0u) ? duty_a_counts - 1u : 0u;
 #ifdef CONFIG_PWM_MULTICHAN
-  gpt_putreg(priv, RZV_GPT_GTCCRB_OFFSET, duty_b_counts);
+  uint32_t ccr_b = (duty_b_counts > 0u) ? duty_b_counts - 1u : 0u;
+#endif
+
+  /* Set compare registers for duty cycle (active registers for initial values). */
+  gpt_putreg(priv, RZV_GPT_GTCCRA_OFFSET, ccr_a);
+#ifdef CONFIG_PWM_MULTICHAN
+  gpt_putreg(priv, RZV_GPT_GTCCRB_OFFSET, ccr_b);
 #endif
 
   /* Set up GTBER double-buffering for glitch-free live duty updates.
@@ -662,11 +672,11 @@ static int rzv_gpt_start(FAR struct pwm_lowerhalf_s *dev,
    * are latched into GTCCRA/GTCCRB/GTPR at next overflow — no mid-cycle glitch.
    * GPT_PRV_GTBER_BUFFER_ENABLE_FORCE_TRANSFER = 0x550000U per RZ/V2H UM. */
   gpt_putreg(priv, RZV_GPT_GTPBR_OFFSET, period - 1u);
-  gpt_putreg(priv, RZV_GPT_GTCCRC_OFFSET, duty_a_counts);
+  gpt_putreg(priv, RZV_GPT_GTCCRC_OFFSET, ccr_a);
 #ifdef CONFIG_PWM_MULTICHAN
-  gpt_putreg(priv, RZV_GPT_GTCCRE_OFFSET, duty_b_counts);
+  gpt_putreg(priv, RZV_GPT_GTCCRE_OFFSET, ccr_b);
 #else
-  gpt_putreg(priv, RZV_GPT_GTCCRE_OFFSET, duty_a_counts);
+  gpt_putreg(priv, RZV_GPT_GTCCRE_OFFSET, ccr_a);
 #endif
   gpt_putreg(priv, RZV_GPT_GTBER_OFFSET, GPT_GTBER_FORCE_TRANSFER);
 

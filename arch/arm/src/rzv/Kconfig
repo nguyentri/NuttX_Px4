@@ -1067,6 +1067,38 @@ config RZV_DMAC_I2C2_CHANNEL
    ---help---
      DMA channel for I2C2 operations (-1 = no DMA).
 
+config RZV_DMAC_GPT6_CHANNEL
+   int "DShot GPT6 (PWM0) DMA channel"
+   default 8
+   range -1 79
+   ---help---
+     DMA channel that streams DShot bit high-times into the GPT6 compare
+     register (-1 = no DMA). Consumed only when the DShot driver is built.
+
+config RZV_DMAC_GPT7_CHANNEL
+   int "DShot GPT7 (PWM1) DMA channel"
+   default 9
+   range -1 79
+   ---help---
+     DMA channel for DShot output on GPT7 (-1 = no DMA). See
+     RZV_DMAC_GPT6_CHANNEL.
+
+config RZV_DMAC_GPT9_CHANNEL
+   int "DShot GPT9 (PWM2) DMA channel"
+   default 10
+   range -1 79
+   ---help---
+     DMA channel for DShot output on GPT9 (-1 = no DMA). See
+     RZV_DMAC_GPT6_CHANNEL.
+
+config RZV_DMAC_GPT10_CHANNEL
+   int "DShot GPT10 (PWM3) DMA channel"
+   default 11
+   range -1 79
+   ---help---
+     DMA channel for DShot output on GPT10 (-1 = no DMA). See
+     RZV_DMAC_GPT6_CHANNEL.
+
 config RZV_DMAC_SPI0_RX_CHANNEL
    int "SPI0 RX DMA channel"
    default -1

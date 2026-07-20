@@ -41,6 +41,7 @@
 #include "chip.h"
 #include "hardware/rzv_cpg.h"
 #include "hardware/rzv_dmac.h"
+#include "hardware/rzv_intc.h"
 #include "rzv_dmac.h"
 #include "rzv_clock.h"
 
@@ -77,8 +78,8 @@ struct rzv_dmac_ctrl_s
   uint8_t                   local_ch;  /* Channel within unit (0-15) */
   bool                      in_use;    /* True when configured */
   bool                      configuring;
-  bool                      enabled;   /* True when one-shot is claimed */
   bool                      operating; /* Register operation in progress */
+  bool                      hw_trigger; /* True: peripheral(ELC)-triggered; no STG */
   struct rzv_dmac_config_s  config;    /* Embedded config (no heap) */
 };
 
@@ -115,6 +116,8 @@ static const struct rzv_dmac_address_region_s g_dmac_address_regions[] =
   {DMAC_CR8_ITCM_CPU_BASE, DMAC_CR8_ITCM_BUS_BASE, DMAC_CR8_TCM_SIZE},
   {DMAC_CR8_DTCM_CPU_BASE, DMAC_CR8_DTCM_BUS_BASE, DMAC_CR8_TCM_SIZE}
 };
+
+static int rzv_dmac_clear_peripheral_source(int channel);
 
 /****************************************************************************
  * Private Functions
@@ -177,39 +180,75 @@ static int rzv_dmac_validate_config(const struct rzv_dmac_config_s *config)
       return -EINVAL;
     }
 
-  if (config->trigger != RZV_DMAC_TRIGGER_SW ||
-      config->callback != NULL || config->elc_event >= 0)
+  /* Polling driver: completion callbacks are not supported in either mode. */
+  if (config->callback != NULL)
     {
       return -ENOTSUP;
     }
 
-  if (config->src_size > RZV_DMAC_SIZE_128BYTE ||
-      config->dst_size > RZV_DMAC_SIZE_128BYTE)
+  bool hw = (config->trigger == RZV_DMAC_TRIGGER_HW);
+
+  if (config->trigger != RZV_DMAC_TRIGGER_SW && !hw)
+    {
+      return -ENOTSUP;
+    }
+
+  /* Software trigger = memory-to-memory (both operands increment, no source).
+   * Hardware trigger = peripheral-paced: needs an ELC activation event and a
+   * fixed destination (a peripheral register, e.g. GPT GTCCRx for DShot). */
+  if (hw)
+    {
+      if (config->elc_event < 0 ||
+          config->src_addr_mode != RZV_DMAC_ADDR_INCREMENT ||
+          config->dst_addr_mode != RZV_DMAC_ADDR_FIXED)
+        {
+          return -ENOTSUP;
+        }
+    }
+  else if (config->elc_event >= 0 ||
+           config->src_addr_mode != RZV_DMAC_ADDR_INCREMENT ||
+           config->dst_addr_mode != RZV_DMAC_ADDR_INCREMENT)
+    {
+      return -ENOTSUP;
+    }
+
+  if ((int)config->src_size < (int)RZV_DMAC_SIZE_1BYTE ||
+      (int)config->dst_size < (int)RZV_DMAC_SIZE_1BYTE ||
+      config->src_size > RZV_DMAC_SIZE_128BYTE ||
+      config->dst_size > RZV_DMAC_SIZE_128BYTE ||
+      config->src_size != config->dst_size)
     {
       return -EINVAL;
-    }
-
-  if (config->src_size != config->dst_size ||
-      config->src_addr_mode != RZV_DMAC_ADDR_INCREMENT ||
-      config->dst_addr_mode != RZV_DMAC_ADDR_INCREMENT)
-    {
-      return -ENOTSUP;
     }
 
   width = 1u << (uint32_t)config->src_size;
 
+  /* Transfer-width alignment applies to both modes. */
   if ((config->src_addr & (width - 1u)) != 0u ||
       (config->dst_addr & (width - 1u)) != 0u ||
-      (config->length & (width - 1u)) != 0u ||
-      (config->src_addr & (DMAC_CACHE_LINE_SIZE - 1u)) != 0u ||
-      (config->dst_addr & (DMAC_CACHE_LINE_SIZE - 1u)) != 0u ||
-      (config->length & (DMAC_CACHE_LINE_SIZE - 1u)) != 0u)
+      (config->length  & (width - 1u)) != 0u)
     {
-      dmaerr("DMAC buffer alignment or length error\n");
+      dmaerr("DMAC width alignment error\n");
+      return -EINVAL;
+    }
+
+  /* Cache-line alignment applies to cached-memory operands only. Source is
+   * always memory; destination is memory for mem-to-mem but an uncached
+   * peripheral register for hardware-triggered transfers. */
+  if ((config->src_addr & (DMAC_CACHE_LINE_SIZE - 1u)) != 0u ||
+      (!hw && (((config->dst_addr & (DMAC_CACHE_LINE_SIZE - 1u)) != 0u) ||
+               ((config->length   & (DMAC_CACHE_LINE_SIZE - 1u)) != 0u))))
+    {
+      dmaerr("DMAC cache-line alignment error\n");
       return -EINVAL;
     }
 
   if (config->priority > 7)
+    {
+      return -EINVAL;
+    }
+
+  if (hw && config->elc_event > 0x3ff)
     {
       return -EINVAL;
     }
@@ -251,13 +290,14 @@ static int rzv_dmac_setup_channel(struct rzv_dmac_ctrl_s *ctrl)
    * DDS[19:16] = destination data size
    * SAD[20]    = source address direction: 0=increment, 1=fixed
    * DAD[21]    = destination address direction: 0=increment, 1=fixed
-   * REN[30]    = 1 for register mode (no link-mode support)
+   * REN[30]    = 0 for the supported one-shot register transfer
    * DEM[24]    = 0 to enable DMAEND interrupt when callback provided,
    *              1 to mask it when no callback
    */
 
   chcfg |= ((uint32_t)config->src_size & 0xfu) << DMAC_CHCFG_SDS_SHIFT; /* SDS */
   chcfg |= ((uint32_t)config->dst_size & 0xfu) << DMAC_CHCFG_DDS_SHIFT; /* DDS */
+  chcfg |= ((uint32_t)local_ch & 0x7u) << DMAC_CHCFG_SEL_SHIFT;
 
   if (config->src_addr_mode == RZV_DMAC_ADDR_FIXED)
     {
@@ -278,6 +318,19 @@ static int rzv_dmac_setup_channel(struct rzv_dmac_ctrl_s *ctrl)
 
   chcfg |= DMAC_CHCFG_DEM; /* Polling path: mask DMAEND interrupt */
 
+  /* Hardware(ELC)-triggered peripheral transfer (e.g. GPT overflow paces one
+   * word into GTCCRx per timer cycle for DShot). TM stays 0 = one transfer
+   * unit per activation event. Detect = rising edge (per the FSP
+   * DETECTION_RISING_EDGE encoding of the GPT overflow events); the requester
+   * is the destination peripheral. Confirm detect/REQD against the manual. */
+  ctrl->hw_trigger = (config->trigger == RZV_DMAC_TRIGGER_HW);
+
+  if (ctrl->hw_trigger)
+    {
+      chcfg |= DMAC_CHCFG_HIEN;   /* rising-edge activation detect */
+      chcfg |= DMAC_CHCFG_REQD;   /* destination peripheral is the requester */
+    }
+
   /* --- CHEXT ---
    * SPR[2:0] = source port priority
    * DPR[10:8] = destination port priority
@@ -292,6 +345,18 @@ static int rzv_dmac_setup_channel(struct rzv_dmac_ctrl_s *ctrl)
   putreg32(chext, RZV_DMAC_CHEXT(unit, local_ch));
   putreg32((uint32_t)config->transfer_interval & 0xffffu,
            RZV_DMAC_CHITVL(unit, local_ch));
+
+  /* Route the ELC activation event (e.g. GPT overflow) to this channel. */
+  if (ctrl->hw_trigger)
+    {
+      ret = rzv_dmac_set_peripheral_source(
+              (int)(unit * RZV_DMAC_CHANNELS_PER_UNIT + local_ch),
+              config->elc_event);
+      if (ret < 0)
+        {
+          return ret;
+        }
+    }
 
   ret = rzv_dmac_convert_cpu_address(config->src_addr, config->length,
                                      &src_bus);
@@ -308,7 +373,12 @@ static int rzv_dmac_setup_channel(struct rzv_dmac_ctrl_s *ctrl)
     }
 
   up_clean_dcache(config->src_addr, config->src_addr + config->length);
-  up_invalidate_dcache(config->dst_addr, config->dst_addr + config->length);
+
+  if (!ctrl->hw_trigger)
+    {
+      up_invalidate_dcache(config->dst_addr,
+                           config->dst_addr + config->length);
+    }
 
   /* N[0]: initial transfer addresses and byte count */
 
@@ -482,6 +552,11 @@ int rzv_dmac_channel_configure(int channel,
   ret = rzv_dmac_setup_channel(ctrl);
   if (ret < 0)
     {
+      if (ctrl->hw_trigger)
+        {
+          rzv_dmac_clear_peripheral_source(channel);
+        }
+
       putreg32(DMAC_CHCTRL_SWRST,
                RZV_DMAC_CHCTRL(ctrl->unit, ctrl->local_ch));
 
@@ -541,7 +616,7 @@ int rzv_dmac_channel_set_buffer(int channel, uintptr_t src_addr,
       return -EINVAL;
     }
 
-  if (ctrl->enabled || ctrl->operating)
+  if (ctrl->operating)
     {
       leave_critical_section(flags);
       return -EBUSY;
@@ -571,7 +646,6 @@ int rzv_dmac_channel_set_buffer(int channel, uintptr_t src_addr,
   if ((src_addr & (width - 1u)) != 0u ||
       (length & (width - 1u)) != 0u ||
       (src_addr & (DMAC_CACHE_LINE_SIZE - 1u)) != 0u ||
-      (length & (DMAC_CACHE_LINE_SIZE - 1u)) != 0u ||
       rzv_dmac_convert_cpu_address(src_addr, length, &src_bus) < 0)
     {
       ret = -EINVAL;
@@ -610,6 +684,8 @@ int rzv_dmac_channel_start(int channel)
   struct rzv_dmac_ctrl_s *ctrl;
   irqstate_t flags;
   uint32_t status;
+  uint32_t src_bus;
+  uint32_t dst_bus;
   int poll;
   int ret;
 
@@ -631,13 +707,12 @@ int rzv_dmac_channel_start(int channel)
       return -EINVAL;
     }
 
-  if (ctrl->enabled || ctrl->operating)
+  if (ctrl->operating)
     {
       leave_critical_section(flags);
       return -EBUSY;
     }
 
-  ctrl->enabled = true;
   ctrl->operating = true;
   leave_critical_section(flags);
 
@@ -648,6 +723,11 @@ int rzv_dmac_channel_start(int channel)
       goto out;
     }
 
+  /* Clean the source buffer from D-cache at start (not configure): the caller
+   * may have filled the buffer after configure(). Source is always memory. */
+  up_clean_dcache(ctrl->config.src_addr,
+                  ctrl->config.src_addr + ctrl->config.length);
+
   /* Reset before SETEN to clear stale END/ER flags from a
    * previous transfer.  SWRST must be issued first; without it, stale flags
    * can re-trigger callbacks or corrupt the channel state machine.
@@ -655,6 +735,28 @@ int rzv_dmac_channel_start(int channel)
 
   putreg32(DMAC_CHCTRL_SWRST,
            RZV_DMAC_CHCTRL(ctrl->unit, ctrl->local_ch));
+
+  ret = rzv_dmac_convert_cpu_address(ctrl->config.src_addr,
+                                     ctrl->config.length, &src_bus);
+  if (ret < 0)
+    {
+      goto out;
+    }
+
+  ret = rzv_dmac_convert_cpu_address(ctrl->config.dst_addr,
+                                     ctrl->config.length, &dst_bus);
+  if (ret < 0)
+    {
+      goto out;
+    }
+
+  /* SWRST clears completion state. Reload N[0] so a completed one-shot
+   * transfer can be armed again without reconfiguring or releasing it. */
+
+  putreg32(src_bus, RZV_DMAC_N0SA(ctrl->unit, ctrl->local_ch));
+  putreg32(dst_bus, RZV_DMAC_N0DA(ctrl->unit, ctrl->local_ch));
+  putreg32(ctrl->config.length,
+           RZV_DMAC_N0TB(ctrl->unit, ctrl->local_ch));
 
   /* Drain the store buffer before asserting SETEN.
    * The Cortex-R8 store buffer may reorder the descriptor register writes
@@ -690,8 +792,14 @@ int rzv_dmac_channel_start(int channel)
       goto out;
     }
 
-  putreg32(DMAC_CHCTRL_STG,
-           RZV_DMAC_CHCTRL(ctrl->unit, ctrl->local_ch));
+  /* Software trigger only for memory-to-memory. Hardware(ELC)-triggered
+   * channels are now armed and transfer on each peripheral activation event
+   * (e.g. GPT overflow); issuing STG would force an extra spurious transfer. */
+  if (!ctrl->hw_trigger)
+    {
+      putreg32(DMAC_CHCTRL_STG,
+               RZV_DMAC_CHCTRL(ctrl->unit, ctrl->local_ch));
+    }
 
   flags = enter_critical_section();
   ctrl->operating = false;
@@ -701,22 +809,15 @@ int rzv_dmac_channel_start(int channel)
   return OK;
 
 out:
+  /* Hardware is idle (reset or never enabled); release the claim so the
+   * channel is reusable without a mandatory stop(). */
   flags = enter_critical_section();
   ctrl->operating = false;
   leave_critical_section(flags);
   return ret;
 }
 
-/****************************************************************************
- * Name: rzv_dmac_channel_stop
- *
- * Description:
- *   Stop a polling transfer and release channel ownership after reset and
- *   destination cache invalidation complete.
- *
- ****************************************************************************/
-
-int rzv_dmac_channel_stop(int channel)
+static int rzv_dmac_channel_disable_internal(int channel, bool release)
 {
   struct rzv_dmac_ctrl_s *ctrl;
   uint32_t status;
@@ -793,20 +894,66 @@ int rzv_dmac_channel_stop(int channel)
   putreg32(DMAC_CHCTRL_SWRST,
            RZV_DMAC_CHCTRL(ctrl->unit, ctrl->local_ch));
 
-  up_invalidate_dcache(ctrl->config.dst_addr,
-                       ctrl->config.dst_addr + ctrl->config.length);
+  if (!ctrl->hw_trigger)
+    {
+      up_invalidate_dcache(ctrl->config.dst_addr,
+                           ctrl->config.dst_addr + ctrl->config.length);
+    }
+
+  if (release && ctrl->hw_trigger)
+    {
+      int route_ret = rzv_dmac_clear_peripheral_source(channel);
+
+      if (ret == OK && route_ret < 0)
+        {
+          ret = route_ret;
+        }
+    }
 
   flags = enter_critical_section();
-  ctrl->enabled     = false;
-  ctrl->in_use      = false;
-  ctrl->configuring = false;
-  ctrl->operating   = false;
-  ctrl->open_id     = 0;
+  ctrl->operating = false;
+
+  if (release)
+    {
+      ctrl->in_use      = false;
+      ctrl->configuring = false;
+      ctrl->hw_trigger  = false;
+      ctrl->open_id     = 0;
+      memset(&ctrl->config, 0, sizeof(ctrl->config));
+    }
 
   leave_critical_section(flags);
 
-  dmainfo("Channel %d stopped\n", channel);
+  dmainfo("Channel %d %s\n", channel,
+          release ? "released" : "disabled");
   return ret;
+}
+
+/****************************************************************************
+ * Name: rzv_dmac_channel_disable
+ *
+ * Description:
+ *   Stop the current transfer but retain ownership and configuration so the
+ *   channel can be re-armed.
+ *
+ ****************************************************************************/
+
+int rzv_dmac_channel_disable(int channel)
+{
+  return rzv_dmac_channel_disable_internal(channel, false);
+}
+
+/****************************************************************************
+ * Name: rzv_dmac_channel_stop
+ *
+ * Description:
+ *   Stop the current transfer and release channel ownership and routing.
+ *
+ ****************************************************************************/
+
+int rzv_dmac_channel_stop(int channel)
+{
+  return rzv_dmac_channel_disable_internal(channel, true);
 }
 
 /****************************************************************************
@@ -868,13 +1015,91 @@ uint32_t rzv_dmac_get_remaining_bytes(int channel)
  * Name: rzv_dmac_set_peripheral_source
  *
  * Description:
- *   Hardware-trigger routing is intentionally unavailable in this driver.
+ *   Route an ELC activation event (e.g. a GPT overflow) to a DMAC channel so
+ *   the channel transfers one unit per event (hardware-triggered mode). Mirrors
+ *   the FSP r_dmac_b activation-source scheme (bsp_dmac.h
+ *   R_BSP_DMAC_ACTIVATION_SOURCE_ENABLE): per-unit INTC DM{k}SEL register block,
+ *   2 channels per 32-bit register (16-bit field each), event masked to 10 bits.
+ *   Unit -> block order per FSP DMkSELy_TABLE: 0->DM4, 1->DM0, 2->DM1, 3->DM2,
+ *   4->DM3. Register offsets match the checked-in R9A09G057H CR CMSIS
+ *   R_INTC_Type layout.
  *
  ****************************************************************************/
 
+#define RZV_INTC_DMKSEL_EVENT_MASK   0x3FFu   /* 10-bit activation event field */
+
+static int rzv_dmac_get_dmksel_field(int channel, uintptr_t *reg,
+                                    uint32_t *shift)
+{
+  static const uint32_t dmksel_block_offset[RZV_DMAC_NUM_UNITS] =
+  {
+    RZV_INTC_DM4SEL0_OFFSET,
+    RZV_INTC_DM0SEL0_OFFSET,
+    RZV_INTC_DM1SEL0_OFFSET,
+    RZV_INTC_DM2SEL0_OFFSET,
+    RZV_INTC_DM3SEL0_OFFSET,
+  };
+
+  if (channel < 0 || channel >= RZV_DMAC_MAX_CHANNELS ||
+      reg == NULL || shift == NULL)
+    {
+      return -EINVAL;
+    }
+
+  uint32_t unit     = (uint32_t)channel / RZV_DMAC_CHANNELS_PER_UNIT;
+  uint32_t local_ch = (uint32_t)channel % RZV_DMAC_CHANNELS_PER_UNIT;
+
+  *reg = RZV_INTC_BASE + dmksel_block_offset[unit] +
+         (uintptr_t)(local_ch / 2u) * 4u;
+  *shift = (local_ch % 2u) * 16u;
+  return OK;
+}
+
 int rzv_dmac_set_peripheral_source(int channel, int elc_event)
 {
-  (void)channel;
-  (void)elc_event;
-  return -ENOTSUP;
+  uintptr_t reg;
+  uint32_t shift;
+  uint32_t val;
+  irqstate_t flags;
+  int ret;
+
+  if (elc_event < 0 || elc_event > (int)RZV_INTC_DMKSEL_EVENT_MASK)
+    {
+      return -EINVAL;
+    }
+
+  ret = rzv_dmac_get_dmksel_field(channel, &reg, &shift);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  flags = enter_critical_section();
+  val = getreg32(reg);
+
+  val &= ~(RZV_INTC_DMKSEL_EVENT_MASK << shift);
+  val |= ((uint32_t)elc_event & RZV_INTC_DMKSEL_EVENT_MASK) << shift;
+  putreg32(val, reg);
+  leave_critical_section(flags);
+
+  return OK;
+}
+
+static int rzv_dmac_clear_peripheral_source(int channel)
+{
+  uintptr_t reg;
+  uint32_t shift;
+  irqstate_t flags;
+  int ret;
+
+  ret = rzv_dmac_get_dmksel_field(channel, &reg, &shift);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  flags = enter_critical_section();
+  modifyreg32(reg, 0, RZV_INTC_DMKSEL_EVENT_MASK << shift);
+  leave_critical_section(flags);
+  return OK;
 }

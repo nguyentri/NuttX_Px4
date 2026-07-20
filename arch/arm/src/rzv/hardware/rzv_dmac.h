@@ -307,48 +307,4 @@ static inline uintptr_t rzv_dmac_get_base(int unit)
 #define DMAC_DCTRL_LWCA_SHIFT       (28)
 #define DMAC_DCTRL_LWCA_MASK        (0xfu << DMAC_DCTRL_LWCA_SHIFT)
 
-/****************************************************************************
- * INTC DMACKSEL Register Support
- *
- * RZV2H INTC (base 0x10400000) has DMACKSEL0..DMACKSELn registers.
- * Each DMACKSEL register packs 4 channels, 8 bits per channel (7 bits val
- * + 1 reserved). Each 7-bit field selects which peripheral event drives
- * the DMAC channel's hardware request (DREQ).
- *
- * DMACKSEL_n covers channels: n*4 to n*4+3
- * Channel k maps to DMACKSEL register n=k/4, bit shift = (k%4)*8
- *
- * The offset of DMACKSEL0 (0x0BCC) is derived from the R_INTC_Type struct
- * in intc_iodefine.h (R9A09G057H CR variant): DMACKSEL0 follows DMRCLR2 +
- * RESERVED13[36 bytes].  This offset is consistent with the field layout
- * enumeration in refs/.../R9A09G057H/cr/iodefines/intc_iodefine.h:2986.
- * rzv_dmac_set_peripheral_source() uses this offset to route ELC events.
- *
- * Reference: refs/.../R9A09G057H/cr/iodefines/intc_iodefine.h DMACKSEL0_b
- *   Each DACK_SEL field is 7 bits. Value = (unit-1)*16 + local_ch
- *   for units 1-4; unit 0: value = (0+4)*16 + local_ch.
- ****************************************************************************/
-
-#define RZV_INTC_BASE               0x10400000UL  /* Same as RZV_ICU_BASE */
-
-/* DMACKSEL offset within INTC - UNVERIFIED (see note above) */
-#define RZV_INTC_DMACKSEL0_OFFSET   0x0BCC  /* Derived from intc_iodefine.h R9A09G057H struct */
-
-#define RZV_INTC_DMACKSEL(n) \
-  (RZV_INTC_BASE + RZV_INTC_DMACKSEL0_OFFSET + (uintptr_t)(n) * 4)
-
-/* DMACKSEL field shift for channel k within its register */
-#define RZV_INTC_DMACKSEL_SHIFT(ch) (((ch) % 4) * 8)
-#define RZV_INTC_DMACKSEL_MASK      0x7fu     /* 7-bit field */
-
-/* Compute the DACK_SEL value for a given DMAC global channel:
- * R_BSP_DMAC_DACK_OUTPUT_PIN_SET encoding:
- *   unit==0: write_value = (0+4)*16 + local_ch  = 64 + local_ch
- *   unit>0 : write_value = (unit-1)*16 + local_ch
- */
-#define RZV_INTC_DMACKSEL_VAL(unit, local_ch) \
-  ((uint32_t)(((unit) == 0) ? \
-   (4 * 16 + (local_ch)) : \
-   ((unit) - 1) * 16 + (local_ch)))
-
 #endif /* __ARCH_ARM_SRC_RZV_HARDWARE_RZV_DMAC_H */
