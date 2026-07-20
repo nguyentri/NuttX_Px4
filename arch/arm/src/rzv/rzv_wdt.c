@@ -221,6 +221,8 @@ static int rzv_wdt_clock_enable(uint8_t channel)
   uintptr_t clkp_reg = RZV_CPG_CLKON(RZV_CPG_CLKON_WDT_CLKP_M(channel));
   uintptr_t loco_reg = RZV_CPG_CLKON(RZV_CPG_CLKON_WDT_LOCO_M(channel));
   uintptr_t clkmon   = RZV_CPG_CLKMON(RZV_CPG_CLKMON_WDT_M);
+  uint32_t clkp_mon  = RZV_CPG_CLKMON_WDT_CLKP_BIT(channel);
+  uint32_t loco_mon  = RZV_CPG_CLKMON_WDT_LOCO_BIT(channel);
   uint32_t rst_bit   = RZV_CPG_RST_WDT_BIT(channel);
   uintptr_t rstmon   = RZV_CPG_RSTMON(RZV_CPG_RSTMON_WDT_M);
   int timeout;
@@ -230,16 +232,16 @@ static int rzv_wdt_clock_enable(uint8_t channel)
   putreg32((clkp_bit << RZV_CPG_CLK_WEN_SHIFT) | clkp_bit, clkp_reg);
   putreg32((loco_bit << RZV_CPG_CLK_WEN_SHIFT) | loco_bit, loco_reg);
 
-  /* Wait for clock monitor to confirm. CLKMON_2 carries WDT bits for
-   * ch=0..2; for ch=3 LOCO/CLKP live elsewhere — best-effort wait, then
-   * proceed.
+  /* Wait for clock monitor to confirm. All four channels report in CLKMON_2;
+   * the monitor bit positions differ from the CLKON gate bit positions for
+   * ch>=2, so use the dedicated CLKMON bit macros.
    */
 
   timeout = 1000;
   while (timeout-- > 0)
     {
       uint32_t mon = getreg32(clkmon);
-      if ((mon & (clkp_bit | loco_bit)) == (clkp_bit | loco_bit))
+      if ((mon & (clkp_mon | loco_mon)) == (clkp_mon | loco_mon))
         {
           break;
         }
@@ -472,15 +474,17 @@ static int rzv_wdt_configure(struct rzv_wdt_priv_s *priv)
            RZV_CPG_ERRORRST_SEL(RZV_CPG_ERRORRST_SEL2_M));
 #endif
 
-  /* Release the counter halt latch in SYSC so the WDT actually counts.
-   * Write WDTSTOPMASK (WEN=1) with bp_halted=0.
+  /* Release the counter halt in SYSC so the WDT actually counts. bp_halted and
+   * WDTSTOPMASK are independent bits (no write-enable), so clear bp_halted with
+   * a read-modify-write and leave the other bits untouched (matches FSP
+   * R_BSP_WDT_COUNTING_ENABLE).
    */
 
   {
     uintptr_t ctrl = rzv_wdt_sysc_ctrl(priv->channel);
     if (ctrl != 0)
       {
-        putreg32(SYS_WDT_CTRL_WDTSTOPMASK, ctrl);
+        putreg32(getreg32(ctrl) & ~SYS_WDT_CTRL_BP_HALTED, ctrl);
       }
   }
 
@@ -552,16 +556,16 @@ static int rzv_wdt_stop(struct watchdog_lowerhalf_s *lower)
 
   wdinfo("Stopping WDT%d\n", priv->channel);
 
-  /* Halt the counter via SYSC: set bp_halted=1 with WEN=1.
-   * Writing bp_halted=1 with the WDTSTOPMASK WEN bit set freezes the WDT
-   * counter immediately.
+  /* Halt the counter via SYSC: set bp_halted=1 (read-modify-write, leaving
+   * WDTSTOPMASK and other bits untouched). bp_halted is a plain functional bit
+   * with no write-enable, matching FSP R_BSP_WDT_COUNTING_ENABLE(ch, false).
    */
 
   {
     uintptr_t ctrl = rzv_wdt_sysc_ctrl(priv->channel);
     if (ctrl != 0)
       {
-        putreg32(SYS_WDT_CTRL_BP_HALTED | SYS_WDT_CTRL_WDTSTOPMASK, ctrl);
+        putreg32(getreg32(ctrl) | SYS_WDT_CTRL_BP_HALTED, ctrl);
       }
   }
 

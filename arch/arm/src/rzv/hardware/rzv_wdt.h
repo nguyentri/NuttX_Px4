@@ -124,8 +124,14 @@
 #define RZV_CPG_CLKON_WDT_LOCO_BIT(ch)         ((ch) < 2 ? (1u << (12 + 2 * (ch))) \
                                                          : (1u << (2 * ((ch) - 2))))
 
-/* CLKMON: all WDT monitor bits live in CLKMON_2 at CLK11/CLK12 base */
+/* CLKMON: all four channels' WDT monitor bits live in CLKMON_2 at
+ * CLK(11+2*ch) (CLKP) and CLK(12+2*ch) (LOCO) — see FSP bsp_override.h
+ * BSP_CLKMON_BIT_FSP_IP_WDT_CLKP/LOCO. These positions differ from the CLKON
+ * bit positions for ch>=2, so they must be computed independently.
+ */
 #define RZV_CPG_CLKMON_WDT_M                   2
+#define RZV_CPG_CLKMON_WDT_CLKP_BIT(ch)        (1u << (11 + 2 * (ch)))
+#define RZV_CPG_CLKMON_WDT_LOCO_BIT(ch)        (1u << (12 + 2 * (ch)))
 
 #define RZV_CPG_RST_WDT_M                      7
 #define RZV_CPG_RST_WDT_BIT(ch)                (1u << (5 + (ch)))
