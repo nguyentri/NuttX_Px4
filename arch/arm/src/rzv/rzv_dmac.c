@@ -248,7 +248,7 @@ static int rzv_dmac_validate_config(const struct rzv_dmac_config_s *config)
       return -EINVAL;
     }
 
-  if (hw && config->elc_event > 0x3ff)
+  if (hw && config->elc_event >= 0x3ff)
     {
       return -EINVAL;
     }
@@ -1063,7 +1063,7 @@ int rzv_dmac_set_peripheral_source(int channel, int elc_event)
   irqstate_t flags;
   int ret;
 
-  if (elc_event < 0 || elc_event > (int)RZV_INTC_DMKSEL_EVENT_MASK)
+  if (elc_event < 0 || elc_event >= (int)RZV_INTC_DMKSEL_EVENT_MASK)
     {
       return -EINVAL;
     }

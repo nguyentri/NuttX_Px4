@@ -310,15 +310,15 @@ uint32_t rzv_dmac_get_remaining_bytes(int channel);
  * Name: rzv_dmac_set_peripheral_source
  *
  * Description:
- *   Hardware-trigger routing is outside the supported driver scope.  This
- *   function returns -ENOTSUP without programming a peripheral selector.
+ *   Route a 10-bit DMAC activation-source number to a hardware-triggered
+ *   channel through the corresponding INTC DMkSEL field.
  *
  * Input Parameters:
  *   channel   - Global DMAC channel (0..79).
- *   elc_event - Reserved for a future hardware-trigger implementation.
+ *   elc_event - DMAC activation-source number (0..1022); 1023 disables a route.
  *
  * Returned Value:
- *   -ENOTSUP.
+ *   OK on success; -EINVAL for an invalid channel, event, or selector.
  *
  ****************************************************************************/
 
