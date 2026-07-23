@@ -330,19 +330,18 @@ void rzv_register_protect_enable(rzv_reg_protect_t regs_to_protect)
     }
 }
 
-extern uint32_t _vectors;  /* from arm_vectortab.S, placed by linker @ ITCM 0 */
-
-static inline void rzv_set_vbar(void)
+/* Cortex-R8 is ARMv7-R and implements NO VBAR register: the exception
+ * vector base is selected solely by SCTLR.V (0x00000000 when clear,
+ * 0xFFFF0000 when set).  Writing VBAR (MCR p15,0,Rt,c12,c0,0) is an
+ * UNDEFINED instruction on this core -- it traps to the undef vector and
+ * panics (confirmed on RDK-RZV2H: the VBAR write undef-faulted, routing
+ * through arm_assert()).  The Renesas FSP reference likewise never touches
+ * VBAR.  So we only force low vectors (SCTLR.V=0); the vector table is
+ * linked and loaded at 0x00000000 (ITCM), which is also the CR8 reset base.
+ */
+static inline void rzv_set_low_vectors(void)
 {
-  uint32_t vbar = (uint32_t)(uintptr_t)&_vectors;
   uint32_t sctlr;
-
-  DEBUGASSERT((vbar & 0x1F) == 0);
-  __asm__ __volatile__
-  (
-    "mcr p15, 0, %0, c12, c0, 0\n"   /* VBAR */
-    :: "r" (vbar) : "memory"
-  );
 
   __asm__ __volatile__
   (
@@ -380,14 +379,20 @@ void arm_boot(void)
   /* Disable interrupts during early boot */
   __asm__ __volatile__ ("cpsid i" : : : "memory");
 
+  /* Enable the FPU (FPEXC.EN + CPACR cp10/cp11) first */
+  arm_fpuconfig();
+
   /* Boot with the D-cache off (MPU is still disabled here).  It is
    * re-enabled by rzv_enable_caches() after the MPU is programmed.  This
    * makes the BSS/DDR initialization below coherent.
    */
   rzv_disable_dcache_early();
 
-  /* Route exceptions to linker-placed _vectors at ITCM 0 */
-  //rzv_set_vbar();
+  /* Force low vectors (SCTLR.V=0) so exceptions vector to the table at
+   * 0x00000000 (ITCM).  Cortex-R8 has no VBAR, so the base cannot be moved;
+   * the vector table must be linked/loaded at 0x0 (the CR8 reset base).
+   */
+  rzv_set_low_vectors();
 
   /* Enable TCM ECC after the DTCM window is available to the initial stack. */
   rzv_enable_tcm_ecc();
@@ -432,12 +437,6 @@ void arm_boot(void)
 
   /* Enable caches and branch prediction */
   rzv_enable_caches();
-
-  /* Enable the FPU (FPEXC.EN + CPACR cp10/cp11).  Must run before any VFP
-   * instruction — PX4 is float-heavy and the ARMv7-R context switch emits
-   * VFP save/restore under CONFIG_ARCH_FPU.
-   */
-  arm_fpuconfig();
 
   showprogress('A');
 

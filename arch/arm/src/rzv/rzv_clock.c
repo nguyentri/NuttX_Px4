@@ -744,8 +744,24 @@ static int rzv_cpg_sci_clock_ctrl(int ch, bool enable)
       remaining -= n;
     }
 
+  /* Release the RSCI bus-interface module stop right after CLKON, and BEFORE
+   * the CLKMON confirmation below.  MSTOP gates the module's BUS/register
+   * interface (bus clock), independently of the functional clock; FSP releases
+   * it immediately after CLKON (MSTP_START precedes RSTOFF, no CLKMON gate).
+   * Gating it behind a passing CLKMON meant a CLKMON timeout returned early
+   * and left every RSCI register reading 0 -> the console up_putc() spun
+   * forever on CSR.TDRE.  BUS_11_MSTOP bit (3 + ch): RSPI0-2 own bits 0-2,
+   * RSCI0-9 own bits 3-12 (RZ/V2H UM Table 4.4-38).
+   */
+
+  if (enable)
+    {
+      rzv_cpg_mstop_write(RZV_CPG_BUS_11_MSTOP, 1u << (3 + ch), true);
+    }
+
   /* Then confirm via CLKMON, which is 32-bit packed with the same global
    * numbering (see rzv_cpg_wait_clkmon) — NOT the CLKON register index.
+   * This is now a diagnostic only; MSTOP is already released above.
    */
 
   ret = rzv_cpg_wait_clkmon(gstart, 5, enable,
@@ -760,17 +776,6 @@ static int rzv_cpg_sci_clock_ctrl(int ch, bool enable)
                              RZV_CPG_DUMP_NONE, 0,
                              "sci_clock_ctrl_failure");
       return ret;
-    }
-
-  /* Release the RSCI bus-interface module stop: BUS_11_MSTOP bit (3 + ch)
-   * (RSPI0-2 own bits 0-2, RSCI0-9 own bits 3-12).  Without this every
-   * RSCI register reads as zero and CSR.TDRE never asserts.  FSP parity:
-   * R_BSP_MODULE_START_FSP_IP_SCI = 5x CLKON + MSTP_START + 2x RSTOFF.
-   */
-
-  if (enable)
-    {
-      rzv_cpg_mstop_write(RZV_CPG_BUS_11_MSTOP, 1u << (3 + ch), true);
     }
 
   clkinfo("SCI%d clocks %s\n", ch, enable ? "enabled" : "disabled");
@@ -1072,21 +1077,25 @@ int rzv_clock_enable(uint32_t clk_id)
       rzv_cpg_putreg(mask, clkon_addr);
       leave_critical_section(flags);
 
+      /* Release the module's bus-interface MSTOP where mapped (see
+       * g_rzv_mstop_map) right after CLKON and BEFORE the CLKMON poll.  MSTOP
+       * gates the register bus, not the functional clock; FSP releases it
+       * immediately after CLKON.  Gating it behind a passing CLKMON left
+       * mapped modules with dead registers (every read 0) on a CLKMON timeout.
+       * Idempotent across retries.  RSCI/DMAC/GPT own dedicated release paths.
+       */
+
+      rzv_cpg_mstop_release(clk_id);
+
       /* Poll with IRQs enabled — timeout.  CLKMON is 32-bit packed with
        * the same global numbering as CLKON (16*domain + bit); see
-       * rzv_cpg_wait_clkmon.
+       * rzv_cpg_wait_clkmon.  Diagnostic only now; MSTOP already released.
        */
 
       ret = rzv_cpg_wait_clkmon(domain * 16u + mon_lsb, mon_n, true,
                                 CPG_TIMEOUT_CLOCK_ENABLE);
       if (ret >= 0)
         {
-          /* Release the module's bus-interface MSTOP where mapped (see
-           * g_rzv_mstop_map).  RSCI/DMAC/GPT own dedicated release paths.
-           */
-
-          rzv_cpg_mstop_release(clk_id);
-
           clkinfo("Clock enabled: domain=%u bit=%u\n", (unsigned int)domain, (unsigned int)bit);
           return OK;
         }

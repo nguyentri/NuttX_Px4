@@ -1164,10 +1164,17 @@ config ARCH_HAVE_LOWVECTORS
 
 config ARCH_LOWVECTORS
 	bool "Vectors in low memory"
+	default y if ARCH_CHIP_RZV && !RZV2H_BUILD_CM33
 	default n
 	depends on ARCH_HAVE_LOWVECTORS
 	---help---
 		Support ARM vectors in low memory.
+
+		The RZ/V2H CR8 cores default this on: the exception vectors are
+		linked VBAR-relative (SCTLR.V=0) and rzv_set_vbar() points VBAR at
+		the DDR-resident vector table.  Leaving it off makes arm_head.S
+		select the high-vector base (0xFFFF0000), which is unmapped on this
+		SoC.  The CM33 core uses VTOR and is unaffected.
 
 config ARCH_ROMPGTABLE
 	bool "ROM page table"
